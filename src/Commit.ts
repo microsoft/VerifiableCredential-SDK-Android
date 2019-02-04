@@ -1,5 +1,6 @@
 import ICommitSigner from './interfaces/ICommitSigner';
 import ICommitHeaders from './interfaces/ICommitHeaders';
+import { SignedCommit } from './index';
 
 /**
  * Fields that can be specified when creating a new commit.
@@ -13,7 +14,7 @@ export interface ICommitFields {
   header?: {[key: string]: any};
 
   /** The application-specific commit payload. */
-  payload: object;
+  payload: object | string;
 
 }
 
@@ -48,21 +49,21 @@ export default class Commit {
   /**
    * Returns the headers which will be signed/encrypted.
    */
-  getProtectedHeaders() {
+  getProtectedHeaders(): Partial<ICommitHeaders> {
     return this.fields.protected;
   }
 
   /**
    * Returns the (optional) headers which will not be signed/encrypted.
    */
-  getUnprotectedHeaders() {
-    return this.fields.header;
+  getUnprotectedHeaders(): {[key: string]: any} {
+    return this.fields.header || {};
   }
 
   /**
    * Returns the application-specific payload for this commit.
    */
-  getPayload() {
+  getPayload(): any {
     return this.fields.payload;
   }
 
@@ -71,7 +72,7 @@ export default class Commit {
    *
    * @param signer The signer to use to sign the commit.
    */
-  sign(signer: ICommitSigner) {
+  sign(signer: ICommitSigner): Promise<SignedCommit> {
     return signer.sign(this);
   }
 

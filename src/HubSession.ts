@@ -96,7 +96,7 @@ export default class HubSession {
     const rawRequestString = JSON.stringify(rawRequestJson);
     const accessToken = await this.getAccessToken();
 
-    let responseString;
+    let responseString: string;
 
     try {
       responseString = await this.makeRequest(rawRequestString, accessToken);
@@ -104,9 +104,10 @@ export default class HubSession {
       // If the access token has expired, renew access token and retry
       if (HubError.is(e) && e.getErrorCode() === HubErrorCode.AuthenticationFailed) {
         const newAccessToken = await this.refreshAccessToken();
-        responseString = this.makeRequest(rawRequestString, newAccessToken);
+        responseString = await this.makeRequest(rawRequestString, newAccessToken);
+      } else {
+        throw e;
       }
-      throw e;
     }
 
     let responseObject: IHubResponse;

@@ -15,7 +15,7 @@ export default class SignedCommit {
   /**
    * Returns the signed commit data in the Flattened JWS JSON Serialization.
    */
-  toFlattenedJson() {
+  toFlattenedJson(): IFlattenedJws {
     return this.json;
   }
 
@@ -35,7 +35,13 @@ export default class SignedCommit {
    */
   getPayload(): any {
     if (this.json && this.json.payload) {
-      return JSON.parse(base64url.decode(this.json.payload));
+      const decoded = base64url.decode(this.json.payload);
+      try {
+        return JSON.parse(decoded);
+      } catch (e) {
+        // Not JSON, return directly
+        return decoded;
+      }
     }
 
     throw new Error('Commit does not have a payload field.');
@@ -49,6 +55,17 @@ export default class SignedCommit {
     const sha256 = crypto.createHash('sha256');
     sha256.update(`${this.json.protected}.${this.json.payload}`);
     return sha256.digest('hex');
+  }
+
+  /**
+   * Retrieves the ID of the object to which this commit belongs.
+   */
+  getObjectId(): string {
+    const headers = this.getProtectedHeaders();
+    if (headers.operation === 'create') {
+      return this.getRevision();
+    }
+    return headers.object_id;
   }
 
 }

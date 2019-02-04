@@ -13,8 +13,15 @@ const HTTP_RESOLVER = 'HTTP_RESOLVER_ENDPOINT_HERE';
 const HUB_ENDPOINT = 'HUB_ENDPOINT_HERE';
 const HUB_DID = 'HUB_DID_HERE';
 
-// Fill in full private key, including `kid` field.
+// Fill in the DID to use
 const DID = 'did:example:YOUR_DID_HERE';
+
+/**
+ * Fill in your full private key, including the `kid` field. The key must:
+ * - Be an RSA private key in JWK format
+ * - Match one of the public keys registered for your DID
+ * - Include a "kid" field with the plain (not fully-qualified) key ID, e.g. "key-1"
+ */
 const PRIVATE_KEY = { kid:'key-1' };
 
 async function runExample() {
@@ -84,7 +91,7 @@ async function runExample() {
     //
 
     if (objects.length > 0) {
-      const objectMetadata = objects[1];
+      const objectMetadata = objects[0];
 
       if (objectMetadata.commit_strategy !== 'basic') {
         throw new Error('Currently only the basic commit strategy is supported.');

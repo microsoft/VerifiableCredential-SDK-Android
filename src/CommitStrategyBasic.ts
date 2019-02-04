@@ -10,6 +10,10 @@ export class CommitStrategyBasic {
   /**
    * Resolves the current state of an object with the `basic` commit strategy.
    *
+   * TODO: This class currently returns only the raw object payload. Once we add an object instance
+   * class to the SDK (e.g. `HubObject`), this method will no longer be called directly, and will
+   * also need to return the app-readable object metadata.
+   *
    * @param commits The entire known set of commits for the object.
    */
   async resolveObject(commits: SignedCommit[]) {
@@ -30,7 +34,8 @@ export class CommitStrategyBasic {
   }
 
   /**
-   * Compares two commits to evaulate which one is more recent.
+   * Compares two commits (which must belong to the same object) in order to evaulate which one is
+   * more recent.
    *
    * Follows the conventions of the JavaScript sort() method:
    *  - `-1` indicates that a comes before (i.e. is older than b)
@@ -40,6 +45,9 @@ export class CommitStrategyBasic {
    * @param b The second commit to compare.
    */
   private compareCommits(a: SignedCommit, b: SignedCommit) {
+    if (a.getObjectId() !== b.getObjectId()) {
+      throw new Error('Cannot compare commits from different objects.');
+    }
 
     const aHeaders = a.getProtectedHeaders();
     const bHeaders = b.getProtectedHeaders();
