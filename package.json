@@ -28,6 +28,7 @@
   "devDependencies": {
     "@decentralized-identity/hub-node-core": "0.1.1",
     "@types/jasmine": "3.3.8",
+    "@types/lodash": "^4.14.120",
     "@types/node": "10.12.19",
     "@types/node-fetch": "2.1.4",
     "@types/object-assign": "4.0.30",
@@ -35,6 +36,7 @@
     "jasmine-reporters": "2.3.2",
     "jasmine-spec-reporter": "4.2.1",
     "jasmine-ts": "0.3.0",
+    "lodash": "^4.17.11",
     "nyc": "13.1.0",
     "ts-node": "7.0.1",
     "tslint": "5.12.1",

@@ -5,7 +5,7 @@ import SignedCommit from './SignedCommit';
  *
  * This class works only with objects using the `basic` commit strategy.
  */
-export class CommitStrategyBasic {
+export default class CommitStrategyBasic {
 
   /**
    * Resolves the current state of an object with the `basic` commit strategy.
@@ -25,8 +25,8 @@ export class CommitStrategyBasic {
     // tslint:disable:align
     const currentState = commits.reduce((latest, candidate) => {
       return this.compareCommits(latest, candidate) < 0
-        ? latest
-        : candidate;
+        ? candidate
+        : latest;
     }, commits[0]);
     // tslint:enable:align
 
@@ -44,7 +44,7 @@ export class CommitStrategyBasic {
    * @param a The first commit to compare.
    * @param b The second commit to compare.
    */
-  private compareCommits(a: SignedCommit, b: SignedCommit) {
+  protected compareCommits(a: SignedCommit, b: SignedCommit) {
     if (a.getObjectId() !== b.getObjectId()) {
       throw new Error('Cannot compare commits from different objects.');
     }

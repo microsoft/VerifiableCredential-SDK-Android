@@ -27,22 +27,67 @@ export default class Commit {
   private fields: ICommitFields;
 
   constructor(fields: ICommitFields) {
-    this.validate(fields);
     this.fields = fields;
   }
 
   /**
-   * Checks the given fields for validity.
+   * Verifies whether the currently set fields constitute a valid commit which can be
+   * signed/encrypted and stored in an Identity Hub.
    *
-   * @param fields The fields to check.
+   * Throws an error if the commit is not valid.
+   *
+   * TODO: Move validation logic to hub-common-js repository to be shared with hub-node-core.
    */
-  private validate(fields: ICommitFields) {
-    if (!fields.protected) {
+  public validate() {
+    if (!this.fields.protected) {
       throw new Error("Commit must specify the 'protected' field.");
     }
 
-    if (!fields.payload) {
+    const protectedHeaders = this.fields.protected as any;
+
+    const requiredStrings = ['interface', 'context', 'type', 'committed_at', 'commit_strategy', 'sub'];
+    requiredStrings.forEach((field) => {
+      if (!protectedHeaders[field] || typeof protectedHeaders[field] !== 'string' || protectedHeaders[field].length === 0) {
+        throw new Error(`Commit 'protected.${field}' field must be a non-zero-length string.`);
+      }
+    });
+
+    if (!this.fields.protected.operation) {
+      throw new Error("Commit 'protected.operation' field must be specified.");
+    }
+
+    if (['create', 'update', 'delete'].indexOf(this.fields.protected.operation) === -1) {
+      throw new Error("Commit 'protected.operation' field must be one of create, update, or delete.");
+    }
+
+    if (this.fields.protected.operation === 'create') {
+      if (this.fields.protected.object_id !== undefined) {
+        throw new Error("Commit 'protected.object_id' field must not be specified when operation is 'create'.");
+      }
+    } else {
+      if (!this.fields.protected.object_id) {
+        throw new Error(`Commit 'protected.object_id' field must be specified when operation is '${this.fields.protected.operation}'.`);
+      }
+    }
+
+    if (!this.fields.payload) {
       throw new Error("Commit must specify the 'payload' field.");
+    }
+
+    if (['string', 'object'].indexOf(typeof this.fields.payload) === -1) {
+      throw new Error(`Commit payload must be string or object, ${typeof this.fields.payload} given.`);
+    }
+  }
+
+  /**
+   * Returns true if the validate() method would pass without error.
+   */
+  public isValid() {
+    try {
+      this.validate();
+      return true;
+    } catch (err) {
+      return false;
     }
   }
 

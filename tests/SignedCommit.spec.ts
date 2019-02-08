@@ -93,7 +93,6 @@ describe('SignedCommit', () => {
 
     it('should return the revision for a create commit', async () => {
       
-
       const signedCommit = new SignedCommit({
         protected: base64url(JSON.stringify(createHeaders)),
         payload: base64url(JSON.stringify({ name: 'test '})),

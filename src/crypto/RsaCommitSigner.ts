@@ -2,6 +2,7 @@ import { PrivateKey, JwsToken, CryptoFactory, RsaCryptoSuite } from '@decentrali
 import ICommitSigner from './ICommitSigner';
 import Commit from '../Commit';
 import SignedCommit from '../SignedCommit';
+import objectAssign = require('object-assign');
 
 interface RsaCommitSignerOptions {
 
@@ -33,11 +34,15 @@ export default class RsaCommitSigner implements ICommitSigner {
    */
   public async sign(commit: Commit): Promise<SignedCommit> {
 
+    commit.validate();
+
     const protectedHeaders = commit.getProtectedHeaders();
-    protectedHeaders['iss'] = this.did;
+    const finalProtectedHeaders = objectAssign({}, protectedHeaders, {
+      iss: this.did,
+    });
 
     const jws = new JwsToken(commit.getPayload(), new CryptoFactory([new RsaCryptoSuite()]));
-    const signed = await jws.sign(this.key, protectedHeaders as any); // TODO: Need to broaden TypeScript definition of JwsToken.sign().
+    const signed = await jws.sign(this.key, finalProtectedHeaders as any); // TODO: Need to broaden TypeScript definition of JwsToken.sign().
 
     const [outputHeaders, outputPayload, outputSignature] = signed.split('.');
 

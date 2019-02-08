@@ -7,6 +7,7 @@ import Commit from './Commit';
 import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
 import { CommitStrategyBasic } from './CommitStrategyBasic';
+import CommitStrategyBasic from './CommitStrategyBasic';
 
 // Fill these in with specific values.
 const HTTP_RESOLVER = 'HTTP_RESOLVER_ENDPOINT_HERE';
