@@ -1,5 +1,5 @@
-import ICommitSigner from './interfaces/ICommitSigner';
-import ICommitHeaders from './interfaces/ICommitHeaders';
+import { ICommitProtectedHeaders, ICommitUnprotectedHeaders, CommitOperation } from '@decentralized-identity/hub-common-js';
+import ICommitSigner from './crypto/ICommitSigner';
 import { SignedCommit } from './index';
 
 /**
@@ -8,10 +8,10 @@ import { SignedCommit } from './index';
 export interface ICommitFields {
 
   /** Fields to include in the protected (signed) commit header. */
-  protected: Partial<ICommitHeaders>;
+  protected: Partial<ICommitProtectedHeaders>;
 
   /** Fields to include in the unprotected (unverified) commit header. */
-  header?: {[key: string]: any};
+  header?: Partial<ICommitUnprotectedHeaders>;
 
   /** The application-specific commit payload. */
   payload: object | string;
@@ -49,7 +49,7 @@ export default class Commit {
   /**
    * Returns the headers which will be signed/encrypted.
    */
-  getProtectedHeaders(): Partial<ICommitHeaders> {
+  getProtectedHeaders(): Partial<ICommitProtectedHeaders> {
     return this.fields.protected;
   }
 

@@ -1,5 +1,5 @@
 import { PrivateKey, JwsToken, CryptoFactory, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
-import ICommitSigner from '../interfaces/ICommitSigner';
+import ICommitSigner from './ICommitSigner';
 import Commit from '../Commit';
 import SignedCommit from '../SignedCommit';
 

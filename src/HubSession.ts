@@ -1,18 +1,17 @@
 import { DidResolver } from '@decentralized-identity/did-common-typescript';
+import { IHubError, IHubResponse, HubErrorCode } from '@decentralized-identity/hub-common-js';
 import { Authentication, PrivateKey, CryptoSuite } from '@decentralized-identity/did-auth-jose';
 import HubRequest from './requests/HubRequest';
-import HubError, { HubErrorCode } from './HubError';
-import IHubResponse from './interfaces/IHubResponse';
+import HubError from './HubError';
 import HubWriteRequest from './requests/HubWriteRequest';
 import HubWriteResponse from './responses/HubWriteResponse';
 import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubObjectQueryResponse from './responses/HubObjectQueryResponse';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
 import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
-import IHubError from './interfaces/IHubError';
 
 // tslint:disable-next-line:import-name
-import fetch from 'node-fetch';
+import fetch, { Request, RequestInit } from 'node-fetch';
 
 /**
  * Options for instantiating a new Hub session.
@@ -110,7 +109,7 @@ export default class HubSession {
       }
     }
 
-    let responseObject: IHubResponse;
+    let responseObject: IHubResponse<string>;
 
     try {
       responseObject = JSON.parse(responseString);
@@ -135,7 +134,7 @@ export default class HubSession {
 
     const requestBuffer = await this.authentication.getAuthenticatedRequest(message, this.clientPrivateKey, this.hubDid, accessToken);
 
-    const res = await fetch(this.hubEndpoint, {
+    const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',
       body: requestBuffer,
       headers: {
@@ -157,6 +156,16 @@ export default class HubSession {
     }
 
     return plainResponse.request;
+  }
+
+  /**
+   * Fetch API wrapper, to allow unit testing.
+   *
+   * @param url The URL to make a request to.
+   * @param init Request initialization details.
+   */
+  private async callFetch(url: string | Request, init?: RequestInit) {
+    return fetch(url, init);
   }
 
   /**
@@ -191,7 +200,7 @@ export default class HubSession {
    *
    * @param response The Hub response to be transformed.
    */
-  private static mapResponseToObject(response: IHubResponse) {
+  private static mapResponseToObject(response: IHubResponse<string>) {
     const responseTypeString = response['@type'];
     const responseType = (HubSession.responseTypes as any)[responseTypeString];
 

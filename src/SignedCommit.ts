@@ -1,6 +1,5 @@
-import IFlattenedJws from './interfaces/IFlattenedJws';
+import { ICommitProtectedHeaders, IFlattenedJws } from '@decentralized-identity/hub-common-js';
 import base64url from 'base64url';
-import { ICommitHeaders } from './index';
 import * as crypto from 'crypto';
 
 /**
@@ -22,7 +21,7 @@ export default class SignedCommit {
   /**
    * Returns the decoded protected headers for this commit. TODO TODO NO REV
    */
-  getProtectedHeaders(): ICommitHeaders {
+  getProtectedHeaders(): ICommitProtectedHeaders {
     if (this.json && this.json.protected) {
       return JSON.parse(base64url.decode(this.json.protected));
     }
@@ -62,10 +61,12 @@ export default class SignedCommit {
    */
   getObjectId(): string {
     const headers = this.getProtectedHeaders();
+
     if (headers.operation === 'create') {
       return this.getRevision();
     }
-    return headers.object_id;
+
+    return headers.object_id!;
   }
 
 }

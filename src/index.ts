@@ -1,16 +1,6 @@
 // Cryptography
 export { default as RsaCommitSigner } from './crypto/RsaCommitSigner';
-
-// Interfaces
-export { default as ICommitHeaders } from './interfaces/ICommitHeaders';
-export { default as ICommitSigner } from './interfaces/ICommitSigner';
-export { default as IFlattenedJws } from './interfaces/IFlattenedJws';
-export { default as IHubCommitQueryResponse } from './interfaces/IHubCommitQueryResponse';
-export { default as IHubError } from './interfaces/IHubError';
-export { default as IHubObjectQueryResponse } from './interfaces/IHubObjectQueryResponse';
-export { default as IHubResponse } from './interfaces/IHubResponse';
-export { default as IHubWriteResponse } from './interfaces/IHubWriteResponse';
-export { default as IObjectMetadata } from './interfaces/IObjectMetadata';
+export { default as ICommitSigner } from './crypto/ICommitSigner';
 
 // Requests
 export { default as HubRequest } from './requests/HubRequest';

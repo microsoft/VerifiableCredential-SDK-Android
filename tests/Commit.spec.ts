@@ -1,6 +1,6 @@
 import * as objectAssign from 'object-assign';
 import Commit from '../src/Commit';
-import ICommitSigner from '../src/interfaces/ICommitSigner';
+import ICommitSigner from './crypto/ICommitSigner';
 import SignedCommit from '../src/SignedCommit';
 
 const commitFields = {

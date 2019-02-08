@@ -77,8 +77,8 @@ async function runExample() {
 
     const queryRequest = new HubObjectQueryRequest({
       interface: 'Collections',
-      '@context': 'http://schema.org',
-      '@type': 'MusicPlaylist',
+      context: 'http://schema.org',
+      type: 'MusicPlaylist',
     });
 
     const queryResponse = await session.send(queryRequest);

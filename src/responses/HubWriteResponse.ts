@@ -1,4 +1,4 @@
-import IHubWriteResponse from '../interfaces/IHubWriteResponse';
+import { IHubWriteResponse } from '@decentralized-identity/hub-common-js';
 
 /**
  * Represents the response to a `HubWriteRequest`.

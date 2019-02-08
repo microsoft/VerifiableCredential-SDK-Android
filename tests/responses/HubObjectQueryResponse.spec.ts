@@ -1,5 +1,5 @@
+import { IObjectMetadata } from '@decentralized-identity/hub-common-js';
 import HubObjectQueryResponse from '../../src/responses/HubObjectQueryResponse';
-import IObjectMetadata from '../../src/interfaces/IObjectMetadata';
 
 const objects: IObjectMetadata[] = [{
   interface: 'Collections',

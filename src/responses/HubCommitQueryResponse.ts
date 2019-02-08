@@ -1,4 +1,4 @@
-import IHubCommitQueryResponse from '../interfaces/IHubCommitQueryResponse';
+import { IHubCommitQueryResponse } from '@decentralized-identity/hub-common-js';
 import SignedCommit from '../SignedCommit';
 
 /**

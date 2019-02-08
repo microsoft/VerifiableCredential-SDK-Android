@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
+      "name": "Run example.ts",
       "program": "${workspaceFolder}/out/src/example.js",
       "preLaunchTask": "run-npm-build",
     },

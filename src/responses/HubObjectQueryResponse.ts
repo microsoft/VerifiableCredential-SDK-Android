@@ -1,4 +1,4 @@
-import IHubObjectQueryResponse from '../interfaces/IHubObjectQueryResponse';
+import { IHubObjectQueryResponse } from '@decentralized-identity/hub-common-js';
 
 /**
  * Represents the response to a `HubObjectQueryRequest`.

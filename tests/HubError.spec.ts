@@ -1,4 +1,5 @@
-import HubError, { HubErrorCode } from '../src/HubError';
+import { HubErrorCode } from '@decentralized-identity/hub-common-js';
+import HubError from '../src/HubError';
 
 const hubErrorBody = {
   error_code: HubErrorCode.NotFound,
