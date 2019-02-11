@@ -15,6 +15,7 @@ export { default as HubWriteResponse } from './responses/HubWriteResponse';
 
 // Root
 export { default as Commit } from './Commit';
+export { default as CommitStrategyBasic } from './CommitStrategyBasic';
 export { default as HubError } from './HubError';
 export { default as HubSession } from './HubSession';
 export { default as SignedCommit } from './SignedCommit';

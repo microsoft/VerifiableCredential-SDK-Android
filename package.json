@@ -2,7 +2,7 @@
   "name": "@decentralized-identity/hub-sdk-js",
   "version": "0.1.0",
   "description": "JavaScript SDK for communicating with Identity Hub instances.",
-  "main": "dist/src/index.js",
+  "main": "out/src/index.js",
   "scripts": {
     "precommit": "npm run lint",
     "build": "tsc",
@@ -59,5 +59,9 @@
       "cobertura",
       "html"
     ]
-  }
+  },
+  "types": "out/src/index.d.ts",
+  "files": [
+    "out/src/**/*"
+  ]
 }
