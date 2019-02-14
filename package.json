@@ -21,7 +21,7 @@
   "homepage": "https://github.com/decentralized-identity/hub-sdk-js#readme",
   "dependencies": {
     "@decentralized-identity/did-auth-jose": "0.1.6",
-    "@decentralized-identity/hub-common-js": "0.1.0",
+    "@decentralized-identity/hub-common-js": "0.1.1",
     "node-fetch": "2.3.0",
     "object-assign": "4.1.1"
   },

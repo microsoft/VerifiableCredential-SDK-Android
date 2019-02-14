@@ -13,7 +13,7 @@ export default class CommitStrategyBasic {
    * TODO: This class currently returns only the raw object payload. Once we add an object instance
    * class to the SDK (e.g. `HubObject`), this method will no longer be called directly, and will
    * also need to return the app-readable object metadata.
-   * 
+   *
    * Currently returns `null` if the object was deleted, otherwise returns the most recent payload.
    *
    * @param commits The entire known set of commits for the object.
