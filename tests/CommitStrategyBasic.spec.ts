@@ -113,6 +113,14 @@ describe('CommitStrategyBasic', () => {
         expect(await strategy.resolveObject([create, update])).toEqual({ op: 'update' });
       });
 
+      it('should return null for a deleted object', async () => {
+        const createCommit = buildSignedCommit({ operation: 'create' }, { op: 'create' });
+        const deleteCommit = buildSignedCommit({ operation: 'delete', object_id: createCommit.getObjectId() }, {});
+
+        expect(await strategy.resolveObject([createCommit, deleteCommit])).toBeNull();
+        expect(await strategy.resolveObject([deleteCommit, createCommit])).toBeNull();
+      });
+
     });
 
   });
