@@ -1,8 +1,8 @@
-# Decentralized Identity User Agent SDK
+# User Agent SDK - Open Source
 
 SDK for building decentralized identity wallets and agents.
 
-# Contributing
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
@@ -16,7 +16,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-# License
+## License
 
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the [MIT](LICENSE.txt) License.

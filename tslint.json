@@ -1,0 +1,65 @@
+{
+  "defaultSeverity": "error",
+  "extends": "tslint-config-standard",
+  "linterOptions": {
+    "exclude": [
+      "tests/**",
+      "node_modules/**"
+    ]
+  },
+  "rules": {
+    "completed-docs": [
+      true,
+      {
+        "classes": {
+          "visibilities": ["exported"]
+        },
+        "enums": {
+          "visibilities": ["exported"]
+        },
+        "functions": {
+          "visibilities": ["exported"]
+        },
+        "interfaces": {
+          "visibilities": ["exported"]
+        },
+        "methods": {
+          "privacies": ["public", "protected"], 
+          "locations": ["all"]
+        },
+        "properties": {
+          "privacies": ["public", "protected"], 
+          "locations": ["all"]
+        },
+        "types": {
+          "visibilities": ["all"]
+        }
+      }
+    ],
+    "jsdoc-format": [
+      true,
+      "check-multiline-start"
+    ],
+    "max-line-length": [
+      true,
+      160
+    ],
+    "object-literal-key-quotes" : [
+      true,
+      "consistent-as-needed"
+    ],
+    "only-arrow-functions": [
+      true,
+      "allow-named-functions"
+    ],
+    "semicolon": [
+      true,
+      "always"
+    ],
+    "variable-name": [
+      true, 
+      "allow-leading-underscore",
+      "check-format"
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "name": "useragent-sdk",
+  "version": "0.0.0",
+  "description": "SDK for building decentralized identity wallets and enterprise agents.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/UserAgent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Microsoft/UserAgent/issues"
+  },
+  "keywords": [
+    "Decentralized Identity",
+    "DID",
+    "UserAgent"
+  ],
+  "author": "Microsoft Corporation",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jasmine": "3.3.8",
+    "@types/node": "11.9.3",
+    "jasmine": "3.3.1",
+    "jasmine-reporters": "2.3.2",
+    "jasmine-spec-reporter": "4.2.1",
+    "jasmine-ts": "0.3.0",
+    "nyc": "13.3.0",
+    "ts-node": "7.0.1",
+    "tslint": "5.12.1",
+    "tslint-config-standard": "8.0.1"
+  },
+  "dependencies": {
+    "typescript": "3.3.3"
+  },
+  "nyc": {
+    "extension": [
+      ".ts",
+      ".tsx"
+    ],
+    "include": [
+      "src/**"
+    ],
+    "reporter": [
+      "text",
+      "cobertura",
+      "html"
+    ]
+  }
+}
