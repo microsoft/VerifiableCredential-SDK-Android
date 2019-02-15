@@ -1,0 +1,6 @@
+{
+    "git.ignoreLimitWarning": true,
+    "editor.detectIndentation": false,
+    "editor.tabSize": 2,
+    "prettier.singleQuote": true
+  }

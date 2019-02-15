@@ -16,6 +16,12 @@
   ],
   "author": "Microsoft Corporation",
   "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --p tsconfig.json && copyfiles --verbose \"./src/**/*.json\" dist",
+    "test": "nyc jasmine-ts --config=tests/jasmine.json",
+    "lint": "tslint --fix --project . --config ./tslint.json"
+  },
   "devDependencies": {
     "@types/jasmine": "3.3.8",
     "@types/node": "11.9.3",
