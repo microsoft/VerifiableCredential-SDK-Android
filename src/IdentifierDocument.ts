@@ -4,8 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationReference, ServiceReference, PublicKey } from './types';
-import UserAgentOptions from './UserAgentOptions';
-import Identifier from './Identifier';
 
 /**
  * Class for creating and managing identifiers,
@@ -20,7 +18,7 @@ export default class IdentifierDocument {
   /**
    * The date the document was created.
    */
-  public created: Date;
+  public created: Date | undefined;
 
   /**
    * Array of service entries added to the document.
@@ -46,10 +44,14 @@ export default class IdentifierDocument {
   constructor (document: any) {
     // Populate the base properties
     this.id = document.id;
-    this.created = document.created;
     this.publicKeys = document.publicKey;
-    this.authenticationReferences = document.authentication;
-    this.serviceReferences = document.service;
+
+    if (document.created) {
+      this.created = new Date(document.created);
+    }
+
+    this.authenticationReferences = document.authentication || new Array();
+    this.serviceReferences = document.service || new Array();
   }
 
   /**
@@ -57,10 +59,9 @@ export default class IdentifierDocument {
    * provided public keys.
    * @param publicKeys to include in the document.
    */
-  public static create (id: string, publicKeys: Array<PublicKey>, options: UserAgentOptions): IdentifierDocument {
-    // Create the document properties
-    const identifier = new Identifier(id, options);
-    return new IdentifierDocument({ id: identifier, created: Date.now(), publicKeys: publicKeys });
+  public static create (id: string, publicKeys: Array<PublicKey>): IdentifierDocument {
+    const createdDate = new Date(Date.now()).toISOString();
+    return new IdentifierDocument({ id: id, created: createdDate, publicKey: publicKeys });
   }
 
   /**

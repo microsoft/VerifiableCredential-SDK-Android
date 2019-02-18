@@ -18,7 +18,7 @@
   "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc --p tsconfig.json && copyfiles --verbose \"./src/**/*.json\" dist",
+    "build": "tsc --p tsconfig.json",
     "test": "nyc jasmine-ts --config=tests/jasmine.json",
     "lint": "tslint --fix --project . --config ./tslint.json"
   },

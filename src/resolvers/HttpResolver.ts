@@ -59,7 +59,7 @@ export default class HttpResolver implements Resolver {
               reject(error);
             }
 
-            const identifierDocument = new IdentifierDocument(await response.json(), this.options);
+            const identifierDocument = new IdentifierDocument(await response.json());
             resolve(identifierDocument);
           },
           (error: any) => reject(error)
