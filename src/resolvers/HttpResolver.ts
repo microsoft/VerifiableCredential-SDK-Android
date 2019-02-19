@@ -9,6 +9,7 @@ import Identifier from '../Identifier';
 import IdentifierDocument from '../IdentifierDocument';
 import Resolver from './Resolver';
 import UserAgentOptions from '../UserAgentOptions';
+import UserAgentError from '../UserAgentError';
 declare var fetch: any;
 
 /**
@@ -35,39 +36,39 @@ export default class HttpResolver implements Resolver {
    * @param identifier to resolve.
    */
   public async resolve (identifier: Identifier): Promise<IdentifierDocument> {
-    const query = `${this.url}${identifier}`;
-    return new Promise((resolve, reject) => {
+    const query = `${this.url}${identifier.id}`;
+    return new Promise(async (resolve, reject) => {
       let timer = setTimeout(
-        () => reject(new Error('Fetch timed out.')), 1000 * this.options.timeoutInSeconds
+        () => reject(new UserAgentError('Fetch timed out.')), 1000 * this.options.timeoutInSeconds
       );
 
       // Now call the actual fetch with the updated options
-      fetch(query)
-        .then(
-          async (response: any) => {
-            if (!response.ok) {
-              let error: Error;
-              switch (response.status) {
-                case 404:
-                  error = new Error(`Identifier document not found for '${identifier}'`);
-                  break;
-                default:
-                  error = new Error(`Resolver at '${this.url}' returned an error with '${response.statusText}'`);
-              }
+      const response = await fetch(query);
 
-              // Reject the promise
-              reject(error);
-            }
+      // Got a response so clear the timer
+      clearTimeout(timer);
 
-            const identifierDocument = new IdentifierDocument(await response.json());
-            resolve(identifierDocument);
-          },
-          (error: any) => reject(error)
-        )
-        .finally(() => {
-          // Clear the timer
-          clearTimeout(timer);
-        });
+      // Check if the response was OK, and
+      // if not return the appropriate error
+      if (!response.ok) {
+        let error: Error;
+        switch (response.status) {
+          case 404:
+            error = new UserAgentError(`Identifier document not found for '${identifier.id}'`);
+            break;
+          default:
+            error = new UserAgentError(`Resolver at '${this.url}' returned an error with '${response.statusText}'`);
+        }
+
+        // Reject the promise
+        reject(error);
+        return;
+      }
+
+      const responseJson = await response.json();
+      const identifierDocument = new IdentifierDocument(responseJson.document || responseJson);
+      resolve(identifierDocument);
+      return;
     });
   }
 }

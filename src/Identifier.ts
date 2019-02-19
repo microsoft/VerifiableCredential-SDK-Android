@@ -51,23 +51,6 @@ export default class Identifier {
   } */
 
   /**
-   * Gets the IdentifierDocument for the identifier
-   * instance, throwing if no identifier has been
-   * created.
-   */
-  public async getDocument (): Promise<IdentifierDocument> {
-    // If we already have not already
-    // retrieved the document use the
-    // resolver to get the document
-    if (!this.document) {
-      // We need to resolve the document
-      this.document = await this.options.resolver.resolve(this);
-    }
-
-    return this.document;
-  }
-
-  /**
    * Creates a new decentralized identifier, using the current identifier
    * and the specified target. If the registar flag is true, the newly created
    * identifier will be registered using the
@@ -78,6 +61,27 @@ export default class Identifier {
 /*   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<Identifier> {
     throw new Error('Not implemented');
   } */
+
+  /**
+   * Gets the IdentifierDocument for the identifier
+   * instance, throwing if no identifier has been
+   * created.
+   */
+  public async getDocument (): Promise<IdentifierDocument> {
+    // If we already have not already
+    // retrieved the document use the
+    // resolver to get the document
+    if (!this.document) {
+      if (!this.options.resolver) {
+        throw new UserAgentError('Resolver not specified in user agent options.')
+      }
+
+      // We need to resolve the document
+      this.document = await this.options.resolver.resolve(this);
+    }
+
+    return this.document;
+  }
 
   /**
    * Performs a public key lookup using the

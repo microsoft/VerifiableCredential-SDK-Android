@@ -61,7 +61,7 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument).toBeDefined();
     expect(identifierDocument.id).toEqual('did:test:identifier');
     if (identifierDocument.created) {
-      expect(Date.parse(identifierDocument.created.toISOString())).toBeCloseTo(Date.now(), 1);
+      expect(Date.parse(identifierDocument.created.toISOString())).toBeCloseTo(Date.now());
     }
     expect(identifierDocument.publicKeys).toBeDefined();
     expect(identifierDocument.publicKeys.length).toEqual(1);

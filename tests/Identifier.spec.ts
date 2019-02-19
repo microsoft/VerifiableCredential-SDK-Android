@@ -6,17 +6,15 @@
 import IdentifierDocument from '../src/IdentifierDocument';
 import Identifier from '../src/Identifier';
 import UserAgentOptions from '../src/UserAgentOptions';
-import TestKeyStore from './TestKeyStore';
-import TestRegistrar from './TestRegistrar';
 import TestResolver from './TestResolver';
 import UserAgentError from '../src/UserAgentError';
 
 describe('Identifier', () => {
+  const testResolver = new TestResolver();
+
   // Configure the agent options for the tests
   const options = {
-    resolver: new TestResolver(),
-    registrar: new TestRegistrar(),
-    keyStore: new TestKeyStore(),
+    resolver: testResolver,
     timeoutInSeconds: 30
   } as UserAgentOptions;
 
@@ -43,11 +41,26 @@ describe('Identifier', () => {
     );
     const identifier = new Identifier(identifierDocument, options);
 
-    const resolver = spyOn(options.resolver, 'resolve').and.callThrough();
+    const resolver = spyOn<any>(testResolver, 'resolve').and.callThrough();
     const localDocument = identifier.getDocument();
     expect(localDocument).toBeDefined();
     expect(resolver).not.toHaveBeenCalled();
     done();
+  });
+
+  it('should throw when no resolver specified and document not cached', async done => {
+    const options = {
+      timeoutInSeconds: 30
+    } as UserAgentOptions;
+
+    const identifier = new Identifier('did:test:identifier', options);
+    await identifier
+      .getDocument()
+      .catch(error => {
+        expect(error instanceof UserAgentError).toBeTruthy();
+        expect(error.message).toEqual('Resolver not specified in user agent options.');
+      })
+      .finally(done);
   });
 
   it('should resolve identifier and return document', async done => {
@@ -57,7 +70,7 @@ describe('Identifier', () => {
     );
     (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
     
-    const resolver = spyOn(options.resolver, 'resolve').and.callThrough();
+    const resolver = spyOn(testResolver, 'resolve').and.callThrough();
     const result = identifier.getDocument();
     expect(result).toBeDefined();
     expect(resolver).toHaveBeenCalled();
@@ -91,7 +104,7 @@ describe('Identifier', () => {
 
     (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
      
-    const resolver = spyOn(options.resolver, 'resolve').and.callThrough();
+    const resolver = spyOn(testResolver, 'resolve').and.callThrough();
     const result = await identifier.getPublicKey('#master');
     expect(result).toBeDefined();
     expect(resolver).toHaveBeenCalled();

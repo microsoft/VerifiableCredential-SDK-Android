@@ -12,28 +12,28 @@ import KeyStore from './keystores/KeyStore';
  * Interface defining options for the
  * User Agent, such as resolver and register.
  */
-export default interface UserAgentOptions {
+export default class UserAgentOptions {
   /**
    * Instance of Resolver than can be used
    * to resolve identifiers.
    */
-  resolver: Resolver;
+  resolver?: Resolver;
 
   /**
    * Instance of Registar than can be used
    * to register identifiers.
    */
-  registrar: Registrar;
+  registrar?: Registrar;
 
   /**
    * Instance of KeyStore than can be used
    * to get and save keys.
    */
-  keyStore: KeyStore;
+  keyStore?: KeyStore;
 
   /**
    * The timeout when making requests to
    * external services.
    */
-  timeoutInSeconds: number;
+  timeoutInSeconds: number = 30;
 }
