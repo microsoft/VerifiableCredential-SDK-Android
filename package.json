@@ -20,7 +20,8 @@
   "scripts": {
     "build": "tsc --p tsconfig.json",
     "test": "nyc jasmine-ts --config=tests/jasmine.json",
-    "lint": "tslint --fix --project . --config ./tslint.json"
+    "lint": "tslint --fix --project . --config ./tslint.json",
+    "lint-pr": "tslint --project . --config ./tslint.json"
   },
   "devDependencies": {
     "@types/jasmine": "3.3.8",
