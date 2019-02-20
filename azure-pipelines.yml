@@ -29,6 +29,7 @@ steps:
   inputs:
     testRunner: Nunit
     testResultsFiles: './nunitresults.xml'
+    failTaskOnFailedTests: true
 
 - task: PublishCodeCoverageResults@1
   condition: succeededOrFailed()
@@ -36,8 +37,10 @@ steps:
     codeCoverageTool: Cobertura
     summaryFileLocation: './coverage/cobertura-coverage.xml'
     reportDirectory: './coverage'
+    failIfCoverageEmpty: true
 
+# Only publish for pull requests
 - task: PublishBuildArtifacts@1
-  condition: eq(variables['Build.Reason'], 'IndividualCI')
+  condition: and(succeededOrFailed(), notIn('PullRequest', variables['Build.Reason']))
   inputs:
     PathtoPublish: './'
