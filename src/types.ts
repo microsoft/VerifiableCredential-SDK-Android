@@ -102,3 +102,10 @@ export interface UserServiceEndpoint extends ServiceEndpoint {
    */
   instances: Array<string>;
 }
+
+/**
+ * Type for defining a claim
+ */
+export interface Claim {
+
+}

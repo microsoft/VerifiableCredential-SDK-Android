@@ -73,7 +73,7 @@ export default class Identifier {
     // resolver to get the document
     if (!this.document) {
       if (!this.options.resolver) {
-        throw new UserAgentError('Resolver not specified in user agent options.')
+        throw new UserAgentError('Resolver not specified in user agent options.');
       }
 
       // We need to resolve the document
