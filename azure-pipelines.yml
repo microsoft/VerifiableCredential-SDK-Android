@@ -23,3 +23,19 @@ steps:
 - script: |
     npm test
   displayName: 'npm test'
+
+- task: PublishTestResults@1
+  condition: succeededOrFailed()
+  inputs:
+    testRunner: Nunit
+    testResultsFiles: './nunitresults.xml'
+
+- task: PublishCodeCoverageResults@2
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: './coverage/cobertura-coverage.xml'
+    reportDirectory: './coverage'
+
+# - task: PublishBuildArtifacts@3
+#   inputs:
+#     PathtoPublish: './'
