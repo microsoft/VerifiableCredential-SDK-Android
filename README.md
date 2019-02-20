@@ -1,3 +1,5 @@
+[![Build Status](https://decentralized-identity.visualstudio.com/Core/_apis/build/status/Microsoft.UserAgent?branchName=master)](https://decentralized-identity.visualstudio.com/Core/_build/latest?definitionId=19&branchName=master)
+
 # User Agent SDK - Open Source
 
 SDK for building decentralized identity wallets and agents.
