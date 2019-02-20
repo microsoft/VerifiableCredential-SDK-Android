@@ -20,7 +20,7 @@ steps:
   displayName: 'npm install'
 
 - script: |
-    npm run lint
+    npm run lint-pr
   displayName: 'npm lint'
 
 - script: |
