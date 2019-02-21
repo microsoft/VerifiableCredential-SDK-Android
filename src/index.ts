@@ -6,5 +6,6 @@
 import Identifier from './Identifier';
 import IdentifierDocument from './IdentifierDocument';
 import Claims from './Claims';
+import Claim from './Claim';
 import Persona from './Persona';
-export { Identifier, IdentifierDocument, Claims, Persona };
+export { Identifier, IdentifierDocument, Claims, Claim, Persona };

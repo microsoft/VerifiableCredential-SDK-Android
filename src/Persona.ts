@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Identifier from './Identifier';
-import Claims from './Claims';
 
 /**
  * Class for creating and managing a persona.
