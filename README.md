@@ -18,4 +18,4 @@ npm install @decentralized-identity/hub-sdk-js
 
 ## Getting Started
 
-Please see the [example file](./src/example.ts) for a sample of using the SDK to communicate with a Hub.
+Please see the [example file](https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/example.ts) for a sample of using the SDK to communicate with a Hub.
