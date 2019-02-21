@@ -7,7 +7,8 @@
     "precommit": "npm run lint",
     "build": "tsc",
     "test": "nyc jasmine-ts --config=./tests/jasmine.json",
-    "lint": "tslint --fix --project ."
+    "lint": "tslint --fix --project .",
+    "docs": "typedoc ./src"
   },
   "repository": {
     "type": "git",
@@ -41,6 +42,7 @@
     "ts-node": "7.0.1",
     "tslint": "5.12.1",
     "tslint-config-airbnb": "5.11.1",
+    "typedoc": "0.14.2",
     "typescript": "3.2.2"
   },
   "nyc": {

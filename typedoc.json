@@ -1,0 +1,5 @@
+{
+  "out": "./docs",
+  "exclude": ["**/node_modules/**", ".\\src\\example.ts"],
+  "mode": "file"
+}
