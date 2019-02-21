@@ -1,3 +1,6 @@
+import HttpResolver from "./resolvers/HttpResolver";
+import { PrivateKey } from "@decentralized-identity/did-auth-jose";
+
 /**
  * Type for defining a identifier document
  * public key.
@@ -105,7 +108,29 @@ export interface UserServiceEndpoint extends ServiceEndpoint {
 
 /**
  * Type for defining a claim
+ * TODO: coming up with a spec for this right now
  */
-export interface Claim {
+export interface ClaimObj {
+  /**
+   * the verified claim in the form of the jwt
+   */
+  jwt: string;
 
+  /**
+   * ui references
+   */
+  uiRef: any;
+
+}
+
+/**
+ * Type for a Hub Session
+ */
+export interface HubSessionOptions {
+  hubEndpoint: string;
+  hubDid: string;
+  resolver: HttpResolver;
+  clientDid: string;
+  clientPrivateKey: PrivateKey;
+  targetDid: string;
 }

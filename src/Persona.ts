@@ -22,11 +22,6 @@ export default class Persona {
   public name: string;
 
   /**
-   * A Claim Object owned by the persona
-   */
-  public claims: Claims;
-
-  /**
    * Constructs an instance of the Persona class using the
    * provided Identifier or identifier string, and the name of the Persona
    * @param identifier either the string representation of an identifier or an Identifier Object
@@ -41,24 +36,6 @@ export default class Persona {
     }
 
     this.name = name;
-
-    this.claims = new Claims(this);
-  }
-
-  /**
-   * Get the claims owned by this persona.
-   */
-  public async getClaims () {
-    return this.claims;
-
-  }
-
-  /**
-   * Store the claims owned by this persona.
-   * @param claims
-   */
-  public async storeClaims (claims: Claims) {
-    this.claims = claims;
   }
 
 }

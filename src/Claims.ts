@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Persona from './Persona';
-import { Claim } from './types';
+import { ServiceReference } from './types';
+import { Identifier } from '.';
 
 /**
  * Class for creating, managing, and storing claims,
@@ -12,31 +12,37 @@ import { Claim } from './types';
 export default class Claims {
 
   /**
-   * The persona that owns the claims.
+   * The identifier that owns the claims
    */
-  public persona: Persona;
+  public identifier: Identifier
 
   /**
-   * An Array of Claim objects owned by the persona.
+   * An Array of Claim objects owned by the identifier.
    * TODO: add a way to do just identifier or both and way to create hub instance or something
    */
-  public claims: Array<Claim> = [];
-
-  constructor (persona: Persona) {
-
-    this.persona = persona;
-  }
+  // public hubSession: HubSession;
 
   /**
-   * Add a claim to the Claims object
-   * @param claim claim object to be added to collection
+   * 
    */
-  public addClaim (claim: Claim) {
-    this.claims.push(claim);
-  }
+  public serviceReferences: Array<ServiceReference> = [];
 
-  /**
-   *
-   */
+  constructor (identifier: Identifier) {
+
+    this.identifier = identifier;
+
+    if (identifier.document) {
+      this.serviceReferences = identifier.document.serviceReferences;
+
+      // const hubSessionOptions: HubSession = {
+      //   hubEndpoint: this.serviceReferences[0].serviceEndpoint,
+      //   hubDid: this.identifier.id,
+      //   resolver: new HttpResolver()
+
+      // };
+  
+      // this.hubSession = new HubSession({})
+    }
+  }
 
 }

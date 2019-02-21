@@ -5,4 +5,6 @@
 
 import Identifier from './Identifier';
 import IdentifierDocument from './IdentifierDocument';
-export { Identifier, IdentifierDocument };
+import Claims from './Claims';
+import Persona from './Persona';
+export { Identifier, IdentifierDocument, Claims, Persona };
