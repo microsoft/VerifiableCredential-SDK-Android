@@ -1,4 +1,5 @@
 import { ClaimObj } from './types';
+import { Identifier } from '.';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -14,6 +15,32 @@ export default class Claim {
    * claim as a JWT
    */
   public jwt: string;
+
+  /**
+   * the contents in the payload of the jwt
+   * aka the actual verified claims
+   */
+ // public contents: {[key: string]: string};
+
+ /**
+  * the signature on the jwt
+  */
+// public signature: string;
+
+  /**
+   * the issuer of the claim
+   */
+// public issuer: string;
+
+  /**
+   * the subject of the claim
+   */
+// public subject: string;
+
+  /**
+   * expiration of the claim
+   */
+// public expiration: string;
 
   /**
    * the ui references for the claim
@@ -32,13 +59,15 @@ export default class Claim {
       this.jwt = claim.jwt;
       this.uiRef = claim.uiRef;
     }
+
+    // TODO: verify that it is a JWS and break down into properties
+    // return an error if it's not formatted correctly
   }
 
   /**
    * Creates a new claim object
-   * @param options
    */
-  public static create (jwt: string, uiRef: any) {
+  public static create (jwt: string, uiRef: any): Claim {
     const claim = new Claim({ jwt, uiRef });
     return claim;
   }
@@ -52,5 +81,26 @@ export default class Claim {
     }
     return this.uiRef;
   }
+
+  /**
+   * Check to see if the claim has expired
+   */
+// public hasExpired(): boolean {}
+
+  /**
+   * Sign the claim and return a JWT
+   */
+  // public async sign(identifier: Identifier, privateKey: PrivateKey): Promise<string> {}
+
+  /**
+   * Verify the claim and return the contents
+   */
+  // public async verify(identifier: Identifier): Promise<any> {}
+
+  /**
+   * The issuer of the claim revokes the claim
+   * TODO: figure out how
+   */
+  // public revoke(identifier: Identifier) {}
 
 }
