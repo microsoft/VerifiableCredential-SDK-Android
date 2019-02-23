@@ -7,7 +7,6 @@ import { AuthenticationReference, UserServiceEndpoint, HostServiceEndpoint, Serv
 import IdentifierDocument from '../src/IdentifierDocument';
 
 describe('IdentifierDocument', () => {
-
   it('should construct new instance when provided a document', async done => {
     const document = { 
       id: 'did:test:identifier', 
@@ -61,7 +60,10 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument).toBeDefined();
     expect(identifierDocument.id).toEqual('did:test:identifier');
     if (identifierDocument.created) {
-      expect(Date.parse(identifierDocument.created.toISOString())).toBeCloseTo(Date.now());
+      const created = Date.parse(identifierDocument.created.toISOString());
+      const expected = Date.now();
+      const isNear = (created >= (expected - 2)) && (created <= (expected + 2));
+      expect(isNear).toBeTruthy();
     }
     expect(identifierDocument.publicKeys).toBeDefined();
     expect(identifierDocument.publicKeys.length).toEqual(1);
