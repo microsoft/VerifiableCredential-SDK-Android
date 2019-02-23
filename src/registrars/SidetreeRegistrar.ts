@@ -23,7 +23,7 @@ export default class SidetreeRegistrar implements Registrar {
    * @param url to the regsitration endpoint at the registrar
    * @param options to configure the resis
    */
-  constructor(public url: string, public options?: UserAgentOptions) {
+  constructor (public url: string, public options?: UserAgentOptions) {
     // Format the url
     const slash = url.endsWith('/') ? '' : '/';
     this.url = `${url}${slash}register`;
@@ -38,7 +38,7 @@ export default class SidetreeRegistrar implements Registrar {
   /**
    * @inheritdoc
    */
-  public async register(
+  public async register (
     identifierDocument: IdentifierDocument
   ): Promise<Identifier> {
     const bodyString = JSON.stringify(identifierDocument);

@@ -86,22 +86,22 @@ export default class IdentifierDocument {
    * Used to control the the properties that are
    * output by JSON.stringify.
    */
-  public toJSON(): any {
+  public toJSON (): any {
     // Clone the current instance. Note the use of
     // a deep clone to ensure immutability of
     // the instance being cloned for serialization
-    const clonedDocument = cloneDeep(this); 
-  
+    const clonedDocument = cloneDeep(this);
+
     if (!this.authenticationReferences || this.authenticationReferences.length === 0) {
-      clonedDocument.authenticationReferences = undefined
+      clonedDocument.authenticationReferences = undefined;
     }
 
     if (!this.serviceReferences || this.serviceReferences.length === 0) {
-      clonedDocument.serviceReferences = undefined
+      clonedDocument.serviceReferences = undefined;
     }
 
     if (!this.publicKeys || this.publicKeys.length === 0) {
-      clonedDocument.publicKeys = undefined
+      clonedDocument.publicKeys = undefined;
     }
 
     // Add the JSON-LD context
