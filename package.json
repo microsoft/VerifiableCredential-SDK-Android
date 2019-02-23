@@ -40,7 +40,8 @@
     "typescript": "3.3.3",
     "node-fetch": "2.3.0",
     "es6-promise": "4.2.6",
-    "isomorphic-fetch": "2.2.1"
+    "isomorphic-fetch": "2.2.1",
+    "lodash": "4.17.11"
   },
   "nyc": {
     "extension": [
