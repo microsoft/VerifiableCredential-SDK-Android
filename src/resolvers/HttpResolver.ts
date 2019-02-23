@@ -18,16 +18,23 @@ declare var fetch: any;
  * @implements Resolver
  */
 export default class HttpResolver implements Resolver {
+  private timeoutInMilliseconds: number;
 
   /**
    * Constructs an instance of the HttpResolver class.
    * @param url of the remote resolver.
-   * @param options for configuring the resolver.
+   * @param [options] for configuring the resolver.
    */
-  constructor (public url: string, public options: UserAgentOptions) {
+  constructor (public url: string, public options?: UserAgentOptions) {
     // Format the url
     const slash = url.endsWith('/') ? '' : '/';
     this.url = `${url}${slash}1.0/identifiers/`;
+
+    this.timeoutInMilliseconds =
+    1000 *
+    (!this.options || !this.options.timeoutInSeconds
+      ? 30
+      : this.options.timeoutInSeconds);
   }
 
   /**
@@ -39,7 +46,7 @@ export default class HttpResolver implements Resolver {
     const query = `${this.url}${identifier.id}`;
     return new Promise(async (resolve, reject) => {
       let timer = setTimeout(
-        () => reject(new UserAgentError('Fetch timed out.')), 1000 * this.options.timeoutInSeconds
+        () => reject(new UserAgentError('Fetch timed out.')), this.timeoutInMilliseconds
       );
 
       // Now call the actual fetch with the updated options
@@ -68,7 +75,6 @@ export default class HttpResolver implements Resolver {
       const responseJson = await response.json();
       const identifierDocument = new IdentifierDocument(responseJson.document || responseJson);
       resolve(identifierDocument);
-      return;
     });
   }
 }

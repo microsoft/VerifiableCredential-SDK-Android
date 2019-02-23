@@ -16,27 +16,37 @@ declare var fetch: any;
  * Registrar implementation for the Sidetree (ION) network
  */
 export default class SidetreeRegistrar implements Registrar {
+  private timeoutInMilliseconds: number;
 
   /**
    * Constructs a new instance of the Sidetree registrar
    * @param url to the regsitration endpoint at the registrar
    * @param options to configure the resis
    */
-  constructor (public url: string, public options: UserAgentOptions) {
+  constructor (public url: string, public options?: UserAgentOptions) {
     // Format the url
     const slash = url.endsWith('/') ? '' : '/';
     this.url = `${url}${slash}register`;
+
+    this.timeoutInMilliseconds =
+      1000 *
+      (!this.options || !this.options.timeoutInSeconds
+        ? 30
+        : this.options.timeoutInSeconds);
   }
 
   /**
    * @inheritdoc
    */
-  public async register (identifierDocument: IdentifierDocument): Promise<Identifier> {
+  public async register (
+    identifierDocument: IdentifierDocument
+  ): Promise<Identifier> {
     const bodyString = JSON.stringify(identifierDocument);
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       let timer = setTimeout(
-        () => reject(new Error('Fetch timed out.')), 1000 * this.options.timeoutInSeconds
+        () => reject(new UserAgentError('Fetch timed out.')),
+        this.timeoutInMilliseconds
       );
 
       const fetchOptions = {
@@ -49,22 +59,22 @@ export default class SidetreeRegistrar implements Registrar {
       };
 
       // Now call the actual fetch with the updated options
-      fetch(this.url, fetchOptions)
-        .then(
-          async (response: any) => {
-            if (!response.ok) {
-              reject(new UserAgentError('Failed to register the identifier document.'));
-            }
+      const response = await fetch(this.url, fetchOptions);
 
-            const identifier = new Identifier(await response.json(), this.options);
-            resolve(identifier);
-          },
-          (error: any) => reject(error)
-        )
-        .finally(() => {
-          // Clear the timer
-          clearTimeout(timer);
-        });
+      // Got a response so clear the timer
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        const error = new UserAgentError(
+          'Failed to register the identifier document.'
+        );
+        reject(error);
+        return;
+      }
+
+      const responseJson = await response.json();
+      const identifier = new Identifier(responseJson, this.options);
+      resolve(identifier);
     });
   }
 }

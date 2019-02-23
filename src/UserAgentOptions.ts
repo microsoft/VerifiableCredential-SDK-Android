@@ -35,5 +35,5 @@ export default class UserAgentOptions {
    * The timeout when making requests to
    * external services.
    */
-  timeoutInSeconds: number = 30;
+  timeoutInSeconds?: number = 30;
 }

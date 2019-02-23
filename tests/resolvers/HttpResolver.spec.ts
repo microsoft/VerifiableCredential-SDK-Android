@@ -106,9 +106,7 @@ describe('HttpResolver', () => {
   });
 
   it('should throw UserAgentError when 500 returned by resolver', async done => {
-    const resolver = new HttpResolver('https://resolver.org', {
-      timeoutInSeconds: 30
-    });
+    const resolver = new HttpResolver('https://resolver.org');
     const identifier = new Identifier('did:test:identifier', {
       timeoutInSeconds: 5
     });
@@ -134,7 +132,7 @@ describe('HttpResolver', () => {
     });
 
     // Set the mock timeout to be greater than the fetch configuration
-    // timeout so that we can ensure that our timeout works as expected.
+    // timeout to ensure that the fetch timeout works as expected.
     const delay = new Promise((res, _) => setTimeout(res, 1000*3))
     fetchMock.get('https://resolver.org/1.0/identifiers/did:test:identifier', delay.then((_)  => 404))
 

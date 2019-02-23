@@ -4,12 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationReference, ServiceReference, PublicKey } from './types';
+const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
  * Class for creating and managing identifiers,
  * retrieving identifier documents.
  */
 export default class IdentifierDocument {
+
   /**
    * The identifier the document represents.
    */
@@ -78,5 +80,34 @@ export default class IdentifierDocument {
    */
   public addServiceReference (serviceReference: ServiceReference) {
     this.serviceReferences.push(serviceReference);
+  }
+
+  /**
+   * Used to control the the properties that are
+   * output by JSON.stringify.
+   */
+  public toJSON (): any {
+    // Clone the current instance. Note the use of
+    // a deep clone to ensure immutability of
+    // the instance being cloned for serialization
+    const clonedDocument = cloneDeep(this);
+
+    if (!this.authenticationReferences || this.authenticationReferences.length === 0) {
+      clonedDocument.authenticationReferences = undefined;
+    }
+
+    if (!this.serviceReferences || this.serviceReferences.length === 0) {
+      clonedDocument.serviceReferences = undefined;
+    }
+
+    if (!this.publicKeys || this.publicKeys.length === 0) {
+      clonedDocument.publicKeys = undefined;
+    }
+
+    // Add the JSON-LD context
+    clonedDocument['@context'] = 'https://w3id.org/did/v1';
+
+    // Now return the cloned document for serialization
+    return clonedDocument;
   }
 }

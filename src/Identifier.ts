@@ -29,9 +29,9 @@ export default class Identifier {
    * Constructs an instance of the Identifier
    * class using the provided identifier or identifier document.
    * @param identifier either the string representation of an identifier or a identifier document.
-   * @param options for configuring how to register and resolve identifiers.
+   * @param [options] for configuring how to register and resolve identifiers.
    */
-  constructor (public identifier: IdentifierDocument | string, private options: UserAgentOptions) {
+  constructor (public identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
     // Check whether passed an identifier document
     // or an identifier string
     if (typeof identifier === 'object') {
@@ -72,7 +72,7 @@ export default class Identifier {
     // retrieved the document use the
     // resolver to get the document
     if (!this.document) {
-      if (!this.options.resolver) {
+      if (!this.options || !this.options.resolver) {
         throw new UserAgentError('Resolver not specified in user agent options.');
       }
 
