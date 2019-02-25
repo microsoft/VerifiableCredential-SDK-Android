@@ -8,6 +8,7 @@
     "build": "tsc",
     "test": "nyc jasmine-ts --config=./tests/jasmine.json",
     "lint": "tslint --fix --project .",
+    "check-lint": "tslint --project .",
     "docs": "typedoc ./src"
   },
   "repository": {
