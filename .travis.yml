@@ -10,5 +10,6 @@ install:
   - npm i
 
 script:
+  - npm run build
   - npm run check-lint
   - npm run test

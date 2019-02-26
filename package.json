@@ -22,13 +22,13 @@
   },
   "homepage": "https://github.com/decentralized-identity/hub-sdk-js#readme",
   "dependencies": {
-    "@decentralized-identity/did-auth-jose": "0.1.6",
+    "@decentralized-identity/did-auth-jose": "0.1.9",
+    "@decentralized-identity/did-common-typescript": "0.1.4",
     "@decentralized-identity/hub-common-js": "0.1.1",
     "node-fetch": "2.3.0",
     "object-assign": "4.1.1"
   },
   "devDependencies": {
-    "@decentralized-identity/hub-node-core": "0.1.1",
     "@types/jasmine": "3.3.8",
     "@types/lodash": "4.14.120",
     "@types/node": "10.12.19",

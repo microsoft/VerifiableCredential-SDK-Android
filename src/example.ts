@@ -1,5 +1,5 @@
 import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto/rsa/RsaPrivateKey';
-import { HttpResolver } from '@decentralized-identity/hub-node-core';
+import { HttpResolver } from '@decentralized-identity/did-common-typescript';
 import HubSession from './HubSession';
 import HubWriteRequest from './requests/HubWriteRequest';
 import RsaCommitSigner from './crypto/RsaCommitSigner';

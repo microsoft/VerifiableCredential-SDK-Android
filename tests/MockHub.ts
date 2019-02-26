@@ -1,5 +1,5 @@
 import { PrivateKey, Authentication, VerifiedRequest } from "@decentralized-identity/did-auth-jose";
-import { DidResolver } from "@decentralized-identity/did-common-typescript";
+import { IDidResolver } from "@decentralized-identity/did-common-typescript";
 import { Response, Request } from 'node-fetch';
 
 /** Handler to intercept requests before they are authenticated. */
@@ -23,7 +23,7 @@ type MockHubHandler = (params: MockHubHandlerParameters) => Promise<Response | s
 interface MockHubOptions {
   hubDid: string;
   hubPrivateKey: PrivateKey;
-  resolver: DidResolver;
+  resolver: IDidResolver;
 }
 
 /**

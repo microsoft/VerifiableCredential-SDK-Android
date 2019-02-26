@@ -1,4 +1,4 @@
-import { DidResolver } from '@decentralized-identity/did-common-typescript';
+import { IDidResolver } from '@decentralized-identity/did-common-typescript';
 import { IHubError, IHubResponse, HubErrorCode } from '@decentralized-identity/hub-common-js';
 import { Authentication, PrivateKey, CryptoSuite } from '@decentralized-identity/did-auth-jose';
 import HubRequest from './requests/HubRequest';
@@ -37,7 +37,7 @@ export interface HubSessionOptions {
   hubEndpoint: string;
 
   /** A DID resolver instance to be used during authentication. */
-  resolver: DidResolver;
+  resolver: IDidResolver;
 
   /**
    * An array of CryptoSuites to use during authentication (optional). Allows the client to provide
