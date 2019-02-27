@@ -1,5 +1,6 @@
-import { ClaimObj } from './types';
-import { Identifier } from '.';
+import Claim from './Claim';
+import { ClaimObj } from '../types';
+import { Identifier } from '..';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -9,7 +10,7 @@ import { Identifier } from '.';
 /**
  * Class for creating and managing a claim
  */
-export default class Claim {
+export default class JwtClaim {
 
   /**
    * claim as a JWT
@@ -61,16 +62,16 @@ export default class Claim {
     }
 
     // TODO: verify that it is a JWS and break down into properties
-    // return an error if it's not formatted correctly
+    // return an error if it's not formatted correctly, or do this in the create method
   }
 
   /**
    * Creates a new claim object
    */
-  public static create (jwt: string, uiRef: any): Claim {
-    const claim = new Claim({ jwt, uiRef });
-    return claim;
-  }
+  // public static create (jwt: string, uiRef: any): Claim {
+  //   const claim = new JwtClaim({ jwt, uiRef });
+  //   return claim;
+  // }
 
   /**
    * Get the uiRef for the claim
