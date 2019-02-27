@@ -24,7 +24,7 @@
         "--config=tests/jasmine.json"
       ],
       "console": "internalConsole",
-      "smartStep": true
+      "smartStep": false
     }
   ]
 }
