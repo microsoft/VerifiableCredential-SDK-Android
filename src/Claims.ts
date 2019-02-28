@@ -14,7 +14,7 @@ export default class Claims {
   /**
    * The identifier that owns the claims
    */
-  public identifier: Identifier
+  public identifier: Identifier;
 
   /**
    * An Array of Claim objects owned by the identifier.
@@ -23,7 +23,7 @@ export default class Claims {
   // public hubSession: HubSession;
 
   /**
-   * 
+   *
    */
   public serviceReferences: Array<ServiceReference> = [];
 
@@ -40,7 +40,7 @@ export default class Claims {
       //   resolver: new HttpResolver()
 
       // };
-  
+
       // this.hubSession = new HubSession({})
     }
   }

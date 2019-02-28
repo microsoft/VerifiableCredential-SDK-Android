@@ -1,5 +1,3 @@
-import Claim from './Claim';
-import { ClaimObj } from '../types';
 import { Identifier } from '..';
 
 /*---------------------------------------------------------------------------------------------
@@ -44,26 +42,20 @@ export default class JwtClaim {
 // public expiration: string;
 
   /**
-   * the ui references for the claim
-   */
-  public uiRef: any | undefined;
-
-  /**
    * Constructs an instance of the Claim
    * class using the provided jwt or claimObj
    */
-  constructor (claim: ClaimObj | string) {
+  // constructor (claim: ClaimObj | string) {
 
-    if (typeof claim === 'string') {
-      this.jwt = claim;
-    } else {
-      this.jwt = claim.jwt;
-      this.uiRef = claim.uiRef;
-    }
+  //   if (typeof claim === 'string') {
+  //     this.jwt = claim;
+  //   } else {
+  //     this.jwt = claim.jwt;
+  //     this.uiRef = claim.uiRef;
+  //   }
 
     // TODO: verify that it is a JWS and break down into properties
     // return an error if it's not formatted correctly, or do this in the create method
-  }
 
   /**
    * Creates a new claim object
@@ -72,16 +64,6 @@ export default class JwtClaim {
   //   const claim = new JwtClaim({ jwt, uiRef });
   //   return claim;
   // }
-
-  /**
-   * Get the uiRef for the claim
-   */
-  public getClaimUI () {
-    if (!this.uiRef) {
-      throw new Error('No UI Reference for Claim');
-    }
-    return this.uiRef;
-  }
 
   /**
    * Check to see if the claim has expired

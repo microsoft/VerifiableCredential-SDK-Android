@@ -6,6 +6,6 @@
 import Identifier from './Identifier';
 import IdentifierDocument from './IdentifierDocument';
 import Claims from './Claims';
-import Claim from './claims/JwtClaim';
+import ClaimDetails from './claimDetails/ClaimDetails';
 import Persona from './Persona';
-export { Identifier, IdentifierDocument, Claims, Claim, Persona };
+export { Identifier, IdentifierDocument, Claims, ClaimDetails, Persona };
