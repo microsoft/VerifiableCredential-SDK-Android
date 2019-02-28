@@ -8,12 +8,7 @@ import { Identifier } from '..';
 /**
  * Class for creating and managing a claim
  */
-export default class JwtClaim {
-
-  /**
-   * claim as a JWT
-   */
-  public jwt: string;
+export default class JwtClaimDetais {
 
   /**
    * the contents in the payload of the jwt

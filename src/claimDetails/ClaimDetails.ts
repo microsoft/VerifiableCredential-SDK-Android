@@ -9,12 +9,7 @@ import Identifier from '../Identifier';
  * Interface defining methods and properties to
  * be implemented by specific claim objects
  */
-export default interface Claim {
-
-  /**
-   * the ui references for the claim
-   */
-  uiRef: any | undefined;
+export default interface ClaimDetails {
 
   /**
    * the contents for the claim
