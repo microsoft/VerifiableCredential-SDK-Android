@@ -3,39 +3,51 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ClaimDetails from '../claimDetails/ClaimDetails';
 import { UriDescription } from '../types';
+import { ClaimObject } from './models/ClaimObject';
+import { ClaimClass } from './models/ClaimClass';
 
 /**
  * Interface defining methods and properties for a Claim object.
  * The properties such as issuer, logo, name, and descriptions are what are meant to be rendered on the claim UI.
  */
-export default interface Claim {
+export default class Claim {
 
   /**
    * The claim details present in the claim.
    * This includes the verifiable part of the claim.
    */
-  claimDetails: ClaimDetails;
+  public claimDetails: string;
 
   /**
    * Issuer Name
    */
-  issuer: string;
+  public issuer: string;
 
   /**
    * Issuer Logo
    */
-  logo: UriDescription;
+  public logo: UriDescription;
 
   /**
    * Claim Name
    */
-  name: string;
+  public name: string;
 
   /**
    * Claim Descriptions
    */
-  descriptions: any;
+  public descriptions: any;
+
+  /**
+   * Contructs an instance of the Claim class
+   */
+  constructor (claimObject: ClaimObject, claimClass: ClaimClass) {
+    this.claimDetails = claimObject.claimDetails;
+    this.issuer = claimClass.issuerName;
+    this.logo = claimClass.claimLogo.sourceUri;
+    this.name = claimClass.claimName;
+    this.descriptions = claimClass.claimDescriptions;
+  }
 
 }
