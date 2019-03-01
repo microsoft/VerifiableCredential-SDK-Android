@@ -6,8 +6,7 @@
 import Identifier from '../Identifier';
 
 /**
- * Interface defining methods and properties to
- * be implemented by specific claim objects
+ * Interface defining methods and properties for a ClaimDetails object
  */
 export default interface ClaimDetails {
 

@@ -1,6 +1,3 @@
-import HttpResolver from './resolvers/HttpResolver';
-import { PrivateKey } from '@decentralized-identity/did-auth-jose';
-
 /**
  * Type for defining a identifier document
  * public key.
@@ -104,4 +101,24 @@ export interface UserServiceEndpoint extends ServiceEndpoint {
    * The type of the service reference.
    */
   instances: Array<string>;
+}
+
+/**
+ * Type for defining a URI as outlined in the claim spec.
+ */
+export interface UriDescription {
+  /**
+   * the type of URI.
+   */
+  '@type': string;
+
+  /**
+   * the actual URI.
+   */
+  uri: string;
+
+  /**
+   * the description of the URI.
+   */
+  description: string;
 }

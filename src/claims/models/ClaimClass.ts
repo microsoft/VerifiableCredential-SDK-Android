@@ -1,51 +1,37 @@
-interface ClaimClass {
+import { UriDescription } from '../../types';
+
+export interface ClaimClass {
   '@type': string;
   issuerName: string;
   claimLogo: {
     '@type': string;
-    sourceUri: {
-      '@type': string;
-      uri: string;
-    }
+    sourceUri: UriDescription;
   };
   claimName: string;
   hexBackgroundColor: string;
   hexFontColor: string;
   heroImage: {
     '@type': string;
-    sourceUri: {
-      '@type': string;
-      uri: string;
-    }
+    sourceUri: UriDescription;
   };
   moreInfo?: string;
   helpLinks?: {
     link: string
   };
-  textModulesData?: [
+  claimDescriptions?: [
       {
         header: string;
         body: string;
       }
   ];
   linksModuleData?: {
-    uris: [
-          {
-            '@type': string;
-            uri: string;
-            description: string;
-          }
-      ]
+    uris: Array<UriDescription>;
   };
   imageModulesData?: [
       {
         mainImage: {
           '@type': string;
-          sourceUri: {
-            '@type': string;
-            uri: string;
-            description: string;
-          }
+          sourceUri: UriDescription;
         }
       }
   ];
