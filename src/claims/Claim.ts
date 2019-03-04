@@ -10,6 +10,7 @@ import { ClaimClass } from './models/ClaimClass';
 /**
  * Interface defining methods and properties for a Claim object.
  * The properties such as issuer, logo, name, and descriptions are what are meant to be rendered on the claim UI.
+ * TODO: figure out what properties exactly we want on a claim.
  */
 export default class Claim {
 
