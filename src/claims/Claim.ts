@@ -50,4 +50,30 @@ export default class Claim {
     this.descriptions = claimClass.claimDescriptions;
   }
 
+  /**
+   * Creates a new instance of the Claim class.
+   * TODO: figure out what properties we want to have on the claim.
+   */
+  // public static create () {}
+
+  /**
+   * Get the claimDetails
+   */
+  public getClaimDetails () {
+    return this.claimDetails;
+  }
+
+  /**
+   * Get the UI properties in order to render claim correctly
+   * TODO: figure out exactly what properties we want to render on the claim.
+   */
+  public getUIProperties () {
+    const uiproperties = {
+      issuerName: this.issuer,
+      claimName: this.name,
+      descriptions: this.descriptions
+    };
+    return uiproperties;
+  }
+
 }
