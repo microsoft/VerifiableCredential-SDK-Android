@@ -6,6 +6,7 @@
 import { UriDescription } from '../types';
 import { ClaimObject } from './models/ClaimObject';
 import { ClaimClass } from './models/ClaimClass';
+import { ClaimDetails } from '..';
 
 /**
  * Interface defining methods and properties for a Claim object.
@@ -17,8 +18,9 @@ export default class Claim {
   /**
    * The claim details present in the claim.
    * This includes the verifiable part of the claim.
+   * TODO: claimDetails needs to be abstracted to ClaimDetails interface somehow.
    */
-  public claimDetails: string;
+  public claimDetails: ClaimDetails | string;
 
   /**
    * Issuer Name
