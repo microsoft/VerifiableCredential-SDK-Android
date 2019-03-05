@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Identifier from '../Identifier';
+import { PrivateKey } from '@decentralized-identity/did-auth-jose';
 
 /**
  * Interface defining methods and properties for a ClaimDetails object
@@ -16,19 +17,9 @@ export default interface ClaimDetails {
   contents: any;
 
   /**
-   * signature on the claim
-   */
-  signature: string;
-
-  /**
-   * Check to see if the claim has expired
-   */
-  hasExpired (): boolean;
-
-  /**
    * Sign the claim and return a JWT
    */
-  sign (identifier: Identifier, privateKey: any): Promise<string>;
+  sign (privateKey: PrivateKey): Promise<string>;
 
   /**
    * Verify the claim and return the contents
@@ -39,6 +30,6 @@ export default interface ClaimDetails {
    * The issuer of the claim revokes the claim
    * TODO: figure out how
    */
-  revoke (identifier: Identifier): void;
+  // revoke (identifier: Identifier): void;
 
 }
