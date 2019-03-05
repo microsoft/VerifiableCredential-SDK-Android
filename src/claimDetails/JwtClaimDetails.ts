@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { JwsToken, CryptoFactory, PrivateKey } from '@decentralized-identity/did-auth-jose';
+import { JwsToken, CryptoFactory, RsaCryptoSuite, Secp256k1CryptoSuite, PrivateKey } from '@decentralized-identity/did-auth-jose';
 import Identifier from '../Identifier';
 import { ClaimDetails } from '..';
 
@@ -24,18 +24,23 @@ export default class JwtClaimDetails implements ClaimDetails {
   public jwsToken: JwsToken;
 
   /**
-   * Constructs an instance of the Claim
-   * class using the provided jwt or claimObj
+   * Constructs an instance of the ClaimDetails Class
+   * @param jwsToken a jwsToken Object.
    */
   constructor (jwsToken: JwsToken) {
     this.jwsToken = jwsToken;
     this.contents = jwsToken.getPayload();
   }
 
-    // TODO: verify that it is a JWS and break down into properties
-    // return an error if it's not formatted correctly, or do this in the create method
-  public static create (jws: string, cryptoFactory: CryptoFactory) {
-    const jwsToken = new JwsToken(jws, cryptoFactory);
+  /**
+   * Create a new instance of JwtClaimDetails.
+   * @param content either the signed payload represented as a string or the payload object to be signed.
+   * @param options optional options such as the cryptoSuites used to sign/verify JWSToken.
+   * TODO: decide if cryptofactory is an advanced option and have defaults instead (RSA and EC)
+   */
+  public static create (content: string | Object, options?: any): JwtClaimDetails {
+    const cryptoFactory = new CryptoFactory(options.cryptoSuites || [new RsaCryptoSuite(), new Secp256k1CryptoSuite()]);
+    const jwsToken = new JwsToken(content, cryptoFactory);
     return new JwtClaimDetails(jwsToken);
   }
 
@@ -49,7 +54,7 @@ export default class JwtClaimDetails implements ClaimDetails {
   /**
    * Verify the claim and return the contents
    */
-  public async verify (identifier: Identifier): Promise<any> {
+  public async verify (identifier: Identifier): Promise<string> {
     const publicKey = await identifier.getPublicKey();
     return this.jwsToken.verifySignature(publicKey.publicKeyJwk);
   }
