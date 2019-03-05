@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from '../Identifier';
-import { PrivateKey } from '@decentralized-identity/did-auth-jose';
+import { PrivateKey, PublicKey } from '@decentralized-identity/did-auth-jose';
 
 /**
  * Interface defining methods and properties for a ClaimDetails object
@@ -24,7 +23,7 @@ export default interface ClaimDetails {
   /**
    * Verify the claim and return the contents
    */
-  verify (identifier: Identifier): Promise<any>;
+  verify (publicKey: PublicKey): Promise<any>;
 
   /**
    * The issuer of the claim revokes the claim
