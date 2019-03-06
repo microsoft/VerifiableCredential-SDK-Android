@@ -1,4 +1,5 @@
 import { UriDescription } from '../../types';
+import { ClaimDetails } from '../..';
 
 /**
  * What a claimObject will look like.
@@ -61,5 +62,15 @@ export interface ClaimObject {
   /**
    * the actual verifiable claims.
    */
-  claimDetails: string;
+  claimDetails: {
+    /**
+     * type of claim details
+     * e.g. JWS
+     */
+    type: string;
+    /**
+     * the actual claim details data.
+     */
+    data: string;
+  };
 }
