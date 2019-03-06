@@ -6,6 +6,14 @@
 import { PrivateKey, PublicKey } from '@decentralized-identity/did-auth-jose';
 
 /**
+ * ClaimDetails Types
+ */
+export enum ClaimDetailsType {
+  jws= 'jws',
+  vc= 'vc'
+}
+
+/**
  * Interface defining methods and properties for a ClaimDetails object
  */
 export default interface ClaimDetails {

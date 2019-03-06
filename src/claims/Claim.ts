@@ -6,8 +6,9 @@
 import { UriDescription } from '../types';
 import { ClaimObject } from './models/ClaimObject';
 import { ClaimClass } from './models/ClaimClass';
-import { ClaimDetails } from '..';
+import ClaimDetails from '../claimDetails/ClaimDetails';
 import JwtClaimDetails from '../claimDetails/JwtClaimDetails';
+import { ClaimDetailsType } from '../claimDetails/claimDetails';
 
 /**
  * Interface defining methods and properties for a Claim object.
@@ -50,10 +51,10 @@ export default class Claim {
     this.issuer = claimClass.issuerName;
     this.logo = claimClass.claimLogo.sourceUri;
     this.name = claimClass.claimName;
-    this.descriptions = claimClass.claimDescriptions;
+    this.descriptions = Object.assign(claimClass.claimDescriptions, claimObject.claimDescriptions);
 
     const claimDetailsObject = claimObject.claimDetails;
-    if (claimDetailsObject.type === 'jws') {
+    if (claimDetailsObject.type === ClaimDetailsType.jws) {
       this.claimDetails = JwtClaimDetails.create(claimDetailsObject.data);
     }
   }
@@ -79,6 +80,7 @@ export default class Claim {
     const uiproperties = {
       issuerName: this.issuer,
       claimName: this.name,
+      issuerLogo: this.logo,
       descriptions: this.descriptions
     };
     return uiproperties;
