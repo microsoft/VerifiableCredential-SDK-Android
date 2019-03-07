@@ -3,32 +3,32 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import JwtClaimDetails from '../../src/claimDetails/JwtClaimDetails';
+import Jwt from '../../src/token/Jwt';
 import { PrivateKeyRsa, JwsToken, CryptoFactory, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
 
 /**
- * Tests the JwtClaimDetails Class.
+ * Tests the JWT Class.
  */
-describe('JwtClaimDetails', () => {
+describe('Jwt', () => {
 
   it('should expect create to have been called.', () => {
-    spyOn(JwtClaimDetails, 'create').and.callThrough();
+    spyOn(Jwt, 'create').and.callThrough();
     const payload = {test: 'test'};
-    const claimDetails = JwtClaimDetails.create(payload);
-    expect(JwtClaimDetails.create).toHaveBeenCalled();
+    const claimDetails = Jwt.create(payload);
+    expect(Jwt.create).toHaveBeenCalled();
     expect(claimDetails).toBeDefined();
   });
 
   it('should expect sign to not have been called.', () => {
     const payload = {test: 'test'};
-    const claimDetails = JwtClaimDetails.create(payload);
+    const claimDetails = Jwt.create(payload);
     spyOn(claimDetails, 'sign');
     expect(claimDetails.sign).not.toHaveBeenCalled();
   });
 
   it('should expect sign to have been called.', async done => {
     const payload = {test: 'test'};
-    const claimDetails = JwtClaimDetails.create(payload);
+    const claimDetails = Jwt.create(payload);
     spyOn(claimDetails, 'sign').and.callThrough();
     const rsaPrivateKey = await PrivateKeyRsa.generatePrivateKey('test');
     const jws = await claimDetails.sign(rsaPrivateKey);
@@ -39,7 +39,7 @@ describe('JwtClaimDetails', () => {
 
   it('should expect verify to not have been called.', () => {
     const payload = 'test';
-    const claimDetails = JwtClaimDetails.create(payload);
+    const claimDetails = Jwt.create(payload);
     spyOn(claimDetails, 'verify');
     expect(claimDetails.verify).not.toHaveBeenCalled();
   });
@@ -51,7 +51,7 @@ describe('JwtClaimDetails', () => {
     const rsaPublicKey = rsaPrivateKey.getPublicKey();
     const signedJws = await jws.sign(rsaPrivateKey);
 
-    const claimDetails = JwtClaimDetails.create(signedJws);
+    const claimDetails = Jwt.create(signedJws);
     console.log(signedJws);
     spyOn(claimDetails, 'verify').and.callThrough();
     const verifiedData = await claimDetails.verify(rsaPublicKey);

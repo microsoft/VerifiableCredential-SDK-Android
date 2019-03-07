@@ -6,9 +6,6 @@
 import { UriDescription } from '../types';
 import { ClaimObject } from './models/ClaimObject';
 import { ClaimClass } from './models/ClaimClass';
-import ClaimDetails from '../claimDetails/ClaimDetails';
-import JwtClaimDetails from '../claimDetails/JwtClaimDetails';
-import { ClaimDetailsType } from '../claimDetails/claimDetails';
 
 /**
  * Interface defining methods and properties for a Claim object.
@@ -22,7 +19,7 @@ export default class Claim {
    * This includes the verifiable part of the claim.
    * TODO: claimDetails needs to be abstracted to ClaimDetails interface somehow.
    */
-  public claimDetails: ClaimDetails | undefined;
+  // public claimDetails: ClaimDetails | undefined;
 
   /**
    * Issuer Name
@@ -53,10 +50,10 @@ export default class Claim {
     this.name = claimClass.claimName;
     this.descriptions = Object.assign(claimClass.claimDescriptions, claimObject.claimDescriptions);
 
-    const claimDetailsObject = claimObject.claimDetails;
-    if (claimDetailsObject.type === ClaimDetailsType.jws) {
-      this.claimDetails = JwtClaimDetails.create(claimDetailsObject.data);
-    }
+    // const claimDetailsObject = claimObject.claimDetails;
+    // if (claimDetailsObject.type === ClaimDetailsType.jws) {
+    //   this.claimDetails = JwtClaimDetails.create(claimDetailsObject.data);
+    // }
   }
 
   /**
@@ -68,9 +65,9 @@ export default class Claim {
   /**
    * Get the claimDetails
    */
-  public getClaimDetails () {
-    return this.claimDetails;
-  }
+  // public getClaimDetails () {
+  //   return this.claimDetails;
+  // }
 
   /**
    * Get the UI properties in order to render claim correctly

@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { JwsToken, CryptoFactory, RsaCryptoSuite, Secp256k1CryptoSuite, PrivateKey, PublicKey } from '@decentralized-identity/did-auth-jose';
-import ClaimDetails from './ClaimDetails';
+import Token from './Token';
 
 /**
- * Class for creating and managing a claim
+ * Class for creating and managing a JWT-formed claims
  */
-export default class JwtClaimDetails implements ClaimDetails {
+export default class Jwt implements Token {
 
   /**
    * the contents in the payload of the jwt
@@ -23,7 +23,7 @@ export default class JwtClaimDetails implements ClaimDetails {
   public jwsToken: JwsToken;
 
   /**
-   * Constructs an instance of the ClaimDetails Class
+   * Constructs an instance of the JWT Class
    * @param jwsToken a jwsToken Object.
    */
   constructor (jwsToken: JwsToken) {
@@ -32,15 +32,22 @@ export default class JwtClaimDetails implements ClaimDetails {
   }
 
   /**
-   * Create a new instance of JwtClaimDetails.
+   * Create a new instance of JWT Class.
    * @param content either the signed payload represented as a string or the payload object to be signed.
    * @param options optional options such as the cryptoSuites used to sign/verify JwsToken.
    * TODO: decide if cryptofactory is an advanced option and have defaults instead (RSA and EC)
    */
-  public static create (content: string | Object, cryptoSuites?: any): JwtClaimDetails {
+  public static create (content: string | Object, cryptoSuites?: any): Jwt {
     const cryptoFactory = new CryptoFactory(cryptoSuites || [new RsaCryptoSuite(), new Secp256k1CryptoSuite()]);
     const jwsToken = new JwsToken(content, cryptoFactory);
-    return new JwtClaimDetails(jwsToken);
+    return new Jwt(jwsToken);
+  }
+
+  /**
+   * Returns the extracted contents of the token.
+   */
+  public extractContents () {
+    return this.contents;
   }
 
   /**
@@ -52,6 +59,7 @@ export default class JwtClaimDetails implements ClaimDetails {
 
   /**
    * Verify the claim and return the contents
+   * @return the stringified contents of the token.
    */
   public async verify (publicKey: PublicKey): Promise<string> {
     return this.jwsToken.verifySignature(publicKey);

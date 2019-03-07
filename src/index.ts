@@ -5,7 +5,7 @@
 
 import Identifier from './Identifier';
 import IdentifierDocument from './IdentifierDocument';
-import Claims from './Claims';
-import ClaimDetails from './claimDetails/ClaimDetails';
+import Token from './token/Token';
+import Jwt from './token/Jwt';
 import Persona from './Persona';
-export { Identifier, IdentifierDocument, Claims, ClaimDetails, Persona };
+export { Identifier, IdentifierDocument, Token, Jwt, Persona };

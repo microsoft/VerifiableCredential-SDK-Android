@@ -14,14 +14,19 @@ export enum ClaimDetailsType {
 }
 
 /**
- * Interface defining methods and properties for a ClaimDetails object
+ * Interface defining methods and properties for a Token object
  */
-export default interface ClaimDetails {
+export default interface Token {
 
   /**
    * the contents for the claim
    */
   contents: any;
+
+  /**
+   * Return the extracted contents of the Token.
+   */
+  extractContents (): any;
 
   /**
    * Sign the claim and return a JWT

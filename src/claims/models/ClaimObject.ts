@@ -1,5 +1,4 @@
 import { UriDescription } from '../../types';
-import { ClaimDetails } from '../..';
 
 /**
  * What a claimObject will look like.
