@@ -19,6 +19,15 @@ describe('Jwt', () => {
     expect(claimDetails).toBeDefined();
   });
 
+  it('should expect extractContents to be called with correct payload.', async done => {
+    const payload = {test: 'test'};
+    const jwt = Jwt.create(payload);
+    spyOn(jwt, 'extractContents').and.callThrough();
+    jwt.extractContents();
+    expect(jwt.extractContents).toHaveBeenCalled();
+    done();
+  });
+
   it('should expect sign to not have been called.', () => {
     const payload = {test: 'test'};
     const claimDetails = Jwt.create(payload);
