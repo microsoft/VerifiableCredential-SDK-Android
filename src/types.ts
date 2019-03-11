@@ -176,6 +176,9 @@ export interface CredentialInput {
    * e.g. what issuers will be accepted.
    */
   constraints: {
+    /**
+     * issuers that are allowed to have issued claim requested.
+     */
     issuers: Array<string>
   };
 }
