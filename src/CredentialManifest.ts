@@ -49,7 +49,7 @@ export default class CredentialManifest {
     this.credential = credentialManifest.credential;
     this.preconditions = credentialManifest.preconditions;
     this.inputs = credentialManifest.inputs;
-    this.issuerOptions = credentialManifest.issuerOptions;
+    this.issuerOptions = credentialManifest.issuer_options;
   }
 
   /**
@@ -95,12 +95,4 @@ export default class CredentialManifest {
   public getDisplayProperties () {
     return this.issuerOptions.style;
   }
-
-  /**
-   * Get the group expressions of the manifest
-   */
-  public getGroupExpressions () {
-    return this.preconditions.groups;
-  }
-
 }

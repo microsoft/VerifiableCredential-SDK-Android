@@ -61,12 +61,10 @@ describe('Jwt', () => {
     const signedJws = await jws.sign(rsaPrivateKey);
 
     const claimDetails = Jwt.create(signedJws);
-    console.log(signedJws);
     spyOn(claimDetails, 'verify').and.callThrough();
     const verifiedData = await claimDetails.verify(rsaPublicKey);
     expect(claimDetails.verify).toHaveBeenCalled();
     expect(verifiedData).toBeDefined();
-    console.log(verifiedData);
     done();
   });
 
