@@ -46,7 +46,7 @@ import { DataInput } from '../src/types';
     issuer_options: testIssuerOptions
   };
 
-    it('should create a new ClaimManifest Object', () => {
+    it('should create a new CredentialManifest Object', () => {
       spyOn(CredentialManifest, 'create').and.callThrough();
       const manifest = CredentialManifest.create(testCredential, testPreconditions, testInputs, testIssuerOptions);
       expect(CredentialManifest.create).toHaveBeenCalled();
