@@ -14,8 +14,10 @@ const context = 'https://identity.foundation/schemas/credentials';
  * type for credentialManifest
  */
 const type = 'CredentialManifest';
+
 /**
- * Interface defining methods and properties for a ClaimManifest object.
+ *  Class defining methods and properties for a ClaimManifest object.
+ *  based off of the CredentialManifest spec: https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md
  */
 export default class CredentialManifest {
 
@@ -40,7 +42,8 @@ export default class CredentialManifest {
   public issuerOptions: any;
 
   /**
-   * Contructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.
+   * Constructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.
+   * TODO: check that the JSON parameter is valid (yup?)
    */
   constructor (credentialManifest: any) {
     this.credential = credentialManifest.credential;
