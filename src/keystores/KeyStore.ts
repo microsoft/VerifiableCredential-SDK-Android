@@ -1,3 +1,5 @@
+import DidKey from '../../../did-common-typescript/lib/crypto/DidKey';
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -21,5 +23,5 @@ export default interface KeyStore {
    * @param keyIdentifier for the key being saved.
    * @param key being saved to the key store.
    */
-  save (keyIdentifier: string, key: Buffer): Promise<boolean>;
+  save (keyIdentifier: string, key: Buffer | DidKey): Promise<boolean>;
 }

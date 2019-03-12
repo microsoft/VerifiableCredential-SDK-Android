@@ -3,10 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import DidKey from '../../did-common-typescript/lib/crypto/DidKey';
+import { KeyType } from '../../did-common-typescript/lib/crypto/KeyType';
+import { KeyUse } from '../../did-common-typescript/lib/crypto/KeyUse';
+// import { DidKey, KeyType, KeyUse } from '@decentralized-identity/did-common-typescript';
 import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
+import KeyStore from './keystores/KeyStore';
 
 /**
  * Class for creating and managing identifiers,
@@ -58,9 +63,37 @@ export default class Identifier {
    * @param register flag indicating whether the new identifier should be registered
    * with a ledger.
    */
-/*   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<Identifier> {
+  public async createLinkedIdentifier (
+    crypto: any, alg: any, did: string, target: string, options: UserAgentOptions, register: boolean = false): Promise<Identifier> {
+    console.log(`${crypto}, ${alg}, ${did}, ${target}, ${options}, ${register}`);
+    if (options.keyStore) {
+      let keyStore: KeyStore = options.keyStore;
+      keyStore.get('masterSeed').then((seed: Buffer) => {
+        // Create DID key
+        let didKey: any = new DidKey(crypto, alg, KeyType.RSA, KeyUse.Signature, null);
+        return didKey.generatePairwise(seed, did, target);
+      })
+      .then((pairwiseKey: DidKey) => {
+        keyStore.save(did, pairwiseKey)
+        .then((success: boolean) => {
+          if (success) {
+            return new Identifier(`${success}`);
+          } else {
+            let message = `Error while saving pairwise key for DID '${did}' to key store.`;
+            throw new Error(message);
+          }
+        })
+        .catch((err) => {
+          throw new Error(`Error occured: '${err}'`);
+        });
+      })
+      .catch((err) => {
+        throw new Error(`Error occured: '${err}'`);
+      });
+    }
+
     throw new Error('Not implemented');
-  } */
+  }
 
   /**
    * Gets the IdentifierDocument for the identifier
