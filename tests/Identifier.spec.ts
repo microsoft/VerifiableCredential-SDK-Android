@@ -67,7 +67,7 @@ describe('Identifier', () => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
       { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
-    );
+    );  
     (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
     
     const resolver = spyOn(testResolver, 'resolve').and.callThrough();
