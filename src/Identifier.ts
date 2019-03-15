@@ -157,7 +157,7 @@ export default class Identifier {
   private createIdentifierDocument (key: DidKey): Promise <IdentifierDocument> {
     return this.getDidPublicKey(key)
     .then((publicKeyJwk) => {
-      return new IdentifierDocument({ id: this.id, created: Date.now(), publicKey: publicKeyJwk });
+      return new IdentifierDocument({ id: this.id, created: Date.now(), publicKey: [ publicKeyJwk ] });
     });
   }
 

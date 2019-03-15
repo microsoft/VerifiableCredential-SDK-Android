@@ -26,13 +26,14 @@ describe('Pairwise Identifier', () => {
     keyStore: keyStore 
   } as UserAgentOptions;
 
-  fit('create an EC paiwise identifier', async done => {
+  it('create an EC paiwise identifier', async done => {
     const personaId = 'did:test:identifier';
     const identifier = new Identifier(personaId, options);
     const alg = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
     identifier.createLinkedIdentifier(crypto, alg, 'my persona', 'peer', options, false)
-    .then((identifier: IdentifierDocument) => {
-      expect(personaId).toBe(identifier.id);
+    .then((identifierDoc: IdentifierDocument) => {
+      expect(personaId).toBe(identifierDoc.id);
+      expect('EC').toBe((identifierDoc.publicKeys[0] as any).kty);
       done();
     })
   });
