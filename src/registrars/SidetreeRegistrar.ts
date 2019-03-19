@@ -77,4 +77,43 @@ export default class SidetreeRegistrar implements Registrar {
       resolve(identifier);
     });
   }
+
+   /**
+   * Uses the specified input to create a basic Sidetree
+   * compliant identifier document and then hashes the document
+   * in accordance with the Sidetree protocol specification
+   * to generate and return the identifier for the input.
+   *
+   * @param input.publicKey to include in the basic Sidetree identifier 
+   * document.
+   */
+  public async generateIdentifier(input: any
+  ): Promise<Identifier> {
+
+    if (!input && !input.publicKey) {
+      throw new UserAgentError('The input provided to the SidetreeRegistrar.generateIdentifier() does not include the required public key.');
+    }
+
+  /*   {
+      "@context": "https://w3id.org/did/v1",
+      "publicKey": [{
+        "id": "#key1",
+        "type": "Secp256k1VerificationKey2018",
+        "publicKeyHex": "02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1"
+      }],
+      "service": [{
+        "id": "IdentityHub",
+        "type": "IdentityHub",
+        "serviceEndpoint": {
+          "@context": "schema.identity.foundation/hub",
+          "@type": "UserServiceEndpoint",
+          "instance": ["did:bar:456", "did:zaz:789"]
+        }
+      }]
+    } */
+
+    const identifierDocument = Object.assign({
+      '@context': 'https://w3id.org/did/v1',
+    }, input.publicKey);
+  }
 }

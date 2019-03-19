@@ -17,4 +17,12 @@ export default interface Registrar {
    * @param identifierDocument to register.
    */
   register (identifierDocument: IdentifierDocument): Promise<Identifier>;
+
+  /**
+   * Uses the specified input for generating 
+   * an identifier reference, but does not register
+   * with a ledger.
+   * @param input generating the identifier.
+   */
+  generateIdentifier(input: any): Promise<Identifier>
 }
