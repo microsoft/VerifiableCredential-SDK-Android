@@ -7,3 +7,7 @@
  *  Class defining methods and properties for an Auth object.
  */
 export default class Auth {}
+
+/**
+ * create, verify a auth request and response using did-auth-jose and ronny's pairwise spec.
+ */
