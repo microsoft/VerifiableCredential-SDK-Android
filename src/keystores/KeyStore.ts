@@ -1,4 +1,4 @@
-import DidKey from '../../../did-common-typescript/lib/crypto/DidKey';
+import { DidKey } from '@decentralized-identity/did-common-typescript';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.

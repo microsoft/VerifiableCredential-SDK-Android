@@ -7,6 +7,7 @@
 import Resolver from './resolvers/Resolver';
 import Registrar from './registrars/Registrar';
 import KeyStore from './keystores/KeyStore';
+import CryptoOptions from './CryptoOptions';
 
 /**
  * Interface defining options for the
@@ -36,4 +37,9 @@ export default class UserAgentOptions {
    * external services.
    */
   timeoutInSeconds?: number = 30;
+
+  /**
+   * Options for cryptography api.
+   */
+  cryptoOptions?: CryptoOptions;
 }

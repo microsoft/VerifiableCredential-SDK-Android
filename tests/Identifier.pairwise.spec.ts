@@ -9,32 +9,75 @@ import UserAgentOptions from '../src/UserAgentOptions';
 import KeyStoreMock from '../src/keystores/KeyStoreMock';
 import TestResolver from './TestResolver';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
-import WebCrypto from 'node-webcrypto-ossl';
-const crypto = new WebCrypto();
+import CryptoOptions from '../src/CryptoOptions';
 
 describe('Pairwise Identifier', () => {
   const testResolver = new TestResolver();
 
-  // Set key store and its data
-  let keyStore: KeyStoreMock = new KeyStoreMock();
-  keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
 
-  // Configure the agent options for the tests
-  const options = {
-    resolver: testResolver,
-    timeoutInSeconds: 30,
-    keyStore: keyStore 
-  } as UserAgentOptions;
+  it('Test throws - no keystore', async done => {
+    const personaId = 'did:test:identifier';
+    const identifier = new Identifier(personaId, {});
+    let throwDetected: boolean = false;
+    await identifier.createLinkedIdentifier('did:test:peer', false)
+    .catch ((err) => {
+      expect('No keyStore in options').toBe(err.message);
+      throwDetected = true;
+    });
 
-  it('create an EC paiwise identifier', async done => {
+    if (!throwDetected) {
+      fail('No Throw detected');
+    }
+    done();
+  });
+
+it('Test throws - storage failure', async done => {
+  const personaId = 'identifier to simulate storage failure';
+  options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+  const identifier = new Identifier(personaId, options);
+  let throwDetected: boolean = false;
+  await identifier.createLinkedIdentifier('did:test:peer', false)
+  .catch ((err) => {
+    expect(`Error while saving pairwise key for DID 'identifier to simulate storage failure' to key store.`).toBe(err.message);
+    throwDetected = true;
+  });
+7
+  if (!throwDetected) {
+    fail('No Throw detected');
+  }
+  done();
+});
+
+    // Set key store and its data
+    let keyStore: KeyStoreMock = new KeyStoreMock();
+    keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
+  
+    // Configure the agent options for the tests
+    const options = {
+      resolver: testResolver,
+      timeoutInSeconds: 30,
+      keyStore: keyStore,
+      cryptoOptions: new CryptoOptions()
+    } as UserAgentOptions;
+  
+  it('create an EC pairwise identifier', async done => {
     const personaId = 'did:test:identifier';
     const identifier = new Identifier(personaId, options);
-    const alg = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
-    identifier.createLinkedIdentifier(crypto, alg, 'my persona', 'peer', options, false)
-    .then((identifierDoc: IdentifierDocument) => {
-      expect(personaId).toBe(identifierDoc.id);
-      expect('EC').toBe((identifierDoc.publicKeys[0] as any).kty);
-      done();
-    })
+    options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+    expect(personaId).toBe(identifier.identifier as string);
+
+    let identifierDoc: IdentifierDocument = await identifier.createLinkedIdentifier('did:test:peer', false);
+    expect(identifierDoc.id).toBeDefined();
+    expect<Boolean>(identifierDoc.id.startsWith('did:test:')).toBe(true);
+    let id = identifierDoc.id;
+    expect('EC').toBe((identifierDoc.publicKeys[0] as any).kty);
+
+    let document: Identifier = new Identifier(identifierDoc);
+    expect(id).toBe(document.id);
+    expect(id).toBe((document.identifier as IdentifierDocument).id);
+
+    expect(id).toBe(document!.document!.id);
+    expect(identifierDoc.publicKeys).toBe(document!.document!.publicKeys);
+    done();
   });
 });

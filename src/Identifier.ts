@@ -3,16 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import DidKey from '../../did-common-typescript/lib/crypto/DidKey';
-import { KeyType } from '../../did-common-typescript/lib/crypto/KeyType';
-import { KeyUse } from '../../did-common-typescript/lib/crypto/KeyUse';
-// import { DidKey, KeyType, KeyUse } from '@decentralized-identity/did-common-typescript';
+import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript';
 import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
 import KeyStore from './keystores/KeyStore';
-import { KeyExport } from '../../did-common-typescript/lib/crypto/KeyExport';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
 
 /**
@@ -21,7 +17,7 @@ import KeyStoreConstants from './keystores/KeyStoreConstants';
  */
 export default class Identifier {
   /**
-   * The string representation of the identier
+   * The string representation of the identier for the persona
    * in the format 'did:{method}:{id}'.
    */
   public id: string;
@@ -38,14 +34,33 @@ export default class Identifier {
    * @param identifier either the string representation of an identifier or a identifier document.
    * @param [options] for configuring how to register and resolve identifiers.
    */
-  constructor (public identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
+  constructor (identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
     // Check whether passed an identifier document
     // or an identifier string
-    if (typeof identifier === 'object') {
-      this.document = identifier;
-      this.id = identifier.id;
+    this.id = ''; // Avoid tslint error
+    this.identifier = identifier;
+  }
+
+  /**
+   * Gets the identifier
+   */
+  public get identifier (): IdentifierDocument | string {
+    if (this.document) {
+      return this.document;
+    }
+
+    return this.id;
+  }
+
+  /**
+   * Sets the identifier
+   */
+  public set identifier (identifierOrDocument: IdentifierDocument | string) {
+    if (typeof identifierOrDocument === 'object') {
+      this.document = identifierOrDocument;
+      this.id = identifierOrDocument.id;
     } else {
-      this.id = identifier;
+      this.id = identifierOrDocument;
     }
   }
 
@@ -61,47 +76,34 @@ export default class Identifier {
    * Creates a new decentralized identifier, using the current identifier
    * and the specified target. If the registar flag is true, the newly created
    * identifier will be registered using the
-   * @param crypto Web crypto object
-   * @param alg Web crypto compliant algorithm object
-   * @param personaId Identifier for the persona for whom we create the decentralized identifier
    * @param target entity for which to create the linked identifier
+   * @param options for configuring how to register and resolve identifiers.
    * @param register flag indicating whether the new identifier should be registered
    * with a ledger.
    */
-  public async createLinkedIdentifier (
-    crypto: any, alg: any, personaId: string, target: string, options: UserAgentOptions, register: boolean = false): Promise<IdentifierDocument> {
-    if (options.keyStore) {
-      let keyStore: KeyStore = options.keyStore;
-      let key: DidKey;
-      return keyStore.get(KeyStoreConstants.masterSeed)
-      .then((seed: Buffer) => {
-        // Create DID key
-        let didKey: any = new DidKey(crypto, alg, KeyType.EC, KeyUse.Signature, null);
-        return didKey.generatePairwise(seed, personaId, target);
-      })
-     .then((pairwiseKey: DidKey) => {
-       key = pairwiseKey;
-        // TODO add key type in the storage identfier
-       return keyStore.save(this.pairwiseKeyStorageIdentifier(personaId, target), pairwiseKey);
-     })
-     .then((success: boolean) => {
-       if (success) {
-         if (register) {
-           throw new Error('Not implemented');
-         }
+  public async createLinkedIdentifier (target: string, register: boolean = false): Promise<IdentifierDocument> {
+    if (this.options && this.options.keyStore) {
+      let keyStore: KeyStore = this.options.keyStore;
+      let seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed);
 
-         return this.createIdentifierDocument(key);
-       } else {
-         let message = `Error while saving pairwise key for DID '${personaId}' to key store.`;
-         throw new UserAgentError(message);
-       }
-     })
-     .catch((err) => {
-       throw new UserAgentError(`Error occured: '${err}'`);
-     });
-    } else {
-      throw new UserAgentError('No KeyStore specified in options');
+      // Create DID key
+      let didKey: any = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
+      let pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
+
+      // TODO add key type in the storage identfier
+      let success: boolean = await keyStore.save(this.pairwiseKeyStorageIdentifier(this.id, target), pairwiseKey);
+      if (success) {
+        if (register) {
+          throw new Error('Not implemented');
+        }
+
+        return this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
+      } else {
+        let message = `Error while saving pairwise key for DID '${this.id}' to key store.`;
+        throw new UserAgentError(message);
+      }
     }
+    throw new UserAgentError('No keyStore in options');
   }
 
   /**
@@ -154,23 +156,19 @@ export default class Identifier {
     throw new UserAgentError('Document does not contain any public keys');
   }
 
-  private createIdentifierDocument (key: DidKey): Promise <IdentifierDocument> {
-    return this.getDidPublicKey(key)
-    .then((publicKeyJwk) => {
-      return new IdentifierDocument({ id: this.id, created: Date.now(), publicKey: [ publicKeyJwk ] });
-    });
+  // Create an identifier document. Included the public key.
+  private async createIdentifierDocument (id: string, key: DidKey, options: UserAgentOptions): Promise <IdentifierDocument> {
+    let publicKeyJwk = await this.getDidPublicKey(key);
+    return IdentifierDocument.createAndGenerateId(id, [ publicKeyJwk ], options);
   }
 
-  private getDidPublicKey (key: DidKey): Promise <any> {
-    return key.getJwkKey(KeyExport.Public)
-    .then((jwk) => {
-      return jwk;
-    })
-    .catch((err) => {
-      throw new UserAgentError(`Could not retrieve public key for pairwise did. Failure '${err}'`);
-    });
+  // Retrieve the public key from a DidKey
+  private async getDidPublicKey (key: DidKey): Promise <any> {
+    let jwk = await key.getJwkKey(KeyExport.Public);
+    return jwk;
   }
 
+  // Generate a storage identifier to store a pairwise key
   private pairwiseKeyStorageIdentifier (personaId: string, target: string): string {
     return `${personaId}-${target}`;
   }

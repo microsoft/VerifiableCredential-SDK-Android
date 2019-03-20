@@ -4,6 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationReference, ServiceReference, PublicKey } from './types';
+import base64url from 'base64url';
+import UserAgentOptions from './UserAgentOptions';
+import UserAgentError from './UserAgentError';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -67,6 +70,50 @@ export default class IdentifierDocument {
   }
 
   /**
+   * Creates a new instance of an identifier document using the
+   * provided public keys.
+   * The id is generated.
+   * @param idBase The base id in format did:{method}:{id}. {id} will be filled in by this method
+   * @param publicKeys to include in the document.
+   * @param options User agent options containing the crypto Api
+   */
+  public static async createAndGenerateId (idBase: string, publicKeys: Array<PublicKey>, options: UserAgentOptions): Promise<IdentifierDocument> {
+    let document = IdentifierDocument.create(idBase, publicKeys);
+    let id: string = await IdentifierDocument.createIdOnDocument(document, options);
+    document.id = id;
+    return document;
+  }
+
+  /**
+   * Create an identifier on the document.
+   * If the document has an identifier already, this is firstly removed.
+   * @param document The document on which to caluclate the identifier
+   * @param options User agent options containing the crypto Api
+   */
+  public static async createIdOnDocument (document: IdentifierDocument, options: UserAgentOptions): Promise<string> {
+    // Strip id
+    let did = document.id;
+    delete document.id;
+
+    // Encode document
+    let serialized = JSON.stringify(document);
+    let encoded = base64url(serialized);
+    let toHash: ArrayBuffer = IdentifierDocument.string2ArrayBuffer(encoded);
+
+    // calculate identifier
+    let id0 = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
+    let id = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
+    let buf: Buffer = Buffer.from(id);
+    console.log(id0);
+    let idDid = base64url(buf);
+    let didComponents = did.split(':');
+    if (didComponents.length < 2) {
+      throw new UserAgentError(`Invalid did '${did}' passed. Should have at least did:<method>.`);
+    }
+    return `${didComponents[0]}:${didComponents[1]}:${idDid}`;
+  }
+
+  /**
    * Adds an authentication reference to the document.
    * @param authenticationReference to add to the document.
    */
@@ -109,5 +156,15 @@ export default class IdentifierDocument {
 
     // Now return the cloned document for serialization
     return clonedDocument;
+  }
+
+  private static string2ArrayBuffer (text: string): ArrayBuffer {
+    let buf = new ArrayBuffer(text.length);
+    let bufView = new Uint8Array(buf);
+    let strLen = text.length;
+    for (let inx = 0; inx < strLen; inx++) {
+      bufView[inx] = text.charCodeAt(inx);
+    }
+    return buf;
   }
 }

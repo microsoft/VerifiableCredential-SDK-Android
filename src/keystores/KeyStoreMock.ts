@@ -1,4 +1,4 @@
-import DidKey from '../../../did-common-typescript/lib/crypto/DidKey';
+import { DidKey } from '@decentralized-identity/did-common-typescript';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -31,6 +31,12 @@ export default class KeyStoreMock {
    */
   save (keyIdentifier: string, key: Buffer | DidKey): Promise<boolean> {
     console.log(this.store.toString() + keyIdentifier + key.toString());
+    if (keyIdentifier.startsWith('identifier to simulate storage failure')) {
+      return new Promise((resolve) => {
+        resolve(false);
+      });
+    }
+
     this.store.set(keyIdentifier, key);
     return new Promise((resolve) => {
       resolve(true);

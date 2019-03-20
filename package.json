@@ -37,7 +37,7 @@
     "fetch-mock": "7.3.0"
   },
   "dependencies": {
-    "@decentralized-identity/did-common-typescript": "^0.1.4",
+    "@decentralized-identity/did-common-typescript": "0.1.6",
     "es6-promise": "4.2.6",
     "isomorphic-fetch": "2.2.1",
     "lodash": "4.17.11",
