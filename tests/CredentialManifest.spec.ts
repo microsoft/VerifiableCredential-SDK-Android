@@ -55,9 +55,9 @@ import { DataInput } from '../src/types';
 
     it('should form a CredentialManifest correctly', () => {
       const credentialManifest = CredentialManifest.create(testCredential, testPreconditions, testInputs, testIssuerOptions);
-      spyOn(credentialManifest, 'form').and.callThrough();
-      const manifest = credentialManifest.form();
-      expect(credentialManifest.form).toHaveBeenCalled();
+      spyOn(credentialManifest, 'toJSON').and.callThrough();
+      const manifest = credentialManifest.toJSON();
+      expect(credentialManifest.toJSON).toHaveBeenCalled();
       expect(manifest).toEqual(testManifest);
     });
 

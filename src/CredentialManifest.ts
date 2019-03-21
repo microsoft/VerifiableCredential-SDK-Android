@@ -70,7 +70,7 @@ export default class CredentialManifest {
   /**
    * forms the CredentialManifest JSON.
    */
-  public form () {
+  public toJSON () {
     const manifest = {
       '@context': context,
       '@type': type,
