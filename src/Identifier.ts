@@ -66,18 +66,20 @@ export default class Identifier {
 
   /**
    * Creates a new decentralized identifier.
-   * @param options for configuring how to register and resolve identifiers.
+   * If the registar flag is true, the newly created
+   * identifier will be registered using the options
+   * @param register flag indicating whether the new identifier should be registered
+   * with a ledger.
    */
-/*   public static async create (options: UserAgentOptions): Promise<Identifier> {
-    throw new Error('Not implemented');
-  } */
+  public async create (register: boolean = false): Promise<IdentifierDocument> {
+    return this.createLinkedIdentifier(this.id, register);
+  }
 
   /**
    * Creates a new decentralized identifier, using the current identifier
    * and the specified target. If the registar flag is true, the newly created
    * identifier will be registered using the
    * @param target entity for which to create the linked identifier
-   * @param options for configuring how to register and resolve identifiers.
    * @param register flag indicating whether the new identifier should be registered
    * with a ledger.
    */
@@ -93,11 +95,18 @@ export default class Identifier {
       // TODO add key type in the storage identfier
       let success: boolean = await keyStore.save(this.pairwiseKeyStorageIdentifier(this.id, target), pairwiseKey);
       if (success) {
+        let document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
         if (register) {
-          throw new Error('Not implemented');
+          if (this.options && this.options.registrar) {
+            // register did document
+            const identfier = await this.options.registrar.register(document);
+            document.id = identfier.id;
+          } else {
+            throw new UserAgentError(`No registrar in options to register DID document`);
+          }
         }
 
-        return this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
+        return document;
       } else {
         let message = `Error while saving pairwise key for DID '${this.id}' to key store.`;
         throw new UserAgentError(message);

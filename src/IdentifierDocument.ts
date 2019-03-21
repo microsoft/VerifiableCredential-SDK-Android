@@ -101,10 +101,8 @@ export default class IdentifierDocument {
     let toHash: ArrayBuffer = IdentifierDocument.string2ArrayBuffer(encoded);
 
     // calculate identifier
-    let id0 = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
     let id = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
     let buf: Buffer = Buffer.from(id);
-    console.log(id0);
     let idDid = base64url(buf);
     let didComponents = did.split(':');
     if (didComponents.length < 2) {
