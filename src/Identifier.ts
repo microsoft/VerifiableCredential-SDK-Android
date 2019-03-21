@@ -99,7 +99,7 @@ export default class Identifier {
         if (register) {
           if (this.options && this.options.registrar) {
             // register did document
-            const identfier = await this.options.registrar.register(document);
+            const identfier = await this.options.registrar.register(document, pairwiseKey as DidKey);
             document.id = identfier.id;
           } else {
             throw new UserAgentError(`No registrar in options to register DID document`);

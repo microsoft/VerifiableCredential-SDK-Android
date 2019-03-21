@@ -11,14 +11,15 @@ import TestResolver from './TestResolver';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import CryptoOptions from '../src/CryptoOptions';
 import { KeyTypeFactory } from '@decentralized-identity/did-common-typescript'
-// import DidAuth from '@decentralized-identity/did-auth-jose';
+import Registrar from '../src/registrars/Registrar';
+import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 
 interface CreateIdentifier {
-  (identifier: Identifier): Promise<IdentifierDocument>;
+  (identifier: Identifier, register: boolean): Promise<IdentifierDocument>;
 }
 
 class Helpers {
-  public static async testIdentifier(testResolver: any, keyStore: KeyStoreMock, alg: any, create: CreateIdentifier) {
+  public static async testIdentifier(register: boolean, testResolver: any, keyStore: KeyStoreMock, alg: any, create: CreateIdentifier) {
     const options = {
       resolver: testResolver,
       timeoutInSeconds: 30,
@@ -26,13 +27,18 @@ class Helpers {
       cryptoOptions: new CryptoOptions()
     } as UserAgentOptions;
 
+    let registar: Registrar | undefined;
+    if (register) {
+      registar = new SidetreeRegistrar('https://beta.register.did.microsoft.com/api/v1.1', options);
+      options.registrar = registar;
+    }
+
     const personaId = 'did:test:identifier';
     options.cryptoOptions!.algorithm = alg;
     const identifier = new Identifier(personaId, options);
     expect(personaId).toBe(identifier.identifier as string);
 
-    // let identifierDoc: IdentifierDocument = await identifier.create(false);
-    let identifierDoc: IdentifierDocument = await create(identifier);
+    let identifierDoc: IdentifierDocument = await create(identifier, register);
     expect(identifierDoc.id).toBeDefined();
     expect<Boolean>(identifierDoc.id.startsWith('did:test:')).toBe(true);
     let id = identifierDoc.id;
@@ -122,21 +128,33 @@ describe('Pairwise Identifier', () => {
     ];
 
     it('create an identifier', async done => {
-      await Helpers.testIdentifier(testResolver, keyStore, alg[0], async (identifier: Identifier) => {
-        return identifier.create(false);
+      await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
+        return identifier.create(register);
       });
+      await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
+        return identifier.create(register);
+      });
+      done();
+    });
+
+    it('create an identifier and register', async done => {
+      await Helpers.testIdentifier(true, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
+        return identifier.create(register);
+      });
+      /*
       await Helpers.testIdentifier(testResolver, keyStore, alg[1], async (identifier: Identifier) => {
         return identifier.create(false);
       });
+      */
       done();
     });
   
   it('create a pairwise identifier', async done => {
-    await Helpers.testIdentifier(testResolver, keyStore, alg[0], async (identifier: Identifier) => {
-      return identifier.createLinkedIdentifier('did:test:peer', false);
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
+      return identifier.createLinkedIdentifier('did:test:peer', register);
     });
-    await Helpers.testIdentifier(testResolver, keyStore, alg[1], async (identifier: Identifier) => {
-      return identifier.createLinkedIdentifier('did:test:peer', false);
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
+      return identifier.createLinkedIdentifier('did:test:peer', register);
     });
     console.log(`Pairwise done`);
     done();

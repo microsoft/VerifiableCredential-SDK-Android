@@ -10,6 +10,8 @@ import Identifier from '../Identifier';
 import IdentifierDocument from '../IdentifierDocument';
 import UserAgentOptions from '../UserAgentOptions';
 import UserAgentError from '../UserAgentError';
+import { Secp256k1CryptoSuite, CryptoFactory, JwsToken } from '@decentralized-identity/did-auth-jose';
+import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript';
 declare var fetch: any;
 
 /**
@@ -26,7 +28,7 @@ export default class SidetreeRegistrar implements Registrar {
   constructor (public url: string, public options?: UserAgentOptions) {
     // Format the url
     const slash = url.endsWith('/') ? '' : '/';
-    this.url = `${url}${slash}register`;
+    this.url = `${url}${slash}`;
 
     this.timeoutInMilliseconds =
       1000 *
@@ -36,10 +38,26 @@ export default class SidetreeRegistrar implements Registrar {
   }
 
   /**
+   * Sign the body for the registar
+   * @param body Body to sign
+   */
+  public async signRequest (
+    body: string,
+    didKey: DidKey
+  ): Promise<string> {
+    const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite()]);
+    const token = new JwsToken(body, cryptoFactory);
+    const privateKey = await didKey.getJwkKey(KeyExport.Private);
+    const signedRegistrationRequest = await token.sign(privateKey);
+    return signedRegistrationRequest;
+  }
+
+  /**
    * @inheritdoc
    */
   public async register (
-    identifierDocument: IdentifierDocument
+    identifierDocument: IdentifierDocument,
+    didKey: DidKey
   ): Promise<Identifier> {
     const bodyString = JSON.stringify(identifierDocument);
 
@@ -49,9 +67,11 @@ export default class SidetreeRegistrar implements Registrar {
         this.timeoutInMilliseconds
       );
 
+      const signedRequest = await this.signRequest(bodyString, didKey);
+
       const fetchOptions = {
         method: 'POST',
-        body: bodyString,
+        body: signedRequest,
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': bodyString.length.toString()
