@@ -18,24 +18,22 @@ describe('Identifier', () => {
     timeoutInSeconds: 30
   } as UserAgentOptions;
 
-  it('should construct new instance when provided an identifier string', async done => {
+  it('should construct new instance when provided an identifier string', () => {
     const identifier = new Identifier('did:test:identifier', options);
     expect(identifier).toBeDefined();
     expect(identifier.id).toEqual('did:test:identifier');
-    done();
   });
 
-  it('should construct new instance when provided an identifier document', async done => {
+  it('should construct new instance when provided an identifier document', () => {
     const identifierDocument = new IdentifierDocument(
       { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
     );
     const identifier = new Identifier(identifierDocument, options);
     expect(identifier).toBeDefined();
     expect(identifier.id).toEqual('did:test:identifier');
-    done();
   });
 
-  it('should return document from local', async done => {
+  it('should return document from local', () => {
     const identifierDocument = new IdentifierDocument(
       { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
     );
@@ -45,7 +43,6 @@ describe('Identifier', () => {
     const localDocument = identifier.getDocument();
     expect(localDocument).toBeDefined();
     expect(resolver).not.toHaveBeenCalled();
-    done();
   });
 
   it('should throw when no resolver specified and document not cached', async done => {
@@ -63,7 +60,7 @@ describe('Identifier', () => {
       .finally(done);
   });
 
-  it('should resolve identifier and return document', async done => {
+  it('should resolve identifier and return document', () => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
       { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
@@ -74,7 +71,6 @@ describe('Identifier', () => {
     const result = identifier.getDocument();
     expect(result).toBeDefined();
     expect(resolver).toHaveBeenCalled();
-    done();
   });
 
   it('should call getDocument() when local document undefined', async done => {
