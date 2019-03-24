@@ -4,12 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 require('es6-promise').polyfill();
+import base64Url from 'base64url';
 import 'isomorphic-fetch';
-import Registrar from './Registrar';
 import Identifier from '../Identifier';
 import IdentifierDocument from '../IdentifierDocument';
-import UserAgentOptions from '../UserAgentOptions';
 import UserAgentError from '../UserAgentError';
+import UserAgentOptions from '../UserAgentOptions';
+import Multihash from './Multihash';
+import Registrar from './Registrar';
+const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
 /**
@@ -20,14 +23,12 @@ export default class SidetreeRegistrar implements Registrar {
 
   /**
    * Constructs a new instance of the Sidetree registrar
-   * @param url to the regsitration endpoint at the registrar
-   * @param options to configure the resis
+   * @param url to the registration endpoint at the registrar
+   * @param options to configure the registrar.
    */
   constructor (public url: string, public options?: UserAgentOptions) {
     // Format the url
-    const slash = url.endsWith('/') ? '' : '/';
-    this.url = `${url}${slash}register`;
-
+    this.url = `${url.replace(/\/?$/, '/')}register`;
     this.timeoutInMilliseconds =
       1000 *
       (!this.options || !this.options.timeoutInSeconds
@@ -78,42 +79,35 @@ export default class SidetreeRegistrar implements Registrar {
     });
   }
 
-   /**
+  /**
    * Uses the specified input to create a basic Sidetree
    * compliant identifier document and then hashes the document
    * in accordance with the Sidetree protocol specification
-   * to generate and return the identifier for the input.
+   * to generate and return the identifier.
    *
-   * @param input.publicKey to include in the basic Sidetree identifier 
-   * document.
+   * @param identifierDocument for which to generate the identifier.
    */
-  public async generateIdentifier(input: any
+  public async generateIdentifier (identifierDocument: IdentifierDocument
   ): Promise<Identifier> {
 
-    if (!input && !input.publicKey) {
-      throw new UserAgentError('The input provided to the SidetreeRegistrar.generateIdentifier() does not include the required public key.');
+    if (!Array.isArray(identifierDocument.publicKeys) || identifierDocument.publicKeys.length === 0) {
+      throw new UserAgentError('At least one public key must be specified in the identifier document.');
     }
 
-  /*   {
-      "@context": "https://w3id.org/did/v1",
-      "publicKey": [{
-        "id": "#key1",
-        "type": "Secp256k1VerificationKey2018",
-        "publicKeyHex": "02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1"
-      }],
-      "service": [{
-        "id": "IdentityHub",
-        "type": "IdentityHub",
-        "serviceEndpoint": {
-          "@context": "schema.identity.foundation/hub",
-          "@type": "UserServiceEndpoint",
-          "instance": ["did:bar:456", "did:zaz:789"]
-        }
-      }]
-    } */
+    // The genesis document is used for generating the hash,
+    // but we need to ensure that the id property of the document
+    // if specified is removed beforehand.
+    const genesisDocument = cloneDeep(identifierDocument);
+    genesisDocument.id = undefined;
 
-    const identifierDocument = Object.assign({
-      '@context': 'https://w3id.org/did/v1',
-    }, input.publicKey);
+    // Hash the document JSON
+    const documentBuffer = Buffer.from(JSON.stringify(genesisDocument));
+    const hashedDocument = Multihash.hash(documentBuffer, 18);
+    const encodedDocument = base64Url.encode(hashedDocument);
+
+    // Now update the identifier property in
+    // the genesis document
+    genesisDocument.id = `did:ion:${encodedDocument}`;
+    return new Identifier(genesisDocument);
   }
 }
