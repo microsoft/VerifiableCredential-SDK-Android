@@ -60,9 +60,9 @@ describe('SidetreeRegistrar', () => {
     );
 
     const identifierDocument = new IdentifierDocument(DOCUMENT);
-    const idenfifier: any = await registrar.register(identifierDocument);
-    expect(idenfifier).toBeDefined();
-    expect(idenfifier.id).toEqual('did:test:identifier');
+    const result: any = await registrar.register(identifierDocument);
+    expect(result).toBeDefined();
+    expect(result.id).toEqual('did:test:identifier');
     done();
   });
 
@@ -100,4 +100,61 @@ describe('SidetreeRegistrar', () => {
       })
       .finally(done);
   });
+
+  it('should throw UserAgentError when generating an identifier and no public key specified', async done => {
+    const registrar = new SidetreeRegistrar('https://registrar.org');
+
+    fetchMock.post('https://registrar.org/register', 404);
+
+    await registrar
+      .generateIdentifier(new IdentifierDocument(DOCUMENT))
+      .catch(error => {
+        expect(error).toBeDefined();
+        expect(error instanceof UserAgentError).toBeTruthy();
+        expect(error.message).toEqual('At least one public key must be specified in the identifier document.');
+      })
+      .finally(done);
+  });
+
+  it('should return generated identifier', async done => {
+    const registrar = new SidetreeRegistrar('https://registrar.org');
+
+    const genesisDocument = Object.assign(DOCUMENT, {
+      publicKey: [{
+        id: '#master',
+        type: 'Secp256k1VerificationKey2018',
+        publicKeyHex: '02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1'
+      }]
+    });
+
+    const identifier: Identifier = await registrar.generateIdentifier(new IdentifierDocument(genesisDocument));
+    expect(identifier).toBeDefined();
+    expect(identifier.id).toContain('did:ion');
+    done();
+  });
+
+  it('should always return same identifier when provided same genesis document ', async done => {
+    const registrar = new SidetreeRegistrar('https://registrar.org');
+
+    const genesisDocument = Object.assign(DOCUMENT, {
+      publicKey: [{
+        id: '#master',
+        type: 'Secp256k1VerificationKey2018',
+        publicKeyHex: '02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1'
+      }]
+    });
+
+    let previousIdentifier: string = '';
+    for(let index = 0; index < 20; index++) {
+      const identifier: Identifier = await registrar.generateIdentifier(new IdentifierDocument(genesisDocument));
+
+      if (index !== 0) {
+        expect(identifier.id).toEqual(previousIdentifier);
+      }
+
+      previousIdentifier = identifier.id;
+    }
+    done();
+  });
 });
+

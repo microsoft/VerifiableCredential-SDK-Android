@@ -4,9 +4,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Resolver from './resolvers/Resolver';
-import Registrar from './registrars/Registrar';
-import KeyStore from './keystores/KeyStore';
+import IResolver from './resolvers/IResolver';
+import IRegistrar from './registrars/IRegistrar';
+import IKeyStore from './keystores/IKeyStore';
 
 /**
  * Interface defining options for the
@@ -17,19 +17,19 @@ export default class UserAgentOptions {
    * Instance of Resolver than can be used
    * to resolve identifiers.
    */
-  resolver?: Resolver;
+  resolver?: IResolver;
 
   /**
    * Instance of Registar than can be used
    * to register identifiers.
    */
-  registrar?: Registrar;
+  registrar?: IRegistrar;
 
   /**
    * Instance of KeyStore than can be used
    * to get and save keys.
    */
-  keyStore?: KeyStore;
+  keyStore?: IKeyStore;
 
   /**
    * The timeout when making requests to

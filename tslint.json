@@ -3,7 +3,6 @@
   "extends": "tslint-config-standard",
   "linterOptions": {
     "exclude": [
-      "tests/**",
       "node_modules/**"
     ]
   },
