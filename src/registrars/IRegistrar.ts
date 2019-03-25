@@ -19,10 +19,10 @@ export default interface IRegistrar {
   register (identifierDocument: IdentifierDocument): Promise<Identifier>;
 
   /**
-   * Uses the specified input for generating 
+   * Uses the specified input for generating
    * an identifier reference, but does not register
    * with a ledger.
    * @param input generating the identifier.
    */
-  generateIdentifier(input: any): Promise<Identifier>
+  generateIdentifier (input: any): Promise<Identifier>;
 }
