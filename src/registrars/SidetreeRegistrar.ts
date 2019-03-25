@@ -10,15 +10,15 @@ import Identifier from '../Identifier';
 import IdentifierDocument from '../IdentifierDocument';
 import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
+import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import Registrar from './Registrar';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
 /**
  * Registrar implementation for the Sidetree (ION) network
  */
-export default class SidetreeRegistrar implements Registrar {
+export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
 
   /**
