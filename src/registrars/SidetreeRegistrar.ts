@@ -48,6 +48,7 @@ export default class SidetreeRegistrar implements Registrar {
     const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite()]);
     const token = new JwsToken(body, cryptoFactory);
     const privateKey = await didKey.getJwkKey(KeyExport.Private);
+    privateKey.defaultSignAlgorithm = 'ES256K';
     const signedRegistrationRequest = await token.sign(privateKey);
     return signedRegistrationRequest;
   }
