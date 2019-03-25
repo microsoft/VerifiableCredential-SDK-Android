@@ -11,7 +11,7 @@ import TestResolver from './TestResolver';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import CryptoOptions from '../src/CryptoOptions';
 import { KeyTypeFactory } from '@decentralized-identity/did-common-typescript'
-import Registrar from '../src/registrars/Registrar';
+import Registrar from '../src/registrars/IRegistrar';
 import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 
 interface CreateIdentifier {
@@ -87,23 +87,6 @@ describe('Pairwise Identifier', () => {
     done();
   });
 
-  it('Test throws - storage failure', async done => {
-    const personaId = 'identifier to simulate storage failure';
-    options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
-    const identifier = new Identifier(personaId, options);
-    let throwDetected: boolean = false;
-    await identifier.createLinkedIdentifier('did:test:peer', false)
-    .catch ((err) => {
-      expect(`Error while saving pairwise key for DID 'identifier to simulate storage failure' to key store.`).toBe(err.message);
-      throwDetected = true;
-    });
-  
-    if (!throwDetected) {
-      fail('No Throw detected');
-    }
-    done();
-  });
-
   it('Test throws - bad id format', async done => {
     const personaId = 'identifier';
     options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
@@ -120,7 +103,6 @@ describe('Pairwise Identifier', () => {
     }
     done();
   });
-    
   
     const alg = [
       { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
@@ -134,18 +116,6 @@ describe('Pairwise Identifier', () => {
       await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
         return identifier.create(register);
       });
-      done();
-    });
-
-    it('create an identifier and register', async done => {
-      await Helpers.testIdentifier(true, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
-        return identifier.create(register);
-      });
-      /*
-      await Helpers.testIdentifier(testResolver, keyStore, alg[1], async (identifier: Identifier) => {
-        return identifier.create(false);
-      });
-      */
       done();
     });
   

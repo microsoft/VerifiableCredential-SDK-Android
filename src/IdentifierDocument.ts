@@ -137,6 +137,9 @@ export default class IdentifierDocument {
     // the instance being cloned for serialization
     const clonedDocument = cloneDeep(this);
 
+    // Add the JSON-LD context
+    clonedDocument['@context'] = 'https://w3id.org/did/v1';
+
     if (!this.authenticationReferences || this.authenticationReferences.length === 0) {
       clonedDocument.authenticationReferences = undefined;
     }
@@ -148,9 +151,6 @@ export default class IdentifierDocument {
     if (!this.publicKeys || this.publicKeys.length === 0) {
       clonedDocument.publicKeys = undefined;
     }
-
-    // Add the JSON-LD context
-    clonedDocument['@context'] = 'https://w3id.org/did/v1';
 
     // Now return the cloned document for serialization
     return clonedDocument;

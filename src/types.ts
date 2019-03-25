@@ -1,5 +1,10 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 /**
- * Type for defining a identifier document
+ * Interface for defining a identifier document
  * public key.
  */
 export interface PublicKey {
@@ -26,7 +31,7 @@ export interface PublicKey {
 }
 
 /**
- * Type for defining a identifier document
+ * Interface for defining a identifier document
  * authentication reference.
  */
 export interface AuthenticationReference {
@@ -43,7 +48,7 @@ export interface AuthenticationReference {
 }
 
 /**
- * Type for defining a identifier document
+ * Interface for defining a identifier document
  * service reference.
  */
 export interface ServiceReference {
@@ -66,7 +71,7 @@ export interface ServiceReference {
 }
 
 /**
- * Type for defining a identifier document
+ * Interface for defining a identifier document
  * service reference endpoint.
  */
 export interface ServiceEndpoint {
@@ -82,7 +87,7 @@ export interface ServiceEndpoint {
 }
 
 /**
- * Type for defining a identifier document
+ * Interface for defining a identifier document
  * service reference endpoint for a host.
  */
 export interface HostServiceEndpoint extends ServiceEndpoint {
@@ -93,7 +98,7 @@ export interface HostServiceEndpoint extends ServiceEndpoint {
 }
 
 /**
- * Type for defining a identifier document
+ * Interface for defining a identifier document
  * service reference endpoint for a user.
  */
 export interface UserServiceEndpoint extends ServiceEndpoint {

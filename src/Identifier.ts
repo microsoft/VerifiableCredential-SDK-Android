@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript';
+import IKeyStore from './keystores/IKeyStore';
+import KeyStoreConstants from './keystores/KeyStoreConstants';
+
 import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
-import KeyStore from './keystores/KeyStore';
-import KeyStoreConstants from './keystores/KeyStoreConstants';
 
 /**
  * Class for creating and managing identifiers,
@@ -85,32 +86,28 @@ export default class Identifier {
    */
   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<IdentifierDocument> {
     if (this.options && this.options.keyStore) {
-      let keyStore: KeyStore = this.options.keyStore;
-      let seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed);
+      let keyStore: IKeyStore = this.options.keyStore;
+      let seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed) as Buffer;
 
       // Create DID key
       let didKey: any = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
       let pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
 
       // TODO add key type in the storage identfier
-      let success: boolean = await keyStore.save(this.pairwiseKeyStorageIdentifier(this.id, target), pairwiseKey);
-      if (success) {
-        let document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
-        if (register) {
-          if (this.options && this.options.registrar) {
+      await keyStore.save(this.pairwiseKeyStorageIdentifier(this.id, target), pairwiseKey);
+      let document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
+      if (register) {
+        if (this.options && this.options.registrar) {
             // register did document
-            const identfier = await this.options.registrar.register(document, pairwiseKey as DidKey);
-            document.id = identfier.id;
-          } else {
-            throw new UserAgentError(`No registrar in options to register DID document`);
-          }
+          const identfier = await this.options.registrar.register(document, pairwiseKey as DidKey);
+          document.id = identfier.id;
+        } else {
+          throw new UserAgentError(`No registrar in options to register DID document`);
         }
-
-        return document;
-      } else {
-        let message = `Error while saving pairwise key for DID '${this.id}' to key store.`;
-        throw new UserAgentError(message);
       }
+
+      return document;
+
     }
     throw new UserAgentError('No keyStore in options');
   }
@@ -120,11 +117,11 @@ export default class Identifier {
    * instance, throwing if no identifier has been
    * created.
    */
-  public async getDocument (): Promise <IdentifierDocument> {
+  public async getDocument (): Promise<IdentifierDocument> {
     // If we already have not already
     // retrieved the document use the
     // resolver to get the document
-    if (!this .document) {
+    if (!this.document) {
       if (!this.options || !this.options.resolver) {
         throw new UserAgentError('Resolver not specified in user agent options.');
       }
@@ -142,8 +139,8 @@ export default class Identifier {
    * key defined in document.
    * @param keyIdentifier the identifier of the public key.
    */
-  public async getPublicKey (keyIdentifier ?: string): Promise <PublicKey> {
-    if (!this .document) {
+  public async getPublicKey (keyIdentifier?: string): Promise<PublicKey> {
+    if (!this.document) {
       await this.getDocument();
     }
 

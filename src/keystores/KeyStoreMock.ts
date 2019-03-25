@@ -1,4 +1,5 @@
 import { DidKey } from '@decentralized-identity/did-common-typescript';
+import IKeyStore from './IKeyStore';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -8,7 +9,7 @@ import { DidKey } from '@decentralized-identity/did-common-typescript';
 /**
  * Class defining methods and properties to mock a KeyStore
  */
-export default class KeyStoreMock {
+export default class KeyStoreMock implements IKeyStore {
   private store: Map<string, Buffer | DidKey> = new Map<string, Buffer | DidKey>();
 
   /**
@@ -29,17 +30,11 @@ export default class KeyStoreMock {
    * @param keyIdentifier for the key being saved.
    * @param key being saved to the key store.
    */
-  save (keyIdentifier: string, key: Buffer | DidKey): Promise<boolean> {
+  save (keyIdentifier: string, key: Buffer | DidKey): Promise<void> {
     console.log(this.store.toString() + keyIdentifier + key.toString());
-    if (keyIdentifier.startsWith('identifier to simulate storage failure')) {
-      return new Promise((resolve) => {
-        resolve(false);
-      });
-    }
-
     this.store.set(keyIdentifier, key);
     return new Promise((resolve) => {
-      resolve(true);
+      resolve();
     });
   }
 }

@@ -7,7 +7,7 @@ require('es6-promise').polyfill();
 import 'isomorphic-fetch';
 import Identifier from '../Identifier';
 import IdentifierDocument from '../IdentifierDocument';
-import Resolver from './Resolver';
+import IResolver from './IResolver';
 import UserAgentOptions from '../UserAgentOptions';
 import UserAgentError from '../UserAgentError';
 declare var fetch: any;
@@ -17,7 +17,7 @@ declare var fetch: any;
  * @class
  * @implements Resolver
  */
-export default class HttpResolver implements Resolver {
+export default class HttpResolver implements IResolver {
   private timeoutInMilliseconds: number;
 
   /**
