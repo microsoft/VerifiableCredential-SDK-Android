@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Resolver from '../src/resolvers/Resolver';
+import IResolver from '../src/resolvers/IResolver';
 import Identifier from '../src/Identifier';
 import IdentifierDocument from '../src/IdentifierDocument';
 
@@ -12,7 +12,7 @@ import IdentifierDocument from '../src/IdentifierDocument';
  * @class
  * @implmenets Resolver
  */
-export default class TestResolver implements Resolver {
+export default class TestResolver implements IResolver {
   private identifier: any;
   private identifierDocument: any;
 
