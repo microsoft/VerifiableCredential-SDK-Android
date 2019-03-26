@@ -86,16 +86,16 @@ export default class Identifier {
    */
   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<IdentifierDocument> {
     if (this.options && this.options.keyStore) {
-      let keyStore: IKeyStore = this.options.keyStore;
-      let seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed) as Buffer;
+      const keyStore: IKeyStore = this.options.keyStore;
+      const seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed) as Buffer;
 
       // Create DID key
-      let didKey: any = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
-      let pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
+      const didKey: any = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
+      const pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
 
       // TODO add key type in the storage identfier
       await keyStore.save(this.pairwiseKeyStorageIdentifier(this.id, target), pairwiseKey);
-      let document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
+      const document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
       if (register) {
         if (this.options && this.options.registrar) {
             // register did document

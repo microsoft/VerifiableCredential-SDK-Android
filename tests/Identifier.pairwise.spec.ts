@@ -6,7 +6,7 @@
 import Identifier from '../src/Identifier';
 import IdentifierDocument from '../src/IdentifierDocument';
 import UserAgentOptions from '../src/UserAgentOptions';
-import KeyStoreMock from '../src/keystores/KeyStoreMock';
+import InMemoryKeyStore from '../src/keystores/InMemoryKeyStore';
 import TestResolver from './TestResolver';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import CryptoOptions from '../src/CryptoOptions';
@@ -19,7 +19,7 @@ interface CreateIdentifier {
 }
 
 class Helpers {
-  public static async testIdentifier(register: boolean, testResolver: any, keyStore: KeyStoreMock, alg: any, create: CreateIdentifier) {
+  public static async testIdentifier(register: boolean, testResolver: any, keyStore: InMemoryKeyStore, alg: any, create: CreateIdentifier) {
     const options = {
       resolver: testResolver,
       timeoutInSeconds: 30,
@@ -56,22 +56,21 @@ class Helpers {
   
 }
 
-describe('Pairwise Identifier', () => {
+describe('Pairwise Identifier', async () => {
   const testResolver = new TestResolver();
-    // Set key store and its data
-    let keyStore: KeyStoreMock = new KeyStoreMock();
-    keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
+  // Set key store and its data
+  const keyStore: InMemoryKeyStore = new InMemoryKeyStore();
+  await keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
 
-    // Configure the agent options for the tests
-    const options = {
-      resolver: testResolver,
-      timeoutInSeconds: 30,
-      keyStore: keyStore,
-      cryptoOptions: new CryptoOptions()
-    } as UserAgentOptions;
+  // Configure the agent options for the tests
+  const options = {
+    resolver: testResolver,
+    timeoutInSeconds: 30,
+    keyStore: keyStore,
+    cryptoOptions: new CryptoOptions()
+  } as UserAgentOptions;
 
-
-  it('Test throws - no keystore', async done => {
+  it('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
     const personaId = 'did:test:identifier';
     const identifier = new Identifier(personaId, {});
     let throwDetected: boolean = false;
@@ -87,7 +86,7 @@ describe('Pairwise Identifier', () => {
     done();
   });
 
-  it('Test throws - bad id format', async done => {
+  it('should throw when creating a linked identifier with a bad formatted personaId', async done => {
     const personaId = 'identifier';
     options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
     const identifier = new Identifier(personaId, options);
@@ -104,22 +103,22 @@ describe('Pairwise Identifier', () => {
     done();
   });
   
-    const alg = [
-      { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
-      { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
-    ];
+  const alg = [
+    { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
+    { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
+  ];
 
-    it('create an identifier', async done => {
-      await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
-        return identifier.create(register);
-      });
-      await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
-        return identifier.create(register);
-      });
-      done();
+  it('should create an identifier', async done => {
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
+      return identifier.create(register);
     });
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
+      return identifier.create(register);
+    });
+    done();
+  });
   
-  it('create a pairwise identifier', async done => {
+  it('should create a pairwise identifier', async done => {
     await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
       return identifier.createLinkedIdentifier('did:test:peer', register);
     });

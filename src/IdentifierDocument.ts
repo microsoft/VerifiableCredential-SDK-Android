@@ -79,7 +79,7 @@ export default class IdentifierDocument {
    */
   public static async createAndGenerateId (idBase: string, publicKeys: Array<PublicKey>, options: UserAgentOptions): Promise<IdentifierDocument> {
     let document = IdentifierDocument.create(idBase, publicKeys);
-    let id: string = await IdentifierDocument.createIdOnDocument(document, options);
+    const id: string = await IdentifierDocument.createIdOnDocument(document, options);
     document.id = id;
     return document;
   }
@@ -92,19 +92,19 @@ export default class IdentifierDocument {
    */
   public static async createIdOnDocument (document: IdentifierDocument, options: UserAgentOptions): Promise<string> {
     // Strip id
-    let did = document.id;
+    const did = document.id;
     delete document.id;
 
     // Encode document
-    let serialized = JSON.stringify(document);
-    let encoded = base64url(serialized);
-    let toHash: ArrayBuffer = IdentifierDocument.string2ArrayBuffer(encoded);
+    const serialized = JSON.stringify(document);
+    const encoded = base64url(serialized);
+    const toHash: ArrayBuffer = IdentifierDocument.string2ArrayBuffer(encoded);
 
     // calculate identifier
-    let id = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
-    let buf: Buffer = Buffer.from(id);
-    let idDid = base64url(buf);
-    let didComponents = did.split(':');
+    const id = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
+    const buf: Buffer = Buffer.from(id);
+    const idDid = base64url(buf);
+    const didComponents = did.split(':');
     if (didComponents.length < 2) {
       throw new UserAgentError(`Invalid did '${did}' passed. Should have at least did:<method>.`);
     }
