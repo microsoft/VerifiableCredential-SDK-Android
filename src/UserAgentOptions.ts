@@ -36,4 +36,10 @@ export default class UserAgentOptions {
    * external services.
    */
   timeoutInSeconds?: number = 30;
+
+  /**
+   * The locale to be used by the
+   * user agent.
+   */
+  locale?: string = 'en';
 }
