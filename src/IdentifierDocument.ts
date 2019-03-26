@@ -7,6 +7,7 @@ import { AuthenticationReference, ServiceReference, PublicKey } from './types';
 import base64url from 'base64url';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
+import { Identifier } from '.';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -78,9 +79,9 @@ export default class IdentifierDocument {
    * @param options User agent options containing the crypto Api
    */
   public static async createAndGenerateId (idBase: string, publicKeys: Array<PublicKey>, options: UserAgentOptions): Promise<IdentifierDocument> {
-    let document = IdentifierDocument.create(idBase, publicKeys);
-    const id: string = await IdentifierDocument.createIdOnDocument(document, options);
-    document.id = id;
+    const document = IdentifierDocument.create(idBase, publicKeys);
+    const identifier: Identifier = await options.registrar!.generateIdentifier(document);
+    document.id = identifier.id;
     return document;
   }
 
@@ -157,9 +158,9 @@ export default class IdentifierDocument {
   }
 
   private static string2ArrayBuffer (text: string): ArrayBuffer {
-    let buf = new ArrayBuffer(text.length);
-    let bufView = new Uint8Array(buf);
-    let strLen = text.length;
+    const buf = new ArrayBuffer(text.length);
+    const bufView = new Uint8Array(buf);
+    const strLen = text.length;
     for (let inx = 0; inx < strLen; inx++) {
       bufView[inx] = text.charCodeAt(inx);
     }

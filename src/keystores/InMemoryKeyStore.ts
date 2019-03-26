@@ -33,7 +33,7 @@ export default class InMemoryKeyStore implements IKeyStore {
   constructor (encryptionKey?: Buffer | string) {
     if (encryptionKey) {
 
-      let options: any = {};
+      const options: any = {};
       const isBuffer = encryptionKey instanceof Buffer;
 
       // If passed a buffer check that the

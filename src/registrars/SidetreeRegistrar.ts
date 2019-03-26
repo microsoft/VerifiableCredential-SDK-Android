@@ -40,15 +40,18 @@ export default class SidetreeRegistrar implements IRegistrar {
    * @inheritdoc
    */
   public async register (
-    identifierDocument: IdentifierDocument
+    identifierDocument: IdentifierDocument,
+    _keyIdentifier: string
   ): Promise<Identifier> {
     const bodyString = JSON.stringify(identifierDocument);
 
     return new Promise(async (resolve, reject) => {
-      let timer = setTimeout(
+      const timer = setTimeout(
         () => reject(new UserAgentError('Fetch timed out.')),
         this.timeoutInMilliseconds
       );
+
+      // TODO add signing of the message
 
       const fetchOptions = {
         method: 'POST',

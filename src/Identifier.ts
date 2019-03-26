@@ -35,45 +35,24 @@ export default class Identifier {
    * @param identifier either the string representation of an identifier or a identifier document.
    * @param [options] for configuring how to register and resolve identifiers.
    */
-  constructor (identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
+  constructor (public identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
     // Check whether passed an identifier document
     // or an identifier string
-    this.id = ''; // Avoid tslint error
-    this.identifier = identifier;
-  }
-
-  /**
-   * Gets the identifier
-   */
-  public get identifier (): IdentifierDocument | string {
-    if (this.document) {
-      return this.document;
-    }
-
-    return this.id;
-  }
-
-  /**
-   * Sets the identifier
-   */
-  public set identifier (identifierOrDocument: IdentifierDocument | string) {
-    if (typeof identifierOrDocument === 'object') {
-      this.document = identifierOrDocument;
-      this.id = identifierOrDocument.id;
+    if (typeof identifier === 'object') {
+      this.document = identifier;
+      this.id = identifier.id;
     } else {
-      this.id = identifierOrDocument;
+      this.id = identifier;
     }
   }
 
   /**
    * Creates a new decentralized identifier.
-   * If the registar flag is true, the newly created
-   * identifier will be registered using the options
-   * @param register flag indicating whether the new identifier should be registered
-   * with a ledger.
+   * @param [options] for configuring how to register and resolve identifiers.
    */
-  public async create (register: boolean = false): Promise<IdentifierDocument> {
-    return this.createLinkedIdentifier(this.id, register);
+  public static async create (options: UserAgentOptions): Promise<Identifier> {
+    const id = 'did:ion';
+    return new Identifier(id, options).createLinkedIdentifier(id);
   }
 
   /**
@@ -84,7 +63,7 @@ export default class Identifier {
    * @param register flag indicating whether the new identifier should be registered
    * with a ledger.
    */
-  public async createLinkedIdentifier (target: string, register: boolean = false): Promise<IdentifierDocument> {
+  public async createLinkedIdentifier (target: string, register: boolean = false): Promise<Identifier> {
     if (this.options && this.options.keyStore) {
       const keyStore: IKeyStore = this.options.keyStore;
       const seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed) as Buffer;
@@ -94,19 +73,20 @@ export default class Identifier {
       const pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
 
       // TODO add key type in the storage identfier
-      await keyStore.save(this.pairwiseKeyStorageIdentifier(this.id, target), pairwiseKey);
-      const document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey, this.options);
+      const pairwiseKeyStorageId = this.pairwiseKeyStorageIdentifier(this.id, target);
+      await keyStore.save(pairwiseKeyStorageId, pairwiseKey);
+      const document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey);
       if (register) {
         if (this.options && this.options.registrar) {
             // register did document
-          const identfier = await this.options.registrar.register(document, pairwiseKey as DidKey);
+          const identfier = await this.options.registrar.register(document, pairwiseKeyStorageId);
           document.id = identfier.id;
         } else {
           throw new UserAgentError(`No registrar in options to register DID document`);
         }
       }
 
-      return document;
+      return new Identifier(document);
 
     }
     throw new UserAgentError('No keyStore in options');
@@ -163,14 +143,14 @@ export default class Identifier {
   }
 
   // Create an identifier document. Included the public key.
-  private async createIdentifierDocument (id: string, key: DidKey, options: UserAgentOptions): Promise <IdentifierDocument> {
-    let publicKeyJwk = await this.getDidPublicKey(key);
-    return IdentifierDocument.createAndGenerateId(id, [ publicKeyJwk ], options);
+  private async createIdentifierDocument (id: string, key: DidKey): Promise <IdentifierDocument> {
+    const publicKeyJwk = await this.getDidPublicKey(key);
+    return IdentifierDocument.createAndGenerateId(id, [ publicKeyJwk ], this.options as UserAgentOptions);
   }
 
   // Retrieve the public key from a DidKey
   private async getDidPublicKey (key: DidKey): Promise <any> {
-    let jwk = await key.getJwkKey(KeyExport.Public);
+    const jwk = await key.getJwkKey(KeyExport.Public);
     return jwk;
   }
 
