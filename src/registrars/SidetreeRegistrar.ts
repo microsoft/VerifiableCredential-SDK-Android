@@ -45,7 +45,7 @@ export default class SidetreeRegistrar implements IRegistrar {
     const bodyString = JSON.stringify(identifierDocument);
 
     return new Promise(async (resolve, reject) => {
-      let timer = setTimeout(
+      const timer = setTimeout(
         () => reject(new UserAgentError('Fetch timed out.')),
         this.timeoutInMilliseconds
       );
