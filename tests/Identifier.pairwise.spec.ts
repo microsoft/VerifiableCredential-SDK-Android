@@ -70,7 +70,7 @@ describe('Pairwise Identifier', async () => {
     cryptoOptions: new CryptoOptions()
   } as UserAgentOptions;
 
-  it('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
+  fit('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
     const personaId = 'did:test:identifier';
     const identifier = new Identifier(personaId, {});
     let throwDetected: boolean = false;
