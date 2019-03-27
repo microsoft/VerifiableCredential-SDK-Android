@@ -4,9 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationReference, ServiceReference, PublicKey } from './types';
-import base64url from 'base64url';
 import UserAgentOptions from './UserAgentOptions';
-import UserAgentError from './UserAgentError';
 import { Identifier } from '.';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
@@ -86,33 +84,6 @@ export default class IdentifierDocument {
   }
 
   /**
-   * Create an identifier on the document.
-   * If the document has an identifier already, this is firstly removed.
-   * @param document The document on which to caluclate the identifier
-   * @param options User agent options containing the crypto Api
-   */
-  public static async createIdOnDocument (document: IdentifierDocument, options: UserAgentOptions): Promise<string> {
-    // Strip id
-    const did = document.id;
-    delete document.id;
-
-    // Encode document
-    const serialized = JSON.stringify(document);
-    const encoded = base64url(serialized);
-    const toHash: ArrayBuffer = IdentifierDocument.string2ArrayBuffer(encoded);
-
-    // calculate identifier
-    const id = await options.cryptoOptions!.cryptoApi.subtle.digest({ name: 'SHA-256' }, toHash);
-    const buf: Buffer = Buffer.from(id);
-    const idDid = base64url(buf);
-    const didComponents = did.split(':');
-    if (didComponents.length < 2) {
-      throw new UserAgentError(`Invalid did '${did}' passed. Should have at least did:<method>.`);
-    }
-    return `${didComponents[0]}:${didComponents[1]}:${idDid}`;
-  }
-
-  /**
    * Adds an authentication reference to the document.
    * @param authenticationReference to add to the document.
    */
@@ -155,15 +126,5 @@ export default class IdentifierDocument {
 
     // Now return the cloned document for serialization
     return clonedDocument;
-  }
-
-  private static string2ArrayBuffer (text: string): ArrayBuffer {
-    const buf = new ArrayBuffer(text.length);
-    const bufView = new Uint8Array(buf);
-    const strLen = text.length;
-    for (let inx = 0; inx < strLen; inx++) {
-      bufView[inx] = text.charCodeAt(inx);
-    }
-    return buf;
   }
 }

@@ -8,11 +8,11 @@ import IdentifierDocument from '../src/IdentifierDocument';
 import UserAgentOptions from '../src/UserAgentOptions';
 import InMemoryKeyStore from '../src/keystores/InMemoryKeyStore';
 import TestResolver from './TestResolver';
-import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import CryptoOptions from '../src/CryptoOptions';
 import { KeyTypeFactory } from '@decentralized-identity/did-common-typescript';
 import Registrar from '../src/registrars/IRegistrar';
 import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
+import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -35,11 +35,8 @@ class Helpers {
       cryptoOptions: new CryptoOptions()
     } as UserAgentOptions;
 
-    let registar: Registrar | undefined;
-    if (register) {
-      registar = new SidetreeRegistrar('https://beta.register.did.microsoft.com/api/v1.1', options);
-      options.registrar = registar;
-    }
+    const registar: Registrar = new SidetreeRegistrar('https://beta.register.did.microsoft.com/api/v1.1', options);
+    options.registrar = registar;
 
     const personaId = 'did:test:identifier';
     options.cryptoOptions!.algorithm = alg;
@@ -48,8 +45,7 @@ class Helpers {
 
     identifier = await create(options, identifier, register);
     expect(identifier.id).toBeDefined();
-    expect(personaId).toBe(identifier.identifier as string);
-    expect<Boolean>(identifier.id.startsWith('did:test:')).toBe(true);
+    expect<Boolean>(identifier.id.startsWith('did:ion:')).toBe(true);
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
@@ -67,16 +63,21 @@ class Helpers {
 describe('Pairwise Identifier', async () => {
   const testResolver = new TestResolver();
   // Set key store and its data
-  const keyStore: InMemoryKeyStore = new InMemoryKeyStore();
-  await keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
+  const keyStore: InMemoryKeyStore | undefined = undefined;
 
-  // Configure the agent options for the tests
+    // Configure the agent options for the tests
   const options = {
     resolver: testResolver,
     timeoutInSeconds: 30,
     keyStore: keyStore,
     cryptoOptions: new CryptoOptions()
   } as UserAgentOptions;
+
+  beforeAll(async () => {
+    options.keyStore = new InMemoryKeyStore();
+    await options.keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
+    options.registrar = new SidetreeRegistrar('https://example.com', options);
+  });
 
   it('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
     const personaId = 'did:test:identifier';
@@ -94,50 +95,47 @@ describe('Pairwise Identifier', async () => {
     done();
   });
 
-  it('should throw when creating a linked identifier with a bad formatted personaId', async done => {
-    const personaId = 'identifier';
-    options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
-    const identifier = new Identifier(personaId, options);
-    let throwDetected: boolean = false;
-    await identifier.createLinkedIdentifier('did:test:peer', false)
-    .catch((err) => {
-      expect(`Invalid did 'identifier' passed. Should have at least did:<method>.`).toBe(err.message);
-      throwDetected = true;
-    });
-
-    if (!throwDetected) {
-      fail('No Throw detected');
-    }
-    done();
-  });
-
   const alg = [
     { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
     { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
   ];
 
-  it('should create an identifier', async done => {
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
-      console.log(`${identifier}-${register}`);
-      return Identifier.create(options);
-    });
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+  it('should create an identifier EC', async done => {
+
+    /* tslint:disable:max-line-length */
+    await Helpers
+    .testIdentifier(false, testResolver, options.keyStore as InMemoryKeyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${identifier}-${register}`);
       return Identifier.create(options);
     });
     done();
   });
 
-  it('should create a pairwise identifier', async done => {
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+  it('should create an identifier RSA', async done => {
+    await Helpers
+    .testIdentifier(false, testResolver, options.keyStore as InMemoryKeyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      console.log(`${identifier}-${register}`);
+      return Identifier.create(options);
+    });
+
+    done();
+  });
+
+  it('should create a pairwise identifier EC', async done => {
+    await Helpers
+    .testIdentifier(false, testResolver, options.keyStore as InMemoryKeyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${options}-${register}`);
       return identifier.createLinkedIdentifier('did:test:peer', register);
     });
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
-      console.log(`${options}-${register}`);
-      return identifier.createLinkedIdentifier('did:test:peer', register);
-    });
-    console.log(`Pairwise done`);
+    done();
+  });
+
+  it('should create a pairwise identifier RSA', async done => {
+    await Helpers.testIdentifier(
+      false, testResolver, options.keyStore as InMemoryKeyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+        console.log(`${options}-${register}`);
+        return identifier.createLinkedIdentifier('did:test:peer', register);
+      });
     done();
   });
 });

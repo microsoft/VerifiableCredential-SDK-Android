@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript';
+import { DidKey, KeyExport, KeyUse, KeyType } from '@decentralized-identity/did-common-typescript';
 import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
 
@@ -73,7 +73,7 @@ export default class Identifier {
       const pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
 
       // TODO add key type in the storage identfier
-      const pairwiseKeyStorageId = this.pairwiseKeyStorageIdentifier(this.id, target);
+      const pairwiseKeyStorageId = this.pairwiseKeyStorageIdentifier(this.id, target, (pairwiseKey as DidKey).keyUse, (pairwiseKey as DidKey).keyType);
       await keyStore.save(pairwiseKeyStorageId, pairwiseKey);
       const document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey);
       if (register) {
@@ -155,7 +155,7 @@ export default class Identifier {
   }
 
   // Generate a storage identifier to store a pairwise key
-  private pairwiseKeyStorageIdentifier (personaId: string, target: string): string {
-    return `${personaId}-${target}`;
+  private pairwiseKeyStorageIdentifier (personaId: string, target: string, keyUse: KeyUse, keyType: KeyType): string {
+    return `${personaId}-${target}-${keyUse}-${keyType}`;
   }
 }
