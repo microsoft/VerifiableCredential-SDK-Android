@@ -15,7 +15,7 @@ import Registrar from '../src/registrars/IRegistrar';
 import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 
 interface CreateIdentifier {
-  (identifier: Identifier, register: boolean): Promise<IdentifierDocument>;
+  (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
 }
 
 class Helpers {
@@ -35,25 +35,25 @@ class Helpers {
 
     const personaId = 'did:test:identifier';
     options.cryptoOptions!.algorithm = alg;
-    const identifier = new Identifier(personaId, options);
+    let identifier = new Identifier(personaId, options);
     expect(personaId).toBe(identifier.identifier as string);
 
-    let identifierDoc: IdentifierDocument = await create(identifier, register);
-    expect(identifierDoc.id).toBeDefined();
-    expect<Boolean>(identifierDoc.id.startsWith('did:test:')).toBe(true);
-    let id = identifierDoc.id;
-    let kty = KeyTypeFactory.create(alg);
+    identifier = await create(options, identifier, register);
+    expect(identifier.id).toBeDefined();
+    expect(personaId).toBe(identifier.identifier as string);
+    expect<Boolean>(identifier.id.startsWith('did:test:')).toBe(true);
+    const id = identifier.id;
+    const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
-    expect(kty).toBe((identifierDoc.publicKeys[0] as any).kty);
+    expect(kty).toBe((identifier!.document!.publicKeys[0] as any).kty);
 
-    let document: Identifier = new Identifier(identifierDoc);
+    const document: Identifier = new Identifier(identifier.document as IdentifierDocument);
     expect(id).toBe(document.id);
     expect(id).toBe((document.identifier as IdentifierDocument).id);
 
     expect(id).toBe(document!.document!.id);
-    expect(identifierDoc.publicKeys).toBe(document!.document!.publicKeys);
+    expect(identifier!.document!.publicKeys).toBe(document!.document!.publicKeys);
   }
-  
 }
 
 describe('Pairwise Identifier', async () => {
@@ -109,20 +109,24 @@ describe('Pairwise Identifier', async () => {
   ];
 
   it('should create an identifier', async done => {
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
-      return identifier.create(register);
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      console.log(`${identifier}-${register}`);
+      return Identifier.create(options);
     });
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
-      return identifier.create(register);
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      console.log(`${identifier}-${register}`);
+      return Identifier.create(options);
     });
     done();
   });
   
   it('should create a pairwise identifier', async done => {
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (identifier: Identifier, register: boolean) => {
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      console.log(`${options}-${register}`);
       return identifier.createLinkedIdentifier('did:test:peer', register);
     });
-    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (identifier: Identifier, register: boolean) => {
+    await Helpers.testIdentifier(false, testResolver, keyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      console.log(`${options}-${register}`);
       return identifier.createLinkedIdentifier('did:test:peer', register);
     });
     console.log(`Pairwise done`);
