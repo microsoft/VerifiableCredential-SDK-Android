@@ -16,7 +16,7 @@ export enum ClaimDetailsType {
 /**
  * Interface defining methods and properties for a Token object
  */
-export default interface Token {
+export default interface IClaim {
 
   /**
    * the contents for the claim

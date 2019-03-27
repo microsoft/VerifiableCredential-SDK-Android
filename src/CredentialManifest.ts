@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CredentialInput, DataInput } from './types';
+import { CredentialInput, DataInput, OpenIDInput, CredentialManifestIssuerOptions } from './types';
 
 /**
  * context for credentialManifest
@@ -17,29 +17,44 @@ const type = 'CredentialManifest';
 
 /**
  *  Class defining methods and properties for a ClaimManifest object.
- *  based off of the CredentialManifest spec: https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md
+ *  based off of the CredentialManifest spec: {@link https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md}
  */
 export default class CredentialManifest {
 
   /**
    * Name of the credential
    */
-  public credential: string;
+  public readonly credential: string;
+
+  /**
+   * Languages supported for localization
+   */
+  public readonly language: Array<string>;
+
+  /**
+   * the keeper DID whose hub stores the CredentialManifest.
+   */
+  public readonly keeper: string;
+
+  /**
+   * Version of the CredentialManifest
+   */
+  public readonly version: string;
 
   /**
    * preconditions for the manifest.
    */
-  public preconditions: any;
+  public readonly preconditions: any;
 
   /**
    * inputs parameter for manifest.
    */
-  public inputs: Array<CredentialInput | DataInput>;
+  public readonly inputs: Array<CredentialInput | DataInput | OpenIDInput>;
 
   /**
    * issuer options for things such as the style of the manifest in the UI.
    */
-  public issuerOptions: any;
+  public issuerOptions: CredentialManifestIssuerOptions;
 
   /**
    * Constructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.
@@ -47,6 +62,9 @@ export default class CredentialManifest {
    */
   constructor (credentialManifest: any) {
     this.credential = credentialManifest.credential;
+    this.language = credentialManifest.language;
+    this.keeper = credentialManifest.keeper;
+    this.version = credentialManifest.version;
     this.preconditions = credentialManifest.preconditions;
     this.inputs = credentialManifest.inputs;
     this.issuerOptions = credentialManifest.issuer_options;
@@ -55,11 +73,20 @@ export default class CredentialManifest {
   /**
    * Creates a new instance of the CredentialManifest class.
    */
-  public static create (credential: string, preconditions: any, inputs: any, issuerOptions: any) {
+  public static create (credential: string,
+                        language: Array<string>,
+                        keeper: string,
+                        version: string,
+                        preconditions: any,
+                        inputs: Array<CredentialInput | DataInput | OpenIDInput>,
+                        issuerOptions: CredentialManifestIssuerOptions) {
     const manifest = {
       '@context': context,
       '@type': type,
+      'language': language,
       'credential': credential,
+      'keeper': keeper,
+      'version': version,
       'preconditions': preconditions,
       'inputs': inputs,
       'issuer_options': issuerOptions
@@ -68,7 +95,7 @@ export default class CredentialManifest {
   }
 
   /**
-   * forms the CredentialManifest JSON.
+   * serializes the CredentialManifest to JSON.
    */
   public toJSON () {
     const manifest = {
@@ -83,6 +110,13 @@ export default class CredentialManifest {
   }
 
   /**
+   * Get the keeper did of the CredentialManifest
+   */
+  public getKeeperDid () {
+    return this.keeper;
+  }
+
+  /**
    * Get the input properties of the manifest
    */
   public getInputProperties () {
@@ -90,9 +124,23 @@ export default class CredentialManifest {
   }
 
   /**
-   * Get the display properties of the manifest.
+   * Get the input style properties of the manifest.
    */
-  public getDisplayProperties () {
-    return this.issuerOptions.style;
+  public getInputStyleProperties () {
+    return this.issuerOptions.input.styles;
+  }
+
+  /**
+   * Get the input label for a specific value
+   */
+  public getInputLabels () {
+    return this.issuerOptions.input.labels;
+  }
+
+  /**
+   * Get the presentation options used to present a credential in a UA
+   */
+  public getPresentationOptions () {
+    return this.issuerOptions.presentation;
   }
 }
