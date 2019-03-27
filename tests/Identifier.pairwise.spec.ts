@@ -10,7 +10,7 @@ import InMemoryKeyStore from '../src/keystores/InMemoryKeyStore';
 import TestResolver from './TestResolver';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import CryptoOptions from '../src/CryptoOptions';
-import { KeyTypeFactory } from '@decentralized-identity/did-common-typescript'
+import { KeyTypeFactory } from '@decentralized-identity/did-common-typescript';
 import Registrar from '../src/registrars/IRegistrar';
 import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 
@@ -19,7 +19,15 @@ interface CreateIdentifier {
 }
 
 class Helpers {
-  public static async testIdentifier(register: boolean, testResolver: any, keyStore: InMemoryKeyStore, alg: any, create: CreateIdentifier) {
+  /**
+   * Create identifier helper
+   * @param register True if registration is requested
+   * @param testResolver The resolver
+   * @param keyStore The key store
+   * @param alg The algorithm to use
+   * @param create Delegate for the creation of the identifer
+   */
+  public static async testIdentifier (register: boolean, testResolver: any, keyStore: InMemoryKeyStore, alg: any, create: CreateIdentifier) {
     const options = {
       resolver: testResolver,
       timeoutInSeconds: 30,
@@ -45,14 +53,14 @@ class Helpers {
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
-    expect(kty).toBe((identifier!.document!.publicKeys[0] as any).kty);
+    expect(kty).toBe((identifier.document!.publicKeys[0] as any).kty);
 
     const document: Identifier = new Identifier(identifier.document as IdentifierDocument);
     expect(id).toBe(document.id);
     expect(id).toBe((document.identifier as IdentifierDocument).id);
 
-    expect(id).toBe(document!.document!.id);
-    expect(identifier!.document!.publicKeys).toBe(document!.document!.publicKeys);
+    expect(id).toBe(document.document!.id);
+    expect(identifier.document!.publicKeys).toBe(document.document!.publicKeys);
   }
 }
 
@@ -70,12 +78,12 @@ describe('Pairwise Identifier', async () => {
     cryptoOptions: new CryptoOptions()
   } as UserAgentOptions;
 
-  fit('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
+  it('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
     const personaId = 'did:test:identifier';
     const identifier = new Identifier(personaId, {});
     let throwDetected: boolean = false;
     await identifier.createLinkedIdentifier('did:test:peer', false)
-    .catch ((err) => {
+    .catch((err) => {
       expect('No keyStore in options').toBe(err.message);
       throwDetected = true;
     });
@@ -92,17 +100,17 @@ describe('Pairwise Identifier', async () => {
     const identifier = new Identifier(personaId, options);
     let throwDetected: boolean = false;
     await identifier.createLinkedIdentifier('did:test:peer', false)
-    .catch ((err) => {
+    .catch((err) => {
       expect(`Invalid did 'identifier' passed. Should have at least did:<method>.`).toBe(err.message);
       throwDetected = true;
     });
-  
+
     if (!throwDetected) {
       fail('No Throw detected');
     }
     done();
   });
-  
+
   const alg = [
     { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
     { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
@@ -119,7 +127,7 @@ describe('Pairwise Identifier', async () => {
     });
     done();
   });
-  
+
   it('should create a pairwise identifier', async done => {
     await Helpers.testIdentifier(false, testResolver, keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${options}-${register}`);

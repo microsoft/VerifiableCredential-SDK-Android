@@ -19,7 +19,7 @@ export default class TestRegistrar implements IRegistrar {
    * @param identifier to use for the test.
    * @param identifierDocument to use for the test.
    */
-  public prepareTest(identifier: Identifier, identifierDocument: IdentifierDocument) {
+  public prepareTest (identifier: Identifier, identifierDocument: IdentifierDocument) {
     this.identifier = identifier;
     this.identifierDocument = identifierDocument;
   }
@@ -27,7 +27,7 @@ export default class TestRegistrar implements IRegistrar {
   /**
    * @inheritdoc
    */
-  public async register(identifierDocument: IdentifierDocument): Promise<Identifier> {
+  public async register (identifierDocument: IdentifierDocument): Promise<Identifier> {
     if (this.identifierDocument === identifierDocument) {
       return this.identifier;
     }
@@ -39,6 +39,6 @@ export default class TestRegistrar implements IRegistrar {
    * @inheritdoc
    */
   public async generateIdentifier (input: any): Promise<Identifier> {
-    throw new Error('Not implemented');
+    throw new Error(`Not implemented - ${input}`);
   }
 }

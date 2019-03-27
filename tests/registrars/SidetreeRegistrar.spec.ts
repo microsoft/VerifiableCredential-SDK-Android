@@ -42,21 +42,20 @@ describe('SidetreeRegistrar', () => {
     const registrar = new SidetreeRegistrar('https://registrar.org', {
       timeoutInSeconds: 30
     });
- 
+
     const identifier: Identifier = new Identifier('did:test:identifier');
 
-    fetchMock.mock(
-      function(url: any, opts: any) {
-        expect(url).toEqual('https://registrar.org/register');
-        expect(opts).toBeDefined();
+    fetchMock.mock((url: any, opts: any) => {
+      expect(url).toEqual('https://registrar.org/register');
+      expect(opts).toBeDefined();
         // Make sure the document has been passed
-        const body: any = JSON.parse(opts.body);
-        expect(body['@context']).toEqual(DOCUMENT['@context']);
-        expect(body.id).toEqual(DOCUMENT.id);
-        return true;
-      },
+      const body: any = JSON.parse(opts.body);
+      expect(body['@context']).toEqual(DOCUMENT['@context']);
+      expect(body.id).toEqual(DOCUMENT.id);
+      return true;
+    },
       new Promise(resolve => resolve(identifier)),
-      { method: 'POST'}
+      { method: 'POST' }
     );
 
     const identifierDocument = new IdentifierDocument(DOCUMENT);
@@ -70,11 +69,11 @@ describe('SidetreeRegistrar', () => {
     const registrar = new SidetreeRegistrar('https://registrar.org', {
       timeoutInSeconds: 1
     });
-   
+
     // Set the mock timeout to be greater than the fetch configuration
     // timeout to ensure that the fetch timeout works as expected.
-    const delay = new Promise((res, _) => setTimeout(res, 1000*3))
-    fetchMock.post('https://registrar.org/register', delay.then((_)  => 404))
+    const delay = new Promise((res, _) => setTimeout(res, 1000 * 3));
+    fetchMock.post('https://registrar.org/register', delay.then((_) => 404));
 
     await registrar
       .register(new IdentifierDocument(DOCUMENT), '')
@@ -145,7 +144,7 @@ describe('SidetreeRegistrar', () => {
     });
 
     let previousIdentifier: string = '';
-    for(let index = 0; index < 20; index++) {
+    for (let index = 0; index < 20; index++) {
       const identifier: Identifier = await registrar.generateIdentifier(new IdentifierDocument(genesisDocument));
 
       if (index !== 0) {
@@ -157,4 +156,3 @@ describe('SidetreeRegistrar', () => {
     done();
   });
 });
-

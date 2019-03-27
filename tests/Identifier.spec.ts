@@ -64,9 +64,9 @@ describe('Identifier', () => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
       { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
-    );  
-    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
-    
+    );
+    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
+
     const resolver = spyOn(testResolver, 'resolve').and.callThrough();
     const result = identifier.getDocument();
     expect(result).toBeDefined();
@@ -76,8 +76,8 @@ describe('Identifier', () => {
   it('should call getDocument() when local document undefined', async done => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
-      { 
-        id: 'did:test:identifier', 
+      {
+        id: 'did:test:identifier',
         created: '2019-01-25T01:08:44.732Z',
         publicKey: [
           {
@@ -98,8 +98,8 @@ describe('Identifier', () => {
       }
     );
 
-    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
-     
+    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
+
     const resolver = spyOn(testResolver, 'resolve').and.callThrough();
     const result = await identifier.getPublicKey('#master');
     expect(result).toBeDefined();
@@ -110,27 +110,27 @@ describe('Identifier', () => {
   it('should throw when document has no keys', async done => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
-      { 
-        id: 'did:test:identifier', 
+      {
+        id: 'did:test:identifier',
         created: '2019-01-25T01:08:44.732Z'
       }
     );
 
-    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
+    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
     await identifier
       .getPublicKey('#master')
       .catch(error => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual('Document does not contain any public keys');
       })
-      .finally(done)
+      .finally(done);
   });
 
   it('should throw when document does not contain specified key', async done => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
-      { 
-        id: 'did:test:identifier', 
+      {
+        id: 'did:test:identifier',
         created: '2019-01-25T01:08:44.732Z',
         publicKey: [
           {
@@ -151,21 +151,21 @@ describe('Identifier', () => {
       }
     );
 
-    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
+    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
     await identifier
       .getPublicKey('#notInDocument')
       .catch(error => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Document does not contain a key with id '#notInDocument'`);
       })
-      .finally(done)
+      .finally(done);
   });
 
   it('should return public key for specified key identifier', async done => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
-      { 
-        id: 'did:test:identifier', 
+      {
+        id: 'did:test:identifier',
         created: '2019-01-25T01:08:44.732Z',
         publicKey: [
           {
@@ -186,7 +186,7 @@ describe('Identifier', () => {
       }
     );
 
-    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
+    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
     const publicKey = await identifier.getPublicKey('#master');
     expect(publicKey).toBeDefined();
     expect(publicKey.id).toEqual('#master');
@@ -196,8 +196,8 @@ describe('Identifier', () => {
   it('should return first public key when no key identifier specified', async done => {
     const identifier = new Identifier('did:test:identifier', options);
     const identifierDocument = new IdentifierDocument(
-      { 
-        id: 'did:test:identifier', 
+      {
+        id: 'did:test:identifier',
         created: '2019-01-25T01:08:44.732Z',
         publicKey: [
           {
@@ -232,7 +232,7 @@ describe('Identifier', () => {
       }
     );
 
-    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument)
+    (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
     const publicKey = await identifier.getPublicKey();
     expect(publicKey).toBeDefined();
     expect(publicKey.id).toEqual('#first');
