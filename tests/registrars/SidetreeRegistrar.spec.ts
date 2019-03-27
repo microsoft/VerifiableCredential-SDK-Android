@@ -60,7 +60,7 @@ describe('SidetreeRegistrar', () => {
     );
 
     const identifierDocument = new IdentifierDocument(DOCUMENT);
-    const result: any = await registrar.register(identifierDocument);
+    const result: any = await registrar.register(identifierDocument, '');
     expect(result).toBeDefined();
     expect(result.id).toEqual('did:test:identifier');
     done();
@@ -77,8 +77,8 @@ describe('SidetreeRegistrar', () => {
     fetchMock.post('https://registrar.org/register', delay.then((_)  => 404))
 
     await registrar
-      .register(new IdentifierDocument(DOCUMENT))
-      .catch(error => {
+      .register(new IdentifierDocument(DOCUMENT), '')
+      .catch((error: any) => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Fetch timed out.`);
@@ -92,8 +92,8 @@ describe('SidetreeRegistrar', () => {
     fetchMock.post('https://registrar.org/register', 404);
 
     await registrar
-      .register(new IdentifierDocument(DOCUMENT))
-      .catch(error => {
+      .register(new IdentifierDocument(DOCUMENT), '')
+      .catch((error: any) => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual('Failed to register the identifier document.');
