@@ -8,8 +8,8 @@ import IdentifierDocument from '../src/IdentifierDocument';
 
 describe('IdentifierDocument', () => {
   it('should construct new instance when provided a document', async done => {
-    const document = { 
-      id: 'did:test:identifier', 
+    const document = {
+      id: 'did:test:identifier',
       created: '2019-01-25T01:08:44.732Z',
       publicKey: [
         {
@@ -27,8 +27,8 @@ describe('IdentifierDocument', () => {
           }
         }
       ]
-    }
-    
+    };
+
     const identifierDocument = new IdentifierDocument(document);
     expect(identifierDocument).toBeDefined();
     expect(identifierDocument.id).toEqual('did:test:identifier');
@@ -54,7 +54,7 @@ describe('IdentifierDocument', () => {
           e: 'AQAB'
         }
       }
-    ]
+    ];
 
     const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
@@ -86,7 +86,7 @@ describe('IdentifierDocument', () => {
           e: 'AQAB'
         }
       }
-    ]
+    ];
 
     const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
@@ -120,7 +120,7 @@ describe('IdentifierDocument', () => {
           e: 'AQAB'
         }
       }
-    ]
+    ];
 
     const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
@@ -165,7 +165,7 @@ describe('IdentifierDocument', () => {
           e: 'AQAB'
         }
       }
-    ]
+    ];
 
     const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();

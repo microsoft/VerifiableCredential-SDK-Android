@@ -12,7 +12,7 @@ const fetchMock = require('fetch-mock');
 const DOCUMENT = {
   document: {
     '@context': 'https://w3id.org/did/v1',
-    id: 'did:test:identifier'
+    'id': 'did:test:identifier'
   },
   resolverMetadata: {
     driverId: 'did:test',
@@ -75,7 +75,7 @@ describe('HttpResolver', () => {
       'https://resolver.org/1.0/identifiers/did:test:identifier',
       new Promise(resolve => resolve({
         '@context': 'https://w3id.org/did/v1',
-        id: 'did:test:identifier'
+        'id': 'did:test:identifier'
       }))
     );
 
@@ -133,8 +133,8 @@ describe('HttpResolver', () => {
 
     // Set the mock timeout to be greater than the fetch configuration
     // timeout to ensure that the fetch timeout works as expected.
-    const delay = new Promise((res, _) => setTimeout(res, 1000*3))
-    fetchMock.get('https://resolver.org/1.0/identifiers/did:test:identifier', delay.then((_)  => 404))
+    const delay = new Promise((res, _) => setTimeout(res, 1000 * 3));
+    fetchMock.get('https://resolver.org/1.0/identifiers/did:test:identifier', delay.then((_) => 404));
 
     await resolver
       .resolve(identifier)
