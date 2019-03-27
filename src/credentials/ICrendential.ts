@@ -6,21 +6,36 @@
 import { Identifier } from '..';
 
 /**
+ * Enumeration of the supported credential types.
+ */
+export enum CredentialType {
+  VerifiedCredential = 'https://www.w3.org/2018/credentials/v1',
+  JsonWebToken = 'https://tools.ietf.org/html/rfc7519',
+  SelfIssuedToken = 'https://self-issued.me'
+}
+
+/**
  * Interface defining common properties and
  * methods of a credential.
  */
 export default interface ICrendential {
+
+  /**
+   * The type of the credential.
+   */
+  type: CredentialType;
+
   /**
    * The identifier the credential was
    * issued to.
    */
-  owner: Identifier;
+  owner: Identifier | string | undefined;
 
   /**
    * The identifier of the issuer of
    * the credential.
    */
-  issuedBy: Identifier;
+  issuedBy: Identifier | string | undefined;
 
   /**
    * The date the credential was issued.
