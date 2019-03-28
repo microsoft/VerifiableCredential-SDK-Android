@@ -20,7 +20,7 @@ export default class UserAgentOptions {
   resolver?: IResolver;
 
   /**
-   * Instance of Registar than can be used
+   * Instance of Registrar than can be used
    * to register identifiers.
    */
   registrar?: IRegistrar;
@@ -42,4 +42,11 @@ export default class UserAgentOptions {
    * user agent.
    */
   locale?: string = 'en';
+
+  /**
+   * The lifetime of any self-issued credentials.
+   * Used to determine the expiry time of the
+   * credential.
+   */
+  selfIssuedCredentialLifetimeInSeconds?: number = 300; // 5 mins
 }

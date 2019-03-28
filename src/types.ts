@@ -20,7 +20,7 @@ export interface PublicKey {
   type: string;
 
   /**
-   * The onwer of the key.
+   * The owner of the key.
    */
   owner?: string;
 

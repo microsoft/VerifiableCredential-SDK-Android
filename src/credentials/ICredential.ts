@@ -10,32 +10,26 @@ import { Identifier } from '..';
  */
 export enum CredentialType {
   VerifiedCredential = 'https://www.w3.org/2018/credentials/v1',
-  JsonWebToken = 'https://tools.ietf.org/html/rfc7519',
-  SelfIssuedToken = 'https://self-issued.me'
+  SelfIssued = 'https://self-issued.me'
 }
 
 /**
  * Interface defining common properties and
  * methods of a credential.
  */
-export default interface ICrendential {
-
-  /**
-   * The type of the credential.
-   */
-  type: CredentialType;
+export default interface ICredential {
 
   /**
    * The identifier the credential was
    * issued to.
    */
-  owner: Identifier | string | undefined;
+  issuedTo: Identifier;
 
   /**
    * The identifier of the issuer of
    * the credential.
    */
-  issuedBy: Identifier | string | undefined;
+  issuedBy: Identifier;
 
   /**
    * The date the credential was issued.
@@ -47,17 +41,4 @@ export default interface ICrendential {
    * credential expires at.
    */
   expiresAt?: Date;
-
-  /**
-   * A boolean indicating whether the
-   * credential was self issued.
-   */
-  isSelfIssued: boolean;
-
-  /**
-   * A boolean indicating whether the
-   * credential has been signed by the
-   * issuer.
-   */
-  isSigned: boolean;
 }
