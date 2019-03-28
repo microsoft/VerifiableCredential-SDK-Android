@@ -1,4 +1,3 @@
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -7,6 +6,7 @@
 import IResolver from './resolvers/IResolver';
 import IRegistrar from './registrars/IRegistrar';
 import IKeyStore from './keystores/IKeyStore';
+import CryptoOptions from './CryptoOptions';
 
 /**
  * Interface defining options for the
@@ -36,4 +36,9 @@ export default class UserAgentOptions {
    * external services.
    */
   timeoutInSeconds?: number = 30;
+
+  /**
+   * Options for cryptography api.
+   */
+  cryptoOptions?: CryptoOptions;
 }

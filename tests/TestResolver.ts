@@ -21,7 +21,7 @@ export default class TestResolver implements IResolver {
    * @param identifier to use for the test.
    * @param identifierDocument to use for the test.
    */
-  public prepareTest(identifier: Identifier, identifierDocument: IdentifierDocument) {
+  public prepareTest (identifier: Identifier, identifierDocument: IdentifierDocument) {
     this.identifier = identifier;
     this.identifierDocument = identifierDocument;
   }

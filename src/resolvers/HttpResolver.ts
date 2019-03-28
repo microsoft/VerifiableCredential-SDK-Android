@@ -45,7 +45,7 @@ export default class HttpResolver implements IResolver {
   public async resolve (identifier: Identifier): Promise<IdentifierDocument> {
     const query = `${this.url}${identifier.id}`;
     return new Promise(async (resolve, reject) => {
-      let timer = setTimeout(
+      const timer = setTimeout(
         () => reject(new UserAgentError('Fetch timed out.')), this.timeoutInMilliseconds
       );
 

@@ -8,8 +8,8 @@ import IdentifierDocument from '../src/IdentifierDocument';
 describe('IdentifierDocument [Standards Compliance]', () => {
 
   it('should serialize expected JSON-LD excluding empty properties', async done => {
-    const document = { 
-      id: 'did:test:identifier', 
+    const document = {
+      id: 'did:test:identifier',
       created: '2019-01-25T01:08:44.732Z',
       publicKey: [
         {
@@ -27,18 +27,19 @@ describe('IdentifierDocument [Standards Compliance]', () => {
           }
         }
       ],
-      authentication:[]
-    }
-    
+      authentication: []
+    };
+
     const identifierDocument = new IdentifierDocument(document);
     const serializedDocument = JSON.stringify(identifierDocument);
+    /* tslint:disable:max-line-length */
     expect(serializedDocument).toEqual('{"publicKeys":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}],"id":"did:test:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1"}');
     done();
   });
 
   it('should serialize expected JSON-LD', async done => {
-    const document = { 
-      id: 'did:test:identifier', 
+    const document = {
+      id: 'did:test:identifier',
       created: '2019-01-25T01:08:44.732Z',
       publicKey: [
         {
@@ -56,10 +57,10 @@ describe('IdentifierDocument [Standards Compliance]', () => {
           }
         }
       ],
-      authentication:[{ type: 'RsaVerificationKey2018', publicKeyReference: '#master'}],
-      service:[]
-    }
-    
+      authentication: [{ type: 'RsaVerificationKey2018', publicKeyReference: '#master' }],
+      service: []
+    };
+
     const identifierDocument = new IdentifierDocument(document);
     const serializedDocument = JSON.stringify(identifierDocument);
     expect(serializedDocument).toEqual('{"publicKeys":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}],"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:test:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1"}');

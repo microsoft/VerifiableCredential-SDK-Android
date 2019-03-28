@@ -21,7 +21,7 @@ describe('InMemoryKeyStore', () => {
     const keyStore = new InMemoryKeyStore(encryptionKey);
     expect(keyStore).toBeDefined();
   });
- 
+
   it('should throw when encryption key buffer less than 32 bytes', () => {
     const encryptionKey = Buffer.from('8697320697'); // 10
     expect(() => new InMemoryKeyStore(encryptionKey)).toThrowError('The encryption key buffer must be 32 bytes.');
@@ -33,7 +33,7 @@ describe('InMemoryKeyStore', () => {
   });
 
   it('should throw when key not found', async (done) => {
-    try{
+    try {
       const keyStore = new InMemoryKeyStore();
       await keyStore.get('does not exist');
     } catch (error) {
@@ -43,13 +43,13 @@ describe('InMemoryKeyStore', () => {
   });
 
   it('should save key to store and retrieve saved key', async (done) => {
-    try{
+    try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore();
       await keyStore.save('did:test:123456789#master', keyBuffer);
-      
+
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:test:123456789#master');
+      const buffer: Buffer = await keyStore.get('did:test:123456789#master') as Buffer;
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {
@@ -59,13 +59,13 @@ describe('InMemoryKeyStore', () => {
   });
 
   it('should save key to store and retrieve saved key when using encrypted store', async (done) => {
-    try{
+    try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore('password');
       await keyStore.save('did:test:987654321#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:test:987654321#master');
+      const buffer: Buffer = await keyStore.get('did:test:987654321#master') as Buffer;
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {

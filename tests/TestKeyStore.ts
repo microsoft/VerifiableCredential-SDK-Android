@@ -41,6 +41,7 @@ export default class TestKeyStore implements IKeyStore {
    * @param key being saved to the key store.
    */
   public async save (keyIdentifier: string, key: Buffer): Promise<void> {
+    console.log(`Save ${keyIdentifier} for ${key}`);
     return;
   }
 }

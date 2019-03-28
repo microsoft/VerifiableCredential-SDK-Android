@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AuthenticationReference, ServiceReference, PublicKey } from './types';
+import UserAgentOptions from './UserAgentOptions';
+import { Identifier } from '.';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -64,6 +66,21 @@ export default class IdentifierDocument {
   public static create (id: string, publicKeys: Array<PublicKey>): IdentifierDocument {
     const createdDate = new Date(Date.now()).toISOString();
     return new IdentifierDocument({ id: id, created: createdDate, publicKey: publicKeys });
+  }
+
+  /**
+   * Creates a new instance of an identifier document using the
+   * provided public keys.
+   * The id is generated.
+   * @param idBase The base id in format did:{method}:{id}. {id} will be filled in by this method
+   * @param publicKeys to include in the document.
+   * @param options User agent options containing the crypto Api
+   */
+  public static async createAndGenerateId (idBase: string, publicKeys: Array<PublicKey>, options: UserAgentOptions): Promise<IdentifierDocument> {
+    const document = IdentifierDocument.create(idBase, publicKeys);
+    const identifier: Identifier = await options.registrar!.generateIdentifier(document);
+    document.id = identifier.id;
+    return document;
   }
 
   /**

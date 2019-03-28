@@ -20,4 +20,3 @@ describe('Multihash', () => {
     expect(hash.length).toEqual(34);
   });
 });
-
