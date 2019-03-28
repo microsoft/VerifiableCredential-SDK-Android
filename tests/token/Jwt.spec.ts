@@ -13,14 +13,14 @@ describe('Jwt', () => {
 
   it('should expect create to have been called.', () => {
     spyOn(Jwt, 'create').and.callThrough();
-    const payload = {test: 'test'};
+    const payload = { test: 'test' };
     const claimDetails = Jwt.create(payload);
     expect(Jwt.create).toHaveBeenCalled();
     expect(claimDetails).toBeDefined();
   });
 
   it('should expect extractContents to be called with correct payload.', async done => {
-    const payload = {test: 'test'};
+    const payload = { test: 'test' };
     const jwt = Jwt.create(payload);
     spyOn(jwt, 'extractContents').and.callThrough();
     jwt.extractContents();
@@ -29,14 +29,14 @@ describe('Jwt', () => {
   });
 
   it('should expect sign to not have been called.', () => {
-    const payload = {test: 'test'};
+    const payload = { test: 'test' };
     const claimDetails = Jwt.create(payload);
     spyOn(claimDetails, 'sign');
     expect(claimDetails.sign).not.toHaveBeenCalled();
   });
 
   it('should expect sign to have been called.', async done => {
-    const payload = {test: 'test'};
+    const payload = { test: 'test' };
     const claimDetails = Jwt.create(payload);
     spyOn(claimDetails, 'sign').and.callThrough();
     const rsaPrivateKey = await PrivateKeyRsa.generatePrivateKey('test');
@@ -55,7 +55,7 @@ describe('Jwt', () => {
 
   it('should expect verify to have been called.', async done => {
     // set up: creates a signed JWS to verify.
-    const jws = new JwsToken({test: 'test'}, new CryptoFactory([new RsaCryptoSuite()]));
+    const jws = new JwsToken({ test: 'test' }, new CryptoFactory([new RsaCryptoSuite()]));
     const rsaPrivateKey = await PrivateKeyRsa.generatePrivateKey('test');
     const rsaPublicKey = rsaPrivateKey.getPublicKey();
     const signedJws = await jws.sign(rsaPrivateKey);
