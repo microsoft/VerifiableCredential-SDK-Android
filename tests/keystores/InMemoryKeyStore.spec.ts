@@ -46,10 +46,10 @@ describe('InMemoryKeyStore', () => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore();
-      await keyStore.save('did:test:123456789#master', keyBuffer);
+      await keyStore.save('did:ion:123456789#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:test:123456789#master') as Buffer;
+      const buffer: Buffer = await keyStore.get('did:ion:123456789#master') as Buffer;
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {
@@ -62,10 +62,10 @@ describe('InMemoryKeyStore', () => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore('password');
-      await keyStore.save('did:test:987654321#master', keyBuffer);
+      await keyStore.save('did:ion:987654321#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:test:987654321#master') as Buffer;
+      const buffer: Buffer = await keyStore.get('did:ion:987654321#master') as Buffer;
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {

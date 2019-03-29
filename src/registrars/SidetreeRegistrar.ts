@@ -12,6 +12,8 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
+import { Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
+import IKeyStore from '../keystores/IKeyStore';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -28,12 +30,62 @@ export default class SidetreeRegistrar implements IRegistrar {
    */
   constructor (public url: string, public options?: UserAgentOptions) {
     // Format the url
-    this.url = `${url.replace(/\/?$/, '/')}register`;
+    this.url = `${url.replace(/\/?$/, '/')}`;
     this.timeoutInMilliseconds =
       1000 *
       (!this.options || !this.options.timeoutInSeconds
         ? 30
         : this.options.timeoutInSeconds);
+  }
+
+  /**
+   * Sign the body for the registar
+   * @param body Body to sign
+   */
+  public async signRequest (
+    body: string,
+    keyStorageReference: string
+  ): Promise<{protected?: string, header?: {[name: string]: string}, payload: string, signature: string}> {
+    const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
+    const token = new JwsToken(body, cryptoFactory);
+    // Get the key
+    const keyStore: IKeyStore = this.options!.keyStore as IKeyStore;
+    const jwk: any = await (keyStore.get(keyStorageReference) as Promise<any>)
+    .catch((err) => {
+      throw new UserAgentError(`The key referenced by '${keyStorageReference}' is not available: '${err}'`);
+    });
+
+    switch (jwk.kty.toUpperCase()) {
+      case 'RSA':
+        jwk.defaultSignAlgorithm = 'RS256';
+        break;
+
+      case 'EC':
+        jwk.defaultSignAlgorithm = 'ES256K';
+        break;
+
+      default:
+        throw new UserAgentError(`The key type '${jwk.kty}' is not supported.`);
+    }
+
+    const signedRegistrationRequest = await token.signFlatJson(jwk, {
+      header: {
+        alg: jwk.defaultSignAlgorithm,
+        kid: jwk.kid,
+        operation: 'create',
+        proofOfWork: '{}'
+      }
+    });
+    return signedRegistrationRequest;
+  }
+
+  /**
+   * Prepare the document for registration
+   * @param document Document to format
+   */
+  public prepareDocForRegistration (document: IdentifierDocument): IdentifierDocument {
+    delete document.id;
+    return document;
   }
 
   /**
@@ -46,7 +98,6 @@ export default class SidetreeRegistrar implements IRegistrar {
     identifierDocument: IdentifierDocument,
     keyReference: string
   ): Promise<Identifier> {
-    const bodyString = JSON.stringify(identifierDocument);
 
     return new Promise(async (resolve, reject) => {
       const timer = setTimeout(
@@ -54,11 +105,17 @@ export default class SidetreeRegistrar implements IRegistrar {
         this.timeoutInMilliseconds
       );
 
-      // TODO Add registration with signed message for bodyString
+      // prepare document for registration
+      identifierDocument = this.prepareDocForRegistration(identifierDocument);
+      let bodyString = JSON.stringify(identifierDocument);
+
+      // registration with signed message for bodyString
+      const signedRequest = await this.signRequest(bodyString, keyReference);
+      bodyString = JSON.stringify(signedRequest);
 
       const fetchOptions = {
         method: 'POST',
-        body: bodyString + keyReference,
+        body: bodyString,
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': bodyString.length.toString()
@@ -96,7 +153,7 @@ export default class SidetreeRegistrar implements IRegistrar {
   public async generateIdentifier (identifierDocument: IdentifierDocument
   ): Promise<Identifier> {
 
-    if (!Array.isArray(identifierDocument.publicKeys) || identifierDocument.publicKeys.length === 0) {
+    if (!Array.isArray(identifierDocument.publicKey) || identifierDocument.publicKey.length === 0) {
       throw new UserAgentError('At least one public key must be specified in the identifier document.');
     }
 

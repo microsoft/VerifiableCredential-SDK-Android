@@ -8,7 +8,6 @@ import IKeyStore from './IKeyStore';
 import PouchDB from 'pouchdb';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import UserAgentError from '../UserAgentError';
-import { DidKey } from '@decentralized-identity/did-common-typescript';
 PouchDB.plugin(PouchDBAdapterMemory);
 const keyStore = new PouchDB('keyStore', { adapter: 'memory' });
 
@@ -59,10 +58,13 @@ export default class InMemoryKeyStore implements IKeyStore {
    * Gets the key from the store using the specified identifier.
    * @param keyIdentifier for which to return the key.
    */
-  public async get (keyIdentifier: string): Promise<Buffer | DidKey> {
+  public async get (keyIdentifier: string): Promise<any> {
     try {
       const keyDocument: any = await keyStore.get(keyIdentifier);
-      return Buffer.from(keyDocument.key);
+      if (keyDocument.key.type === 'Buffer') {
+        return Buffer.from(keyDocument.key);
+      }
+      return keyDocument.key;
     } catch (error) {
       throw new UserAgentError(`No key found for '${keyIdentifier}'.`);
     }
@@ -73,7 +75,7 @@ export default class InMemoryKeyStore implements IKeyStore {
    * @param keyIdentifier to store the key against
    * @param key the key to store.
    */
-  public async save (keyIdentifier: string, key: Buffer | DidKey): Promise<void> {
+  public async save (keyIdentifier: string, key: any): Promise<void> {
     // Format the document
     const keyDocument = {
       _id: keyIdentifier,

@@ -35,10 +35,10 @@ class Helpers {
       cryptoOptions: new CryptoOptions()
     } as UserAgentOptions;
 
-    const registar: Registrar = new SidetreeRegistrar('https://beta.register.did.microsoft.com/api/v1.1', options);
+    const registar: Registrar = new SidetreeRegistrar('http://beta.sidetree.did.microsoft.com', options);
     options.registrar = registar;
 
-    const personaId = 'did:test:identifier';
+    const personaId = 'did:ion:identifier';
     options.cryptoOptions!.algorithm = alg;
     let identifier = new Identifier(personaId, options);
     expect(personaId).toBe(identifier.identifier as string);
@@ -49,14 +49,14 @@ class Helpers {
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
-    expect(kty).toBe((identifier.document!.publicKeys[0] as any).kty);
+    expect(kty).toBe((identifier.document!.publicKey[0]!.publicKeyJwk as any).kty);
 
     const document: Identifier = new Identifier(identifier.document as IdentifierDocument);
     expect(id).toBe(document.id);
     expect(id).toBe((document.identifier as IdentifierDocument).id);
 
     expect(id).toBe(document.document!.id);
-    expect(identifier.document!.publicKeys).toBe(document.document!.publicKeys);
+    expect(identifier.document!.publicKey).toBe(document.document!.publicKey);
   }
 }
 
@@ -80,10 +80,10 @@ describe('Pairwise Identifier', async () => {
   });
 
   it('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
-    const personaId = 'did:test:identifier';
+    const personaId = 'did:ion:identifier';
     const identifier = new Identifier(personaId, {});
     let throwDetected: boolean = false;
-    await identifier.createLinkedIdentifier('did:test:peer', false)
+    await identifier.createLinkedIdentifier('did:ion:peer', false)
     .catch((err) => {
       expect('No keyStore in options').toBe(err.message);
       throwDetected = true;
@@ -125,7 +125,7 @@ describe('Pairwise Identifier', async () => {
     await Helpers
     .testIdentifier(false, testResolver, options.keyStore as InMemoryKeyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${options}-${register}`);
-      return identifier.createLinkedIdentifier('did:test:peer', register);
+      return identifier.createLinkedIdentifier('did:ion:peer', register);
     });
     done();
   });
@@ -134,8 +134,28 @@ describe('Pairwise Identifier', async () => {
     await Helpers.testIdentifier(
       false, testResolver, options.keyStore as InMemoryKeyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(`${options}-${register}`);
-        return identifier.createLinkedIdentifier('did:test:peer', register);
+        return identifier.createLinkedIdentifier('did:ion:peer', register);
       });
     done();
   });
+
+  it('should create an identifier and register for EC', async done => {
+    await Helpers.testIdentifier(
+      true, testResolver, options.keyStore as InMemoryKeyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+        console.log(options);
+        return identifier.createLinkedIdentifier('did:ion:peer', register);
+      });
+    done();
+  });
+/*
+  Not yet supported in sidetree core
+  fit('should create an identifier and register for RSA', async done => {
+    await Helpers.testIdentifier(
+      true, testResolver, options.keyStore as InMemoryKeyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+        console.log(options);
+        return identifier.createLinkedIdentifier('did:ion:peer', register);
+      });
+    done();
+  });
+*/
 });

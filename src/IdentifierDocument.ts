@@ -27,7 +27,7 @@ export default class IdentifierDocument {
   /**
    * Array of service entries added to the document.
    */
-  public publicKeys: Array<PublicKey> = [];
+  public publicKey: Array<PublicKey> = [];
 
   /**
    * Array of authentication entries added to the document.
@@ -48,7 +48,7 @@ export default class IdentifierDocument {
   constructor (document: any) {
     // Populate the base properties
     this.id = document.id;
-    this.publicKeys = document.publicKey;
+    this.publicKey = document.publicKey;
 
     if (document.created) {
       this.created = new Date(document.created);
@@ -120,8 +120,8 @@ export default class IdentifierDocument {
       clonedDocument.serviceReferences = undefined;
     }
 
-    if (!this.publicKeys || this.publicKeys.length === 0) {
-      clonedDocument.publicKeys = undefined;
+    if (!this.publicKey || this.publicKey.length === 0) {
+      clonedDocument.publicKey = undefined;
     }
 
     // Now return the cloned document for serialization
