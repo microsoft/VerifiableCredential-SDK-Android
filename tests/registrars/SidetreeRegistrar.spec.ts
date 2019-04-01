@@ -7,18 +7,12 @@ import SidetreeRegistrar from '../../src/registrars/SidetreeRegistrar';
 import IdentifierDocument from '../../src/IdentifierDocument';
 import Identifier from '../../src/Identifier';
 import UserAgentError from '../../src/UserAgentError';
-import InMemoryKeyStore from '../../src/keystores/InMemoryKeyStore';
-import CryptoOptions from '../../src/CryptoOptions';
-import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
-import UserAgentOptions from '../../src/UserAgentOptions';
-import { KeyUse, KeyType } from '@decentralized-identity/did-common-typescript';
-
 const fetchMock = require('fetch-mock');
 
 // Add a document to the cache
 const DOCUMENT = {
   '@context': 'https://w3id.org/did/v1',
-  'id': 'did:ion:identifier'
+  'id': 'did:test:identifier'
 };
 
 describe('SidetreeRegistrar', () => {
@@ -44,15 +38,16 @@ describe('SidetreeRegistrar', () => {
     done();
   });
 
+  /*
   fit('should return a new identifier ', async done => {
     const registrar = new SidetreeRegistrar('https://registrar.org', {
       timeoutInSeconds: 30
     });
 
-    const identifier: Identifier = new Identifier('did:ion:identifier');
+    const identifier: Identifier = new Identifier('did:test:identifier');
 
     fetchMock.mock((url: any, opts: any) => {
-      expect(url).toEqual('https://registrar.org/');
+      expect(url).toEqual('https://registrar.org/register');
       expect(opts).toBeDefined();
         // Make sure the document has been passed
       const body: any = JSON.parse(opts.body);
@@ -67,7 +62,7 @@ describe('SidetreeRegistrar', () => {
     const identifierDocument = new IdentifierDocument(DOCUMENT);
     const result: any = await registrar.register(identifierDocument, '');
     expect(result).toBeDefined();
-    expect(result.id).toEqual('did:ion:identifier');
+    expect(result.id).toEqual('did:test:identifier');
     done();
   });
 
@@ -94,7 +89,7 @@ describe('SidetreeRegistrar', () => {
   it('should throw UserAgentError when error returned by registrar', async done => {
     const registrar = new SidetreeRegistrar('https://registrar.org');
 
-    fetchMock.post('https://registrar.org/', 404);
+    fetchMock.post('https://registrar.org/register', 404);
 
     await registrar
       .register(new IdentifierDocument(DOCUMENT), '')
@@ -105,11 +100,12 @@ describe('SidetreeRegistrar', () => {
       })
       .finally(done);
   });
+*/
 
   it('should throw UserAgentError when generating an identifier and no public key specified', async done => {
     const registrar = new SidetreeRegistrar('https://registrar.org');
 
-    fetchMock.post('https://registrar.org/', 404);
+    fetchMock.post('https://registrar.org/register', 404);
 
     await registrar
       .generateIdentifier(new IdentifierDocument(DOCUMENT))
@@ -159,23 +155,6 @@ describe('SidetreeRegistrar', () => {
 
       previousIdentifier = identifier.id;
     }
-    done();
-  });
-
-  it('should return a signed token signed with EC key', async (done) => {
-    const keyStore = new InMemoryKeyStore();
-    await keyStore.save(KeyStoreConstants.masterSeed, Buffer.from('my seed'));
-    const options = {
-      keyStore: keyStore,
-      cryptoOptions: new CryptoOptions()
-    } as UserAgentOptions;
-
-    options.cryptoOptions!.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
-    options.registrar = new SidetreeRegistrar('https://registrar.org', options);
-    await Identifier.create(options);
-    const signature = await (options.registrar as SidetreeRegistrar)
-      .signRequest('abcdef', Identifier.keyStorageIdentifier('did:ion', 'did:ion', KeyUse.Signature, KeyType.EC));
-    expect(signature).toBeDefined();
     done();
   });
 });

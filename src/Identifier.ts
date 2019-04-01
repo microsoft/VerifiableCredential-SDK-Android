@@ -82,20 +82,17 @@ export default class Identifier {
         type: this.getDidDocumentKeyType(),  // TODO switch by leveraging pairwiseKey
         publicKeyJwk: jwk
       };
-
-      const document = await this.createIdentifierDocument(this.id, publicKey);
-      if (register) {
-        if (this.options && this.options.registrar) {
+      if (this.options.registrar) {
+        const document = await this.createIdentifierDocument(this.id, publicKey);
+        if (register) {
             // register did document
           const identfier = await this.options.registrar.register(document, pairwiseKeyStorageId);
           document.id = identfier.id;
-        } else {
-          throw new UserAgentError(`No registrar in options to register DID document`);
         }
+        return new Identifier(document);
+      } else {
+        throw new UserAgentError(`No registrar in options to register DID document`);
       }
-
-      return new Identifier(document);
-
     }
     throw new UserAgentError('No keyStore in options');
   }

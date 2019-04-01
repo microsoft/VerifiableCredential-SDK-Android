@@ -12,7 +12,7 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import { Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
+import { FlatJsonJws, Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
 import IKeyStore from '../keystores/IKeyStore';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
@@ -45,7 +45,7 @@ export default class SidetreeRegistrar implements IRegistrar {
   public async signRequest (
     body: string,
     keyStorageReference: string
-  ): Promise<{protected?: string, header?: {[name: string]: string}, payload: string, signature: string}> {
+  ): Promise<FlatJsonJws> {
     const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
     const token = new JwsToken(body, cryptoFactory);
     // Get the key

@@ -49,7 +49,7 @@ class Helpers {
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
-    expect(kty).toBe((identifier.document!.publicKey[0]!.publicKeyJwk as any).kty);
+    expect(kty).toBe((identifier.document!.publicKey[0].publicKeyJwk).kty);
 
     const document: Identifier = new Identifier(identifier.document as IdentifierDocument);
     expect(id).toBe(document.id);
@@ -86,6 +86,24 @@ describe('Pairwise Identifier', async () => {
     await identifier.createLinkedIdentifier('did:ion:peer', false)
     .catch((err) => {
       expect('No keyStore in options').toBe(err.message);
+      throwDetected = true;
+    });
+
+    if (!throwDetected) {
+      fail('No Throw detected');
+    }
+    done();
+  });
+
+  it('should throw when creating a linked identifier and no registrar specified in user agent options', async done => {
+    const personaId = 'did:ion:identifier' + Math.random();
+    (options.cryptoOptions as CryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+    delete options.registrar;
+    const identifier = new Identifier(personaId, options);
+    let throwDetected: boolean = false;
+    await identifier.createLinkedIdentifier('did:ion:peer', true)
+    .catch((err) => {
+      expect('No registrar in options to register DID document').toBe(err.message);
       throwDetected = true;
     });
 
@@ -140,10 +158,11 @@ describe('Pairwise Identifier', async () => {
   });
 
   it('should create an identifier and register for EC', async done => {
+
     await Helpers.testIdentifier(
       true, testResolver, options.keyStore as InMemoryKeyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(options);
-        return identifier.createLinkedIdentifier('did:ion:peer', register);
+        return identifier.createLinkedIdentifier('did:ion:peerforregister', register);
       });
     done();
   });
