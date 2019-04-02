@@ -8,7 +8,7 @@ import IKeyStore from '../../src/keystores/IKeyStore';
 /**
  * Class defining methods and properties to mock a KeyStore
  */
-export default class KeyStoreMock implements IKeyStore{
+export default class KeyStoreMock implements IKeyStore {
   private store: Map<string, Buffer | DidKey> = new Map<string, Buffer | DidKey>();
 
   /**
@@ -18,8 +18,12 @@ export default class KeyStoreMock implements IKeyStore{
    */
   get (keyIdentifier: string): Promise<Buffer | DidKey> {
     console.log(this.store.toString() + keyIdentifier);
-    return new Promise((resolve) => {
-      resolve(this.store.get(keyIdentifier));
+    return new Promise((resolve, reject) => {
+      if (this.store.has(keyIdentifier)) {
+        resolve(this.store.get(keyIdentifier));
+      } else {
+        reject(`${keyIdentifier} not found`);
+      }
     });
   }
 

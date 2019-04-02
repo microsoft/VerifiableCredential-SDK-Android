@@ -24,7 +24,7 @@ export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
   private serOptions: string;
   private keyStore: IKeyStore;
-  
+
   /**
    * Constructs a new instance of the Sidetree registrar
    * @param url to the registration endpoint at the registrar
@@ -32,7 +32,7 @@ export default class SidetreeRegistrar implements IRegistrar {
    */
   constructor (public url: string, options: UserAgentOptions) {
     // Set options. Stringify to avoid circular exception during serialization of this object.
-    if (!(options && options.keyStore )) {
+    if (!(options && options.keyStore)) {
       throw new UserAgentError('options and options.keyStore need to be defined');
     }
 
@@ -110,7 +110,8 @@ export default class SidetreeRegistrar implements IRegistrar {
 
     return new Promise(async (resolve, reject) => {
       const timer = setTimeout(
-        () => reject(new UserAgentError('Fetch timed out.')),
+        () =>
+          reject(new UserAgentError('Fetch timed out.')),
         this.timeoutInMilliseconds
       );
 

@@ -129,7 +129,9 @@ describe('Pairwise Identifier', async () => {
     done();
   });
 
-  it('should create an identifier RSA', async done => {
+/*
+  Not yet supported in sidetree core
+  fit('should create an identifier RSA', async done => {
     await Helpers
     .testIdentifier(false, testResolver, options.keyStore as InMemoryKeyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${identifier}-${register}`);
@@ -138,7 +140,7 @@ describe('Pairwise Identifier', async () => {
 
     done();
   });
-
+*/
   it('should create a pairwise identifier EC', async done => {
     await Helpers
     .testIdentifier(false, testResolver, options.keyStore as InMemoryKeyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
