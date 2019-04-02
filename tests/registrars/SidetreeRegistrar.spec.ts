@@ -3,10 +3,16 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { FlatJsonJws } from '@decentralized-identity/did-auth-jose';
 import SidetreeRegistrar from '../../src/registrars/SidetreeRegistrar';
 import IdentifierDocument from '../../src/IdentifierDocument';
 import Identifier from '../../src/Identifier';
 import UserAgentError from '../../src/UserAgentError';
+import InMemoryKeyStore from '../../src/keystores/InMemoryKeyStore';
+import UserAgentOptions from '../../src/UserAgentOptions';
+import CryptoOptions from '../../src/CryptoOptions';
+import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
+import KeyStoreMock from '../keystores/KeyStoreMock';
 const fetchMock = require('fetch-mock');
 
 // Add a document to the cache
@@ -38,34 +44,41 @@ describe('SidetreeRegistrar', () => {
     done();
   });
 
-  /*
-  fit('should return a new identifier ', async done => {
-    const registrar = new SidetreeRegistrar('https://registrar.org', {
-      timeoutInSeconds: 30
-    });
+  const options = {
+    timeoutInSeconds: 30,
+    keyStore: new KeyStoreMock(),
+    cryptoOptions: new CryptoOptions()
+  } as UserAgentOptions;
+  (options.cryptoOptions as CryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+  options.registrar = new SidetreeRegistrar('https://registrar.org', options);
 
-    const identifier: Identifier = new Identifier('did:test:identifier');
+  it('should return a new identifier ', async done => {
+    // Setup registration environment
+    await (options.keyStore as InMemoryKeyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
 
-    fetchMock.mock((url: any, opts: any) => {
-      expect(url).toEqual('https://registrar.org/register');
-      expect(opts).toBeDefined();
+    let identifier: Identifier = new Identifier('did:test:identifier', options);
+
+    fetchMock.mock(
+      function(url: any, opts: any) {
+        expect(url).toEqual('https://registrar.org/');
+        expect(opts).toBeDefined();
         // Make sure the document has been passed
-      const body: any = JSON.parse(opts.body);
-      expect(body['@context']).toEqual(DOCUMENT['@context']);
-      expect(body.id).toEqual(DOCUMENT.id);
-      return true;
-    },
-      new Promise(resolve => resolve(identifier)),
-      { method: 'POST' }
+        const body: FlatJsonJws = JSON.parse(opts.body);
+        expect(body.header).toBeDefined();
+        expect(body.payload).toBeDefined();
+        expect(body.signature).toBeDefined();
+        return true;
+      },
+      new Promise(resolve => 
+        resolve(identifier)),
+      { method: 'POST'}
     );
 
-    const identifierDocument = new IdentifierDocument(DOCUMENT);
-    const result: any = await registrar.register(identifierDocument, '');
-    expect(result).toBeDefined();
-    expect(result.id).toEqual('did:test:identifier');
+    identifier = await identifier.createLinkedIdentifier('did:ion:peer', true);
+    expect(identifier).toBeDefined();
     done();
   });
-
+  /*
   it('should throw UserAgentError when fetch timeout threshold reached', async done => {
     const registrar = new SidetreeRegistrar('https://registrar.org', {
       timeoutInSeconds: 1
@@ -103,7 +116,7 @@ describe('SidetreeRegistrar', () => {
 */
 
   it('should throw UserAgentError when generating an identifier and no public key specified', async done => {
-    const registrar = new SidetreeRegistrar('https://registrar.org');
+    const registrar = new SidetreeRegistrar('https://registrar.org', options);
 
     fetchMock.post('https://registrar.org/register', 404);
 
@@ -118,7 +131,7 @@ describe('SidetreeRegistrar', () => {
   });
 
   it('should return generated identifier', async done => {
-    const registrar = new SidetreeRegistrar('https://registrar.org');
+    const registrar = new SidetreeRegistrar('https://registrar.org', options);
 
     const genesisDocument = Object.assign(DOCUMENT, {
       publicKey: [{
@@ -135,7 +148,7 @@ describe('SidetreeRegistrar', () => {
   });
 
   it('should always return same identifier when provided same genesis document ', async done => {
-    const registrar = new SidetreeRegistrar('https://registrar.org');
+    const registrar = new SidetreeRegistrar('https://registrar.org', options);
 
     const genesisDocument = Object.assign(DOCUMENT, {
       publicKey: [{

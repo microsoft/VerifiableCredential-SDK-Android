@@ -52,7 +52,7 @@ export default class Identifier {
    */
   public static async create (options: UserAgentOptions): Promise<Identifier> {
     const id = 'did:ion';
-    return new Identifier(id, options).createLinkedIdentifier(id);
+    return new Identifier(id, options).createLinkedIdentifier(id, true);
   }
 
   /**

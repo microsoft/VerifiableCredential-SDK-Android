@@ -22,20 +22,30 @@ declare var fetch: any;
  */
 export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
-
+  private serOptions: string;
+  private keyStore: IKeyStore;
+  
   /**
    * Constructs a new instance of the Sidetree registrar
    * @param url to the registration endpoint at the registrar
    * @param options to configure the registrar.
    */
-  constructor (public url: string, public options?: UserAgentOptions) {
+  constructor (public url: string, options: UserAgentOptions) {
+    // Set options. Stringify to avoid circular exception during serialization of this object.
+    if (!(options && options.keyStore )) {
+      throw new UserAgentError('options and options.keyStore need to be defined');
+    }
+
+    this.serOptions = JSON.stringify(options);
+    this.keyStore = options.keyStore;
+
     // Format the url
     this.url = `${url.replace(/\/?$/, '/')}`;
     this.timeoutInMilliseconds =
       1000 *
-      (!this.options || !this.options.timeoutInSeconds
+      (!options || !options.timeoutInSeconds
         ? 30
-        : this.options.timeoutInSeconds);
+        : options.timeoutInSeconds);
   }
 
   /**
@@ -49,8 +59,7 @@ export default class SidetreeRegistrar implements IRegistrar {
     const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
     const token = new JwsToken(body, cryptoFactory);
     // Get the key
-    const keyStore: IKeyStore = this.options!.keyStore as IKeyStore;
-    const jwk: any = await (keyStore.get(keyStorageReference) as Promise<any>)
+    const jwk: any = await (this.keyStore.get(keyStorageReference) as Promise<any>)
     .catch((err) => {
       throw new UserAgentError(`The key referenced by '${keyStorageReference}' is not available: '${err}'`);
     });
@@ -137,7 +146,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       }
 
       const responseJson = await response.json();
-      const identifier = new Identifier(responseJson, this.options);
+      const identifier = new Identifier(responseJson, JSON.parse(this.serOptions) as UserAgentOptions);
       resolve(identifier);
     });
   }
