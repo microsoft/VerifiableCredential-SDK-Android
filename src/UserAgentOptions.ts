@@ -1,3 +1,4 @@
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -6,7 +7,6 @@
 import IResolver from './resolvers/IResolver';
 import IRegistrar from './registrars/IRegistrar';
 import IKeyStore from './keystores/IKeyStore';
-import CryptoOptions from './CryptoOptions';
 
 /**
  * Interface defining options for the
@@ -20,7 +20,7 @@ export default class UserAgentOptions {
   resolver?: IResolver;
 
   /**
-   * Instance of Registar than can be used
+   * Instance of Registrar than can be used
    * to register identifiers.
    */
   registrar?: IRegistrar;
@@ -38,7 +38,15 @@ export default class UserAgentOptions {
   timeoutInSeconds?: number = 30;
 
   /**
-   * Options for cryptography api.
+   * The locale to be used by the
+   * user agent.
    */
-  cryptoOptions?: CryptoOptions;
+  locale?: string = 'en';
+
+  /**
+   * The lifetime of any self-issued credentials.
+   * Used to determine the expiry time of the
+   * credential.
+   */
+  selfIssuedCredentialLifetimeInSeconds?: number = 300; // 5 mins
 }
