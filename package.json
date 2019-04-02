@@ -41,7 +41,7 @@
     "fetch-mock": "7.3.0"
   },
   "dependencies": {
-    "@decentralized-identity/did-auth-jose": "0.1.9",
+    "@decentralized-identity/did-auth-jose": "0.1.10",
     "@decentralized-identity/did-common-typescript": "0.1.10",
     "base64url": "3.0.1",
     "es6-promise": "4.2.6",

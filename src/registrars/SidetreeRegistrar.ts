@@ -77,7 +77,7 @@ export default class SidetreeRegistrar implements IRegistrar {
         throw new UserAgentError(`The key type '${jwk.kty}' is not supported.`);
     }
 
-    const signedRegistrationRequest = await token.signFlatJson(jwk, {
+    const signedRegistrationRequest = await token.signAsFlattenedJson(jwk, {
       header: {
         alg: jwk.defaultSignAlgorithm,
         kid: jwk.kid,
