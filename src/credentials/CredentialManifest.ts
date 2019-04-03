@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CredentialInput, DataInput, OpenIDInput, CredentialManifestIssuerOptions } from './types';
+import { CredentialInput, DataInput, OpenIDInput } from '../types';
+import CredentialManifestIssuerOptions from './CredentialManifestIssuerOptions';
 
 /**
  * context for credentialManifest
@@ -24,43 +25,49 @@ export default class CredentialManifest {
   /**
    * Name of the credential
    */
-  public readonly credential: string;
+  public readonly credential?: string;
 
   /**
    * Languages supported for localization
    */
-  public readonly language: Array<string>;
+  public readonly language?: Array<string>;
 
   /**
    * the keeper DID whose hub stores the CredentialManifest.
    */
-  public readonly keeper: string;
+  public readonly keeper?: string;
 
   /**
    * Version of the CredentialManifest
    */
-  public readonly version: string;
+  public readonly version?: string;
 
   /**
    * preconditions for the manifest.
    */
-  public readonly preconditions: any;
+  public readonly preconditions?: any;
 
   /**
    * inputs parameter for manifest.
    */
-  public readonly inputs: Array<CredentialInput | DataInput | OpenIDInput>;
+  public readonly inputs?: Array<CredentialInput | DataInput | OpenIDInput>;
 
   /**
    * issuer options for things such as the style of the manifest in the UI.
    */
-  public issuerOptions: CredentialManifestIssuerOptions;
+  public issuerOptions?: CredentialManifestIssuerOptions;
+
+  /**
+   * issuer endpoint
+   */
+  public endpoint: string;
 
   /**
    * Constructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.
    * TODO: check that the JSON parameter is valid (yup?)
    */
   constructor (credentialManifest: any) {
+    this.endpoint = credentialManifest.endpoint;
     this.credential = credentialManifest.credential;
     this.language = credentialManifest.language;
     this.keeper = credentialManifest.keeper;
@@ -74,6 +81,7 @@ export default class CredentialManifest {
    * Creates a new instance of the CredentialManifest class.
    */
   public static create (credential: string,
+                        endpoint: string,
                         language: Array<string>,
                         keeper: string,
                         version: string,
@@ -83,6 +91,7 @@ export default class CredentialManifest {
     const manifest = {
       '@context': context,
       '@type': type,
+      'endpoint': endpoint,
       'language': language,
       'credential': credential,
       'keeper': keeper,
@@ -101,6 +110,7 @@ export default class CredentialManifest {
     const manifest = {
       '@context': context,
       '@type': type,
+      'endpoint': this.endpoint,
       'credential': this.credential,
       'preconditions': this.preconditions,
       'inputs': this.inputs,
@@ -121,26 +131,5 @@ export default class CredentialManifest {
    */
   public getInputProperties () {
     return this.inputs;
-  }
-
-  /**
-   * Get the input style properties of the manifest.
-   */
-  public getInputStyleProperties () {
-    return this.issuerOptions.input.styles;
-  }
-
-  /**
-   * Get the input label for a specific value
-   */
-  public getInputLabels () {
-    return this.issuerOptions.input.labels;
-  }
-
-  /**
-   * Get the presentation options used to present a credential in a UA
-   */
-  public getPresentationOptions () {
-    return this.issuerOptions.presentation;
   }
 }

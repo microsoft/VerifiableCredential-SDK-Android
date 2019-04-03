@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CredentialManifest from '../src/CredentialManifest';
-import { DataInput, CredentialManifestIssuerOptions } from '../src/types';
+import CredentialManifest from '../../src/credentials/CredentialManifest';
+import { DataInput } from '../../src/types';
+import CredentialManifestIssuerOptions from '../../src/credentials/CredentialManifestIssuerOptions';
 
 describe('ClaimManifest', () => {
 
@@ -15,6 +16,8 @@ describe('ClaimManifest', () => {
   const testKeeper = 'did:test:example123';
 
   const testVersion = 'v1';
+
+  const testEndpoint = 'http://endpoint.org';
 
   const testPreconditions = {
     '@type': 'ProofSet',
@@ -71,6 +74,7 @@ describe('ClaimManifest', () => {
     '@context': 'https://identity.foundation/schemas/credentials',
     '@type': 'CredentialManifest',
     'credential': testCredential,
+    'endpoint': testEndpoint,
     'preconditions': testPreconditions,
     'inputs': testInputs,
     'issuer_options': testIssuerOptions
@@ -81,6 +85,7 @@ describe('ClaimManifest', () => {
   beforeEach(() => {
 
     credentialManifest = CredentialManifest.create(testCredential,
+      testEndpoint,
       testLanguage,
       testKeeper,
       testVersion,
@@ -93,6 +98,7 @@ describe('ClaimManifest', () => {
   it('should create a new CredentialManifest Object', () => {
     spyOn(CredentialManifest, 'create').and.callThrough();
     const manifest = CredentialManifest.create(testCredential,
+                                               testCredential,
                                                testLanguage,
                                                testKeeper,
                                                testVersion,
@@ -122,26 +128,5 @@ describe('ClaimManifest', () => {
     const inputProperties = credentialManifest.getInputProperties();
     expect(credentialManifest.getInputProperties).toHaveBeenCalled();
     expect(inputProperties).toEqual(testInputs);
-  });
-
-  it('should get Input Style Properties', () => {
-    spyOn(credentialManifest, 'getInputStyleProperties').and.callThrough();
-    const styleProperties = credentialManifest.getInputStyleProperties();
-    expect(credentialManifest.getInputStyleProperties).toHaveBeenCalled();
-    expect(styleProperties).toEqual(testStyles);
-  });
-
-  it('should get Input Labels', () => {
-    spyOn(credentialManifest, 'getInputLabels').and.callThrough();
-    const styleProperties = credentialManifest.getInputLabels();
-    expect(credentialManifest.getInputLabels).toHaveBeenCalled();
-    expect(styleProperties).toEqual(testLabels);
-  });
-
-  it('should get Presentation Options', () => {
-    spyOn(credentialManifest, 'getPresentationOptions').and.callThrough();
-    const styleProperties = credentialManifest.getPresentationOptions();
-    expect(credentialManifest.getPresentationOptions).toHaveBeenCalled();
-    expect(styleProperties).toEqual(testPresentation);
   });
 });
