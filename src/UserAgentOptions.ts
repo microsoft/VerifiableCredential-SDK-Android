@@ -7,6 +7,7 @@
 import IResolver from './resolvers/IResolver';
 import IRegistrar from './registrars/IRegistrar';
 import IKeyStore from './keystores/IKeyStore';
+import CryptoOptions from './CryptoOptions';
 
 /**
  * Interface defining options for the
@@ -49,4 +50,9 @@ export default class UserAgentOptions {
    * credential.
    */
   selfIssuedCredentialLifetimeInSeconds?: number = 300; // 5 mins
+
+  /**
+   * Crypto Options
+   */
+  cryptoOptions?: CryptoOptions;
 }

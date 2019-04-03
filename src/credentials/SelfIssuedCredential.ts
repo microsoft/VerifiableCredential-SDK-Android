@@ -35,7 +35,7 @@ export class SelfIssuedCredential implements ICredential {
   /**
    * @inheritdoc
    */
-  public readonly expiresAt: Date;
+  public readonly expiresAt?: Date;
 
   /**
    * Constructs a new instance of a self-issued

@@ -5,6 +5,9 @@
 
 import ICredential from './ICredential';
 import UserAgentError from '../UserAgentError';
+import Identifier from '../Identifier';
+import 'isomorphic-fetch';
+declare var fetch: any;
 
 /**
  * Class for obtaining
@@ -13,20 +16,65 @@ import UserAgentError from '../UserAgentError';
 export default class CredentialIssuer {
 
   /**
+   * The identifier for the issuer.
+   */
+  public readonly identifier: Identifier;
+
+  /**
+   * The manifest of the credential being issued
+   */
+  public readonly manifest: any;
+
+  /**
    * Constructs an instance of the credential issuer
    * based on the specified credential manifest.
-   * @param manifest for the issuer.
+   * @param identifier for the issuer.
+   * @param manifest credential manifest for specific credential.
    */
-  constructor (private manifest: CredentialManifest) {
+  constructor (identifier: Identifier, manifest: any) {
+    this.identifier = identifier;
+    this.manifest = manifest;
+  }
+
+  /**
+   * Constructs an instance of the credential issuer
+   * based on the specified credential manifest.
+   * TODO: check if manifest param is id in hub of credential manifest.
+   * @param identifier for the issuer.
+   * @param manifest credential manifest object or endpoint string of manifest.
+   */
+  public static async create (identifier: Identifier, manifest: any | string) {
+
+    let manifestInstance: any;
+
+    if (typeof(manifest) === 'string') {
+      const response = await fetch(manifest);
+      if (!response.ok) {
+        let error: Error;
+        switch (response.status) {
+          case 404:
+            error = new UserAgentError(`Failed to request a credential manifest from the issuer \'${identifier.id}.\'`);
+            break;
+          default:
+            error = new UserAgentError(`'${manifest}' returned an error with \'${response.statusText}\'`);
+        }
+        throw error;
+      }
+      manifestInstance = await response.json();
+    } else {
+      manifestInstance = manifest;
+    }
+    return new CredentialIssuer(identifier, manifestInstance);
   }
 
   /**
    * Gets the array of languages supported
    * by the manifest.
    */
-  public get language (): Array<string> {
-    return this.manifest.language || [];
-  }
+  // public get language (): Array<string> {
+  //   console.log(this.identifier);
+  //   return this.manifest.language || [];
+  // }
 
   /**
    * Requests a new credential from the issuer,
@@ -38,10 +86,10 @@ export default class CredentialIssuer {
   public async requestCredential (inputCredential: ICredential): Promise<ICredential> {
 
     // Sign the credential, will need to
-    // add sign and encrypt methods on identifier class
+    // TODO: add sign and encrypt methods on identifier class
     const serializedCredential = JSON.stringify(inputCredential);
-    const signedCredential = inputCredential.issuedBy.sign(serializedCredential);
-    const encryptedCredential = inputCredential.issuedTo.encrypt(signedCredential);
+    // const signedCredential = inputCredential.issuedBy.sign(serializedCredential);
+    // const encryptedCredential = inputCredential.issuedTo.encrypt(signedCredential);
 
     return new Promise(async (resolve, reject) => {
       const timer = setTimeout(
@@ -51,10 +99,10 @@ export default class CredentialIssuer {
 
       const fetchOptions = {
         method: 'POST',
-        body: encryptedCredential,
+        body: inputCredential,
         headers: {
-          'Content-Type': 'application/jose',
-          'Content-Length': encryptedCredential.length.toString()
+          'Content-Type': 'application/json',
+          'Content-Length': serializedCredential.length.toString()
         }
       };
 
@@ -66,14 +114,14 @@ export default class CredentialIssuer {
 
       if (!response.ok) {
         const error = new UserAgentError(
-          'Failed to request a credential from the issuer.'
+          `Failed to request a credential from the issuer '${this.identifier.id}.'`
         );
         reject(error);
         return;
       }
 
       const responseJson = await response.json();
-      const credential: ICredential = JSON.parse(responseJson);
+      const credential: ICredential = responseJson.body;
       resolve(credential);
     });
   }

@@ -31,5 +31,4 @@ export class VerifiedCredential implements ICredential {
    * @inheritdoc
    */
   public readonly expiresAt: Date;
-  }
 }
