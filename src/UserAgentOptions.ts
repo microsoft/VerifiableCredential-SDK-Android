@@ -41,4 +41,9 @@ export default class UserAgentOptions {
    * Options for cryptography api.
    */
   cryptoOptions?: CryptoOptions;
+
+  /**
+   * Prefix for the generated did.
+   */
+  didPrefix?: string = 'did:ion';
 }

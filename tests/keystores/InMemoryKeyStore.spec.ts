@@ -58,6 +58,26 @@ describe('InMemoryKeyStore', () => {
     done();
   });
 
+  it('should save object as key to store and retrieve saved key', async (done) => {
+    try {
+      const keyObject: any = {
+        kty: 'EC',
+        use: 'sig'
+      };
+      const keyStore = new InMemoryKeyStore();
+      await keyStore.save('did:ion:abcdef', keyObject);
+
+      // Now try get get the key back
+      const key: any = await keyStore.get('did:ion:abcdef');
+      expect(key).toBeDefined();
+      expect('EC').toEqual(key.kty);
+      expect('sig').toEqual(key.use);
+    } catch (error) {
+      fail(`Exception not expected, got: '${error}'`);
+    }
+    done();
+  });
+
   it('should save key to store and retrieve saved key when using encrypted store', async (done) => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');

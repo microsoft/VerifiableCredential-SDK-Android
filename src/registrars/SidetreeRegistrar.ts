@@ -22,7 +22,7 @@ declare var fetch: any;
  */
 export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
-  private serOptions: string;
+  private serializedOptions: string;
   private keyStore: IKeyStore;
 
   /**
@@ -36,7 +36,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       throw new UserAgentError('options and options.keyStore need to be defined');
     }
 
-    this.serOptions = JSON.stringify(options);
+    this.serializedOptions = JSON.stringify(options);
     this.keyStore = options.keyStore;
 
     // Format the url
@@ -147,7 +147,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       }
 
       const responseJson = await response.json();
-      const identifier = new Identifier(responseJson, JSON.parse(this.serOptions) as UserAgentOptions);
+      const identifier = new Identifier(responseJson, JSON.parse(this.serializedOptions) as UserAgentOptions);
       resolve(identifier);
     });
   }

@@ -51,7 +51,7 @@ export default class Identifier {
    * @param [options] for configuring how to register and resolve identifiers.
    */
   public static async create (options: UserAgentOptions): Promise<Identifier> {
-    const id = 'did:ion';
+    const id = options.didPrefix as string;
     return new Identifier(id, options).createLinkedIdentifier(id, true);
   }
 

@@ -64,6 +64,8 @@ describe('IdentifierDocument [Standards Compliance]', () => {
     const identifierDocument = new IdentifierDocument(document);
     const serializedDocument = JSON.stringify(identifierDocument);
     expect(serializedDocument).toEqual('{"publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}],"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1"}');
+    delete identifierDocument.publicKey;
+    expect(JSON.stringify(identifierDocument)).toEqual('{"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1"}');
     done();
   });
 });
