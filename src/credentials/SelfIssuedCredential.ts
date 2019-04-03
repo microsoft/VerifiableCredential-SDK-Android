@@ -5,6 +5,7 @@
 
 import ICredential from './ICredential';
 import Identifier from '../Identifier';
+import UserAgentError from '../UserAgentError';
 
 /**
  * Implementation of an OpenID Connect
@@ -15,6 +16,8 @@ export class SelfIssuedCredential implements ICredential {
 
   /**
    * Array to hold claims to be included in the credential
+   * @param name name of the claim.
+   * @param value value of the claim.
    */
   private claims: Array<{name: string, value: any}> = [];
 
@@ -60,13 +63,17 @@ export class SelfIssuedCredential implements ICredential {
     .getPublicKey()
     .then((publicKey: any) => {
       this.addClaim({ name: 'sub_jwk', value: publicKey });
+    })
+    .catch(error => {
+      throw new UserAgentError(error);
     });
   }
 
   /**
    * Adds the specified claim to the credential.
-   * @param claim.name The name of the claim to add to the credential.
-   * @param claim.value The value of the claim to add.
+   * @param claim claim to add to credential.
+   * @param name name of the claim to add.
+   * @param value value of the claim to add.
    */
   public addClaim (claim: { name: string, value: any }) {
     // Add the claim to the credential
