@@ -98,6 +98,21 @@ export interface HostServiceEndpoint extends ServiceEndpoint {
 }
 
 /**
+ * Interface for defining a claim.
+ */
+export interface Claim {
+  /**
+   * The name of the claim
+   */
+  name: string;
+
+  /**
+   * The value of the claim.
+   */
+  value: string;
+}
+
+/**
  * Interface for defining a identifier document
  * service reference endpoint for a user.
  */

@@ -6,6 +6,7 @@
 import ICredential from './ICredential';
 import Identifier from '../Identifier';
 import UserAgentError from '../UserAgentError';
+import { Claim } from '../types';
 
 /**
  * Implementation of an OpenID Connect
@@ -16,10 +17,8 @@ export class SelfIssuedCredential implements ICredential {
 
   /**
    * Array to hold claims to be included in the credential
-   * @property name name of the claim.
-   * @property value value of the claim.
    */
-  private claims: Array<{name: string, value: any}> = [];
+  private claims: Array<Claim> = [];
 
   /**
    * @inheritdoc
@@ -72,10 +71,8 @@ export class SelfIssuedCredential implements ICredential {
   /**
    * Adds the specified claim to the credential.
    * @param claim claim to add to credential.
-   * @property name name of the claim to add.
-   * @property value value of the claim to add.
    */
-  public addClaim (claim: { name: string, value: any }) {
+  public addClaim (claim: Claim) {
     // Add the claim to the credential
     this.claims.push(claim);
   }
