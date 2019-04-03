@@ -7,6 +7,5 @@ import Identifier from './Identifier';
 import IdentifierDocument from './IdentifierDocument';
 import Token from './token/Token';
 import Jwt from './token/Jwt';
-import CredentialManifest from './CredentialManifest';
-import Persona from './Persona';
-export { Identifier, IdentifierDocument, Token, Jwt, CredentialManifest, Persona };
+import CredentialManifest from './credentials/CredentialManifest';
+export { Identifier, IdentifierDocument, Token, Jwt, CredentialManifest };

@@ -12,6 +12,7 @@ import Identifier from '../Identifier';
  * @implements ICredential
  */
 export class SelfIssuedCredential implements ICredential {
+
   /**
    * Array to hold claims to be included in the credential
    */

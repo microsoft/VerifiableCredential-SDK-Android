@@ -6,6 +6,7 @@
 import CredentialIssuer from '../../src/credentials/CredentialIssuer';
 import Identifier from '../../src/Identifier';
 import UserAgentError from '../../src/UserAgentError';
+import { CredentialManifest } from '../../src';
 const fetchMock = require('fetch-mock');
 
 describe('CredentialIssuer', () => {
@@ -14,10 +15,10 @@ describe('CredentialIssuer', () => {
     fetchMock.restore();
   });
 
-  const CREDENTIALMANIFEST = {
+  const CREDENTIALMANIFEST = new CredentialManifest({
     credentailManifest: 'example',
     endpoint: 'https://enterpriseagent.org/verifiedcredential.json'
-  };
+  });
 
   const issuerIdentifier = new Identifier('did:test:example.id');
   const consumer = new Identifier('did:test:consumer.id');
@@ -38,7 +39,7 @@ describe('CredentialIssuer', () => {
     it('should create a new CredentialIssuer from Credential Manifest Endpoint', async done => {
       fetchMock.get(
         'https://enterpriseagent.org/credentialManifest.json',
-        new Promise(resolve => resolve(CREDENTIALMANIFEST))
+        new Promise(resolve => resolve(CREDENTIALMANIFEST as CredentialManifest))
       );
 
       const issuer: CredentialIssuer = await CredentialIssuer.create(issuerIdentifier,

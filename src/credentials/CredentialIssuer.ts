@@ -6,6 +6,7 @@
 import ICredential from './ICredential';
 import UserAgentError from '../UserAgentError';
 import Identifier from '../Identifier';
+import CredentialManifest from './CredentialManifest';
 import 'isomorphic-fetch';
 declare var fetch: any;
 
@@ -23,7 +24,7 @@ export default class CredentialIssuer {
   /**
    * The manifest of the credential being issued
    */
-  public readonly manifest: any;
+  public readonly manifest: CredentialManifest;
 
   /**
    * Constructs an instance of the credential issuer
@@ -33,7 +34,7 @@ export default class CredentialIssuer {
    */
   constructor (identifier: Identifier, manifest: any) {
     this.identifier = identifier;
-    this.manifest = manifest;
+    this.manifest = new CredentialManifest(manifest);
   }
 
   /**
@@ -43,7 +44,7 @@ export default class CredentialIssuer {
    * @param identifier for the issuer.
    * @param manifest credential manifest object or endpoint string of manifest.
    */
-  public static async create (identifier: Identifier, manifest: any | string) {
+  public static async create (identifier: Identifier, manifest: CredentialManifest | string) {
 
     let manifestInstance: any;
 
@@ -88,8 +89,6 @@ export default class CredentialIssuer {
     // Sign the credential, will need to
     // TODO: add sign and encrypt methods on identifier class
     const serializedCredential = JSON.stringify(inputCredential);
-    // const signedCredential = inputCredential.issuedBy.sign(serializedCredential);
-    // const encryptedCredential = inputCredential.issuedTo.encrypt(signedCredential);
 
     return new Promise(async (resolve, reject) => {
       const timer = setTimeout(

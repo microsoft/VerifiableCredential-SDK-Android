@@ -30,5 +30,11 @@ export class VerifiedCredential implements ICredential {
   /**
    * @inheritdoc
    */
-  public readonly expiresAt: Date;
+  public readonly expiresAt?: Date;
+
+  constructor (issuedBy: Identifier, issuedTo: Identifier, issuedAt: Date) {
+    this.issuedBy = issuedBy;
+    this.issuedTo = issuedTo;
+    this.issuedAt = issuedAt;
+  }
 }
