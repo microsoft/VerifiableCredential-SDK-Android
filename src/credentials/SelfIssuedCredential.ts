@@ -16,8 +16,8 @@ export class SelfIssuedCredential implements ICredential {
 
   /**
    * Array to hold claims to be included in the credential
-   * @param name name of the claim.
-   * @param value value of the claim.
+   * @property name name of the claim.
+   * @property value value of the claim.
    */
   private claims: Array<{name: string, value: any}> = [];
 
@@ -72,8 +72,8 @@ export class SelfIssuedCredential implements ICredential {
   /**
    * Adds the specified claim to the credential.
    * @param claim claim to add to credential.
-   * @param name name of the claim to add.
-   * @param value value of the claim to add.
+   * @property name name of the claim to add.
+   * @property value value of the claim to add.
    */
   public addClaim (claim: { name: string, value: any }) {
     // Add the claim to the credential

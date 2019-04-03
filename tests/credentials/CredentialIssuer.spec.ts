@@ -39,7 +39,7 @@ describe('CredentialIssuer', () => {
     it('should create a new CredentialIssuer from Credential Manifest Endpoint', async done => {
       fetchMock.get(
         'https://enterpriseagent.org/credentialManifest.json',
-        new Promise(resolve => resolve(CREDENTIALMANIFEST as CredentialManifest))
+        new Promise(resolve => resolve(CREDENTIALMANIFEST))
       );
 
       const issuer: CredentialIssuer = await CredentialIssuer.create(issuerIdentifier,
