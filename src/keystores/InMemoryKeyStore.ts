@@ -8,6 +8,8 @@ import IKeyStore from './IKeyStore';
 import PouchDB from 'pouchdb';
 import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
 import UserAgentError from '../UserAgentError';
+import { SignatureFormat } from './SignatureFormat';
+import Protect from './Protect';
 PouchDB.plugin(PouchDBAdapterMemory);
 const keyStore = new PouchDB('keyStore', { adapter: 'memory' });
 
@@ -58,10 +60,13 @@ export default class InMemoryKeyStore implements IKeyStore {
    * Gets the key from the store using the specified identifier.
    * @param keyIdentifier for which to return the key.
    */
-  public async get (keyIdentifier: string): Promise<Buffer> {
+  public async get (keyIdentifier: string): Promise<any> {
     try {
       const keyDocument: any = await keyStore.get(keyIdentifier);
-      return Buffer.from(keyDocument.key);
+      if (keyDocument.key.type === 'Buffer') {
+        return Buffer.from(keyDocument.key);
+      }
+      return keyDocument.key;
     } catch (error) {
       throw new UserAgentError(`No key found for '${keyIdentifier}'.`);
     }
@@ -72,7 +77,7 @@ export default class InMemoryKeyStore implements IKeyStore {
    * @param keyIdentifier to store the key against
    * @param key the key to store.
    */
-  public async save (keyIdentifier: string, key: Buffer): Promise<void> {
+  public async save (keyIdentifier: string, key: any): Promise<void> {
     // Format the document
     const keyDocument = {
       _id: keyIdentifier,
@@ -80,5 +85,21 @@ export default class InMemoryKeyStore implements IKeyStore {
     };
 
     await keyStore.put(keyDocument);
+  }
+
+  /**
+   * Sign the data with the key referenced by keyIdentifier.
+   * @param keyIdentifier for the key used for signature.
+   * @param data Data to sign
+   * @param format Signature format
+   */
+  public async sign (keyIdentifier: string, data: string, format: SignatureFormat): Promise<string> {
+    switch (format) {
+      case SignatureFormat.FlatJsonJws:
+        return Protect.sign(data, keyIdentifier, this);
+
+      default:
+        throw new UserAgentError(`The signature format '${format}' is not supported`);
+    }
   }
 }

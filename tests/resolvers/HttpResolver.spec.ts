@@ -12,10 +12,10 @@ const fetchMock = require('fetch-mock');
 const DOCUMENT = {
   document: {
     '@context': 'https://w3id.org/did/v1',
-    'id': 'did:test:identifier'
+    'id': 'did:ion:identifier'
   },
   resolverMetadata: {
-    driverId: 'did:test',
+    driverId: 'did:ion',
     driver: 'HttpDriver',
     duration: '100.0000ms'
   }
@@ -48,18 +48,18 @@ describe('HttpResolver', () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 30
     });
-    const identifier = new Identifier('did:test:identifier', {
+    const identifier = new Identifier('did:ion:identifier', {
       timeoutInSeconds: 5
     });
 
     fetchMock.get(
-      'https://resolver.org/1.0/identifiers/did:test:identifier',
+      'https://resolver.org/1.0/identifiers/did:ion:identifier',
       new Promise(resolve => resolve(DOCUMENT))
     );
 
     const idenfifierDocument: any = await resolver.resolve(identifier);
     expect(idenfifierDocument).toBeDefined();
-    expect(idenfifierDocument.id).toEqual('did:test:identifier');
+    expect(idenfifierDocument.id).toEqual('did:ion:identifier');
     done();
   });
 
@@ -67,21 +67,21 @@ describe('HttpResolver', () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 30
     });
-    const identifier = new Identifier('did:test:identifier', {
+    const identifier = new Identifier('did:ion:identifier', {
       timeoutInSeconds: 5
     });
 
     fetchMock.get(
-      'https://resolver.org/1.0/identifiers/did:test:identifier',
+      'https://resolver.org/1.0/identifiers/did:ion:identifier',
       new Promise(resolve => resolve({
         '@context': 'https://w3id.org/did/v1',
-        'id': 'did:test:identifier'
+        'id': 'did:ion:identifier'
       }))
     );
 
     const idenfifierDocument: any = await resolver.resolve(identifier);
     expect(idenfifierDocument).toBeDefined();
-    expect(idenfifierDocument.id).toEqual('did:test:identifier');
+    expect(idenfifierDocument.id).toEqual('did:ion:identifier');
     done();
   });
 
@@ -89,29 +89,29 @@ describe('HttpResolver', () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 30
     });
-    const identifier = new Identifier('did:test:identifier', {
+    const identifier = new Identifier('did:ion:identifier', {
       timeoutInSeconds: 5
     });
 
-    fetchMock.get('https://resolver.org/1.0/identifiers/did:test:identifier', 404);
+    fetchMock.get('https://resolver.org/1.0/identifiers/did:ion:identifier', 404);
 
     await resolver
       .resolve(identifier)
       .catch(error => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`Identifier document not found for 'did:test:identifier'`);
+        expect(error.message).toEqual(`Identifier document not found for 'did:ion:identifier'`);
       })
       .finally(done);
   });
 
   it('should throw UserAgentError when 500 returned by resolver', async done => {
     const resolver = new HttpResolver('https://resolver.org');
-    const identifier = new Identifier('did:test:identifier', {
+    const identifier = new Identifier('did:ion:identifier', {
       timeoutInSeconds: 5
     });
 
-    fetchMock.get('https://resolver.org/1.0/identifiers/did:test:identifier', 500);
+    fetchMock.get('https://resolver.org/1.0/identifiers/did:ion:identifier', 500);
 
     await resolver
       .resolve(identifier)
@@ -127,14 +127,14 @@ describe('HttpResolver', () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 1
     });
-    const identifier = new Identifier('did:test:identifier', {
+    const identifier = new Identifier('did:ion:identifier', {
       timeoutInSeconds: 1
     });
 
     // Set the mock timeout to be greater than the fetch configuration
     // timeout to ensure that the fetch timeout works as expected.
     const delay = new Promise((res, _) => setTimeout(res, 1000 * 3));
-    fetchMock.get('https://resolver.org/1.0/identifiers/did:test:identifier', delay.then((_) => 404));
+    fetchMock.get('https://resolver.org/1.0/identifiers/did:ion:identifier', delay.then((_) => 404));
 
     await resolver
       .resolve(identifier)

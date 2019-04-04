@@ -48,7 +48,7 @@ export default class IdentifierDocument {
   constructor (document: any) {
     // Populate the base properties
     this.id = document.id;
-    this.publicKeys = document.publicKey;
+    this.publicKeys = document.publicKeys;
 
     if (document.created) {
       this.created = new Date(document.created);
@@ -65,7 +65,7 @@ export default class IdentifierDocument {
    */
   public static create (id: string, publicKeys: Array<PublicKey>): IdentifierDocument {
     const createdDate = new Date(Date.now()).toISOString();
-    return new IdentifierDocument({ id: id, created: createdDate, publicKey: publicKeys });
+    return new IdentifierDocument({ id: id, created: createdDate, publicKeys: publicKeys });
   }
 
   /**
@@ -101,6 +101,21 @@ export default class IdentifierDocument {
 
   /**
    * Used to control the the properties that are
+   * output by JSON.parse.
+   */
+  public static fromJSON (obj: IdentifierDocument): IdentifierDocument {
+    // const copy: any = this;
+    // this.publicKeys = copy.publicKey;
+    const document = Object.create(IdentifierDocument.prototype);
+    const result = Object.assign(document, obj, {
+      publicKeys: (obj as any).publicKey
+    });
+    delete result.publicKey;
+    return result as IdentifierDocument;
+  }
+
+  /**
+   * Used to control the the properties that are
    * output by JSON.stringify.
    */
   public toJSON (): any {
@@ -122,6 +137,9 @@ export default class IdentifierDocument {
 
     if (!this.publicKeys || this.publicKeys.length === 0) {
       clonedDocument.publicKeys = undefined;
+    } else {
+      clonedDocument.publicKey = this.publicKeys;
+      delete clonedDocument.publicKeys;
     }
 
     // Now return the cloned document for serialization

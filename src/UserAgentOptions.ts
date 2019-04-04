@@ -55,4 +55,9 @@ export default class UserAgentOptions {
    * Crypto Options
    */
   cryptoOptions?: CryptoOptions;
+
+  /**
+   * Prefix for the generated did.
+   */
+  didPrefix?: string = 'did:ion';
 }

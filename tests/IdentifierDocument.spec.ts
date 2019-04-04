@@ -9,9 +9,9 @@ import IdentifierDocument from '../src/IdentifierDocument';
 describe('IdentifierDocument', () => {
   it('should construct new instance when provided a document', async done => {
     const document = {
-      id: 'did:test:identifier',
+      id: 'did:ion:identifier',
       created: '2019-01-25T01:08:44.732Z',
-      publicKey: [
+      publicKeys: [
         {
           id: '#master',
           type: 'RsaVerificationKey2018',
@@ -31,7 +31,7 @@ describe('IdentifierDocument', () => {
 
     const identifierDocument = new IdentifierDocument(document);
     expect(identifierDocument).toBeDefined();
-    expect(identifierDocument.id).toEqual('did:test:identifier');
+    expect(identifierDocument.id).toEqual('did:ion:identifier');
     expect(identifierDocument.created).toEqual(new Date('2019-01-25T01:08:44.732Z'));
     expect(identifierDocument.publicKeys).toBeDefined();
     expect(identifierDocument.publicKeys.length).toEqual(1);
@@ -56,9 +56,9 @@ describe('IdentifierDocument', () => {
       }
     ];
 
-    const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
+    const identifierDocument = IdentifierDocument.create('did:ion:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
-    expect(identifierDocument.id).toEqual('did:test:identifier');
+    expect(identifierDocument.id).toEqual('did:ion:identifier');
     if (identifierDocument.created) {
       const created = Date.parse(identifierDocument.created.toISOString());
       const expected = Date.now();
@@ -88,7 +88,7 @@ describe('IdentifierDocument', () => {
       }
     ];
 
-    const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
+    const identifierDocument = IdentifierDocument.create('did:ion:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
 
     // Add authetication references
@@ -122,7 +122,7 @@ describe('IdentifierDocument', () => {
       }
     ];
 
-    const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
+    const identifierDocument = IdentifierDocument.create('did:ion:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
 
     // Add authetication references
@@ -167,7 +167,7 @@ describe('IdentifierDocument', () => {
       }
     ];
 
-    const identifierDocument = IdentifierDocument.create('did:test:identifier', publicKeys);
+    const identifierDocument = IdentifierDocument.create('did:ion:identifier', publicKeys);
     expect(identifierDocument).toBeDefined();
 
     // Add authetication references
