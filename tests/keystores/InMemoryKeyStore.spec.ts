@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import InMemoryKeyStore from '../../src/keystores/InMemoryKeyStore';
-import { SignatureFormat } from '../../src/keystores/signatureFormat';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 
 describe('InMemoryKeyStore', () => {
   it('should return a new instance with no encryption', () => {

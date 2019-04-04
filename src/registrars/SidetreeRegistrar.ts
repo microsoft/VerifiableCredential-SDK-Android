@@ -13,7 +13,7 @@ import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
 import IKeyStore from '../keystores/IKeyStore';
-import { SignatureFormat } from '../keystores/signatureFormat';
+import { SignatureFormat } from '../keystores/SignatureFormat';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 

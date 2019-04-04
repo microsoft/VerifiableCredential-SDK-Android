@@ -9,7 +9,7 @@ import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript
 import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import KeyStoreMock from '../keystores/KeyStoreMock';
-import { SignatureFormat } from '../../src/keystores/signatureFormat';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 
 describe('KeyStoreMock', async () => {
 
