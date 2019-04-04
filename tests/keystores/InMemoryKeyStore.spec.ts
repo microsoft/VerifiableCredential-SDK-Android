@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import InMemoryKeyStore from '../../src/keystores/InMemoryKeyStore';
+import { SignatureFormat } from '../../src/keystores/signatureFormat';
 
 describe('InMemoryKeyStore', () => {
   it('should return a new instance with no encryption', () => {
@@ -92,5 +93,38 @@ describe('InMemoryKeyStore', () => {
       fail(`Exception not expected, got: '${error}'`);
     }
     done();
+  });
+
+  it('should throw because of missing key reference', async (done) => {
+    let throwCaught = false;
+    const keyStore = new InMemoryKeyStore();
+    await keyStore.sign('key', 'abc', SignatureFormat.FlatJsonJws)
+    .then(() => {
+      if (!throwCaught) {
+        fail('No throw detected because of missing key in store');
+      }
+    })
+    .catch((err) => {
+      throwCaught = true;
+      expect(`The key referenced by 'key' is not available: 'Error: No key found for 'key'.'`).toBe(err.message);
+      done();
+    });
+  });
+
+  it('should throw because of bad signature format', async (done) => {
+    let throwCaught = false;
+    const keyStore = new InMemoryKeyStore();
+    const keyStoreCopy: any = keyStore;
+    await keyStoreCopy.sign('key', 'abc', -1)
+    .then(() => {
+      if (!throwCaught) {
+        fail('No throw detected because of missing key in store');
+      }
+    })
+    .catch((err: any) => {
+      throwCaught = true;
+      expect(`The signature format '-1' is not supported`).toBe(err.message);
+      done();
+    });
   });
 });

@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DidKey } from '@decentralized-identity/did-common-typescript';
+import { SignatureFormat } from './signatureFormat';
 
 /**
  * Interface defining methods and properties to
@@ -24,4 +25,12 @@ export default interface IKeyStore {
    * @param key being saved to the key store.
    */
   save (keyIdentifier: string, key: Buffer | DidKey): Promise<void>;
+
+  /**
+   * Sign the data with the key referenced by keyIdentifier.
+   * @param keyIdentifier for the key used for signature.
+   * @param data Data to sign
+   * @param format Signature format
+   */
+  sign (keyIdentifier: string, data: string, format: SignatureFormat): Promise<string>;
 }

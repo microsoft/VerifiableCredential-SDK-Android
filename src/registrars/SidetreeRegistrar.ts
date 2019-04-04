@@ -12,8 +12,8 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import { FlatJsonJws, Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
 import IKeyStore from '../keystores/IKeyStore';
+import { SignatureFormat } from '../keystores/signatureFormat';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -49,46 +49,6 @@ export default class SidetreeRegistrar implements IRegistrar {
   }
 
   /**
-   * Sign the body for the registar
-   * @param body Body to sign
-   */
-  public async signRequest (
-    body: string,
-    keyStorageReference: string
-  ): Promise<FlatJsonJws> {
-    const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
-    const token = new JwsToken(body, cryptoFactory);
-    // Get the key
-    const jwk: any = await (this.keyStore.get(keyStorageReference) as Promise<any>)
-    .catch((err) => {
-      throw new UserAgentError(`The key referenced by '${keyStorageReference}' is not available: '${err}'`);
-    });
-
-    switch (jwk.kty.toUpperCase()) {
-      case 'RSA':
-        jwk.defaultSignAlgorithm = 'RS256';
-        break;
-
-      case 'EC':
-        jwk.defaultSignAlgorithm = 'ES256K';
-        break;
-
-      default:
-        throw new UserAgentError(`The key type '${jwk.kty}' is not supported.`);
-    }
-
-    const signedRegistrationRequest = await token.signAsFlattenedJson(jwk, {
-      header: {
-        alg: jwk.defaultSignAlgorithm,
-        kid: jwk.kid,
-        operation: 'create',
-        proofOfWork: '{}'
-      }
-    });
-    return signedRegistrationRequest;
-  }
-
-  /**
    * Prepare the document for registration
    * @param document Document to format
    */
@@ -120,8 +80,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       let bodyString = JSON.stringify(identifierDocument);
 
       // registration with signed message for bodyString
-      const signedRequest = await this.signRequest(bodyString, keyReference);
-      bodyString = JSON.stringify(signedRequest);
+      bodyString = await this.keyStore.sign(keyReference, bodyString, SignatureFormat.FlatJsonJws);
 
       const fetchOptions = {
         method: 'POST',
@@ -146,7 +105,7 @@ export default class SidetreeRegistrar implements IRegistrar {
         return;
       }
 
-      const responseJson = await response.json();
+      const responseJson = IdentifierDocument.fromJSON(await response.json());
       const identifier = new Identifier(responseJson, JSON.parse(this.serializedOptions) as UserAgentOptions);
       resolve(identifier);
     });

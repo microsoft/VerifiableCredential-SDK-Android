@@ -13,6 +13,7 @@ import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import KeyStoreMock from '../keystores/KeyStoreMock';
 import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript';
+import { SignatureFormat } from '../../src/keystores/signatureFormat';
 const fetchMock = require('fetch-mock');
 
 // Add a document to the cache
@@ -43,36 +44,6 @@ describe('SidetreeRegistrar', () => {
     }
   });
 
-  it('should throw because of missing key reference', async (done) => {
-    let throwCaught = false;
-    new SidetreeRegistrar('https://registrar.org/', options).signRequest('abc', 'key')
-    .then(() => {
-      if (!throwCaught) {
-        fail('No throw detected because of missing key in store');
-      }
-    })
-    .catch((err) => {
-      throwCaught = true;
-      expect(`The key referenced by 'key' is not available: 'key not found'`).toBe(err.message);
-      done();
-    });
-  });
-
-  it('should create a new RSA signature', async done => {
-        // Setup registration environment
-    await (options.keyStore as KeyStoreMock).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
-    const didKey = new DidKey(
-      (options.cryptoOptions as CryptoOptions).cryptoApi,
-      { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: 'SHA-256' } },
-      null
-    );
-    const jwk: any = await didKey.getJwkKey(KeyExport.Private);
-    await (options.keyStore as KeyStoreMock).save('key', jwk);
-    const signature = await new SidetreeRegistrar('https://registrar.org/', options).signRequest('abc', 'key');
-    expect(signature).toBeDefined();
-    done();
-  });
-
   it('should throw when key type not supported for signature', async (done) => {
         // Setup registration environment
     await (options.keyStore as KeyStoreMock).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
@@ -83,9 +54,9 @@ describe('SidetreeRegistrar', () => {
         );
     const jwk: any = await didKey.getJwkKey(KeyExport.Private);
     jwk.kty = 'AA';
-    await (options.keyStore as KeyStoreMock).save('key', jwk);
-    const registar = new SidetreeRegistrar('https://registrar.org/', options);
-    registar.signRequest('abc', 'key')
+    const keyStore = options.keyStore as KeyStoreMock;
+    await keyStore.save('key', jwk);
+    keyStore.sign('key', 'abc', SignatureFormat.FlatJsonJws)
         .then(() => {
           fail('Should throw');
         })
@@ -211,7 +182,7 @@ describe('SidetreeRegistrar', () => {
     const registrar = new SidetreeRegistrar('https://registrar.org', options);
 
     const genesisDocument = Object.assign(DOCUMENT, {
-      publicKey: [{
+      publicKeys: [{
         id: '#master',
         type: 'Secp256k1VerificationKey2018',
         publicKeyHex: '02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1'
@@ -228,7 +199,7 @@ describe('SidetreeRegistrar', () => {
     const registrar = new SidetreeRegistrar('https://registrar.org', options);
 
     const genesisDocument = Object.assign(DOCUMENT, {
-      publicKey: [{
+      publicKeys: [{
         id: '#master',
         type: 'Secp256k1VerificationKey2018',
         publicKeyHex: '02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1'

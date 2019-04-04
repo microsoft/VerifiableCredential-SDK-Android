@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 import { DidKey } from '@decentralized-identity/did-common-typescript';
 import IKeyStore from '../../src/keystores/IKeyStore';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
+import Protect from '../../src/keystores/Protect';
 
 /**
  * Class defining methods and properties to mock a KeyStore
@@ -39,5 +41,15 @@ export default class KeyStoreMock implements IKeyStore {
     return new Promise((resolve) => {
       resolve();
     });
+  }
+
+  /**
+   * Sign the data with the key referenced by keyIdentifier.
+   * @param keyIdentifier for the key used for signature.
+   * @param data Data to sign
+   * @param format Signature format
+   */
+  public async sign (keyIdentifier: string, data: string, _format: SignatureFormat): Promise<string> {
+    return Protect.sign(data, keyIdentifier, this);
   }
 }

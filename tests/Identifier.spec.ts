@@ -91,7 +91,7 @@ describe('Identifier', () => {
       {
         id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#master',
             type: 'RsaVerificationKey2018',
@@ -144,7 +144,7 @@ describe('Identifier', () => {
       {
         id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#master',
             type: 'RsaVerificationKey2018',
@@ -179,7 +179,7 @@ describe('Identifier', () => {
       {
         id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#master',
             type: 'RsaVerificationKey2018',
@@ -211,7 +211,7 @@ describe('Identifier', () => {
       {
         id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#first',
             type: 'RsaVerificationKey2018',
