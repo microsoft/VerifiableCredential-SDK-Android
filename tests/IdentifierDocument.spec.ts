@@ -33,8 +33,8 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument).toBeDefined();
     expect(identifierDocument.id).toEqual('did:ion:identifier');
     expect(identifierDocument.created).toEqual(new Date('2019-01-25T01:08:44.732Z'));
-    expect(identifierDocument.publicKey).toBeDefined();
-    expect(identifierDocument.publicKey.length).toEqual(1);
+    expect(identifierDocument.publicKeys).toBeDefined();
+    expect(identifierDocument.publicKeys.length).toEqual(1);
     done();
   });
 
@@ -65,8 +65,8 @@ describe('IdentifierDocument', () => {
       const isNear = (created >= (expected - 2)) && (created <= (expected + 2));
       expect(isNear).toBeTruthy();
     }
-    expect(identifierDocument.publicKey).toBeDefined();
-    expect(identifierDocument.publicKey.length).toEqual(1);
+    expect(identifierDocument.publicKeys).toBeDefined();
+    expect(identifierDocument.publicKeys.length).toEqual(1);
     done();
   });
 

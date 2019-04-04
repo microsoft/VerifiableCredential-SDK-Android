@@ -50,14 +50,14 @@ class Helpers {
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
-    expect(kty).toBe((identifier.document!.publicKey[0].publicKeyJwk).kty);
+    expect(kty).toBe((identifier.document!.publicKeys[0].publicKeyJwk).kty);
 
     const document: Identifier = new Identifier(identifier.document as IdentifierDocument);
     expect(id).toBe(document.id);
     expect(id).toBe((document.identifier as IdentifierDocument).id);
 
     expect(id).toBe(document.document!.id);
-    expect(identifier.document!.publicKey).toBe(document.document!.publicKey);
+    expect(identifier.document!.publicKeys).toBe(document.document!.publicKeys);
   }
 }
 

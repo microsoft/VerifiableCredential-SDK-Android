@@ -163,7 +163,7 @@ export default class SidetreeRegistrar implements IRegistrar {
   public async generateIdentifier (identifierDocument: IdentifierDocument
   ): Promise<Identifier> {
 
-    if (!Array.isArray(identifierDocument.publicKey) || identifierDocument.publicKey.length === 0) {
+    if (!Array.isArray(identifierDocument.publicKeys) || identifierDocument.publicKeys.length === 0) {
       throw new UserAgentError('At least one public key must be specified in the identifier document.');
     }
 

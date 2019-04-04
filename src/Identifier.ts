@@ -131,17 +131,17 @@ export default class Identifier {
 
     // If we have been provided a key identifier use
     // the identifier to look up a key in the document
-    if (this.document && this.document.publicKey && keyIdentifier) {
-      const index = this.document.publicKey.findIndex(key => key.id === keyIdentifier);
+    if (this.document && this.document.publicKeys && keyIdentifier) {
+      const index = this.document.publicKeys.findIndex(key => key.id === keyIdentifier);
       if (index === -1) {
         throw new UserAgentError(`Document does not contain a key with id '${keyIdentifier}'`);
       }
 
-      return this.document.publicKey[index];
-    } else if (this.document && this.document.publicKey && this.document.publicKey.length > 0) {
+      return this.document.publicKeys[index];
+    } else if (this.document && this.document.publicKeys && this.document.publicKeys.length > 0) {
       // If only one key has been specified in the document
       // return that
-      return this.document.publicKey[0];
+      return this.document.publicKeys[0];
     }
 
     throw new UserAgentError('Document does not contain any public keys');
