@@ -6,7 +6,8 @@
 import CredentialIssuer from '../../src/credentials/CredentialIssuer';
 import Identifier from '../../src/Identifier';
 import UserAgentError from '../../src/UserAgentError';
-import { CredentialManifest } from '../../src';
+import CredentialManifest from '../../src/credentials/CredentialManifest';
+import TestDataHandler from './TestDataHandler';
 const fetchMock = require('fetch-mock');
 
 describe('CredentialIssuer', () => {
@@ -16,7 +17,7 @@ describe('CredentialIssuer', () => {
   });
 
   const CREDENTIALMANIFEST = new CredentialManifest({
-    credentailManifest: 'example',
+    credential: 'example',
     endpoint: 'https://enterpriseagent.org/verifiedcredential.json'
   });
 
@@ -156,5 +157,37 @@ describe('CredentialIssuer', () => {
       }
       done();
     }, 50000);
+  });
+
+  describe('handleCredentialRequest', () => {
+
+    let issuer: CredentialIssuer;
+
+    const testDataHandler = new TestDataHandler();
+
+    beforeEach(async () => {
+      issuer = await CredentialIssuer.create(issuerIdentifier, CREDENTIALMANIFEST);
+    });
+
+    it('should throw an error because credential does not match credential manifest', async () => {
+      spyOn(issuer, 'validateCredential').and.returnValue(false);
+      try {
+        await issuer.handleCredentialRequest(inputCredential, testDataHandler);
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(error instanceof UserAgentError).toBeTruthy();
+        expect(error.message).toEqual(
+          `Credential issued by '${inputCredential.issuedBy.id}' does not match credential manifest '${CREDENTIALMANIFEST.credential}'`
+          );
+      }
+    });
+
+    it('should handle the Credential Request and return new Credential', async () => {
+      const credential = await issuer.handleCredentialRequest(inputCredential, testDataHandler);
+      expect(credential.issuedTo).toEqual(inputCredential.issuedBy);
+      expect(credential.issuedBy).toEqual(inputCredential.issuedTo);
+      expect(credential.issuedAt).toBeDefined();
+    });
+
   });
 });

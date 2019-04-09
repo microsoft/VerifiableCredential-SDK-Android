@@ -135,7 +135,7 @@ export default class CredentialIssuer {
 
     // Validate that credential matched credential manifest.
     if (!this.validateCredential(inputCredential)) {
-      throw new UserAgentError(`Credential issued by '${inputCredential.issuedBy}' does not match credential manifest '${this.manifest.credential}'`);
+      throw new UserAgentError(`Credential issued by '${inputCredential.issuedBy.id}' does not match credential manifest '${this.manifest.credential}'`);
     }
 
     // exchange credential using data handler plug in.
@@ -150,7 +150,7 @@ export default class CredentialIssuer {
    * Validate whether a credential is valid for the manifest.
    * @param _inputCredential the Credential to validate against the credential manifest
    */
-  private validateCredential (_inputCredential: ICredential) {
+  public validateCredential (_inputCredential: ICredential) {
     return true;
   }
 }
