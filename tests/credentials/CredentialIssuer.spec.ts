@@ -108,8 +108,8 @@ describe('CredentialIssuer', () => {
       const issuer = new CredentialIssuer(issuerIdentifier, CREDENTIALMANIFEST);
       const verifiedCredential = await issuer.requestCredential(inputCredential);
       expect(verifiedCredential).toBeDefined();
-      expect(verifiedCredential.issuedBy.id).toEqual(issuerIdentifier.id);
-      expect(verifiedCredential.issuedTo.id).toEqual(consumer.id);
+      expect(verifiedCredential.issuedBy.id).toEqual('did:test:example.id');
+      expect(verifiedCredential.issuedTo.id).toEqual('did:test:consumer.id');
       done();
     });
 

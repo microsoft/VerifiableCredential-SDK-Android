@@ -120,7 +120,8 @@ export default class CredentialIssuer {
         return;
       }
 
-      const credential: ICredential = await response.json();
+      const responseJson = await response.json();
+      const credential = responseJson.body;
       resolve(credential);
     });
   }
