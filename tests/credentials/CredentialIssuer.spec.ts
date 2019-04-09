@@ -98,11 +98,10 @@ describe('CredentialIssuer', () => {
     });
 
     it('should get a verified credential back', async done => {
-      const response = { status: 200, body: VERIFIEDCREDENTIAL, statusText: 'OK' };
       const options = { method: 'POST' };
       fetchMock.mock(
         'https://enterpriseagent.org/verifiedcredential.json',
-        response,
+        VERIFIEDCREDENTIAL,
         options
       );
 

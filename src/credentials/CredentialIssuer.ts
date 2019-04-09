@@ -120,8 +120,7 @@ export default class CredentialIssuer {
         return;
       }
 
-      const responseJson = await response.json();
-      const credential = responseJson.body;
+      const credential = await response.json();
       resolve(credential);
     });
   }
@@ -148,6 +147,7 @@ export default class CredentialIssuer {
 
   /**
    * Validate whether a credential is valid for the manifest.
+   * TODO: implement method to validate that credential matches the manifest.
    * @param _inputCredential the Credential to validate against the credential manifest
    */
   public validateCredential (_inputCredential: ICredential) {
