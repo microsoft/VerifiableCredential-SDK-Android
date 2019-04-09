@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey, KeyExport, KeyUse, KeyType } from '@decentralized-identity/did-common-typescript';
+import { DidKey, KeyExport, KeyUseFactory } from '@decentralized-identity/did-common-typescript';
 import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
 
@@ -51,8 +51,8 @@ export default class Identifier {
    * @param [options] for configuring how to register and resolve identifiers.
    */
   public static async create (options: UserAgentOptions): Promise<Identifier> {
-    const id = 'did:ion';
-    return new Identifier(id, options).createLinkedIdentifier(id);
+    const id = options.didPrefix as string;
+    return new Identifier(id, options).createLinkedIdentifier(id, true);
   }
 
   /**
@@ -69,25 +69,30 @@ export default class Identifier {
       const seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed) as Buffer;
 
       // Create DID key
-      const didKey: any = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
-      const pairwiseKey: Buffer | DidKey = await didKey.generatePairwise(seed, this.id, target);
+      const didKey = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
+      const pairwiseKey: DidKey = await didKey.generatePairwise(seed, this.id, target);
+      const jwk: any = await pairwiseKey.getJwkKey(KeyExport.Private);
 
-      // TODO add key type in the storage identfier
-      const pairwiseKeyStorageId = this.pairwiseKeyStorageIdentifier(this.id, target, (pairwiseKey as DidKey).keyUse, (pairwiseKey as DidKey).keyType);
-      await keyStore.save(pairwiseKeyStorageId, pairwiseKey);
-      const document = await this.createIdentifierDocument(this.id, pairwiseKey as DidKey);
-      if (register) {
-        if (this.options && this.options.registrar) {
+      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(pairwiseKey.algorithm), jwk.kty);
+      await keyStore.save(pairwiseKeyStorageId, jwk);
+
+      // Set key format
+      const publicKey: PublicKey = {
+        id: jwk.kid,
+        type: this.getDidDocumentKeyType(),  // TODO switch by leveraging pairwiseKey
+        publicKeyJwk: jwk
+      };
+      if (this.options.registrar) {
+        const document = await this.createIdentifierDocument(this.id, publicKey);
+        if (register) {
             // register did document
-          const identifier = await this.options.registrar.register(document, pairwiseKeyStorageId);
-          document.id = identifier.id;
-        } else {
-          throw new UserAgentError(`No registrar in options to register DID document`);
+          const identfier = await this.options.registrar.register(document, pairwiseKeyStorageId);
+          document.id = identfier.id;
         }
+        return new Identifier(document);
+      } else {
+        throw new UserAgentError(`No registrar in options to register DID document`);
       }
-
-      return new Identifier(document);
-
     }
     throw new UserAgentError('No keyStore in options');
   }
@@ -142,20 +147,25 @@ export default class Identifier {
     throw new UserAgentError('Document does not contain any public keys');
   }
 
-  // Create an identifier document. Included the public key.
-  private async createIdentifierDocument (id: string, key: DidKey): Promise <IdentifierDocument> {
-    const publicKeyJwk = await this.getDidPublicKey(key);
-    return IdentifierDocument.createAndGenerateId(id, [ publicKeyJwk ], this.options as UserAgentOptions);
-  }
-
-  // Retrieve the public key from a DidKey
-  private async getDidPublicKey (key: DidKey): Promise <any> {
-    const jwk = await key.getJwkKey(KeyExport.Public);
-    return jwk;
-  }
-
-  // Generate a storage identifier to store a pairwise key
-  private pairwiseKeyStorageIdentifier (personaId: string, target: string, keyUse: KeyUse, keyType: KeyType): string {
+  /**
+   * Generate a storage identifier to store a key
+   * @param personaId The identifier for the persona
+   * @param target The identifier for the peer. Will be persona for non-pairwise keys
+   * @param keyUse Key usage
+   * @param keyType Key type
+   */
+  public static keyStorageIdentifier (personaId: string, target: string, keyUse: string, keyType: string): string {
     return `${personaId}-${target}-${keyUse}-${keyType}`;
+  }
+
+  // Create an identifier document. Included the public key.
+  private async createIdentifierDocument (id: string, publicKey: PublicKey): Promise <IdentifierDocument> {
+    return IdentifierDocument.createAndGenerateId(id, [ publicKey ], this.options as UserAgentOptions);
+  }
+
+  // Get the did document public key type
+  private getDidDocumentKeyType () {
+    // Support other key types
+    return 'Secp256k1VerificationKey2018';
   }
 }

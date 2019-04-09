@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import InMemoryKeyStore from '../../src/keystores/InMemoryKeyStore';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 
 describe('InMemoryKeyStore', () => {
   it('should return a new instance with no encryption', () => {
@@ -46,12 +47,32 @@ describe('InMemoryKeyStore', () => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore();
-      await keyStore.save('did:test:123456789#master', keyBuffer);
+      await keyStore.save('did:ion:123456789#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:test:123456789#master');
+      const buffer: Buffer = await keyStore.get('did:ion:123456789#master') as Buffer;
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
+    } catch (error) {
+      fail(`Exception not expected, got: '${error}'`);
+    }
+    done();
+  });
+
+  it('should save object as key to store and retrieve saved key', async (done) => {
+    try {
+      const keyObject: any = {
+        kty: 'EC',
+        use: 'sig'
+      };
+      const keyStore = new InMemoryKeyStore();
+      await keyStore.save('did:ion:abcdef', keyObject);
+
+      // Now try get get the key back
+      const key: any = await keyStore.get('did:ion:abcdef');
+      expect(key).toBeDefined();
+      expect('EC').toEqual(key.kty);
+      expect('sig').toEqual(key.use);
     } catch (error) {
       fail(`Exception not expected, got: '${error}'`);
     }
@@ -62,15 +83,48 @@ describe('InMemoryKeyStore', () => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore('password');
-      await keyStore.save('did:test:987654321#master', keyBuffer);
+      await keyStore.save('did:ion:987654321#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:test:987654321#master');
+      const buffer: Buffer = await keyStore.get('did:ion:987654321#master') as Buffer;
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {
       fail(`Exception not expected, got: '${error}'`);
     }
     done();
+  });
+
+  it('should throw because of missing key reference', async (done) => {
+    let throwCaught = false;
+    const keyStore = new InMemoryKeyStore();
+    await keyStore.sign('key', 'abc', SignatureFormat.FlatJsonJws)
+    .then(() => {
+      if (!throwCaught) {
+        fail('No throw detected because of missing key in store');
+      }
+    })
+    .catch((err) => {
+      throwCaught = true;
+      expect(`The key referenced by 'key' is not available: 'Error: No key found for 'key'.'`).toBe(err.message);
+      done();
+    });
+  });
+
+  it('should throw because of bad signature format', async (done) => {
+    let throwCaught = false;
+    const keyStore = new InMemoryKeyStore();
+    const keyStoreCopy: any = keyStore;
+    await keyStoreCopy.sign('key', 'abc', -1)
+    .then(() => {
+      if (!throwCaught) {
+        fail('No throw detected because of missing key in store');
+      }
+    })
+    .catch((err: any) => {
+      throwCaught = true;
+      expect(`The signature format '-1' is not supported`).toBe(err.message);
+      done();
+    });
   });
 });
