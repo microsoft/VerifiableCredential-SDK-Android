@@ -5,7 +5,7 @@
 
 import ICredential from './ICredential';
 import Identifier from '../Identifier';
-import UserAgentError from '../UserAgentError';
+// import UserAgentError from '../UserAgentError';
 import { Claim } from '../types';
 
 /**
@@ -13,7 +13,7 @@ import { Claim } from '../types';
  * self-issued id token.
  * @implements ICredential
  */
-export class SelfIssuedCredential implements ICredential {
+export default class SelfIssuedCredential implements ICredential {
 
   /**
    * Array to hold claims to be included in the credential
@@ -58,14 +58,14 @@ export class SelfIssuedCredential implements ICredential {
 
     // Need to get the public key from the identifier
     // and sub_jwk
-    issuer
-    .getPublicKey()
-    .then((publicKey: any) => {
-      this.addClaim({ name: 'sub_jwk', value: publicKey });
-    })
-    .catch(error => {
-      throw new UserAgentError(error);
-    });
+    // issuer
+    // .getPublicKey()
+    // .then((publicKey: any) => {
+    //   this.addClaim({ name: 'sub_jwk', value: publicKey });
+    // })
+    // .catch(error => {
+    //   throw new UserAgentError(error);
+    // });
   }
 
   /**
@@ -81,7 +81,7 @@ export class SelfIssuedCredential implements ICredential {
    * Used to control the the properties that are
    * output by JSON.stringify.
    */
-  public toJSON (): any {
+  // public toJSON (): any {
     // The JSON representation of the credential
     // MUST conform to the OpenID Connect
     // Self-Issued specification id token
@@ -90,9 +90,4 @@ export class SelfIssuedCredential implements ICredential {
     // JWT for serializing.
 
     // Need to generate thumbprint for the
-    // sub_jwk and set as the iss.
-
-    const idToken = {};
-    return idToken;
-  }
 }

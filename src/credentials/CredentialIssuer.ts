@@ -7,6 +7,7 @@ import ICredential from './ICredential';
 import UserAgentError from '../UserAgentError';
 import Identifier from '../Identifier';
 import CredentialManifest from './CredentialManifest';
+import IDataHandler from './IDataHandler';
 import 'isomorphic-fetch';
 declare var fetch: any;
 
@@ -46,7 +47,7 @@ export default class CredentialIssuer {
    */
   public static async create (identifier: Identifier, manifest: CredentialManifest | string) {
 
-    let manifestInstance: any;
+    let manifestJson: any;
 
     if (typeof(manifest) === 'string') {
       const response = await fetch(manifest);
@@ -61,11 +62,11 @@ export default class CredentialIssuer {
         }
         throw error;
       }
-      manifestInstance = await response.json();
+      manifestJson = await response.json();
     } else {
-      manifestInstance = manifest;
+      manifestJson = manifest;
     }
-    return new CredentialIssuer(identifier, manifestInstance);
+    return new CredentialIssuer(identifier, manifestJson);
   }
 
   /**
@@ -98,10 +99,10 @@ export default class CredentialIssuer {
 
       const fetchOptions = {
         method: 'POST',
-        body: inputCredential,
+        body: serializedCredential,
         headers: {
           'Content-Type': 'application/json',
-          'Content-Length': serializedCredential.length.toString()
+          'Content-Length': serializedCredential.length
         }
       };
 
@@ -119,9 +120,36 @@ export default class CredentialIssuer {
         return;
       }
 
-      const responseJson = await response.json();
-      const credential: ICredential = responseJson.body;
+      const credential: ICredential = await response.json();
       resolve(credential);
     });
+  }
+
+  /**
+   * Validate inputCredential with manifest and process and exchange inputCredential wuth Data Handler
+   * @param inputCredential The Self-Issued Credential that with required claims.
+   * @param _dataHandler Data handler for process and exchanging credentials.
+   */
+  public async handleCredentialRequest (inputCredential: ICredential, dataHandler: IDataHandler) {
+
+    // Validate that credential matched credential manifest.
+    if (!this.validateCredential(inputCredential)) {
+      throw new UserAgentError(`Credential issued by '${inputCredential.issuedBy}' does not match credential manifest '${this.manifest.credential}'`);
+    }
+
+    // exchange credential using data handler plug in.
+    const exchangedCredential = await dataHandler.process(inputCredential);
+
+    // TODO: sign and encrypt credentials using Identifiers private key.
+
+    return exchangedCredential;
+  }
+
+  /**
+   * Validate whether a credential is valid for the manifest.
+   * @param _inputCredential the Credential to validate against the credential manifest
+   */
+  private validateCredential (_inputCredential: ICredential) {
+    return true;
   }
 }
