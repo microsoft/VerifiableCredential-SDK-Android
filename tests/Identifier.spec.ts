@@ -8,6 +8,7 @@ import Identifier from '../src/Identifier';
 import UserAgentOptions from '../src/UserAgentOptions';
 import TestResolver from './TestResolver';
 import UserAgentError from '../src/UserAgentError';
+import { KeyUse, KeyType } from '@decentralized-identity/did-common-typescript';
 
 describe('Identifier', () => {
   const testResolver = new TestResolver();
@@ -18,24 +19,35 @@ describe('Identifier', () => {
     timeoutInSeconds: 30
   } as UserAgentOptions;
 
+  it('should construct a storage identfier for the key', () => {
+    let identifier = Identifier.keyStorageIdentifier('did:ion:identifier', 'peer', KeyUse.Encryption, KeyType.EC);
+    expect(identifier).toEqual('did:ion:identifier-peer-enc-EC');
+    identifier = Identifier.keyStorageIdentifier('did:ion:identifier', 'peer', KeyUse.Encryption, KeyType.RSA);
+    expect(identifier).toEqual('did:ion:identifier-peer-enc-RSA');
+    identifier = Identifier.keyStorageIdentifier('did:ion:identifier', 'peer', KeyUse.Signature, KeyType.EC);
+    expect(identifier).toEqual('did:ion:identifier-peer-sig-EC');
+    identifier = Identifier.keyStorageIdentifier('did:ion:identifier', 'peer', KeyUse.Signature, KeyType.RSA);
+    expect(identifier).toEqual('did:ion:identifier-peer-sig-RSA');
+  });
+
   it('should construct new instance when provided an identifier string', () => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     expect(identifier).toBeDefined();
-    expect(identifier.id).toEqual('did:test:identifier');
+    expect(identifier.id).toEqual('did:ion:identifier');
   });
 
   it('should construct new instance when provided an identifier document', () => {
     const identifierDocument = new IdentifierDocument(
-      { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
+      { id: 'did:ion:identifier', created: '2019-01-25T01:08:44.732Z' }
     );
     const identifier = new Identifier(identifierDocument, options);
     expect(identifier).toBeDefined();
-    expect(identifier.id).toEqual('did:test:identifier');
+    expect(identifier.id).toEqual('did:ion:identifier');
   });
 
   it('should return document from local', () => {
     const identifierDocument = new IdentifierDocument(
-      { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
+      { id: 'did:ion:identifier', created: '2019-01-25T01:08:44.732Z' }
     );
     const identifier = new Identifier(identifierDocument, options);
 
@@ -50,7 +62,7 @@ describe('Identifier', () => {
       timeoutInSeconds: 30
     } as UserAgentOptions;
 
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     await identifier
       .getDocument()
       .catch(error => {
@@ -61,9 +73,9 @@ describe('Identifier', () => {
   });
 
   it('should resolve identifier and return document', () => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     const identifierDocument = new IdentifierDocument(
-      { id: 'did:test:identifier', created: '2019-01-25T01:08:44.732Z' }
+      { id: 'did:ion:identifier', created: '2019-01-25T01:08:44.732Z' }
     );
     (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
 
@@ -74,12 +86,12 @@ describe('Identifier', () => {
   });
 
   it('should call getDocument() when local document undefined', async done => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     const identifierDocument = new IdentifierDocument(
       {
-        id: 'did:test:identifier',
+        id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#master',
             type: 'RsaVerificationKey2018',
@@ -108,10 +120,10 @@ describe('Identifier', () => {
   });
 
   it('should throw when document has no keys', async done => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     const identifierDocument = new IdentifierDocument(
       {
-        id: 'did:test:identifier',
+        id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z'
       }
     );
@@ -127,12 +139,12 @@ describe('Identifier', () => {
   });
 
   it('should throw when document does not contain specified key', async done => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     const identifierDocument = new IdentifierDocument(
       {
-        id: 'did:test:identifier',
+        id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#master',
             type: 'RsaVerificationKey2018',
@@ -162,12 +174,12 @@ describe('Identifier', () => {
   });
 
   it('should return public key for specified key identifier', async done => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     const identifierDocument = new IdentifierDocument(
       {
-        id: 'did:test:identifier',
+        id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#master',
             type: 'RsaVerificationKey2018',
@@ -194,12 +206,12 @@ describe('Identifier', () => {
   });
 
   it('should return first public key when no key identifier specified', async done => {
-    const identifier = new Identifier('did:test:identifier', options);
+    const identifier = new Identifier('did:ion:identifier', options);
     const identifierDocument = new IdentifierDocument(
       {
-        id: 'did:test:identifier',
+        id: 'did:ion:identifier',
         created: '2019-01-25T01:08:44.732Z',
-        publicKey: [
+        publicKeys: [
           {
             id: '#first',
             type: 'RsaVerificationKey2018',

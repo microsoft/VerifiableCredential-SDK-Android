@@ -12,6 +12,8 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
+import IKeyStore from '../keystores/IKeyStore';
+import { SignatureFormat } from '../keystores/SignatureFormat';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -20,20 +22,39 @@ declare var fetch: any;
  */
 export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
+  private serializedOptions: string;
+  private keyStore: IKeyStore;
 
   /**
    * Constructs a new instance of the Sidetree registrar
    * @param url to the registration endpoint at the registrar
    * @param options to configure the registrar.
    */
-  constructor (public url: string, public options?: UserAgentOptions) {
+  constructor (public url: string, options: UserAgentOptions) {
+    // Set options. Stringify to avoid circular exception during serialization of this object.
+    if (!(options && options.keyStore)) {
+      throw new UserAgentError('options and options.keyStore need to be defined');
+    }
+
+    this.serializedOptions = JSON.stringify(options);
+    this.keyStore = options.keyStore;
+
     // Format the url
-    this.url = `${url.replace(/\/?$/, '/')}register`;
+    this.url = `${url.replace(/\/?$/, '/')}`;
     this.timeoutInMilliseconds =
       1000 *
-      (!this.options || !this.options.timeoutInSeconds
+      (!options || !options.timeoutInSeconds
         ? 30
-        : this.options.timeoutInSeconds);
+        : options.timeoutInSeconds);
+  }
+
+  /**
+   * Prepare the document for registration
+   * @param document Document to format
+   */
+  public prepareDocForRegistration (document: IdentifierDocument): IdentifierDocument {
+    delete document.id;
+    return document;
   }
 
   /**
@@ -46,19 +67,24 @@ export default class SidetreeRegistrar implements IRegistrar {
     identifierDocument: IdentifierDocument,
     keyReference: string
   ): Promise<Identifier> {
-    const bodyString = JSON.stringify(identifierDocument);
 
     return new Promise(async (resolve, reject) => {
       const timer = setTimeout(
-        () => reject(new UserAgentError('Fetch timed out.')),
+        () =>
+          reject(new UserAgentError('Fetch timed out.')),
         this.timeoutInMilliseconds
       );
 
-      // TODO Add registration with signed message for bodyString
+      // prepare document for registration
+      identifierDocument = this.prepareDocForRegistration(identifierDocument);
+      let bodyString = JSON.stringify(identifierDocument);
+
+      // registration with signed message for bodyString
+      bodyString = await this.keyStore.sign(keyReference, bodyString, SignatureFormat.FlatJsonJws);
 
       const fetchOptions = {
         method: 'POST',
-        body: bodyString + keyReference,
+        body: bodyString,
         headers: {
           'Content-Type': 'application/json',
           'Content-Length': bodyString.length.toString()
@@ -79,8 +105,8 @@ export default class SidetreeRegistrar implements IRegistrar {
         return;
       }
 
-      const responseJson = await response.json();
-      const identifier = new Identifier(responseJson, this.options);
+      const responseJson = IdentifierDocument.fromJSON(await response.json());
+      const identifier = new Identifier(responseJson, JSON.parse(this.serializedOptions) as UserAgentOptions);
       resolve(identifier);
     });
   }
