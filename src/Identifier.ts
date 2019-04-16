@@ -11,6 +11,7 @@ import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
+import { SignatureFormat } from './keystores/SignatureFormat';
 
 /**
  * Class for creating and managing identifiers,
@@ -167,5 +168,21 @@ export default class Identifier {
   private getDidDocumentKeyType () {
     // Support other key types
     return 'Secp256k1VerificationKey2018';
+  }
+
+  /**
+   * Sign payload with key specified by keyStorageIdentifier in options.keyStore
+   * @param payload object to be signed
+   * @param keyStorageIdentifier the identifier for the key used to sign payload.
+   */
+  public async sign (payload: any, keyStorageIdentifier: string) {
+    let keyStore: IKeyStore;
+    if (this.options && this.options.keyStore) {
+      keyStore = this.options.keyStore;
+    } else {
+      throw new UserAgentError('No keyStore in options');
+    }
+    const signedBody = await keyStore.sign(keyStorageIdentifier, payload, SignatureFormat.FlatJsonJws);
+    return signedBody;
   }
 }
