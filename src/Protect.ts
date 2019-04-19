@@ -7,8 +7,17 @@ import UserAgentError from './UserAgentError';
 import IKeyStore from './keystores/IKeyStore';
 import { PublicKey } from './types';
 
+/**
+ * Class for Signing and Verifying payloads using keystore and Identifier Documents respectively.
+ */
 export default class Protect {
 
+  /**
+   * Sign the body with the reference key in keystore.
+   * @param body JSON body to be signed
+   * @param keyStorageReference reference string for key in keyStore
+   * @param keyStore keyStore that holds the key.
+   */
   public static async sign (
     body: string,
     keyStorageReference: string,
