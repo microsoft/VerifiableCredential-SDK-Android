@@ -11,7 +11,7 @@ import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
-import { SignatureFormat } from './keystores/SignatureFormat';
+import Protect from './Protect';
 
 /**
  * Class for creating and managing identifiers,
@@ -31,12 +31,17 @@ export default class Identifier {
   public document: IdentifierDocument | undefined;
 
   /**
+   * User Agent Options
+   */
+  public options: UserAgentOptions | undefined;
+
+  /**
    * Constructs an instance of the Identifier
    * class using the provided identifier or identifier document.
    * @param identifier either the string representation of an identifier or a identifier document.
    * @param [options] for configuring how to register and resolve identifiers.
    */
-  constructor (public identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
+  constructor (public identifier: IdentifierDocument | string, options?: UserAgentOptions) {
     // Check whether passed an identifier document
     // or an identifier string
     if (typeof identifier === 'object') {
@@ -45,6 +50,7 @@ export default class Identifier {
     } else {
       this.id = identifier;
     }
+    this.options = options;
   }
 
   /**
@@ -75,6 +81,7 @@ export default class Identifier {
       const jwk: any = await pairwiseKey.getJwkKey(KeyExport.Private);
 
       const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(pairwiseKey.algorithm), jwk.kty);
+      console.log(pairwiseKeyStorageId);
       await keyStore.save(pairwiseKeyStorageId, jwk);
 
       // Set key format
@@ -87,10 +94,10 @@ export default class Identifier {
         const document = await this.createIdentifierDocument(this.id, publicKey);
         if (register) {
             // register did document
-          const identfier = await this.options.registrar.register(document, pairwiseKeyStorageId);
-          document.id = identfier.id;
+          const identifier = await this.options.registrar.register(document, pairwiseKeyStorageId);
+          document.id = identifier.id;
         }
-        return new Identifier(document);
+        return new Identifier(document, this.options);
       } else {
         throw new UserAgentError(`No registrar in options to register DID document`);
       }
@@ -182,7 +189,24 @@ export default class Identifier {
     } else {
       throw new UserAgentError('No keyStore in options');
     }
-    const signedBody = await keyStore.sign(keyStorageIdentifier, payload, SignatureFormat.FlatJsonJws);
+    const signedBody = await Protect.sign(payload, keyStorageIdentifier, keyStore);
     return signedBody;
+  }
+
+  /**
+   * Verify the payload with public key from the Identifier Document.
+   * @param jws the signed token to be verified.
+   */
+  public async verify (jws: string) {
+
+    if (!this.document) {
+      this.document = await this.getDocument();
+    }
+    const document: any = this.document;
+    console.log('__________________________');
+    console.log(document);
+    console.log(document.publicKey);
+    console.log('__________________');
+    return Protect.verify(jws, document.publicKey);
   }
 }
