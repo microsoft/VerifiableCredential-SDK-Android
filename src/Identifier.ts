@@ -81,7 +81,6 @@ export default class Identifier {
       const jwk: any = await pairwiseKey.getJwkKey(KeyExport.Private);
 
       const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(pairwiseKey.algorithm), jwk.kty);
-      console.log(pairwiseKeyStorageId);
       await keyStore.save(pairwiseKeyStorageId, jwk);
 
       // Set key format
@@ -203,10 +202,6 @@ export default class Identifier {
       this.document = await this.getDocument();
     }
     const document: any = this.document;
-    console.log('__________________________');
-    console.log(document);
-    console.log(document.publicKey);
-    console.log('__________________');
     return Protect.verify(jws, document.publicKey);
   }
 }
