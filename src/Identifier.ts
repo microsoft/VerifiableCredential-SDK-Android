@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey, KeyExport, KeyUseFactory } from '@decentralized-identity/did-common-typescript';
+import { DidKey, KeyExport, KeyUseFactory, KeyTypeFactory, KeyUse } from '@decentralized-identity/did-common-typescript';
 import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
 
@@ -181,15 +181,17 @@ export default class Identifier {
    * @param payload object to be signed
    * @param keyStorageIdentifier the identifier for the key used to sign payload.
    */
-  public async sign (payload: any, keyStorageIdentifier: string) {
-    let keyStore: IKeyStore;
+  public async sign (payload: any, target: string) { // persona ID and target
     if (this.options && this.options.keyStore) {
-      keyStore = this.options.keyStore;
+      const keyStorageIdentifier = Identifier.keyStorageIdentifier(this.id,
+                                                                   target,
+                                                                   KeyUse.Signature,
+                                                                   KeyTypeFactory.create(this.options.cryptoOptions!.algorithm));
+      const signedBody = await Protect.sign(payload, keyStorageIdentifier, this.options.keyStore);
+      return signedBody;
     } else {
       throw new UserAgentError('No keyStore in options');
     }
-    const signedBody = await Protect.sign(payload, keyStorageIdentifier, keyStore);
-    return signedBody;
   }
 
   /**
