@@ -8,7 +8,7 @@ import Identifier from '../src/Identifier';
 import UserAgentOptions from '../src/UserAgentOptions';
 import TestResolver from './TestResolver';
 import UserAgentError from '../src/UserAgentError';
-import { KeyUse, KeyType } from '@decentralized-identity/did-common-typescript';
+import { KeyUse, KeyType } from '@decentralized-identity/did-crypto-typescript';
 
 describe('Identifier', () => {
   const testResolver = new TestResolver();

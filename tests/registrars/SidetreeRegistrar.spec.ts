@@ -12,7 +12,7 @@ import UserAgentOptions from '../../src/UserAgentOptions';
 import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import KeyStoreMock from '../keystores/KeyStoreMock';
-import { DidKey, KeyExport } from '@decentralized-identity/did-common-typescript';
+import { DidKey, KeyExport } from '@decentralized-identity/did-crypto-typescript';
 import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 const fetchMock = require('fetch-mock');
 
