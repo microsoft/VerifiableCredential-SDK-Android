@@ -188,9 +188,9 @@ export default class Identifier {
       const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
                                                                    target,
                                                                    KeyUse.Signature,
-                                                                   KeyTypeFactory.create(this.options.cryptoOptions!.algorithm));
+                                                                   KeyTypeFactory.create(this.options.cryptoOptions.algorithm));
       if (this.options.keyStore) {
-        if (typeof(payload) != 'string') {
+        if (typeof(payload) !== 'string') {
           body = JSON.stringify(payload);
         } else {
           body = payload;
