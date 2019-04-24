@@ -11,7 +11,8 @@ import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
-import Protect from './Protect';
+import Protect from './keystores/Protect';
+import { SignatureFormat } from './keystores/SignatureFormat';
 
 /**
  * Class for creating and managing identifiers,
@@ -181,16 +182,26 @@ export default class Identifier {
    * @param payload object to be signed
    * @param keyStorageIdentifier the identifier for the key used to sign payload.
    */
-  public async sign (payload: any, target: string) { // persona ID and target
-    if (this.options && this.options.keyStore) {
-      const keyStorageIdentifier = Identifier.keyStorageIdentifier(this.id,
+  public async sign (payload: any, personaId: string, target: string) {
+    let body: string;
+    if (this.options && this.options.cryptoOptions) {
+      const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
                                                                    target,
                                                                    KeyUse.Signature,
                                                                    KeyTypeFactory.create(this.options.cryptoOptions!.algorithm));
-      const signedBody = await Protect.sign(payload, keyStorageIdentifier, this.options.keyStore);
-      return signedBody;
+      if (this.options.keyStore) {
+        if (typeof(payload) != 'string') {
+          body = JSON.stringify(payload);
+        } else {
+          body = payload;
+        }
+        const signedBody = await this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
+        return signedBody;
+      } else {
+        throw new UserAgentError('No KeyStore in Options');
+      }
     } else {
-      throw new UserAgentError('No keyStore in options');
+      throw new UserAgentError('No Crypto Options in User Agent Options');
     }
   }
 
@@ -203,7 +214,6 @@ export default class Identifier {
     if (!this.document) {
       this.document = await this.getDocument();
     }
-    const document: any = this.document;
-    return Protect.verify(jws, document.publicKey);
+    return Protect.verify(jws, this.document.publicKeys);
   }
 }

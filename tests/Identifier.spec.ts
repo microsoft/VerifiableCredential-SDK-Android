@@ -9,6 +9,10 @@ import UserAgentOptions from '../src/UserAgentOptions';
 import TestResolver from './TestResolver';
 import UserAgentError from '../src/UserAgentError';
 import { KeyUse, KeyType } from '@decentralized-identity/did-crypto-typescript';
+import CryptoOptions from '../src/CryptoOptions';
+import KeyStoreMock from './keystores/KeyStoreMock';
+import Protect from '../src/keystores/Protect';
+import TestRegistrar from './TestRegistrar';
 
 describe('Identifier', () => {
   const testResolver = new TestResolver();
@@ -249,5 +253,125 @@ describe('Identifier', () => {
     expect(publicKey).toBeDefined();
     expect(publicKey.id).toEqual('#first');
     done();
+  });
+
+  describe('sign', () => {
+
+    let options: UserAgentOptions;
+
+    beforeEach(() => {
+      options = {
+        resolver: testResolver,
+        timeoutInSeconds: 30,
+        didPrefix: 'did:ion',
+        registrar: new TestRegistrar()
+      } as UserAgentOptions;
+    });
+
+    it('should throw a User Agent Error if no crypto options defined', async done => {
+      try {
+        const identifier = new Identifier('did:ion:identifier', options);
+        await identifier.sign('example payload', 'test', 'testTarget');
+        fail();
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(error instanceof UserAgentError).toBeTruthy();
+        expect(error.message).toEqual(`No Crypto Options in User Agent Options`);
+      }
+      done();
+    });
+
+    it('should throw a User Agent Error if no keyStore defined', async done => {
+      try {
+        options.cryptoOptions = new CryptoOptions();
+        options.cryptoOptions.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+        const identifier = new Identifier('did:ion:identifier', options);
+        await identifier.sign('example payload', 'test', 'testTarget');
+        fail();
+      } catch (error) {
+        expect(error).toBeDefined();
+        expect(error instanceof UserAgentError).toBeTruthy();
+        expect(error.message).toEqual(`No KeyStore in Options`);
+      }
+      done();
+    });
+
+    it('should sign a payload that is a string', async done => {
+      options.cryptoOptions = new CryptoOptions();
+      options.cryptoOptions.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+      options.keyStore = new KeyStoreMock();
+      await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
+      const identifier = await Identifier.create(options);
+      const signMethod = spyOn(Protect, 'sign').and.returnValue('signedPayload');
+      const signedPayload = await identifier.sign('examplePayload', 'did:ion', 'did:ion');
+      expect(signMethod).toHaveBeenCalled();
+      expect(signedPayload).toBeDefined();
+      expect(signedPayload).toEqual('signedPayload');
+      done();
+    });
+
+    it('should sign a payload that is an object', async done => {
+      options.cryptoOptions = new CryptoOptions();
+      options.cryptoOptions.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+      options.keyStore = new KeyStoreMock();
+      await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
+      const identifier = await Identifier.create(options);
+      const signMethod = spyOn(Protect, 'sign').and.returnValue('signedPayload');
+      const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion', 'did:ion');
+      expect(signMethod).toHaveBeenCalled();
+      expect(signedPayload).toBeDefined();
+      expect(signedPayload).toEqual('signedPayload');
+      done();
+    });
+  });
+
+  describe('verify', () => {
+
+    const identifier = new Identifier('did:ion:identifier', options);
+
+    const identifierDocument = new IdentifierDocument(
+      {
+        id: 'did:ion:identifier',
+        created: '2019-01-25T01:08:44.732Z',
+        publicKeys: [
+          {
+            id: '#master',
+            type: 'RsaVerificationKey2018',
+            publicKeyJwk: {
+              kty: 'RSA',
+              kid: '#master',
+              keyOps: [
+                'sign',
+                'verify'
+              ],
+              n: 'vdpHn7kNq42UMC1W8bwxgE7K...',
+              e: 'AQAB'
+            }
+          }
+        ]
+      }
+    );
+
+    const testJws = 'testJWS';
+
+    it('should resolve identifier document and verify jws', async done => {
+      (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
+      const verifyMethod = spyOn(Protect, 'verify').and.returnValue('verifiedPayload');
+      const verifiedPayload = await identifier.verify(testJws);
+      expect(verifyMethod).toHaveBeenCalledWith(testJws, identifierDocument.publicKeys);
+      expect(verifiedPayload).toBeDefined();
+      expect(verifiedPayload).toBe('verifiedPayload');
+      done();
+    });
+
+    it('should verify jws', async done => {
+      const testIdentifier = new Identifier(identifierDocument);
+      const verifyMethod = spyOn(Protect, 'verify').and.returnValue('verifiedPayload');
+      const verifiedPayload = await testIdentifier.verify(testJws);
+      expect(verifyMethod).toHaveBeenCalledWith(testJws, identifierDocument.publicKeys);
+      expect(verifiedPayload).toBeDefined();
+      expect(verifiedPayload).toBe('verifiedPayload');
+      done();
+    });
   });
 });

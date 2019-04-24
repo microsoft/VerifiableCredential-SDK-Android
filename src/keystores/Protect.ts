@@ -5,6 +5,7 @@
 import { FlatJsonJws, Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
 import UserAgentError from '../UserAgentError';
 import IKeyStore from './IKeyStore';
+import { PublicKey } from '../types';
 
  /**
   * Class to model protection mechanisms
@@ -50,5 +51,44 @@ export default class Protect {
     });
 
     return JSON.stringify(signedRegistrationRequest);
+  }
+
+  /**
+   * Verify the jws
+   * @param jws token to be verified
+   * @param jwk Public Key to be used to verify
+   */
+  public static async verify (jws: string, publicKeys: Array<PublicKey>) {
+
+    const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
+    const token = new JwsToken(jws, cryptoFactory);
+    const headers = token.getHeader();
+    const filteredpublicKeys = publicKeys.filter(key => headers.kid === key.id);
+
+    if (filteredpublicKeys.length === 0) {
+      throw new UserAgentError(`No Public Key '${headers.kid}'`);
+    }
+
+    const publicKey = filteredpublicKeys[0].publicKeyJwk;
+
+    switch (publicKey.kty.toUpperCase()) {
+      case 'RSA':
+        publicKey.defaultSignAlgorithm = 'RS256';
+        break;
+
+      case 'EC':
+        publicKey.defaultSignAlgorithm = 'ES256K';
+        break;
+
+      default:
+        throw new UserAgentError(`The key type '${publicKey.kty}' is not supported.`);
+    }
+
+    const body = await token.verifySignature(publicKey)
+    .catch((error: any) => {
+      throw new UserAgentError(`JWS Token cannot be verified by public key: '${error}'`);
+    });
+
+    return body;
   }
 }
