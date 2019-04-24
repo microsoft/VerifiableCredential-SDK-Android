@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey } from '@decentralized-identity/did-common-typescript';
+import { DidKey } from '@decentralized-identity/did-crypto-typescript';
 import { SignatureFormat } from './SignatureFormat';
 
 /**

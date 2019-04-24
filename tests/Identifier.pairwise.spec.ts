@@ -9,7 +9,7 @@ import UserAgentOptions from '../src/UserAgentOptions';
 import KeyStoreMock from './keystores/KeyStoreMock';
 import TestResolver from './TestResolver';
 import CryptoOptions from '../src/CryptoOptions';
-import { KeyTypeFactory } from '@decentralized-identity/did-common-typescript';
+import { KeyTypeFactory } from '@decentralized-identity/did-crypto-typescript';
 import Registrar from '../src/registrars/IRegistrar';
 import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
