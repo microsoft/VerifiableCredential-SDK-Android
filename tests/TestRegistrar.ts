@@ -28,17 +28,23 @@ export default class TestRegistrar implements IRegistrar {
    * @inheritdoc
    */
   public async register (identifierDocument: IdentifierDocument): Promise<Identifier> {
-    if (this.identifierDocument === identifierDocument) {
-      return this.identifier;
-    }
+    // if (this.identifierDocument === identifierDocument) {
+    //   return this.identifier;
+    // }
 
-    throw new Error('Not found');
+    // throw new Error('Not found');
+    console.log(identifierDocument);
+    console.log(this.identifierDocument);
+    return this.identifier;
   }
 
   /**
    * @inheritdoc
    */
   public async generateIdentifier (input: any): Promise<Identifier> {
-    throw new Error(`Not implemented - ${input}`);
+    const document = IdentifierDocument.create(`${input.id}:12345abcde`, input.publicKeys);
+    this.identifierDocument = document;
+    this.identifier = new Identifier(document);
+    return this.identifier;
   }
 }

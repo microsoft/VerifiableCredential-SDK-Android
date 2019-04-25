@@ -31,7 +31,7 @@ export default class TestResolver implements IResolver {
    * specified identifier.
    */
   public async resolve (identifier: Identifier): Promise<IdentifierDocument> {
-    if (this.identifier === identifier) {
+    if (this.identifier.id === identifier.id) {
       return this.identifierDocument;
     }
 
