@@ -83,7 +83,7 @@ describe('Protect', () => {
       } catch (error) {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`The key type 'AA' is not supported.`);
+        expect(error.message).toEqual('The key type \'AA\' is not supported.');
       }
       done();
     });
@@ -110,7 +110,7 @@ describe('Protect', () => {
       } catch (error) {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`No Public Key '#key1'`);
+        expect(error.message).toEqual('No Public Key \'#key1\'');
       }
       done();
     });
@@ -133,7 +133,7 @@ describe('Protect', () => {
       } catch (error) {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`JWS Token cannot be verified by public key: 'Error: Could not parse contents into a JWS'`);
+        expect(error.message).toEqual('JWS Token cannot be verified by public key: \'Error: Could not parse contents into a JWS\'');
       }
       done();
     });
