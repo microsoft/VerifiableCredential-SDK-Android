@@ -24,6 +24,7 @@ describe('Protect', () => {
       );
       const privateKey = await didKey.getJwkKey(KeyExport.Private);
       const jwk: any = await didKey.getJwkKey(KeyExport.Public);
+      jwk.kid = '#key1';
       const publicKey: PublicKey = {
         id: jwk.kid,
         type: 'RsaVerificationKey2018',  // TODO switch by leveraging pairwiseKey
@@ -46,6 +47,7 @@ describe('Protect', () => {
       );
       const privateKey = await didKey.getJwkKey(KeyExport.Private);
       const jwk: any = await didKey.getJwkKey(KeyExport.Public);
+      jwk.kid = '#key1';
       const publicKey: PublicKey = {
         id: jwk.kid,
         type: 'Secp256k1VerificationKey2018',
