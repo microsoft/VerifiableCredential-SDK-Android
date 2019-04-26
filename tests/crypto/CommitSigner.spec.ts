@@ -1,13 +1,14 @@
 import { ICommitProtectedHeaders } from '@decentralized-identity/hub-common-js';
-import RsaCommitSigner from '../../src/crypto/RsaCommitSigner';
+import CommitSigner from '../../src/crypto/CommitSigner';
 import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto/rsa/RsaPrivateKey';
+import { EcPrivateKey, Secp256k1CryptoSuite } from '@decentralized-identity/did-auth-jose';
 import Commit from '../../src/Commit';
 
-describe('RsaCommitSigner', () => {
+describe('CommitSigner', () => {
 
   describe('sign()', () => {
 
-    it('should sign a commit', async () => {
+    it('should sign a commit using Rsa', async () => {
       const testDid = 'did:example:person.id';
       const testKid = `${testDid}#key-1`;
       const testKey = await RsaPrivateKey.generatePrivateKey(testKid);
@@ -32,9 +33,53 @@ describe('RsaCommitSigner', () => {
         payload
       });
 
-      const signer = new RsaCommitSigner({
+      const signer = new CommitSigner({
         did: testDid,
         key: testKey
+      });
+
+      const signedCommit = await signer.sign(commit);
+
+      expect(signedCommit.getPayload()).toEqual(payload);
+
+      const signedProtectedHeaders = signedCommit.getProtectedHeaders();
+      Object.keys(protectedHeaders).forEach((headerKey) => {
+        expect((signedProtectedHeaders as any)[headerKey]).toEqual((protectedHeaders as any)[headerKey]);
+      })
+
+      expect(signedProtectedHeaders.iss).toEqual(testDid);
+      expect(signedProtectedHeaders.kid).toEqual(testKid);
+    });
+
+    it('should sign a commit using EC', async () => {
+      const testDid = 'did:example:person.id';
+      const testKid = `${testDid}#key-1`;
+      const testKey = await EcPrivateKey.generatePrivateKey(testKid);
+
+      const protectedHeaders: Partial<ICommitProtectedHeaders> = {
+        interface: 'Collections',
+        context: 'schema.org',
+        type: 'MusicPlaylist',
+        operation: 'create',
+        committed_at: '2019-01-01',
+        commit_strategy: 'basic',
+        sub: 'did:example:sub.id',
+        // iss and kid left out intentionally
+      };
+
+      const payload = {
+        name: "Test"
+      };
+
+      const commit = new Commit({
+        protected: protectedHeaders,
+        payload
+      });
+
+      const signer = new CommitSigner({
+        did: testDid,
+        key: testKey,
+        cryptoSuite: new Secp256k1CryptoSuite()
       });
 
       const signedCommit = await signer.sign(commit);
@@ -70,7 +115,7 @@ describe('RsaCommitSigner', () => {
         }
       });
 
-      const signer = new RsaCommitSigner({
+      const signer = new CommitSigner({
         did: testDid,
         key: testKey
       });

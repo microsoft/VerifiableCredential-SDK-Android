@@ -2,7 +2,7 @@ import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto
 import { HttpResolver } from '@decentralized-identity/did-common-typescript';
 import HubSession from './HubSession';
 import HubWriteRequest from './requests/HubWriteRequest';
-import RsaCommitSigner from './crypto/RsaCommitSigner';
+import CommitSigner from './crypto/CommitSigner';
 import Commit from './Commit';
 import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
@@ -60,7 +60,7 @@ async function runExample() {
       },
     });
 
-    const signer = new RsaCommitSigner({
+    const signer = new CommitSigner({
       did: DID,
       key: privateKey,
     });

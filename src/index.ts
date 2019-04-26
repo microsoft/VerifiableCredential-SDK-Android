@@ -1,5 +1,5 @@
 // Cryptography
-export { default as RsaCommitSigner } from './crypto/RsaCommitSigner';
+export { default as CommitSigner } from './crypto/CommitSigner';
 export { default as ICommitSigner } from './crypto/ICommitSigner';
 
 // Requests
