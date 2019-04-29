@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey, KeyExport, KeyUseFactory } from '@decentralized-identity/did-common-typescript';
+import { DidKey, KeyExport, KeyUseFactory, KeyTypeFactory, KeyUse } from '@decentralized-identity/did-crypto-typescript';
 import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
 
@@ -11,6 +11,8 @@ import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
+import Protect from './keystores/Protect';
+import { SignatureFormat } from './keystores/SignatureFormat';
 
 /**
  * Class for creating and managing identifiers,
@@ -30,12 +32,17 @@ export default class Identifier {
   public document: IdentifierDocument | undefined;
 
   /**
+   * User Agent Options
+   */
+  public options: UserAgentOptions | undefined;
+
+  /**
    * Constructs an instance of the Identifier
    * class using the provided identifier or identifier document.
    * @param identifier either the string representation of an identifier or a identifier document.
    * @param [options] for configuring how to register and resolve identifiers.
    */
-  constructor (public identifier: IdentifierDocument | string, private options?: UserAgentOptions) {
+  constructor (public identifier: IdentifierDocument | string, options?: UserAgentOptions) {
     // Check whether passed an identifier document
     // or an identifier string
     if (typeof identifier === 'object') {
@@ -44,6 +51,7 @@ export default class Identifier {
     } else {
       this.id = identifier;
     }
+    this.options = options;
   }
 
   /**
@@ -86,10 +94,10 @@ export default class Identifier {
         const document = await this.createIdentifierDocument(this.id, publicKey);
         if (register) {
             // register did document
-          const identfier = await this.options.registrar.register(document, pairwiseKeyStorageId);
-          document.id = identfier.id;
+          const identifier = await this.options.registrar.register(document, pairwiseKeyStorageId);
+          document.id = identifier.id;
         }
-        return new Identifier(document);
+        return new Identifier(document, this.options);
       } else {
         throw new UserAgentError(`No registrar in options to register DID document`);
       }
@@ -167,5 +175,45 @@ export default class Identifier {
   private getDidDocumentKeyType () {
     // Support other key types
     return 'Secp256k1VerificationKey2018';
+  }
+
+  /**
+   * Sign payload with key specified by keyStorageIdentifier in options.keyStore
+   * @param payload object to be signed
+   * @param keyStorageIdentifier the identifier for the key used to sign payload.
+   */
+  public async sign (payload: any, personaId: string, target: string) {
+    let body: string;
+    if (this.options && this.options.cryptoOptions) {
+      const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
+                                                                   target,
+                                                                   KeyUse.Signature,
+                                                                   KeyTypeFactory.create(this.options.cryptoOptions.algorithm));
+      if (this.options.keyStore) {
+        if (typeof(payload) !== 'string') {
+          body = JSON.stringify(payload);
+        } else {
+          body = payload;
+        }
+        const signedBody = await this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
+        return signedBody;
+      } else {
+        throw new UserAgentError('No KeyStore in Options');
+      }
+    } else {
+      throw new UserAgentError('No Crypto Options in User Agent Options');
+    }
+  }
+
+  /**
+   * Verify the payload with public key from the Identifier Document.
+   * @param jws the signed token to be verified.
+   */
+  public async verify (jws: string) {
+
+    if (!this.document) {
+      this.document = await this.getDocument();
+    }
+    return Protect.verify(jws, this.document.publicKeys);
   }
 }
