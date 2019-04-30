@@ -15,14 +15,24 @@ import { UserAgentOptions } from '..';
  * Interface defining methods and properties to
  * be implemented by specific credential stores.
  */
-export default class InMemoryCredentialStore implements ICredentialStore {
+export default class CredentialStore implements ICredentialStore {
 
   private hubSession: HubSession;
 
+  /**
+   * Creates a Credential Store from a Hub Session.
+   * @param hubSession hub session for the credential store.
+   */
   constructor (hubSession: HubSession) {
     this.hubSession = hubSession;
   }
 
+  /**
+   * Creates a Credential Store from identifier.
+   * @param identifier Identifier of Hub or User of Hub.
+   * @param publicKeyReference Reference to the Public Key for Hub.
+   * @param hubInstance Hub Instance Reference if Identifier is a User Identifier.
+   */
   public async create (identifier: Identifier, publicKeyReference: string, hubInstance?: string) {
 
     let hubIdentifierDocument: IdentifierDocument;
