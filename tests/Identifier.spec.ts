@@ -6,13 +6,13 @@
 import IdentifierDocument from '../src/IdentifierDocument';
 import Identifier from '../src/Identifier';
 import UserAgentOptions from '../src/UserAgentOptions';
-import TestResolver from './TestResolver';
+import TestResolver from './resolvers/TestResolver';
 import UserAgentError from '../src/UserAgentError';
 import { KeyUse, KeyType } from '@decentralized-identity/did-crypto-typescript';
 import CryptoOptions from '../src/CryptoOptions';
 import KeyStoreMock from './keystores/KeyStoreMock';
 import Protect from '../src/keystores/Protect';
-import TestRegistrar from './TestRegistrar';
+import TestRegistrar from './registrars/TestRegistrar';
 
 describe('Identifier', () => {
   const testResolver = new TestResolver();

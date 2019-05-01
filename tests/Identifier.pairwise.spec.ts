@@ -7,7 +7,7 @@ import Identifier from '../src/Identifier';
 import IdentifierDocument from '../src/IdentifierDocument';
 import UserAgentOptions from '../src/UserAgentOptions';
 import KeyStoreMock from './keystores/KeyStoreMock';
-import TestResolver from './TestResolver';
+import TestResolver from './resolvers/TestResolver';
 import CryptoOptions from '../src/CryptoOptions';
 import { KeyTypeFactory } from '@decentralized-identity/did-crypto-typescript';
 import Registrar from '../src/registrars/IRegistrar';
