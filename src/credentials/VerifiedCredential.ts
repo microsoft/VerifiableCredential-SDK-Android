@@ -13,25 +13,35 @@ import Identifier from '../Identifier';
  */
 export class VerifiedCredential implements ICredential {
   /**
-   * @inheritdoc
+   * The identifier of the issuer of
+   * the credential.
    */
   public readonly issuedBy: Identifier;
 
   /**
-   * @inheritdoc
+   * The identifier the credential was
+   * issued to.
    */
   public readonly issuedTo: Identifier;
 
   /**
-   * @inheritdoc
+   * The date the credential was issued.
    */
   public readonly issuedAt: Date;
 
   /**
-   * @inheritdoc
+   * The date and time that the
+   * credential expires at.
    */
   public readonly expiresAt?: Date;
 
+  /**
+   * Constructs a new instance of a verified
+   * credential for the specified identifier.
+   * @param issuedBy the specified identifier.
+   * @param issuedTo the specified identifier.
+   * @param issuedAt date and time.
+   */
   constructor (issuedBy: Identifier, issuedTo: Identifier, issuedAt: Date) {
     this.issuedBy = issuedBy;
     this.issuedTo = issuedTo;
