@@ -5,8 +5,6 @@
 
 import Identifier from './Identifier';
 import IdentifierDocument from './IdentifierDocument';
-import Token from './token/Token';
-import Jwt from './token/Jwt';
 import CredentialManifest from './credentials/CredentialManifest';
 import CredentialIssuer from './credentials/CredentialIssuer';
 import ICredential from './credentials/ICredential';
@@ -18,7 +16,6 @@ import InMemoryKeyStore from './keystores/InMemoryKeyStore';
 import UserAgentOptions from './UserAgentOptions';
 import HttpResolver from './resolvers/HttpResolver';
 export { Identifier, IdentifierDocument, UserAgentOptions };
-export { Token, Jwt };
 export { CredentialManifest, CredentialIssuer, ICredential, SelfIssuedCredential };
 export { TestDataHandler, IDataHandler };
 export { SidetreeRegistrar };

@@ -5,7 +5,6 @@
 
 import ICredential from './ICredential';
 import Identifier from '../Identifier';
-// import UserAgentError from '../UserAgentError';
 import { Claim } from '../types';
 
 /**
@@ -21,22 +20,25 @@ export default class SelfIssuedCredential implements ICredential {
   private claims: Array<Claim> = [];
 
   /**
-   * @inheritdoc
+   * The identifier of the issuer of
+   * the credential.
    */
   public readonly issuedBy: Identifier;
 
   /**
-   * @inheritdoc
+   * The identifier the credential was
+   * issued to.
    */
   public readonly issuedTo: Identifier;
 
   /**
-   * @inheritdoc
+   * The date the credential was issued.
    */
   public readonly issuedAt: Date;
 
   /**
-   * @inheritdoc
+   * The date and time that the
+   * credential expires at.
    */
   public readonly expiresAt?: Date;
 
@@ -55,17 +57,6 @@ export default class SelfIssuedCredential implements ICredential {
 
     // Add the identifier as the did claim
     this.addClaim({ name: 'did', value: issuer.id });
-
-    // Need to get the public key from the identifier
-    // and sub_jwk
-    // issuer
-    // .getPublicKey()
-    // .then((publicKey: any) => {
-    //   this.addClaim({ name: 'sub_jwk', value: publicKey });
-    // })
-    // .catch(error => {
-    //   throw new UserAgentError(error);
-    // });
   }
 
   /**
@@ -76,18 +67,4 @@ export default class SelfIssuedCredential implements ICredential {
     // Add the claim to the credential
     this.claims.push(claim);
   }
-
-  /**
-   * Used to control the the properties that are
-   * output by JSON.stringify.
-   */
-  // public toJSON (): any {
-    // The JSON representation of the credential
-    // MUST conform to the OpenID Connect
-    // Self-Issued specification id token
-
-    // TODO Use a JWT lib for creating the actual
-    // JWT for serializing.
-
-    // Need to generate thumbprint for the
 }
