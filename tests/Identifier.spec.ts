@@ -302,7 +302,7 @@ describe('Identifier', () => {
       options.keyStore = new KeyStoreMock();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
-      const signMethod = spyOn(Protect, 'sign').and.returnValue('signedPayload');
+      const signMethod = spyOn(Protect, 'sign').and.returnValue(Promise.resolve('signedPayload'));
       const signedPayload = await identifier.sign('examplePayload', 'did:ion', 'did:ion');
       expect(signMethod).toHaveBeenCalled();
       expect(signedPayload).toBeDefined();
@@ -316,7 +316,7 @@ describe('Identifier', () => {
       options.keyStore = new KeyStoreMock();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
-      const signMethod = spyOn(Protect, 'sign').and.returnValue('signedPayload');
+      const signMethod = spyOn(Protect, 'sign').and.returnValue(Promise.resolve('signedPayload'));
       const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion', 'did:ion');
       expect(signMethod).toHaveBeenCalled();
       expect(signedPayload).toBeDefined();
@@ -356,7 +356,7 @@ describe('Identifier', () => {
 
     it('should resolve identifier document and verify jws', async done => {
       (options.resolver as TestResolver).prepareTest(identifier, identifierDocument);
-      const verifyMethod = spyOn(Protect, 'verify').and.returnValue('verifiedPayload');
+      const verifyMethod = spyOn(Protect, 'verify').and.returnValue(Promise.resolve('verifiedPayload'));
       const verifiedPayload = await identifier.verify(testJws);
       expect(verifyMethod).toHaveBeenCalledWith(testJws, identifierDocument.publicKeys);
       expect(verifiedPayload).toBeDefined();
@@ -366,7 +366,7 @@ describe('Identifier', () => {
 
     it('should verify jws', async done => {
       const testIdentifier = new Identifier(identifierDocument);
-      const verifyMethod = spyOn(Protect, 'verify').and.returnValue('verifiedPayload');
+      const verifyMethod = spyOn(Protect, 'verify').and.returnValue(Promise.resolve('verifiedPayload'));
       const verifiedPayload = await testIdentifier.verify(testJws);
       expect(verifyMethod).toHaveBeenCalledWith(testJws, identifierDocument.publicKeys);
       expect(verifiedPayload).toBeDefined();

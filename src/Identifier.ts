@@ -6,7 +6,6 @@
 import { DidKey, KeyExport, KeyUseFactory, KeyTypeFactory, KeyUse } from '@decentralized-identity/did-crypto-typescript';
 import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
-
 import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
