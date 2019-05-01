@@ -18,27 +18,37 @@
   "license": "MIT",
   "main": "dist/src/index.js",
   "scripts": {
+    "precommit": "npm run lint && npm run build:docs && git add docs/sdk.md",
     "build": "tsc --p tsconfig.json",
     "test": "nyc jasmine-ts --config=tests/jasmine.json",
     "lint": "tslint --fix --project . --config ./tslint.json",
-    "lint-pr": "tslint --project . --config ./tslint.json"
+    "lint-pr": "tslint --project . --config ./tslint.json",
+    "build:docs": "jsdoc2md --files src/**/*.ts --configure jsdoc2md.json > docs/sdk.md"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-typescript": "^7.3.3",
     "@types/jasmine": "3.3.8",
-    "@types/node": "11.9.3",
     "@types/lodash": "4.14.123",
+    "@types/memdown": "3.0.0",
+    "@types/node": "11.9.3",
     "@types/pouchdb": "6.3.3",
     "@types/pouchdb-adapter-memory": "6.1.2",
-    "@types/memdown": "3.0.0",
+    "fetch-mock": "7.3.0",
+    "husky": "^2.1.0",
     "jasmine": "3.3.1",
     "jasmine-reporters": "2.3.2",
     "jasmine-spec-reporter": "4.2.1",
     "jasmine-ts": "0.3.0",
+    "jsdoc-babel": "^0.5.0",
+    "jsdoc-to-markdown": "^4.0.1",
     "nyc": "13.3.0",
     "ts-node": "7.0.1",
     "tslint": "5.12.1",
-    "tslint-config-standard": "8.0.1",
-    "fetch-mock": "7.3.0"
+    "tslint-config-standard": "8.0.1"
   },
   "dependencies": {
     "@decentralized-identity/did-auth-jose": "0.1.11",
