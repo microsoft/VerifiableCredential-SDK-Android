@@ -94,7 +94,7 @@ export interface HostServiceEndpoint extends ServiceEndpoint {
   /**
    * The type of the service reference.
    */
-  locations: Array<string>;
+  locations: string[];
 }
 
 /**
@@ -120,7 +120,7 @@ export interface UserServiceEndpoint extends ServiceEndpoint {
   /**
    * The type of the service reference.
    */
-  instances: Array<string>;
+  instances: string[];
 }
 
 /**
@@ -156,7 +156,7 @@ export interface DataInput {
    * a variety of proofs/prerequisites that can be accepted.
    * e.g. [A]
    */
-  group: Array<string>;
+  group: string[];
 
   /**
    * what data input is used for.
@@ -184,7 +184,7 @@ export interface CredentialInput {
    * a variety of proofs/prerequisites that can be accepted.
    * e.g. [A]
    */
-  group: Array<string>;
+  group: string[];
 
   /**
    * Schema used for the specific credential.
@@ -199,7 +199,7 @@ export interface CredentialInput {
     /**
      * issuers that are allowed to have issued claim requested.
      */
-    issuers: Array<string>
+    issuers: string[]
   };
 }
 
@@ -216,7 +216,7 @@ export interface OpenIDInput {
    * a variety of proofs/prerequisites that can be accepted.
    * e.g. [A]
    */
-  group: Array<string>;
+  group: string[];
 
   /**
    * redirect URL.

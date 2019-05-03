@@ -17,28 +17,32 @@ export default class SelfIssuedCredential implements ICredential {
   /**
    * Array to hold claims to be included in the credential
    */
-  private claims: Array<Claim> = [];
-
-  /**
-   * The identifier of the issuer of
-   * the credential.
-   */
-  public readonly issuedBy: Identifier;
+  private claims: Claim[] = [];
 
   /**
    * The identifier the credential was
    * issued to.
+   * @inheritdoc
+   */
+  public readonly issuedBy: Identifier;
+
+  /**
+   * The identifier of the issuer of
+   * the credential.
+   * @inheritdoc
    */
   public readonly issuedTo: Identifier;
 
   /**
    * The date the credential was issued.
+   * @inheritdoc
    */
   public readonly issuedAt: Date;
 
   /**
    * The date and time that the
    * credential expires at.
+   * @inheritdoc
    */
   public readonly expiresAt?: Date;
 
@@ -67,4 +71,18 @@ export default class SelfIssuedCredential implements ICredential {
     // Add the claim to the credential
     this.claims.push(claim);
   }
+
+  /**
+   * Used to control the the properties that are
+   * output by JSON.stringify.
+   */
+  // public toJSON (): any {
+    // The JSON representation of the credential
+    // MUST conform to the OpenID Connect
+    // Self-Issued specification id token
+
+    // Use a JWT lib for creating the actual
+    // JWT for serializing.
+
+    // Need to generate thumbprint for the
 }

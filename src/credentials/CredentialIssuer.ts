@@ -41,7 +41,6 @@ export default class CredentialIssuer {
   /**
    * Constructs an instance of the credential issuer
    * based on the specified credential manifest.
-   * TODO: check if manifest param is id in hub of credential manifest.
    * @param identifier for the issuer.
    * @param manifest credential manifest object or endpoint string of manifest.
    */
@@ -87,8 +86,6 @@ export default class CredentialIssuer {
    */
   public async requestCredential (inputCredential: ICredential): Promise<ICredential> {
 
-    // Sign the credential, will need to
-    // TODO: add sign and encrypt methods on identifier class
     const serializedCredential = JSON.stringify(inputCredential);
 
     return new Promise(async (resolve, reject) => {
@@ -136,18 +133,11 @@ export default class CredentialIssuer {
     if (!this.validateCredential(inputCredential)) {
       throw new UserAgentError(`Credential issued by '${inputCredential.issuedBy.id}' does not match credential manifest '${this.manifest.credential}'`);
     }
-
-    // exchange credential using data handler plug in.
-    const exchangedCredential = await dataHandler.process(inputCredential);
-
-    // TODO: sign and encrypt credentials using Identifiers private key.
-
-    return exchangedCredential;
+    return dataHandler.process(inputCredential);
   }
 
   /**
    * Validate whether a credential is valid for the manifest.
-   * TODO: implement method to validate that credential matches the manifest.
    * @param _inputCredential the Credential to validate against the credential manifest
    */
   public validateCredential (_inputCredential: ICredential) {

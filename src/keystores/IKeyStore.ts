@@ -16,7 +16,7 @@ export default interface IKeyStore {
    * key identifier.
    * @param keyIdentifier for which to return the key.
    */
-  get (keyIdentifier: string): Promise<Buffer | DidKey>;
+  getKey (keyIdentifier: string): Promise<Buffer | DidKey>;
 
   /**
    * Saves the specified key to the key store using

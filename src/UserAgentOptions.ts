@@ -53,6 +53,7 @@ export default class UserAgentOptions {
 
   /**
    * Crypto Options
+   * contains algorithm and other data about crypto
    */
   cryptoOptions?: CryptoOptions;
 

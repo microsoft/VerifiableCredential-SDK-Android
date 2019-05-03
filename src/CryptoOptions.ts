@@ -2,8 +2,8 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import WebCrypto from 'node-webcrypto-ossl';
-const crypto = new WebCrypto();
+import nodeWebcryptoOssl from 'node-webcrypto-ossl';
+const crypto = new nodeWebcryptoOssl();
 
 /**
  * Class used to model crypto options

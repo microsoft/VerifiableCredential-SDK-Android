@@ -18,7 +18,7 @@ export default class KeyStoreMock implements IKeyStore {
    * key identifier.
    * @param keyIdentifier for which to return the key.
    */
-  get (keyIdentifier: string): Promise<Buffer | DidKey> {
+  getKey (keyIdentifier: string): Promise<Buffer | DidKey> {
     console.log(this.store.toString() + keyIdentifier);
     return new Promise((resolve, reject) => {
       if (this.store.has(keyIdentifier)) {
