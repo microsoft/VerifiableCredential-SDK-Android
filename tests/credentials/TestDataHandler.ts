@@ -19,11 +19,10 @@ export default class TestDataHandler implements IDataHandler {
    */
   public async process (inputCredential: ICredential): Promise<ICredential> {
 
-    const credential: ICredential = {
+    return {
       issuedBy: inputCredential.issuedTo,
       issuedTo: inputCredential.issuedBy,
       issuedAt: new Date()
     };
-    return credential;
   }
 }

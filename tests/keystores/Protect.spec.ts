@@ -16,7 +16,7 @@ describe('Protect', () => {
 
     const payload = 'example payload';
 
-    it('should verify a jws using RSA keys', async done => {
+    it('should verify a jws using RSA keys', async () => {
       const didKey = new DidKey(
         (new CryptoOptions()).cryptoApi,
         { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: 'SHA-256' } },
@@ -25,9 +25,10 @@ describe('Protect', () => {
       const privateKey = await didKey.getJwkKey(KeyExport.Private);
       const jwk: any = await didKey.getJwkKey(KeyExport.Public);
       jwk.kid = '#key1';
+      // switch to leveraging pairwiseKey
       const publicKey: PublicKey = {
         id: jwk.kid,
-        type: 'RsaVerificationKey2018',  // TODO switch by leveraging pairwiseKey
+        type: 'RsaVerificationKey2018',
         publicKeyJwk: jwk
       };
       const keyStore = new KeyStoreMock();
@@ -36,10 +37,9 @@ describe('Protect', () => {
       const result = await Protect.verify(signature, [publicKey]);
       expect(result).toBeDefined();
       expect(result).toBe(payload);
-      done();
     });
 
-    it('should verify a jws using EC keys', async done => {
+    it('should verify a jws using EC keys', async () => {
       const didKey = new DidKey(
         (new CryptoOptions()).cryptoApi,
         { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
@@ -59,10 +59,9 @@ describe('Protect', () => {
       const result = await Protect.verify(signature, [publicKey]);
       expect(result).toBeDefined();
       expect(result).toBe(payload);
-      done();
     });
 
-    it('should throw an error because key type is not supported', async done => {
+    it('should throw an error because key type is not supported', async () => {
       const didKey = new DidKey(
         (new CryptoOptions()).cryptoApi,
         { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
@@ -88,10 +87,9 @@ describe('Protect', () => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual('The key type \'AA\' is not supported.');
       }
-      done();
     });
 
-    it('should throw an error because no public key matches the header key id', async done => {
+    it('should throw an error because no public key matches the header key id', async () => {
       const didKey = new DidKey(
         (new CryptoOptions()).cryptoApi,
         { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
@@ -115,10 +113,9 @@ describe('Protect', () => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual('No Public Key \'#key1\'');
       }
-      done();
     });
 
-    it('should throw an error because signature could not be verified', async done => {
+    it('should throw an error because signature could not be verified', async () => {
       const didKey = new DidKey(
         (new CryptoOptions()).cryptoApi,
         { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
@@ -138,7 +135,6 @@ describe('Protect', () => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual('JWS Token cannot be verified by public key: \'Error: Could not parse contents into a JWS\'');
       }
-      done();
     });
   });
 });

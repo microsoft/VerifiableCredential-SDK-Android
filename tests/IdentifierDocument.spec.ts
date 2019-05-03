@@ -7,7 +7,7 @@ import { AuthenticationReference, UserServiceEndpoint, HostServiceEndpoint, Serv
 import IdentifierDocument from '../src/IdentifierDocument';
 
 describe('IdentifierDocument', () => {
-  it('should construct new instance when provided a document', async done => {
+  it('should construct new instance when provided a document', async () => {
     const document = {
       id: 'did:ion:identifier',
       created: '2019-01-25T01:08:44.732Z',
@@ -35,10 +35,9 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument.created).toEqual(new Date('2019-01-25T01:08:44.732Z'));
     expect(identifierDocument.publicKeys).toBeDefined();
     expect(identifierDocument.publicKeys.length).toEqual(1);
-    done();
   });
 
-  it('should create a new instance with expected properties', async done => {
+  it('should create a new instance with expected properties', async () => {
     const publicKeys = [
       {
         id: '#master',
@@ -67,10 +66,9 @@ describe('IdentifierDocument', () => {
     }
     expect(identifierDocument.publicKeys).toBeDefined();
     expect(identifierDocument.publicKeys.length).toEqual(1);
-    done();
   });
 
-  it('should add authentication references', async done => {
+  it('should add authentication references', async () => {
     const publicKeys = [
       {
         id: '#master',
@@ -92,19 +90,18 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument).toBeDefined();
 
     // Add authetication references
-    const authenticationReference = {
+    const authenticationReference = <AuthenticationReference> {
       type: 'RsaVerificationKey2018',
       publicKeyReference: '#master'
-    } as AuthenticationReference;
+    };
 
     identifierDocument.addAuthenticationReference(authenticationReference);
     expect(identifierDocument.authenticationReferences.length).toEqual(1);
     expect(identifierDocument.authenticationReferences[0].type).toEqual('RsaVerificationKey2018');
     expect(identifierDocument.authenticationReferences[0].publicKeyReference).toEqual('#master');
-    done();
   });
 
-  it('should add service reference for user service endpoint', async done => {
+  it('should add service reference for user service endpoint', async () => {
     const publicKeys = [
       {
         id: '#master',
@@ -126,7 +123,7 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument).toBeDefined();
 
     // Add authetication references
-    const serviceReference = {
+    const serviceReference = <ServiceReference> {
       type: 'ServiceReference',
       publicKeyReference: '#master',
       serviceEndpoint: {
@@ -134,7 +131,7 @@ describe('IdentifierDocument', () => {
         type: 'UserServiceEndpoint',
         instances: ['test']
       }
-    } as ServiceReference;
+    };
 
     identifierDocument.addServiceReference(serviceReference);
     expect(identifierDocument.serviceReferences.length).toEqual(1);
@@ -143,13 +140,12 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument.serviceReferences[0].serviceEndpoint).toBeDefined();
     expect(identifierDocument.serviceReferences[0].serviceEndpoint.context).toEqual('TestContext');
     expect(identifierDocument.serviceReferences[0].serviceEndpoint.type).toEqual('UserServiceEndpoint');
-    const userServiceEndpoint = identifierDocument.serviceReferences[0].serviceEndpoint as UserServiceEndpoint;
+    const userServiceEndpoint = <UserServiceEndpoint> identifierDocument.serviceReferences[0].serviceEndpoint;
     expect(userServiceEndpoint.instances.length).toEqual(1);
     expect(userServiceEndpoint.instances[0]).toEqual('test');
-    done();
   });
 
-  it('should add service reference for host service endpoint', async done => {
+  it('should add service reference for host service endpoint', async () => {
     const publicKeys = [
       {
         id: '#master',
@@ -171,7 +167,7 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument).toBeDefined();
 
     // Add authetication references
-    const serviceReference = {
+    const serviceReference = <ServiceReference> {
       type: 'ServiceReference',
       publicKeyReference: '#master',
       serviceEndpoint: {
@@ -179,7 +175,7 @@ describe('IdentifierDocument', () => {
         type: 'HostServiceEndpoint',
         locations: ['test']
       }
-    } as ServiceReference;
+    };
 
     identifierDocument.addServiceReference(serviceReference);
     expect(identifierDocument.serviceReferences.length).toEqual(1);
@@ -188,9 +184,8 @@ describe('IdentifierDocument', () => {
     expect(identifierDocument.serviceReferences[0].serviceEndpoint).toBeDefined();
     expect(identifierDocument.serviceReferences[0].serviceEndpoint.context).toEqual('TestContext');
     expect(identifierDocument.serviceReferences[0].serviceEndpoint.type).toEqual('HostServiceEndpoint');
-    const hostServiceEndpoint = identifierDocument.serviceReferences[0].serviceEndpoint as HostServiceEndpoint;
+    const hostServiceEndpoint = <HostServiceEndpoint> identifierDocument.serviceReferences[0].serviceEndpoint;
     expect(hostServiceEndpoint.locations.length).toEqual(1);
     expect(hostServiceEndpoint.locations[0]).toEqual('test');
-    done();
   });
 });

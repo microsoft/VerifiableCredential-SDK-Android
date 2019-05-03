@@ -7,7 +7,7 @@ import IdentifierDocument from '../src/IdentifierDocument';
 
 describe('IdentifierDocument [Standards Compliance]', () => {
 
-  it('should serialize expected JSON-LD excluding empty properties', async done => {
+  it('should serialize expected JSON-LD excluding empty properties', async () => {
     const document = {
       id: 'did:ion:identifier',
       created: '2019-01-25T01:08:44.732Z',
@@ -34,10 +34,9 @@ describe('IdentifierDocument [Standards Compliance]', () => {
     const serializedDocument = JSON.stringify(identifierDocument);
     /* tslint:disable:max-line-length */
     expect(serializedDocument).toEqual('{"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}');
-    done();
   });
 
-  it('should serialize expected JSON-LD', async done => {
+  it('should serialize expected JSON-LD', async () => {
     const document = {
       id: 'did:ion:identifier',
       created: '2019-01-25T01:08:44.732Z',
@@ -66,10 +65,9 @@ describe('IdentifierDocument [Standards Compliance]', () => {
     expect(serializedDocument).toEqual('{"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}');
     delete identifierDocument.publicKeys;
     expect(JSON.stringify(identifierDocument)).toEqual('{"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1"}');
-    done();
   });
 
-  it('should deserialize JSON-LD', async done => {
+  it('should deserialize JSON-LD', async () => {
     const document = {
       id: 'did:ion:identifier',
       created: '2019-01-25T01:08:44.732Z',
@@ -97,6 +95,5 @@ describe('IdentifierDocument [Standards Compliance]', () => {
     expect(document.id).toBe(deserializedDocument.id);
     expect(1).toBe(deserializedDocument.publicKeys.length);
     expect(document.authenticationReferences).toEqual(deserializedDocument.authenticationReferences);
-    done();
   });
 });

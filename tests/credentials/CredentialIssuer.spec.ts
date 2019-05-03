@@ -8,57 +8,67 @@ import Identifier from '../../src/Identifier';
 import UserAgentError from '../../src/UserAgentError';
 import CredentialManifest from '../../src/credentials/CredentialManifest';
 import TestDataHandler from './TestDataHandler';
-const fetchMock = require('fetch-mock');
+
+let fetchMock: any;
 
 describe('CredentialIssuer', () => {
+
+  let credentialManifest: CredentialManifest;
+  let issuerIdentifier: Identifier; 
+  let consumer: Identifier;
+  let inputCredential: any;
+  let testVerifiedCredential: any;
+
+  beforeAll(() => {
+    fetchMock = require('fetch-mock');
+
+    credentialManifest = new CredentialManifest({
+      credential: 'example',
+      endpoint: 'https://enterpriseagent.org/verifiedcredential.json'
+    });
+
+    issuerIdentifier = new Identifier('did:test:example.id');
+    consumer = new Identifier('did:test:consumer.id');
+
+    
+    inputCredential = {
+      issuedBy: consumer,
+      issuedTo: issuerIdentifier,
+      issuedAt: new Date()
+    };
+
+    testVerifiedCredential = {
+      issuedBy: issuerIdentifier,
+      issuedTo: consumer,
+      issuedAt: new Date()
+    };
+  });
 
   afterEach(() => {
     fetchMock.restore();
   });
 
-  const CREDENTIALMANIFEST = new CredentialManifest({
-    credential: 'example',
-    endpoint: 'https://enterpriseagent.org/verifiedcredential.json'
-  });
-
-  const issuerIdentifier = new Identifier('did:test:example.id');
-  const consumer = new Identifier('did:test:consumer.id');
-
-  const inputCredential = {
-    issuedBy: consumer,
-    issuedTo: issuerIdentifier,
-    issuedAt: new Date()
-  };
-
-  const VERIFIEDCREDENTIAL = {
-    issuedBy: issuerIdentifier,
-    issuedTo: consumer,
-    issuedAt: new Date()
-  };
-
   describe('create', () => {
-    it('should create a new CredentialIssuer from Credential Manifest Endpoint', async done => {
+    it('should create a new CredentialIssuer from Credential Manifest Endpoint', async () => {
       fetchMock.get(
         'https://enterpriseagent.org/credentialManifest.json',
-        new Promise(resolve => resolve(CREDENTIALMANIFEST))
+        new Promise(resolve => resolve(credentialManifest))
       );
 
       const issuer: CredentialIssuer = await CredentialIssuer.create(issuerIdentifier,
          'https://enterpriseagent.org/credentialManifest.json');
       expect(issuer).toBeDefined();
-      expect(issuer.manifest).toEqual(CREDENTIALMANIFEST);
-      done();
+      expect(issuer.manifest).toEqual(credentialManifest);
     });
 
-    it('should create a new CredentialIssuer from Credential Manifest Object', async done => {
+    it('should create a new CredentialIssuer from Credential Manifest Object', async () => {
 
-      const issuer: CredentialIssuer = await CredentialIssuer.create(issuerIdentifier, CREDENTIALMANIFEST);
+      const issuer: CredentialIssuer = await CredentialIssuer.create(issuerIdentifier, credentialManifest);
       expect(issuer).toBeDefined();
-      expect(issuer.manifest).toEqual(CREDENTIALMANIFEST);
-      done();
+      expect(issuer.manifest).toEqual(credentialManifest);
     });
 
-    it('should throw an error when fetch returns 404', async done => {
+    it('should throw an error when fetch returns 404', async () => {
       fetchMock.get('https://enterpriseagent.org/credentialManifest.json', 404);
 
       try {
@@ -71,10 +81,9 @@ describe('CredentialIssuer', () => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Failed to request a credential manifest from the issuer 'did:test:example.id.'`);
       }
-      done();
     });
 
-    it('should throw an error when server returns 500', async done => {
+    it('should throw an error when server returns 500', async () => {
       fetchMock.get('https://enterpriseagent.org/credentialManifest.json', 500);
 
       try {
@@ -87,7 +96,6 @@ describe('CredentialIssuer', () => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`'https://enterpriseagent.org/credentialManifest.json' returned an error with 'Internal Server Error'`);
       }
-      done();
     });
   });
 
@@ -97,24 +105,23 @@ describe('CredentialIssuer', () => {
       fetchMock.restore();
     });
 
-    it('should get a verified credential back', async done => {
+    it('should get a verified credential back', async () => {
       const options = { method: 'POST' };
       fetchMock.mock(
         'https://enterpriseagent.org/verifiedcredential.json',
-        VERIFIEDCREDENTIAL,
+        testVerifiedCredential,
         options
       );
 
-      const issuer = new CredentialIssuer(issuerIdentifier, CREDENTIALMANIFEST);
+      const issuer = new CredentialIssuer(issuerIdentifier, credentialManifest);
       const verifiedCredential = await issuer.requestCredential(inputCredential);
       expect(verifiedCredential).toBeDefined();
       expect(verifiedCredential.issuedBy.id).toEqual('did:test:example.id');
       expect(verifiedCredential.issuedTo.id).toEqual('did:test:consumer.id');
-      done();
     });
 
-    it('should throw an error when fetch returns 404', async done => {
-      const response = { status: 404, body: VERIFIEDCREDENTIAL };
+    it('should throw an error when fetch returns 404', async () => {
+      const response = { status: 404, body: testVerifiedCredential };
       const options = { method: 'POST' };
       fetchMock.mock(
         'https://enterpriseagent.org/verifiedcredential.json',
@@ -123,7 +130,7 @@ describe('CredentialIssuer', () => {
       );
 
       try {
-        const issuer = new CredentialIssuer(issuerIdentifier, CREDENTIALMANIFEST);
+        const issuer = new CredentialIssuer(issuerIdentifier, credentialManifest);
         const verifiedCredential = await issuer.requestCredential(inputCredential);
         console.log(verifiedCredential);
         fail();
@@ -132,11 +139,10 @@ describe('CredentialIssuer', () => {
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Failed to request a credential from the issuer 'did:test:example.id.'`);
       }
-      done();
     });
 
-    it('should throw a timeout error', async done => {
-      const delay = new Promise((res, _rej) => setTimeout(res, 40000));
+    it('should throw a timeout error', async () => {
+      const delay = new Promise((_res, _rej) => setTimeout(_res, 40000));
       // const response = { status: 404, body: VERIFIEDCREDENTIAL };
       // const options = { method: 'POST' };
       fetchMock.mock(
@@ -145,27 +151,25 @@ describe('CredentialIssuer', () => {
       );
 
       try {
-        const issuer = new CredentialIssuer(issuerIdentifier, CREDENTIALMANIFEST);
+        const issuer = new CredentialIssuer(issuerIdentifier, credentialManifest);
         const verifiedCredential = await issuer.requestCredential(inputCredential);
         console.log(verifiedCredential);
         fail();
       } catch (error) {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`Requesting a credential from '${CREDENTIALMANIFEST.endpoint}' timed out`);
+        expect(error.message).toEqual(`Requesting a credential from '${credentialManifest.endpoint}' timed out`);
       }
-      done();
     }, 50000);
   });
 
   describe('handleCredentialRequest', () => {
-
     let issuer: CredentialIssuer;
-
-    const testDataHandler = new TestDataHandler();
+    let testDataHandler: TestDataHandler;
 
     beforeEach(async () => {
-      issuer = await CredentialIssuer.create(issuerIdentifier, CREDENTIALMANIFEST);
+      issuer = await CredentialIssuer.create(issuerIdentifier, credentialManifest);
+      testDataHandler = new TestDataHandler();
     });
 
     it('should throw an error because credential does not match credential manifest', async () => {
@@ -176,7 +180,7 @@ describe('CredentialIssuer', () => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(
-          `Credential issued by '${inputCredential.issuedBy.id}' does not match credential manifest '${CREDENTIALMANIFEST.credential}'`
+          `Credential issued by '${inputCredential.issuedBy.id}' does not match credential manifest '${credentialManifest.credential}'`
           );
       }
     });

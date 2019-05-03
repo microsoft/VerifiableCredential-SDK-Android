@@ -58,7 +58,7 @@ export default class Identifier {
    * @param [options] for configuring how to register and resolve identifiers.
    */
   public static async create (options: UserAgentOptions): Promise<Identifier> {
-    const id = options.didPrefix as string;
+    const id = <string> options.didPrefix;
     return new Identifier(id, options).createLinkedIdentifier(id, true);
   }
 
@@ -73,7 +73,7 @@ export default class Identifier {
   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<Identifier> {
     if (this.options && this.options.keyStore) {
       const keyStore: IKeyStore = this.options.keyStore;
-      const seed: Buffer = await keyStore.get(KeyStoreConstants.masterSeed) as Buffer;
+      const seed: Buffer = <Buffer> await keyStore.getKey(KeyStoreConstants.masterSeed);
 
       // Create DID key
       const didKey = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
@@ -84,9 +84,10 @@ export default class Identifier {
       await keyStore.save(pairwiseKeyStorageId, jwk);
 
       // Set key format
+      // todo switch by leveraging pairwiseKey
       const publicKey: PublicKey = {
         id: jwk.kid,
-        type: this.getDidDocumentKeyType(),  // TODO switch by leveraging pairwiseKey
+        type: this.getDidDocumentKeyType(),
         publicKeyJwk: jwk
       };
       if (this.options.registrar) {
@@ -119,7 +120,7 @@ export default class Identifier {
       }
 
       // We need to resolve the document
-      this.document = await this.options.resolver.resolve(this);
+      this.document = <IdentifierDocument> await this.options.resolver.resolve(this);
     }
 
     return this.document;
@@ -139,7 +140,7 @@ export default class Identifier {
     // If we have been provided a key identifier use
     // the identifier to look up a key in the document
     if (this.document && this.document.publicKeys && keyIdentifier) {
-      const index = this.document.publicKeys.findIndex(key => key.id === keyIdentifier);
+      const index = this.document.publicKeys.findIndex((key: any) => key.id === keyIdentifier);
       if (index === -1) {
         throw new UserAgentError(`Document does not contain a key with id '${keyIdentifier}'`);
       }
@@ -167,7 +168,7 @@ export default class Identifier {
 
   // Create an identifier document. Included the public key.
   private async createIdentifierDocument (id: string, publicKey: PublicKey): Promise <IdentifierDocument> {
-    return IdentifierDocument.createAndGenerateId(id, [ publicKey ], this.options as UserAgentOptions);
+    return IdentifierDocument.createAndGenerateId(id, [ publicKey ], <UserAgentOptions> this.options);
   }
 
   // Get the did document public key type
@@ -194,8 +195,7 @@ export default class Identifier {
         } else {
           body = payload;
         }
-        const signedBody = await this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
-        return signedBody;
+        return this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
       } else {
         throw new UserAgentError('No KeyStore in Options');
       }

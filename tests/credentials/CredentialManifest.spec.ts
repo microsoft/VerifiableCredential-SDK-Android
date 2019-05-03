@@ -17,7 +17,7 @@ describe('ClaimManifest', () => {
 
   const testVersion = 'v1';
 
-  const testEndpoint = 'http://endpoint.org';
+  const testEndpoint = 'endpoint.org';
 
   const testPreconditions = {
     '@type': 'ProofSet',
@@ -29,7 +29,7 @@ describe('ClaimManifest', () => {
     ]
   };
 
-  const testInputs: Array<DataInput> = [
+  const testInputs: DataInput[] = [
     {
       type: 'data',
       group: ['A'],
