@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { DidKey } from '@decentralized-identity/did-crypto-typescript';
-import IKeyStore from 'src/keystores/IKeyStore';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
-import Protect from 'src/keystores/Protect';
+import IKeyStore from '../../src/keystores/IKeyStore';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
+import Protect from '../../src/keystores/Protect';
 
 /**
  * Class defining methods and properties to mock a KeyStore

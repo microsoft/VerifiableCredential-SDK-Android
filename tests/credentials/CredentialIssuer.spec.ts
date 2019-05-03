@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CredentialIssuer from 'src/credentials/CredentialIssuer';
-import Identifier from 'src/Identifier';
-import UserAgentError from 'src/UserAgentError';
-import CredentialManifest from 'src/credentials/CredentialManifest';
-import TestDataHandler from 'tests/credentials/TestDataHandler';
+import CredentialIssuer from '../../src/credentials/CredentialIssuer';
+import Identifier from '../../src/Identifier';
+import UserAgentError from '../../src/UserAgentError';
+import CredentialManifest from '../../src/credentials/CredentialManifest';
+import TestDataHandler from './TestDataHandler';
 
 let fetchMock: any;
 
@@ -142,7 +142,7 @@ describe('CredentialIssuer', () => {
     });
 
     it('should throw a timeout error', async () => {
-      const delay = new Promise((response, _rej) => setTimeout(response, 40000));
+      const delay = new Promise((_res, _rej) => setTimeout(_res, 40000));
       // const response = { status: 404, body: VERIFIEDCREDENTIAL };
       // const options = { method: 'POST' };
       fetchMock.mock(

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IDataHandler from 'src/credentials/IDataHandler';
-import ICredential from 'src/credentials/ICredential';
+import IDataHandler from '../../src/credentials/IDataHandler';
+import ICredential from '../../src/credentials/ICredential';
 
 /**
  * Implementation of a data handler for testing.

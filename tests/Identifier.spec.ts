@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IdentifierDocument from 'src/IdentifierDocument';
-import Identifier from 'src/Identifier';
-import UserAgentOptions from 'src/UserAgentOptions';
-import TestResolver from 'tests/TestResolver';
-import UserAgentError from 'src/UserAgentError';
+import IdentifierDocument from '../src/IdentifierDocument';
+import Identifier from '../src/Identifier';
+import UserAgentOptions from '../src/UserAgentOptions';
+import TestResolver from '../tests/TestResolver';
+import UserAgentError from '../src/UserAgentError';
 import { KeyUse, KeyType } from '@decentralized-identity/did-crypto-typescript';
-import CryptoOptions from 'src/CryptoOptions';
-import KeyStoreMock from 'tests/keystores/KeyStoreMock';
-import Protect from 'src/keystores/Protect';
-import TestRegistrar from 'tests/TestRegistrar';
+import CryptoOptions from '../src/CryptoOptions';
+import KeyStoreMock from './keystores/KeyStoreMock';
+import Protect from '../src/keystores/Protect';
+import TestRegistrar from './TestRegistrar';
 
 describe('Identifier', () => {
 

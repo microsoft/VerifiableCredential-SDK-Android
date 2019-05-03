@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationReference, UserServiceEndpoint, HostServiceEndpoint, ServiceReference } from 'src/types';
-import IdentifierDocument from 'src/IdentifierDocument';
+import { AuthenticationReference, UserServiceEndpoint, HostServiceEndpoint, ServiceReference } from '../src/types';
+import IdentifierDocument from '../src/IdentifierDocument';
 
 describe('IdentifierDocument', () => {
   it('should construct new instance when provided a document', async () => {

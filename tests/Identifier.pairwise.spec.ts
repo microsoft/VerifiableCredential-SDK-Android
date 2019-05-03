@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from 'src/Identifier';
-import IdentifierDocument from 'src/IdentifierDocument';
-import UserAgentOptions from 'src/UserAgentOptions';
-import KeyStoreMock from 'tests/keystores/KeyStoreMock';
-import TestResolver from 'tests/TestResolver';
-import CryptoOptions from 'src/CryptoOptions';
+import Identifier from '../src/Identifier';
+import IdentifierDocument from '../src/IdentifierDocument';
+import UserAgentOptions from '../src/UserAgentOptions';
+import KeyStoreMock from './keystores/KeyStoreMock';
+import TestResolver from './TestResolver';
+import CryptoOptions from '../src/CryptoOptions';
 import { KeyTypeFactory } from '@decentralized-identity/did-crypto-typescript';
-import SidetreeRegistrar from 'src/registrars/SidetreeRegistrar';
-import KeyStoreConstants from 'src/keystores/KeyStoreConstants';
-import IRegistrar from 'src/registrars/IRegistrar';
+import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
+import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
+import IRegistrar from '../src/registrars/IRegistrar';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -87,7 +87,7 @@ describe('Pairwise Identifier', async () => {
     const identifier = new Identifier(personaId, {});
     let throwDetected: boolean = false;
     await identifier.createLinkedIdentifier('did:ion:peer')
-    .catch((err) => {
+    .catch((err: any) => {
       expect('No keyStore in options').toBe(err.message);
       throwDetected = true;
     });
@@ -104,7 +104,7 @@ describe('Pairwise Identifier', async () => {
     const identifier = new Identifier(personaId, options);
     let throwDetected: boolean = false;
     await identifier.createLinkedIdentifier('did:ion:peer', true)
-    .catch((err) => {
+    .catch((err: any) => {
       expect('No registrar in options to register DID document').toBe(err.message);
       throwDetected = true;
     });

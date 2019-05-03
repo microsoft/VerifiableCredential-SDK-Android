@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// import { SignatureFormat } from '../../src/keystores/signatureFormat';
-import UserAgentOptions from 'src/UserAgentOptions';
+import UserAgentOptions from '../../src/UserAgentOptions';
 import { DidKey, KeyExport } from '@decentralized-identity/did-crypto-typescript';
-import CryptoOptions from 'src/CryptoOptions';
-import KeyStoreConstants from 'src/keystores/KeyStoreConstants';
-import KeyStoreMock from 'tests/keystores/KeyStoreMock';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
+import CryptoOptions from '../../src/CryptoOptions';
+import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
+import KeyStoreMock from './KeyStoreMock';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 
 describe('KeyStoreMock', async () => {
 

@@ -1,10 +1,10 @@
-import Protect from 'src/keystores/Protect';
+import Protect from '../../src/keystores/Protect';
 import { DidKey, KeyExport } from '@decentralized-identity/did-crypto-typescript';
-import CryptoOptions from 'src/CryptoOptions';
-import KeyStoreMock from 'tests/keystores/KeyStoreMock';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
-import { PublicKey } from 'src/types';
-import UserAgentError from 'src/UserAgentError';
+import CryptoOptions from '../../src/CryptoOptions';
+import KeyStoreMock from './KeyStoreMock';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
+import { PublicKey } from '../../src/types';
+import UserAgentError from '../../src/UserAgentError';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.

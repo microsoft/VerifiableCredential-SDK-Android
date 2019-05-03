@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { FlatJsonJws } from '@decentralized-identity/did-auth-jose';
-import SidetreeRegistrar from 'src/registrars/SidetreeRegistrar';
-import IdentifierDocument from 'src/IdentifierDocument';
-import Identifier from 'src/Identifier';
-import UserAgentError from 'src/UserAgentError';
-import UserAgentOptions from 'src/UserAgentOptions';
-import CryptoOptions from 'src/CryptoOptions';
-import KeyStoreConstants from 'src/keystores/KeyStoreConstants';
-import KeyStoreMock from 'tests/keystores/KeyStoreMock';
+import SidetreeRegistrar from '../../src/registrars/SidetreeRegistrar';
+import IdentifierDocument from '../../src/IdentifierDocument';
+import Identifier from '../../src/Identifier';
+import UserAgentError from '../../src/UserAgentError';
+import UserAgentOptions from '../../src/UserAgentOptions';
+import CryptoOptions from '../../src/CryptoOptions';
+import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
+import KeyStoreMock from '../keystores/KeyStoreMock';
 import { DidKey, KeyExport } from '@decentralized-identity/did-crypto-typescript';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
+import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 let fetchMock: any;
 
 // Add a document to the cache
@@ -66,7 +66,7 @@ describe('SidetreeRegistrar', () => {
         .then(() => {
           fail('Should throw');
         })
-        .catch((err) => {
+        .catch((err: any) => {
           expect(`The key type 'AA' is not supported.`).toBe(err.message);
           done();
         });
@@ -173,7 +173,7 @@ describe('SidetreeRegistrar', () => {
 
     await registrar
       .generateIdentifier(new IdentifierDocument(DOCUMENT))
-      .catch(error => {
+      .catch((error: any) => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual('At least one public key must be specified in the identifier document.');

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CredentialManifest from 'src/credentials/CredentialManifest';
-import { DataInput } from 'src/types';
-import CredentialManifestIssuerOptions from 'src/credentials/CredentialManifestIssuerOptions';
+import CredentialManifest from '../../src/credentials/CredentialManifest';
+import { DataInput } from '../../src/types';
+import CredentialManifestIssuerOptions from '../../src/credentials/CredentialManifestIssuerOptions';
 
 describe('ClaimManifest', () => {
 

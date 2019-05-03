@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Multihash from 'src/registrars/Multihash';
+import Multihash from '../../src/registrars/Multihash';
 
 describe('Multihash', () => {
   it('should throw on unsupported hash algorithm', () => {

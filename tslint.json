@@ -1,6 +1,6 @@
 {
   "defaultSeverity": "error",
-  "extends": ["tslint-microsoft-contrib/recommended"],
+  "extends": "tslint-microsoft-contrib/recommended",
   "linterOptions": {
     "exclude": [
       "node_modules/**"
@@ -8,65 +8,67 @@
   },
   "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
   "rules": {
-    "prefer-const": true,
+  //  "prefer-const": true,
+    "no-string-based-set-timeout": false,
     "function-name": [
       true, 
       {
         "static-method-regex": "^[a-z][\\w\\d]+$"
       }
     ],
-    "completed-docs": [
-      true,
-      {
-        "classes": {
-          "visibilities": ["exported"]
-        },
-        "enums": {
-          "visibilities": ["exported"]
-        },
-        "functions": {
-          "visibilities": ["exported"]
-        },
-        "interfaces": {
-          "visibilities": ["exported"]
-        },
-        "methods": {
-          "privacies": ["public", "protected"], 
-          "locations": ["all"]
-        },
-        "properties": {
-          "privacies": ["public", "protected"], 
-          "locations": ["all"]
-        },
-        "types": {
-          "visibilities": ["all"]
-        }
-      }
-    ],
-    "jsdoc-format": [
-      true,
-      "check-multiline-start"
-    ],
-    "max-line-length": [
-      true,
-      160
-    ],
-    "object-literal-key-quotes" : [
-      true,
-      "consistent-as-needed"
-    ],
-    "only-arrow-functions": [
-      true,
-      "allow-named-functions"
-    ],
-    "semicolon": [
-      true,
-      "always"
-    ],
-    "variable-name": [
-      true, 
-      "allow-leading-underscore",
-      "check-format"
-    ]
+    "no-relative-imports": false,
+    // "completed-docs": [
+    //   true,
+    //   {
+    //     "classes": {
+    //       "visibilities": ["exported"]
+    //     },
+    //     "enums": {
+    //       "visibilities": ["exported"]
+    //     },
+    //     "functions": {
+    //       "visibilities": ["exported"]
+    //     },
+    //     "interfaces": {
+    //       "visibilities": ["exported"]
+    //     },
+    //     "methods": {
+    //       "privacies": ["public", "protected"], 
+    //       "locations": ["all"]
+    //     },
+    //     "properties": {
+    //       "privacies": ["public", "protected"], 
+    //       "locations": ["all"]
+    //     },
+    //     "types": {
+    //       "visibilities": ["all"]
+    //     }
+    //   }
+    // ],
+    // "jsdoc-format": [
+    //   true,
+    //   "check-multiline-start"
+    // ],
+    // "max-line-length": [
+    //   true,
+    //   160
+    // ],
+    // "object-literal-key-quotes" : [
+    //   true,
+    //   "consistent-as-needed"
+    // ],
+    // "only-arrow-functions": [
+    //   true,
+    //   "allow-named-functions"
+    // ],
+    // "semicolon": [
+    //   true,
+    //   "always"
+    // ],
+    // "variable-name": [
+    //   true, 
+    //   "allow-leading-underscore",
+    //   "check-format"
+    // ]
   }
 }

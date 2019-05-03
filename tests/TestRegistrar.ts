@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IRegistrar from 'src/registrars/IRegistrar';
-import Identifier from 'src/Identifier';
-import IdentifierDocument from 'src/IdentifierDocument';
+import IRegistrar from '../src/registrars/IRegistrar';
+import Identifier from '../src/Identifier';
+import IdentifierDocument from '../src/IdentifierDocument';
 
 /**
  * Implementation of a registrar for testing.
