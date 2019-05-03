@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CredentialManifest from '../../src/credentials/CredentialManifest';
-import { DataInput } from '../../src/types';
-import CredentialManifestIssuerOptions from '../../src/credentials/CredentialManifestIssuerOptions';
+import CredentialManifest from 'src/credentials/CredentialManifest';
+import { DataInput } from 'src/types';
+import CredentialManifestIssuerOptions from 'src/credentials/CredentialManifestIssuerOptions';
 
 describe('ClaimManifest', () => {
 
@@ -17,7 +17,7 @@ describe('ClaimManifest', () => {
 
   const testVersion = 'v1';
 
-  const testEndpoint = 'http://endpoint.org';
+  const testEndpoint = 'endpoint.org';
 
   const testPreconditions = {
     '@type': 'ProofSet',
@@ -29,7 +29,7 @@ describe('ClaimManifest', () => {
     ]
   };
 
-  const testInputs: Array<DataInput> = [
+  const testInputs: DataInput[] = [
     {
       type: 'data',
       group: ['A'],

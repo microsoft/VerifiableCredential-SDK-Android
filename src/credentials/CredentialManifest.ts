@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CredentialInput, DataInput, OpenIDInput } from '../types';
-import CredentialManifestIssuerOptions from './CredentialManifestIssuerOptions';
+import { CredentialInput, DataInput, OpenIDInput } from 'src/types';
+import CredentialManifestIssuerOptions from 'src/credentials/CredentialManifestIssuerOptions';
 
 /**
  * context for credentialManifest
@@ -30,7 +30,7 @@ export default class CredentialManifest {
   /**
    * Languages supported for localization
    */
-  public readonly language?: Array<string>;
+  public readonly language?: string[];
 
   /**
    * the keeper DID whose hub stores the CredentialManifest.
@@ -50,7 +50,7 @@ export default class CredentialManifest {
   /**
    * inputs parameter for manifest.
    */
-  public readonly inputs?: Array<CredentialInput | DataInput | OpenIDInput>;
+  public readonly inputs?: (CredentialInput | DataInput | OpenIDInput)[];
 
   /**
    * issuer options for things such as the style of the manifest in the UI.
@@ -64,7 +64,6 @@ export default class CredentialManifest {
 
   /**
    * Constructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.
-   * TODO: check that the JSON parameter is valid (yup?)
    */
   constructor (credentialManifest: any) {
     this.endpoint = credentialManifest.endpoint;
@@ -82,11 +81,11 @@ export default class CredentialManifest {
    */
   public static create (credential: string,
                         endpoint: string,
-                        language: Array<string>,
+                        language: string[],
                         keeper: string,
                         version: string,
                         preconditions: any,
-                        inputs: Array<CredentialInput | DataInput | OpenIDInput>,
+                        inputs: (CredentialInput | DataInput | OpenIDInput)[],
                         issuerOptions: CredentialManifestIssuerOptions) {
     const manifest = {
       '@context': context,
@@ -107,7 +106,7 @@ export default class CredentialManifest {
    * serializes the CredentialManifest to JSON.
    */
   public toJSON () {
-    const manifest = {
+    return {
       '@context': context,
       '@type': type,
       'endpoint': this.endpoint,
@@ -116,7 +115,6 @@ export default class CredentialManifest {
       'inputs': this.inputs,
       'issuer_options': this.issuerOptions
     };
-    return manifest;
   }
 
   /**

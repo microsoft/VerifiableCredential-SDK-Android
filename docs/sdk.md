@@ -1,10 +1,6 @@
 ## Classes
 
 <dl>
-<dt><a href="#Claim">Claim</a></dt>
-<dd><p>Interface defining methods and properties for a Claim object.
-The properties such as issuer, logo, name, and descriptions are what are meant to be rendered on the claim UI.
-TODO: figure out what properties exactly we want on a claim.</p></dd>
 <dt><a href="#CredentialIssuer">CredentialIssuer</a></dt>
 <dd><p>Class for obtaining
 credentials from an issuer.</p></dd>
@@ -17,9 +13,6 @@ self-issued id token.</p></dd>
 <dt><a href="#VerifiedCredential">VerifiedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
-<dt><a href="#CredentialStore">CredentialStore</a></dt>
-<dd><p>Interface defining methods and properties to
-be implemented by specific credential stores.</p></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
 <dt><a href="#Identifier">Identifier</a></dt>
@@ -44,8 +37,6 @@ to allow simple testing and experimentation with the UserAgent SDK.</p></dd>
 <dd><p>Registrar implementation for the Sidetree (ION) network</p></dd>
 <dt><a href="#HttpResolver">HttpResolver</a></dt>
 <dd><p>Fetches DID Documents from remote resolvers over http</p></dd>
-<dt><a href="#Jwt">Jwt</a></dt>
-<dd><p>Class for creating and managing a JWT-formed claims</p></dd>
 <dt><a href="#UserAgentError">UserAgentError</a></dt>
 <dd><p>Base error class for the UserAgent.</p></dd>
 <dt><a href="#UserAgentOptions">UserAgentOptions</a></dt>
@@ -63,10 +54,6 @@ User Agent, such as resolver and register.</p></dd>
 methods of a credential.</p></dd>
 <dt><a href="#SignatureFormat">SignatureFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
-<dt><a href="#ClaimDetailsType">ClaimDetailsType</a></dt>
-<dd><p>ClaimDetails Types</p></dd>
-<dt><a href="#ClaimDetailsType">ClaimDetailsType</a></dt>
-<dd><p>Interface defining methods and properties for a Token object</p></dd>
 </dl>
 
 ## Constants
@@ -78,31 +65,6 @@ methods of a credential.</p></dd>
 <dd><p>type for credentialManifest</p></dd>
 </dl>
 
-<a name="Claim"></a>
-
-## Claim
-<p>Interface defining methods and properties for a Claim object.
-The properties such as issuer, logo, name, and descriptions are what are meant to be rendered on the claim UI.
-TODO: figure out what properties exactly we want on a claim.</p>
-
-**Kind**: global class  
-
-* [Claim](#Claim)
-    * [new Claim()](#new_Claim_new)
-    * [.getUIProperties()](#Claim+getUIProperties)
-
-<a name="new_Claim_new"></a>
-
-### new Claim()
-<p>Contructs an instance of the Claim class</p>
-
-<a name="Claim+getUIProperties"></a>
-
-### claim.getUIProperties()
-<p>Get the UI properties in order to render claim correctly
-TODO: figure out exactly what properties we want to render on the claim.</p>
-
-**Kind**: instance method of [<code>Claim</code>](#Claim)  
 <a name="CredentialIssuer"></a>
 
 ## CredentialIssuer
@@ -160,8 +122,7 @@ specified in the credential manifest.</p>
 <a name="CredentialIssuer+validateCredential"></a>
 
 ### credentialIssuer.validateCredential(_inputCredential)
-<p>Validate whether a credential is valid for the manifest.
-TODO: implement method to validate that credential matches the manifest.</p>
+<p>Validate whether a credential is valid for the manifest.</p>
 
 **Kind**: instance method of [<code>CredentialIssuer</code>](#CredentialIssuer)  
 
@@ -173,8 +134,7 @@ TODO: implement method to validate that credential matches the manifest.</p>
 
 ### CredentialIssuer.create(identifier, manifest)
 <p>Constructs an instance of the credential issuer
-based on the specified credential manifest.
-TODO: check if manifest param is id in hub of credential manifest.</p>
+based on the specified credential manifest.</p>
 
 **Kind**: static method of [<code>CredentialIssuer</code>](#CredentialIssuer)  
 
@@ -203,8 +163,7 @@ TODO: check if manifest param is id in hub of credential manifest.</p>
 <a name="new_CredentialManifest_new"></a>
 
 ### new CredentialManifest()
-<p>Constructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.
-TODO: check that the JSON parameter is valid (yup?)</p>
+<p>Constructs an instance of the CredentialManifest class from a well-formed credential manifest JSON object.</p>
 
 <a name="CredentialManifest+toJSON"></a>
 
@@ -274,40 +233,11 @@ self-issued id token.</p>
 
 **Kind**: global class  
 **Implements**: <code>ICredential</code>  
-<a name="CredentialStore"></a>
+<a name="new_VerifiedCredential_new"></a>
 
-## CredentialStore
-<p>Interface defining methods and properties to
-be implemented by specific credential stores.</p>
-
-**Kind**: global class  
-
-* [CredentialStore](#CredentialStore)
-    * [new CredentialStore(hubSession)](#new_CredentialStore_new)
-    * [.create(identifier, publicKeyReference, hubInstance)](#CredentialStore+create)
-
-<a name="new_CredentialStore_new"></a>
-
-### new CredentialStore(hubSession)
-<p>Creates a Credential Store from a Hub Session.</p>
-
-
-| Param | Description |
-| --- | --- |
-| hubSession | <p>hub session for the credential store.</p> |
-
-<a name="CredentialStore+create"></a>
-
-### credentialStore.create(identifier, publicKeyReference, hubInstance)
-<p>Creates a Credential Store from identifier.</p>
-
-**Kind**: instance method of [<code>CredentialStore</code>](#CredentialStore)  
-
-| Param | Description |
-| --- | --- |
-| identifier | <p>Identifier of Hub or User of Hub.</p> |
-| publicKeyReference | <p>Reference to the Public Key for Hub.</p> |
-| hubInstance | <p>Hub Instance Reference if Identifier is a User Identifier.</p> |
+### new VerifiedCredential()
+<p>The date and time that the
+credential expires at.</p>
 
 <a name="CryptoOptions"></a>
 
@@ -443,6 +373,8 @@ retrieving identifier documents.</p>
     * _instance_
         * [.addAuthenticationReference(authenticationReference)](#IdentifierDocument+addAuthenticationReference)
         * [.addServiceReference(serviceReference)](#IdentifierDocument+addServiceReference)
+        * [.getHubInstances()](#IdentifierDocument+getHubInstances)
+        * [.getHubLocations()](#IdentifierDocument+getHubLocations)
         * [.toJSON()](#IdentifierDocument+toJSON)
     * _static_
         * [.create(publicKeys)](#IdentifierDocument.create)
@@ -483,6 +415,18 @@ document.</p>
 | --- | --- |
 | serviceReference | <p>to add to the document.</p> |
 
+<a name="IdentifierDocument+getHubInstances"></a>
+
+### identifierDocument.getHubInstances()
+<p>Get Hub Instances from Identity Service Reference.</p>
+
+**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
+<a name="IdentifierDocument+getHubLocations"></a>
+
+### identifierDocument.getHubLocations()
+<p>Get Hub Locations from Identity Service Reference.</p>
+
+**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
 <a name="IdentifierDocument+toJSON"></a>
 
 ### identifierDocument.toJSON()
@@ -537,7 +481,7 @@ to allow simple testing and experimentation with the UserAgent SDK.</p>
 
 * [InMemoryKeyStore](#InMemoryKeyStore)
     * [new InMemoryKeyStore([encryptionKey])](#new_InMemoryKeyStore_new)
-    * [.get(keyIdentifier)](#InMemoryKeyStore+get)
+    * [.getKey(keyIdentifier)](#InMemoryKeyStore+getKey)
     * [.save(keyIdentifier, key)](#InMemoryKeyStore+save)
     * [.sign(keyIdentifier, data, format)](#InMemoryKeyStore+sign)
 
@@ -553,9 +497,9 @@ using the specified encryption key.</p>
 | --- | --- |
 | [encryptionKey] | <p>a 32 byte buffer that will be used as the key or a string which will be used to generate one.</p> |
 
-<a name="InMemoryKeyStore+get"></a>
+<a name="InMemoryKeyStore+getKey"></a>
 
-### inMemoryKeyStore.get(keyIdentifier)
+### inMemoryKeyStore.getKey(keyIdentifier)
 <p>Gets the key from the store using the specified identifier.</p>
 
 **Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
@@ -738,63 +682,6 @@ specified identifier.</p>
 | --- | --- |
 | identifier | <p>to resolve.</p> |
 
-<a name="Jwt"></a>
-
-## Jwt
-<p>Class for creating and managing a JWT-formed claims</p>
-
-**Kind**: global class  
-
-* [Jwt](#Jwt)
-    * [new Jwt(jwsToken)](#new_Jwt_new)
-    * _instance_
-        * [.extractContents()](#Jwt+extractContents)
-        * [.sign()](#Jwt+sign)
-        * [.verify()](#Jwt+verify) ⇒
-    * _static_
-        * [.create(content, options)](#Jwt.create)
-
-<a name="new_Jwt_new"></a>
-
-### new Jwt(jwsToken)
-<p>Constructs an instance of the JWT Class</p>
-
-
-| Param | Description |
-| --- | --- |
-| jwsToken | <p>a jwsToken Object.</p> |
-
-<a name="Jwt+extractContents"></a>
-
-### jwt.extractContents()
-<p>Returns the extracted contents of the token.</p>
-
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-<a name="Jwt+sign"></a>
-
-### jwt.sign()
-<p>Sign the claim and return a JWT</p>
-
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-<a name="Jwt+verify"></a>
-
-### jwt.verify() ⇒
-<p>Verify the claim and return the contents</p>
-
-**Kind**: instance method of [<code>Jwt</code>](#Jwt)  
-**Returns**: <p>the stringified contents of the token.</p>  
-<a name="Jwt.create"></a>
-
-### Jwt.create(content, options)
-<p>Create a new instance of JWT Class.</p>
-
-**Kind**: static method of [<code>Jwt</code>](#Jwt)  
-
-| Param | Description |
-| --- | --- |
-| content | <p>either the signed payload represented as a string or the payload object to be signed.</p> |
-| options | <p>optional options such as the cryptoSuites used to sign/verify JwsToken. TODO: decide if cryptofactory is an advanced option and have defaults instead (RSA and EC)</p> |
-
 <a name="UserAgentError"></a>
 
 ## UserAgentError
@@ -825,18 +712,6 @@ methods of a credential.</p>
 
 ## SignatureFormat
 <p>Enum to define different signature formats</p>
-
-**Kind**: global variable  
-<a name="ClaimDetailsType"></a>
-
-## ClaimDetailsType
-<p>ClaimDetails Types</p>
-
-**Kind**: global variable  
-<a name="ClaimDetailsType"></a>
-
-## ClaimDetailsType
-<p>Interface defining methods and properties for a Token object</p>
 
 **Kind**: global variable  
 <a name="context"></a>

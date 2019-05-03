@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { FlatJsonJws, Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
-import UserAgentError from '../UserAgentError';
-import IKeyStore from './IKeyStore';
-import { PublicKey } from '../types';
+import UserAgentError from 'src/UserAgentError';
+import IKeyStore from 'src/keystores/IKeyStore';
+import { PublicKey } from 'src/types';
 
  /**
   * Class to model protection mechanisms
@@ -23,7 +23,7 @@ export default class Protect {
     const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
     const token = new JwsToken(body, cryptoFactory);
     // Get the key
-    const jwk: any = await keyStore.get(keyStorageReference)
+    const jwk: any = await keyStore.getKey(keyStorageReference)
     .catch((err) => {
       throw new UserAgentError(`The key referenced by '${keyStorageReference}' is not available: '${err}'`);
     });
@@ -58,7 +58,7 @@ export default class Protect {
    * @param jws token to be verified
    * @param jwk Public Key to be used to verify
    */
-  public static async verify (jws: string, publicKeys: Array<PublicKey>) {
+  public static async verify (jws: string, publicKeys: PublicKey[]) {
 
     const cryptoFactory = new CryptoFactory([new Secp256k1CryptoSuite(), new RsaCryptoSuite()]);
     const token = new JwsToken(jws, cryptoFactory);
@@ -84,11 +84,9 @@ export default class Protect {
         throw new UserAgentError(`The key type '${publicKey.kty}' is not supported.`);
     }
 
-    const body = await token.verifySignature(publicKey)
+    return token.verifySignature(publicKey)
     .catch((error: any) => {
       throw new UserAgentError(`JWS Token cannot be verified by public key: '${error}'`);
     });
-
-    return body;
   }
 }

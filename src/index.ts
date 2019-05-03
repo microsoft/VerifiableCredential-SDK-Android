@@ -3,24 +3,20 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from './Identifier';
-import IdentifierDocument from './IdentifierDocument';
-import Token from './token/Token';
-import Jwt from './token/Jwt';
-import CredentialManifest from './credentials/CredentialManifest';
-import CredentialIssuer from './credentials/CredentialIssuer';
-import ICredential from './credentials/ICredential';
-import SelfIssuedCredential from './credentials/SelfIssuedCredential';
-import IDataHandler from './credentials/IDataHandler';
-import TestDataHandler from '../tests/credentials/TestDataHandler';
-import SidetreeRegistrar from './registrars/SidetreeRegistrar';
-import InMemoryKeyStore from './keystores/InMemoryKeyStore';
-import UserAgentOptions from './UserAgentOptions';
-import HttpResolver from './resolvers/HttpResolver';
+import Identifier from 'src/Identifier';
+import IdentifierDocument from 'src/IdentifierDocument';
+import CredentialManifest from 'src/credentials/CredentialManifest';
+import CredentialIssuer from 'src/credentials/CredentialIssuer';
+import ICredential from 'src/credentials/ICredential';
+import SelfIssuedCredential from 'src/credentials/SelfIssuedCredential';
+import IDataHandler from 'src/credentials/IDataHandler';
+import SidetreeRegistrar from 'src/registrars/SidetreeRegistrar';
+import InMemoryKeyStore from 'src/keystores/InMemoryKeyStore';
+import UserAgentOptions from 'src/UserAgentOptions';
+import HttpResolver from 'src/resolvers/HttpResolver';
 export { Identifier, IdentifierDocument, UserAgentOptions };
-export { Token, Jwt };
 export { CredentialManifest, CredentialIssuer, ICredential, SelfIssuedCredential };
-export { TestDataHandler, IDataHandler };
+export { IDataHandler };
 export { SidetreeRegistrar };
 export { InMemoryKeyStore };
 export { HttpResolver };

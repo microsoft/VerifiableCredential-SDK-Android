@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import InMemoryKeyStore from '../../src/keystores/InMemoryKeyStore';
-import { SignatureFormat } from '../../src/keystores/SignatureFormat';
+import InMemoryKeyStore from 'src/keystores/InMemoryKeyStore';
+import { SignatureFormat } from 'src/keystores/SignatureFormat';
 
 describe('InMemoryKeyStore', () => {
   it('should return a new instance with no encryption', () => {
@@ -33,33 +33,31 @@ describe('InMemoryKeyStore', () => {
     expect(() => new InMemoryKeyStore(encryptionKey)).toThrowError('The encryption key buffer must be 32 bytes.');
   });
 
-  it('should throw when key not found', async (done) => {
+  it('should throw when key not found', async () => {
     try {
       const keyStore = new InMemoryKeyStore();
-      await keyStore.get('does not exist');
+      await keyStore.getKey('does not exist');
     } catch (error) {
       expect(error.message).toEqual(`No key found for 'does not exist'.`);
     }
-    done();
   });
 
-  it('should save key to store and retrieve saved key', async (done) => {
+  it('should save key to store and retrieve saved key', async () => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore();
       await keyStore.save('did:ion:123456789#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:ion:123456789#master') as Buffer;
+      const buffer: Buffer = <Buffer> await keyStore.getKey('did:ion:123456789#master');
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {
       fail(`Exception not expected, got: '${error}'`);
     }
-    done();
   });
 
-  it('should save object as key to store and retrieve saved key', async (done) => {
+  it('should save object as key to store and retrieve saved key', async () => {
     try {
       const keyObject: any = {
         kty: 'EC',
@@ -69,30 +67,28 @@ describe('InMemoryKeyStore', () => {
       await keyStore.save('did:ion:abcdef', keyObject);
 
       // Now try get get the key back
-      const key: any = await keyStore.get('did:ion:abcdef');
+      const key: any = await keyStore.getKey('did:ion:abcdef');
       expect(key).toBeDefined();
       expect('EC').toEqual(key.kty);
       expect('sig').toEqual(key.use);
     } catch (error) {
       fail(`Exception not expected, got: '${error}'`);
     }
-    done();
   });
 
-  it('should save key to store and retrieve saved key when using encrypted store', async (done) => {
+  it('should save key to store and retrieve saved key when using encrypted store', async () => {
     try {
       const keyBuffer: Buffer = Buffer.from('Some key material');
       const keyStore = new InMemoryKeyStore('password');
       await keyStore.save('did:ion:987654321#master', keyBuffer);
 
       // Now try get get the key back
-      const buffer: Buffer = await keyStore.get('did:ion:987654321#master') as Buffer;
+      const buffer: Buffer = <Buffer> await keyStore.getKey('did:ion:987654321#master');
       expect(buffer).toBeDefined();
       expect(buffer.toString()).toEqual('Some key material');
     } catch (error) {
       fail(`Exception not expected, got: '${error}'`);
     }
-    done();
   });
 
   it('should throw because of missing key reference', async (done) => {

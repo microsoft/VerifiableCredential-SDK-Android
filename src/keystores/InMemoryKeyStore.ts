@@ -4,14 +4,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IKeyStore from './IKeyStore';
-import PouchDB from 'pouchdb';
-import PouchDBAdapterMemory from 'pouchdb-adapter-memory';
-import UserAgentError from '../UserAgentError';
-import { SignatureFormat } from './SignatureFormat';
-import Protect from './Protect';
-PouchDB.plugin(PouchDBAdapterMemory);
-const keyStore = new PouchDB('keyStore', { adapter: 'memory' });
+import IKeyStore from 'src/keystores/IKeyStore';
+import pouchdb from 'pouchdb';
+import pouchdbAdapterMemory from 'pouchdb-adapter-memory';
+import UserAgentError from 'src/UserAgentError';
+import { SignatureFormat } from 'src/keystores/SignatureFormat';
+import Protect from 'src/keystores/Protect';
+pouchdb.plugin(pouchdbAdapterMemory);
+const keyStore = new pouchdb('keyStore', { adapter: 'memory' });
 
 /**
  * An encrypted in memory implementation of IKeyStore using PouchDB
@@ -49,10 +49,10 @@ export default class InMemoryKeyStore implements IKeyStore {
         options.password = encryptionKey;
       }
 
-      PouchDB.plugin(require('crypto-pouch'));
+      pouchdb.plugin(require('crypto-pouch'));
 
       // Set the encryption key for the store
-      (keyStore as any).crypto(options);
+      (<any> keyStore).crypto(options);
     }
   }
 
@@ -60,7 +60,7 @@ export default class InMemoryKeyStore implements IKeyStore {
    * Gets the key from the store using the specified identifier.
    * @param keyIdentifier for which to return the key.
    */
-  public async get (keyIdentifier: string): Promise<any> {
+  public async getKey (keyIdentifier: string): Promise<any> {
     try {
       const keyDocument: any = await keyStore.get(keyIdentifier);
       if (keyDocument.key.type === 'Buffer') {

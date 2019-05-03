@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationReference, ServiceReference, PublicKey } from './types';
-import UserAgentOptions from './UserAgentOptions';
-import { Identifier } from '.';
+import { AuthenticationReference, ServiceReference, PublicKey, UserServiceEndpoint, HostServiceEndpoint } from 'src/types';
+import UserAgentOptions from 'src/UserAgentOptions';
+import Identifier from 'src/Identifier';
+import UserAgentError from 'src/UserAgentError';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -27,17 +28,17 @@ export default class IdentifierDocument {
   /**
    * Array of service entries added to the document.
    */
-  public publicKeys: Array<PublicKey> = [];
+  public publicKeys: PublicKey[] = [];
 
   /**
    * Array of authentication entries added to the document.
    */
-  public authenticationReferences: Array<AuthenticationReference> = [];
+  public authenticationReferences: AuthenticationReference[] = [];
 
   /**
    * Array of service entries added to the document.
    */
-  public serviceReferences: Array<ServiceReference> = [];
+  public serviceReferences: ServiceReference[] = [];
 
   /**
    * Constructs an instance of the identifier
@@ -54,8 +55,8 @@ export default class IdentifierDocument {
       this.created = new Date(document.created);
     }
 
-    this.authenticationReferences = document.authentication || new Array();
-    this.serviceReferences = document.service || new Array();
+    this.authenticationReferences = document.authentication || [];
+    this.serviceReferences = document.service || [];
   }
 
   /**
@@ -63,7 +64,7 @@ export default class IdentifierDocument {
    * provided public keys.
    * @param publicKeys to include in the document.
    */
-  public static create (id: string, publicKeys: Array<PublicKey>): IdentifierDocument {
+  public static create (id: string, publicKeys: PublicKey[]): IdentifierDocument {
     const createdDate = new Date(Date.now()).toISOString();
     return new IdentifierDocument({ id: id, created: createdDate, publicKeys: publicKeys });
   }
@@ -76,7 +77,7 @@ export default class IdentifierDocument {
    * @param publicKeys to include in the document.
    * @param options User agent options containing the crypto Api
    */
-  public static async createAndGenerateId (idBase: string, publicKeys: Array<PublicKey>, options: UserAgentOptions): Promise<IdentifierDocument> {
+  public static async createAndGenerateId (idBase: string, publicKeys: PublicKey[], options: UserAgentOptions): Promise<IdentifierDocument> {
     const document = IdentifierDocument.create(idBase, publicKeys);
     const identifier: Identifier = await options.registrar!.generateIdentifier(document);
     document.id = identifier.id;
@@ -100,18 +101,44 @@ export default class IdentifierDocument {
   }
 
   /**
+   * Get Hub Instances from Identity Service Reference.
+   */
+  public getHubInstances () {
+    const filteredServiceReferences = this.serviceReferences.filter(reference => reference.type === 'IdentityHub');
+    if (filteredServiceReferences.length === 0 || filteredServiceReferences[0].serviceEndpoint.type !== 'UserServiceEndpoint') {
+      throw new UserAgentError(`No Hub Instances for ${this.id}`);
+    }
+    const serviceEndpoint = <UserServiceEndpoint> filteredServiceReferences[0].serviceEndpoint;
+    return serviceEndpoint.instances;
+  }
+
+  /**
+   * Get Hub Locations from Identity Service Reference.
+   */
+  public getHubLocations () {
+    const filteredServiceReferences = this.serviceReferences.filter(reference => reference.type === 'IdentityHub');
+    if (filteredServiceReferences.length === 0 || filteredServiceReferences[0].serviceEndpoint.type !== 'HostServiceEndpoint') {
+      throw new UserAgentError(`No Hub Locations for ${this.id}`);
+    }
+    const serviceEndpoint = <HostServiceEndpoint> filteredServiceReferences[0].serviceEndpoint;
+    return serviceEndpoint.locations;
+
+  }
+
+  /**
    * Used to control the the properties that are
    * output by JSON.parse.
    */
+  // tslint:disable-next-line:function-name
   public static fromJSON (obj: IdentifierDocument): IdentifierDocument {
     // const copy: any = this;
     // this.publicKeys = copy.publicKey;
     const document = Object.create(IdentifierDocument.prototype);
     const result = Object.assign(document, obj, {
-      publicKeys: (obj as any).publicKey
+      publicKeys: (<any> obj).publicKey
     });
     delete result.publicKey;
-    return result as IdentifierDocument;
+    return <IdentifierDocument> result;
   }
 
   /**

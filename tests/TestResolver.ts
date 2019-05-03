@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IResolver from '../src/resolvers/IResolver';
-import Identifier from '../src/Identifier';
-import IdentifierDocument from '../src/IdentifierDocument';
+import IResolver from 'src/resolvers/IResolver';
+import Identifier from 'src/Identifier';
+import IdentifierDocument from 'src/IdentifierDocument';
 
 /**
  * Implementation of a resolver for testing.

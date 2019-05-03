@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 require('es6-promise').polyfill();
-import base64Url from 'base64url';
+import base64url from 'base64url';
 import 'isomorphic-fetch';
-import Identifier from '../Identifier';
-import IdentifierDocument from '../IdentifierDocument';
-import UserAgentError from '../UserAgentError';
-import UserAgentOptions from '../UserAgentOptions';
-import IRegistrar from './IRegistrar';
-import Multihash from './Multihash';
-import IKeyStore from '../keystores/IKeyStore';
-import { SignatureFormat } from '../keystores/SignatureFormat';
+import Identifier from 'src/Identifier';
+import IdentifierDocument from 'src/IdentifierDocument';
+import UserAgentError from 'src/UserAgentError';
+import UserAgentOptions from 'src/UserAgentOptions';
+import IRegistrar from 'src/registrars/IRegistrar';
+import Multihash from 'src/registrars/Multihash';
+import IKeyStore from 'src/keystores/IKeyStore';
+import { SignatureFormat } from 'src/keystores/SignatureFormat';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -106,7 +106,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       }
 
       const responseJson = IdentifierDocument.fromJSON(await response.json());
-      const identifier = new Identifier(responseJson, JSON.parse(this.serializedOptions) as UserAgentOptions);
+      const identifier = new Identifier(responseJson, <UserAgentOptions> JSON.parse(this.serializedOptions));
       resolve(identifier);
     });
   }
@@ -135,7 +135,7 @@ export default class SidetreeRegistrar implements IRegistrar {
     // Hash the document JSON
     const documentBuffer = Buffer.from(JSON.stringify(genesisDocument));
     const hashedDocument = Multihash.hash(documentBuffer, 18);
-    const encodedDocument = base64Url.encode(hashedDocument);
+    const encodedDocument = base64url.encode(hashedDocument);
 
     // Now update the identifier property in
     // the genesis document

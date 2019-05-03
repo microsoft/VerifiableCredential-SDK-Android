@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Identifier } from '..';
+import Identifier from 'src/Identifier';
 
 /**
  * Enumeration of the supported credential types.

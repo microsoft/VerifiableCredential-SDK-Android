@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from '../src/Identifier';
-import IdentifierDocument from '../src/IdentifierDocument';
-import UserAgentOptions from '../src/UserAgentOptions';
-import KeyStoreMock from './keystores/KeyStoreMock';
-import TestResolver from './TestResolver';
-import CryptoOptions from '../src/CryptoOptions';
+import Identifier from 'src/Identifier';
+import IdentifierDocument from 'src/IdentifierDocument';
+import UserAgentOptions from 'src/UserAgentOptions';
+import KeyStoreMock from 'tests/keystores/KeyStoreMock';
+import TestResolver from 'tests/TestResolver';
+import CryptoOptions from 'src/CryptoOptions';
 import { KeyTypeFactory } from '@decentralized-identity/did-crypto-typescript';
-import Registrar from '../src/registrars/IRegistrar';
-import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
-import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
+import SidetreeRegistrar from 'src/registrars/SidetreeRegistrar';
+import KeyStoreConstants from 'src/keystores/KeyStoreConstants';
+import IRegistrar from 'src/registrars/IRegistrar';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -28,21 +28,21 @@ class Helpers {
    * @param create Delegate for the creation of the identifer
    */
   public static async testIdentifier (register: boolean, testResolver: any, keyStore: KeyStoreMock, alg: any, create: CreateIdentifier) {
-    const options = {
+    const options = <UserAgentOptions> {
       resolver: testResolver,
       timeoutInSeconds: 30,
       keyStore: keyStore,
       cryptoOptions: new CryptoOptions(),
       didPrefix: 'did:ion'
-    } as UserAgentOptions;
+    };
 
-    const registar: Registrar = new SidetreeRegistrar('http://beta.sidetree.did.microsoft.com', options);
+    const registar: IRegistrar = new SidetreeRegistrar('beta.ion.microsoft.com', options);
     options.registrar = registar;
 
     const personaId = 'did:ion:identifier';
     options.cryptoOptions!.algorithm = alg;
     let identifier = new Identifier(personaId, options);
-    expect(personaId).toBe(identifier.identifier as string);
+    expect(personaId).toBe(<string> identifier.identifier);
 
     identifier = await create(options, identifier, register);
     expect(identifier.id).toBeDefined();
@@ -52,9 +52,9 @@ class Helpers {
     console.log(`Identifier: Test key type ${kty}`);
     expect(kty).toBe((identifier.document!.publicKeys[0].publicKeyJwk).kty);
 
-    const document: Identifier = new Identifier(identifier.document as IdentifierDocument);
+    const document: Identifier = new Identifier(<IdentifierDocument> identifier.document);
     expect(id).toBe(document.id);
-    expect(id).toBe((document.identifier as IdentifierDocument).id);
+    expect(id).toBe((<IdentifierDocument> document.identifier).id);
 
     expect(id).toBe(document.document!.id);
     expect(identifier.document!.publicKeys).toBe(document.document!.publicKeys);
@@ -62,26 +62,27 @@ class Helpers {
 }
 
 describe('Pairwise Identifier', async () => {
-  const testResolver = new TestResolver();
+  let testResolver: TestResolver;
+  let options: UserAgentOptions;
   // Set key store and its data
   const keyStore: KeyStoreMock | undefined = undefined;
 
-    // Configure the agent options for the tests
-  const options = {
-    resolver: testResolver,
-    timeoutInSeconds: 30,
-    keyStore: keyStore,
-    cryptoOptions: new CryptoOptions(),
-    didPrefix: 'did:ion'
-  } as UserAgentOptions;
-
   beforeAll(async () => {
+    // Configure the agent options for the tests
+    options = <UserAgentOptions> {
+      resolver: testResolver,
+      timeoutInSeconds: 30,
+      keyStore: keyStore,
+      cryptoOptions: new CryptoOptions(),
+      didPrefix: 'did:ion'
+    };
+    testResolver = new TestResolver();
     options.keyStore = new KeyStoreMock();
-    await (options.keyStore as KeyStoreMock).save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
+    await (<KeyStoreMock> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
     options.registrar = new SidetreeRegistrar('https://example.com', options);
   });
 
-  it('should throw when creating a linked identifier and no key store specified in user agent options', async done => {
+  it('should throw when creating a linked identifier and no key store specified in user agent options', async () => {
     const personaId = 'did:ion:identifier';
     const identifier = new Identifier(personaId, {});
     let throwDetected: boolean = false;
@@ -94,12 +95,11 @@ describe('Pairwise Identifier', async () => {
     if (!throwDetected) {
       fail('No Throw detected');
     }
-    done();
   });
 
-  it('should throw when creating a linked identifier and no registrar specified in user agent options', async done => {
-    const personaId = 'did:ion:identifier' + Math.random();
-    (options.cryptoOptions as CryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+  it('should throw when creating a linked identifier and no registrar specified in user agent options', async () => {
+    const personaId = 'did:ion:identifier';
+    (<CryptoOptions> options.cryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
     delete options.registrar;
     const identifier = new Identifier(personaId, options);
     let throwDetected: boolean = false;
@@ -112,7 +112,6 @@ describe('Pairwise Identifier', async () => {
     if (!throwDetected) {
       fail('No Throw detected');
     }
-    done();
   });
 
   const alg = [
@@ -120,15 +119,14 @@ describe('Pairwise Identifier', async () => {
     { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
   ];
 
-  it('should create an identifier EC', async done => {
+  it('should create an identifier EC', async () => {
 
     /* tslint:disable:max-line-length */
     await Helpers
-    .testIdentifier(false, testResolver, options.keyStore as KeyStoreMock, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+    .testIdentifier(false, testResolver, <KeyStoreMock> options.keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${identifier}-${register}`);
       return Identifier.create(options);
     });
-    done();
   });
 
 /*
@@ -143,32 +141,29 @@ describe('Pairwise Identifier', async () => {
     done();
   });
 */
-  it('should create a pairwise identifier EC', async done => {
+  it('should create a pairwise identifier EC', async () => {
     await Helpers
-    .testIdentifier(false, testResolver, options.keyStore as KeyStoreMock, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+    .testIdentifier(false, testResolver, <KeyStoreMock> options.keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${options}-${register}`);
       return identifier.createLinkedIdentifier('did:ion:peer', register);
     });
-    done();
   });
 
-  it('should create a pairwise identifier RSA', async done => {
+  it('should create a pairwise identifier RSA', async () => {
     await Helpers.testIdentifier(
-      false, testResolver, options.keyStore as KeyStoreMock, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      false, testResolver, <KeyStoreMock> options.keyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(`${options}-${register}`);
         return identifier.createLinkedIdentifier('did:ion:peer', register);
       });
-    done();
   });
 
-  it('should create an identifier and register for EC', async done => {
+  it('should create an identifier and register for EC', async () => {
 
     await Helpers.testIdentifier(
-      true, testResolver, options.keyStore as KeyStoreMock, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
+      true, testResolver, <KeyStoreMock> options.keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(options);
         return identifier.createLinkedIdentifier('did:ion:peerforregister', register);
       });
-    done();
   });
 /*
   Not yet supported in sidetree core

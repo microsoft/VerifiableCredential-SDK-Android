@@ -5,11 +5,11 @@
 
 require('es6-promise').polyfill();
 import 'isomorphic-fetch';
-import Identifier from '../Identifier';
-import IdentifierDocument from '../IdentifierDocument';
-import IResolver from './IResolver';
-import UserAgentOptions from '../UserAgentOptions';
-import UserAgentError from '../UserAgentError';
+import Identifier from 'src/Identifier';
+import IdentifierDocument from 'src/IdentifierDocument';
+import IResolver from 'src/resolvers/IResolver';
+import UserAgentOptions from 'src/UserAgentOptions';
+import UserAgentError from 'src/UserAgentError';
 declare var fetch: any;
 
 /**

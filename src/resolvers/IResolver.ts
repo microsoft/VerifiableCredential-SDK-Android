@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from '../Identifier';
-import IdentifierDocument from '../IdentifierDocument';
+import Identifier from 'src/Identifier';
+import IdentifierDocument from 'src/IdentifierDocument';
 
 /**
  * Interface defining methods and properties to

@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ICredential from './ICredential';
-import Identifier from '../Identifier';
+import ICredential from 'src/credentials/ICredential';
+import Identifier from 'src/Identifier';
 // import UserAgentError from '../UserAgentError';
-import { Claim } from '../types';
+import { Claim } from 'src/types';
 
 /**
  * Implementation of an OpenID Connect
@@ -18,24 +18,31 @@ export default class SelfIssuedCredential implements ICredential {
   /**
    * Array to hold claims to be included in the credential
    */
-  private claims: Array<Claim> = [];
+  private claims: Claim[] = [];
 
   /**
+   * The identifier the credential was
+   * issued to.
    * @inheritdoc
    */
   public readonly issuedBy: Identifier;
 
   /**
+   * The identifier of the issuer of
+   * the credential.
    * @inheritdoc
    */
   public readonly issuedTo: Identifier;
 
   /**
+   * The date the credential was issued.
    * @inheritdoc
    */
   public readonly issuedAt: Date;
 
   /**
+   * The date and time that the
+   * credential expires at.
    * @inheritdoc
    */
   public readonly expiresAt?: Date;
@@ -86,7 +93,7 @@ export default class SelfIssuedCredential implements ICredential {
     // MUST conform to the OpenID Connect
     // Self-Issued specification id token
 
-    // TODO Use a JWT lib for creating the actual
+    // Use a JWT lib for creating the actual
     // JWT for serializing.
 
     // Need to generate thumbprint for the

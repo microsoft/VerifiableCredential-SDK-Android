@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IDataHandler from '../../src/credentials/IDataHandler';
-import ICredential from '../../src/credentials/ICredential';
+import IDataHandler from 'src/credentials/IDataHandler';
+import ICredential from 'src/credentials/ICredential';
 
 /**
  * Implementation of a data handler for testing.
@@ -19,11 +19,10 @@ export default class TestDataHandler implements IDataHandler {
    */
   public async process (inputCredential: ICredential): Promise<ICredential> {
 
-    const credential: ICredential = {
+    return {
       issuedBy: inputCredential.issuedTo,
       issuedTo: inputCredential.issuedBy,
       issuedAt: new Date()
     };
-    return credential;
   }
 }

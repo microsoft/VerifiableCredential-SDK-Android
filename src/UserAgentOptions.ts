@@ -4,10 +4,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IResolver from './resolvers/IResolver';
-import IRegistrar from './registrars/IRegistrar';
-import IKeyStore from './keystores/IKeyStore';
-import CryptoOptions from './CryptoOptions';
+import IResolver from 'src/resolvers/IResolver';
+import IRegistrar from 'src/registrars/IRegistrar';
+import IKeyStore from 'src/keystores/IKeyStore';
+import CryptoOptions from 'src/CryptoOptions';
 
 /**
  * Interface defining options for the
@@ -53,6 +53,7 @@ export default class UserAgentOptions {
 
   /**
    * Crypto Options
+   * contains algorithm and other data about crypto
    */
   cryptoOptions?: CryptoOptions;
 

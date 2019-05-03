@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import HttpResolver from '../../src/resolvers/HttpResolver';
-import Identifier from '../../src/Identifier';
-import UserAgentError from '../../src/UserAgentError';
-const fetchMock = require('fetch-mock');
+import HttpResolver from 'src/resolvers/HttpResolver';
+import Identifier from 'src/Identifier';
+import UserAgentError from 'src/UserAgentError';
 
 // Add a document to the cache
 const DOCUMENT = {
@@ -21,30 +20,35 @@ const DOCUMENT = {
   }
 };
 
+let fetchMock: any;
+
 describe('HttpResolver', () => {
+
+  beforeAll(() => {
+    fetchMock = require('fetch-mock');
+  });
+
   afterEach(() => {
     fetchMock.restore();
   });
 
-  it('should construct new instance of the HttpResolver', async done => {
+  it('should construct new instance of the HttpResolver', async () => {
     const resolver = new HttpResolver('https://resolver.org/', {
       timeoutInSeconds: 30
     });
     expect(resolver).toBeDefined();
     expect(resolver.url).toEqual('https://resolver.org/1.0/identifiers/');
-    done();
   });
 
-  it('should construct new instance of the HttpResolver appending trailing slash', async done => {
+  it('should construct new instance of the HttpResolver appending trailing slash', async () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 30
     });
     expect(resolver).toBeDefined();
     expect(resolver.url).toEqual('https://resolver.org/1.0/identifiers/');
-    done();
   });
 
-  it('should return a new identifier document', async done => {
+  it('should return a new identifier document', async () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 30
     });
@@ -60,10 +64,9 @@ describe('HttpResolver', () => {
     const idenfifierDocument: any = await resolver.resolve(identifier);
     expect(idenfifierDocument).toBeDefined();
     expect(idenfifierDocument.id).toEqual('did:ion:identifier');
-    done();
   });
 
-  it('should return a new identifier document when document is root', async done => {
+  it('should return a new identifier document when document is root', async () => {
     const resolver = new HttpResolver('https://resolver.org', {
       timeoutInSeconds: 30
     });
@@ -82,7 +85,6 @@ describe('HttpResolver', () => {
     const idenfifierDocument: any = await resolver.resolve(identifier);
     expect(idenfifierDocument).toBeDefined();
     expect(idenfifierDocument.id).toEqual('did:ion:identifier');
-    done();
   });
 
   it('should throw UserAgentError when 404 returned by resolver', async done => {
@@ -133,7 +135,7 @@ describe('HttpResolver', () => {
 
     // Set the mock timeout to be greater than the fetch configuration
     // timeout to ensure that the fetch timeout works as expected.
-    const delay = new Promise((res, _) => setTimeout(res, 1000 * 3));
+    const delay = new Promise((response, _) => setTimeout(response, 1000 * 3));
     fetchMock.get('https://resolver.org/1.0/identifiers/did:ion:identifier', delay.then((_) => 404));
 
     await resolver

@@ -1,13 +1,20 @@
 {
   "defaultSeverity": "error",
-  "extends": "tslint-config-standard",
+  "extends": ["tslint-microsoft-contrib/recommended"],
   "linterOptions": {
     "exclude": [
       "node_modules/**"
     ]
   },
+  "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
   "rules": {
     "prefer-const": true,
+    "function-name": [
+      true, 
+      {
+        "static-method-regex": "^[a-z][\\w\\d]+$"
+      }
+    ],
     "completed-docs": [
       true,
       {
