@@ -1,6 +1,6 @@
 {
-  "name": "useragent-sdk",
-  "version": "0.0.0",
+  "name": "@microsoft/useragent-sdk",
+  "version": "1.0.0-alpha.0",
   "description": "SDK for building decentralized identity wallets and enterprise agents.",
   "repository": {
     "type": "git",

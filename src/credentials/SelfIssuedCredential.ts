@@ -61,17 +61,6 @@ export default class SelfIssuedCredential implements ICredential {
 
     // Add the identifier as the did claim
     this.addClaim({ name: 'did', value: issuer.id });
-
-    // Need to get the public key from the identifier
-    // and sub_jwk
-    // issuer
-    // .getPublicKey()
-    // .then((publicKey: any) => {
-    //   this.addClaim({ name: 'sub_jwk', value: publicKey });
-    // })
-    // .catch(error => {
-    //   throw new UserAgentError(error);
-    // });
   }
 
   /**

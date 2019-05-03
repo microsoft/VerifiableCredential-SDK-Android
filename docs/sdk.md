@@ -235,9 +235,16 @@ self-issued id token.</p>
 **Implements**: <code>ICredential</code>  
 <a name="new_VerifiedCredential_new"></a>
 
-### new VerifiedCredential()
-<p>The date and time that the
-credential expires at.</p>
+### new VerifiedCredential(issuedBy, issuedTo, issuedAt)
+<p>Constructs a new instance of a verified
+credential for the specified identifier.</p>
+
+
+| Param | Description |
+| --- | --- |
+| issuedBy | <p>the specified identifier.</p> |
+| issuedTo | <p>the specified identifier.</p> |
+| issuedAt | <p>date and time.</p> |
 
 <a name="CryptoOptions"></a>
 
