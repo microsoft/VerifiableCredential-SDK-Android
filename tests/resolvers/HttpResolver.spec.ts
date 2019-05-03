@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import HttpResolver from 'src/resolvers/HttpResolver';
-import Identifier from 'src/Identifier';
-import UserAgentError from 'src/UserAgentError';
+import HttpResolver from '../../src/resolvers/HttpResolver';
+import Identifier from '../../src/Identifier';
+import UserAgentError from '../../src/UserAgentError';
 
 // Add a document to the cache
 const DOCUMENT = {
@@ -99,7 +99,7 @@ describe('HttpResolver', () => {
 
     await resolver
       .resolve(identifier)
-      .catch(error => {
+      .catch((error: any) => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Identifier document not found for 'did:ion:identifier'`);
@@ -117,7 +117,7 @@ describe('HttpResolver', () => {
 
     await resolver
       .resolve(identifier)
-      .catch(error => {
+      .catch((error: any) => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Resolver at 'https://resolver.org/1.0/identifiers/' returned an error with 'Internal Server Error'`);
@@ -140,7 +140,7 @@ describe('HttpResolver', () => {
 
     await resolver
       .resolve(identifier)
-      .catch(error => {
+      .catch((error: any) => {
         expect(error).toBeDefined();
         expect(error instanceof UserAgentError).toBeTruthy();
         expect(error.message).toEqual(`Fetch timed out.`);

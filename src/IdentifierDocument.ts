@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationReference, ServiceReference, PublicKey, UserServiceEndpoint, HostServiceEndpoint } from 'src/types';
-import UserAgentOptions from 'src/UserAgentOptions';
-import Identifier from 'src/Identifier';
-import UserAgentError from 'src/UserAgentError';
+import { AuthenticationReference, ServiceReference, PublicKey } from './types';
+import UserAgentOptions from './UserAgentOptions';
+import Identifier from './Identifier';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -98,31 +97,6 @@ export default class IdentifierDocument {
    */
   public addServiceReference (serviceReference: ServiceReference) {
     this.serviceReferences.push(serviceReference);
-  }
-
-  /**
-   * Get Hub Instances from Identity Service Reference.
-   */
-  public getHubInstances () {
-    const filteredServiceReferences = this.serviceReferences.filter(reference => reference.type === 'IdentityHub');
-    if (filteredServiceReferences.length === 0 || filteredServiceReferences[0].serviceEndpoint.type !== 'UserServiceEndpoint') {
-      throw new UserAgentError(`No Hub Instances for ${this.id}`);
-    }
-    const serviceEndpoint = <UserServiceEndpoint> filteredServiceReferences[0].serviceEndpoint;
-    return serviceEndpoint.instances;
-  }
-
-  /**
-   * Get Hub Locations from Identity Service Reference.
-   */
-  public getHubLocations () {
-    const filteredServiceReferences = this.serviceReferences.filter(reference => reference.type === 'IdentityHub');
-    if (filteredServiceReferences.length === 0 || filteredServiceReferences[0].serviceEndpoint.type !== 'HostServiceEndpoint') {
-      throw new UserAgentError(`No Hub Locations for ${this.id}`);
-    }
-    const serviceEndpoint = <HostServiceEndpoint> filteredServiceReferences[0].serviceEndpoint;
-    return serviceEndpoint.locations;
-
   }
 
   /**

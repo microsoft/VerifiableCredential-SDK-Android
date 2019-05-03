@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ICredential from 'src/credentials/ICredential';
-import Identifier from 'src/Identifier';
-// import UserAgentError from '../UserAgentError';
-import { Claim } from 'src/types';
+import ICredential from './ICredential';
+import Identifier from '../Identifier';
+import { Claim } from '../types';
 
 /**
  * Implementation of an OpenID Connect

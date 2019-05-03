@@ -4,12 +4,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IKeyStore from 'src/keystores/IKeyStore';
+import IKeyStore from './IKeyStore';
 import pouchdb from 'pouchdb';
 import pouchdbAdapterMemory from 'pouchdb-adapter-memory';
-import UserAgentError from 'src/UserAgentError';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
-import Protect from 'src/keystores/Protect';
+import UserAgentError from '../UserAgentError';
+import { SignatureFormat } from './SignatureFormat';
+import Protect from './Protect';
 pouchdb.plugin(pouchdbAdapterMemory);
 const keyStore = new pouchdb('keyStore', { adapter: 'memory' });
 

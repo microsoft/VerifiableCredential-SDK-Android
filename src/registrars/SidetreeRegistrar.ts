@@ -6,14 +6,14 @@
 require('es6-promise').polyfill();
 import base64url from 'base64url';
 import 'isomorphic-fetch';
-import Identifier from 'src/Identifier';
-import IdentifierDocument from 'src/IdentifierDocument';
-import UserAgentError from 'src/UserAgentError';
-import UserAgentOptions from 'src/UserAgentOptions';
-import IRegistrar from 'src/registrars/IRegistrar';
-import Multihash from 'src/registrars/Multihash';
-import IKeyStore from 'src/keystores/IKeyStore';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
+import Identifier from '../Identifier';
+import IdentifierDocument from '../IdentifierDocument';
+import UserAgentError from '../UserAgentError';
+import UserAgentOptions from '../UserAgentOptions';
+import IRegistrar from './IRegistrar';
+import Multihash from './Multihash';
+import IKeyStore from '../keystores/IKeyStore';
+import { SignatureFormat } from '../keystores/SignatureFormat';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -139,7 +139,7 @@ export default class SidetreeRegistrar implements IRegistrar {
 
     // Now update the identifier property in
     // the genesis document
-    genesisDocument.id = `did:ion:${encodedDocument}`;
+    genesisDocument.id = `did:ion-test:${encodedDocument}`;
     return new Identifier(genesisDocument);
   }
 }

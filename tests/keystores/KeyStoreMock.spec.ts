@@ -10,7 +10,7 @@ import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import KeyStoreMock from './KeyStoreMock';
 import { SignatureFormat } from '../../src/keystores/SignatureFormat';
 
-describe('KeyStoreMock', async () => {
+describe('KeyStoreMock', () => {
 
   let options: UserAgentOptions;
 

@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DidKey, KeyExport, KeyUseFactory, KeyTypeFactory, KeyUse } from '@decentralized-identity/did-crypto-typescript';
-import IKeyStore from 'src/keystores/IKeyStore';
-import KeyStoreConstants from 'src/keystores/KeyStoreConstants';
-import { PublicKey } from 'src/types';
-import IdentifierDocument from 'src/IdentifierDocument';
-import UserAgentOptions from 'src/UserAgentOptions';
-import UserAgentError from 'src/UserAgentError';
-import Protect from 'src/keystores/Protect';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
+import IKeyStore from './keystores/IKeyStore';
+import KeyStoreConstants from './keystores/KeyStoreConstants';
+import { PublicKey } from './types';
+import IdentifierDocument from './IdentifierDocument';
+import UserAgentOptions from './UserAgentOptions';
+import UserAgentError from './UserAgentError';
+import Protect from './keystores/Protect';
+import { SignatureFormat } from './keystores/SignatureFormat';
 
 /**
  * Class for creating and managing identifiers,
@@ -140,7 +140,7 @@ export default class Identifier {
     // If we have been provided a key identifier use
     // the identifier to look up a key in the document
     if (this.document && this.document.publicKeys && keyIdentifier) {
-      const index = this.document.publicKeys.findIndex(key => key.id === keyIdentifier);
+      const index = this.document.publicKeys.findIndex((key: any) => key.id === keyIdentifier);
       if (index === -1) {
         throw new UserAgentError(`Document does not contain a key with id '${keyIdentifier}'`);
       }

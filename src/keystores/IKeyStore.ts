@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DidKey } from '@decentralized-identity/did-crypto-typescript';
-import { SignatureFormat } from 'src/keystores/SignatureFormat';
+import { SignatureFormat } from './SignatureFormat';
 
 /**
  * Interface defining methods and properties to

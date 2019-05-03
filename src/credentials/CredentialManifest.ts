@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CredentialInput, DataInput, OpenIDInput } from 'src/types';
-import CredentialManifestIssuerOptions from 'src/credentials/CredentialManifestIssuerOptions';
+import { CredentialInput, DataInput, OpenIDInput } from '../types';
+import CredentialManifestIssuerOptions from './CredentialManifestIssuerOptions';
 
 /**
  * context for credentialManifest

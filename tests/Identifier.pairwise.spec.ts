@@ -33,20 +33,20 @@ class Helpers {
       timeoutInSeconds: 30,
       keyStore: keyStore,
       cryptoOptions: new CryptoOptions(),
-      didPrefix: 'did:ion'
+      didPrefix: 'did:ion-test'
     };
 
-    const registar: IRegistrar = new SidetreeRegistrar('beta.ion.microsoft.com', options);
-    options.registrar = registar;
+    const registrar: IRegistrar = new SidetreeRegistrar('https://beta.ion.microsoft.com/api/1.0/register', options);
+    options.registrar = registrar;
 
-    const personaId = 'did:ion:identifier';
+    const personaId = 'did:ion-test:identifier';
     options.cryptoOptions!.algorithm = alg;
     let identifier = new Identifier(personaId, options);
     expect(personaId).toBe(<string> identifier.identifier);
 
     identifier = await create(options, identifier, register);
     expect(identifier.id).toBeDefined();
-    expect<Boolean>(identifier.id.startsWith('did:ion:')).toBe(true);
+    expect<Boolean>(identifier.id.startsWith('did:ion-test:')).toBe(true);
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
@@ -61,7 +61,7 @@ class Helpers {
   }
 }
 
-describe('Pairwise Identifier', async () => {
+describe('Pairwise Identifier', () => {
   let testResolver: TestResolver;
   let options: UserAgentOptions;
   // Set key store and its data
@@ -142,6 +142,7 @@ describe('Pairwise Identifier', async () => {
   });
 */
   it('should create a pairwise identifier EC', async () => {
+    options.didPrefix = 'did:ion';
     await Helpers
     .testIdentifier(false, testResolver, <KeyStoreMock> options.keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${options}-${register}`);
@@ -150,6 +151,7 @@ describe('Pairwise Identifier', async () => {
   });
 
   it('should create a pairwise identifier RSA', async () => {
+    options.didPrefix = 'did:ion';
     await Helpers.testIdentifier(
       false, testResolver, <KeyStoreMock> options.keyStore, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(`${options}-${register}`);
@@ -162,7 +164,7 @@ describe('Pairwise Identifier', async () => {
     await Helpers.testIdentifier(
       true, testResolver, <KeyStoreMock> options.keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(options);
-        return identifier.createLinkedIdentifier('did:ion:peerforregister', register);
+        return identifier.createLinkedIdentifier('did:ion-test:peerforregister', register);
       });
   });
 /*

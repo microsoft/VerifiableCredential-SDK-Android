@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { FlatJsonJws, Secp256k1CryptoSuite, CryptoFactory, JwsToken, RsaCryptoSuite } from '@decentralized-identity/did-auth-jose';
-import UserAgentError from 'src/UserAgentError';
-import IKeyStore from 'src/keystores/IKeyStore';
-import { PublicKey } from 'src/types';
+import UserAgentError from '../UserAgentError';
+import IKeyStore from './IKeyStore';
+import { PublicKey } from '../types';
 
  /**
   * Class to model protection mechanisms

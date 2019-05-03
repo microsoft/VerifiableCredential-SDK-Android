@@ -20,7 +20,7 @@
   "scripts": {
     "precommit": "npm run lint && npm run build:docs && git add docs/sdk.md",
     "build": "tsc --p tsconfig.json",
-    "test": "jasmine-ts --config=tests/jasmine.json",
+    "test": "nyc jasmine-ts --config=./tests/jasmine.json",
     "lint": "tslint --fix --project . --config ./tslint.json",
     "lint-pr": "tslint --project . --config ./tslint.json",
     "build:docs": "jsdoc2md --files src/**/*.ts --configure jsdoc2md.json > docs/sdk.md"

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ICredential from 'src/credentials/ICredential';
-import Identifier from 'src/Identifier';
+import ICredential from './ICredential';
+import Identifier from '../Identifier';
 
 /**
  * Implementation of an OpenID Connect

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ICredential from 'src/credentials/ICredential';
-import UserAgentError from 'src/UserAgentError';
-import Identifier from 'src/Identifier';
-import CredentialManifest from 'src/credentials/CredentialManifest';
-import IDataHandler from 'src/credentials/IDataHandler';
+import ICredential from './ICredential';
+import UserAgentError from '../UserAgentError';
+import Identifier from '../Identifier';
+import CredentialManifest from './CredentialManifest';
+import IDataHandler from './IDataHandler';
 import 'isomorphic-fetch';
 declare var fetch: any;
 

@@ -4,10 +4,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import IResolver from 'src/resolvers/IResolver';
-import IRegistrar from 'src/registrars/IRegistrar';
-import IKeyStore from 'src/keystores/IKeyStore';
-import CryptoOptions from 'src/CryptoOptions';
+import IResolver from './resolvers/IResolver';
+import IRegistrar from './registrars/IRegistrar';
+import IKeyStore from './keystores/IKeyStore';
+import CryptoOptions from './CryptoOptions';
 
 /**
  * Interface defining options for the

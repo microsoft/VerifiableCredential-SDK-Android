@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import ICredential from 'src/credentials/ICredential';
+import ICredential from './ICredential';
 
 /**
  * Interface defining common properties and
