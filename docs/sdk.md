@@ -380,6 +380,8 @@ retrieving identifier documents.</p>
     * _instance_
         * [.addAuthenticationReference(authenticationReference)](#IdentifierDocument+addAuthenticationReference)
         * [.addServiceReference(serviceReference)](#IdentifierDocument+addServiceReference)
+        * [.getHubInstances()](#IdentifierDocument+getHubInstances)
+        * [.getHubLocations()](#IdentifierDocument+getHubLocations)
         * [.toJSON()](#IdentifierDocument+toJSON)
     * _static_
         * [.create(publicKeys)](#IdentifierDocument.create)
@@ -420,6 +422,18 @@ document.</p>
 | --- | --- |
 | serviceReference | <p>to add to the document.</p> |
 
+<a name="IdentifierDocument+getHubInstances"></a>
+
+### identifierDocument.getHubInstances()
+<p>Get Hub Instances from Identity Service Reference.</p>
+
+**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
+<a name="IdentifierDocument+getHubLocations"></a>
+
+### identifierDocument.getHubLocations()
+<p>Get Hub Locations from Identity Service Reference.</p>
+
+**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
 <a name="IdentifierDocument+toJSON"></a>
 
 ### identifierDocument.toJSON()
