@@ -1,6 +1,10 @@
 // Cryptography
 export { default as CommitSigner } from './crypto/CommitSigner';
 export { default as ICommitSigner } from './crypto/ICommitSigner';
+import { IKeyStore, KeyStoreMem, ProtectionFormat } from '@decentralized-identity/did-auth-jose';
+export { IKeyStore, KeyStoreMem, ProtectionFormat } ;
+
+// Identifier
 
 // Requests
 export { default as HubRequest } from './requests/HubRequest';

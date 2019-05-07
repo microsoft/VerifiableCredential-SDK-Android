@@ -7,7 +7,7 @@ import HubObjectQueryResponse from '../src/responses/HubObjectQueryResponse';
 import HubError from '../src/HubError';
 import SignedCommit from '../src/SignedCommit';
 import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto/rsa/RsaPrivateKey';
-import { PrivateKey, Authentication } from '@decentralized-identity/did-auth-jose';
+import { PrivateKey, KeyStoreMem, IKeyStore } from '@decentralized-identity/did-auth-jose';
 import MockResolver from './MockResolver';
 import { Request, Response } from 'node-fetch';
 import MockHub from './MockHub';
@@ -53,13 +53,18 @@ describe('HubSession', () => {
         resolver: mockResolver
       });
       
+      const kid = 'testkey';
+      const keyStore: IKeyStore = new KeyStoreMem();
+      keyStore.save(kid, clientPrivateKey);
+
       session = new HubSession({
         clientDid: 'did:fake:client.id',
-        clientPrivateKey: clientPrivateKey,
+        clientPrivateKeyReference: kid,
         targetDid: 'did:fake:target.id',
         hubDid,
         hubEndpoint: 'https://example.com',
         resolver: mockResolver,
+        keyStore: keyStore
       });
 
       // Redirect fetch() calls to mockHub

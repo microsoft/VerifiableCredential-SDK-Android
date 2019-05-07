@@ -1,6 +1,6 @@
-import { IDidResolver } from '@decentralized-identity/did-common-typescript';
 import { IHubError, IHubResponse, HubErrorCode } from '@decentralized-identity/hub-common-js';
-import { Authentication, PrivateKey, CryptoSuite } from '@decentralized-identity/did-auth-jose';
+import { Authentication, CryptoSuite, IKeyStore } from '@decentralized-identity/did-auth-jose';
+import { HttpResolver, IDidResolver } from '@decentralized-identity/did-common-typescript';
 import HubRequest from './requests/HubRequest';
 import HubError from './HubError';
 import HubWriteRequest from './requests/HubWriteRequest';
@@ -25,7 +25,7 @@ export interface HubSessionOptions {
    * The private key to use for decrypting/signing when communicating with the Hub. Must be
    * registered in the DID document of the clientDid.
    */
-  clientPrivateKey: PrivateKey;
+  clientPrivateKeyReference: string;
 
   /** The DID owning the Hub with which we will be communicating. */
   targetDid: string;
@@ -45,6 +45,12 @@ export interface HubSessionOptions {
    * available in-memory.
    */
   cryptoSuites?: CryptoSuite[];
+
+  /**
+   * Instance of KeyStore than can be used
+   * to get and save keys.
+   */
+  keyStore: IKeyStore;
 }
 
 /**
@@ -52,28 +58,26 @@ export interface HubSessionOptions {
  */
 export default class HubSession {
 
-  private authentication: Authentication;
   private clientDid: string;
-  private clientPrivateKey: PrivateKey;
   private hubDid: string;
   private hubEndpoint: string;
   private targetDid: string;
-
   private currentAccessToken: string | undefined;
+  private authentication: Authentication;
 
   constructor(options: HubSessionOptions) {
-    this.clientPrivateKey = options.clientPrivateKey;
     this.clientDid = options.clientDid;
     this.hubDid = options.hubDid;
     this.hubEndpoint = options.hubEndpoint;
     this.targetDid = options.targetDid;
 
-    const kid = this.clientPrivateKey.kid;
+    // Setup authentication context
     this.authentication = new Authentication({
-      keys: { [kid] : this.clientPrivateKey },
       resolver: options.resolver,
-      cryptoSuites: options.cryptoSuites,
+      keyStore: options.keyStore,
+      keyReferences: [options.clientPrivateKeyReference],
     });
+
   }
 
   /**
@@ -132,7 +136,7 @@ export default class HubSession {
    */
   private async makeRequest(message: string, accessToken?: string): Promise<string> {
 
-    const requestBuffer = await this.authentication.getAuthenticatedRequest(message, this.clientPrivateKey, this.hubDid, accessToken);
+    const requestBuffer = await this.authentication.getAuthenticatedRequest(message, this.hubDid, accessToken);
 
     const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',

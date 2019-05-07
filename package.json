@@ -22,9 +22,10 @@
   },
   "homepage": "https://github.com/decentralized-identity/hub-sdk-js#readme",
   "dependencies": {
-    "@decentralized-identity/did-auth-jose": "0.1.9",
-    "@decentralized-identity/did-common-typescript": "0.1.4",
-    "@decentralized-identity/hub-common-js": "0.1.1",
+    "@decentralized-identity/did-auth-jose": "0.1.12",
+    "@decentralized-identity/did-common-typescript": "0.1.18",
+    "@decentralized-identity/did-crypto-typescript": "0.1.6",
+    "@decentralized-identity/hub-common-js": "0.1.2",
     "node-fetch": "2.3.0",
     "object-assign": "4.1.1"
   },

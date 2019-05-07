@@ -7,6 +7,7 @@ import Commit from './Commit';
 import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
 import CommitStrategyBasic from './CommitStrategyBasic';
+import { KeyStoreMem, IKeyStore } from './index';
 
 // Fill these in with specific values.
 const HTTP_RESOLVER = 'HTTP_RESOLVER_ENDPOINT_HERE';
@@ -31,12 +32,16 @@ async function runExample() {
     const kid = `${DID}#${PRIVATE_KEY.kid}`;
     const privateKey = RsaPrivateKey.wrapJwk(kid, PRIVATE_KEY);
 
+    const keyStore: IKeyStore = new KeyStoreMem();
+    keyStore.save(kid, privateKey);
+
     const session = new HubSession({
+      keyStore,
       hubEndpoint: HUB_ENDPOINT,
       hubDid: HUB_DID,
       resolver: new HttpResolver(HTTP_RESOLVER),
       clientDid: DID,
-      clientPrivateKey: privateKey,
+      clientPrivateKeyReference: kid,
       targetDid: DID,
     });
 
