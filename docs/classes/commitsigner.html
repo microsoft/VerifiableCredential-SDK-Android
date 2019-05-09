@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>HubObjectQueryRequest | @decentralized-identity/hub-sdk-js</title>
+	<title>CommitSigner | @decentralized-identity/hub-sdk-js</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,10 +56,10 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="hubobjectqueryrequest.html">HubObjectQueryRequest</a>
+					<a href="commitsigner.html">CommitSigner</a>
 				</li>
 			</ul>
-			<h1>Class HubObjectQueryRequest</h1>
+			<h1>Class CommitSigner</h1>
 		</div>
 	</div>
 </header>
@@ -69,7 +69,7 @@
 			<section class="tsd-panel tsd-comment">
 				<div class="tsd-comment tsd-typography">
 					<div class="lead">
-						<p>Represents a request to a Hub to query the available objects.</p>
+						<p>Class which can apply a signature to a commit.</p>
 					</div>
 				</div>
 			</section>
@@ -77,13 +77,14 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<a href="hubrequest.html" class="tsd-signature-type">HubRequest</a>
-						<ul class="tsd-hierarchy">
-							<li>
-								<span class="target">HubObjectQueryRequest</span>
-							</li>
-						</ul>
+						<span class="target">CommitSigner</span>
 					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../interfaces/icommitsigner.html" class="tsd-signature-type">ICommitSigner</a></li>
 				</ul>
 			</section>
 			<section class="tsd-panel-group tsd-index-group">
@@ -93,19 +94,21 @@
 						<section class="tsd-index-section ">
 							<h3>Constructors</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="hubobjectqueryrequest.html#constructor" class="tsd-kind-icon">constructor</a></li>
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="commitsigner.html#constructor" class="tsd-kind-icon">constructor</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-private tsd-is-private-protected">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="hubobjectqueryrequest.html#_isobjectqueryrequest" class="tsd-kind-icon">_is<wbr>Object<wbr>Query<wbr>Request</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="commitsigner.html#cryptosuite" class="tsd-kind-icon">crypto<wbr>Suite</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="commitsigner.html#did" class="tsd-kind-icon">did</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="commitsigner.html#key" class="tsd-kind-icon">key</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-inherited">
+						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="hubobjectqueryrequest.html#getrequestjson" class="tsd-kind-icon">get<wbr>Request<wbr>Json</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="commitsigner.html#sign" class="tsd-kind-icon">sign</a></li>
 							</ul>
 						</section>
 					</div>
@@ -113,27 +116,26 @@
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Constructors</h2>
-				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
-					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Hub<wbr>Object<wbr>Query<wbr>Request<span class="tsd-signature-symbol">(</span>queryOptions<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IHubObjectQueryOptions</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="hubobjectqueryrequest.html" class="tsd-signature-type">HubObjectQueryRequest</a></li>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Commit<wbr>Signer<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/commitsigneroptions.html" class="tsd-signature-type">CommitSignerOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="commitsigner.html" class="tsd-signature-type">CommitSigner</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Overrides <a href="hubrequest.html">HubRequest</a>.<a href="hubrequest.html#constructor">constructor</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/requests/HubObjectQueryRequest.ts#L11">requests/HubObjectQueryRequest.ts:11</a></li>
+									<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/crypto/CommitSigner.ts#L27">crypto/CommitSigner.ts:27</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>queryOptions: <span class="tsd-signature-type">IHubObjectQueryOptions</span></h5>
+									<h5>options: <a href="../interfaces/commitsigneroptions.html" class="tsd-signature-type">CommitSignerOptions</a></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="hubobjectqueryrequest.html" class="tsd-signature-type">HubObjectQueryRequest</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="commitsigner.html" class="tsd-signature-type">CommitSigner</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -141,38 +143,67 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
-					<a name="_isobjectqueryrequest" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _is<wbr>Object<wbr>Query<wbr>Request</h3>
-					<div class="tsd-signature tsd-kind-icon">_is<wbr>Object<wbr>Query<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">true</span><span class="tsd-signature-symbol"> =&nbsp;true</span></div>
+					<a name="cryptosuite" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> crypto<wbr>Suite</h3>
+					<div class="tsd-signature tsd-kind-icon">crypto<wbr>Suite<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">CryptoSuite</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/requests/HubObjectQueryRequest.ts#L11">requests/HubObjectQueryRequest.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/crypto/CommitSigner.ts#L27">crypto/CommitSigner.ts:27</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="did" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> did</h3>
+					<div class="tsd-signature tsd-kind-icon">did<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/crypto/CommitSigner.ts#L25">crypto/CommitSigner.ts:25</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="key" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> key</h3>
+					<div class="tsd-signature tsd-kind-icon">key<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PrivateKey</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/crypto/CommitSigner.ts#L26">crypto/CommitSigner.ts:26</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-inherited">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
-				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-					<a name="getrequestjson" class="tsd-anchor"></a>
-					<h3>get<wbr>Request<wbr>Json</h3>
-					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Request<wbr>Json<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="sign" class="tsd-anchor"></a>
+					<h3>sign</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">sign<span class="tsd-signature-symbol">(</span>commit<span class="tsd-signature-symbol">: </span><a href="commit.html" class="tsd-signature-type">Commit</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="signedcommit.html" class="tsd-signature-type">SignedCommit</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
-								<p>Inherited from <a href="hubrequest.html">HubRequest</a>.<a href="hubrequest.html#getrequestjson">getRequestJson</a></p>
+								<p>Implementation of <a href="../interfaces/icommitsigner.html">ICommitSigner</a>.<a href="../interfaces/icommitsigner.html#sign">sign</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/requests/HubRequest.ts#L19">requests/HubRequest.ts:19</a></li>
+									<li>Defined in <a href="https://github.com/decentralized-identity/hub-sdk-js/blob/master/src/crypto/CommitSigner.ts#L44">crypto/CommitSigner.ts:44</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Returns the raw request JSON which will be sent to the Hub.</p>
+									<p>Signs the given commit.</p>
 								</div>
 							</div>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>commit: <a href="commit.html" class="tsd-signature-type">Commit</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The commit to sign.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="signedcommit.html" class="tsd-signature-type">SignedCommit</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -191,9 +222,30 @@
 					<li class=" tsd-kind-class">
 						<a href="commit.html" class="tsd-kind-icon">Commit</a>
 					</li>
-					<li class=" tsd-kind-class">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class">
 						<a href="commitsigner.html" class="tsd-kind-icon">Commit<wbr>Signer</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="commitsigner.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="commitsigner.html#cryptosuite" class="tsd-kind-icon">crypto<wbr>Suite</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="commitsigner.html#did" class="tsd-kind-icon">did</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="commitsigner.html#key" class="tsd-kind-icon">key</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="commitsigner.html#sign" class="tsd-kind-icon">sign</a>
+							</li>
+						</ul>
 					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-class">
 						<a href="commitstrategybasic.html" class="tsd-kind-icon">Commit<wbr>Strategy<wbr>Basic</a>
 					</li>
@@ -209,24 +261,9 @@
 					<li class=" tsd-kind-class">
 						<a href="huberror.html" class="tsd-kind-icon">Hub<wbr>Error</a>
 					</li>
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-class">
+					<li class=" tsd-kind-class">
 						<a href="hubobjectqueryrequest.html" class="tsd-kind-icon">Hub<wbr>Object<wbr>Query<wbr>Request</a>
-						<ul>
-							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
-								<a href="hubobjectqueryrequest.html#constructor" class="tsd-kind-icon">constructor</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
-								<a href="hubobjectqueryrequest.html#_isobjectqueryrequest" class="tsd-kind-icon">_is<wbr>Object<wbr>Query<wbr>Request</a>
-							</li>
-							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
-								<a href="hubobjectqueryrequest.html#getrequestjson" class="tsd-kind-icon">get<wbr>Request<wbr>Json</a>
-							</li>
-						</ul>
 					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-class">
 						<a href="hubobjectqueryresponse.html" class="tsd-kind-icon">Hub<wbr>Object<wbr>Query<wbr>Response</a>
 					</li>
