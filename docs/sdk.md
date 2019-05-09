@@ -13,6 +13,12 @@ self-issued id token.</p></dd>
 <dt><a href="#VerifiedCredential">VerifiedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
+<dt><a href="#CryptoFactory">CryptoFactory</a></dt>
+<dd><p>Utility class to handle all CryptoSuite dependency injection</p></dd>
+<dt><a href="#PrivateKey">PrivateKey</a></dt>
+<dd><p>Represents a Private Key in JWK format.</p></dd>
+<dt><a href="#KeyOperation">KeyOperation</a></dt>
+<dd></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
 <dt><a href="#Identifier">Identifier</a></dt>
@@ -52,6 +58,16 @@ User Agent, such as resolver and register.</p></dd>
 <dt><a href="#CredentialType">CredentialType</a></dt>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
+<dt><a href="#KeyType">KeyType</a></dt>
+<dd><p>enum to model key types</p></dd>
+<dt><a href="#KeyType">KeyType</a></dt>
+<dd><p>Factory class to create KeyType objects</p></dd>
+<dt><a href="#KeyUse">KeyUse</a></dt>
+<dd><p>enum to model key use</p></dd>
+<dt><a href="#KeyUse">KeyUse</a></dt>
+<dd><p>Factory class to create KeyUse objects</p></dd>
+<dt><a href="#KeyOperation">KeyOperation</a></dt>
+<dd><p>JWK key operations</p></dd>
 <dt><a href="#SignatureFormat">SignatureFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
 </dl>
@@ -245,6 +261,87 @@ credential for the specified identifier.</p>
 | issuedBy | <p>the specified identifier.</p> |
 | issuedTo | <p>the specified identifier.</p> |
 | issuedAt | <p>date and time.</p> |
+
+<a name="CryptoFactory"></a>
+
+## CryptoFactory
+<p>Utility class to handle all CryptoSuite dependency injection</p>
+
+**Kind**: global class  
+
+* [CryptoFactory](#CryptoFactory)
+    * [new CryptoFactory(suites)](#new_CryptoFactory_new)
+    * [.getEncrypter(name)](#CryptoFactory+getEncrypter) ⇒
+    * [.getSigner(name)](#CryptoFactory+getSigner) ⇒
+    * [.getSymmetricEncrypter(name)](#CryptoFactory+getSymmetricEncrypter) ⇒
+    * [.getDefaultSymmetricEncryptionAlgorithm()](#CryptoFactory+getDefaultSymmetricEncryptionAlgorithm)
+
+<a name="new_CryptoFactory_new"></a>
+
+### new CryptoFactory(suites)
+<p>Constructs a new CryptoRegistry</p>
+
+
+| Param | Description |
+| --- | --- |
+| suites | <p>The suites to use for dependency injection</p> |
+
+<a name="CryptoFactory+getEncrypter"></a>
+
+### cryptoFactory.getEncrypter(name) ⇒
+<p>Gets the Encrypter object given the encryption algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding Encrypter, if any</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getSigner"></a>
+
+### cryptoFactory.getSigner(name) ⇒
+<p>Gets the Signer object given the signing algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding Signer, if any</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getSymmetricEncrypter"></a>
+
+### cryptoFactory.getSymmetricEncrypter(name) ⇒
+<p>Gets the SymmetricEncrypter object given the symmetric encryption algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding SymmetricEncrypter, if any</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getDefaultSymmetricEncryptionAlgorithm"></a>
+
+### cryptoFactory.getDefaultSymmetricEncryptionAlgorithm()
+<p>Gets the default symmetric encryption algorithm to use</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+<a name="PrivateKey"></a>
+
+## *PrivateKey*
+<p>Represents a Private Key in JWK format.</p>
+
+**Kind**: global abstract class  
+<a name="KeyOperation"></a>
+
+## *KeyOperation*
+**Kind**: global abstract class  
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
 
 <a name="CryptoOptions"></a>
 
@@ -701,6 +798,41 @@ User Agent, such as resolver and register.</p>
 methods of a credential.</p>
 
 **Kind**: global variable  
+<a name="KeyType"></a>
+
+## KeyType
+<p>enum to model key types</p>
+
+**Kind**: global variable  
+<a name="KeyType"></a>
+
+## KeyType
+<p>Factory class to create KeyType objects</p>
+
+**Kind**: global variable  
+<a name="KeyUse"></a>
+
+## KeyUse
+<p>enum to model key use</p>
+
+**Kind**: global variable  
+<a name="KeyUse"></a>
+
+## KeyUse
+<p>Factory class to create KeyUse objects</p>
+
+**Kind**: global variable  
+<a name="KeyOperation"></a>
+
+## KeyOperation
+<p>JWK key operations</p>
+
+**Kind**: global variable  
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
 <a name="SignatureFormat"></a>
 
 ## SignatureFormat
