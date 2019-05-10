@@ -6,13 +6,35 @@
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
 import CryptoFactory from '../CryptoFactory';
+import { ProtectionFormat } from './ProtectionFormat';
 
 
 /**
- * Interface defining methods and properties to
- * be implemented by specific key stores.
+ * Interface defining IKeyStore options.
  */
-export interface ISigningOptions {
+export interface IKeyStoreOptions {
+  // The crypto algorithm suites used for signing
+  cryptoFactory: CryptoFactory,
+
+  // The key store
+  keyStore: IKeyStore,
+
+  // The used algorithm
+  algorithm: Algorithm
+}
+
+/**
+ * Interface defining signature options.
+ */
+export interface ISigningOptions extends IKeyStoreOptions {
+}
+
+/**
+ * Interface defining encryption options.
+ */
+export interface IEncryptionOptions extends IKeyStoreOptions {
+  // The key encryption algorithm
+  kekAlgorithm: Algorithm
 }
 
 /**
@@ -45,18 +67,19 @@ export default interface IKeyStore {
    * Sign the data with the key referenced by keyReference.
    * @param keyReference Reference to the key used for signature.
    * @param data Data to sign
+   * @param format used to protect the content
    * @param signingOptions Set of signing options
    * @returns The protected message
    */
-  sign (keyReference: string, data: string | Buffer, signingOptions?: ISigningOptions): Promise<any>;
+  sign (keyReference: string, data: string | Buffer, format: ProtectionFormat, signingOptions: ISigningOptions): Promise<any>;
 
   /**
    * Decrypt the data with the key referenced by keyReference.
    * @param keyReference Reference to the key used for signature.
    * @param cipher Data to decrypt
    * @param format Protection format used to decrypt the data
-   * @param cryptoFactory used to specify the algorithms to use
+   * @param encryptionOptions Set of encryption options
    * @returns The plain text message
    */
-  decrypt (keyReference: string, cipher: string | Buffer, cryptoFactory: CryptoFactory): Promise<any>;
+  decrypt (keyReference: string, cipher: string | Buffer, encryptionOptions: IEncryptionOptions): Promise<any>;
 }
