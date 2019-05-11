@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CryptoFactory from '../CryptoFactory';
+import CryptoFactory from '../plugin/CryptoFactory';
 import PrivateKey from '../keys/PrivateKey';
 import IKeyStore, { ISigningOptions, IEncryptionOptions } from './IKeyStore';
 import { ProtectionFormat } from './ProtectionFormat';

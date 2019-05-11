@@ -14,7 +14,7 @@ export default interface IJwsCompact  {
   protected?: {[name: string]: string} | undefined,
 
   /**
-   * The application-specific payload.
+   * The application-specific non-encoded payload.
    */
   payload: string,
 

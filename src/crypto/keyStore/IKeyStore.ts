@@ -5,7 +5,7 @@
 
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
-import CryptoFactory from '../CryptoFactory';
+import CryptoFactory from '../plugin/CryptoFactory';
 import { ProtectionFormat } from './ProtectionFormat';
 
 
@@ -20,7 +20,16 @@ export interface IKeyStoreOptions {
   keyStore: IKeyStore,
 
   // The used algorithm
-  algorithm: Algorithm
+  algorithm?: Algorithm,
+
+  // The default protected header
+  protected?: { [name: string]: string },
+
+  // The default header
+  header?: { [name: string]: string },
+
+  // Make the type indexable
+  [key: string]: any;
 }
 
 /**

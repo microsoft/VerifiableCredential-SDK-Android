@@ -8,7 +8,7 @@ import Protect from './Protect';
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
 import IKeyStore, { ISigningOptions, IEncryptionOptions } from './IKeyStore';
-import CryptoFactory from '../CryptoFactory';
+import CryptoFactory from '../plugin/CryptoFactory';
 
 /**
  * Class defining methods and properties for a light KeyStore
