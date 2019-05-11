@@ -11,7 +11,7 @@ import IJwsSignature from './IJwsSignature';
 export default interface IJwsFlatJson extends IJwsSignature {
 
   /**
-   * The application-specific payload.
+   * The application-specific non-encoded payload.
    */
   payload: string,
 

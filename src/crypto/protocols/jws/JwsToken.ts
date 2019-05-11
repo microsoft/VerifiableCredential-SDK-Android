@@ -5,14 +5,14 @@
 
 import base64url from 'base64url';
 import CryptoFactory from '../../CryptoFactory';
+import PrivateKey from '../../keys/PrivateKey';
 import PublicKey from '../../keys/PublicKey';
 import IJwsCompact from './IJwsCompact';
 import IJwsFlatJson from './IJwsFlatJson';
 import IJwsGeneralJSon from './IJwsGeneralJSon';
 import IJwsSignature from './IJwsSignature';
-import { ISigningOptions } from '../../keyStore/IKeyStore';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import IKeyStore from '../../../keystores/IKeyStore';
+import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions } from '../../keystore/IKeyStore';
 
 /**
  * Definition for a delegate that can verfiy signed data.
@@ -38,18 +38,13 @@ export default class JwsToken {
    */
   public signatures: IJwsSignature[] | undefined = [] as IJwsSignature[];
 
-  private keyStore: IKeyStore;
-  private cryptoFactory: CryptoFactory;
-
+  private options: ISigningOptions | IEncryptionOptions | undefined;
   /**
    * Create an Jws token object
    * @param cryptoFactory Suite of crypto APIs to use
    */
-  constructor (options?: ISigningOptions) {
-    if (options) {
-      this.cryptoFactory = options.cryptoFactory;
-      this.keyStore = options.keyStore;
-    }
+  constructor (options?: ISigningOptions | IEncryptionOptions){
+    this.options = options;
   }
 
   /**
@@ -246,6 +241,65 @@ export default class JwsToken {
   }
 
   /**
+   * Get the keyStore to be used
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getKeyStore(newOptions?: IKeyStoreOptions, manadatory: boolean = true): IKeyStore {
+    return this.getOptionsProperty<IKeyStore>(newOptions, 'keyStore', manadatory);
+  }
+
+  /**
+   * Get the CryptoFactory to be used
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getCryptoFactory(newOptions?: IKeyStoreOptions, manadatory: boolean = true): CryptoFactory {
+    return this.getOptionsProperty<CryptoFactory>(newOptions, 'cryptoFactory', manadatory);
+  }
+
+  /**
+   * Get the default protected header to be used
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getProtected(newOptions?: IKeyStoreOptions, manadatory: boolean = false): { [name: string]: string } {
+    return this.getOptionsProperty<{ [name: string]: string }>(newOptions, 'protected', manadatory);
+  }
+
+  /**
+   * Get the default header to be used
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getHeader(newOptions?: IKeyStoreOptions, manadatory: boolean = false): { [name: string]: string } {
+    return this.getOptionsProperty<{ [name: string]: string }>(newOptions, 'header', manadatory);
+  }
+
+  /**
+   * Get the Protected to be used
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getOptionsProperty<T>(newOptions?: IKeyStoreOptions, property: string, manadatory: boolean = true): T {
+    let newProtected: T | undefined;
+    let ctorProtected: T | undefined;
+
+    if (newOptions) {
+      newProtected = newOptions[property] as T;
+    }
+    if (this.options) {
+      ctorProtected = this.options[property] as T;
+    }
+
+    if (manadatory && !newProtected && !ctorProtected) {
+      throw new Error(`The property ${property} is missing from options`);
+    }
+
+    return newProtected || ctorProtected as T;
+  }
+
+  /**
    * Signs contents using the given private key in JWK format.
    *
    * @param signingKeyReference Reference to the signing key.
@@ -255,10 +309,72 @@ export default class JwsToken {
    * @returns Signed payload in compact JWS format.
    */
   public async sign (signingKeyReference: string, payload: string, format: ProtectionFormat, options?: ISigningOptions): Promise<IJwsGeneralJSon> {
+    const keyStore: IKeyStore = this.getKeyStore(options);
+    const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
+    
+    // TODO support for multiple signatures
+    const jwsSignature: IJwsSignature = {} as IJwsSignature;
+
+    // Set payload
+    const jwsToken = new JwsToken();
+
+    // Get signing key public key
+    const jwk: PublicKey = await keyStore.get(signingKeyReference, false) as PublicKey;
+
     // Steps according to RTC7515 5.1
     // 2. Compute encoded payload value base64URL(JWS Payload)
-    const jwsToken = new JwsToken()
+    jwsToken.payload = payload;
     const encodedContent = base64url.encode(payload);
+
+    // 3. Compute the headers. 
+    jwsSignature.header = this.getHeader(options) || {};
+    jwsSignature.protected = this.getProtected(options) || {};
+
+    // Get the required algorithm
+    
+    // add required fields if missing
+    if (!('alg' in jwsSignature.header) && !('alg' in jwsSignature.protected)) {
+      jwsSignature.protected['alg'] = jwk.alg as string;
+    }
+
+    if (jwk.kid && 
+      !(jwsSignature.header && 'kid' in jwsSignature.header) && 
+      !('kid' in jwsSignature.protected)) {
+        jwsSignature.protected['kid'] = jwk.kid;
+    }
+
+    const alg = jwsSignature.protected.alg || jwsSignature.header!.alg;
+    const protectedUsed = Object.keys(jwsSignature.protected).length > 0;
+    
+    // 4. Compute BASE64URL(UTF8(JWS Header))
+    const encodedProtected = !protectedUsed ? '' : 
+      base64url.encode(JSON.stringify(jwsSignature.protected));
+
+    // 5. Compute the signature using data ASCII(BASE64URL(UTF8(JWS protected Header))) || . || . BASE64URL(JWS Payload)
+    //    using the "alg" signature algorithm.
+    const signatureInput = `${encodedProtected}.${encodedContent}`;
+
+    // TODO define base layer plugable crypto API
+    const signature = await (cryptoFactory.getSigner(alg)).sign(signatureInput, jwk);
+    // 6. Compute BASE64URL(JWS Signature)
+    const encodedSignature = Base64Url.fromBase64(signature);
+    // 8. Create the desired output: BASE64URL(UTF8(JWS Header)) || . BASE64URL(JWS payload) || . || BASE64URL(JWS Signature)
+    const jws: FlatJsonJws = {
+      header,
+      payload: encodedContent,
+      signature: encodedSignature
+    };
+    if (protectedUsed) {
+      jws.protected = encodedProtected;
+    }
+    return jws;
+
+
+
+
+
+
+
     // 3. Compute the headers
     const headers = jwsHeaderParameters || {};
     // add required fields if missing
