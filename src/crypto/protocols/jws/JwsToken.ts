@@ -332,7 +332,6 @@ export default class JwsToken {
     jwsSignature.protected = this.getProtected(options) || {};
 
     // Get the required algorithm
-
     // add required fields if missing
     if (!('alg' in jwsSignature.header) && !('alg' in jwsSignature.protected)) {
       jwsSignature.protected['alg'] = jwk.alg as string;
