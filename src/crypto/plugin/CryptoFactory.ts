@@ -3,34 +3,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CryptoSuite from './CryptoSuite';
+import CryptoSuite, { CryptoSuiteMap } from './CryptoSuite';
 import ISubtleCrypto from './ISubtleCrypto';
 import DefaultCryptoSuite from './DefaultCryptoSuite';
 
-// A dictionary of JWA encryption algorithm names to key encrypter objects 
-type KeyEncrypterMap = {[name: string]: ISubtleCrypto};
-// A dictionary of JWA encryption algorithm names to shared key encrypter objects 
-type SharedKeyEncrypterMap = {[name: string]: ISubtleCrypto};
-// A dictionary of JWA encryption algorithm names to symmetric encrypter objects 
-type SymmetricEncrypterMap = {[name: string]: ISubtleCrypto};
-// A dictionary of JWA signing algorithm names to message signer objects 
-type MessageSignerMap = { [name: string]: ISubtleCrypto };
-// A dictionary of JWA signing algorithm names to MAC signer objects 
-type MacSignerMap = { [name: string]: ISubtleCrypto };
-// A dictionary of JWA signing algorithm names to message digest objects 
-type MessageDigestMap = { [name: string]: ISubtleCrypto };
 
 /**
  * Utility class to handle all CryptoSuite dependency injection
  */
 export default class CryptoFactory {
 
-  private keyEncrypters: KeyEncrypterMap;
-  private sharedKeyEncrypters: SharedKeyEncrypterMap;
-  private symmetricEncrypter: SymmetricEncrypterMap;
-  private messageSigners: MessageSignerMap;
-  private macSigners: MacSignerMap;
-  private messageDigests: MessageDigestMap;
+  private keyEncrypters: CryptoSuiteMap;
+  private sharedKeyEncrypters: CryptoSuiteMap;
+  private symmetricEncrypter: CryptoSuiteMap;
+  private messageSigners: CryptoSuiteMap;
+  private macSigners: CryptoSuiteMap;
+  private messageDigests: CryptoSuiteMap;
 
   /**
    * Constructs a new CryptoRegistry
@@ -44,24 +32,24 @@ export default class CryptoFactory {
     // Set default API
     crypto = new DefaultCryptoSuite();
     }
-    this.keyEncrypters = {'*': crypto } as KeyEncrypterMap;
-    this.sharedKeyEncrypters = {'*': crypto } as SharedKeyEncrypterMap;
-    this.symmetricEncrypter = {'*': crypto } as SymmetricEncrypterMap;
-    this.messageSigners = {'*': crypto } as MessageSignerMap;
-    this.macSigners = {'*': crypto } as MacSignerMap;
-    this.messageDigests = {'*': crypto } as MessageDigestMap;
+    this.keyEncrypters = {'*': crypto } as CryptoSuiteMap;
+    this.sharedKeyEncrypters = {'*': crypto } as CryptoSuiteMap;
+    this.symmetricEncrypter = {'*': crypto } as CryptoSuiteMap;
+    this.messageSigners = {'*': crypto } as CryptoSuiteMap;
+    this.macSigners = {'*': crypto } as CryptoSuiteMap;
+    this.messageDigests = {'*': crypto } as CryptoSuiteMap;
   }
 
   /**
-   * Gets the Encrypter object given the encryption algorithm's name
+   * Gets the key encrypter object given the encryption algorithm's name
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
   public getKeyEncrypter (name: string): ISubtleCrypto {
     if (this.keyEncrypters[name]) {
-      return this.keyEncrypters[name];
+      return this.keyEncrypters[name].getKekEncrypters();
     }
-    return this.keyEncrypters['*'];
+    return this.keyEncrypters['*'].getKekEncrypters();
   }
 
   /**
@@ -72,9 +60,9 @@ export default class CryptoFactory {
    */
   getSharedKeyEncrypter (name: string): ISubtleCrypto {
     if (this.sharedKeyEncrypters[name]) {
-      return this.sharedKeyEncrypters[name];
+      return this.sharedKeyEncrypters[name].getSharedKeyEncrypters();
     }
-    return this.sharedKeyEncrypters['*'];
+    return this.sharedKeyEncrypters['*'].getSharedKeyEncrypters();
   }
 
   /**
@@ -84,9 +72,9 @@ export default class CryptoFactory {
    */
   getSymmetricEncrypter (name: string): ISubtleCrypto {
     if (this.symmetricEncrypter[name]) {
-      return this.symmetricEncrypter[name];
+      return this.symmetricEncrypter[name].getSymmetricEncrypters();
     }
-    return this.symmetricEncrypter['*'];
+    return this.symmetricEncrypter['*'].getSymmetricEncrypters();
   }
   
   /**
@@ -96,9 +84,9 @@ export default class CryptoFactory {
    */
   getMessageSigner (name: string): ISubtleCrypto {
     if (this.messageSigners[name]) {
-      return this.messageSigners[name];
+      return this.messageSigners[name].getMessageSigners();
     }
-    return this.messageSigners['*'];
+    return this.messageSigners['*'].getMessageSigners();
   }
 
   /**
@@ -108,10 +96,11 @@ export default class CryptoFactory {
    */
   getMacSigner (name: string): ISubtleCrypto {
     if (this.macSigners[name]) {
-      return this.macSigners[name];
+      return this.macSigners[name].getMacSigners();
     }
-    return this.macSigners['*'];
+    return this.macSigners['*'].getMacSigners();
   }
+
   /**
    * Gets the message digest object given the digest algorithm's name
    * @param name The name of the algorithm
@@ -119,8 +108,8 @@ export default class CryptoFactory {
    */
   getMessageDigest (name: string): ISubtleCrypto {
     if (this.messageDigests[name]) {
-      return this.messageDigests[name];
+      return this.messageDigests[name].getMessageDigests();
     }
-    return this.messageDigests['*'];
+    return this.messageDigests['*'].getMessageDigests();
   }
 }

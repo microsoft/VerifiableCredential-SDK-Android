@@ -5,6 +5,12 @@
 import ISubtleCrypto from './ISubtleCrypto'
 
 /**
+ * A dictionary of JWA encryption algorithm names to a crypto object
+ */
+export type CryptoSuiteMap = {[name: string]: CryptoSuite};
+
+
+/**
  * Interface for the Crypto Algorithms Plugins
  */
 export default abstract class CryptoSuite {

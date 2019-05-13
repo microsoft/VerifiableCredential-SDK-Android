@@ -42,7 +42,7 @@ export default class JwsToken {
   private options: ISigningOptions | IEncryptionOptions | undefined;
   /**
    * Create an Jws token object
-   * @param cryptoFactory Suite of crypto APIs to use
+   * @param options Set of jws token options
    */
   constructor (options?: ISigningOptions | IEncryptionOptions){
     this.options = options;
@@ -51,11 +51,11 @@ export default class JwsToken {
   /**
    * Create an Jws token object from a token
    * @param token Base object used to create this token
-   * @param cryptoFactory Suite of crypto APIs to use
+   * @param options Set of jws token options
    */
   public static create (
-    token: IJwsFlatJson | IJwsGeneralJSon | IJwsCompact | string, cryptoFactory: CryptoFactory) : JwsToken {
-      const jwsToken = new JwsToken(cryptoFactory);
+    token: IJwsFlatJson | IJwsGeneralJSon | IJwsCompact | string, options?: ISigningOptions | IEncryptionOptions) : JwsToken {
+      const jwsToken = new JwsToken(options);
       
       // check for JWS compact format
     if (typeof token === 'string') {
@@ -91,15 +91,16 @@ export default class JwsToken {
       } else {
         console.debug(`Failed parsing as IJwsCompact. Reasom: ${decodeStatus.reason}`)
       }
+
       // Try to handle token as IJwsFlatJson
       decodeStatus = jwsToken.setFlatParts(token as IJwsGeneralJSon);
       if (decodeStatus.result) {
           return jwsToken;
       } else {
-        console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`)
+        console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
       }
 
-      throw new Error(`The content does not represent a valid jws token`)
+      throw new Error(`The content does not represent a valid jws token. Reasom: ${decodeStatus.reason}`);
     }
   }
 
@@ -332,7 +333,7 @@ export default class JwsToken {
     const jwsToken = new JwsToken();
 
     // Get signing key public key
-    const jwk: PublicKey = await keyStore.get(signingKeyReference, false) as PublicKey;
+    const jwk: PublicKey = await keyStore.get(signingKeyReference, true) as PublicKey;
 
     // Steps according to RTC7515 5.1
     // 2. Compute encoded payload value base64URL(JWS Payload)
@@ -366,7 +367,8 @@ export default class JwsToken {
     const signatureInput = `${encodedProtected}.${encodedContent}`;
 
     // TODO define base layer plugable crypto API
-    const signature = await (cryptoFactory.getMessageSigners(alg)).sign(signatureInput, jwk);
+    const signature = await (cryptoFactory.getMessageSigner(alg)).sign(algorithm, Buffer.from(signatureInput), signingKeyReference);
+
     // 6. Compute BASE64URL(JWS Signature)
     const encodedSignature = base64url.fromBase64(signature);
     // 8. Create the desired output: BASE64URL(UTF8(JWS Header)) || . BASE64URL(JWS payload) || . || BASE64URL(JWS Signature)
@@ -385,7 +387,9 @@ export default class JwsToken {
     return base64url.decode(this.payload as string) as string;
   }
 
-  private getJoseAlgorithm(algorithm: Algorithm): string {
-    return '';
+  private getJoseAlgorithm(algorithm: any): string {
+    switch (algorithm.name.toLowerCase()) {
+      case
+    }
   }
 }

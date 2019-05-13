@@ -2,9 +2,10 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
+import CryptoSuite from './CryptoSuite';
 import ISubtleCrypto from './ISubtleCrypto'
 import { SubtleCrypto } from 'webcrypto-core';
-import CryptoSuite from './CryptoSuite';
 
 /**
  * Default crypto suite
