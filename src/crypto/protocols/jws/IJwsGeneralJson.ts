@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import IJwsSignature from './IJwsSignature';
+import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 
 /**
  * JWS general json format
@@ -18,5 +19,10 @@ export default interface IJwsFlatJson extends IJwsSignature {
   /**
    * The signatures
    */
-  signatures: IJwsSignature[]
+  signatures: IJwsSignature[],
+
+  /**
+   * The serialization format
+   */
+  format: ProtectionFormat
 };

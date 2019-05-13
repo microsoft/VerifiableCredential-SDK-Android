@@ -7,41 +7,41 @@ import ISubtleCrypto from './ISubtleCrypto'
 /**
  * Interface for the Crypto Algorithms Plugins
  */
-export default interface ICryptoSuite {
+export default abstract class CryptoSuite {
  /**
   * Gets all of the key encryption Algorithms from the plugin
   * @returns a subtle crypto object for key encryption/decryption
   */
- getKekEncrypters (): ISubtleCrypto;
+ abstract getKekEncrypters (): ISubtleCrypto;
 
  /**
   * Gets all of the key sharing encryption Algorithms from the plugin
   * @returns a subtle crypto object for key sharing encryption/decryption
   */
- getSharedKeyEncrypters (): ISubtleCrypto;
+ abstract getSharedKeyEncrypters (): ISubtleCrypto;
 
  /**
    * Get all of the symmetric encrypter algorithms from the plugin
   * @returns a subtle crypto object for symmetric encryption/decryption
    */
-  getSymmetricEncrypters (): ISubtleCrypto;
+  abstract getSymmetricEncrypters (): ISubtleCrypto;
 
  /**
   * Gets all of the message signing Algorithms from the plugin
  * @returns a subtle crypto object for message signing
    */
-  getMessageSigners (): ISubtleCrypto;
+  abstract getMessageSigners (): ISubtleCrypto;
 
  /**
   * Gets all of the MAC signing Algorithms from the plugin. 
   * Will be used for primitive operations such as key generation.
  * @returns a subtle crypto object for message signing
    */
-  getMacSigners (): ISubtleCrypto;
+  abstract getMacSigners (): ISubtleCrypto;
 
  /**
   * Gets all of the message digest Algorithms from the plugin. 
  * @returns a subtle crypto object for message digests
    */
-  getMessageDigests (): ISubtleCrypto;
+  abstract getMessageDigests (): ISubtleCrypto;
 }
