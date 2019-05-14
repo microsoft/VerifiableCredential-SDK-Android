@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import CryptoSuite, { CryptoSuiteMap } from './CryptoSuite';
-import ISubtleCrypto from './ISubtleCrypto';
 import DefaultCryptoSuite from './DefaultCryptoSuite';
-
+import IKeyStore from '../keyStore/IKeyStore';
+import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * Utility class to handle all CryptoSuite dependency injection
@@ -20,11 +20,15 @@ export default class CryptoFactory {
   private macSigners: CryptoSuiteMap;
   private messageDigests: CryptoSuiteMap;
 
+  public keyStore: IKeyStore;
+
   /**
    * Constructs a new CryptoRegistry
+   * @param keyStore used to store private jeys
    * @param suite The suite to use for dependency injection
    */
-  constructor (suite?: CryptoSuite) {
+  constructor (keyStore: IKeyStore, suite?: CryptoSuite) {
+    this.keyStore = keyStore;
     let crypto: CryptoSuite; 
     if (suite) {
       crypto = suite;
@@ -45,7 +49,7 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  public getKeyEncrypter (name: string): ISubtleCrypto {
+  public getKeyEncrypter (name: string): SubtleCrypto {
     if (this.keyEncrypters[name]) {
       return this.keyEncrypters[name].getKekEncrypters();
     }
@@ -58,7 +62,7 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  getSharedKeyEncrypter (name: string): ISubtleCrypto {
+  getSharedKeyEncrypter (name: string): SubtleCrypto {
     if (this.sharedKeyEncrypters[name]) {
       return this.sharedKeyEncrypters[name].getSharedKeyEncrypters();
     }
@@ -70,7 +74,7 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  getSymmetricEncrypter (name: string): ISubtleCrypto {
+  getSymmetricEncrypter (name: string): SubtleCrypto {
     if (this.symmetricEncrypter[name]) {
       return this.symmetricEncrypter[name].getSymmetricEncrypters();
     }
@@ -82,7 +86,7 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  getMessageSigner (name: string): ISubtleCrypto {
+  getMessageSigner (name: string): SubtleCrypto {
     if (this.messageSigners[name]) {
       return this.messageSigners[name].getMessageSigners();
     }
@@ -94,7 +98,7 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  getMacSigner (name: string): ISubtleCrypto {
+  getMacSigner (name: string): SubtleCrypto {
     if (this.macSigners[name]) {
       return this.macSigners[name].getMacSigners();
     }
@@ -106,7 +110,7 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  getMessageDigest (name: string): ISubtleCrypto {
+  getMessageDigest (name: string): SubtleCrypto {
     if (this.messageDigests[name]) {
       return this.messageDigests[name].getMessageDigests();
     }

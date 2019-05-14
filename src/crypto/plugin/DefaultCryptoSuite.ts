@@ -4,71 +4,51 @@
  *--------------------------------------------------------------------------------------------*/
 
 import CryptoSuite from './CryptoSuite';
-import ISubtleCrypto from './ISubtleCrypto'
 import { SubtleCrypto } from 'webcrypto-core';
+import { Crypto } from '@peculiar/webcrypto';
 
 /**
  * Default crypto suite implementing the default plugable crypto layer
  *  */
 export default class DefaultCryptoSuite extends CryptoSuite {
+  private defaultCrypto: SubtleCrypto | undefined;
+  public crypto: Crypto;
+
+  constructor () {
+    super();
+    this.crypto = new Crypto();
+  }
+
  /**
   * Gets all of the key encryption Algorithms from the plugin
   * @returns a subtle crypto object for key encryption/decryption
   */
- public getKekEncrypters (): ISubtleCrypto {
-  // tslint:disable-next-line:no-typeof-undefined
-  if (typeof window !== 'undefined') {
-    // return browser api
-    return <ISubtleCrypto>window.crypto.subtle;
-  } else {
-    // return nodejs api
-    return <ISubtleCrypto>new SubtleCrypto();
-  }
+ public getKekEncrypters (): SubtleCrypto {
+  return this.subtleCrypto();
 }
 
  /**
   * Gets all of the key sharing encryption Algorithms from the plugin
   * @returns a subtle crypto object for key sharing encryption/decryption
   */
- public getSharedKeyEncrypters (): ISubtleCrypto {
-  // tslint:disable-next-line:no-typeof-undefined
-  if (typeof window !== 'undefined') {
-    // return browser api
-    return <ISubtleCrypto>window.crypto.subtle;
-  } else {
-    // return nodejs api
-    return <ISubtleCrypto>new SubtleCrypto();
-  }
+ public getSharedKeyEncrypters (): SubtleCrypto {
+  return this.subtleCrypto();
 }
 
  /**
    * Get all of the symmetric encrypter algorithms from the plugin
   * @returns a subtle crypto object for symmetric encryption/decryption
    */
-  public getSymmetricEncrypters (): ISubtleCrypto {
-  // tslint:disable-next-line:no-typeof-undefined
-  if (typeof window !== 'undefined') {
-    // return browser api
-      return <ISubtleCrypto>window.crypto.subtle;
-    } else {
-      // return nodejs api
-      return <ISubtleCrypto>new SubtleCrypto();
-    }
+  public getSymmetricEncrypters (): SubtleCrypto {
+    return this.subtleCrypto();
   }
 
  /**
   * Gets all of the message signing Algorithms from the plugin
  * @returns a subtle crypto object for message signing
    */
-  public getMessageSigners (): ISubtleCrypto {
-  // tslint:disable-next-line:no-typeof-undefined
-  if (typeof window !== 'undefined') {
-    // return browser api
-      return <ISubtleCrypto>window.crypto.subtle;
-    } else {
-      // return nodejs api
-      return <ISubtleCrypto>new SubtleCrypto();
-    }
+  public getMessageSigners (): SubtleCrypto {
+    return this.subtleCrypto();
   }
 
  /**
@@ -76,29 +56,30 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * Will be used for primitive operations such as key generation.
  * @returns a subtle crypto object for message signing
    */
-  public getMacSigners (): ISubtleCrypto {
-  // tslint:disable-next-line:no-typeof-undefined
-  if (typeof window !== 'undefined') {
-    // return browser api
-      return <ISubtleCrypto>window.crypto.subtle;
-    } else {
-      // return nodejs api
-      return <ISubtleCrypto>new SubtleCrypto();
-    }
+  public getMacSigners (): SubtleCrypto {
+    return this.subtleCrypto();
   }
 
  /**
   * Gets all of the message digest Algorithms from the plugin. 
  * @returns a subtle crypto object for message digests
    */
-  public getMessageDigests (): ISubtleCrypto {
+  public getMessageDigests (): SubtleCrypto {
+    return this.subtleCrypto();
+  }
+
+   private subtleCrypto(): SubtleCrypto {
   // tslint:disable-next-line:no-typeof-undefined
   if (typeof window !== 'undefined') {
     // return browser api
-      return <ISubtleCrypto>window.crypto.subtle;
+    return window.crypto.subtle;
     } else {
       // return nodejs api
-      return <ISubtleCrypto>new SubtleCrypto();
+      if (this.defaultCrypto) {
+        return this.defaultCrypto;
+      }
+      this.defaultCrypto = this.crypto.subtle;
+      return this.defaultCrypto;
     }
    }
 }

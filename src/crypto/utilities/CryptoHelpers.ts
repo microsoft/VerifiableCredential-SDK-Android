@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from '../plugin/CryptoFactory';
-import ISubtleCrypto from '../plugin/ISubtleCrypto';
 import PublicKey from '../keys/PublicKey';
 import EcPublicKey from '../keys/ec/EcPublicKey';
+import { CryptoAlgorithm } from '../keyStore/IKeyStore';
+import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * Crypto helpers support for plugable crypto layer
@@ -18,25 +19,25 @@ export default class CryptoHelpers {
    * @param algorithmName Requested algorithm
    * @param hash Optional hash for the algorithm
    */
-  public static getSubtleCrypto(cryptoFactory: CryptoFactory, algorithm: any): ISubtleCrypto {
+  public static getSubtleCryptoForTheAlgorithm(cryptoFactory: CryptoFactory, algorithm: any): SubtleCrypto {
     const jwa = CryptoHelpers.toJwa(algorithm)
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':
       case 'ECDSA':
         return cryptoFactory.getMessageSigner(jwa);
-        case 'RSA-OAEP': 
+      case 'RSA-OAEP': 
         return cryptoFactory.getKeyEncrypter(jwa);
       case 'ECDH':
       case 'DH':
-                return cryptoFactory.getSharedKeyEncrypter(jwa);
+        return cryptoFactory.getSharedKeyEncrypter(jwa);
       case 'AES-GCM':
         return cryptoFactory.getSymmetricEncrypter(jwa);
       case 'HMAC':
         return cryptoFactory.getMacSigner(jwa);
-        case 'SHA-256':
-        case 'SHA-384':
-        case 'SHA-512':
-          return cryptoFactory.getMessageDigest(jwa);
+      case 'SHA-256':
+      case 'SHA-384':
+      case 'SHA-512':
+        return cryptoFactory.getMessageDigest(jwa);
     }
 
     throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
@@ -77,7 +78,7 @@ export default class CryptoHelpers {
    * Derive the key import algorithm
    * @param algorithm used for signature
    */
-  public static getKeyImportAlgorithm(algorithm: RsaPssParams | EcdsaParams | AesCmacParams, jwk: PublicKey): string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams {
+  public static getKeyImportAlgorithm(algorithm: CryptoAlgorithm, jwk: PublicKey): string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams {
     const hash = (<any>algorithm).hash || 'SHA-256';
     const name = algorithm.name;
     switch (algorithm.name.toUpperCase()) {

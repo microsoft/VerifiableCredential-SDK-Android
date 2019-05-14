@@ -69,7 +69,7 @@
     "pouchdb": "7.0.0",
     "pouchdb-adapter-memory": "7.0.0",
     "typescript": "3.4.5",
-    "webcrypto-core": "^1.0.12"
+    "@peculiar/webcrypto": "^1.0.9"
   },
   "nyc": {
     "extension": [

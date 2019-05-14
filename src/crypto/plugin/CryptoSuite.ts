@@ -2,13 +2,12 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import ISubtleCrypto from './ISubtleCrypto'
+import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * A dictionary of JWA encryption algorithm names to a crypto object
  */
 export type CryptoSuiteMap = {[name: string]: CryptoSuite};
-
 
 /**
  * Interface for the Crypto Algorithms Plugins
@@ -18,36 +17,36 @@ export default abstract class CryptoSuite {
   * Gets all of the key encryption Algorithms from the plugin
   * @returns a subtle crypto object for key encryption/decryption
   */
- abstract getKekEncrypters (): ISubtleCrypto;
+ abstract getKekEncrypters (): SubtleCrypto;
 
  /**
   * Gets all of the key sharing encryption Algorithms from the plugin
   * @returns a subtle crypto object for key sharing encryption/decryption
   */
- abstract getSharedKeyEncrypters (): ISubtleCrypto;
+ abstract getSharedKeyEncrypters (): SubtleCrypto;
 
  /**
    * Get all of the symmetric encrypter algorithms from the plugin
   * @returns a subtle crypto object for symmetric encryption/decryption
    */
-  abstract getSymmetricEncrypters (): ISubtleCrypto;
+  abstract getSymmetricEncrypters (): SubtleCrypto;
 
  /**
   * Gets all of the message signing Algorithms from the plugin
  * @returns a subtle crypto object for message signing
    */
-  abstract getMessageSigners (): ISubtleCrypto;
+  abstract getMessageSigners (): SubtleCrypto;
 
  /**
   * Gets all of the MAC signing Algorithms from the plugin. 
   * Will be used for primitive operations such as key generation.
  * @returns a subtle crypto object for message signing
    */
-  abstract getMacSigners (): ISubtleCrypto;
+  abstract getMacSigners (): SubtleCrypto;
 
  /**
   * Gets all of the message digest Algorithms from the plugin. 
  * @returns a subtle crypto object for message digests
    */
-  abstract getMessageDigests (): ISubtleCrypto;
+  abstract getMessageDigests (): SubtleCrypto;
 }

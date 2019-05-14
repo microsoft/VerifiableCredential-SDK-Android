@@ -3,10 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
+import KeyStoreMem from '../../../src/crypto/keyStore/KeyStoreMem';
 
 describe('CryptoFactory', () => {
   it('should create a crypto suite',() => {
-    const factory = new CryptoFactory();
+    const keyStore = new KeyStoreMem();
+    
+    const factory = new CryptoFactory(keyStore);
     expect(factory).toBeDefined();
     const keyEncrypter = factory.getKeyEncrypter('*');
     expect(keyEncrypter).toBeDefined();

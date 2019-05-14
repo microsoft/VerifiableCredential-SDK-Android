@@ -13,6 +13,7 @@ import IJwsSignature from './IJwsSignature';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions, CryptoAlgorithm } from '../../keystore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
+import DefaultCrypto from '../../plugin/DefaultCrypto';
 
 type Header = {[name: string]: string};
 
@@ -244,7 +245,7 @@ export default class JwsToken {
    * @param manadatory True if property needs to be defined
    */
   private getKeyStore(newOptions?: IKeyStoreOptions, manadatory: boolean = true): IKeyStore {
-    return this.getOptionsProperty<IKeyStore>('keyStore', newOptions, manadatory);
+    return this.getCryptoFactory(newOptions, manadatory).keyStore;
   }
 
   /**
@@ -364,7 +365,8 @@ export default class JwsToken {
     const signatureInput = `${encodedProtected}.${encodedContent}`;
 
     // call base layer plugable crypto API for signing with a key reference
-    const signature = await (cryptoFactory.getMessageSigner(alg)).signByKeyStore(algorithm, signingKeyReference, Buffer.from(signatureInput));
+    const signer = new DefaultCrypto(cryptoFactory);
+    const signature = await signer.signByKeyStore(algorithm, signingKeyReference, Buffer.from(signatureInput));
     
     // Compose result
     jwsSignature.signature = Buffer.from(signature);
