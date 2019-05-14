@@ -13,4 +13,4 @@ export default interface IJwsFlatJson extends IJwsSignature {
    * The application-specific payload.
    */
   payload: string,
-};
+}

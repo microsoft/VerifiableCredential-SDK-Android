@@ -5,7 +5,6 @@
 
 import * as webcrypto from 'webcrypto-core';
 const SubtleCrypto = webcrypto.SubtleCrypto;
-import DefaultCryptoSuite from './DefaultCryptoSuite';
 
 /**
  * Subtle crypto class.

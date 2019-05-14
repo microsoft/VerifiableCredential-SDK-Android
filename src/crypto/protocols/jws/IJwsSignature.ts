@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * JWS signature
+ * JWS signature used by the general JSON
  */
 export default interface IJwsSignature {
   /**
@@ -20,5 +20,5 @@ export default interface IJwsSignature {
   /**
    * The JWS signature.
    */
-  signature: string
-};
+  signature: Buffer
+}

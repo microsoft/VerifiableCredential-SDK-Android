@@ -3,12 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ProtectionFormat } from './ProtectionFormat';
-import Protect from './Protect';
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
-import IKeyStore, { ISigningOptions, IEncryptionOptions } from './IKeyStore';
-import CryptoFactory from '../plugin/CryptoFactory';
+import IKeyStore from './IKeyStore';
 
 /**
  * Class defining methods and properties for a light KeyStore
@@ -50,8 +47,8 @@ export default class KeyStoreMem implements IKeyStore {
   list (): Promise<{ [name: string]: string }> {
     const dictionary: { [name: string]: string } = {};
     for (let [key, value] of this.store) {
-      if ((value as any).kid) {
-        dictionary[key] = (value as any).kid;
+      if ((<any>value).kid) {
+        dictionary[key] = (<any>value).kid;
       }
     }
     return new Promise((resolve) => {
@@ -71,31 +68,5 @@ export default class KeyStoreMem implements IKeyStore {
     return new Promise((resolve) => {
       resolve();
     });
-  }
-
-  /**
-   * Sign the data with the key referenced by keyIdentifier.
-   * @param keyReference for the key used for signature.
-   * @param payload Data to sign
-   * @param format used to protect the content
-   * @param signingOptions Set of signing options
-   * @returns The protected message
-   */
-  public async sign (keyReference: string,
-    payload: string | Buffer,
-    format: ProtectionFormat,
-    signingOptions: ISigningOptions): Promise<string> {
-    return Protect.sign(keyReference, payload, format, signingOptions);
-  }
-
-  /**
-   * Decrypt the data with the key referenced by keyReference.
-   * @param keyReference Reference to the key used for signature.
-   * @param cipher Data to decrypt
-   * @param encryptionOptions Set of encryption options
-   * @returns The plain text message
-   */
-  public async decrypt (keyReference: string, cipher: string | Buffer, encryptionOptions: IEncryptionOptions): Promise<string> {
-    return Protect.decrypt(keyReference, cipher, encryptionOptions);
   }
 }

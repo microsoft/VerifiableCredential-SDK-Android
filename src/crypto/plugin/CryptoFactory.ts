@@ -32,12 +32,12 @@ export default class CryptoFactory {
     // Set default API
     crypto = new DefaultCryptoSuite();
     }
-    this.keyEncrypters = {'*': crypto } as CryptoSuiteMap;
-    this.sharedKeyEncrypters = {'*': crypto } as CryptoSuiteMap;
-    this.symmetricEncrypter = {'*': crypto } as CryptoSuiteMap;
-    this.messageSigners = {'*': crypto } as CryptoSuiteMap;
-    this.macSigners = {'*': crypto } as CryptoSuiteMap;
-    this.messageDigests = {'*': crypto } as CryptoSuiteMap;
+    this.keyEncrypters = <CryptoSuiteMap>{'*': crypto };
+    this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
+    this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
+    this.messageSigners = <CryptoSuiteMap>{'*': crypto };
+    this.macSigners = <CryptoSuiteMap>{'*': crypto };
+    this.messageDigests = <CryptoSuiteMap>{'*': crypto };
   }
 
   /**

@@ -9,7 +9,7 @@ import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 /**
  * JWS general json format
  */
-export default interface IJwsFlatJson extends IJwsSignature {
+export default interface IJwsGeneralJson {
 
   /**
    * The application-specific non-encoded payload.
@@ -25,4 +25,4 @@ export default interface IJwsFlatJson extends IJwsSignature {
    * The serialization format
    */
   format: ProtectionFormat
-};
+}

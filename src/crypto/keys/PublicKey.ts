@@ -31,23 +31,23 @@ export enum KeyOperation {
  */
 export default abstract class PublicKey {
   // Key type
-  kty: KeyType | undefined;
+  public kty: KeyType | undefined;
   // Key ID 
-  kid: string = '';
+  public kid: string = '';
   // Intended use
-  use?: KeyUse; // "sig" "enc"
+  public use?: KeyUse; // "sig" "enc"
   // Valid key operations (key_ops)
-  key_ops?: KeyOperation[];
+  public key_ops?: KeyOperation[];
   // Algorithm intended for use with this key
-  alg?: string;
+  public alg?: string;
   // A resource for a X.509 public key certificate
-  x5u?: Url;
+  public x5u?: Url;
   // One or more PKIX certificates as base64 DER
-  x5c?: string[];
+  public x5c?: string[];
   // Base64URL SHA-1 thumbprint of the DER of an X.509 certificate
-  x5t?: string;
+  public x5t?: string;
   // base64URL SHA-256 thumbprint of the DER of the X.509 certificate
-  x5tS256?: string;
+  public x5tS256?: string;
 
   /**
    * Obtains the thumbprint for the jwk parameter

@@ -4,9 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from '../plugin/CryptoFactory';
 import ISubtleCrypto from '../plugin/ISubtleCrypto';
+import PublicKey from '../keys/PublicKey';
+import EcPublicKey from '../keys/ec/EcPublicKey';
 
 /**
- * Crypto helpers
+ * Crypto helpers support for plugable crypto layer
  */
 export default class CryptoHelpers {
 
@@ -70,6 +72,30 @@ export default class CryptoHelpers {
 
     throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
   }
+  
+  /**
+   * Derive the key import algorithm
+   * @param algorithm used for signature
+   */
+  public static getKeyImportAlgorithm(algorithm: RsaPssParams | EcdsaParams | AesCmacParams, jwk: PublicKey): string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams {
+    const hash = (<any>algorithm).hash || 'SHA-256';
+    const name = algorithm.name;
+    switch (algorithm.name.toUpperCase()) {
+      case 'RSASSA-PKCS1-V1_5':
+      case 'RSA-OAEP': 
+      case 'HMAC':
+      case 'SHA-256':
+      case 'SHA-384':
+      case 'SHA-512':
+          return <RsaHashedImportParams>{ name, hash };
+      case 'ECDSA':
+      case 'ECDH':
+          return <EcKeyImportParams>{ name, namedCurve: (<EcPublicKey>jwk).crv };
+      case 'AES-GCM':
+          return <RsaHashedImportParams>{ name };
+      }
+      throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+    }        
 
   private static getHash(hash: string) {
     return (hash || 'SHA-256').toUpperCase().replace('SHA-', '');

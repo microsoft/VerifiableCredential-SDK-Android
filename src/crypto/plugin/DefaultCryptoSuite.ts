@@ -8,7 +8,7 @@ import ISubtleCrypto from './ISubtleCrypto'
 import { SubtleCrypto } from 'webcrypto-core';
 
 /**
- * Default crypto suite
+ * Default crypto suite implementing the default plugable crypto layer
  *  */
 export default class DefaultCryptoSuite extends CryptoSuite {
  /**
@@ -18,12 +18,12 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  public getKekEncrypters (): ISubtleCrypto {
   if (window.crypto.subtle) {
     // return browser api
-    return window.crypto.subtle as ISubtleCrypto;
+    return <ISubtleCrypto>window.crypto.subtle;
   } else {
     // return nodejs api
-    return new SubtleCrypto() as ISubtleCrypto;
+    return <ISubtleCrypto>new SubtleCrypto();
   }
- }
+}
 
  /**
   * Gets all of the key sharing encryption Algorithms from the plugin
@@ -32,12 +32,12 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  public getSharedKeyEncrypters (): ISubtleCrypto {
   if (window.crypto.subtle) {
     // return browser api
-    return window.crypto.subtle as ISubtleCrypto;
+    return <ISubtleCrypto>window.crypto.subtle;
   } else {
     // return nodejs api
-    return new SubtleCrypto() as ISubtleCrypto;
+    return <ISubtleCrypto>new SubtleCrypto();
   }
- }
+}
 
  /**
    * Get all of the symmetric encrypter algorithms from the plugin
@@ -46,12 +46,12 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   public getSymmetricEncrypters (): ISubtleCrypto {
     if (window.crypto.subtle) {
       // return browser api
-      return window.crypto.subtle as ISubtleCrypto;
+      return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
-      return new SubtleCrypto() as ISubtleCrypto;
+      return <ISubtleCrypto>new SubtleCrypto();
     }
-   }
+  }
 
  /**
   * Gets all of the message signing Algorithms from the plugin
@@ -60,12 +60,12 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   public getMessageSigners (): ISubtleCrypto {
     if (window.crypto.subtle) {
       // return browser api
-      return window.crypto.subtle as ISubtleCrypto;
+      return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
-      return new SubtleCrypto() as ISubtleCrypto;
+      return <ISubtleCrypto>new SubtleCrypto();
     }
-   }
+  }
 
  /**
   * Gets all of the MAC signing Algorithms from the plugin. 
@@ -75,12 +75,12 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   public getMacSigners (): ISubtleCrypto {
     if (window.crypto.subtle) {
       // return browser api
-      return window.crypto.subtle as ISubtleCrypto;
+      return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
-      return new SubtleCrypto() as ISubtleCrypto;
+      return <ISubtleCrypto>new SubtleCrypto();
     }
-   }
+  }
 
  /**
   * Gets all of the message digest Algorithms from the plugin. 
@@ -89,10 +89,10 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   public getMessageDigests (): ISubtleCrypto {
     if (window.crypto.subtle) {
       // return browser api
-      return window.crypto.subtle as ISubtleCrypto;
+      return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
-      return new SubtleCrypto() as ISubtleCrypto;
+      return <ISubtleCrypto>new SubtleCrypto();
     }
    }
 }

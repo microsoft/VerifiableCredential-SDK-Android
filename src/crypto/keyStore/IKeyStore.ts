@@ -6,8 +6,11 @@
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
 import CryptoFactory from '../plugin/CryptoFactory';
-import { ProtectionFormat } from './ProtectionFormat';
 
+/**
+ * Define different types for the algorithm parameter
+ */
+export type CryptoAlgorithm = RsaPssParams | EcdsaParams | AesCmacParams;
 
 /**
  * Interface defining IKeyStore options.
@@ -20,7 +23,7 @@ export interface IKeyStoreOptions {
   keyStore: IKeyStore,
 
   // The used algorithm
-  algorithm?: Algorithm,
+  algorithm?: CryptoAlgorithm,
 
   // The default protected header
   protected?: { [name: string]: string },
@@ -71,24 +74,4 @@ export default interface IKeyStore {
    * Lists all key references with their corresponding key ids
    */
   list (): Promise<{ [name: string]: string }>;
-
-  /**
-   * Sign the data with the key referenced by keyReference.
-   * @param keyReference Reference to the key used for signature.
-   * @param data Data to sign
-   * @param format used to protect the content
-   * @param signingOptions Set of signing options
-   * @returns The protected message
-   */
-  sign (keyReference: string, data: string | Buffer, format: ProtectionFormat, signingOptions: ISigningOptions): Promise<any>;
-
-  /**
-   * Decrypt the data with the key referenced by keyReference.
-   * @param keyReference Reference to the key used for signature.
-   * @param cipher Data to decrypt
-   * @param format Protection format used to decrypt the data
-   * @param encryptionOptions Set of encryption options
-   * @returns The plain text message
-   */
-  decrypt (keyReference: string, cipher: string | Buffer, encryptionOptions: IEncryptionOptions): Promise<any>;
 }

@@ -22,4 +22,4 @@ export default interface IJwsCompact  {
    * The signature
    */
   signature: string
-};
+}

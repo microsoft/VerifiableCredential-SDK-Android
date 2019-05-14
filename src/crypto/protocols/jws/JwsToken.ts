@@ -5,19 +5,16 @@
 
 import base64url from 'base64url';
 import CryptoFactory from '../../plugin/CryptoFactory';
-import PrivateKey from '../../keys/PrivateKey';
 import PublicKey from '../../keys/PublicKey';
 import IJwsCompact from './IJwsCompact';
 import IJwsFlatJson from './IJwsFlatJson';
-import IJwsGeneralJSon from './IJwsGeneralJSon';
+import IJwsGeneralJson from './IJwsGeneralJson';
 import IJwsSignature from './IJwsSignature';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions } from '../../keystore/IKeyStore';
+import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions, CryptoAlgorithm } from '../../keystore/IKeyStore';
+import CryptoHelpers from '../../utilities/CryptoHelpers';
 
-/**
- * Definition for a delegate that can verfiy signed data.
- */
-type VerifySignatureDelegate = (signedContent: string, signature: string, jwk: PublicKey) => Promise<boolean>;
+type Header = {[name: string]: string};
 
 /**
  * Class for containing JWS token operations.
@@ -37,7 +34,7 @@ export default class JwsToken {
   /**
    * Signatures on content
    */
-  public signatures: IJwsSignature[] | undefined = [] as IJwsSignature[];
+  public signatures: IJwsSignature[] | undefined = <IJwsSignature[]>[];
 
   private options: ISigningOptions | IEncryptionOptions | undefined;
   /**
@@ -54,7 +51,7 @@ export default class JwsToken {
    * @param options Set of jws token options
    */
   public static create (
-    token: IJwsFlatJson | IJwsGeneralJSon | IJwsCompact | string, options?: ISigningOptions | IEncryptionOptions) : JwsToken {
+    token: IJwsFlatJson | IJwsGeneralJson | IJwsCompact | string, options?: ISigningOptions | IEncryptionOptions) : JwsToken {
       const jwsToken = new JwsToken(options);
       
       // check for JWS compact format
@@ -62,9 +59,9 @@ export default class JwsToken {
       const parts = token.split('.');
       if (parts.length === 3) {
         jwsToken.payload = parts[1];
-        const signature = {} as IJwsSignature;
+        const signature = <IJwsSignature>{};
         signature.protected = jwsToken.setProtected(parts[0]);
-        signature.signature = parts[2];
+        signature.signature = base64url.toBuffer(parts[2]);
         return jwsToken;
       } else {
         throw new Error(`Invalid compact JWS. Content has ${parts.length} item. Only 3 allowed`);
@@ -77,7 +74,7 @@ export default class JwsToken {
       jwsToken.payload = token.payload;
 
       // Try to handle token as IJwsGeneralJSon
-      let decodeStatus: { result: boolean, reason: string } = jwsToken.setGeneralParts(token as IJwsGeneralJSon);
+      let decodeStatus: { result: boolean, reason: string } = jwsToken.setGeneralParts(<IJwsGeneralJson>token);
       if (decodeStatus.result) {
           return jwsToken;
       } else {
@@ -85,7 +82,7 @@ export default class JwsToken {
       }
 
       // Try to handle token as IJwsCompact
-      decodeStatus = jwsToken.setCompactParts(token as IJwsGeneralJSon);
+      decodeStatus = jwsToken.setCompactParts(<IJwsCompact>token);
       if (decodeStatus.result) {
           return jwsToken;
       } else {
@@ -93,15 +90,14 @@ export default class JwsToken {
       }
 
       // Try to handle token as IJwsFlatJson
-      decodeStatus = jwsToken.setFlatParts(token as IJwsGeneralJSon);
+      decodeStatus = jwsToken.setFlatParts(<IJwsFlatJson>token);
       if (decodeStatus.result) {
           return jwsToken;
       } else {
         console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
       }
-
-      throw new Error(`The content does not represent a valid jws token. Reasom: ${decodeStatus.reason}`);
     }
+    throw new Error(`The content does not represent a valid jws token`);
   }
 
   /**
@@ -109,7 +105,7 @@ export default class JwsToken {
    * @param content Alledged IJwsGeneralJSon token
    * @returns true if valid token was parsed
    */
-  private setGeneralParts(content: IJwsGeneralJSon): {result: boolean, reason: string} {
+  private setGeneralParts(content: IJwsGeneralJson): {result: boolean, reason: string} {
     if (content) {
       if (content.payload) {
         this.payload = content.payload;
@@ -132,7 +128,7 @@ export default class JwsToken {
    */
   private setFlatParts(content: IJwsFlatJson): {result: boolean, reason: string} {
     if (content) {
-      const signature = {} as IJwsSignature;
+      const signature = <IJwsSignature>{};
 
       if (content.signature) {
         signature.signature = content.signature;
@@ -170,10 +166,10 @@ export default class JwsToken {
    */
   private setCompactParts(content: IJwsCompact): {result: boolean, reason: string} {
     if (content) {
-      const signature = {} as IJwsSignature;
+      const signature = <IJwsSignature>{};
 
       if (content.signature) {
-        signature.signature = content.signature;
+        signature.signature = base64url.toBuffer(content.signature);
       } else {
         // manadatory field
         return {result: false, reason: 'missing signature'};
@@ -204,10 +200,10 @@ export default class JwsToken {
    * Set the protected header
    * @param protectedHeader to set on the JwsToken object
    */
-  private setProtected(protectedHeader: string | {[name: string]: string} ) {
+  private setProtected(protectedHeader: string | Header ) {
     if (typeof protectedHeader === 'string' ) {
       const json = base64url.decode(protectedHeader);
-      return JSON.parse(json) as  {[name: string]: string};
+      return <Header>JSON.parse(json);
     }
 
     return protectedHeader;
@@ -261,7 +257,7 @@ export default class JwsToken {
   }
 
   /**
-   * Get the default protected header to be used
+   * Get the default protected header to be used from the options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
@@ -270,7 +266,7 @@ export default class JwsToken {
   }
 
   /**
-   * Get the default header to be used
+   * Get the default header to be used from the options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
@@ -279,16 +275,16 @@ export default class JwsToken {
   }
 
   /**
-   * Get the algorithm
+   * Get the algorithm from the options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getAlgorithm(newOptions?: IKeyStoreOptions, manadatory: boolean = true): Algorithm {
-    return this.getOptionsProperty<Algorithm>('algorithm', newOptions, manadatory);
+  private getAlgorithm(newOptions?: IKeyStoreOptions, manadatory: boolean = true): CryptoAlgorithm {
+    return this.getOptionsProperty<CryptoAlgorithm>('algorithm', newOptions, manadatory);
   }
 
   /**
-   * Get the Protected to be used
+   * Get the Protected to be used from the options
    * @param propertyName Property name in options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
@@ -298,17 +294,17 @@ export default class JwsToken {
     let ctorProtected: T | undefined;
 
     if (newOptions) {
-      newProtected = newOptions[propertyName] as T;
+      newProtected = <T>newOptions[propertyName];
     }
     if (this.options) {
-      ctorProtected = this.options[propertyName] as T;
+      ctorProtected = <T>this.options[propertyName];
     }
 
     if (manadatory && !newProtected && !ctorProtected) {
       throw new Error(`The property ${propertyName} is missing from options`);
     }
 
-    return newProtected || ctorProtected as T;
+    return newProtected || <T>ctorProtected;
   }
 
   /**
@@ -320,20 +316,21 @@ export default class JwsToken {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact JWS format.
    */
-  public async sign (signingKeyReference: string, payload: string, format: ProtectionFormat, options?: ISigningOptions): Promise<IJwsGeneralJSon> {
+  public async sign (signingKeyReference: string, payload: string, format: ProtectionFormat, options?: ISigningOptions): Promise<IJwsGeneralJson> {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
-    const algorithm: Algorithm = this.getAlgorithm(options);
-    const alg: string = this.getJoseAlgorithm(algorithm);
+    const algorithm: CryptoAlgorithm = this.getAlgorithm(options);
+    const alg: string = CryptoHelpers.toJwa(algorithm);
 
+    // tslint:disable-next-line:no-suspicious-comment
     // TODO support for multiple signatures
-    const jwsSignature: IJwsSignature = {} as IJwsSignature;
+    const jwsSignature: IJwsSignature = <IJwsSignature>{};
 
     // Set payload
     const jwsToken = new JwsToken();
 
     // Get signing key public key
-    const jwk: PublicKey = await keyStore.get(signingKeyReference, true) as PublicKey;
+    const jwk: PublicKey = await <Promise<PublicKey>>keyStore.get(signingKeyReference, true);
 
     // Steps according to RTC7515 5.1
     // 2. Compute encoded payload value base64URL(JWS Payload)
@@ -366,30 +363,22 @@ export default class JwsToken {
     //    using the "alg" signature algorithm.
     const signatureInput = `${encodedProtected}.${encodedContent}`;
 
-    // TODO define base layer plugable crypto API
-    const signature = await (cryptoFactory.getMessageSigner(alg)).sign(algorithm, Buffer.from(signatureInput), signingKeyReference);
-
-    // 6. Compute BASE64URL(JWS Signature)
-    const encodedSignature = base64url.fromBase64(signature);
-    // 8. Create the desired output: BASE64URL(UTF8(JWS Header)) || . BASE64URL(JWS payload) || . || BASE64URL(JWS Signature)
-    const jws: IJwsGeneralJSon = {
+    // call base layer plugable crypto API for signing with a key reference
+    const signature = await (cryptoFactory.getMessageSigner(alg)).signByKeyStore(algorithm, signingKeyReference, Buffer.from(signatureInput));
+    
+    // Compose result
+    jwsSignature.signature = Buffer.from(signature);
+    return <IJwsGeneralJson> {
       format,
       payload,
       signatures: [jwsSignature]
     };
-    return jws;
   }
 
   /**
    * Gets the base64 URL decrypted payload.
    */
   public getPayload (): string {
-    return base64url.decode(this.payload as string) as string;
-  }
-
-  private getJoseAlgorithm(algorithm: any): string {
-    switch (algorithm.name.toLowerCase()) {
-      case
-    }
+    return <string>base64url.decode(<string>this.payload);
   }
 }
