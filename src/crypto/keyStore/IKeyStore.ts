@@ -10,7 +10,7 @@ import CryptoFactory from '../plugin/CryptoFactory';
 /**
  * Define different types for the algorithm parameter
  */
-export type CryptoAlgorithm = RsaPssParams | EcdsaParams | AesCmacParams;
+export type CryptoAlgorithm = RsaPssParams | EcdsaParams | AesCmacParams | Algorithm;
 
 /**
  * Interface defining IKeyStore options.
@@ -23,7 +23,7 @@ export interface IKeyStoreOptions {
   keyStore: IKeyStore,
 
   // The used algorithm
-  algorithm?: CryptoAlgorithm,
+  algorithm: CryptoAlgorithm,
 
   // The default protected header
   protected?: { [name: string]: string },

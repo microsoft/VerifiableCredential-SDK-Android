@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { SubtleCrypto } from 'webcrypto-core'
+import { CryptoAlgorithm } from '../keyStore/IKeyStore';
 
 /**
  * Interface for the Crypto Algorithms Plugins
@@ -14,5 +15,5 @@ export default interface ISubtleCrypto extends SubtleCrypto {
    * @param keyReference points to key in the key store
    * @param data to sign
    */
-  signByKeyStore(algorithm: string | RsaPssParams | EcdsaParams | AesCmacParams, keyReference: string, data: BufferSource): PromiseLike<ArrayBuffer>;        
+  signByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, data: BufferSource): PromiseLike<ArrayBuffer>;        
 }

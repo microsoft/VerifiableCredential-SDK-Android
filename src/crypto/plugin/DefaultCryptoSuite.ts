@@ -16,7 +16,8 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * @returns a subtle crypto object for key encryption/decryption
   */
  public getKekEncrypters (): ISubtleCrypto {
-  if (window.crypto.subtle) {
+  // tslint:disable-next-line:no-typeof-undefined
+  if (typeof window !== 'undefined') {
     // return browser api
     return <ISubtleCrypto>window.crypto.subtle;
   } else {
@@ -30,7 +31,8 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * @returns a subtle crypto object for key sharing encryption/decryption
   */
  public getSharedKeyEncrypters (): ISubtleCrypto {
-  if (window.crypto.subtle) {
+  // tslint:disable-next-line:no-typeof-undefined
+  if (typeof window !== 'undefined') {
     // return browser api
     return <ISubtleCrypto>window.crypto.subtle;
   } else {
@@ -44,8 +46,9 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * @returns a subtle crypto object for symmetric encryption/decryption
    */
   public getSymmetricEncrypters (): ISubtleCrypto {
-    if (window.crypto.subtle) {
-      // return browser api
+  // tslint:disable-next-line:no-typeof-undefined
+  if (typeof window !== 'undefined') {
+    // return browser api
       return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
@@ -58,8 +61,9 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  * @returns a subtle crypto object for message signing
    */
   public getMessageSigners (): ISubtleCrypto {
-    if (window.crypto.subtle) {
-      // return browser api
+  // tslint:disable-next-line:no-typeof-undefined
+  if (typeof window !== 'undefined') {
+    // return browser api
       return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
@@ -73,8 +77,9 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  * @returns a subtle crypto object for message signing
    */
   public getMacSigners (): ISubtleCrypto {
-    if (window.crypto.subtle) {
-      // return browser api
+  // tslint:disable-next-line:no-typeof-undefined
+  if (typeof window !== 'undefined') {
+    // return browser api
       return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
@@ -87,8 +92,9 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  * @returns a subtle crypto object for message digests
    */
   public getMessageDigests (): ISubtleCrypto {
-    if (window.crypto.subtle) {
-      // return browser api
+  // tslint:disable-next-line:no-typeof-undefined
+  if (typeof window !== 'undefined') {
+    // return browser api
       return <ISubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
