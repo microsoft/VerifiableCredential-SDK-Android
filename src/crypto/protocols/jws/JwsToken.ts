@@ -13,7 +13,7 @@ import IJwsSignature from './IJwsSignature';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions, CryptoAlgorithm } from '../../keystore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
-import DefaultCrypto from '../../plugin/DefaultCrypto';
+import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 
 type Header = {[name: string]: string};
 
@@ -365,7 +365,7 @@ export default class JwsToken {
     const signatureInput = `${encodedProtected}.${encodedContent}`;
 
     // call base layer plugable crypto API for signing with a key reference
-    const signer = new DefaultCrypto(cryptoFactory);
+    const signer = new SubtleCryptoExtension(cryptoFactory);
     const signature = await signer.signByKeyStore(algorithm, signingKeyReference, Buffer.from(signatureInput));
     
     // Compose result

@@ -83,6 +83,7 @@ export default class CryptoHelpers {
     const name = algorithm.name;
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':
+        return  <RsaHashedImportParams>{ name, hash: {name: "SHA-256"} };
       case 'RSA-OAEP': 
       case 'HMAC':
       case 'SHA-256':
