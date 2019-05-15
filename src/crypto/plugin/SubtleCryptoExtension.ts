@@ -13,7 +13,7 @@ import { SubtleCrypto } from 'webcrypto-core';
 /**
  * Default crypto suite
  */
-export default class DefaultCrypto extends SubtleCrypto implements ISubtleCrypto {
+export default class SubtleCryptoExtension extends SubtleCrypto implements ISubtleCrypto {
   private keyStore: IKeyStore;
   private cryptoFactory: CryptoFactory;
 
@@ -34,8 +34,12 @@ export default class DefaultCrypto extends SubtleCrypto implements ISubtleCrypto
     const jwk: PublicKey = await <Promise<PublicKey>>this.keyStore.get(keyReference, false);
     const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
-    const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['sign']);
+    
+    const key = await crypto.importKey('jwk', jwk, <RsaHashedImportParams>keyImportAlgorithm, true, ['sign']);
+    //importKey(format: KeyFormat, keyData: JsonWebKey | BufferSource, algorithm: AlgorithmIdentifier, extractable: boolean, keyUsages: KeyUsage[]): Promise<CryptoKey$1>;
+    
     return await <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>algorithm: <RsaPssParams>algorithm, key, <ArrayBuffer>data);
   }        
 }
 
+ 

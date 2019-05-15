@@ -72,13 +72,13 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   // tslint:disable-next-line:no-typeof-undefined
   if (typeof window !== 'undefined') {
     // return browser api
-    return window.crypto.subtle;
+    return <SubtleCrypto>window.crypto.subtle;
     } else {
       // return nodejs api
       if (this.defaultCrypto) {
         return this.defaultCrypto;
       }
-      this.defaultCrypto = this.crypto.subtle;
+      this.defaultCrypto = <SubtleCrypto>this.crypto.subtle;
       return this.defaultCrypto;
     }
    }

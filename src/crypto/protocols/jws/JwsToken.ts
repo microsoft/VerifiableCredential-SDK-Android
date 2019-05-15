@@ -13,7 +13,7 @@ import IJwsSignature from './IJwsSignature';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions, CryptoAlgorithm } from '../../keystore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
-import DefaultCrypto from '../../plugin/DefaultCrypto';
+import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 
 type Header = {[name: string]: string};
 

@@ -21,19 +21,23 @@ self-issued id token.</p></dd>
 <dd><p>Represents a Private Key in JWK format.</p></dd>
 <dt><a href="#KeyOperation">KeyOperation</a></dt>
 <dd></dd>
+<dt><a href="#RsaPrivateKey">RsaPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
+<dd><p>Represents an Elliptic Curve private key</p></dd>
+<dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code>PublicKey</code></dt>
+<dd><p>Represents an RSA public key</p></dd>
 <dt><a href="#KeyStoreMem">KeyStoreMem</a></dt>
 <dd><p>Class defining methods and properties for a light KeyStore</p></dd>
 <dt><a href="#CryptoFactory">CryptoFactory</a></dt>
 <dd><p>Utility class to handle all CryptoSuite dependency injection</p></dd>
 <dt><a href="#CryptoSuite">CryptoSuite</a></dt>
 <dd><p>Interface for the Crypto Algorithms Plugins</p></dd>
-<dt><a href="#DefaultCrypto">DefaultCrypto</a></dt>
-<dd><p>Default crypto suite</p></dd>
 <dt><a href="#DefaultCryptoSuite">DefaultCryptoSuite</a></dt>
 <dd><p>Default crypto suite implementing the default plugable crypto layer</p></dd>
 <dt><a href="#SubtleCryptoDefault">SubtleCryptoDefault</a></dt>
 <dd><p>Subtle crypto class.
 Provides support for nodejs and browser</p></dd>
+<dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
+<dd><p>Default crypto suite</p></dd>
 <dt><a href="#JwsToken">JwsToken</a></dt>
 <dd><p>Class for containing JWS token operations.
 This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
@@ -314,6 +318,26 @@ credential for the specified identifier.</p>
 ### *new exports.KeyOperation()*
 <p>Represents a Public Key in JWK format.</p>
 
+<a name="RsaPrivateKey"></a>
+
+## RsaPrivateKey ⇐ [<code>PrivateKey</code>](#PrivateKey)
+<p>Represents an Elliptic Curve private key</p>
+
+**Kind**: global class  
+**Extends**: [<code>PrivateKey</code>](#PrivateKey)  
+<a name="RsaPrivateKey+getPublicKey"></a>
+
+### rsaPrivateKey.getPublicKey()
+<p>Get the RSA public key</p>
+
+**Kind**: instance method of [<code>RsaPrivateKey</code>](#RsaPrivateKey)  
+<a name="RsaPublicKey"></a>
+
+## RsaPublicKey ⇐ <code>PublicKey</code>
+<p>Represents an RSA public key</p>
+
+**Kind**: global class  
+**Extends**: <code>PublicKey</code>  
 <a name="KeyStoreMem"></a>
 
 ## KeyStoreMem
@@ -366,7 +390,7 @@ the key identifier.</p>
 **Kind**: global class  
 
 * [CryptoFactory](#CryptoFactory)
-    * [new CryptoFactory(suite)](#new_CryptoFactory_new)
+    * [new CryptoFactory(keyStore, suite)](#new_CryptoFactory_new)
     * [.getKeyEncrypter(name)](#CryptoFactory+getKeyEncrypter) ⇒
     * [.getSharedKeyEncrypter(name)](#CryptoFactory+getSharedKeyEncrypter) ⇒
     * [.getSymmetricEncrypter(name)](#CryptoFactory+getSymmetricEncrypter) ⇒
@@ -376,12 +400,13 @@ the key identifier.</p>
 
 <a name="new_CryptoFactory_new"></a>
 
-### new CryptoFactory(suite)
+### new CryptoFactory(keyStore, suite)
 <p>Constructs a new CryptoRegistry</p>
 
 
 | Param | Description |
 | --- | --- |
+| keyStore | <p>used to store private jeys</p> |
 | suite | <p>The suite to use for dependency injection</p> |
 
 <a name="CryptoFactory+getKeyEncrypter"></a>
@@ -463,26 +488,6 @@ Used for DH algorithms</p>
 <p>Interface for the Crypto Algorithms Plugins</p>
 
 **Kind**: global class  
-<a name="DefaultCrypto"></a>
-
-## DefaultCrypto
-<p>Default crypto suite</p>
-
-**Kind**: global class  
-<a name="DefaultCrypto+signByKeyStore"></a>
-
-### defaultCrypto.signByKeyStore(algorithm, keyReference, data) ⇒
-<p>Sign with a key referenced in the key store</p>
-
-**Kind**: instance method of [<code>DefaultCrypto</code>](#DefaultCrypto)  
-**Returns**: <p>The signature in the requested algorithm</p>  
-
-| Param | Description |
-| --- | --- |
-| algorithm | <p>used for signature</p> |
-| keyReference | <p>points to key in the key store</p> |
-| data | <p>to sign</p> |
-
 <a name="DefaultCryptoSuite"></a>
 
 ## DefaultCryptoSuite
@@ -552,6 +557,26 @@ Provides support for nodejs and browser</p>
 
 ### new SubtleCryptoDefault()
 <p>Constructs a new instance of the class.</p>
+
+<a name="SubtleCryptoExtension"></a>
+
+## SubtleCryptoExtension
+<p>Default crypto suite</p>
+
+**Kind**: global class  
+<a name="SubtleCryptoExtension+signByKeyStore"></a>
+
+### subtleCryptoExtension.signByKeyStore(algorithm, keyReference, data) ⇒
+<p>Sign with a key referenced in the key store</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+**Returns**: <p>The signature in the requested algorithm</p>  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for signature</p> |
+| keyReference | <p>points to key in the key store</p> |
+| data | <p>to sign</p> |
 
 <a name="JwsToken"></a>
 
@@ -758,13 +783,13 @@ Crypto calls always happen via CryptoFactory</p>
 **Kind**: global class  
 
 * [CryptoHelpers](#CryptoHelpers)
-    * [.getSubtleCrypto(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCrypto)
+    * [.getSubtleCryptoForTheAlgorithm(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCryptoForTheAlgorithm)
     * [.toJwa(algorithmName, hash)](#CryptoHelpers.toJwa)
     * [.getKeyImportAlgorithm(algorithm)](#CryptoHelpers.getKeyImportAlgorithm)
 
-<a name="CryptoHelpers.getSubtleCrypto"></a>
+<a name="CryptoHelpers.getSubtleCryptoForTheAlgorithm"></a>
 
-### CryptoHelpers.getSubtleCrypto(cryptoFactory, algorithmName, hash)
+### CryptoHelpers.getSubtleCryptoForTheAlgorithm(cryptoFactory, algorithmName, hash)
 <p>The API which implements the requested algorithm</p>
 
 **Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
