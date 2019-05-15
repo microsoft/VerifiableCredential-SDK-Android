@@ -54,7 +54,9 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param format Optional specify the serialization format. If not specified, use default format.
    */
   public serialize (format?: ProtectionFormat): string {
-    format = format || this.format;
+    if (format === undefined) {
+      format = this.format;
+    }
 
       switch (format) {
         case ProtectionFormat.JwsGeneralJson:
@@ -103,30 +105,17 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param token JWS base object
    */
   private static serializeJwsFlatJson (token: JwsToken): string {
-    const jws = {
-      payload: base64url.encode(<string>token.payload),
-      signatures: <any[]>[]
+    const jws: any = {
+      payload: base64url.encode(<string>token.payload)
     }
 
-    for (let inx = 0; inx < token.signatures.length; inx ++) {
-      const tokenSignature: JwsSignature = token.signatures[inx];
-      const jwsSignature: any = {
-        signature:  base64url.encode(tokenSignature.signature),
-      };
-
-      if (JwsToken.headerHasElements(tokenSignature.protected)) {
-        jwsSignature.protected = JwsToken.encodeHeader(<JwsHeader>tokenSignature.protected);
-      }
-
-      if (JwsToken.headerHasElements(tokenSignature.header)) {
-        jwsSignature.header = JwsToken.encodeHeader(<JwsHeader>tokenSignature.header, false);
-      } 
-      if (!jwsSignature.protected && ! jwsSignature.header) {
-        throw new Error(`Signature ${inx} is missing header and protected`);
-      }
-      jws.signatures.push(jwsSignature);
+    if (JwsToken.headerHasElements(token.signatures[0].protected)) {
+      jws.protected = JwsToken.encodeHeader(<JwsHeader>token.signatures[0].protected);
     }
-
+    if (JwsToken.headerHasElements(token.signatures[0].header)) {
+      jws.header = JwsToken.encodeHeader(<JwsHeader>token.signatures[0].header, false);
+    }
+    jws.signature = base64url.encode(token.signatures[0].signature);
     return JSON.stringify(jws);
   }
 

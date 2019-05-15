@@ -28,8 +28,6 @@ describe('JwsToken standard', () => {
       const p = new Uint8Array(Buffer.from(payload));
       expect(p).toBeDefined();
     
-      const encodedPayload = base64url.encode(payload);
-      expect(encodedPayload).toBeDefined();
       const keyStore = new KeyStoreMem();
       const cryptoSuite = new DefaultCryptoSuite();
       const options: ISigningOptions = {
@@ -52,12 +50,27 @@ describe('JwsToken standard', () => {
       const jwsToken = new JwsToken(options);
       const signature = await jwsToken.sign('key', payload, ProtectionFormat.JwsCompactJson);
       expect(signature).toBeDefined();
+      const encodedPayload = 'eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ';
+      const encodedProtected = 'eyJhbGciOiJSUzI1NiJ9';
+      const encodedSignature = 'cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw';
+      expect(base64url.encode(signature.signatures[0].signature)).toEqual(encodedSignature);
 
-      const jwsSignature = 'cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw';
-      expect(base64url.encode(signature.signatures[0].signature)).toEqual(jwsSignature);
+      const compact = signature.serialize(ProtectionFormat.JwsCompactJson);
+      expect(compact).toEqual(`${encodedProtected}.${encodedPayload}.${encodedSignature}`);
 
-      const serialized = signature.serialize(ProtectionFormat.JwsCompactJson);
-      expect(serialized).toEqual('eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ.cC4hiUPoj9Eetdgtv3hF80EGrhuB__dzERat0XF9g2VtQgr9PJbu3XOiZj5RZmh7AAuHIm4Bh-0Qc_lF5YKt_O8W2Fp5jujGbds9uJdbF9CUAr7t1dnZcAcQjbKBYNX4BAynRFdiuB--f_nZLgrnbyTyWzO75vRK5h6xBArLIARNPvkSjtQBMHlb1L07Qe7K0GarZRmB_eSN9383LcOLn6_dO--xi12jzDwusC-eOkHWEsqtFZESc6BfI7noOPqvhJ1phCnvWh6IeYI2w9QOYEUipUTI8np6LbgGY9Fs98rqVt5AXLIhWkWywlVmtVrBp0igcN_IoypGlUPQGe77Rw');
-  });
+      const general = signature.serialize(ProtectionFormat.JwsGeneralJson);
+      let parsed = JSON.parse(general);
+      expect(parsed.payload).toEqual(encodedPayload);
+      expect(parsed.signatures[0].signature).toEqual(encodedSignature);
+      expect(parsed.signatures[0].protected).toEqual(encodedProtected);
+      expect(parsed.signatures[0].header).toBeUndefined()
+
+      const flat = signature.serialize(ProtectionFormat.JwsFlatJson);
+      parsed = JSON.parse(flat);
+      expect(parsed.payload).toEqual(encodedPayload);
+      expect(parsed.signature).toEqual(encodedSignature);
+      expect(parsed.protected).toEqual(encodedProtected);
+      expect(parsed.header).toBeUndefined()
+      });
 
 });
