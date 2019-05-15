@@ -38,6 +38,8 @@ self-issued id token.</p></dd>
 Provides support for nodejs and browser</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
 <dd><p>Default crypto suite</p></dd>
+<dt><a href="#JwsSignature">JwsSignature</a></dt>
+<dd><p>JWS signature used by the general JSON</p></dd>
 <dt><a href="#JwsToken">JwsToken</a></dt>
 <dd><p>Class for containing JWS token operations.
 This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
@@ -578,6 +580,17 @@ Provides support for nodejs and browser</p>
 | keyReference | <p>points to key in the key store</p> |
 | data | <p>to sign</p> |
 
+<a name="JwsSignature"></a>
+
+## JwsSignature
+<p>JWS signature used by the general JSON</p>
+
+**Kind**: global class  
+<a name="new_JwsSignature_new"></a>
+
+### new JwsSignature()
+<p>The JWS signature.</p>
+
 <a name="JwsToken"></a>
 
 ## JwsToken
@@ -590,6 +603,7 @@ Crypto calls always happen via CryptoFactory</p>
 * [JwsToken](#JwsToken)
     * [new JwsToken(options)](#new_JwsToken_new)
     * _instance_
+        * [.serialize(format)](#JwsToken+serialize)
         * [.setGeneralParts(content)](#JwsToken+setGeneralParts) ⇒
         * [.setFlatParts(content)](#JwsToken+setFlatParts) ⇒
         * [.setCompactParts(content)](#JwsToken+setCompactParts) ⇒
@@ -604,7 +618,12 @@ Crypto calls always happen via CryptoFactory</p>
         * [.sign(signingKeyReference, payload, format, options)](#JwsToken+sign) ⇒
         * [.getPayload()](#JwsToken+getPayload)
     * _static_
+        * [.serializeJwsGeneralJson(token)](#JwsToken.serializeJwsGeneralJson)
+        * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
+        * [.serializeJwsCompact(token)](#JwsToken.serializeJwsCompact)
         * [.create(token, options)](#JwsToken.create)
+        * [.headerHasElements(header)](#JwsToken.headerHasElements)
+        * [.encodeHeader(header, toBase64Url)](#JwsToken.encodeHeader)
 
 <a name="new_JwsToken_new"></a>
 
@@ -615,6 +634,17 @@ Crypto calls always happen via CryptoFactory</p>
 | Param | Description |
 | --- | --- |
 | options | <p>Set of jws token options</p> |
+
+<a name="JwsToken+serialize"></a>
+
+### jwsToken.serialize(format)
+<p>Serialize a Jws token object from a token</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| format | <p>Optional specify the serialization format. If not specified, use default format.</p> |
 
 <a name="JwsToken+setGeneralParts"></a>
 
@@ -763,6 +793,39 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Gets the base64 URL decrypted payload.</p>
 
 **Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+<a name="JwsToken.serializeJwsGeneralJson"></a>
+
+### JwsToken.serializeJwsGeneralJson(token)
+<p>Serialize a Jws token object from a token in General Json format</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>JWS base object</p> |
+
+<a name="JwsToken.serializeJwsFlatJson"></a>
+
+### JwsToken.serializeJwsFlatJson(token)
+<p>Serialize a Jws token object from a token in Flat Json format</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>JWS base object</p> |
+
+<a name="JwsToken.serializeJwsCompact"></a>
+
+### JwsToken.serializeJwsCompact(token)
+<p>Serialize a Jws token object from a token in Compact format</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>JWS base object</p> |
+
 <a name="JwsToken.create"></a>
 
 ### JwsToken.create(token, options)
@@ -774,6 +837,29 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- |
 | token | <p>Base object used to create this token</p> |
 | options | <p>Set of jws token options</p> |
+
+<a name="JwsToken.headerHasElements"></a>
+
+### JwsToken.headerHasElements(header)
+<p>Return true if the header has elements</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| header | <p>to test</p> |
+
+<a name="JwsToken.encodeHeader"></a>
+
+### JwsToken.encodeHeader(header, toBase64Url)
+<p>Encode the header to JSON and base 64 url</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| header |  | <p>to encode</p> |
+| toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
 
 <a name="CryptoHelpers"></a>
 

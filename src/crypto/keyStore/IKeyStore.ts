@@ -6,6 +6,7 @@
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
 import CryptoFactory from '../plugin/CryptoFactory';
+import { JwsHeader } from '../protocols/jws/IJwsGeneralJson';
 
 /**
  * Define different types for the algorithm parameter
@@ -23,10 +24,10 @@ export interface IKeyStoreOptions {
   algorithm: CryptoAlgorithm,
 
   // The default protected header
-  protected?: { [name: string]: string },
+  protected?: JwsHeader,
 
   // The default header
-  header?: { [name: string]: string },
+  header?: JwsHeader,
 
   // Make the type indexable
   [key: string]: any;
@@ -70,5 +71,5 @@ export default interface IKeyStore {
   /**
    * Lists all key references with their corresponding key ids
    */
-  list (): Promise<{ [name: string]: string }>;
+  list (): Promise<Map<string, string>>;
 }

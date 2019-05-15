@@ -5,6 +5,13 @@
 
 import IJwsSignature from './IJwsSignature';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
+import { TSMap } from 'typescript-map'
+
+/**
+ * Defines a header in JWS
+ */
+export type JwsHeader = TSMap<string, string>;
+
 
 /**
  * JWS general json format

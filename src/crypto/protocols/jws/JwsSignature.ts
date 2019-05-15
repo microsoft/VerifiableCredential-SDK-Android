@@ -4,24 +4,28 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { JwsHeader } from "./IJwsGeneralJson";
+import IJwsSignature from "./IJwsSignature";
 
 /**
- * JWS compact format
+ * JWS signature used by the general JSON
  */
-export default interface IJwsCompact  {
-
+export default class JwsSignature implements IJwsSignature {
   /**
    * The protected (signed) header.
    */
-  protected?: JwsHeader | undefined,
+  public protected?: JwsHeader;
 
   /**
-   * The application-specific non-encoded payload.
+   * The unprotected (unverified) header.
    */
-  payload: string,
+  public header?: JwsHeader;
 
   /**
-   * The signature
+   * The JWS signature.
    */
-  signature: string
+  public signature: Buffer;
+
+  constructor() {
+    this.signature = Buffer.from('');
+  }
 }

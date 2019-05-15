@@ -44,11 +44,11 @@ export default class KeyStoreMem implements IKeyStore {
  /**
   * Lists all keys with their corresponding key ids
   */
-  list (): Promise<{ [name: string]: string }> {
-    const dictionary: { [name: string]: string } = {};
+  list (): Promise<Map<string, string>> {
+    const dictionary: Map<string, string> = new Map<string, string>();
     for (let [key, value] of this.store) {
       if ((<any>value).kid) {
-        dictionary[key] = (<any>value).kid;
+        dictionary.set(key, (<any>value).kid);
       }
     }
     return new Promise((resolve) => {
