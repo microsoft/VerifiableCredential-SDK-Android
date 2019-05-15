@@ -1,0 +1,7 @@
+dist/
+out/
+node_modules/
+
+.nyc_output/
+coverage/
+nunitresults.xml

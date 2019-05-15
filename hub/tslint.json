@@ -1,0 +1,38 @@
+{
+  "extends": "tslint-config-airbnb",
+  "linterOptions": {
+    "exclude": [
+      "node_modules/**",
+      "tests/**"
+    ]
+  },
+  "rules": {
+    "max-line-length": [
+      true,
+      160
+    ],
+    "completed-docs": [
+      true,
+      {
+        "classes": {"visibilities": ["exported"]},
+        "enums": {"visibilities": ["exported"]},
+        "functions": {"visibilities": ["exported"]},
+        "interfaces": {"visibilities": ["exported"]},
+        "methods": {"privacies": ["public", "protected"], 
+          "locations": ["all"]},
+          "properties": {"privacies": ["public", "protected"], 
+            "locations": ["all"]},
+            "types": {"visibilities": ["all"]}
+      }
+    ],
+    "jsdoc-format": [
+      true,
+      "check-multiline-start"
+    ],
+    "variable-name": [
+      true, 
+      "check-format",
+      "allow-leading-underscore"
+    ]
+  }
+}
