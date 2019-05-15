@@ -1,13 +1,13 @@
-import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto/rsa/RsaPrivateKey';
+import { PrivateKeyRsa } from '@decentralized-identity/did-auth-jose';
 import { HttpResolver } from '@decentralized-identity/did-common-typescript';
-import HubSession from './HubSession';
-import HubWriteRequest from './requests/HubWriteRequest';
-import CommitSigner from './crypto/CommitSigner';
-import Commit from './Commit';
-import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
-import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
-import CommitStrategyBasic from './CommitStrategyBasic';
-import { KeyStoreMem, IKeyStore } from './index';
+import HubSession from '../src/hub/HubSession';
+import HubCommitWriteRequest from '../src/hub/requests/HubCommitWriteRequest';
+import CommitSigner from '../src/hub/crypto/CommitSigner';
+import Commit from '../src/hub/Commit';
+import HubObjectQueryRequest from '../src/hub/requests/HubObjectQueryRequest';
+import HubCommitQueryRequest from '../src/hub/requests/HubCommitQueryRequest';
+import CommitStrategyBasic from '../src/hub/CommitStrategyBasic';
+import { KeyStoreMem, IKeyStore } from '../src/index';
 
 // Fill these in with specific values.
 const HTTP_RESOLVER = 'HTTP_RESOLVER_ENDPOINT_HERE';
@@ -30,7 +30,7 @@ async function runExample() {
   try {
 
     const kid = `${DID}#${PRIVATE_KEY.kid}`;
-    const privateKey = RsaPrivateKey.wrapJwk(kid, PRIVATE_KEY);
+    const privateKey = PrivateKeyRsa.wrapJwk(kid, PRIVATE_KEY);
 
     const keyStore: IKeyStore = new KeyStoreMem();
     keyStore.save(kid, privateKey);
@@ -55,7 +55,7 @@ async function runExample() {
         iss: DID,
         sub: DID,
         interface: 'Collections',
-        context: 'http://schema.org',
+        context: 'https://schema.org',
         type: 'MusicPlaylist',
         operation: 'create',
         commit_strategy: 'basic',
@@ -72,7 +72,7 @@ async function runExample() {
 
     const signedCommit = await signer.sign(commit);
 
-    const commitRequest = new HubWriteRequest(signedCommit);
+    const commitRequest = new HubCommitWriteRequest(signedCommit);
     const commitResponse = await session.send(commitRequest);
     console.log(commitResponse);
 
@@ -82,7 +82,7 @@ async function runExample() {
 
     const queryRequest = new HubObjectQueryRequest({
       interface: 'Collections',
-      context: 'http://schema.org',
+      context: 'https://schema.org',
       type: 'MusicPlaylist',
     });
 

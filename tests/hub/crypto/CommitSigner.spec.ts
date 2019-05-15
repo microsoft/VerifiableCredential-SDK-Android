@@ -1,8 +1,8 @@
 import { ICommitProtectedHeaders } from '@decentralized-identity/hub-common-js';
-import CommitSigner from './CommitSigner';
+import CommitSigner from '../../../src/hub/crypto/CommitSigner';
 import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto/rsa/RsaPrivateKey';
 import { EcPrivateKey, Secp256k1CryptoSuite } from '@decentralized-identity/did-auth-jose';
-import Commit from '../Commit';
+import Commit from '../../../src/hub/Commit';
 
 describe('CommitSigner', () => {
 
@@ -44,7 +44,7 @@ describe('CommitSigner', () => {
 
       const signedProtectedHeaders = signedCommit.getProtectedHeaders();
       Object.keys(protectedHeaders).forEach((headerKey) => {
-        expect((signedProtectedHeaders as any)[headerKey]).toEqual((protectedHeaders as any)[headerKey]);
+        expect((<any> signedProtectedHeaders)[headerKey]).toEqual((<any> protectedHeaders)[headerKey]);
       })
 
       expect(signedProtectedHeaders.iss).toEqual(testDid);
@@ -88,7 +88,7 @@ describe('CommitSigner', () => {
 
       const signedProtectedHeaders = signedCommit.getProtectedHeaders();
       Object.keys(protectedHeaders).forEach((headerKey) => {
-        expect((signedProtectedHeaders as any)[headerKey]).toEqual((protectedHeaders as any)[headerKey]);
+        expect((<any> signedProtectedHeaders)[headerKey]).toEqual((<any> protectedHeaders)[headerKey]);
       })
 
       expect(signedProtectedHeaders.iss).toEqual(testDid);

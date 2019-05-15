@@ -1,4 +1,4 @@
-import * as objectAssign from 'object-assign';
+import objectAssign from 'object-assign';
 
 /**
  * The base class for all requests to an Identity Hub.

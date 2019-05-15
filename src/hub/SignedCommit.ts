@@ -19,7 +19,7 @@ export default class SignedCommit {
   }
 
   /**
-   * Returns the decoded protected headers for this commit. TODO TODO NO REV
+   * Returns the decoded protected headers for this commit.
    */
   getProtectedHeaders(): ICommitProtectedHeaders {
     if (this.json && this.json.protected) {
@@ -50,7 +50,7 @@ export default class SignedCommit {
    * Retrieves the revision ID for this commit.
    */
   getRevision(): string {
-    // TODO: Verify signature; cache result
+    // NEED: Verify signature; cache result
     const sha256 = crypto.createHash('sha256');
     sha256.update(`${this.json.protected}.${this.json.payload}`);
     return sha256.digest('hex');

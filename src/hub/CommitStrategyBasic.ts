@@ -10,7 +10,7 @@ export default class CommitStrategyBasic {
   /**
    * Resolves the current state of an object with the `basic` commit strategy.
    *
-   * TODO: This class currently returns only the raw object payload. Once we add an object instance
+   * need: This class currently returns only the raw object payload. Once we add an object instance
    * class to the SDK (e.g. `HubObject`), this method will no longer be called directly, and will
    * also need to return the app-readable object metadata.
    *

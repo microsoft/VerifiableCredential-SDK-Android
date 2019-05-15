@@ -1,9 +1,9 @@
 import { IHubError, IHubResponse, HubErrorCode } from '@decentralized-identity/hub-common-js';
 import { Authentication, CryptoSuite, IKeyStore } from '@decentralized-identity/did-auth-jose';
-import { HttpResolver, IDidResolver } from '@decentralized-identity/did-common-typescript';
+import { IDidResolver } from '@decentralized-identity/did-common-typescript';
 import HubRequest from './requests/HubRequest';
 import HubError from './HubError';
-import HubWriteRequest from './requests/HubWriteRequest';
+import HubCommitWriteRequest from './requests/HubCommitWriteRequest';
 import HubWriteResponse from './responses/HubWriteResponse';
 import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubObjectQueryResponse from './responses/HubObjectQueryResponse';
@@ -18,7 +18,9 @@ import fetch, { Request, RequestInit } from 'node-fetch';
  */
 export interface HubSessionOptions {
 
-  /** The DID of the client, i.e the identity of the user/app using this SDK. */
+  /** 
+   * The DID of the client, i.e the identity of the user/app using this SDK. 
+   */
   clientDid: string;
 
   /**
@@ -27,16 +29,24 @@ export interface HubSessionOptions {
    */
   clientPrivateKeyReference: string;
 
-  /** The DID owning the Hub with which we will be communicating. */
+  /** 
+   * The DID owning the Hub with which we will be communicating. 
+   */
   targetDid: string;
 
-  /** The DID of the Hub, for addressing request envelopes. */
+  /** 
+   * The DID of the Hub, for addressing request envelopes. 
+   */
   hubDid: string;
 
-  /** The HTTPS endpoint of the Hub. */
+  /** 
+   * The HTTPS endpoint of the Hub. 
+   */
   hubEndpoint: string;
 
-  /** A DID resolver instance to be used during authentication. */
+  /** 
+   * A DID resolver instance to be used during authentication. 
+   */
   resolver: IDidResolver;
 
   /**
@@ -85,7 +95,7 @@ export default class HubSession {
    *
    * @param request An instance or subclass of HubRequest to be sent.
    */
-  send(request: HubWriteRequest): Promise<HubWriteResponse>;
+  send(request: HubCommitWriteRequest): Promise<HubWriteResponse>;
   send(request: HubObjectQueryRequest): Promise<HubObjectQueryResponse>;
   send(request: HubCommitQueryRequest): Promise<HubCommitQueryResponse>;
   async send(request: HubRequest): Promise<any> {
@@ -191,7 +201,9 @@ export default class HubSession {
     return this.currentAccessToken!;
   }
 
-  /** Mapping of known response types. */
+  /** 
+   * Mapping of known response types. 
+   */
   private static responseTypes = {
     WriteResponse: HubWriteResponse,
     ObjectQueryResponse: HubObjectQueryResponse,
@@ -206,14 +218,14 @@ export default class HubSession {
    */
   private static mapResponseToObject(response: IHubResponse<string>) {
     const responseTypeString = response['@type'];
-    const responseType = (HubSession.responseTypes as any)[responseTypeString];
+    const responseType = (<any> HubSession.responseTypes)[responseTypeString];
 
     if (responseType) {
       return new responseType(response);
     }
 
     if (response['@type'] === 'ErrorResponse') {
-      throw new HubError(response as any as IHubError);
+      throw new HubError(<IHubError> <any> response);
     }
 
     throw new HubError({

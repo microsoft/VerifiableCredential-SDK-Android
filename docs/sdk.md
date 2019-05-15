@@ -15,6 +15,34 @@ self-issued id token.</p></dd>
 self-issued id token.</p></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
+<dt><a href="#Commit">Commit</a></dt>
+<dd><p>Represents a new (i.e pending, unsigned) commit which will create, update, or delete an object in
+a user&#39;s Identity Hub.</p></dd>
+<dt><a href="#CommitStrategyBasic">CommitStrategyBasic</a></dt>
+<dd><p>Resolves the final state of an object from the constituent set of commits for that object.</p>
+<p>This class works only with objects using the <code>basic</code> commit strategy.</p></dd>
+<dt><a href="#CommitSigner">CommitSigner</a></dt>
+<dd><p>Class which can apply a signature to a commit.</p></dd>
+<dt><a href="#HubError">HubError</a></dt>
+<dd><p>Represents an error returned by an Identity Hub.</p></dd>
+<dt><a href="#HubSession">HubSession</a></dt>
+<dd><p>Represents a communication session with a particular Hub instance.</p></dd>
+<dt><a href="#HubCommitQueryRequest">HubCommitQueryRequest</a></dt>
+<dd><p>Represents a request to a Hub for a set of commits.</p></dd>
+<dt><a href="#HubCommitWriteRequest">HubCommitWriteRequest</a></dt>
+<dd><p>Represents a request to commit the given Commit object to an Identity Hub.</p></dd>
+<dt><a href="#HubObjectQueryRequest">HubObjectQueryRequest</a></dt>
+<dd><p>Represents a request to a Hub to query the available objects.</p></dd>
+<dt><a href="#HubRequest">HubRequest</a></dt>
+<dd><p>The base class for all requests to an Identity Hub.</p></dd>
+<dt><a href="#HubCommitQueryResponse">HubCommitQueryResponse</a></dt>
+<dd><p>Represents the response to a <code>HubCommitQueryRequest</code>.</p></dd>
+<dt><a href="#HubObjectQueryResponse">HubObjectQueryResponse</a></dt>
+<dd><p>Represents the response to a <code>HubObjectQueryRequest</code>.</p></dd>
+<dt><a href="#HubWriteResponse">HubWriteResponse</a></dt>
+<dd><p>Represents the response to a <code>HubWriteRequest</code>.</p></dd>
+<dt><a href="#SignedCommit">SignedCommit</a></dt>
+<dd><p>Class representing a signed commit.</p></dd>
 <dt><a href="#Identifier">Identifier</a></dt>
 <dd><p>Class for creating and managing identifiers,
 retrieving identifier documents.</p></dd>
@@ -252,6 +280,390 @@ credential for the specified identifier.</p>
 <p>Class used to model crypto options</p>
 
 **Kind**: global class  
+<a name="Commit"></a>
+
+## Commit
+<p>Represents a new (i.e pending, unsigned) commit which will create, update, or delete an object in
+a user's Identity Hub.</p>
+
+**Kind**: global class  
+
+* [Commit](#Commit)
+    * [.validate()](#Commit+validate)
+    * [.isValid()](#Commit+isValid)
+    * [.getProtectedHeaders()](#Commit+getProtectedHeaders)
+    * [.getUnprotectedHeaders()](#Commit+getUnprotectedHeaders)
+    * [.getPayload()](#Commit+getPayload)
+    * [.sign(signer)](#Commit+sign)
+
+<a name="Commit+validate"></a>
+
+### commit.validate()
+<p>Verifies whether the currently set fields constitute a valid commit which can be
+signed/encrypted and stored in an Identity Hub.</p>
+<p>Throws an error if the commit is not valid.</p>
+<p>need: Move validation logic to hub-common-js repository to be shared with hub-node-core.</p>
+
+**Kind**: instance method of [<code>Commit</code>](#Commit)  
+<a name="Commit+isValid"></a>
+
+### commit.isValid()
+<p>Returns true if the validate() method would pass without error.</p>
+
+**Kind**: instance method of [<code>Commit</code>](#Commit)  
+<a name="Commit+getProtectedHeaders"></a>
+
+### commit.getProtectedHeaders()
+<p>Returns the headers which will be signed/encrypted.</p>
+
+**Kind**: instance method of [<code>Commit</code>](#Commit)  
+<a name="Commit+getUnprotectedHeaders"></a>
+
+### commit.getUnprotectedHeaders()
+<p>Returns the (optional) headers which will not be signed/encrypted.</p>
+
+**Kind**: instance method of [<code>Commit</code>](#Commit)  
+<a name="Commit+getPayload"></a>
+
+### commit.getPayload()
+<p>Returns the application-specific payload for this commit.</p>
+
+**Kind**: instance method of [<code>Commit</code>](#Commit)  
+<a name="Commit+sign"></a>
+
+### commit.sign(signer)
+<p>Returns a copy of this commit signed with the given signer.</p>
+
+**Kind**: instance method of [<code>Commit</code>](#Commit)  
+
+| Param | Description |
+| --- | --- |
+| signer | <p>The signer to use to sign the commit.</p> |
+
+<a name="CommitStrategyBasic"></a>
+
+## CommitStrategyBasic
+<p>Resolves the final state of an object from the constituent set of commits for that object.</p>
+<p>This class works only with objects using the <code>basic</code> commit strategy.</p>
+
+**Kind**: global class  
+
+* [CommitStrategyBasic](#CommitStrategyBasic)
+    * [.resolveObject(commits)](#CommitStrategyBasic+resolveObject)
+    * [.compareCommits(a, b)](#CommitStrategyBasic+compareCommits)
+
+<a name="CommitStrategyBasic+resolveObject"></a>
+
+### commitStrategyBasic.resolveObject(commits)
+<p>Resolves the current state of an object with the <code>basic</code> commit strategy.</p>
+<p>need: This class currently returns only the raw object payload. Once we add an object instance
+class to the SDK (e.g. <code>HubObject</code>), this method will no longer be called directly, and will
+also need to return the app-readable object metadata.</p>
+<p>Currently returns <code>null</code> if the object was deleted, otherwise returns the most recent payload.</p>
+
+**Kind**: instance method of [<code>CommitStrategyBasic</code>](#CommitStrategyBasic)  
+
+| Param | Description |
+| --- | --- |
+| commits | <p>The entire known set of commits for the object.</p> |
+
+<a name="CommitStrategyBasic+compareCommits"></a>
+
+### commitStrategyBasic.compareCommits(a, b)
+<p>Compares two commits (which must belong to the same object) in order to evaulate which one is
+more recent.</p>
+<p>Follows the conventions of the JavaScript sort() method:</p>
+<ul>
+<li><code>-1</code> indicates that a comes before (i.e. is older than b)</li>
+<li><code>1</code> indicates that a comes after (i.e. is newer than b)</li>
+</ul>
+
+**Kind**: instance method of [<code>CommitStrategyBasic</code>](#CommitStrategyBasic)  
+
+| Param | Description |
+| --- | --- |
+| a | <p>The first commit to compare.</p> |
+| b | <p>The second commit to compare.</p> |
+
+<a name="CommitSigner"></a>
+
+## CommitSigner
+<p>Class which can apply a signature to a commit.</p>
+
+**Kind**: global class  
+<a name="CommitSigner+sign"></a>
+
+### commitSigner.sign(commit)
+<p>Signs the given commit.</p>
+
+**Kind**: instance method of [<code>CommitSigner</code>](#CommitSigner)  
+
+| Param | Description |
+| --- | --- |
+| commit | <p>The commit to sign.</p> |
+
+<a name="HubError"></a>
+
+## HubError
+<p>Represents an error returned by an Identity Hub.</p>
+
+**Kind**: global class  
+
+* [HubError](#HubError)
+    * _instance_
+        * [.getErrorCode()](#HubError+getErrorCode)
+        * [.getTarget()](#HubError+getTarget)
+        * [.getRawError()](#HubError+getRawError)
+    * _static_
+        * [.is()](#HubError.is)
+
+<a name="HubError+getErrorCode"></a>
+
+### hubError.getErrorCode()
+<p>Returns the error code given by the Hub.</p>
+
+**Kind**: instance method of [<code>HubError</code>](#HubError)  
+<a name="HubError+getTarget"></a>
+
+### hubError.getTarget()
+<p>Returns the error target (e.g. the property which is invalid).</p>
+
+**Kind**: instance method of [<code>HubError</code>](#HubError)  
+<a name="HubError+getRawError"></a>
+
+### hubError.getRawError()
+<p>Returns the raw error JSON as provided by the Hub.</p>
+
+**Kind**: instance method of [<code>HubError</code>](#HubError)  
+<a name="HubError.is"></a>
+
+### HubError.is()
+<p>Indicates whether the passed-in object is a HubError instance.</p>
+
+**Kind**: static method of [<code>HubError</code>](#HubError)  
+<a name="HubSession"></a>
+
+## HubSession
+<p>Represents a communication session with a particular Hub instance.</p>
+
+**Kind**: global class  
+
+* [HubSession](#HubSession)
+    * _instance_
+        * [.send(request)](#HubSession+send)
+        * [.makeRequest(message, accessToken)](#HubSession+makeRequest)
+        * [.callFetch(url, init)](#HubSession+callFetch)
+        * [.getAccessToken()](#HubSession+getAccessToken)
+        * [.refreshAccessToken()](#HubSession+refreshAccessToken)
+    * _static_
+        * [.mapResponseToObject(response)](#HubSession.mapResponseToObject)
+
+<a name="HubSession+send"></a>
+
+### hubSession.send(request)
+<p>Sends the given request to the Hub instance, and returns the associated response.</p>
+
+**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
+
+| Param | Description |
+| --- | --- |
+| request | <p>An instance or subclass of HubRequest to be sent.</p> |
+
+<a name="HubSession+makeRequest"></a>
+
+### hubSession.makeRequest(message, accessToken)
+<p>Sends a raw (string) request body to the Hub and receives a response.</p>
+
+**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
+
+| Param | Description |
+| --- | --- |
+| message | <p>The raw request body to send.</p> |
+| accessToken | <p>The access token to include in the request, if any.</p> |
+
+<a name="HubSession+callFetch"></a>
+
+### hubSession.callFetch(url, init)
+<p>Fetch API wrapper, to allow unit testing.</p>
+
+**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
+
+| Param | Description |
+| --- | --- |
+| url | <p>The URL to make a request to.</p> |
+| init | <p>Request initialization details.</p> |
+
+<a name="HubSession+getAccessToken"></a>
+
+### hubSession.getAccessToken()
+<p>Returns the current access token for the Hub, requesting one if necessary.</p>
+
+**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
+<a name="HubSession+refreshAccessToken"></a>
+
+### hubSession.refreshAccessToken()
+<p>Requests an updated access token from the Hub.</p>
+
+**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
+<a name="HubSession.mapResponseToObject"></a>
+
+### HubSession.mapResponseToObject(response)
+<p>Transforms a JSON blob returned by the Hub into a subclass of HubResponse, based on the <code>@type</code>
+field of the response.</p>
+
+**Kind**: static method of [<code>HubSession</code>](#HubSession)  
+
+| Param | Description |
+| --- | --- |
+| response | <p>The Hub response to be transformed.</p> |
+
+<a name="HubCommitQueryRequest"></a>
+
+## HubCommitQueryRequest
+<p>Represents a request to a Hub for a set of commits.</p>
+
+**Kind**: global class  
+<a name="HubCommitWriteRequest"></a>
+
+## HubCommitWriteRequest
+<p>Represents a request to commit the given Commit object to an Identity Hub.</p>
+
+**Kind**: global class  
+<a name="HubObjectQueryRequest"></a>
+
+## HubObjectQueryRequest
+<p>Represents a request to a Hub to query the available objects.</p>
+
+**Kind**: global class  
+<a name="HubRequest"></a>
+
+## HubRequest
+<p>The base class for all requests to an Identity Hub.</p>
+
+**Kind**: global class  
+<a name="HubRequest+getRequestJson"></a>
+
+### hubRequest.getRequestJson()
+<p>Returns the raw request JSON which will be sent to the Hub.</p>
+
+**Kind**: instance method of [<code>HubRequest</code>](#HubRequest)  
+<a name="HubCommitQueryResponse"></a>
+
+## HubCommitQueryResponse
+<p>Represents the response to a <code>HubCommitQueryRequest</code>.</p>
+
+**Kind**: global class  
+
+* [HubCommitQueryResponse](#HubCommitQueryResponse)
+    * [.getCommits()](#HubCommitQueryResponse+getCommits)
+    * [.hasSkipToken()](#HubCommitQueryResponse+hasSkipToken)
+    * [.getSkipToken()](#HubCommitQueryResponse+getSkipToken)
+
+<a name="HubCommitQueryResponse+getCommits"></a>
+
+### hubCommitQueryResponse.getCommits()
+<p>Returns the set of commits returned by the Hub.</p>
+
+**Kind**: instance method of [<code>HubCommitQueryResponse</code>](#HubCommitQueryResponse)  
+<a name="HubCommitQueryResponse+hasSkipToken"></a>
+
+### hubCommitQueryResponse.hasSkipToken()
+<p>Indicates whether additional pages of results are available.</p>
+
+**Kind**: instance method of [<code>HubCommitQueryResponse</code>](#HubCommitQueryResponse)  
+<a name="HubCommitQueryResponse+getSkipToken"></a>
+
+### hubCommitQueryResponse.getSkipToken()
+<p>Retrieves a token which can be used to fetch subsequent result pages.</p>
+
+**Kind**: instance method of [<code>HubCommitQueryResponse</code>](#HubCommitQueryResponse)  
+<a name="HubObjectQueryResponse"></a>
+
+## HubObjectQueryResponse
+<p>Represents the response to a <code>HubObjectQueryRequest</code>.</p>
+
+**Kind**: global class  
+
+* [HubObjectQueryResponse](#HubObjectQueryResponse)
+    * [.getObjects()](#HubObjectQueryResponse+getObjects)
+    * [.hasSkipToken()](#HubObjectQueryResponse+hasSkipToken)
+    * [.getSkipToken()](#HubObjectQueryResponse+getSkipToken)
+
+<a name="HubObjectQueryResponse+getObjects"></a>
+
+### hubObjectQueryResponse.getObjects()
+<p>Returns the set of objects returned by the Hub.</p>
+<p>NEED TO Map JSON into useful objects, as done for commits.</p>
+
+**Kind**: instance method of [<code>HubObjectQueryResponse</code>](#HubObjectQueryResponse)  
+<a name="HubObjectQueryResponse+hasSkipToken"></a>
+
+### hubObjectQueryResponse.hasSkipToken()
+<p>Indicates whether additional pages of results are available.</p>
+
+**Kind**: instance method of [<code>HubObjectQueryResponse</code>](#HubObjectQueryResponse)  
+<a name="HubObjectQueryResponse+getSkipToken"></a>
+
+### hubObjectQueryResponse.getSkipToken()
+<p>Retrieves a token which can be used to fetch subsequent result pages.</p>
+
+**Kind**: instance method of [<code>HubObjectQueryResponse</code>](#HubObjectQueryResponse)  
+<a name="HubWriteResponse"></a>
+
+## HubWriteResponse
+<p>Represents the response to a <code>HubWriteRequest</code>.</p>
+
+**Kind**: global class  
+<a name="HubWriteResponse+getRevisions"></a>
+
+### hubWriteResponse.getRevisions()
+<p>Returns the list of known revisions for the object which was created/modified.</p>
+
+**Kind**: instance method of [<code>HubWriteResponse</code>](#HubWriteResponse)  
+<a name="SignedCommit"></a>
+
+## SignedCommit
+<p>Class representing a signed commit.</p>
+
+**Kind**: global class  
+
+* [SignedCommit](#SignedCommit)
+    * [.toFlattenedJson()](#SignedCommit+toFlattenedJson)
+    * [.getProtectedHeaders()](#SignedCommit+getProtectedHeaders)
+    * [.getPayload()](#SignedCommit+getPayload)
+    * [.getRevision()](#SignedCommit+getRevision)
+    * [.getObjectId()](#SignedCommit+getObjectId)
+
+<a name="SignedCommit+toFlattenedJson"></a>
+
+### signedCommit.toFlattenedJson()
+<p>Returns the signed commit data in the Flattened JWS JSON Serialization.</p>
+
+**Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
+<a name="SignedCommit+getProtectedHeaders"></a>
+
+### signedCommit.getProtectedHeaders()
+<p>Returns the decoded protected headers for this commit.</p>
+
+**Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
+<a name="SignedCommit+getPayload"></a>
+
+### signedCommit.getPayload()
+<p>Returns the decoded payload for this commit.</p>
+
+**Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
+<a name="SignedCommit+getRevision"></a>
+
+### signedCommit.getRevision()
+<p>Retrieves the revision ID for this commit.</p>
+
+**Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
+<a name="SignedCommit+getObjectId"></a>
+
+### signedCommit.getObjectId()
+<p>Retrieves the ID of the object to which this commit belongs.</p>
+
+**Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
 <a name="Identifier"></a>
 
 ## Identifier

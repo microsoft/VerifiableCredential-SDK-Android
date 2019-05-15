@@ -1,7 +1,7 @@
 import { alter, explain } from './TestUtils';
-import Commit, { ICommitFields } from './Commit';
-import ICommitSigner from './crypto/ICommitSigner';
-import SignedCommit from './SignedCommit';
+import Commit, { ICommitFields } from '../../src/hub/Commit';
+import ICommitSigner from '../../src/hub/crypto/ICommitSigner';
+import SignedCommit from '../../src/hub/SignedCommit';
 
 const commitFields: ICommitFields = {
   protected: {
@@ -21,9 +21,13 @@ const commitFields: ICommitFields = {
   },
 };
 
-const commit = new Commit(commitFields);
-
 describe('Commit', () => {
+
+  let commit: Commit;
+
+  beforeAll(() => {
+    commit = new Commit(commitFields);
+  });
 
   describe('validate', () => {
 
@@ -92,7 +96,7 @@ describe('Commit', () => {
 
   describe('getUnprotectedHeaders()', () => {
     it('should return the unprotected headers', async () => {
-      expect(commit.getUnprotectedHeaders()).toEqual(commitFields.header as any);
+      expect(commit.getUnprotectedHeaders()).toEqual(<any> commitFields.header);
     });
   });
 
@@ -118,7 +122,7 @@ describe('Commit', () => {
       };
 
       spyOn(signer, 'sign').and.callThrough();
-      const returnValue = await commit.sign(signer as any);
+      const returnValue = await commit.sign(<any> signer);
 
       expect(signer.sign).toHaveBeenCalled();
       expect(returnValue).toEqual(signedCommit);

@@ -1,4 +1,4 @@
-import { ICommitProtectedHeaders, ICommitUnprotectedHeaders, CommitOperation } from '@decentralized-identity/hub-common-js';
+import { ICommitProtectedHeaders, ICommitUnprotectedHeaders } from '@decentralized-identity/hub-common-js';
 import ICommitSigner from './crypto/ICommitSigner';
 import { SignedCommit } from './index';
 
@@ -7,13 +7,19 @@ import { SignedCommit } from './index';
  */
 export interface ICommitFields {
 
-  /** Fields to include in the protected (signed) commit header. */
+  /** 
+   * Fields to include in the protected (signed) commit header. 
+   */
   protected: Partial<ICommitProtectedHeaders>;
 
-  /** Fields to include in the unprotected (unverified) commit header. */
+  /** 
+   * Fields to include in the unprotected (unverified) commit header. 
+   */
   header?: Partial<ICommitUnprotectedHeaders>;
 
-  /** The application-specific commit payload. */
+  /** 
+   * The application-specific commit payload. 
+   */
   payload: object | string;
 
 }
@@ -36,14 +42,14 @@ export default class Commit {
    *
    * Throws an error if the commit is not valid.
    *
-   * TODO: Move validation logic to hub-common-js repository to be shared with hub-node-core.
+   * need: Move validation logic to hub-common-js repository to be shared with hub-node-core.
    */
   public validate() {
     if (!this.fields.protected) {
       throw new Error("Commit must specify the 'protected' field.");
     }
 
-    const protectedHeaders = this.fields.protected as any;
+    const protectedHeaders = <any> this.fields.protected;
 
     const requiredStrings = ['interface', 'context', 'type', 'committed_at', 'commit_strategy', 'sub'];
     requiredStrings.forEach((field) => {

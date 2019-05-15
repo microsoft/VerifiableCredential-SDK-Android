@@ -1,5 +1,5 @@
 import { IObjectMetadata } from '@decentralized-identity/hub-common-js';
-import HubObjectQueryResponse from './HubObjectQueryResponse';
+import HubObjectQueryResponse from '../../../src/hub/responses/HubObjectQueryResponse';
 
 const objects: IObjectMetadata[] = [{
   interface: 'Collections',
@@ -12,21 +12,25 @@ const objects: IObjectMetadata[] = [{
   commit_strategy: 'basic',
 }];
 
-const response = new HubObjectQueryResponse({
-  '@context': 'https://schema.identity.foundation/0.1',
-  '@type': 'ObjectQueryResponse',
-  objects,
-  skip_token: 'abc',
-});
-
 describe('HubObjectQueryResponse', () => {
+
+  let response: HubObjectQueryResponse;
+  
+  beforeAll(() => {
+    response = new HubObjectQueryResponse({
+      '@context': 'https://schema.identity.foundation/0.1',
+      '@type': 'ObjectQueryResponse',
+      objects,
+      skip_token: 'abc',
+    });
+  });
 
   describe('constructor', () => {
     it('should throw on an invalid response type', async () => {
       try {
-        const r = new HubObjectQueryResponse({
+        const r = new HubObjectQueryResponse(<any> {
           '@type': 'WrongType',
-        } as any);
+        });
         fail('Constructor was expected to throw');
       } catch (e) {
         // Expected
@@ -41,11 +45,11 @@ describe('HubObjectQueryResponse', () => {
     });
 
     it('should return an array even if none was in the response', async () => {
-      const response = new HubObjectQueryResponse({
+      const response = new HubObjectQueryResponse(<any> {
         '@context': 'https://schema.identity.foundation/0.1',
         '@type': 'ObjectQueryResponse',
         objects: null,
-      } as any);
+      });
       expect(Array.isArray(response.getObjects())).toEqual(true);
     });
   });

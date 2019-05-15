@@ -1,13 +1,12 @@
 import { HubErrorCode } from '@decentralized-identity/hub-common-js';
-import HubSession from './HubSession';
-import HubWriteRequest from './requests/HubWriteRequest';
-import HubWriteResponse from './responses/HubWriteResponse';
-import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
-import HubObjectQueryResponse from './responses/HubObjectQueryResponse';
-import HubError from './HubError';
-import SignedCommit from './SignedCommit';
-import RsaPrivateKey from '@decentralized-identity/did-auth-jose/dist/lib/crypto/rsa/RsaPrivateKey';
-import { PrivateKey, KeyStoreMem, IKeyStore } from '@decentralized-identity/did-auth-jose';
+import HubSession from '../../src/hub/HubSession';
+import HubCommitWriteRequest from '../../src/hub/requests/HubCommitWriteRequest';
+import HubWriteResponse from '../../src/hub/responses/HubWriteResponse';
+import HubCommitQueryResponse from '../../src/hub/responses/HubCommitQueryResponse';
+import HubObjectQueryResponse from '../../src/hub/responses/HubObjectQueryResponse';
+import HubError from '../../src/hub/HubError';
+import SignedCommit from '../../src/hub/SignedCommit';
+import { PrivateKey, KeyStoreMem, IKeyStore, PrivateKeyRsa } from '@decentralized-identity/did-auth-jose';
 import MockResolver from './MockResolver';
 import { Request, Response } from 'node-fetch';
 import MockHub from './MockHub';
@@ -16,7 +15,7 @@ let clientPrivateKey: PrivateKey;
 const clientDid = 'did:fake:client.id';
 const clientKid = `${clientDid}#key-1`;
 
-let hubPrivateKey: RsaPrivateKey;
+let hubPrivateKey: PrivateKeyRsa;
 const hubDid = 'did:fake:hub.id';
 const hubKid = `${hubDid}#key-1`;
 
@@ -33,8 +32,8 @@ describe('HubSession', () => {
   beforeEach(async () => {
     mockResolver = new MockResolver();
 
-    clientPrivateKey = await RsaPrivateKey.generatePrivateKey(clientKid);
-    hubPrivateKey = await RsaPrivateKey.generatePrivateKey(hubKid);
+    clientPrivateKey = await PrivateKeyRsa.generatePrivateKey(clientKid);
+    hubPrivateKey = await PrivateKeyRsa.generatePrivateKey(hubKid);
 
     mockResolver.setKey(hubDid, hubPrivateKey.getPublicKey());
     mockResolver.setKey(clientDid, clientPrivateKey.getPublicKey());
@@ -75,7 +74,7 @@ describe('HubSession', () => {
     });
 
     it('should send a valid request', async () => {
-      const request = new HubWriteRequest(signedCommit);
+      const request = new HubCommitWriteRequest(signedCommit);
 
       const mockWriteResponse = JSON.stringify({
         '@context': 'https://schema.identity.foundation/0.1',
@@ -101,7 +100,7 @@ describe('HubSession', () => {
     });
 
     it('should refresh an invalid access token', async () => {
-      const request = new HubWriteRequest(signedCommit);
+      const request = new HubCommitWriteRequest(signedCommit);
 
       session['currentAccessToken'] = 'invalid-access-token';
 
@@ -144,7 +143,7 @@ describe('HubSession', () => {
     });
 
     it('should pass through a hub error', async () => {
-      const request = new HubWriteRequest(signedCommit);
+      const request = new HubCommitWriteRequest(signedCommit);
 
       const errorResponse = {
         '@type': 'ErrorResponse',
@@ -170,12 +169,12 @@ describe('HubSession', () => {
         fail('Not expected to reach this point.');
       } catch (e) {
         expect(HubError.is(e)).toBeTruthy();
-        expect((e as HubError).getErrorCode()).toEqual(HubErrorCode.TooManyRequests);
+        expect((<HubError> e).getErrorCode()).toEqual(HubErrorCode.TooManyRequests);
       }
     });
 
     it('should handle invalid json', async () => {
-      const request = new HubWriteRequest(signedCommit);
+      const request = new HubCommitWriteRequest(signedCommit);
 
       // Set Hub behavior
       mockHub.setHandler(async (callDetails) => {
@@ -193,7 +192,7 @@ describe('HubSession', () => {
         fail('Not expected to reach this point.');
       } catch (e) {
         expect(HubError.is(e)).toBeTruthy();
-        expect((e as HubError).getErrorCode()).toEqual(HubErrorCode.ServerError);
+        expect((<HubError> e).getErrorCode()).toEqual(HubErrorCode.ServerError);
       }
     });
 
@@ -220,15 +219,15 @@ describe('HubSession', () => {
 
     it('should map and throw an error response', () => {
       try {
-        HubSession['mapResponseToObject']({
+        HubSession['mapResponseToObject'](<any> {
           '@context': 'https://schema.identity.foundation/0.1',
           '@type': 'ErrorResponse',
           error_code: HubErrorCode.AuthenticationFailed,
-        } as any);
+        });
         fail('Not expected to reach this point.');
       } catch (e) {
         expect(HubError.is(e)).toBeTruthy();
-        expect((e as HubError).getErrorCode()).toEqual(HubErrorCode.AuthenticationFailed);
+        expect((<HubError> e).getErrorCode()).toEqual(HubErrorCode.AuthenticationFailed);
       }
     });
 
@@ -241,7 +240,7 @@ describe('HubSession', () => {
         fail('Not expected to reach this point.');
       } catch (e) {
         expect(HubError.is(e)).toBeTruthy();
-        expect((e as HubError).getErrorCode()).toEqual(HubErrorCode.NotImplemented);
+        expect((<HubError> e).getErrorCode()).toEqual(HubErrorCode.NotImplemented);
       }
     });
   });

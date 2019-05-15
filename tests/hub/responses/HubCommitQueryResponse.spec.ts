@@ -1,5 +1,5 @@
-import HubCommitQueryResponse from './HubCommitQueryResponse';
-import SignedCommit from '../SignedCommit';
+import HubCommitQueryResponse from '../../../src/hub/responses/HubCommitQueryResponse';
+import SignedCommit from '../../../src/hub/SignedCommit';
 
 const flattenedCommitJson = {
   protected: 'test',
@@ -7,21 +7,25 @@ const flattenedCommitJson = {
   signature: 'test',
 };
 
-const response = new HubCommitQueryResponse({
-  '@context': 'https://schema.identity.foundation/0.1',
-  '@type': 'CommitQueryResponse',
-  commits: [flattenedCommitJson],
-  skip_token: 'abc',
-});
-
 describe('HubCommitQueryResponse', () => {
+
+  let response: HubCommitQueryResponse;
+
+  beforeAll(() => {
+    response = new HubCommitQueryResponse({
+      '@context': 'https://schema.identity.foundation/0.1',
+      '@type': 'CommitQueryResponse',
+      commits: [flattenedCommitJson],
+      skip_token: 'abc',
+    });
+  });
 
   describe('constructor', () => {
     it('should throw on an invalid response type', async () => {
       try {
-        const r = new HubCommitQueryResponse({
+        const r = new HubCommitQueryResponse(<any> {
           '@type': 'WrongType',
-        } as any);
+        });
         fail('Constructor was expected to throw');
       } catch (e) {
         // Expected

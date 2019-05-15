@@ -1,4 +1,4 @@
-import HubWriteResponse from './HubWriteResponse';
+import HubWriteResponse from '../../../src/hub/responses/HubWriteResponse';
 
 describe('HubWriteResponse', () => {
 

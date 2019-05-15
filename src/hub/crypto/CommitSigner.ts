@@ -2,7 +2,7 @@ import { PrivateKey, JwsToken, CryptoFactory, RsaCryptoSuite, CryptoSuite } from
 import ICommitSigner from './ICommitSigner';
 import Commit from '../Commit';
 import SignedCommit from '../SignedCommit';
-import objectAssign = require('object-assign');
+import objectAssign from 'object-assign';
 
 interface CommitSignerOptions {
 
@@ -57,7 +57,7 @@ export default class CommitSigner implements ICommitSigner {
     });
 
     const jws = new JwsToken(commit.getPayload(), new CryptoFactory([this.cryptoSuite]));
-    const signed = await jws.sign(this.key, finalProtectedHeaders as any); // TODO: Need to broaden TypeScript definition of JwsToken.sign().
+    const signed = await jws.sign(this.key, <any> finalProtectedHeaders); // Need to broaden TypeScript definition of JwsToken.sign().
 
     const [outputHeaders, outputPayload, outputSignature] = signed.split('.');
 

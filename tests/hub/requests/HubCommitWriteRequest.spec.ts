@@ -1,5 +1,5 @@
-import HubWriteRequest from './HubWriteRequest';
-import SignedCommit from '../SignedCommit';
+import HubCommitWriteRequest from '../../../src/hub/requests/HubCommitWriteRequest';
+import SignedCommit from '../../../src/hub/SignedCommit';
 
 describe('HubWriteRequest', () => {
 
@@ -12,7 +12,7 @@ describe('HubWriteRequest', () => {
         signature: 'test',
       };
 
-      const req = new HubWriteRequest(new SignedCommit(flattenedCommitJson));
+      const req = new HubCommitWriteRequest(new SignedCommit(flattenedCommitJson));
 
       const json = await req.getRequestJson();
 

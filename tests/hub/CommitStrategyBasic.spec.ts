@@ -1,8 +1,8 @@
 import base64url from 'base64url';
 import { ICommitProtectedHeaders } from '@decentralized-identity/hub-common-js';
 import { alter } from './TestUtils';
-import CommitStrategyBasic from './CommitStrategyBasic';
-import SignedCommit from './SignedCommit';
+import CommitStrategyBasic from '../../src/hub/CommitStrategyBasic';
+import SignedCommit from '../../src/hub/SignedCommit';
 
 const commitHeaders: Partial<ICommitProtectedHeaders> = {
   interface: 'Collections',
@@ -101,7 +101,7 @@ describe('CommitStrategyBasic', () => {
     describe('resoloveObject()', () => {
 
       it('should return null for an empty commit list', async () => {
-        expect(await strategy.resolveObject(undefined as any)).toBeNull();
+        expect(await strategy.resolveObject(<any> undefined)).toBeNull();
         expect(await strategy.resolveObject([])).toBeNull();
       });
   

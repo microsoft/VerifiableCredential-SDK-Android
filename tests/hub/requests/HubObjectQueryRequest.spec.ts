@@ -1,4 +1,4 @@
-import HubObjectQueryRequest from './HubObjectQueryRequest';
+import HubObjectQueryRequest from '../../../src/hub/requests/HubObjectQueryRequest';
 
 describe('HubObjectQueryRequest', () => {
 

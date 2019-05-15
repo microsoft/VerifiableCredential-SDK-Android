@@ -1,6 +1,6 @@
 import { ICommitProtectedHeaders, IFlattenedJws } from '@decentralized-identity/hub-common-js';
 import base64url from 'base64url';
-import SignedCommit from './SignedCommit';
+import SignedCommit from '../../src/hub/SignedCommit';
 import objectAssign = require('object-assign');
 
 const createHeaders: ICommitProtectedHeaders = {
@@ -30,10 +30,10 @@ describe('SignedCommit', () => {
     });
 
     it('should throw if protected headers are missing', async () => {
-      const signedCommit = new SignedCommit({
+      const signedCommit = new SignedCommit(<IFlattenedJws> {
         payload: base64url(JSON.stringify({ name: 'test' })),
         signature: 'abc',
-      } as IFlattenedJws);
+      });
 
       try {
         signedCommit.getProtectedHeaders();
@@ -74,10 +74,10 @@ describe('SignedCommit', () => {
     });
 
     it('should throw if a payload is missing', async () => {
-      const signedCommit = new SignedCommit({
+      const signedCommit = new SignedCommit(<IFlattenedJws> {
         protected: base64url(JSON.stringify(createHeaders)),
         signature: 'abc',
-      } as IFlattenedJws);
+      });
 
       try {
         signedCommit.getPayload();

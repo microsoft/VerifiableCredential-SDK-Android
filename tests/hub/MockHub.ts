@@ -2,7 +2,9 @@ import { PrivateKey, Authentication, VerifiedRequest } from "@decentralized-iden
 import { IDidResolver } from "@decentralized-identity/did-common-typescript";
 import { Response, Request } from 'node-fetch';
 
-/** Handler to intercept requests before they are authenticated. */
+/** 
+ * Handler to intercept requests before they are authenticated. 
+ */
 type MockHubPreAuthHandler = (body: Buffer) => Promise<Response | undefined>;
 
 interface MockHubHandlerAuthRequestParameters {
@@ -17,7 +19,9 @@ interface MockHubHandlerClientRequestParameters {
 
 type MockHubHandlerParameters = MockHubHandlerAuthRequestParameters | MockHubHandlerClientRequestParameters;
 
-/** Handler to intercept requests after they are authenticated. */
+/** 
+ * Handler to intercept requests after they are authenticated. 
+ */
 type MockHubHandler = (params: MockHubHandlerParameters) => Promise<Response | string>;
 
 interface MockHubOptions {
@@ -89,16 +93,16 @@ export default class MockHub {
 
     if (Buffer.isBuffer(verifiedRequest)) {
       // Auth token request
-      handlerParameters = {
+      handlerParameters = <MockHubHandlerAuthRequestParameters> {
         isAuthTokenRequest: true,
         authTokenResponse: new Response(verifiedRequest)
-      } as MockHubHandlerAuthRequestParameters;
+      };
     } else {
       // Client request
-      handlerParameters = {
+      handlerParameters = <MockHubHandlerClientRequestParameters> {
         isAuthTokenRequest: false,
         clientRequest: verifiedRequest
-      } as MockHubHandlerClientRequestParameters;
+      };
     }
 
     if (!this.handler) {
@@ -109,7 +113,7 @@ export default class MockHub {
 
     if (typeof handlerResponse === 'string') {
       // Returned a real response
-      let responseBuffer = await this.authentication.getAuthenticatedResponse(verifiedRequest as VerifiedRequest, handlerResponse);
+      let responseBuffer = await this.authentication.getAuthenticatedResponse(<VerifiedRequest> verifiedRequest, handlerResponse);
       return new Response(responseBuffer);
     }
 

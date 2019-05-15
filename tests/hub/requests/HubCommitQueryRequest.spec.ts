@@ -1,4 +1,4 @@
-import HubCommitQueryRequest from './HubCommitQueryRequest';
+import HubCommitQueryRequest from '../../../src/hub/requests/HubCommitQueryRequest';
 
 describe('HubCommitQueryRequest', () => {
 

@@ -20,7 +20,7 @@ export default class HubError extends Error {
 
     // NOTE: Extending 'Error' breaks prototype chain since TypeScript 2.1.
     // The following line restores prototype chain.
-    if ((Object as any).setPrototypeOf) (Object as any).setPrototypeOf(this, new.target.prototype);
+    if ((<any> Object).setPrototypeOf) (<any> Object).setPrototypeOf(this, new.target.prototype);
   }
 
   /**

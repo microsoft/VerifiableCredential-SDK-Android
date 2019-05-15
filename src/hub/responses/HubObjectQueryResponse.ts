@@ -18,7 +18,7 @@ export default class HubObjectQueryResponse {
   /**
    * Returns the set of objects returned by the Hub.
    *
-   * TODO: Map JSON into useful objects, as done for commits.
+   * NEED TO Map JSON into useful objects, as done for commits.
    */
   public getObjects() {
     return this.response.objects || [];
