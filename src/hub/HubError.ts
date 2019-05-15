@@ -1,9 +1,10 @@
 import { IHubError, HubErrorCode } from '@decentralized-identity/hub-common-js';
+import UserAgentError from '../UserAgentError';
 
 /**
  * Represents an error returned by an Identity Hub.
  */
-export default class HubError extends Error {
+export default class HubError extends UserAgentError {
 
   // tslint:disable-next-line:variable-name
   private __hubError = true;

@@ -166,7 +166,7 @@ describe('HubSession', () => {
       try {
         console.log('test');
         const response = await session.send(request);
-        fail('Not expected to reach this point.');
+        fail(`Not expected to reach this point: ${response}`);
       } catch (e) {
         expect(HubError.is(e)).toBeTruthy();
         expect((<HubError> e).getErrorCode()).toEqual(HubErrorCode.TooManyRequests);
@@ -189,7 +189,7 @@ describe('HubSession', () => {
 
       try {
         const response = await session.send(request);
-        fail('Not expected to reach this point.');
+        fail(`Not expected to reach this point: ${response}`);
       } catch (e) {
         expect(HubError.is(e)).toBeTruthy();
         expect((<HubError> e).getErrorCode()).toEqual(HubErrorCode.ServerError);

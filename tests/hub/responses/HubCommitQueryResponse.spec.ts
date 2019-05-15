@@ -1,5 +1,4 @@
 import HubCommitQueryResponse from '../../../src/hub/responses/HubCommitQueryResponse';
-import SignedCommit from '../../../src/hub/SignedCommit';
 
 const flattenedCommitJson = {
   protected: 'test',
@@ -26,7 +25,7 @@ describe('HubCommitQueryResponse', () => {
         const r = new HubCommitQueryResponse(<any> {
           '@type': 'WrongType',
         });
-        fail('Constructor was expected to throw');
+        fail(`Constructor was expected to throw: '${r}'`);
       } catch (e) {
         // Expected
       }

@@ -31,7 +31,7 @@ describe('HubObjectQueryResponse', () => {
         const r = new HubObjectQueryResponse(<any> {
           '@type': 'WrongType',
         });
-        fail('Constructor was expected to throw');
+        fail(`Constructor was expected to throw: '${r}'`);
       } catch (e) {
         // Expected
       }

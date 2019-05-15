@@ -1,6 +1,6 @@
 import { ICommitProtectedHeaders, ICommitUnprotectedHeaders } from '@decentralized-identity/hub-common-js';
 import ICommitSigner from './crypto/ICommitSigner';
-import { SignedCommit } from './index';
+import SignedCommit from './SignedCommit';
 
 /**
  * Fields that can be specified when creating a new commit.

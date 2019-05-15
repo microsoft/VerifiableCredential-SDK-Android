@@ -72,6 +72,7 @@
     "lodash": "4.17.11",
     "multihashes": "0.4.14",
     "node-fetch": "2.3.0",
+    "node-webcrypto-ossl": "^1.0.44",
     "object-assign": "4.1.1",
     "pouchdb": "7.0.0",
     "pouchdb-adapter-memory": "7.0.0",
