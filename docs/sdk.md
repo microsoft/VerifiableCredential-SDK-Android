@@ -38,6 +38,12 @@ self-issued id token.</p></dd>
 Provides support for nodejs and browser</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
 <dd><p>Default crypto suite</p></dd>
+<dt><a href="#JweRecipient">JweRecipient</a></dt>
+<dd><p>JWS signature used by the general JSON</p></dd>
+<dt><a href="#JweToken">JweToken</a></dt>
+<dd><p>Class for containing Jwe token operations.
+This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
+Crypto calls always happen via CryptoFactory</p></dd>
 <dt><a href="#JwsSignature">JwsSignature</a></dt>
 <dd><p>JWS signature used by the general JSON</p></dd>
 <dt><a href="#JwsToken">JwsToken</a></dt>
@@ -579,6 +585,287 @@ Provides support for nodejs and browser</p>
 | algorithm | <p>used for signature</p> |
 | keyReference | <p>points to key in the key store</p> |
 | data | <p>to sign</p> |
+
+<a name="JweRecipient"></a>
+
+## JweRecipient
+<p>JWS signature used by the general JSON</p>
+
+**Kind**: global class  
+<a name="new_JweRecipient_new"></a>
+
+### new JweRecipient()
+<p>The JWE signature.</p>
+
+<a name="JweToken"></a>
+
+## JweToken
+<p>Class for containing Jwe token operations.
+This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
+Crypto calls always happen via CryptoFactory</p>
+
+**Kind**: global class  
+
+* [JweToken](#JweToken)
+    * [new JweToken(options)](#new_JweToken_new)
+    * _instance_
+        * [.serialize(format)](#JweToken+serialize)
+        * [.setGeneralParts(content)](#JweToken+setGeneralParts) ⇒
+        * [.setFlatParts(content)](#JweToken+setFlatParts) ⇒
+        * [.setCompactParts(content)](#JweToken+setCompactParts) ⇒
+        * [.setProtected(protectedHeader)](#JweToken+setProtected)
+        * [.isValidToken()](#JweToken+isValidToken)
+        * [.getKeyStore(newOptions, manadatory)](#JweToken+getKeyStore)
+        * [.getCryptoFactory(newOptions, manadatory)](#JweToken+getCryptoFactory)
+        * [.getProtected(newOptions, manadatory)](#JweToken+getProtected)
+        * [.getHeader(newOptions, manadatory)](#JweToken+getHeader)
+        * [.getAlgorithm(newOptions, manadatory)](#JweToken+getAlgorithm)
+        * [.getOptionsProperty(propertyName, newOptions, manadatory)](#JweToken+getOptionsProperty)
+        * [.sign(signingKeyReference, payload, format, options)](#JweToken+sign) ⇒
+        * [.getPayload()](#JweToken+getPayload)
+    * _static_
+        * [.serializeJweGeneralJson(token)](#JweToken.serializeJweGeneralJson)
+        * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
+        * [.serializeJweCompact(token)](#JweToken.serializeJweCompact)
+        * [.create(token, options)](#JweToken.create)
+        * [.headerHasElements(header)](#JweToken.headerHasElements)
+        * [.encodeHeader(header, toBase64Url)](#JweToken.encodeHeader)
+
+<a name="new_JweToken_new"></a>
+
+### new JweToken(options)
+<p>Create an Jwe token object</p>
+
+
+| Param | Description |
+| --- | --- |
+| options | <p>Set of Jwe token options</p> |
+
+<a name="JweToken+serialize"></a>
+
+### jweToken.serialize(format)
+<p>Serialize a Jwe token object from a token</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| format | <p>Optional specify the serialization format. If not specified, use default format.</p> |
+
+<a name="JweToken+setGeneralParts"></a>
+
+### jweToken.setGeneralParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJweGeneralJSon token</p> |
+
+<a name="JweToken+setFlatParts"></a>
+
+### jweToken.setFlatParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJweFlatJson token</p> |
+
+<a name="JweToken+setCompactParts"></a>
+
+### jweToken.setCompactParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJweCompact token</p> |
+
+<a name="JweToken+setProtected"></a>
+
+### jweToken.setProtected(protectedHeader)
+<p>Set the protected header</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| protectedHeader | <p>to set on the JweToken object</p> |
+
+<a name="JweToken+isValidToken"></a>
+
+### jweToken.isValidToken()
+<p>Check if a valid token was found after decoding</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+<a name="JweToken+getKeyStore"></a>
+
+### jweToken.getKeyStore(newOptions, manadatory)
+<p>Get the keyStore to be used</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getCryptoFactory"></a>
+
+### jweToken.getCryptoFactory(newOptions, manadatory)
+<p>Get the CryptoFactory to be used</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getProtected"></a>
+
+### jweToken.getProtected(newOptions, manadatory)
+<p>Get the default protected header to be used from the options</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getHeader"></a>
+
+### jweToken.getHeader(newOptions, manadatory)
+<p>Get the default header to be used from the options</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getAlgorithm"></a>
+
+### jweToken.getAlgorithm(newOptions, manadatory)
+<p>Get the algorithm from the options</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getOptionsProperty"></a>
+
+### jweToken.getOptionsProperty(propertyName, newOptions, manadatory)
+<p>Get the Protected to be used from the options</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| propertyName |  | <p>Property name in options</p> |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+sign"></a>
+
+### jweToken.sign(signingKeyReference, payload, format, options) ⇒
+<p>Signs contents using the given private key in JWK format.</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>Signed payload in compact Jwe format.</p>  
+
+| Param | Description |
+| --- | --- |
+| signingKeyReference | <p>Reference to the signing key.</p> |
+| payload | <p>to sign.</p> |
+| format | <p>of the final signature.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JweToken+getPayload"></a>
+
+### jweToken.getPayload()
+<p>Gets the base64 URL decrypted payload.</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+<a name="JweToken.serializeJweGeneralJson"></a>
+
+### JweToken.serializeJweGeneralJson(token)
+<p>Serialize a Jwe token object from a token in General Json format</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Jwe base object</p> |
+
+<a name="JweToken.serializeJweFlatJson"></a>
+
+### JweToken.serializeJweFlatJson(token)
+<p>Serialize a Jwe token object from a token in Flat Json format</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Jwe base object</p> |
+
+<a name="JweToken.serializeJweCompact"></a>
+
+### JweToken.serializeJweCompact(token)
+<p>Serialize a Jwe token object from a token in Compact format</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Jwe base object</p> |
+
+<a name="JweToken.create"></a>
+
+### JweToken.create(token, options)
+<p>Create an Jwe token object from a token</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Base object used to create this token</p> |
+| options | <p>Set of Jwe token options</p> |
+
+<a name="JweToken.headerHasElements"></a>
+
+### JweToken.headerHasElements(header)
+<p>Return true if the header has elements</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| header | <p>to test</p> |
+
+<a name="JweToken.encodeHeader"></a>
+
+### JweToken.encodeHeader(header, toBase64Url)
+<p>Encode the header to JSON and base 64 url</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| header |  | <p>to encode</p> |
+| toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
 
 <a name="JwsSignature"></a>
 

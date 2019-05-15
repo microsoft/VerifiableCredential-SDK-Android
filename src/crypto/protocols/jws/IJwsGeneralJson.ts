@@ -12,7 +12,6 @@ import { TSMap } from 'typescript-map'
  */
 export type JwsHeader = TSMap<string, string>;
 
-
 /**
  * JWS general json format
  */
