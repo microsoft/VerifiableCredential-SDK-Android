@@ -15,6 +15,19 @@ self-issued id token.</p></dd>
 self-issued id token.</p></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
+<dt><a href="#HubClient">HubClient</a></dt>
+<dd><p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
+In a Hub.</p></dd>
+<dt><a href="#Actions">Actions</a></dt>
+<dd><p>A Class that represents objects</p></dd>
+<dt><a href="#Collections">Collections</a></dt>
+<dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
+<dt><a href="#HubMethods">HubMethods</a></dt>
+<dd><p>An Abstract Class for HubMethods.</p></dd>
+<dt><a href="#Permissions">Permissions</a></dt>
+<dd><p>A Class that does CRUD operations for storing items as Permissions in the Hub</p></dd>
+<dt><a href="#Profile">Profile</a></dt>
+<dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
 <dt><a href="#Commit">Commit</a></dt>
 <dd><p>Represents a new (i.e pending, unsigned) commit which will create, update, or delete an object in
 a user&#39;s Identity Hub.</p></dd>
@@ -278,6 +291,53 @@ credential for the specified identifier.</p>
 
 ## CryptoOptions
 <p>Class used to model crypto options</p>
+
+**Kind**: global class  
+<a name="HubClient"></a>
+
+## HubClient
+<p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
+In a Hub.</p>
+
+**Kind**: global class  
+<a name="new_HubClient_new"></a>
+
+### new HubClient(hubClientOptions)
+<p>Constructs an instance of the Hub Client Class for hub operations</p>
+
+
+| Param | Description |
+| --- | --- |
+| hubClientOptions | <p>hub client options used to create instance.</p> |
+
+<a name="Actions"></a>
+
+## Actions
+<p>A Class that represents objects</p>
+
+**Kind**: global class  
+<a name="Collections"></a>
+
+## Collections
+<p>A Class that does CRUD operations for storing items as Collections in the Hub</p>
+
+**Kind**: global class  
+<a name="HubMethods"></a>
+
+## HubMethods
+<p>An Abstract Class for HubMethods.</p>
+
+**Kind**: global class  
+<a name="Permissions"></a>
+
+## Permissions
+<p>A Class that does CRUD operations for storing items as Permissions in the Hub</p>
+
+**Kind**: global class  
+<a name="Profile"></a>
+
+## Profile
+<p>A Class that does CRUD operations for storing items as Collections in the Hub</p>
 
 **Kind**: global class  
 <a name="Commit"></a>
