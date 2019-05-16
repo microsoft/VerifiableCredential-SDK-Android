@@ -5,6 +5,7 @@
 
 import UserAgentError from '../UserAgentError';
 import HubSession from '../hubSession/HubSession';
+import CommitSigner from '../hubSession/crypto/CommitSigner';
 
 /**
 * An Abstract Class for HubMethods.
@@ -12,9 +13,13 @@ import HubSession from '../hubSession/HubSession';
 export default abstract class HubMethods {
 
   private hubSession: HubSession; 
+  private method: string;
+  private commitSigner: CommitSigner;
 
-  constructor (hubSession: HubSession) {
+  constructor (hubSession: HubSession, commitSigner: CommitSigner, method: string) {
     this.hubSession = hubSession;
+    this.commitSigner = commitSigner;
+    this.method = method;
   }
 
   public getItem() {

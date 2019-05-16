@@ -3,9 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import HubMethods from "./HubMethods";
+import HubMethods from './HubMethods';
+import HubSession from '../hubSession/HubSession';
+import CommitSigner from '../hubSession/crypto/CommitSigner';
 
 /**
 * A Class that does CRUD operations for storing items as Collections in the Hub
 */
-export default class Profile extends HubMethods {}
+export default class Profile extends HubMethods {
+
+  constructor (hubSession: HubSession, commitSigner: CommitSigner) {
+    super(hubSession, commitSigner, 'Profile');
+  }
+}
