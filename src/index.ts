@@ -31,26 +31,28 @@ import HttpResolver from './resolvers/HttpResolver';
 export { HttpResolver };
 
 // Cryptography
-export { default as CommitSigner } from './hub/crypto/CommitSigner';
-export { default as ICommitSigner } from './hub/crypto/ICommitSigner';
-import { IKeyStore, KeyStoreMem, ProtectionFormat } from '@decentralized-identity/did-auth-jose';
-export { IKeyStore, KeyStoreMem, ProtectionFormat } ;
+import CryptoOptions from './CryptoOptions';
+export { CryptoOptions };
+
+// CommitSigners
+export { default as CommitSigner } from './hubSession/crypto/CommitSigner';
+export { default as ICommitSigner } from './hubSession/crypto/ICommitSigner';
 
 // Hub Requests
-export { default as HubRequest } from './hub/requests/HubRequest';
-export { default as HubObjectQueryRequest } from './hub/requests/HubObjectQueryRequest';
-export { default as HubCommitQueryRequest } from './hub/requests/HubCommitQueryRequest';
-export { default as HubWriteRequest } from './hub/requests/HubCommitWriteRequest';
+export { default as HubRequest } from './hubSession/requests/HubRequest';
+export { default as HubObjectQueryRequest } from './hubSession/requests/HubObjectQueryRequest';
+export { default as HubCommitQueryRequest } from './hubSession/requests/HubCommitQueryRequest';
+export { default as HubWriteRequest } from './hubSession/requests/HubCommitWriteRequest';
 
 // Hub Responses
-export { default as HubObjectQueryResponse } from './hub/responses/HubObjectQueryResponse';
-export { default as HubCommitQueryResponse } from './hub/responses/HubCommitQueryResponse';
-export { default as HubWriteResponse } from './hub/responses/HubWriteResponse';
+export { default as HubObjectQueryResponse } from './hubSession/responses/HubObjectQueryResponse';
+export { default as HubCommitQueryResponse } from './hubSession/responses/HubCommitQueryResponse';
+export { default as HubWriteResponse } from './hubSession/responses/HubWriteResponse';
 
-// Hub SDK
-export { default as Commit } from './hub/Commit';
-export { default as CommitStrategyBasic } from './hub/CommitStrategyBasic';
-export { default as HubError } from './hub/HubError';
-export { default as HubSession } from './hub/HubSession';
-export { default as SignedCommit } from './hub/SignedCommit';
+// Hub Session
+export { default as Commit } from './hubSession/Commit';
+export { default as CommitStrategyBasic } from './hubSession/CommitStrategyBasic';
+export { default as HubError } from './hubSession/HubError';
+export { default as HubSession } from './hubSession/HubSession';
+export { default as SignedCommit } from './hubSession/SignedCommit';
 
