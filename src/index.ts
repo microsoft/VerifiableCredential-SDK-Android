@@ -37,13 +37,13 @@ export { CryptoOptions };
 // Hub Client and Methods
 import HubClient from './HubClient';
 import HubInterfaces from './hubInterfaces/HubInterfaces';
-import {HubMethodsOptions, HubInterface, CommitStrategyReference } from './hubInterfaces/HubInterfaces';
+import {HubInterfacesOptions, HubInterface, CommitStrategyReference } from './hubInterfaces/HubInterfaces';
 import Actions from './hubInterfaces/Actions';
 import Collections from './hubInterfaces/Collections';
 import Permissions from './hubInterfaces/Permissions';
 import Profile from './hubInterfaces/Profile';
 export { HubClient, HubInterfaces, Actions, Collections, Permissions, Profile };
-export { HubMethodsOptions, HubInterface, CommitStrategyReference };
+export { HubInterfacesOptions as HubMethodsOptions, HubInterface, CommitStrategyReference };
 
 // CommitSigners
 export { default as CommitSigner } from './hubSession/crypto/CommitSigner';

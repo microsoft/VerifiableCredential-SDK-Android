@@ -38,7 +38,7 @@ export enum Operation {
 /**
  * Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.
  */
-export interface HubMethodsOptions {
+export interface HubInterfacesOptions {
 
   /**
    * Hub Client that will be used to commit and query a hub.
@@ -80,23 +80,23 @@ export default abstract class HubInterfaces {
 
   /**
    * Creates an instance of HubMethods that will be used to send hub requests and responses.
-   * @param [hubMethodOptions] for configuring how to form hub requests and responses.
+   * @param [hubInterfacesOptions] for configuring how to form hub requests and responses.
    */
-  constructor (hubMethodOptions: HubMethodsOptions) {
+  constructor (hubInterfacesOptions: HubInterfacesOptions) {
     
-    this.context = hubMethodOptions.context;
-    this.type = hubMethodOptions.type;
-    this.hubClient = hubMethodOptions.hubClient;
+    this.context = hubInterfacesOptions.context;
+    this.type = hubInterfacesOptions.type;
+    this.hubClient = hubInterfacesOptions.hubClient;
 
-    if (!hubMethodOptions.hubInterface) {
+    if (!hubInterfacesOptions.hubInterface) {
       throw new UserAgentError('Hub Interface is not defined in the Hub Method Options');
     }
-    this.hubInterface = hubMethodOptions.hubInterface;
+    this.hubInterface = hubInterfacesOptions.hubInterface;
 
-    if (!hubMethodOptions.commitStrategy) {
+    if (!hubInterfacesOptions.commitStrategy) {
       this.commitStrategy = CommitStrategyReference.Basic;
     } else {
-      this.commitStrategy = hubMethodOptions.commitStrategy;
+      this.commitStrategy = hubInterfacesOptions.commitStrategy;
     }
   }
 
@@ -115,7 +115,6 @@ export default abstract class HubInterfaces {
       },
       payload
     });
-
     this.hubClient.commit(commit);
   }
   

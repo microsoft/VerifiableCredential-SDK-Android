@@ -379,13 +379,13 @@ creates a hubSession for hub instance that is available/online.</p>
 **Kind**: global class  
 <a name="new_HubInterfaces_new"></a>
 
-### new HubInterfaces([hubMethodOptions])
+### new HubInterfaces([hubInterfacesOptions])
 <p>Creates an instance of HubMethods that will be used to send hub requests and responses.</p>
 
 
 | Param | Description |
 | --- | --- |
-| [hubMethodOptions] | <p>for configuring how to form hub requests and responses.</p> |
+| [hubInterfacesOptions] | <p>for configuring how to form hub requests and responses.</p> |
 
 <a name="Permissions"></a>
 
