@@ -4,14 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import UserAgentError from '../UserAgentError';
-import HubSession from '../hubSession/HubSession';
-import CommitSigner from '../hubSession/crypto/CommitSigner';
+import Commit from '../hubSession/Commit';
+import HubClient from '../HubClient';
 
 /**
  * Constants that represent what type of commit strategy to be used.
  */
 export enum CommitStrategyReference {
   Basic = 'basic',
+  LastWriterWins = 'lastWriterWins'
 }
 
 /**
@@ -28,15 +29,21 @@ export enum HubInterface {
  * Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.
  */
 export interface HubMethodsOptions {
-  /**
-   * HubSession used to send Hub Requests to the Hub.
-   */
-  hubSession: HubSession;
 
   /**
-   * CommitSigner object to sign the commits
+   * Hub Client that will be used to commit and query a hub.
    */
-  commitSigner: CommitSigner;
+  hubClient: HubClient;
+
+  /**
+   * the schema for the object that will be committed.
+   */
+  context: string;
+
+  /**
+   * the type of the object that will be committed.
+   */
+  type: string;
 
   /**
    * Optional Commit Strategy to define what strategy to use when compiling commits.
@@ -55,19 +62,21 @@ export interface HubMethodsOptions {
  */
 export default abstract class HubMethods {
 
-  private hubSession: HubSession; 
   private hubInterface: HubInterface;
-  private commitSigner: CommitSigner;
   private commitStrategy: CommitStrategyReference;
+  private type: string;
+  private context: string;
+  private hubClient: HubClient;
 
   /**
    * Creates an instance of HubMethods that will be used to send hub requests and responses.
    * @param [hubMethodOptions] for configuring how to form hub requests and responses.
    */
   constructor (hubMethodOptions: HubMethodsOptions) {
-
-    this.hubSession = hubMethodOptions.hubSession;   
-    this.commitSigner = hubMethodOptions.commitSigner;
+    
+    this.context = hubMethodOptions.context;
+    this.type = hubMethodOptions.type;
+    this.hubClient = hubMethodOptions.hubClient;
 
     if (!hubMethodOptions.hubInterface) {
       throw new UserAgentError('Hub Interface is not defined in the Hub Method Options');
@@ -81,16 +90,33 @@ export default abstract class HubMethods {
     }
   }
 
-  public async getItem() {
+  public async addItem(payload: any): Promise<void> {
+    
+    const create = 'create';
+
+    const commit = new Commit({
+      protected: {
+        committed_at: (new Date()).toISOString(),
+        iss: this.hubClient.clientIdentifier.id,
+        sub: this.hubClient.hubOwner.id,
+        interface: this.hubInterface,
+        context: this.context,
+        type: this.type,
+        operation: create,
+        commit_strategy: this.commitStrategy,
+      },
+      payload
+    });
+
+    this.hubClient.commit(commit);
+  }
+  
+  public async getItems() {
 
     throw new UserAgentError('Not Implemented');
   }
 
   public async updateItem() {
-    throw new UserAgentError('Not Implemented');
-  }
-
-  public async addItem() {
     throw new UserAgentError('Not Implemented');
   }
 

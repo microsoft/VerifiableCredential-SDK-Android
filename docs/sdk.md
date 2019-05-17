@@ -306,6 +306,14 @@ credential for the specified identifier.</p>
 In a Hub.</p>
 
 **Kind**: global class  
+
+* [HubClient](#HubClient)
+    * [new HubClient(hubClientOptions)](#new_HubClient_new)
+    * [.commit(commit)](#HubClient+commit)
+    * [.queryObjects(queryRequest)](#HubClient+queryObjects)
+    * [.getHubInstances()](#HubClient+getHubInstances)
+    * [.createHubSession()](#HubClient+createHubSession)
+
 <a name="new_HubClient_new"></a>
 
 ### new HubClient(hubClientOptions)
@@ -316,6 +324,39 @@ In a Hub.</p>
 | --- | --- |
 | hubClientOptions | <p>hub client options used to create instance.</p> |
 
+<a name="HubClient+commit"></a>
+
+### hubClient.commit(commit)
+**Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+
+| Param | Description |
+| --- | --- |
+| commit | <p>Signs and sends a commit to the hub owner's hub.</p> |
+
+<a name="HubClient+queryObjects"></a>
+
+### hubClient.queryObjects(queryRequest)
+<p>Query Objects of certain type in Hub.</p>
+
+**Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+
+| Param | Description |
+| --- | --- |
+| queryRequest | <p>object that tells the hub what objec to get.</p> |
+
+<a name="HubClient+getHubInstances"></a>
+
+### hubClient.getHubInstances()
+<p>Get all Hub Instances from hub owner's identifier document.</p>
+
+**Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+<a name="HubClient+createHubSession"></a>
+
+### hubClient.createHubSession()
+<p>Implement createHubSession method once HubSession is refactored.
+creates a hubSession for hub instance that is available/online.</p>
+
+**Kind**: instance method of [<code>HubClient</code>](#HubClient)  
 <a name="Actions"></a>
 
 ## Actions

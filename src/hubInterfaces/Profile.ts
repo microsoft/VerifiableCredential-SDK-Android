@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import HubMethods, { HubMethodsOptions, HubInterface } from './HubMethods';
+import HubInterfaces, { HubMethodsOptions, HubInterface } from './HubInterfaces';
 
 /**
-* A Class that represents objects 
+* A Class that does CRUD operations for storing items as Collections in the Hub
 */
-export default class Actions extends HubMethods {
+export default class Profile extends HubInterfaces {
 
-  constructor (hubMethodsOptions: HubMethodsOptions) {
-    hubMethodsOptions.hubInterface = HubInterface.Action;
-    super(hubMethodsOptions);
+  constructor (hubMethodOptions: HubMethodsOptions) {
+    hubMethodOptions.hubInterface = HubInterface.Profile;
+    super(hubMethodOptions);
   }
 }

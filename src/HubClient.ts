@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Actions from './hubMethods/Actions';
-import Collections from './hubMethods/Collections';
-import Permissions from './hubMethods/Permissions';
-import Profile from './hubMethods/Profile';
 import Identifier from './Identifier';
-import HubSession from './hubSession/HubSession';
+import Commit from './hubSession/Commit';
+import UserAgentError from './UserAgentError';
 import CommitSigner from './hubSession/crypto/CommitSigner';
+import HubCommitWriteRequest from './hubSession/requests/HubCommitWriteRequest';
+import HubObjectQueryRequest from './hubSession/requests/HubObjectQueryRequest';
+import HubSession from './hubSession/HubSession';
 
 /**
  * Interface defining options for the
@@ -17,14 +17,19 @@ import CommitSigner from './hubSession/crypto/CommitSigner';
  */
 export interface HubClientOptions {
   /**
-   * The Identifier of the Hub that client wants to access.
+   * The Identifier of the owner of the hub.
    */
-  hubIdentifier: Identifier;
+  hubOwner: Identifier;
 
   /**
    * The Identifier of the Client that wants to start hub session.
    */
   clientIdentifier: Identifier;
+
+  /**
+   * Key reference to private key to be used to sign commits and create HubSession
+   */
+  keyReference: string;
 }
 
 /**
@@ -33,37 +38,74 @@ export interface HubClientOptions {
  */
 export default class HubClient {
 
-  /**
-   * Actions Object for adding, updating, deleting, reading actions to hub
-   */
-  public readonly actions: Actions;
+  public hubOwner: Identifier;
 
-  /**
-   * Collections Object for adding, updating, deleting, reading collections to hub
-   */
-  public readonly collections: Collections;
+  public clientIdentifier: Identifier;
 
-  /**
-   * Permission Object for adding, updating, deleting, reading permissions to hub
-   */
-  public readonly permissions: Permissions;
-
-  /**
-   * Profile Object for adding, updating, deleting, reading profile to hub
-   */
-  public readonly profile: Profile;
+  private readonly keyReference: string;
 
   /**
    * Constructs an instance of the Hub Client Class for hub operations
    * @param hubClientOptions hub client options used to create instance.
    */
-  constructor (_hubClientOptions: HubClientOptions) {
-    // NEED to create a hubSession here.
-    const hubSession = <HubSession> {};
-    const commitSigner = <CommitSigner> {}
-    this.actions = new Actions(hubSession, commitSigner);
-    this.collections = new Collections(hubSession, commitSigner);
-    this.permissions = new Permissions(hubSession, commitSigner);
-    this.profile = new Profile(hubSession, commitSigner);
+  constructor (hubClientOptions: HubClientOptions) {
+    this.hubOwner = hubClientOptions.hubOwner;
+    this.clientIdentifier = hubClientOptions.clientIdentifier;
+    this.keyReference = hubClientOptions.keyReference;
+  }
+
+  /**
+   * 
+   * @param commit Signs and sends a commit to the hub owner's hub.
+   */
+  public async commit (commit: Commit) {
+
+    if (commit.getProtectedHeaders().iss !== this.clientIdentifier.id) {
+      throw new UserAgentError(`Issuer, '${commit.getProtectedHeaders().iss},' is not valid for this HubClient Instance.`);
+    }
+
+    if (commit.getProtectedHeaders().sub !== this.hubOwner.id) {
+      throw new UserAgentError(`Subject, '${commit.getProtectedHeaders().sub},' is not valid for this HubClient Instance.`);
+    }
+
+    if (!this.clientIdentifier.options || !this.clientIdentifier.options.keyStore) {
+      throw new UserAgentError(`No KeyStore defined for '${this.clientIdentifier}`);
+    }
+
+    const session = await this.createHubSession();
+
+    // NEED: change implementation of commit signer to use keyStore
+    const commitSigner = <CommitSigner> {};
+
+    const signedCommit = await commitSigner.sign(commit);
+
+    const commitRequest = new HubCommitWriteRequest(signedCommit);
+    session.send(commitRequest);
+  }
+
+  /**
+   * Query Objects of certain type in Hub.
+   * @param queryRequest object that tells the hub what objec to get.
+   */
+  public async queryObjects (queryRequest: HubObjectQueryRequest) {
+    const session = await this.createHubSession();
+    const queryResponse = await session.send(queryRequest);
+    return queryResponse.getObjects();
+  }
+
+  /**
+   * Get all Hub Instances from hub owner's identifier document.
+   */
+  public async getHubInstances () {
+    const identifierDocument = await this.hubOwner.getDocument();
+    return identifierDocument.getHubInstances();
+  }
+
+  /**
+   * Implement createHubSession method once HubSession is refactored.
+   * creates a hubSession for hub instance that is available/online.
+   */
+  public async createHubSession () {
+    return <HubSession> {}
   }
 }
