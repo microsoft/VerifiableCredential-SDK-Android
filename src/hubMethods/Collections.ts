@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import HubMethods from './HubMethods';
-import UserAgentError from '../UserAgentError';
 import HubSession from '../hubSession/HubSession';
 import CommitSigner from '../hubSession/crypto/CommitSigner';
 

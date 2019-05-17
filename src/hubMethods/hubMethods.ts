@@ -8,8 +8,9 @@ import HubSession from '../hubSession/HubSession';
 import CommitSigner from '../hubSession/crypto/CommitSigner';
 
 /**
-* An Abstract Class for HubMethods.
-*/
+ * An Abstract Class for HubMethods.
+ * 
+ */
 export default abstract class HubMethods {
 
   private hubSession: HubSession; 
@@ -22,19 +23,19 @@ export default abstract class HubMethods {
     this.method = method;
   }
 
-  public getItem() {
+  public async getItem() {
     throw new UserAgentError('Not Implemented');
   }
 
-  public updateItem() {
+  public async updateItem() {
     throw new UserAgentError('Not Implemented');
   }
 
-  public addItem() {
+  public async addItem() {
     throw new UserAgentError('Not Implemented');
   }
 
-  public deleteItem() {
+  public async deleteItem() {
     throw new UserAgentError('Not Implemented');
   }
 }
