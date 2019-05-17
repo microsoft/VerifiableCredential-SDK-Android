@@ -22,8 +22,8 @@ In a Hub.</p></dd>
 <dd><p>A Class that represents objects</p></dd>
 <dt><a href="#Collections">Collections</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
-<dt><a href="#HubMethods">HubMethods</a></dt>
-<dd><p>An Abstract Class for HubMethods.</p></dd>
+<dt><a href="#HubInterfaces">HubInterfaces</a></dt>
+<dd><p>An Abstract Class for Hub Interfaces.</p></dd>
 <dt><a href="#Permissions">Permissions</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Permissions in the Hub</p></dd>
 <dt><a href="#Profile">Profile</a></dt>
@@ -98,6 +98,8 @@ methods of a credential.</p></dd>
 <dt><a href="#CommitStrategyReference">CommitStrategyReference</a></dt>
 <dd><p>Constants that represent what interface type the hub request payload will be.</p></dd>
 <dt><a href="#HubInterface">HubInterface</a></dt>
+<dd><p>Hub Operations</p></dd>
+<dt><a href="#Operation">Operation</a></dt>
 <dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
 <dt><a href="#SignatureFormat">SignatureFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
@@ -369,15 +371,15 @@ creates a hubSession for hub instance that is available/online.</p>
 <p>A Class that does CRUD operations for storing items as Collections in the Hub</p>
 
 **Kind**: global class  
-<a name="HubMethods"></a>
+<a name="HubInterfaces"></a>
 
-## HubMethods
-<p>An Abstract Class for HubMethods.</p>
+## HubInterfaces
+<p>An Abstract Class for Hub Interfaces.</p>
 
 **Kind**: global class  
-<a name="new_HubMethods_new"></a>
+<a name="new_HubInterfaces_new"></a>
 
-### new HubMethods([hubMethodOptions])
+### new HubInterfaces([hubMethodOptions])
 <p>Creates an instance of HubMethods that will be used to send hub requests and responses.</p>
 
 
@@ -1259,6 +1261,12 @@ methods of a credential.</p>
 <a name="HubInterface"></a>
 
 ## HubInterface
+<p>Hub Operations</p>
+
+**Kind**: global variable  
+<a name="Operation"></a>
+
+## Operation
 <p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p>
 
 **Kind**: global variable  

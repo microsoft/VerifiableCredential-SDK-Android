@@ -26,6 +26,16 @@ export enum HubInterface {
 }
 
 /**
+ * Hub Operations
+ */
+export enum Operation {
+  Create = 'create',
+  Read = 'read',
+  Update = 'update',
+  Delete = 'delete'
+}
+
+/**
  * Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.
  */
 export interface HubMethodsOptions {
@@ -57,10 +67,10 @@ export interface HubMethodsOptions {
 }
 
 /**
- * An Abstract Class for HubMethods.
+ * An Abstract Class for Hub Interfaces.
  * 
  */
-export default abstract class HubMethods {
+export default abstract class HubInterfaces {
 
   private hubInterface: HubInterface;
   private commitStrategy: CommitStrategyReference;
@@ -91,8 +101,6 @@ export default abstract class HubMethods {
   }
 
   public async addItem(payload: any): Promise<void> {
-    
-    const create = 'create';
 
     const commit = new Commit({
       protected: {
@@ -102,7 +110,7 @@ export default abstract class HubMethods {
         interface: this.hubInterface,
         context: this.context,
         type: this.type,
-        operation: create,
+        operation: Operation.Create,
         commit_strategy: this.commitStrategy,
       },
       payload
@@ -112,7 +120,10 @@ export default abstract class HubMethods {
   }
   
   public async getItems() {
+    throw new UserAgentError('Not Implemented');
+  }
 
+  public async getItem() {
     throw new UserAgentError('Not Implemented');
   }
 
