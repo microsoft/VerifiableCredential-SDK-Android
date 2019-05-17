@@ -93,6 +93,12 @@ User Agent, such as resolver and register.</p></dd>
 <dt><a href="#CredentialType">CredentialType</a></dt>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
+<dt><a href="#CommitStrategyReference">CommitStrategyReference</a></dt>
+<dd><p>Constants that represent what type of commit strategy to be used.</p></dd>
+<dt><a href="#CommitStrategyReference">CommitStrategyReference</a></dt>
+<dd><p>Constants that represent what interface type the hub request payload will be.</p></dd>
+<dt><a href="#HubInterface">HubInterface</a></dt>
+<dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
 <dt><a href="#SignatureFormat">SignatureFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
 </dl>
@@ -328,6 +334,16 @@ In a Hub.</p>
 <p>An Abstract Class for HubMethods.</p>
 
 **Kind**: global class  
+<a name="new_HubMethods_new"></a>
+
+### new HubMethods([hubMethodOptions])
+<p>Creates an instance of HubMethods that will be used to send hub requests and responses.</p>
+
+
+| Param | Description |
+| --- | --- |
+| [hubMethodOptions] | <p>for configuring how to form hub requests and responses.</p> |
+
 <a name="Permissions"></a>
 
 ## Permissions
@@ -1185,6 +1201,24 @@ User Agent, such as resolver and register.</p>
 ## CredentialType
 <p>Interface defining common properties and
 methods of a credential.</p>
+
+**Kind**: global variable  
+<a name="CommitStrategyReference"></a>
+
+## CommitStrategyReference
+<p>Constants that represent what type of commit strategy to be used.</p>
+
+**Kind**: global variable  
+<a name="CommitStrategyReference"></a>
+
+## CommitStrategyReference
+<p>Constants that represent what interface type the hub request payload will be.</p>
+
+**Kind**: global variable  
+<a name="HubInterface"></a>
+
+## HubInterface
+<p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p>
 
 **Kind**: global variable  
 <a name="SignatureFormat"></a>

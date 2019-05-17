@@ -3,16 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import HubMethods from './HubMethods';
-import HubSession from '../hubSession/HubSession';
-import CommitSigner from '../hubSession/crypto/CommitSigner';
+import HubMethods, { HubMethodsOptions, HubInterface } from './HubMethods';
 
 /**
 * A Class that does CRUD operations for storing items as Permissions in the Hub
 */
 export default class Permissions extends HubMethods {
 
-  constructor (hubSession: HubSession, commitSigner: CommitSigner) {
-    super(hubSession, commitSigner, 'Permissions');
+  constructor (hubMethodsOptions: HubMethodsOptions) {
+    hubMethodsOptions.hubInterface = HubInterface.Permissions;
+    super(hubMethodsOptions);
   }
 }
