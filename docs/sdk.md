@@ -38,6 +38,8 @@ self-issued id token.</p></dd>
 Provides support for nodejs and browser</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
 <dd><p>Default crypto suite</p></dd>
+<dt><a href="#JoseHelpers">JoseHelpers</a></dt>
+<dd><p>Crypto helpers support for plugable crypto layer</p></dd>
 <dt><a href="#JweRecipient">JweRecipient</a></dt>
 <dd><p>JWS signature used by the general JSON</p></dd>
 <dt><a href="#JweToken">JweToken</a></dt>
@@ -586,6 +588,40 @@ Provides support for nodejs and browser</p>
 | keyReference | <p>points to key in the key store</p> |
 | data | <p>to sign</p> |
 
+<a name="JoseHelpers"></a>
+
+## JoseHelpers
+<p>Crypto helpers support for plugable crypto layer</p>
+
+**Kind**: global class  
+
+* [JoseHelpers](#JoseHelpers)
+    * [.headerHasElements(header)](#JoseHelpers.headerHasElements)
+    * [.encodeHeader(header, toBase64Url)](#JoseHelpers.encodeHeader)
+
+<a name="JoseHelpers.headerHasElements"></a>
+
+### JoseHelpers.headerHasElements(header)
+<p>Return true if the header has elements</p>
+
+**Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
+
+| Param | Description |
+| --- | --- |
+| header | <p>to test</p> |
+
+<a name="JoseHelpers.encodeHeader"></a>
+
+### JoseHelpers.encodeHeader(header, toBase64Url)
+<p>Encode the header to JSON and base 64 url</p>
+
+**Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| header |  | <p>to encode</p> |
+| toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
+
 <a name="JweRecipient"></a>
 
 ## JweRecipient
@@ -621,15 +657,13 @@ Crypto calls always happen via CryptoFactory</p>
         * [.getHeader(newOptions, manadatory)](#JweToken+getHeader)
         * [.getAlgorithm(newOptions, manadatory)](#JweToken+getAlgorithm)
         * [.getOptionsProperty(propertyName, newOptions, manadatory)](#JweToken+getOptionsProperty)
-        * [.sign(signingKeyReference, payload, format, options)](#JweToken+sign) ⇒
+        * [.encrypt(signingKeyReference, payload, format, options)](#JweToken+encrypt) ⇒
         * [.getPayload()](#JweToken+getPayload)
     * _static_
         * [.serializeJweGeneralJson(token)](#JweToken.serializeJweGeneralJson)
         * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
         * [.serializeJweCompact(token)](#JweToken.serializeJweCompact)
         * [.create(token, options)](#JweToken.create)
-        * [.headerHasElements(header)](#JweToken.headerHasElements)
-        * [.encodeHeader(header, toBase64Url)](#JweToken.encodeHeader)
 
 <a name="new_JweToken_new"></a>
 
@@ -778,10 +812,10 @@ Crypto calls always happen via CryptoFactory</p>
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
-<a name="JweToken+sign"></a>
+<a name="JweToken+encrypt"></a>
 
-### jweToken.sign(signingKeyReference, payload, format, options) ⇒
-<p>Signs contents using the given private key in JWK format.</p>
+### jweToken.encrypt(signingKeyReference, payload, format, options) ⇒
+<p>Encrypt content using the given public keys in JWK format.</p>
 
 **Kind**: instance method of [<code>JweToken</code>](#JweToken)  
 **Returns**: <p>Signed payload in compact Jwe format.</p>  
@@ -843,29 +877,6 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- |
 | token | <p>Base object used to create this token</p> |
 | options | <p>Set of Jwe token options</p> |
-
-<a name="JweToken.headerHasElements"></a>
-
-### JweToken.headerHasElements(header)
-<p>Return true if the header has elements</p>
-
-**Kind**: static method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Description |
-| --- | --- |
-| header | <p>to test</p> |
-
-<a name="JweToken.encodeHeader"></a>
-
-### JweToken.encodeHeader(header, toBase64Url)
-<p>Encode the header to JSON and base 64 url</p>
-
-**Kind**: static method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| header |  | <p>to encode</p> |
-| toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
 
 <a name="JwsSignature"></a>
 

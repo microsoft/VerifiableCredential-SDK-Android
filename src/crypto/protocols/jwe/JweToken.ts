@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import base64url from 'base64url';
 import CryptoFactory from '../../plugin/CryptoFactory';
 import PublicKey from '../../keys/PublicKey';
 import IJweCompact from './IJweCompact';
@@ -63,16 +62,17 @@ export default class JweToken implements IJweGeneralJson {
   public format: ProtectionFormat = ProtectionFormat.JweGeneralJson;
 
   // Options passed into the constructor
-  private options: ISigningOptions | IEncryptionOptions | undefined;
+  private options: IEncryptionOptions | undefined;
 
   /**
    * Create an Jwe token object
    * @param options Set of Jwe token options
    */
-  constructor (options?: ISigningOptions | IEncryptionOptions) {
+  constructor (options?: IEncryptionOptions) {
     this.options = options;
   }
 
+  //#region serialization
   /**
    * Serialize a Jwe token object from a token
    * @param format Optional specify the serialization format. If not specified, use default format.
@@ -158,7 +158,8 @@ export default class JweToken implements IJweGeneralJson {
     const encodedSignature = base64url.encode(token.signatures[0].signature);
     return `${encodedProtected}.${encodedpayload}.${encodedSignature}`;
   }
-  
+  //#endregion
+ //#region create
   /**
    * Create an Jwe token object from a token
    * @param token Base object used to create this token
@@ -212,30 +213,6 @@ export default class JweToken implements IJweGeneralJson {
       }
     }
     throw new Error(`The content does not represent a valid Jwe token`);
-  }
-
-  /**
-   * Return true if the header has elements
-   * @param header to test
-   */
-  private static headerHasElements(header: JweHeader | undefined): boolean {
-    if (!header) {
-      return false;
-    }
-    return header.length > 0;
-  }
-
-  /**
-   * Encode the header to JSON and base 64 url
-   * @param header to encode
-   * @param toBase64Url is true when result needs to be base 64 url
-   */
-  private static encodeHeader(header: JweHeader, toBase64Url: boolean = true): string {
-    const serializedHeader = JSON.stringify(header.toJSON());
-    if (toBase64Url) {
-      return base64url.encode(serializedHeader);
-    }
-    return serializedHeader;
   }
 
   /**
@@ -375,7 +352,7 @@ export default class JweToken implements IJweGeneralJson {
 
     return {result: true, reason: ''};
   }
-
+//#endregion
   /**
    * Get the keyStore to be used
    * @param newOptions Options passed in after the constructure
@@ -446,7 +423,7 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   /**
-   * Signs contents using the given private key in JWK format.
+   * Encrypt content using the given public keys in JWK format.
    *
    * @param signingKeyReference Reference to the signing key.
    * @param payload to sign.
@@ -454,19 +431,21 @@ export default class JweToken implements IJweGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact Jwe format.
    */
-  public async sign (signingKeyReference: string, payload: string, format: ProtectionFormat, options?: ISigningOptions): Promise<JweToken> {
+  public async encrypt (recipients: PublicKey[], payload: string, options?: IEncryptionOptions): Promise<JweToken> {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const algorithm: CryptoAlgorithm = this.getAlgorithm(options);
     const alg: string = CryptoHelpers.toJwa(algorithm);
 
-    // tslint:disable-next-line:no-suspicious-comment
-    // TODO support for multiple signatures
-    const JweRecipient = new JweRecipient();
+    // Set the recipients structure
+    const jweRecipient = new JweRecipient();
 
-    // Set payload
-    const JweToken = new JweToken();
+    // Set the resulting token
+    const jweToken: JweToken = new JweToken();
 
+    for (let inx = 0 ; inx < recipients.length; inx ++) {
+
+    }
     // Get signing key public key
     const jwk: PublicKey = await <Promise<PublicKey>>keyStore.get(signingKeyReference, true);
 

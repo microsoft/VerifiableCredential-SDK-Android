@@ -39,13 +39,13 @@ export default class JwsToken implements IJwsGeneralJson {
   public format: ProtectionFormat = ProtectionFormat.JweGeneralJson;
 
   // Options passed into the constructor
-  private options: ISigningOptions | IEncryptionOptions | undefined;
+  private options: ISigningOptions | undefined;
 
   /**
    * Create an Jws token object
    * @param options Set of jws token options
    */
-  constructor (options?: ISigningOptions | IEncryptionOptions) {
+  constructor (options?: ISigningOptions) {
     this.options = options;
   }
 
