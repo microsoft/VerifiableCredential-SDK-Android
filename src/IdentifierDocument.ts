@@ -128,11 +128,22 @@ export default class IdentifierDocument {
     // Add the JSON-LD context
     clonedDocument['@context'] = 'https://w3id.org/did/v1';
 
+    // switch authentication references to authentication.
     if (!this.authenticationReferences || this.authenticationReferences.length === 0) {
       clonedDocument.authenticationReferences = undefined;
     }
+    if (this.authenticationReferences && this.authenticationReferences.length > 0 ) {
+      clonedDocument.authentication = this.authenticationReferences;
+      clonedDocument.authenticationReferences = undefined;
+    }
 
+    // switch service references to service.
     if (!this.serviceReferences || this.serviceReferences.length === 0) {
+      clonedDocument.serviceReferences = undefined;
+    }
+    if (this.serviceReferences.length > 0 ) {
+      clonedDocument.serviceReferences 
+      clonedDocument.service = this.serviceReferences;
       clonedDocument.serviceReferences = undefined;
     }
 
