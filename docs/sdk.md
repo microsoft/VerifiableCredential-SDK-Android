@@ -22,7 +22,7 @@ In a Hub.</p></dd>
 <dd><p>A Class that represents objects</p></dd>
 <dt><a href="#Collections">Collections</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
-<dt><a href="#HubInterfaces">HubInterfaces</a></dt>
+<dt><a href="#HubInterface">HubInterface</a></dt>
 <dd><p>An Abstract Class for Hub Interfaces.</p></dd>
 <dt><a href="#Permissions">Permissions</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Permissions in the Hub</p></dd>
@@ -93,11 +93,11 @@ User Agent, such as resolver and register.</p></dd>
 <dt><a href="#CredentialType">CredentialType</a></dt>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
-<dt><a href="#CommitStrategyReference">CommitStrategyReference</a></dt>
+<dt><a href="#CommitStrategyType">CommitStrategyType</a></dt>
 <dd><p>Constants that represent what type of commit strategy to be used.</p></dd>
-<dt><a href="#CommitStrategyReference">CommitStrategyReference</a></dt>
+<dt><a href="#CommitStrategyType">CommitStrategyType</a></dt>
 <dd><p>Constants that represent what interface type the hub request payload will be.</p></dd>
-<dt><a href="#HubInterface">HubInterface</a></dt>
+<dt><a href="#HubInterfaceType">HubInterfaceType</a></dt>
 <dd><p>Hub Operations</p></dd>
 <dt><a href="#Operation">Operation</a></dt>
 <dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
@@ -371,21 +371,21 @@ creates a hubSession for hub instance that is available/online.</p>
 <p>A Class that does CRUD operations for storing items as Collections in the Hub</p>
 
 **Kind**: global class  
-<a name="HubInterfaces"></a>
+<a name="HubInterface"></a>
 
-## HubInterfaces
+## HubInterface
 <p>An Abstract Class for Hub Interfaces.</p>
 
 **Kind**: global class  
-<a name="new_HubInterfaces_new"></a>
+<a name="new_HubInterface_new"></a>
 
-### new HubInterfaces([hubInterfacesOptions])
+### new HubInterface([hubInterfaceOptions])
 <p>Creates an instance of HubMethods that will be used to send hub requests and responses.</p>
 
 
 | Param | Description |
 | --- | --- |
-| [hubInterfacesOptions] | <p>for configuring how to form hub requests and responses.</p> |
+| [hubInterfaceOptions] | <p>for configuring how to form hub requests and responses.</p> |
 
 <a name="Permissions"></a>
 
@@ -1246,21 +1246,21 @@ User Agent, such as resolver and register.</p>
 methods of a credential.</p>
 
 **Kind**: global variable  
-<a name="CommitStrategyReference"></a>
+<a name="CommitStrategyType"></a>
 
-## CommitStrategyReference
+## CommitStrategyType
 <p>Constants that represent what type of commit strategy to be used.</p>
 
 **Kind**: global variable  
-<a name="CommitStrategyReference"></a>
+<a name="CommitStrategyType"></a>
 
-## CommitStrategyReference
+## CommitStrategyType
 <p>Constants that represent what interface type the hub request payload will be.</p>
 
 **Kind**: global variable  
-<a name="HubInterface"></a>
+<a name="HubInterfaceType"></a>
 
-## HubInterface
+## HubInterfaceType
 <p>Hub Operations</p>
 
 **Kind**: global variable  

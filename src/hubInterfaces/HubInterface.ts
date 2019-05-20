@@ -10,7 +10,7 @@ import HubClient from '../HubClient';
 /**
  * Constants that represent what type of commit strategy to be used.
  */
-export enum CommitStrategyReference {
+export enum CommitStrategyType {
   Basic = 'basic',
   LastWriterWins = 'lastWriterWins'
 }
@@ -18,7 +18,7 @@ export enum CommitStrategyReference {
 /**
  * Constants that represent what interface type the hub request payload will be.
  */
-export enum HubInterface {
+export enum HubInterfaceType {
   Action = 'Actions',
   Collections = 'Collections',
   Permissions = 'Permissions',
@@ -38,7 +38,7 @@ export enum Operation {
 /**
  * Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.
  */
-export interface HubInterfacesOptions {
+export interface HubInterfaceOptions {
 
   /**
    * Hub Client that will be used to commit and query a hub.
@@ -58,45 +58,45 @@ export interface HubInterfacesOptions {
   /**
    * Optional Commit Strategy to define what strategy to use when compiling commits.
    */
-  commitStrategy?: CommitStrategyReference;
+  commitStrategy?: CommitStrategyType;
 
   /**
    * Optional Hub Interface to define the type of interface the hub request payload will be.
    */
-  hubInterface?: HubInterface;
+  hubInterface?: HubInterfaceType;
 }
 
 /**
  * An Abstract Class for Hub Interfaces.
  * 
  */
-export default abstract class HubInterfaces {
+export default abstract class HubInterface {
 
-  private hubInterface: HubInterface;
-  private commitStrategy: CommitStrategyReference;
+  private hubInterface: HubInterfaceType;
+  private commitStrategy: CommitStrategyType;
   private type: string;
   private context: string;
   private hubClient: HubClient;
 
   /**
    * Creates an instance of HubMethods that will be used to send hub requests and responses.
-   * @param [hubInterfacesOptions] for configuring how to form hub requests and responses.
+   * @param [hubInterfaceOptions] for configuring how to form hub requests and responses.
    */
-  constructor (hubInterfacesOptions: HubInterfacesOptions) {
+  constructor (hubInterfaceOptions: HubInterfaceOptions) {
     
-    this.context = hubInterfacesOptions.context;
-    this.type = hubInterfacesOptions.type;
-    this.hubClient = hubInterfacesOptions.hubClient;
+    this.context = hubInterfaceOptions.context;
+    this.type = hubInterfaceOptions.type;
+    this.hubClient = hubInterfaceOptions.hubClient;
 
-    if (!hubInterfacesOptions.hubInterface) {
+    if (!hubInterfaceOptions.hubInterface) {
       throw new UserAgentError('Hub Interface is not defined in the Hub Method Options');
     }
-    this.hubInterface = hubInterfacesOptions.hubInterface;
+    this.hubInterface = hubInterfaceOptions.hubInterface;
 
-    if (!hubInterfacesOptions.commitStrategy) {
-      this.commitStrategy = CommitStrategyReference.Basic;
+    if (!hubInterfaceOptions.commitStrategy) {
+      this.commitStrategy = CommitStrategyType.Basic;
     } else {
-      this.commitStrategy = hubInterfacesOptions.commitStrategy;
+      this.commitStrategy = hubInterfaceOptions.commitStrategy;
     }
   }
 

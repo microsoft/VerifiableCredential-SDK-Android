@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import HubInterfaces, { HubInterfacesOptions, HubInterface } from './HubInterfaces';
+import HubInterface, { HubInterfaceOptions, HubInterfaceType } from './HubInterface';
 
 /**
 * A Class that does CRUD operations for storing items as Permissions in the Hub
 */
-export default class Permissions extends HubInterfaces {
+export default class Permissions extends HubInterface {
 
-  constructor (hubMethodsOptions: HubInterfacesOptions) {
-    hubMethodsOptions.hubInterface = HubInterface.Permissions;
+  constructor (hubMethodsOptions: HubInterfaceOptions) {
+    hubMethodsOptions.hubInterface = HubInterfaceType.Permissions;
     super(hubMethodsOptions);
   }
 }
