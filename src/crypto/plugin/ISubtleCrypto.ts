@@ -10,10 +10,19 @@ import { CryptoAlgorithm } from '../keyStore/IKeyStore';
  */
 export default interface ISubtleCrypto extends SubtleCrypto {
   /**
-   * Sign with a key referenced in the key store
+   * Sign with a key referenced in the key store.
+   * The referenced key must be a jwk key.
    * @param algorithm used for signature
    * @param keyReference points to key in the key store
    * @param data to sign
    */
-  signByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, data: BufferSource): PromiseLike<ArrayBuffer>;        
+  signByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, data: BufferSource): PromiseLike<ArrayBuffer>;  
+        
+  /**
+   * Encrypt with a jwk key referenced in the key store
+   * @param algorithm used for signature
+   * @param keyReference points to key in the key store
+   * @param data to sign
+   */
+  encryptByJwk(algorithm: CryptoAlgorithm, key: JsonWebKey, data: BufferSource): Promise<ArrayBuffer>;
 }

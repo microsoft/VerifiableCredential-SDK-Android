@@ -5,15 +5,19 @@
 
 import CryptoFactory from '../../plugin/CryptoFactory';
 import PublicKey from '../../keys/PublicKey';
-import IJweCompact from './IJweCompact';
-import IJweFlatJson from './IJweFlatJson';
 import IJweGeneralJson, { JweHeader } from './IJweGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions, CryptoAlgorithm } from '../../keystore/IKeyStore';
-import CryptoHelpers from '../../utilities/CryptoHelpers';
-import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
+import { IEncryptionOptions } from '../../keystore/IKeyStore';
+//import CryptoHelpers from '../../utilities/CryptoHelpers';
+//import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import JweRecipient from './JweRecipient';
 import { TSMap } from 'typescript-map'
+import JoseHelpers from '../jose/JoseHelpers';
+import { KeyType } from '../../keys/KeyType';
+import JoseConstants from '../jose/JoseConstants'
+import CryptoHelpers from '../../utilities/CryptoHelpers';
+import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
+import base64url from 'base64url';
 
 /**
  * Class for containing Jwe token operations.
@@ -98,223 +102,34 @@ export default class JweToken implements IJweGeneralJson {
    * Serialize a Jwe token object from a token in General Json format
    * @param token Jwe base object
    */
-  private static serializeJweGeneralJson (token: JweToken): string {
-    const Jwe = {
-      payload: base64url.encode(<string>token.payload),
-      signatures: <any[]>[]
-    }
-
-    for (let inx = 0; inx < token.signatures.length; inx ++) {
-      const tokenSignature: JweRecipient = token.signatures[inx];
-      const JweRecipient: any = {
-        signature:  base64url.encode(tokenSignature.signature),
-      };
-      if (JweToken.headerHasElements(tokenSignature.protected)) {
-        JweRecipient.protected = JweToken.encodeHeader(<JweHeader>tokenSignature.protected);
-      }
-      if (JweToken.headerHasElements(tokenSignature.header)) {
-        JweRecipient.header = JweToken.encodeHeader(<JweHeader>tokenSignature.header, false);
-      } 
-      if (!JweRecipient.protected && ! JweRecipient.header) {
-        throw new Error(`Signature ${inx} is missing header and protected`);
-      }
-      Jwe.signatures.push(JweRecipient);
-    }
-
-    return JSON.stringify(Jwe);
+  private static serializeJweGeneralJson (_token: JweToken): string {
+    return '';
   }
+
 
   /**
    * Serialize a Jwe token object from a token in Flat Json format
    * @param token Jwe base object
    */
-  private static serializeJweFlatJson (token: JweToken): string {
-    const Jwe: any = {
-      payload: base64url.encode(<string>token.payload)
-    }
-
-    if (JweToken.headerHasElements(token.signatures[0].protected)) {
-      Jwe.protected = JweToken.encodeHeader(<JweHeader>token.signatures[0].protected);
-    }
-    if (JweToken.headerHasElements(token.signatures[0].header)) {
-      Jwe.header = JweToken.encodeHeader(<JweHeader>token.signatures[0].header, false);
-    }
-    Jwe.signature = base64url.encode(token.signatures[0].signature);
-    return JSON.stringify(Jwe);
+  private static serializeJweFlatJson (_token: JweToken): string {
+    return '';
   }
 
   /**
    * Serialize a Jwe token object from a token in Compact format
    * @param token Jwe base object
    */
-  private static serializeJweCompact (token: JweToken): string {
-
-    let encodedProtected: string = '';
-    if (JweToken.headerHasElements(token.signatures[0].protected)) {
-      encodedProtected = JweToken.encodeHeader(<JweHeader>token.signatures[0].protected);
-    }
-
-    const encodedpayload = base64url.encode(<string>token.payload);
-    const encodedSignature = base64url.encode(token.signatures[0].signature);
-    return `${encodedProtected}.${encodedpayload}.${encodedSignature}`;
+  private static serializeJweCompact (_token: JweToken): string {
+    return '';
   }
   //#endregion
- //#region create
-  /**
-   * Create an Jwe token object from a token
-   * @param token Base object used to create this token
-   * @param options Set of Jwe token options
-   */
-  public static create (
-    token: IJweFlatJson | IJweGeneralJson | IJweCompact | string, options?: ISigningOptions | IEncryptionOptions) : JweToken {
-      const JweToken = new JweToken(options);
-      
-      // check for Jwe compact format
-    if (typeof token === 'string') {
-      const parts = token.split('.');
-      if (parts.length === 3) {
-        JweToken.payload = parts[1];
-        const signature = new JweRecipient();
-        signature.protected = JweToken.setProtected(parts[0]);
-        signature.signature = base64url.toBuffer(parts[2]);
-        return JweToken;
-      } else {
-        throw new Error(`Invalid compact Jwe. Content has ${parts.length} item. Only 3 allowed`);
-      }
-    }
-
-    // Check for JSON Serialization and reparse content if appropriate
-    if (typeof token === 'object') {
-      // set payload
-      JweToken.payload = token.payload;
-
-      // Try to handle token as IJweGeneralJSon
-      let decodeStatus: { result: boolean, reason: string } = JweToken.setGeneralParts(<IJweGeneralJson>token);
-      if (decodeStatus.result) {
-          return JweToken;
-      } else {
-        console.debug(`Failed parsing as IJweGeneralJSon. Reasom: ${decodeStatus.reason}`)
-      }
-
-      // Try to handle token as IJweCompact
-      decodeStatus = JweToken.setCompactParts(<IJweCompact>token);
-      if (decodeStatus.result) {
-          return JweToken;
-      } else {
-        console.debug(`Failed parsing as IJweCompact. Reasom: ${decodeStatus.reason}`)
-      }
-
-      // Try to handle token as IJweFlatJson
-      decodeStatus = JweToken.setFlatParts(<IJweFlatJson>token);
-      if (decodeStatus.result) {
-          return JweToken;
-      } else {
-        console.debug(`Failed parsing as IJweFlatJson. Reasom: ${decodeStatus.reason}`);
-      }
-    }
-    throw new Error(`The content does not represent a valid Jwe token`);
-  }
-
-  /**
-   * Try to parse the input token and set the properties of this JswToken
-   * @param content Alledged IJweGeneralJSon token
-   * @returns true if valid token was parsed
-   */
-  private setGeneralParts(content: IJweGeneralJson): {result: boolean, reason: string} {
-    if (content) {
-      if (content.payload) {
-        this.payload = content.payload;
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing payload'};
-      }
-
-      this.signatures = content.signatures;
-      return this.isValidToken();
-    }
-
-    return {result: false, reason: 'no content passed'};
-  }
-
-  /**
-   * Try to parse the input token and set the properties of this JswToken
-   * @param content Alledged IJweFlatJson token
-   * @returns true if valid token was parsed
-   */
-  private setFlatParts(content: IJweFlatJson): {result: boolean, reason: string} {
-    if (content) {
-      const signature = new JweRecipient();
-
-      if (content.signature) {
-        signature.signature = content.signature;
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing signature'};
-      }
-
-      if (JweToken.headerHasElements(content.protected)) {
-        signature.protected = this.setProtected(<JweHeader>content.protected);
-      } 
-
-      if (JweToken.headerHasElements(content.header)) {
-        signature.header = content.header;
-      } 
-
-      if (content.payload) {
-        this.payload = content.payload;
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing payload'};
-      }
-
-      this.signatures = [signature];
-      return this.isValidToken();
-    } 
-
-    return {result: false, reason: 'no content passed'};
-  }
-
-  /**
-   * Try to parse the input token and set the properties of this JswToken
-   * @param content Alledged IJweCompact token
-   * @returns true if valid token was parsed
-   */
-  private setCompactParts(content: IJweCompact): {result: boolean, reason: string} {
-    if (content) {
-      const signature = new JweRecipient();
-
-      if (content.signature) {
-        signature.signature = base64url.toBuffer(content.signature);
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing signature'};
-      }
-
-      if (JweToken.headerHasElements(content.protected)) {
-        signature.protected = this.setProtected(<JweHeader>content.protected);
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing protected'};
-      }
-
-      if (content.payload) {
-        this.payload = content.payload;
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing payload'};
-      }
-
-      this.signatures = [signature];
-      return this.isValidToken();
-    } 
-
-    return {result: false, reason: 'no content passed'};
-  }
+  //#region create
 
   /**
    * Set the protected header
    * @param protectedHeader to set on the JweToken object
    */
+  /*
   private setProtected(protectedHeader: string | JweHeader ) {
     if (typeof protectedHeader === 'string' ) {
       const json = base64url.decode(protectedHeader);
@@ -323,52 +138,44 @@ export default class JweToken implements IJweGeneralJson {
 
     return protectedHeader;
   }
+*/
 
-  /**
-   * Check if a valid token was found after decoding
-   */
-  private isValidToken(): {result: boolean, reason: string} {
-    if (!this.payload) {
-      return {result: false, reason: 'missing payload'};
-    }
-
-    if (!this.signatures) {
-      return {result: false, reason: 'missing signatures'};
-    }
-
-    if (this.signatures.length == 0) {
-      return {result: false, reason: 'signatures array is empty'};
-    }
-
-    for (let inx = 0; inx < this.signatures.length; inx++) {
-      const signature = this.signatures[inx];
-      if (!signature.signature) {
-        return {result: false, reason: `signature ${inx} is missing signature`};
-      }
-      if (!signature.header && !signature.protected) {
-        return {result: false, reason: `signature ${inx} is missing header and protected`};
-      }
-    }
-
-    return {result: true, reason: ''};
-  }
 //#endregion
+  //#region options
   /**
    * Get the keyStore to be used
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getKeyStore(newOptions?: IKeyStoreOptions, manadatory: boolean = true): IKeyStore {
-    return this.getCryptoFactory(newOptions, manadatory).keyStore;
-  }
+  //private getKeyStore(newOptions?: IEncryptionOptions, manadatory: boolean = true): IKeyStore {
+  //  return this.getCryptoFactory(newOptions, manadatory).keyStore;
+  //}
 
   /**
    * Get the CryptoFactory to be used
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getCryptoFactory(newOptions?: IKeyStoreOptions, manadatory: boolean = true): CryptoFactory {
-    return this.getOptionsProperty<CryptoFactory>('cryptoFactory', newOptions, manadatory);
+  private getCryptoFactory(newOptions?: IEncryptionOptions, manadatory: boolean = true): CryptoFactory {
+    return JoseHelpers.getOptionsProperty<CryptoFactory>('cryptoFactory', this.options, newOptions, manadatory);
+  }
+
+  /**
+   * Get the key encryption key for testing
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getKeyEncryptionKey(newOptions?: IEncryptionOptions, manadatory: boolean = true): Buffer {
+    return JoseHelpers.getOptionsProperty<Buffer>('contentEncryptionKey', this.options, newOptions, manadatory);
+  }
+
+  /**
+   * Get the initial vector for testing
+   * @param newOptions Options passed in after the constructure
+   * @param manadatory True if property needs to be defined
+   */
+  private getInitialVector(newOptions?: IEncryptionOptions, manadatory: boolean = true): Buffer {
+    return JoseHelpers.getOptionsProperty<Buffer>('initialVector', this.options, newOptions, manadatory);
   }
 
   /**
@@ -376,127 +183,115 @@ export default class JweToken implements IJweGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getProtected(newOptions?: IKeyStoreOptions, manadatory: boolean = false): JweHeader {
-    return this.getOptionsProperty<JweHeader>('protected', newOptions, manadatory);
-  }
+  //private getProtected(newOptions?: IEncryptionOptions, manadatory: boolean = false): JweHeader {
+  //  return JoseHelpers.getOptionsProperty<JweHeader>('protected', this.options, newOptions, manadatory);
+  //}
 
   /**
    * Get the default header to be used from the options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getHeader(newOptions?: IKeyStoreOptions, manadatory: boolean = false): JweHeader {
-    return this.getOptionsProperty<JweHeader>('header', newOptions,manadatory);
-  }
+  //private getHeader(newOptions?: IEncryptionOptions, manadatory: boolean = false): JweHeader {
+  //  return JoseHelpers.getOptionsProperty<JweHeader>('header', this.options, newOptions,manadatory);
+  //}
 
   /**
-   * Get the algorithm from the options
+   * Get the content encryption algorithm from the options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getAlgorithm(newOptions?: IKeyStoreOptions, manadatory: boolean = true): CryptoAlgorithm {
-    return this.getOptionsProperty<CryptoAlgorithm>('algorithm', newOptions, manadatory);
+  private getContentEncryptionAlgorithm(newOptions?: IEncryptionOptions, manadatory: boolean = true): string {
+    return JoseHelpers.getOptionsProperty<string>('contentEncryptionAlgorithm', this.options, newOptions, manadatory);
   }
-
-  /**
-   * Get the Protected to be used from the options
-   * @param propertyName Property name in options
-   * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
-   */
-  private getOptionsProperty<T>(propertyName: string, newOptions?: IKeyStoreOptions,  manadatory: boolean = true): T {
-    let newProtected: T | undefined;
-    let ctorProtected: T | undefined;
-
-    if (newOptions) {
-      newProtected = <T>newOptions[propertyName];
-    }
-    if (this.options) {
-      ctorProtected = <T>this.options[propertyName];
-    }
-
-    if (manadatory && !newProtected && !ctorProtected) {
-      throw new Error(`The property ${propertyName} is missing from options`);
-    }
-
-    return newProtected || <T>ctorProtected;
-  }
+  //#endregion
 
   /**
    * Encrypt content using the given public keys in JWK format.
-   *
-   * @param signingKeyReference Reference to the signing key.
+   * The key type enforces the key encryption algorithm.
+   * The options can override certain algorithm choices.
+   * 
+   * @param recipients List of recipients' public keys.
    * @param payload to sign.
    * @param format of the final signature.
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact Jwe format.
    */
-  public async encrypt (recipients: PublicKey[], payload: string, options?: IEncryptionOptions): Promise<JweToken> {
-    const keyStore: IKeyStore = this.getKeyStore(options);
+  public async encrypt (recipients: PublicKey[], payload: string, format: ProtectionFormat, options?: IEncryptionOptions): Promise<JweToken> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
-    const algorithm: CryptoAlgorithm = this.getAlgorithm(options);
-    const alg: string = CryptoHelpers.toJwa(algorithm);
+    const contentEncryptionAlgorithm = this.getContentEncryptionAlgorithm(options);
+    this.format = format;
 
-    // Set the recipients structure
-    const jweRecipient = new JweRecipient();
+    // encoded protected header
+    let encodedProtected: string = '';
 
     // Set the resulting token
     const jweToken: JweToken = new JweToken();
 
+    // Set the content encryption key
+    const contentEncryptionKey: Buffer = this.getKeyEncryptionKey(options);
+
+    // Get the encryptor extensions
+    const encryptor = new SubtleCryptoExtension(cryptoFactory);
+    
+
     for (let inx = 0 ; inx < recipients.length; inx ++) {
+      // Set the recipients structure
+      const jweRecipient = new JweRecipient();
+      jweToken.recipients.push(jweRecipient);
 
-    }
-    // Get signing key public key
-    const jwk: PublicKey = await <Promise<PublicKey>>keyStore.get(signingKeyReference, true);
+      // Decide key encryption algorithm based on given JWK.
+      const publicKey: PublicKey = recipients[inx];
+      let keyEncryptionAlgorithm: string  | undefined = recipients[inx].alg;
+      if (!keyEncryptionAlgorithm) {
+        if (publicKey.kty == KeyType.EC) {
+          throw new Error('EC encryption not implemented');
+        } else {
+          // Default RSA algorithm
+          keyEncryptionAlgorithm = JoseConstants.RsaOaep;
+        }
+      }
 
-    // Steps according to RTC7515 5.1
-    // 2. Compute encoded payload value base64URL(Jwe Payload)
-    JweToken.payload = payload;
-    const encodedContent = base64url.encode(payload);
-
-    // 3. Compute the headers. 
-    JweRecipient.header = this.getHeader(options) || new TSMap<string, string>();
-    JweRecipient.protected = this.getProtected(options) || new TSMap<string, string>();
-
-    // Get the required algorithm
-    // add required fields if missing
-    if (!('alg' in JweRecipient.header) && !('alg' in JweRecipient.protected)) {
-      // tslint:disable-next-line:no-backbone-get-set-outside-model
-      JweRecipient.protected.set('alg', alg);
-    }
-
-    if (jwk.kid && 
-      !(JweRecipient.header && 'kid' in JweRecipient.header) && 
-      !('kid' in JweRecipient.protected)) {
-        // tslint:disable-next-line:no-backbone-get-set-outside-model
-        JweRecipient.protected.set('kid', jwk.kid);
-    }
-
-    const protectedUsed = JweToken.headerHasElements(JweRecipient.protected);
+      if (!JoseHelpers.headerHasElements(jweToken.protected) ) {
+        // tslint:disable: no-backbone-get-set-outside-model
+        jweToken.protected.set('alg', keyEncryptionAlgorithm);
+        jweToken.protected.set('enc', contentEncryptionAlgorithm);
     
-    // 4. Compute BASE64URL(UTF8(Jwe Header))
-    const encodedProtected = !protectedUsed ? '' : 
-      JweToken.encodeHeader(JweRecipient.protected);
+        if (publicKey.kid) {
+          jweToken.protected.set('kid', publicKey.kid);
+        }
+        
+        encodedProtected = JoseHelpers.headerHasElements(jweToken.protected) ?  
+          JoseHelpers.encodeHeader(jweToken.protected) :
+          '';
+      }
 
-    // 5. Compute the signature using data ASCII(BASE64URL(UTF8(Jwe protected Header))) || . || . BASE64URL(Jwe Payload)
-    //    using the "alg" signature algorithm.
-    const signatureInput = `${encodedProtected}.${encodedContent}`;
 
-    // call base layer plugable crypto API for signing with a key reference
-    const signer = new SubtleCryptoExtension(cryptoFactory);
-    const signature = await signer.signByKeyStore(algorithm, signingKeyReference, Buffer.from(signatureInput));
-    
-    // Compose result
-    JweRecipient.signature = Buffer.from(signature);
-    JweToken.signatures.push(JweRecipient);
-    JweToken.format = format;
-    return JweToken;
-  }
+      // Get key encrypter and encrypt the content key
+      jweRecipient.encrypted_key = Buffer.from(
+        await encryptor.encryptByJwk(
+          CryptoHelpers.jwaTow3c(keyEncryptionAlgorithm),
+          publicKey,
+          contentEncryptionKey));
+    }
 
-  /**
-   * Gets the base64 URL decrypted payload.
-   */
-  public getPayload (): string {
-    return <string>base64url.decode(<string>this.payload);
+    // Set the initial vector
+    jweToken.iv = this.getInitialVector(options);
+
+    // Set aad as the protected header
+    jweToken.aad = base64url.toBuffer(encodedProtected);
+
+    // encrypt content
+    const contentEncryptorKey: JsonWebKey = {
+      k: base64url.encode(contentEncryptionKey),
+      kty: 'oct'
+    };
+
+    jweToken.ciphertext = Buffer.from(
+      await encryptor.encryptByJwk(
+        CryptoHelpers.jwaTow3c(contentEncryptionAlgorithm),
+        contentEncryptorKey,
+        Buffer.from(payload)));
+    return jweToken;
   }
 }

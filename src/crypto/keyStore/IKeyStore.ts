@@ -20,9 +20,6 @@ export interface IKeyStoreOptions {
   // The crypto algorithm suites used for signing
   cryptoFactory: CryptoFactory,
 
-  // The used algorithm
-  algorithm: CryptoAlgorithm,
-
   // The default protected header
   protected?: JwsHeader,
 
@@ -43,8 +40,25 @@ export interface ISigningOptions extends IKeyStoreOptions {
  * Interface defining encryption options.
  */
 export interface IEncryptionOptions extends IKeyStoreOptions {
-  // The key encryption algorithm
-  kekAlgorithm: Algorithm
+  /**
+   * The content encryption algorithm in JWA format
+   */ 
+  contentEncryptionAlgorithm: string,
+
+  /**
+   * The content key encryption key.
+   * Remark: Only used for testing with reference data.
+   * Should be undefined in production code.
+   */
+  contentEncryptionKey?: Buffer,
+
+
+  /**
+   * The initial vector.
+   * Remark: Only used for testing with reference data.
+   * Should be undefined in production code.
+   */
+  initialVector?: Buffer
 }
 
 /**

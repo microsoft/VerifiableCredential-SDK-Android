@@ -1,16 +1,16 @@
+
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import IJweRecipient from './IJweRecipient';
-
 /**
- * JWS flattened json format
- */
-export default interface IJweFlatJson extends IJweRecipient {
-
+  * Class for JOSE constants
+  */
+ export default class JoseConstants {
   /**
-   * The application-specific payload.
+   * Define algorithm constants
    */
-  payload: string,
+  public static RsaOaep = 'RSA-OAEP';
 }
+

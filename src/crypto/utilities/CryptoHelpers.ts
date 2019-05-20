@@ -20,7 +20,7 @@ export default class CryptoHelpers {
    * @param hash Optional hash for the algorithm
    */
   public static getSubtleCryptoForTheAlgorithm(cryptoFactory: CryptoFactory, algorithm: any): SubtleCrypto {
-    const jwa = CryptoHelpers.toJwa(algorithm)
+    const jwa = CryptoHelpers.w3cToJwa(algorithm)
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':
       case 'ECDSA':
@@ -44,11 +44,39 @@ export default class CryptoHelpers {
   }
 
   /**
+   * Map the JWA algorithm to the W3C crypto API algorithm
+   * @param jwaAlgorithmName Requested algorithm
+   */
+  public static jwaTow3c(jwa: string): any {
+    switch (jwa) {
+      case 'RSASSA-PKCS1-V1_5':
+        return { name: jwa };
+      case 'ECDSA':
+        return { name: jwa };
+      case 'RSA-OAEP': 
+        return { name: jwa };
+      case 'ECDH':
+      case 'DH':
+        return { name: jwa };
+      case 'AES-GCM':
+        return { name: jwa };
+      case 'HMAC':
+        return { name: jwa };
+      case 'SHA-256':
+      case 'SHA-384':
+      case 'SHA-512':
+        return { name: jwa };
+    }
+
+    throw new Error(`Algorithm '${JSON.stringify(jwa)}' is not supported`);
+  }
+
+  /**
    * Maps the subtle crypto algorithm name to the JWA name
    * @param algorithmName Requested algorithm
    * @param hash Optional hash for the algorithm
    */
-  public static toJwa(algorithm: any): string {
+  public static w3cToJwa(algorithm: any): string {
     const hash = algorithm.hash || 'SHA-256';
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':
@@ -78,7 +106,7 @@ export default class CryptoHelpers {
    * Derive the key import algorithm
    * @param algorithm used for signature
    */
-  public static getKeyImportAlgorithm(algorithm: CryptoAlgorithm, jwk: PublicKey): string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams {
+  public static getKeyImportAlgorithm(algorithm: CryptoAlgorithm, jwk: PublicKey | JsonWebKey): string | RsaHashedImportParams | EcKeyImportParams | HmacImportParams | DhImportKeyParams {
     const hash = (<any>algorithm).hash || 'SHA-256';
     const name = algorithm.name;
     switch (algorithm.name.toUpperCase()) {

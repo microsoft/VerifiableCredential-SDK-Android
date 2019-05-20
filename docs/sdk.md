@@ -38,6 +38,8 @@ self-issued id token.</p></dd>
 Provides support for nodejs and browser</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
 <dd><p>Default crypto suite</p></dd>
+<dt><a href="#JoseConstants">JoseConstants</a></dt>
+<dd><p>Class for JOSE constants</p></dd>
 <dt><a href="#JoseHelpers">JoseHelpers</a></dt>
 <dd><p>Crypto helpers support for plugable crypto layer</p></dd>
 <dt><a href="#JweRecipient">JweRecipient</a></dt>
@@ -574,6 +576,11 @@ Provides support for nodejs and browser</p>
 <p>Default crypto suite</p>
 
 **Kind**: global class  
+
+* [SubtleCryptoExtension](#SubtleCryptoExtension)
+    * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
+    * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
+
 <a name="SubtleCryptoExtension+signByKeyStore"></a>
 
 ### subtleCryptoExtension.signByKeyStore(algorithm, keyReference, data) ⇒
@@ -588,6 +595,25 @@ Provides support for nodejs and browser</p>
 | keyReference | <p>points to key in the key store</p> |
 | data | <p>to sign</p> |
 
+<a name="SubtleCryptoExtension+encryptByJwk"></a>
+
+### subtleCryptoExtension.encryptByJwk(algorithm, jwk, data)
+<p>Encrypt with a jwk key referenced in the key store</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for encryption</p> |
+| jwk | <p>Json web key public key</p> |
+| data | <p>to encrypt</p> |
+
+<a name="JoseConstants"></a>
+
+## JoseConstants
+<p>Class for JOSE constants</p>
+
+**Kind**: global class  
 <a name="JoseHelpers"></a>
 
 ## JoseHelpers
@@ -598,6 +624,7 @@ Provides support for nodejs and browser</p>
 * [JoseHelpers](#JoseHelpers)
     * [.headerHasElements(header)](#JoseHelpers.headerHasElements)
     * [.encodeHeader(header, toBase64Url)](#JoseHelpers.encodeHeader)
+    * [.getOptionsProperty(propertyName, initialOptions, overrideOptions, manadatory)](#JoseHelpers.getOptionsProperty)
 
 <a name="JoseHelpers.headerHasElements"></a>
 
@@ -621,6 +648,20 @@ Provides support for nodejs and browser</p>
 | --- | --- | --- |
 | header |  | <p>to encode</p> |
 | toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
+
+<a name="JoseHelpers.getOptionsProperty"></a>
+
+### JoseHelpers.getOptionsProperty(propertyName, initialOptions, overrideOptions, manadatory)
+<p>Get the Protected to be used from the options</p>
+
+**Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| propertyName |  | <p>Property name in options</p> |
+| initialOptions |  | <p>The initial set of options</p> |
+| overrideOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
 <a name="JweRecipient"></a>
 
@@ -646,24 +687,15 @@ Crypto calls always happen via CryptoFactory</p>
     * [new JweToken(options)](#new_JweToken_new)
     * _instance_
         * [.serialize(format)](#JweToken+serialize)
-        * [.setGeneralParts(content)](#JweToken+setGeneralParts) ⇒
-        * [.setFlatParts(content)](#JweToken+setFlatParts) ⇒
-        * [.setCompactParts(content)](#JweToken+setCompactParts) ⇒
-        * [.setProtected(protectedHeader)](#JweToken+setProtected)
-        * [.isValidToken()](#JweToken+isValidToken)
-        * [.getKeyStore(newOptions, manadatory)](#JweToken+getKeyStore)
         * [.getCryptoFactory(newOptions, manadatory)](#JweToken+getCryptoFactory)
-        * [.getProtected(newOptions, manadatory)](#JweToken+getProtected)
-        * [.getHeader(newOptions, manadatory)](#JweToken+getHeader)
-        * [.getAlgorithm(newOptions, manadatory)](#JweToken+getAlgorithm)
-        * [.getOptionsProperty(propertyName, newOptions, manadatory)](#JweToken+getOptionsProperty)
-        * [.encrypt(signingKeyReference, payload, format, options)](#JweToken+encrypt) ⇒
-        * [.getPayload()](#JweToken+getPayload)
+        * [.getKeyEncryptionKey(newOptions, manadatory)](#JweToken+getKeyEncryptionKey)
+        * [.getInitialVector(newOptions, manadatory)](#JweToken+getInitialVector)
+        * [.getContentEncryptionAlgorithm(newOptions, manadatory)](#JweToken+getContentEncryptionAlgorithm)
+        * [.encrypt(recipients, payload, format, options)](#JweToken+encrypt) ⇒
     * _static_
         * [.serializeJweGeneralJson(token)](#JweToken.serializeJweGeneralJson)
         * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
         * [.serializeJweCompact(token)](#JweToken.serializeJweCompact)
-        * [.create(token, options)](#JweToken.create)
 
 <a name="new_JweToken_new"></a>
 
@@ -686,71 +718,6 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- |
 | format | <p>Optional specify the serialization format. If not specified, use default format.</p> |
 
-<a name="JweToken+setGeneralParts"></a>
-
-### jweToken.setGeneralParts(content) ⇒
-<p>Try to parse the input token and set the properties of this JswToken</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-**Returns**: <p>true if valid token was parsed</p>  
-
-| Param | Description |
-| --- | --- |
-| content | <p>Alledged IJweGeneralJSon token</p> |
-
-<a name="JweToken+setFlatParts"></a>
-
-### jweToken.setFlatParts(content) ⇒
-<p>Try to parse the input token and set the properties of this JswToken</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-**Returns**: <p>true if valid token was parsed</p>  
-
-| Param | Description |
-| --- | --- |
-| content | <p>Alledged IJweFlatJson token</p> |
-
-<a name="JweToken+setCompactParts"></a>
-
-### jweToken.setCompactParts(content) ⇒
-<p>Try to parse the input token and set the properties of this JswToken</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-**Returns**: <p>true if valid token was parsed</p>  
-
-| Param | Description |
-| --- | --- |
-| content | <p>Alledged IJweCompact token</p> |
-
-<a name="JweToken+setProtected"></a>
-
-### jweToken.setProtected(protectedHeader)
-<p>Set the protected header</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Description |
-| --- | --- |
-| protectedHeader | <p>to set on the JweToken object</p> |
-
-<a name="JweToken+isValidToken"></a>
-
-### jweToken.isValidToken()
-<p>Check if a valid token was found after decoding</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-<a name="JweToken+getKeyStore"></a>
-
-### jweToken.getKeyStore(newOptions, manadatory)
-<p>Get the keyStore to be used</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| newOptions |  | <p>Options passed in after the constructure</p> |
-| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
-
 <a name="JweToken+getCryptoFactory"></a>
 
 ### jweToken.getCryptoFactory(newOptions, manadatory)
@@ -763,34 +730,10 @@ Crypto calls always happen via CryptoFactory</p>
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
-<a name="JweToken+getProtected"></a>
+<a name="JweToken+getKeyEncryptionKey"></a>
 
-### jweToken.getProtected(newOptions, manadatory)
-<p>Get the default protected header to be used from the options</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| newOptions |  | <p>Options passed in after the constructure</p> |
-| manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
-
-<a name="JweToken+getHeader"></a>
-
-### jweToken.getHeader(newOptions, manadatory)
-<p>Get the default header to be used from the options</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| newOptions |  | <p>Options passed in after the constructure</p> |
-| manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
-
-<a name="JweToken+getAlgorithm"></a>
-
-### jweToken.getAlgorithm(newOptions, manadatory)
-<p>Get the algorithm from the options</p>
+### jweToken.getKeyEncryptionKey(newOptions, manadatory)
+<p>Get the key encryption key for testing</p>
 
 **Kind**: instance method of [<code>JweToken</code>](#JweToken)  
 
@@ -799,40 +742,47 @@ Crypto calls always happen via CryptoFactory</p>
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
-<a name="JweToken+getOptionsProperty"></a>
+<a name="JweToken+getInitialVector"></a>
 
-### jweToken.getOptionsProperty(propertyName, newOptions, manadatory)
-<p>Get the Protected to be used from the options</p>
+### jweToken.getInitialVector(newOptions, manadatory)
+<p>Get the initial vector for testing</p>
 
 **Kind**: instance method of [<code>JweToken</code>](#JweToken)  
 
 | Param | Default | Description |
 | --- | --- | --- |
-| propertyName |  | <p>Property name in options</p> |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getContentEncryptionAlgorithm"></a>
+
+### jweToken.getContentEncryptionAlgorithm(newOptions, manadatory)
+<p>Get the content encryption algorithm from the options</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
 <a name="JweToken+encrypt"></a>
 
-### jweToken.encrypt(signingKeyReference, payload, format, options) ⇒
-<p>Encrypt content using the given public keys in JWK format.</p>
+### jweToken.encrypt(recipients, payload, format, options) ⇒
+<p>Encrypt content using the given public keys in JWK format.
+The key type enforces the key encryption algorithm.
+The options can override certain algorithm choices.</p>
 
 **Kind**: instance method of [<code>JweToken</code>](#JweToken)  
 **Returns**: <p>Signed payload in compact Jwe format.</p>  
 
 | Param | Description |
 | --- | --- |
-| signingKeyReference | <p>Reference to the signing key.</p> |
+| recipients | <p>List of recipients' public keys.</p> |
 | payload | <p>to sign.</p> |
 | format | <p>of the final signature.</p> |
 | options | <p>used for the signature. These options override the options provided in the constructor.</p> |
 
-<a name="JweToken+getPayload"></a>
-
-### jweToken.getPayload()
-<p>Gets the base64 URL decrypted payload.</p>
-
-**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
 <a name="JweToken.serializeJweGeneralJson"></a>
 
 ### JweToken.serializeJweGeneralJson(token)
@@ -865,18 +815,6 @@ Crypto calls always happen via CryptoFactory</p>
 | Param | Description |
 | --- | --- |
 | token | <p>Jwe base object</p> |
-
-<a name="JweToken.create"></a>
-
-### JweToken.create(token, options)
-<p>Create an Jwe token object from a token</p>
-
-**Kind**: static method of [<code>JweToken</code>](#JweToken)  
-
-| Param | Description |
-| --- | --- |
-| token | <p>Base object used to create this token</p> |
-| options | <p>Set of Jwe token options</p> |
 
 <a name="JwsSignature"></a>
 
@@ -912,7 +850,6 @@ Crypto calls always happen via CryptoFactory</p>
         * [.getProtected(newOptions, manadatory)](#JwsToken+getProtected)
         * [.getHeader(newOptions, manadatory)](#JwsToken+getHeader)
         * [.getAlgorithm(newOptions, manadatory)](#JwsToken+getAlgorithm)
-        * [.getOptionsProperty(propertyName, newOptions, manadatory)](#JwsToken+getOptionsProperty)
         * [.sign(signingKeyReference, payload, format, options)](#JwsToken+sign) ⇒
         * [.getPayload()](#JwsToken+getPayload)
     * _static_
@@ -920,8 +857,6 @@ Crypto calls always happen via CryptoFactory</p>
         * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
         * [.serializeJwsCompact(token)](#JwsToken.serializeJwsCompact)
         * [.create(token, options)](#JwsToken.create)
-        * [.headerHasElements(header)](#JwsToken.headerHasElements)
-        * [.encodeHeader(header, toBase64Url)](#JwsToken.encodeHeader)
 
 <a name="new_JwsToken_new"></a>
 
@@ -1057,19 +992,6 @@ Crypto calls always happen via CryptoFactory</p>
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
-<a name="JwsToken+getOptionsProperty"></a>
-
-### jwsToken.getOptionsProperty(propertyName, newOptions, manadatory)
-<p>Get the Protected to be used from the options</p>
-
-**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| propertyName |  | <p>Property name in options</p> |
-| newOptions |  | <p>Options passed in after the constructure</p> |
-| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
-
 <a name="JwsToken+sign"></a>
 
 ### jwsToken.sign(signingKeyReference, payload, format, options) ⇒
@@ -1136,29 +1058,6 @@ Crypto calls always happen via CryptoFactory</p>
 | token | <p>Base object used to create this token</p> |
 | options | <p>Set of jws token options</p> |
 
-<a name="JwsToken.headerHasElements"></a>
-
-### JwsToken.headerHasElements(header)
-<p>Return true if the header has elements</p>
-
-**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
-
-| Param | Description |
-| --- | --- |
-| header | <p>to test</p> |
-
-<a name="JwsToken.encodeHeader"></a>
-
-### JwsToken.encodeHeader(header, toBase64Url)
-<p>Encode the header to JSON and base 64 url</p>
-
-**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| header |  | <p>to encode</p> |
-| toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
-
 <a name="CryptoHelpers"></a>
 
 ## CryptoHelpers
@@ -1168,7 +1067,8 @@ Crypto calls always happen via CryptoFactory</p>
 
 * [CryptoHelpers](#CryptoHelpers)
     * [.getSubtleCryptoForTheAlgorithm(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCryptoForTheAlgorithm)
-    * [.toJwa(algorithmName, hash)](#CryptoHelpers.toJwa)
+    * [.jwaTow3c(jwaAlgorithmName)](#CryptoHelpers.jwaTow3c)
+    * [.w3cToJwa(algorithmName, hash)](#CryptoHelpers.w3cToJwa)
     * [.getKeyImportAlgorithm(algorithm)](#CryptoHelpers.getKeyImportAlgorithm)
 
 <a name="CryptoHelpers.getSubtleCryptoForTheAlgorithm"></a>
@@ -1184,9 +1084,20 @@ Crypto calls always happen via CryptoFactory</p>
 | algorithmName | <p>Requested algorithm</p> |
 | hash | <p>Optional hash for the algorithm</p> |
 
-<a name="CryptoHelpers.toJwa"></a>
+<a name="CryptoHelpers.jwaTow3c"></a>
 
-### CryptoHelpers.toJwa(algorithmName, hash)
+### CryptoHelpers.jwaTow3c(jwaAlgorithmName)
+<p>Map the JWA algorithm to the W3C crypto API algorithm</p>
+
+**Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
+
+| Param | Description |
+| --- | --- |
+| jwaAlgorithmName | <p>Requested algorithm</p> |
+
+<a name="CryptoHelpers.w3cToJwa"></a>
+
+### CryptoHelpers.w3cToJwa(algorithmName, hash)
 <p>Maps the subtle crypto algorithm name to the JWA name</p>
 
 **Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  

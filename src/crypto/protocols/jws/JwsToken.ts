@@ -10,11 +10,12 @@ import IJwsCompact from './IJwsCompact';
 import IJwsFlatJson from './IJwsFlatJson';
 import IJwsGeneralJson, { JwsHeader } from './IJwsGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import IKeyStore, { ISigningOptions ,IEncryptionOptions, IKeyStoreOptions, CryptoAlgorithm } from '../../keystore/IKeyStore';
+import IKeyStore, { ISigningOptions , CryptoAlgorithm } from '../../keystore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
 import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import JwsSignature from './JwsSignature';
 import { TSMap } from 'typescript-map'
+import JoseHelpers from '../jose/JoseHelpers';
 
 /**
  * Class for containing JWS token operations.
@@ -85,11 +86,11 @@ export default class JwsToken implements IJwsGeneralJson {
       const jwsSignature: any = {
         signature:  base64url.encode(tokenSignature.signature),
       };
-      if (JwsToken.headerHasElements(tokenSignature.protected)) {
-        jwsSignature.protected = JwsToken.encodeHeader(<JwsHeader>tokenSignature.protected);
+      if (JoseHelpers.headerHasElements(tokenSignature.protected)) {
+        jwsSignature.protected = JoseHelpers.encodeHeader(<JwsHeader>tokenSignature.protected);
       }
-      if (JwsToken.headerHasElements(tokenSignature.header)) {
-        jwsSignature.header = JwsToken.encodeHeader(<JwsHeader>tokenSignature.header, false);
+      if (JoseHelpers.headerHasElements(tokenSignature.header)) {
+        jwsSignature.header = JoseHelpers.encodeHeader(<JwsHeader>tokenSignature.header, false);
       } 
       if (!jwsSignature.protected && ! jwsSignature.header) {
         throw new Error(`Signature ${inx} is missing header and protected`);
@@ -109,11 +110,11 @@ export default class JwsToken implements IJwsGeneralJson {
       payload: base64url.encode(<string>token.payload)
     }
 
-    if (JwsToken.headerHasElements(token.signatures[0].protected)) {
-      jws.protected = JwsToken.encodeHeader(<JwsHeader>token.signatures[0].protected);
+    if (JoseHelpers.headerHasElements(token.signatures[0].protected)) {
+      jws.protected = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].protected);
     }
-    if (JwsToken.headerHasElements(token.signatures[0].header)) {
-      jws.header = JwsToken.encodeHeader(<JwsHeader>token.signatures[0].header, false);
+    if (JoseHelpers.headerHasElements(token.signatures[0].header)) {
+      jws.header = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].header, false);
     }
     jws.signature = base64url.encode(token.signatures[0].signature);
     return JSON.stringify(jws);
@@ -126,8 +127,8 @@ export default class JwsToken implements IJwsGeneralJson {
   private static serializeJwsCompact (token: JwsToken): string {
 
     let encodedProtected: string = '';
-    if (JwsToken.headerHasElements(token.signatures[0].protected)) {
-      encodedProtected = JwsToken.encodeHeader(<JwsHeader>token.signatures[0].protected);
+    if (JoseHelpers.headerHasElements(token.signatures[0].protected)) {
+      encodedProtected = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].protected);
     }
 
     const encodedpayload = base64url.encode(<string>token.payload);
@@ -141,7 +142,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param options Set of jws token options
    */
   public static create (
-    token: IJwsFlatJson | IJwsGeneralJson | IJwsCompact | string, options?: ISigningOptions | IEncryptionOptions) : JwsToken {
+    token: IJwsFlatJson | IJwsGeneralJson | IJwsCompact | string, options?: ISigningOptions) : JwsToken {
       const jwsToken = new JwsToken(options);
       
       // check for JWS compact format
@@ -191,30 +192,6 @@ export default class JwsToken implements IJwsGeneralJson {
   }
 
   /**
-   * Return true if the header has elements
-   * @param header to test
-   */
-  private static headerHasElements(header: JwsHeader | undefined): boolean {
-    if (!header) {
-      return false;
-    }
-    return header.length > 0;
-  }
-
-  /**
-   * Encode the header to JSON and base 64 url
-   * @param header to encode
-   * @param toBase64Url is true when result needs to be base 64 url
-   */
-  private static encodeHeader(header: JwsHeader, toBase64Url: boolean = true): string {
-    const serializedHeader = JSON.stringify(header.toJSON());
-    if (toBase64Url) {
-      return base64url.encode(serializedHeader);
-    }
-    return serializedHeader;
-  }
-
-  /**
    * Try to parse the input token and set the properties of this JswToken
    * @param content Alledged IJwsGeneralJSon token
    * @returns true if valid token was parsed
@@ -251,11 +228,11 @@ export default class JwsToken implements IJwsGeneralJson {
         return {result: false, reason: 'missing signature'};
       }
 
-      if (JwsToken.headerHasElements(content.protected)) {
+      if (JoseHelpers.headerHasElements(content.protected)) {
         signature.protected = this.setProtected(<JwsHeader>content.protected);
       } 
 
-      if (JwsToken.headerHasElements(content.header)) {
+      if (JoseHelpers.headerHasElements(content.header)) {
         signature.header = content.header;
       } 
 
@@ -289,7 +266,7 @@ export default class JwsToken implements IJwsGeneralJson {
         return {result: false, reason: 'missing signature'};
       }
 
-      if (JwsToken.headerHasElements(content.protected)) {
+      if (JoseHelpers.headerHasElements(content.protected)) {
         signature.protected = this.setProtected(<JwsHeader>content.protected);
       } else {
         // manadatory field
@@ -357,7 +334,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getKeyStore(newOptions?: IKeyStoreOptions, manadatory: boolean = true): IKeyStore {
+  private getKeyStore(newOptions?: ISigningOptions, manadatory: boolean = true): IKeyStore {
     return this.getCryptoFactory(newOptions, manadatory).keyStore;
   }
 
@@ -366,8 +343,8 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getCryptoFactory(newOptions?: IKeyStoreOptions, manadatory: boolean = true): CryptoFactory {
-    return this.getOptionsProperty<CryptoFactory>('cryptoFactory', newOptions, manadatory);
+  private getCryptoFactory(newOptions?: ISigningOptions, manadatory: boolean = true): CryptoFactory {
+    return JoseHelpers.getOptionsProperty<CryptoFactory>('cryptoFactory', this.options, newOptions, manadatory);
   }
 
   /**
@@ -375,8 +352,8 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getProtected(newOptions?: IKeyStoreOptions, manadatory: boolean = false): JwsHeader {
-    return this.getOptionsProperty<JwsHeader>('protected', newOptions, manadatory);
+  private getProtected(newOptions?: ISigningOptions, manadatory: boolean = false): JwsHeader {
+    return JoseHelpers.getOptionsProperty<JwsHeader>('protected', this.options, newOptions, manadatory);
   }
 
   /**
@@ -384,8 +361,8 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getHeader(newOptions?: IKeyStoreOptions, manadatory: boolean = false): JwsHeader {
-    return this.getOptionsProperty<JwsHeader>('header', newOptions,manadatory);
+  private getHeader(newOptions?: ISigningOptions, manadatory: boolean = false): JwsHeader {
+    return JoseHelpers.getOptionsProperty<JwsHeader>('header', this.options, newOptions,manadatory);
   }
 
   /**
@@ -393,32 +370,8 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getAlgorithm(newOptions?: IKeyStoreOptions, manadatory: boolean = true): CryptoAlgorithm {
-    return this.getOptionsProperty<CryptoAlgorithm>('algorithm', newOptions, manadatory);
-  }
-
-  /**
-   * Get the Protected to be used from the options
-   * @param propertyName Property name in options
-   * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
-   */
-  private getOptionsProperty<T>(propertyName: string, newOptions?: IKeyStoreOptions,  manadatory: boolean = true): T {
-    let newProtected: T | undefined;
-    let ctorProtected: T | undefined;
-
-    if (newOptions) {
-      newProtected = <T>newOptions[propertyName];
-    }
-    if (this.options) {
-      ctorProtected = <T>this.options[propertyName];
-    }
-
-    if (manadatory && !newProtected && !ctorProtected) {
-      throw new Error(`The property ${propertyName} is missing from options`);
-    }
-
-    return newProtected || <T>ctorProtected;
+  private getAlgorithm(newOptions?: ISigningOptions, manadatory: boolean = true): CryptoAlgorithm {
+    return JoseHelpers.getOptionsProperty<CryptoAlgorithm>('algorithm', this.options, newOptions, manadatory);
   }
 
   /**
@@ -434,7 +387,7 @@ export default class JwsToken implements IJwsGeneralJson {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const algorithm: CryptoAlgorithm = this.getAlgorithm(options);
-    const alg: string = CryptoHelpers.toJwa(algorithm);
+    const alg: string = CryptoHelpers.w3cToJwa(algorithm);
 
     // tslint:disable-next-line:no-suspicious-comment
     // TODO support for multiple signatures
@@ -469,11 +422,11 @@ export default class JwsToken implements IJwsGeneralJson {
         jwsSignature.protected.set('kid', jwk.kid);
     }
 
-    const protectedUsed = JwsToken.headerHasElements(jwsSignature.protected);
+    const protectedUsed = JoseHelpers.headerHasElements(jwsSignature.protected);
     
     // 4. Compute BASE64URL(UTF8(JWS Header))
     const encodedProtected = !protectedUsed ? '' : 
-      JwsToken.encodeHeader(jwsSignature.protected);
+    JoseHelpers.encodeHeader(jwsSignature.protected);
 
     // 5. Compute the signature using data ASCII(BASE64URL(UTF8(JWS protected Header))) || . || . BASE64URL(JWS Payload)
     //    using the "alg" signature algorithm.
