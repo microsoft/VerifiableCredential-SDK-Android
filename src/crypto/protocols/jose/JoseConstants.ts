@@ -9,8 +9,24 @@
   */
  export default class JoseConstants {
   /**
-   * Define algorithm constants
+   * Define JOSE algorithm constants
    */
-  public static RsaOaep = 'RSA-OAEP';
+  public static RsaOaep256 = 'RSA-OAEP-256';
+
+  /**
+   * Define JOSE algorithm constants
+   */
+  public static AesGcm128 ='A128GCM';
+  
+  /**
+   * Define JOSE algorithm constants
+   */
+  public static AesGcm192 ='A192GCM';
+  
+  /**
+   * Define JOSE algorithm constants
+   */
+  public static AesGcm256 ='A256GCM';
+  
 }
 

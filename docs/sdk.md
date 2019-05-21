@@ -56,6 +56,8 @@ This class hides the JOSE and crypto library dependencies to allow support for a
 Crypto calls always happen via CryptoFactory</p></dd>
 <dt><a href="#CryptoHelpers">CryptoHelpers</a></dt>
 <dd><p>Crypto helpers support for plugable crypto layer</p></dd>
+<dt><a href="#W3cCryptoApiConstants">W3cCryptoApiConstants</a></dt>
+<dd><p>Class for W3C Crypto API constants</p></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
 <dt><a href="#Identifier">Identifier</a></dt>
@@ -688,7 +690,7 @@ Crypto calls always happen via CryptoFactory</p>
     * _instance_
         * [.serialize(format)](#JweToken+serialize)
         * [.getCryptoFactory(newOptions, manadatory)](#JweToken+getCryptoFactory)
-        * [.getKeyEncryptionKey(newOptions, manadatory)](#JweToken+getKeyEncryptionKey)
+        * [.getContentEncryptionKey(newOptions, manadatory)](#JweToken+getContentEncryptionKey)
         * [.getInitialVector(newOptions, manadatory)](#JweToken+getInitialVector)
         * [.getContentEncryptionAlgorithm(newOptions, manadatory)](#JweToken+getContentEncryptionAlgorithm)
         * [.encrypt(recipients, payload, format, options)](#JweToken+encrypt) ⇒
@@ -730,9 +732,9 @@ Crypto calls always happen via CryptoFactory</p>
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
-<a name="JweToken+getKeyEncryptionKey"></a>
+<a name="JweToken+getContentEncryptionKey"></a>
 
-### jweToken.getKeyEncryptionKey(newOptions, manadatory)
+### jweToken.getContentEncryptionKey(newOptions, manadatory)
 <p>Get the key encryption key for testing</p>
 
 **Kind**: instance method of [<code>JweToken</code>](#JweToken)  
@@ -1087,7 +1089,9 @@ Crypto calls always happen via CryptoFactory</p>
 <a name="CryptoHelpers.jwaTow3c"></a>
 
 ### CryptoHelpers.jwaTow3c(jwaAlgorithmName)
-<p>Map the JWA algorithm to the W3C crypto API algorithm</p>
+<p>Map the JWA algorithm to the W3C crypto API algorithm.
+The method restricts the supported algorithms. This can easily be extended.
+Based on https://<a href="http://www.w3.org/TR/WebCryptoAPI/">www.w3.org/TR/WebCryptoAPI/</a> A. Mapping between JSON Web Key / JSON Web Algorithm</p>
 
 **Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
 
@@ -1118,6 +1122,12 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- |
 | algorithm | <p>used for signature</p> |
 
+<a name="W3cCryptoApiConstants"></a>
+
+## W3cCryptoApiConstants
+<p>Class for W3C Crypto API constants</p>
+
+**Kind**: global class  
 <a name="CryptoOptions"></a>
 
 ## CryptoOptions

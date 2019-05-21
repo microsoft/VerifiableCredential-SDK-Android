@@ -165,7 +165,7 @@ export default class JweToken implements IJweGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getKeyEncryptionKey(newOptions?: IEncryptionOptions, manadatory: boolean = true): Buffer {
+  private getContentEncryptionKey(newOptions?: IEncryptionOptions, manadatory: boolean = true): Buffer {
     return JoseHelpers.getOptionsProperty<Buffer>('contentEncryptionKey', this.options, newOptions, manadatory);
   }
 
@@ -229,33 +229,30 @@ export default class JweToken implements IJweGeneralJson {
     const jweToken: JweToken = new JweToken();
 
     // Set the content encryption key
-    const contentEncryptionKey: Buffer = this.getKeyEncryptionKey(options);
+    const contentEncryptionKey: Buffer = this.getContentEncryptionKey(options);
 
     // Get the encryptor extensions
     const encryptor = new SubtleCryptoExtension(cryptoFactory);
     
+      // Set the initial vector
+      jweToken.iv = this.getInitialVector(options);
 
-    for (let inx = 0 ; inx < recipients.length; inx ++) {
-      // Set the recipients structure
-      const jweRecipient = new JweRecipient();
-      jweToken.recipients.push(jweRecipient);
-
-      // Decide key encryption algorithm based on given JWK.
-      const publicKey: PublicKey = recipients[inx];
-      let keyEncryptionAlgorithm: string  | undefined = recipients[inx].alg;
+      // Needs to be improved when alg is not provided.
+            // Decide key encryption algorithm based on given JWK.
+            let publicKey: PublicKey = recipients[0];
+      let keyEncryptionAlgorithm: string  | undefined = publicKey.alg;
       if (!keyEncryptionAlgorithm) {
         if (publicKey.kty == KeyType.EC) {
           throw new Error('EC encryption not implemented');
         } else {
           // Default RSA algorithm
-          keyEncryptionAlgorithm = JoseConstants.RsaOaep;
+          keyEncryptionAlgorithm = JoseConstants.RsaOaep256;
         }
       }
-
-      if (!JoseHelpers.headerHasElements(jweToken.protected) ) {
+    
         // tslint:disable: no-backbone-get-set-outside-model
-        jweToken.protected.set('alg', keyEncryptionAlgorithm);
-        jweToken.protected.set('enc', contentEncryptionAlgorithm);
+        jweToken.protected.set('alg', <string>keyEncryptionAlgorithm);
+        jweToken.protected.set('enc', <string>contentEncryptionAlgorithm);
     
         if (publicKey.kid) {
           jweToken.protected.set('kid', publicKey.kid);
@@ -264,22 +261,27 @@ export default class JweToken implements IJweGeneralJson {
         encodedProtected = JoseHelpers.headerHasElements(jweToken.protected) ?  
           JoseHelpers.encodeHeader(jweToken.protected) :
           '';
-      }
 
+      // Set aad as the protected header
+      jweToken.aad = base64url.toBuffer(encodedProtected);
+
+
+    for (let inx = 0 ; inx < recipients.length; inx ++) {
+      // Set the recipients structure
+      const jweRecipient = new JweRecipient();
+      jweToken.recipients.push(jweRecipient);
+
+      // Decide key encryption algorithm based on given JWK.
+      publicKey = recipients[inx];
 
       // Get key encrypter and encrypt the content key
       jweRecipient.encrypted_key = Buffer.from(
         await encryptor.encryptByJwk(
-          CryptoHelpers.jwaTow3c(keyEncryptionAlgorithm),
+          CryptoHelpers.jwaTow3c(<string>keyEncryptionAlgorithm),
           publicKey,
           contentEncryptionKey));
     }
 
-    // Set the initial vector
-    jweToken.iv = this.getInitialVector(options);
-
-    // Set aad as the protected header
-    jweToken.aad = base64url.toBuffer(encodedProtected);
 
     // encrypt content
     const contentEncryptorKey: JsonWebKey = {
@@ -287,11 +289,15 @@ export default class JweToken implements IJweGeneralJson {
       kty: 'oct'
     };
 
-    jweToken.ciphertext = Buffer.from(
-      await encryptor.encryptByJwk(
-        CryptoHelpers.jwaTow3c(contentEncryptionAlgorithm),
-        contentEncryptorKey,
-        Buffer.from(payload)));
+    const encodedAad = base64url.encode(jweToken.aad);
+    const cipherText = await encryptor.encryptByJwk(
+      CryptoHelpers.jwaTow3c(contentEncryptionAlgorithm, new Uint8Array(jweToken.iv), new Uint8Array(Buffer.from(encodedAad))),
+      contentEncryptorKey,
+      Buffer.from(payload));
+
+    jweToken.tag = Buffer.from(cipherText, cipherText.byteLength - 16)  
+    jweToken.ciphertext = Buffer.from(cipherText, 0 , cipherText.byteLength - 16);
+      
     return jweToken;
   }
 }

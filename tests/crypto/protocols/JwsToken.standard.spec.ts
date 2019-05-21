@@ -25,8 +25,6 @@ describe('JwsToken standard', () => {
       111, 116, 34, 58, 116, 114, 117, 101, 125];
       expect(payload).toBeDefined();
       expect(payloadBuffer).toBeDefined();
-      const p = new Uint8Array(Buffer.from(payload));
-      expect(p).toBeDefined();
     
       const keyStore = new KeyStoreMem();
       const cryptoSuite = new DefaultCryptoSuite();

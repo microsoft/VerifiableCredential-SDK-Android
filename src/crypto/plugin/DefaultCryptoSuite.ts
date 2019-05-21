@@ -5,18 +5,18 @@
 
 import CryptoSuite from './CryptoSuite';
 import { SubtleCrypto } from 'webcrypto-core';
-import { Crypto } from '@peculiar/webcrypto';
+import nodeWebcryptoOssl from 'node-webcrypto-ossl';
 
 /**
  * Default crypto suite implementing the default plugable crypto layer
  *  */
 export default class DefaultCryptoSuite extends CryptoSuite {
   private defaultCrypto: SubtleCrypto | undefined;
-  public crypto: Crypto;
+  public crypto: any;
 
   constructor () {
     super();
-    this.crypto = new Crypto();
+    this.crypto = new nodeWebcryptoOssl();
   }
 
  /**

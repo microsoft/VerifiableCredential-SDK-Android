@@ -7,6 +7,9 @@ import PublicKey from '../keys/PublicKey';
 import EcPublicKey from '../keys/ec/EcPublicKey';
 import { CryptoAlgorithm } from '../keyStore/IKeyStore';
 import { SubtleCrypto } from 'webcrypto-core';
+//import JoseConstants from '../protocols/jose/JoseConstants';
+import W3cCryptoApiConstants from './W3cCryptoApiConstants';
+import JoseConstants from '../protocols/jose/JoseConstants';
 
 /**
  * Crypto helpers support for plugable crypto layer
@@ -25,7 +28,8 @@ export default class CryptoHelpers {
       case 'RSASSA-PKCS1-V1_5':
       case 'ECDSA':
         return cryptoFactory.getMessageSigner(jwa);
-      case 'RSA-OAEP': 
+        case 'RSA-OAEP': 
+        case 'RSA-OAEP-256': 
         return cryptoFactory.getKeyEncrypter(jwa);
       case 'ECDH':
       case 'DH':
@@ -44,23 +48,38 @@ export default class CryptoHelpers {
   }
 
   /**
-   * Map the JWA algorithm to the W3C crypto API algorithm
+   * Map the JWA algorithm to the W3C crypto API algorithm.
+   * The method restricts the supported algorithms. This can easily be extended.
+   * Based on https://www.w3.org/TR/WebCryptoAPI/ A. Mapping between JSON Web Key / JSON Web Algorithm
    * @param jwaAlgorithmName Requested algorithm
    */
-  public static jwaTow3c(jwa: string): any {
-    switch (jwa) {
-      case 'RSASSA-PKCS1-V1_5':
-        return { name: jwa };
+  public static jwaTow3c(jwa: string, ...args: any): any {
+    const regex = new RegExp('\\d+');
+    let matches:RegExpExecArray;
+
+    switch (jwa.toUpperCase()) {
+      case 'RS256':
+      case 'RS384':
+      case 'RS512':
+        matches = <RegExpExecArray>regex.exec(jwa);
+        return { name: W3cCryptoApiConstants.RsaSsaPkcs1V15, hash: { name: `SHA-${CryptoHelpers.getRegexMatch(<RegExpExecArray>matches, 0)}`} };
       case 'ECDSA':
         return { name: jwa };
+      case 'RSA-OAEP-256': 
+        return { name: 'RSA-OAEP', hash: 'SHA-256' };
       case 'RSA-OAEP': 
         return { name: jwa };
       case 'ECDH':
       case 'DH':
         return { name: jwa };
-      case 'AES-GCM':
-        return { name: jwa };
-      case 'HMAC':
+      case JoseConstants.AesGcm128:
+      case JoseConstants.AesGcm192:
+      case JoseConstants.AesGcm256:
+        const iv = args[0];
+        const aad = args[1];
+        matches = <RegExpExecArray>regex.exec(jwa);
+        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad };
+    case 'HMAC':
         return { name: jwa };
       case 'SHA-256':
       case 'SHA-384':
@@ -83,9 +102,11 @@ export default class CryptoHelpers {
         return `RS${CryptoHelpers.getHash(hash)}`;
       case 'ECDSA':
           return `P-256K`;
-      case 'RSA-OAEP': 
-        return `RSA-OAEP-${CryptoHelpers.getHash(hash)}`;
-      case 'ECDH':
+          case 'RSA-OAEP-256':
+            return 'RSA-OAEP-256'; 
+          case 'RSA-OAEP': 
+          return `RSA-OAEP-${CryptoHelpers.getHash(hash)}`;
+          case 'ECDH':
           return `ECDH-ES`;
       case 'AES-GCM':
         const length = algorithm.length || 128;
@@ -112,7 +133,6 @@ export default class CryptoHelpers {
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':
         return  <RsaHashedImportParams>{ name, hash: {name: "SHA-256"} };
-      case 'RSA-OAEP': 
       case 'HMAC':
       case 'SHA-256':
       case 'SHA-384':
@@ -121,6 +141,9 @@ export default class CryptoHelpers {
       case 'ECDSA':
       case 'ECDH':
           return <EcKeyImportParams>{ name, namedCurve: (<EcPublicKey>jwk).crv };
+      case 'RSA-OAEP': 
+      case 'RSA-OAEP-256': 
+          return {name, hash: 'SHA-256'}
       case 'AES-GCM':
           return <RsaHashedImportParams>{ name };
       }
@@ -129,5 +152,13 @@ export default class CryptoHelpers {
 
   private static getHash(hash: string) {
     return (hash || 'SHA-256').toUpperCase().replace('SHA-', '');
+  }
+
+  private static getRegexMatch(matches: RegExpExecArray, index: number): string {
+    if (matches[index]) {
+      return matches[index];
+    }
+
+    throw new Error(`No match found for regex`);
   }
 }
