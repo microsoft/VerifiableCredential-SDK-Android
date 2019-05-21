@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import ServiceEndpoint from './serviceEndpoints/ServiceEndpoint';
+
 /**
  * Interface for defining a identifier document
  * public key.
@@ -71,33 +73,6 @@ export interface ServiceReference {
 }
 
 /**
- * Interface for defining a identifier document
- * service reference endpoint.
- */
-export interface ServiceEndpoint {
-  /**
-   * The type of the service reference.
-   */
-  context: string;
-
-  /**
-   * The type of the service reference.
-   */
-  type: string;
-}
-
-/**
- * Interface for defining a identifier document
- * service reference endpoint for a host.
- */
-export interface HostServiceEndpoint extends ServiceEndpoint {
-  /**
-   * The type of the service reference.
-   */
-  locations: string[];
-}
-
-/**
  * Interface for defining a claim.
  */
 export interface Claim {
@@ -110,17 +85,6 @@ export interface Claim {
    * The value of the claim.
    */
   value: string;
-}
-
-/**
- * Interface for defining a identifier document
- * service reference endpoint for a user.
- */
-export interface UserServiceEndpoint extends ServiceEndpoint {
-  /**
-   * The type of the service reference.
-   */
-  instances: string[];
 }
 
 /**
