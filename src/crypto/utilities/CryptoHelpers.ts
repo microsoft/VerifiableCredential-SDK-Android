@@ -58,20 +58,14 @@ export default class CryptoHelpers {
     let matches:RegExpExecArray;
 
     switch (jwa.toUpperCase()) {
-      case 'RS256':
-      case 'RS384':
-      case 'RS512':
+      case JoseConstants.Rs256:
+      case JoseConstants.Rs384:
+      case JoseConstants.Rs512:
         matches = <RegExpExecArray>regex.exec(jwa);
         return { name: W3cCryptoApiConstants.RsaSsaPkcs1V15, hash: { name: `SHA-${CryptoHelpers.getRegexMatch(<RegExpExecArray>matches, 0)}`} };
-      case 'ECDSA':
-        return { name: jwa };
-      case 'RSA-OAEP-256': 
+      case JoseConstants.RsaOaep: 
+      case JoseConstants.RsaOaep256: 
         return { name: 'RSA-OAEP', hash: 'SHA-256' };
-      case 'RSA-OAEP': 
-        return { name: jwa };
-      case 'ECDH':
-      case 'DH':
-        return { name: jwa };
       case JoseConstants.AesGcm128:
       case JoseConstants.AesGcm192:
       case JoseConstants.AesGcm256:
@@ -79,12 +73,6 @@ export default class CryptoHelpers {
         const aad = args[1];
         matches = <RegExpExecArray>regex.exec(jwa);
         return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad };
-    case 'HMAC':
-        return { name: jwa };
-      case 'SHA-256':
-      case 'SHA-384':
-      case 'SHA-512':
-        return { name: jwa };
     }
 
     throw new Error(`Algorithm '${JSON.stringify(jwa)}' is not supported`);
@@ -150,7 +138,10 @@ export default class CryptoHelpers {
       throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
     }        
 
-  private static getHash(hash: string) {
+  private static getHash(hash: any) {
+    if (hash.name) {
+      return (hash.name).toUpperCase().replace('SHA-', '');
+    }
     return (hash || 'SHA-256').toUpperCase().replace('SHA-', '');
   }
 
