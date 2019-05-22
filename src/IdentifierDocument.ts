@@ -6,6 +6,8 @@
 import { AuthenticationReference, ServiceReference, PublicKey } from './types';
 import UserAgentOptions from './UserAgentOptions';
 import Identifier from './Identifier';
+import HostServiceEndpoint from './serviceEndpoints/HostServiceEndpoint';
+import UserServiceEndpoint from './serviceEndpoints/UserServiceEndpoint';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -56,6 +58,17 @@ export default class IdentifierDocument {
 
     this.authenticationReferences = document.authentication || [];
     this.serviceReferences = document.service || [];
+
+    if (document.service && document.service.length > 0) {
+      document.service.forEach((serviceRef: any) => {
+        if (serviceRef.serviceEndpoint['@type'] === 'HostServiceEndpoint') {
+          serviceRef.serviceEndpoint = HostServiceEndpoint.fromJSON(serviceRef.serviceEndpoint);
+        } else {
+          serviceRef.serviceEndpoint = UserServiceEndpoint.fromJSON(serviceRef.serviceEndpoint);
+        }
+      });
+    }
+
   }
 
   /**
@@ -103,16 +116,13 @@ export default class IdentifierDocument {
    * Used to control the the properties that are
    * output by JSON.parse.
    */
-  // tslint:disable-next-line:function-name
-  public static fromJSON (obj: IdentifierDocument): IdentifierDocument {
-    // const copy: any = this;
-    // this.publicKeys = copy.publicKey;
+  public static fromJSON (obj: any): IdentifierDocument {
     const document = Object.create(IdentifierDocument.prototype);
     const result = Object.assign(document, obj, {
       publicKeys: (<any> obj).publicKey
     });
     delete result.publicKey;
-    return <IdentifierDocument> result;
+    return new IdentifierDocument(document);
   }
 
   /**
@@ -128,13 +138,24 @@ export default class IdentifierDocument {
     // Add the JSON-LD context
     clonedDocument['@context'] = 'https://w3id.org/did/v1';
 
-    if (!this.authenticationReferences || this.authenticationReferences.length === 0) {
-      clonedDocument.authenticationReferences = undefined;
+    // switch authentication references to authentication.
+    if (this.authenticationReferences && this.authenticationReferences.length > 0 ) {
+      clonedDocument.authentication = this.authenticationReferences;
     }
+    clonedDocument.authenticationReferences = undefined;
 
-    if (!this.serviceReferences || this.serviceReferences.length === 0) {
-      clonedDocument.serviceReferences = undefined;
+    // switch service references to service.
+    if (this.serviceReferences && this.serviceReferences.length > 0 ) {
+      clonedDocument.service = this.serviceReferences;
+      clonedDocument.service.forEach((serviceRef: ServiceReference) => {
+        if (serviceRef.serviceEndpoint['type'] === 'HostServiceEndpoint') {
+          serviceRef.serviceEndpoint = (<HostServiceEndpoint> serviceRef.serviceEndpoint).toJSON();
+        } else {
+          serviceRef.serviceEndpoint = (<UserServiceEndpoint> serviceRef.serviceEndpoint).toJSON();
+        }
+      });
     }
+    clonedDocument.serviceReferences = undefined;
 
     if (!this.publicKeys || this.publicKeys.length === 0) {
       clonedDocument.publicKeys = undefined;

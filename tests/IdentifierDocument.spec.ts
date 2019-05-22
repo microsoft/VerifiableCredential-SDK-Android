@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationReference, UserServiceEndpoint, HostServiceEndpoint, ServiceReference } from '../src/types';
+import { AuthenticationReference, ServiceReference } from '../src/types';
+import HostServiceEndpoint from '../src/serviceEndpoints/HostServiceEndpoint';
+import UserServiceEndpoint from '../src/serviceEndpoints/UserServiceEndpoint';
 import IdentifierDocument from '../src/IdentifierDocument';
 
 describe('IdentifierDocument', () => {
