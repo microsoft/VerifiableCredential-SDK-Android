@@ -102,8 +102,33 @@ export default class JweToken implements IJweGeneralJson {
    * Serialize a Jwe token object from a token in General Json format
    * @param token Jwe base object
    */
-  private static serializeJweGeneralJson (_token: JweToken): string {
-    return '';
+  private static serializeJweGeneralJson (token: JweToken): string {
+    let json: any = {
+      recipients: [],
+      aad: base64url.encode(token.aad),
+      iv: base64url.encode(token.iv),
+      ciphertext: base64url.encode(token.ciphertext),
+      tag: base64url.encode(token.tag)      
+    }
+    if (JoseHelpers.headerHasElements(token.protected)) {
+      json.protected = JoseHelpers.encodeHeader(<JweHeader>token.protected);
+    }
+    if (JoseHelpers.headerHasElements(token.unprotected)) {
+      json.unprotected = JoseHelpers.encodeHeader(<JweHeader>token.unprotected);
+    }
+
+    for (let inx = 0 ; inx < token.recipients.length ; inx++ ) {
+      const recipient: any = {
+        encrypted_key: base64url.encode(token.recipients[inx].encrypted_key)
+      }
+      if (JoseHelpers.headerHasElements(token.recipients[inx].header)) {
+        recipient.header = JoseHelpers.encodeHeader(<JweHeader>token.recipients[inx].header);
+      }
+      
+      json.recipients.push(recipient);
+    }
+
+    return JSON.stringify(json);
   }
 
 
@@ -111,17 +136,43 @@ export default class JweToken implements IJweGeneralJson {
    * Serialize a Jwe token object from a token in Flat Json format
    * @param token Jwe base object
    */
-  private static serializeJweFlatJson (_token: JweToken): string {
-    return '';
+  private static serializeJweFlatJson (token: JweToken): string {
+    let json: any = {
+      encrypted_key: base64url.encode(token.recipients[0].encrypted_key),
+      aad: base64url.encode(token.aad),
+      iv: base64url.encode(token.iv),
+      ciphertext: base64url.encode(token.ciphertext),
+      tag: base64url.encode(token.tag)      
+    }
+    if (JoseHelpers.headerHasElements(token.protected)) {
+      json.protected = JoseHelpers.encodeHeader(<JweHeader>token.protected);
+    }
+    if (JoseHelpers.headerHasElements(token.unprotected)) {
+      json.unprotected = JoseHelpers.encodeHeader(<JweHeader>token.unprotected);
+    }
+    if (JoseHelpers.headerHasElements(token.recipients[0].header)) {
+      json.header = JoseHelpers.encodeHeader(<JweHeader>token.recipients[0].header);
+    }
+
+    return JSON.stringify(json);
   }
 
   /**
    * Serialize a Jwe token object from a token in Compact format
    * @param token Jwe base object
    */
-  private static serializeJweCompact (_token: JweToken): string {
-    return '';
+  private static serializeJweCompact (token: JweToken): string {
+    let encodedProtected = '';
+    if (JoseHelpers.headerHasElements(token.protected)) {
+      encodedProtected = JoseHelpers.encodeHeader(<JweHeader>token.protected);
+    }
+    const encryptedKey = base64url.encode(token.recipients[0].encrypted_key);
+    const iv = base64url.encode(token.iv);
+    const cipher = base64url.encode(token.ciphertext);
+    const tag = base64url.encode(token.tag);
+    return `${encodedProtected}.${encryptedKey}.${iv}.${cipher}.${tag}`;
   }
+
   //#endregion
   //#region create
 

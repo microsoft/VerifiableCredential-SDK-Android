@@ -1,21 +1,18 @@
-//import base64url from "base64url";
-import JweToken from "../../../src/crypto/protocols/jwe/JweToken";
-import { IEncryptionOptions } from "../../../src/crypto/keyStore/IKeyStore";
-import KeyStoreMem from '../../../src/crypto/keyStore/KeyStoreMem';
-import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
-import DefaultCryptoSuite from '../../../src/crypto/plugin/DefaultCryptoSuite';
-import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
-import RsaPrivateKey from '../../../src/crypto/keys/rsa/RsaPrivateKey';
-import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
-import JoseHelpers from '../../../src/crypto/protocols/jose/JoseHelpers';
-import base64url from 'base64url';
-import nodeWebcryptoOssl from 'node-webcrypto-ossl';
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
+ import JweToken from "../../../src/crypto/protocols/jwe/JweToken";
+ import { IEncryptionOptions } from "../../../src/crypto/keyStore/IKeyStore";
+ import KeyStoreMem from '../../../src/crypto/keyStore/KeyStoreMem';
+ import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
+ import DefaultCryptoSuite from '../../../src/crypto/plugin/DefaultCryptoSuite';
+ import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
+ import RsaPrivateKey from '../../../src/crypto/keys/rsa/RsaPrivateKey';
+ import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
+ import JoseHelpers from '../../../src/crypto/protocols/jose/JoseHelpers';
+ import base64url from 'base64url';
+ 
 describe('JweToken standard', () => {
   it('should run RFC 7516 A.1.  Example JWE using RSAES-OAEP and AES GCM', async () => {
     const payload = 'The true sign of intelligence is not knowledge but imagination.';
@@ -47,47 +44,43 @@ describe('JweToken standard', () => {
       await keyStore.save('key', key);
       const jweToken = new JweToken(options);
       const cipher = await jweToken.encrypt([key.getPublicKey()], payload, ProtectionFormat.JweCompactJson);
-      expect(JoseHelpers.encodeHeader(cipher.protected)).toEqual('eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ');
-      expect(base64url.encode(cipher.iv)).toEqual('48V1_ALb6US04U3b');
-      expect(base64url.encode(cipher.aad)).toEqual('eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ');
-      expect(base64url.encode(cipher.tag)).toEqual('XFBoMYUZodetZdvTiFvSkQ');
-      expect(base64url.encode(cipher.ciphertext)).toEqual('5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A');
+      const protectedHeader = JoseHelpers.encodeHeader(cipher.protected);
+      const encryptedKey = base64url.encode(cipher.recipients[0].encrypted_key);
+      const encodedIv = base64url.encode(cipher.iv);
+      const aad = base64url.encode(cipher.aad);
+      const tag = base64url.encode(cipher.tag);
+      const encodedCipher = base64url.encode(cipher.ciphertext);
+      expect(protectedHeader).toEqual('eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ');
+      expect(encodedIv).toEqual('48V1_ALb6US04U3b');
+      expect(aad).toEqual('eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ');
+      expect(tag).toEqual('XFBoMYUZodetZdvTiFvSkQ');
+      expect(encodedCipher).toEqual('5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A');
 
-      const jwk =    {   //this is an example jwk key, "raw" would be an ArrayBuffer
-      kty: "oct",
-      k: base64url.encode( Buffer.from(contentEncryptionKey)),
-      alg: "A256GCM",
-      ext: true,
-      };
-      const aad =  [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 83, 85, 48, 69,
-        116, 84, 48, 70, 70, 85, 67, 73, 115, 73, 109, 86, 117, 89, 121, 73,
-        54, 73, 107, 69, 121, 78, 84, 90, 72, 81, 48, 48, 105, 102, 81];
-      const crypto = new nodeWebcryptoOssl();
+      const compact = cipher.serialize(ProtectionFormat.JweCompactJson);
+      expect(compact).toEqual(`${protectedHeader}.${encryptedKey}.${encodedIv}.${encodedCipher}.${tag}`);
 
-      const aesKey = await crypto.subtle.importKey(
-        "jwk", //can be "jwk" or "raw"
-        jwk,
-        <RsaHashedImportParams>{
-          name: "AES-GCM",
-        },
-        true, //whether the key is extractable (i.e. can be used in exportKey)
-        ["decrypt"] //can "encrypt", "decrypt", "wrapKey", or "unwrapKey"          
-        );
+      const flat = cipher.serialize(ProtectionFormat.JweFlatJson);
+      let parsed = JSON.parse(flat);
+      expect(parsed.protected).toEqual(protectedHeader);
+      expect(parsed.unprotected).toBeUndefined();
+      expect(parsed.header).toBeUndefined();
+      expect(parsed.encrypted_key).toBeDefined();
+      expect(parsed.ciphertext).toEqual(encodedCipher);
+      expect(parsed.aad).toEqual(aad);
+      expect(parsed.iv).toEqual(encodedIv);
+      expect(parsed.tag).toEqual(tag);
 
-        const aesEncrypt = {
-          name: "AES-GCM",
-          iv: new Uint8Array(iv),
-          additionalData: new Uint8Array(aad),
-          tagLength: 128, //The tagLength you used to encrypt (if any)
-      };
-      const inputcipher =  new Uint8Array(Buffer.concat([cipher.ciphertext, cipher.tag]));
-        const plain = await crypto.subtle.decrypt(
-          aesEncrypt,
-          aesKey,
-          inputcipher);
-        // const text = String.fromCharCode.apply(null, plain);
-        expect(plain).toBeDefined();
-        
+      const general = cipher.serialize(ProtectionFormat.JweGeneralJson);
+      parsed = JSON.parse(general);
+      expect(parsed.protected).toEqual(protectedHeader);
+      expect(parsed.unprotected).toBeUndefined();
+      expect(parsed.ciphertext).toEqual(encodedCipher);
+      expect(parsed.aad).toEqual(aad);
+      expect(parsed.iv).toEqual(encodedIv);
+      expect(parsed.tag).toEqual(tag);
+      expect(parsed.recipients.length).toEqual(1);
+      expect(parsed.recipients[0].encrypted_key).toBeDefined();
+      expect(parsed.recipients[0].header).toBeUndefined();
 
       // Decrypt
       const plaintext = await cipher.decrypt('key');
