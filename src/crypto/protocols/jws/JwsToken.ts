@@ -52,6 +52,7 @@ export default class JwsToken implements IJwsGeneralJson {
     this.options = options;
   }
 
+  //#region 
   /**
    * Serialize a Jws token object from a token
    * @param format Optional specify the serialization format. If not specified, use default format.
@@ -137,7 +138,8 @@ export default class JwsToken implements IJwsGeneralJson {
     const encodedSignature = base64url.encode(token.signatures[0].signature);
     return `${encodedProtected}.${encodedpayload}.${encodedSignature}`;
   }
-  
+  //#endregion
+  //#region create
   /**
    * Create an Jws token object from a token
    * @param token Base object used to create this token
@@ -330,7 +332,8 @@ export default class JwsToken implements IJwsGeneralJson {
 
     return {result: true, reason: ''};
   }
-
+  //#endregion
+  
   /**
    * Get the keyStore to be used
    * @param newOptions Options passed in after the constructure

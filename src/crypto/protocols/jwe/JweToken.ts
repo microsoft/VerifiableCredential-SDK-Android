@@ -174,33 +174,6 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   //#endregion
-  //#region create
-
-  /**
-   * Set the protected header
-   * @param protectedHeader to set on the JweToken object
-   */
-  /*
-  private setProtected(protectedHeader: string | JweHeader ) {
-    if (typeof protectedHeader === 'string' ) {
-      const json = base64url.decode(protectedHeader);
-      return <JweHeader>JSON.parse(json);
-    }
-
-    return protectedHeader;
-  }
-*/
-
-//#endregion
-  //#region options
-  /**
-   * Get the keyStore to be used
-   * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
-   */
-  //private getKeyStore(newOptions?: IEncryptionOptions, manadatory: boolean = true): IKeyStore {
-  //  return this.getCryptoFactory(newOptions, manadatory).keyStore;
-  //}
 
   /**
    * Get the CryptoFactory to be used
