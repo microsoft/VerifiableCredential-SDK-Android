@@ -79,6 +79,8 @@ export default class Identifier {
       const didKey = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
       const pairwiseKey: DidKey = await didKey.generatePairwise(seed, this.id, target);
       const jwk: any = await pairwiseKey.getJwkKey(KeyExport.Private);
+      const pubJwk: any = await pairwiseKey.getJwkKey(KeyExport.Public);
+      pubJwk.kid = jwk.kid;
 
       const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(pairwiseKey.algorithm), jwk.kty);
       await keyStore.save(pairwiseKeyStorageId, jwk);
@@ -88,7 +90,7 @@ export default class Identifier {
       const publicKey: PublicKey = {
         id: jwk.kid,
         type: this.getDidDocumentKeyType(),
-        publicKeyJwk: jwk
+        publicKeyJwk: pubJwk
       };
       if (this.options.registrar) {
         const document = await this.createIdentifierDocument(this.id, publicKey);

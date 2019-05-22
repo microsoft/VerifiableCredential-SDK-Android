@@ -36,6 +36,7 @@ describe('IdentifierDocument [Standards Compliance]', () => {
     expect(serializedDocument).toEqual('{"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}');
   });
 
+  // tslint:disable-next-line:mocha-no-side-effect-code
   it('should serialize expected JSON-LD', async () => {
     const document = {
       id: 'did:ion:identifier',
@@ -57,16 +58,27 @@ describe('IdentifierDocument [Standards Compliance]', () => {
         }
       ],
       authentication: [{ type: 'RsaVerificationKey2018', publicKeyReference: '#master' }],
-      service: []
+      service: [{
+        type: 'test', 
+        publicKey: 'did:bar:456#key-1',
+        serviceEndpoint: {
+          '@context': 'test',
+          '@type': 'HostServiceEndpoint',
+          locations: ['test.com']
+        }
+      }]
     };
+
+    const service = '"service":[{"type":"test","publicKey":"did:bar:456#key-1","serviceEndpoint":{"locations":["test.com"],"@context":"test","@type":"HostServiceEndpoint"}}]';
 
     const identifierDocument = new IdentifierDocument(document);
     const serializedDocument = JSON.stringify(identifierDocument);
-    expect(serializedDocument).toEqual('{"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}');
+    expect(serializedDocument).toEqual(`{"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","authentication":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],${service},"publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}`);
     delete identifierDocument.publicKeys;
-    expect(JSON.stringify(identifierDocument)).toEqual('{"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1"}');
+    expect(JSON.stringify(identifierDocument)).toEqual(`{"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","authentication":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],${service}}`);
   });
 
+  // tslint:disable-next-line:mocha-no-side-effect-code
   it('should deserialize JSON-LD', async () => {
     const document = {
       id: 'did:ion:identifier',
@@ -87,11 +99,25 @@ describe('IdentifierDocument [Standards Compliance]', () => {
           }
         }
       ],
-      authenticationReferences: [{ type: 'RsaVerificationKey2018', publicKeyReference: '#master' }]
+      authenticationReferences: [{ type: 'RsaVerificationKey2018', publicKeyReference: '#master' }],
+      serviceReferences: [
+        {
+          type: 'test', 
+          publicKey: 'did:bar:456#key-1',
+          serviceEndpoint: {
+            context: 'test',
+            type: 'HostServiceEndpoint',
+            locations: ['test.com']
+          }
+        }
+      ]
     };
 
-    const serializedDocument = '{"authenticationReferences":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}';
+    const service = '"service":[{"type":"test","publicKey":"did:bar:456#key-1","serviceEndpoint":{"@context":"test","@type":"HostServiceEndpoint","locations":["test.com"]}}]';
+
+    const serializedDocument = `{${service},"authentication":[{"type":"RsaVerificationKey2018","publicKeyReference":"#master"}],"id":"did:ion:identifier","created":"2019-01-25T01:08:44.732Z","@context":"https://w3id.org/did/v1","publicKey":[{"id":"#master","type":"RsaVerificationKey2018","publicKeyJwk":{"kty":"RSA","kid":"#master","keyOps":["sign","verify"],"n":"vdpHn7kNq42UMC1W8bwxgE7K...","e":"AQAB"}}]}`;
     const deserializedDocument = IdentifierDocument.fromJSON(JSON.parse(serializedDocument));
+    console.log(deserializedDocument);
     expect(document.id).toBe(deserializedDocument.id);
     expect(1).toBe(deserializedDocument.publicKeys.length);
     expect(document.authenticationReferences).toEqual(deserializedDocument.authenticationReferences);

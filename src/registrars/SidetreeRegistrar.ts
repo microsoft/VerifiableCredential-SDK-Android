@@ -78,6 +78,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       // prepare document for registration
       identifierDocument = this.prepareDocForRegistration(identifierDocument);
       let bodyString = JSON.stringify(identifierDocument);
+      console.log(bodyString);
 
       // registration with signed message for bodyString
       bodyString = await this.keyStore.sign(keyReference, bodyString, SignatureFormat.FlatJsonJws);

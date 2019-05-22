@@ -82,6 +82,13 @@ to allow simple testing and experimentation with the UserAgent SDK.</p></dd>
 <dd><p>Registrar implementation for the Sidetree (ION) network</p></dd>
 <dt><a href="#HttpResolver">HttpResolver</a></dt>
 <dd><p>Fetches DID Documents from remote resolvers over http</p></dd>
+<dt><a href="#HostServiceEndpoint">HostServiceEndpoint</a></dt>
+<dd><p>class to represent a host service endpoint.</p></dd>
+<dt><a href="#ServiceEndpoint">ServiceEndpoint</a></dt>
+<dd><p>abstract class to represent a service endpoint.
+based on: <a href="https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md">https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md</a>.</p></dd>
+<dt><a href="#UserServiceEndpoint">UserServiceEndpoint</a></dt>
+<dd><p>Class to represent a host service endpoint.</p></dd>
 <dt><a href="#UserAgentError">UserAgentError</a></dt>
 <dd><p>Base error class for the UserAgent.</p></dd>
 <dt><a href="#UserAgentOptions">UserAgentOptions</a></dt>
@@ -1629,6 +1636,84 @@ specified identifier.</p>
 | --- | --- |
 | identifier | <p>to resolve.</p> |
 
+<a name="HostServiceEndpoint"></a>
+
+## HostServiceEndpoint
+<p>class to represent a host service endpoint.</p>
+
+**Kind**: global class  
+
+* [HostServiceEndpoint](#HostServiceEndpoint)
+    * [new HostServiceEndpoint()](#new_HostServiceEndpoint_new)
+    * _instance_
+        * [.toJSON()](#HostServiceEndpoint+toJSON)
+    * _static_
+        * [.fromJSON()](#HostServiceEndpoint.fromJSON)
+
+<a name="new_HostServiceEndpoint_new"></a>
+
+### new HostServiceEndpoint()
+<p>locations of the hubs.</p>
+
+<a name="HostServiceEndpoint+toJSON"></a>
+
+### hostServiceEndpoint.toJSON()
+<p>Used to control the the properties that are
+output by JSON.stringify.</p>
+
+**Kind**: instance method of [<code>HostServiceEndpoint</code>](#HostServiceEndpoint)  
+<a name="HostServiceEndpoint.fromJSON"></a>
+
+### HostServiceEndpoint.fromJSON()
+<p>Used to control the the properties that are
+output by JSON.parse.</p>
+
+**Kind**: static method of [<code>HostServiceEndpoint</code>](#HostServiceEndpoint)  
+<a name="ServiceEndpoint"></a>
+
+## ServiceEndpoint
+<p>abstract class to represent a service endpoint.
+based on: https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md.</p>
+
+**Kind**: global class  
+<a name="new_ServiceEndpoint_new"></a>
+
+### new ServiceEndpoint()
+<p>The type of the service reference.</p>
+
+<a name="UserServiceEndpoint"></a>
+
+## UserServiceEndpoint
+<p>Class to represent a host service endpoint.</p>
+
+**Kind**: global class  
+
+* [UserServiceEndpoint](#UserServiceEndpoint)
+    * [new UserServiceEndpoint()](#new_UserServiceEndpoint_new)
+    * _instance_
+        * [.toJSON()](#UserServiceEndpoint+toJSON)
+    * _static_
+        * [.fromJSON()](#UserServiceEndpoint.fromJSON)
+
+<a name="new_UserServiceEndpoint_new"></a>
+
+### new UserServiceEndpoint()
+<p>locations of the hubs.</p>
+
+<a name="UserServiceEndpoint+toJSON"></a>
+
+### userServiceEndpoint.toJSON()
+<p>Used to control the the properties that are
+output by JSON.stringify.</p>
+
+**Kind**: instance method of [<code>UserServiceEndpoint</code>](#UserServiceEndpoint)  
+<a name="UserServiceEndpoint.fromJSON"></a>
+
+### UserServiceEndpoint.fromJSON()
+<p>Used to control the the properties that are
+output by JSON.parse.</p>
+
+**Kind**: static method of [<code>UserServiceEndpoint</code>](#UserServiceEndpoint)  
 <a name="UserAgentError"></a>
 
 ## UserAgentError
