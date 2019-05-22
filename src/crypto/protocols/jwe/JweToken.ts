@@ -8,8 +8,6 @@ import PublicKey from '../../keys/PublicKey';
 import IJweGeneralJson, { JweHeader } from './IJweGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 import { IEncryptionOptions } from '../../keystore/IKeyStore';
-//import CryptoHelpers from '../../utilities/CryptoHelpers';
-//import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import JweRecipient from './JweRecipient';
 import { TSMap } from 'typescript-map'
 import JoseHelpers from '../jose/JoseHelpers';
@@ -18,6 +16,8 @@ import JoseConstants from '../jose/JoseConstants'
 import CryptoHelpers from '../../utilities/CryptoHelpers';
 import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import base64url from 'base64url';
+import IJweRecipient from './IJweRecipient';
+import ISubtleCrypto from '../../plugin/ISubtleCrypto';
 
 /**
  * Class for containing Jwe token operations.
@@ -205,7 +205,7 @@ export default class JweToken implements IJweGeneralJson {
     return JoseHelpers.getOptionsProperty<string>('contentEncryptionAlgorithm', this.options, newOptions, manadatory);
   }
   //#endregion
-
+  //#region encrypt
   /**
    * Encrypt content using the given public keys in JWK format.
    * The key type enforces the key encryption algorithm.
@@ -226,7 +226,7 @@ export default class JweToken implements IJweGeneralJson {
     let encodedProtected: string = '';
 
     // Set the resulting token
-    const jweToken: JweToken = new JweToken();
+    const jweToken: JweToken = new JweToken(options || this.options);
 
     // Set the content encryption key
     const contentEncryptionKey: Buffer = this.getContentEncryptionKey(options);
@@ -277,7 +277,7 @@ export default class JweToken implements IJweGeneralJson {
       // Get key encrypter and encrypt the content key
       jweRecipient.encrypted_key = Buffer.from(
         await encryptor.encryptByJwk(
-          CryptoHelpers.jwaTow3c(<string>keyEncryptionAlgorithm),
+          CryptoHelpers.jwaToW3c(<string>keyEncryptionAlgorithm),
           publicKey,
           contentEncryptionKey));
     }
@@ -291,13 +291,91 @@ export default class JweToken implements IJweGeneralJson {
 
     const encodedAad = base64url.encode(jweToken.aad);
     const cipherText = await encryptor.encryptByJwk(
-      CryptoHelpers.jwaTow3c(contentEncryptionAlgorithm, new Uint8Array(jweToken.iv), new Uint8Array(Buffer.from(encodedAad))),
+      CryptoHelpers.jwaToW3c(contentEncryptionAlgorithm, new Uint8Array(jweToken.iv), new Uint8Array(Buffer.from(encodedAad))),
       contentEncryptorKey,
       Buffer.from(payload));
 
-    jweToken.tag = Buffer.from(cipherText, cipherText.byteLength - 16)  
+    jweToken.tag = Buffer.from(cipherText, cipherText.byteLength - 16);
     jweToken.ciphertext = Buffer.from(cipherText, 0 , cipherText.byteLength - 16);
+    //jweToken.ciphertext = Buffer.from(cipherText);
       
     return jweToken;
   }
+  //#endregion
+  //#region decrypt
+  /**
+   * Decrypt the content.
+   * 
+   * @param decryptionKeyReference Reference to the decryption key.
+   * @param options used for the signature. These options override the options provided in the constructor.
+   * @returns Signed payload in compact Jwe format.
+   */
+// tslint:disable-next-line: max-func-body-length
+   public async decrypt (decryptionKeyReference: string, options?: IEncryptionOptions): Promise<string> {
+    const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
+
+    // Get the encryptor extensions
+    const decryptor = new SubtleCryptoExtension(cryptoFactory);
+
+    // get decryption public key
+    let jwk: PublicKey = await <Promise<PublicKey>>cryptoFactory.keyStore.get(decryptionKeyReference, true);
+
+    // Get the encrypted key
+    // Check if kid matches
+    let contentEncryptionKey: Buffer | undefined;
+    if (jwk.kid) {
+    for (let inx = 0 ; inx < this.recipients.length ; inx ++) {
+      const recipient = this.recipients[inx];
+      if (recipient.header) {
+        const headerKid = recipient.header.get('kid'); 
+        if (headerKid && headerKid === jwk.kid) {
+          if (contentEncryptionKey = await this.decryptContentEncryptionKey(recipient, decryptor, decryptionKeyReference)) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  if (!contentEncryptionKey) {
+    // try to decrypt every key
+    for (let inx = 0 ; inx < this.recipients.length ; inx ++) {
+      const recipient = this.recipients[inx];
+      if (contentEncryptionKey = await this.decryptContentEncryptionKey(recipient, decryptor, decryptionKeyReference)) {
+        break;
+      }
+    }
+  }
+
+  if (!contentEncryptionKey) {
+    throw new Error('Cannot decrypt the content encryption key because of missing key');
+  }
+
+  // Decrypt content
+  const contentEncryptionAlgorithm = this.protected.get('enc');
+  const iv =  new Uint8Array(this.iv); 
+  const encodedAad = base64url.encode(this.aad);
+  const aad = new Uint8Array(Buffer.from(encodedAad));
+  const algorithm = CryptoHelpers.jwaToW3c(contentEncryptionAlgorithm, iv, aad);    
+  const contentJwk: JsonWebKey = {
+    kty: 'oct',
+    k: base64url.encode(contentEncryptionKey)
+  };
+
+  const plaintext =  await decryptor.decryptByJwk(algorithm, contentJwk, Buffer.concat([this.ciphertext, this.tag]));
+  return plaintext.toString();
+  }
+
+  private async decryptContentEncryptionKey(recipient: IJweRecipient, decryptor: ISubtleCrypto, decryptionKeyReference: string): Promise<Buffer> {
+    let keyDecryptionAlgorithm = '';
+    if (!recipient.header) {
+      keyDecryptionAlgorithm = this.protected.get('alg');
+    } else {
+      keyDecryptionAlgorithm = recipient.header.get('alg') || this.protected.get('alg');
+    }
+
+    const algorithm = CryptoHelpers.jwaToW3c(keyDecryptionAlgorithm);    
+    return Buffer.from(await decryptor.decryptByKeyStore(algorithm, decryptionKeyReference, recipient.encrypted_key));
+   }
+  //#endregion
 }

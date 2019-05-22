@@ -9,6 +9,7 @@ import CryptoHelpers from '../utilities/CryptoHelpers';
 import PublicKey from '../keys/PublicKey';
 import { KeyType } from '../keys/KeyType';
 import { SubtleCrypto } from 'webcrypto-core';
+import { PrivateKey } from '@decentralized-identity/did-auth-jose';
 
 /**
  * Default crypto suite
@@ -31,14 +32,44 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    * @returns The signature in the requested algorithm
    */
   public async signByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, data: BufferSource): Promise<ArrayBuffer> {
-    const jwk: PublicKey = await <Promise<PublicKey>>this.keyStore.get(keyReference, false);
+    const jwk: PrivateKey = await <Promise<PrivateKey>>this.keyStore.get(keyReference, false);
     const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
     
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['sign']);
     return await <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>algorithm: <RsaPssParams>algorithm, key, <ArrayBuffer>data);
   }
-        
+          
+  /**
+   * Decrypt with a key referenced in the key store.
+   * The referenced key must be a jwk key.
+   * @param algorithm used for signature
+   * @param keyReference points to key in the key store
+   * @param cipher to decrypt
+   */
+   public async decryptByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, cipher: BufferSource): Promise<ArrayBuffer> {
+    const jwk: PrivateKey = <PrivateKey> await this.keyStore.get(keyReference, false);
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
+    
+    const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['decrypt']);
+    return crypto.decrypt(algorithm, key, cipher);
+   }  
+          
+  /**
+   * Decrypt with JWK.
+   * @param algorithm used for decryption
+   * @param jwk Json web key to decrypt
+   * @param cipher to decrypt
+   */
+   public async decryptByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, cipher: BufferSource): Promise<ArrayBuffer> {
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
+    
+    const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['decrypt']);
+    return crypto.decrypt(algorithm, key, cipher);
+   }  
+
   /**
    * Encrypt with a jwk key referenced in the key store
    * @param algorithm used for encryption

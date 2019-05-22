@@ -9,6 +9,7 @@ import RsaPrivateKey from '../../../src/crypto/keys/rsa/RsaPrivateKey';
 import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
 import JoseHelpers from '../../../src/crypto/protocols/jose/JoseHelpers';
 import base64url from 'base64url';
+import nodeWebcryptoOssl from 'node-webcrypto-ossl';
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -51,7 +52,47 @@ describe('JweToken standard', () => {
       expect(base64url.encode(cipher.aad)).toEqual('eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ');
       expect(base64url.encode(cipher.tag)).toEqual('XFBoMYUZodetZdvTiFvSkQ');
       expect(base64url.encode(cipher.ciphertext)).toEqual('5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A');
-      });
+
+      const jwk =    {   //this is an example jwk key, "raw" would be an ArrayBuffer
+      kty: "oct",
+      k: base64url.encode( Buffer.from(contentEncryptionKey)),
+      alg: "A256GCM",
+      ext: true,
+      };
+      const aad =  [101, 121, 74, 104, 98, 71, 99, 105, 79, 105, 74, 83, 85, 48, 69,
+        116, 84, 48, 70, 70, 85, 67, 73, 115, 73, 109, 86, 117, 89, 121, 73,
+        54, 73, 107, 69, 121, 78, 84, 90, 72, 81, 48, 48, 105, 102, 81];
+      const crypto = new nodeWebcryptoOssl();
+
+      const aesKey = await crypto.subtle.importKey(
+        "jwk", //can be "jwk" or "raw"
+        jwk,
+        <RsaHashedImportParams>{
+          name: "AES-GCM",
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ["decrypt"] //can "encrypt", "decrypt", "wrapKey", or "unwrapKey"          
+        );
+
+        const aesEncrypt = {
+          name: "AES-GCM",
+          iv: new Uint8Array(iv),
+          additionalData: new Uint8Array(aad),
+          tagLength: 128, //The tagLength you used to encrypt (if any)
+      };
+      const inputcipher =  new Uint8Array(Buffer.concat([cipher.ciphertext, cipher.tag]));
+        const plain = await crypto.subtle.decrypt(
+          aesEncrypt,
+          aesKey,
+          inputcipher);
+        // const text = String.fromCharCode.apply(null, plain);
+        expect(plain).toBeDefined();
+        
+
+      // Decrypt
+      const plaintext = await cipher.decrypt('key');
+      expect(plaintext).toEqual(payload);
+    });
 
         it('should add kid and default alg', async () => {
           const payload = 'The true sign of intelligence is not knowledge but imagination.';
@@ -89,6 +130,10 @@ describe('JweToken standard', () => {
             expect(base64url.encode(cipher.aad)).toEqual('eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIiwia2lkIjoia2V5MSJ9');
             expect(base64url.encode(cipher.tag)).toEqual('eU_zskwUtrjl6qNjeEgtAQ');
             expect(base64url.encode(cipher.ciphertext)).toEqual('5eym8TW_c8SuK0ltJ3rpYIzOeDQz7TALvtu6UG9oMo4vpzs9tX_EFShS8iB7j6jiSdiwkIr3ajwQzaBtQD_A');
+
+            // Decrypt
+            const plaintext = await cipher.decrypt('key');
+            expect(plaintext).toEqual(payload);
         });
         
 });

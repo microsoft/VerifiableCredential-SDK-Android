@@ -581,6 +581,8 @@ Provides support for nodejs and browser</p>
 
 * [SubtleCryptoExtension](#SubtleCryptoExtension)
     * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
+    * [.decryptByKeyStore(algorithm, keyReference, cipher)](#SubtleCryptoExtension+decryptByKeyStore)
+    * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
     * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
 
 <a name="SubtleCryptoExtension+signByKeyStore"></a>
@@ -596,6 +598,33 @@ Provides support for nodejs and browser</p>
 | algorithm | <p>used for signature</p> |
 | keyReference | <p>points to key in the key store</p> |
 | data | <p>to sign</p> |
+
+<a name="SubtleCryptoExtension+decryptByKeyStore"></a>
+
+### subtleCryptoExtension.decryptByKeyStore(algorithm, keyReference, cipher)
+<p>Decrypt with a key referenced in the key store.
+The referenced key must be a jwk key.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for signature</p> |
+| keyReference | <p>points to key in the key store</p> |
+| cipher | <p>to decrypt</p> |
+
+<a name="SubtleCryptoExtension+decryptByJwk"></a>
+
+### subtleCryptoExtension.decryptByJwk(algorithm, jwk, cipher)
+<p>Decrypt with JWK.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for decryption</p> |
+| jwk | <p>Json web key to decrypt</p> |
+| cipher | <p>to decrypt</p> |
 
 <a name="SubtleCryptoExtension+encryptByJwk"></a>
 
@@ -694,6 +723,7 @@ Crypto calls always happen via CryptoFactory</p>
         * [.getInitialVector(newOptions, manadatory)](#JweToken+getInitialVector)
         * [.getContentEncryptionAlgorithm(newOptions, manadatory)](#JweToken+getContentEncryptionAlgorithm)
         * [.encrypt(recipients, payload, format, options)](#JweToken+encrypt) ⇒
+        * [.decrypt(decryptionKeyReference, options)](#JweToken+decrypt) ⇒
     * _static_
         * [.serializeJweGeneralJson(token)](#JweToken.serializeJweGeneralJson)
         * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
@@ -783,6 +813,19 @@ The options can override certain algorithm choices.</p>
 | recipients | <p>List of recipients' public keys.</p> |
 | payload | <p>to sign.</p> |
 | format | <p>of the final signature.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JweToken+decrypt"></a>
+
+### jweToken.decrypt(decryptionKeyReference, options) ⇒
+<p>Decrypt the content.</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>Signed payload in compact Jwe format.</p>  
+
+| Param | Description |
+| --- | --- |
+| decryptionKeyReference | <p>Reference to the decryption key.</p> |
 | options | <p>used for the signature. These options override the options provided in the constructor.</p> |
 
 <a name="JweToken.serializeJweGeneralJson"></a>
@@ -1069,7 +1112,7 @@ Crypto calls always happen via CryptoFactory</p>
 
 * [CryptoHelpers](#CryptoHelpers)
     * [.getSubtleCryptoForTheAlgorithm(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCryptoForTheAlgorithm)
-    * [.jwaTow3c(jwaAlgorithmName)](#CryptoHelpers.jwaTow3c)
+    * [.jwaToW3c(jwaAlgorithmName)](#CryptoHelpers.jwaToW3c)
     * [.w3cToJwa(algorithmName, hash)](#CryptoHelpers.w3cToJwa)
     * [.getKeyImportAlgorithm(algorithm)](#CryptoHelpers.getKeyImportAlgorithm)
 
@@ -1086,9 +1129,9 @@ Crypto calls always happen via CryptoFactory</p>
 | algorithmName | <p>Requested algorithm</p> |
 | hash | <p>Optional hash for the algorithm</p> |
 
-<a name="CryptoHelpers.jwaTow3c"></a>
+<a name="CryptoHelpers.jwaToW3c"></a>
 
-### CryptoHelpers.jwaTow3c(jwaAlgorithmName)
+### CryptoHelpers.jwaToW3c(jwaAlgorithmName)
 <p>Map the JWA algorithm to the W3C crypto API algorithm.
 The method restricts the supported algorithms. This can easily be extended.
 Based on https://<a href="http://www.w3.org/TR/WebCryptoAPI/">www.w3.org/TR/WebCryptoAPI/</a> A. Mapping between JSON Web Key / JSON Web Algorithm</p>

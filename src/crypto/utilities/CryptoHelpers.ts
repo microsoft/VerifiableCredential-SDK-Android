@@ -53,7 +53,7 @@ export default class CryptoHelpers {
    * Based on https://www.w3.org/TR/WebCryptoAPI/ A. Mapping between JSON Web Key / JSON Web Algorithm
    * @param jwaAlgorithmName Requested algorithm
    */
-  public static jwaTow3c(jwa: string, ...args: any): any {
+  public static jwaToW3c(jwa: string, ...args: any): any {
     const regex = new RegExp('\\d+');
     let matches:RegExpExecArray;
 
@@ -72,7 +72,7 @@ export default class CryptoHelpers {
         const iv = args[0];
         const aad = args[1];
         matches = <RegExpExecArray>regex.exec(jwa);
-        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad };
+        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128 };
     }
 
     throw new Error(`Algorithm '${JSON.stringify(jwa)}' is not supported`);
