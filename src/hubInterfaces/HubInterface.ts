@@ -5,7 +5,7 @@
 
 import UserAgentError from '../UserAgentError';
 import Commit from '../hubSession/Commit';
-import HubClient from '../HubClient';
+import HubClient from '../hubClient/HubClient';
 
 /**
  * Constants that represent what type of commit strategy to be used.
@@ -38,27 +38,27 @@ export enum Operation {
 /**
  * Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.
  */
-export interface HubInterfaceOptions {
+export class HubInterfaceOptions {
 
   /**
    * Hub Client that will be used to commit and query a hub.
    */
-  hubClient: HubClient;
+  hubClient: HubClient | undefined;
 
   /**
    * the schema for the object that will be committed.
    */
-  context: string;
+  context: string | undefined;
 
   /**
    * the type of the object that will be committed.
    */
-  type: string;
+  type: string | undefined;
 
   /**
    * Optional Commit Strategy to define what strategy to use when compiling commits.
    */
-  commitStrategy?: CommitStrategyType;
+  commitStrategy: CommitStrategyType = CommitStrategyType.Basic;
 
   /**
    * Optional Hub Interface to define the type of interface the hub request payload will be.
@@ -83,6 +83,10 @@ export default abstract class HubInterface {
    * @param [hubInterfaceOptions] for configuring how to form hub requests and responses.
    */
   constructor (hubInterfaceOptions: HubInterfaceOptions) {
+
+    if (!hubInterfaceOptions.context || !hubInterfaceOptions.type || !hubInterfaceOptions.hubClient) {
+      throw new UserAgentError(`Hub Interface Options missing parameters`);
+    }
     
     this.context = hubInterfaceOptions.context;
     this.type = hubInterfaceOptions.type;
@@ -92,12 +96,7 @@ export default abstract class HubInterface {
       throw new UserAgentError('Hub Interface is not defined in the Hub Method Options');
     }
     this.hubInterface = hubInterfaceOptions.hubInterface;
-
-    if (!hubInterfaceOptions.commitStrategy) {
-      this.commitStrategy = CommitStrategyType.Basic;
-    } else {
-      this.commitStrategy = hubInterfaceOptions.commitStrategy;
-    }
+    this.commitStrategy = hubInterfaceOptions.commitStrategy;
   }
 
   public async addItem(payload: any): Promise<void> {

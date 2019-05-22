@@ -3,40 +3,41 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from './Identifier';
-import Commit from './hubSession/Commit';
-import UserAgentError from './UserAgentError';
-import CommitSigner from './hubSession/crypto/CommitSigner';
-import HubCommitWriteRequest from './hubSession/requests/HubCommitWriteRequest';
-import HubObjectQueryRequest from './hubSession/requests/HubObjectQueryRequest';
-import HubSession from './hubSession/HubSession';
+import Identifier from '../Identifier';
+import Commit from '../hubSession/Commit';
+import UserAgentError from '../UserAgentError';
+import CommitSigner from '../hubSession/crypto/CommitSigner';
+import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest';
+import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
+import HubSession from '../hubSession/HubSession';
+import IHubClient from './IHubClient';
 
 /**
  * Interface defining options for the
  * HubClient, such as hub Identifier and client Identifier.
  */
-export interface HubClientOptions {
+export class HubClientOptions {
   /**
    * The Identifier of the owner of the hub.
    */
-  hubOwner: Identifier;
+  hubOwner: Identifier | undefined;
 
   /**
    * The Identifier of the Client that wants to start hub session.
    */
-  clientIdentifier: Identifier;
+  clientIdentifier: Identifier | undefined;
 
   /**
    * Key reference to private key to be used to sign commits and create HubSession
    */
-  keyReference: string;
+  keyReference: string | undefined;
 }
 
 /**
  * Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
  * In a Hub.
  */
-export default class HubClient {
+export default class HubClient implements IHubClient {
 
   public hubOwner: Identifier;
 
@@ -49,6 +50,10 @@ export default class HubClient {
    * @param hubClientOptions hub client options used to create instance.
    */
   constructor (hubClientOptions: HubClientOptions) {
+
+    if (!hubClientOptions.hubOwner || !hubClientOptions.clientIdentifier || !hubClientOptions.keyReference) {
+      throw new UserAgentError(`HubClientOptions does not contain all properties`);
+    }
     this.hubOwner = hubClientOptions.hubOwner;
     this.clientIdentifier = hubClientOptions.clientIdentifier;
     this.keyReference = hubClientOptions.keyReference;

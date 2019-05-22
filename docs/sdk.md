@@ -15,15 +15,20 @@ self-issued id token.</p></dd>
 self-issued id token.</p></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
+<dt><a href="#HubClientOptions">HubClientOptions</a></dt>
+<dd><p>Interface defining options for the
+HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
-<dd><p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
-In a Hub.</p></dd>
+<dd></dd>
+<dt><a href="#HubClientOptions">HubClientOptions</a></dt>
+<dd><p>Class for defining options for the
+HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#Actions">Actions</a></dt>
 <dd><p>A Class that represents objects</p></dd>
 <dt><a href="#Collections">Collections</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
 <dt><a href="#HubInterface">HubInterface</a></dt>
-<dd><p>An Abstract Class for Hub Interfaces.</p></dd>
+<dd></dd>
 <dt><a href="#Permissions">Permissions</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Permissions in the Hub</p></dd>
 <dt><a href="#Profile">Profile</a></dt>
@@ -93,6 +98,12 @@ User Agent, such as resolver and register.</p></dd>
 <dt><a href="#CredentialType">CredentialType</a></dt>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
+<dt><a href="#HubClientOptions">HubClientOptions</a></dt>
+<dd><p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
+In a Hub.</p></dd>
+<dt><a href="#HubClientOptions">HubClientOptions</a></dt>
+<dd><p>Interface for HubClient class that manages which hub instance to create hub session with
+And commits and queries for objects in the hub session.</p></dd>
 <dt><a href="#CommitStrategyType">CommitStrategyType</a></dt>
 <dd><p>Constants that represent what type of commit strategy to be used.</p></dd>
 <dt><a href="#CommitStrategyType">CommitStrategyType</a></dt>
@@ -101,6 +112,8 @@ methods of a credential.</p></dd>
 <dd><p>Hub Operations</p></dd>
 <dt><a href="#Operation">Operation</a></dt>
 <dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
+<dt><a href="#HubInterfaceOptions">HubInterfaceOptions</a></dt>
+<dd><p>An Abstract Class for Hub Interfaces.</p></dd>
 <dt><a href="#SignatureFormat">SignatureFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
 </dl>
@@ -301,12 +314,16 @@ credential for the specified identifier.</p>
 <p>Class used to model crypto options</p>
 
 **Kind**: global class  
+<a name="HubClientOptions"></a>
+
+## HubClientOptions
+<p>Interface defining options for the
+HubClient, such as hub Identifier and client Identifier.</p>
+
+**Kind**: global class  
 <a name="HubClient"></a>
 
 ## HubClient
-<p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
-In a Hub.</p>
-
 **Kind**: global class  
 
 * [HubClient](#HubClient)
@@ -359,6 +376,13 @@ In a Hub.</p>
 creates a hubSession for hub instance that is available/online.</p>
 
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+<a name="HubClientOptions"></a>
+
+## HubClientOptions
+<p>Class for defining options for the
+HubClient, such as hub Identifier and client Identifier.</p>
+
+**Kind**: global class  
 <a name="Actions"></a>
 
 ## Actions
@@ -374,8 +398,6 @@ creates a hubSession for hub instance that is available/online.</p>
 <a name="HubInterface"></a>
 
 ## HubInterface
-<p>An Abstract Class for Hub Interfaces.</p>
-
 **Kind**: global class  
 <a name="new_HubInterface_new"></a>
 
@@ -1246,6 +1268,20 @@ User Agent, such as resolver and register.</p>
 methods of a credential.</p>
 
 **Kind**: global variable  
+<a name="HubClientOptions"></a>
+
+## HubClientOptions
+<p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
+In a Hub.</p>
+
+**Kind**: global variable  
+<a name="HubClientOptions"></a>
+
+## HubClientOptions
+<p>Interface for HubClient class that manages which hub instance to create hub session with
+And commits and queries for objects in the hub session.</p>
+
+**Kind**: global variable  
 <a name="CommitStrategyType"></a>
 
 ## CommitStrategyType
@@ -1268,6 +1304,12 @@ methods of a credential.</p>
 
 ## Operation
 <p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p>
+
+**Kind**: global variable  
+<a name="HubInterfaceOptions"></a>
+
+## HubInterfaceOptions
+<p>An Abstract Class for Hub Interfaces.</p>
 
 **Kind**: global variable  
 <a name="SignatureFormat"></a>
