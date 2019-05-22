@@ -116,10 +116,7 @@ export default class IdentifierDocument {
    * Used to control the the properties that are
    * output by JSON.parse.
    */
-  // tslint:disable-next-line:function-name
   public static fromJSON (obj: any): IdentifierDocument {
-    // const copy: any = this;
-    // this.publicKeys = copy.publicKey;
     const document = Object.create(IdentifierDocument.prototype);
     const result = Object.assign(document, obj, {
       publicKeys: (<any> obj).publicKey

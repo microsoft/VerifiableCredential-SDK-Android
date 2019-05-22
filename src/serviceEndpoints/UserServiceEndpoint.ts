@@ -8,7 +8,7 @@ const cloneDeep = require('lodash/fp/cloneDeep');
 
 const type = 'UserServiceEndpoint';
 /**
- * class to represent a host service endpoint.
+ * Class to represent a host service endpoint.
  */
 export default class UserServiceEndpoint extends ServiceEndpoint {
   
@@ -44,7 +44,6 @@ export default class UserServiceEndpoint extends ServiceEndpoint {
    * Used to control the the properties that are
    * output by JSON.parse.
    */
-  // tslint:disable-next-line:function-name
   public static fromJSON (object: any): ServiceEndpoint { 
     return new UserServiceEndpoint(object['@context'], object['instances']);
   }

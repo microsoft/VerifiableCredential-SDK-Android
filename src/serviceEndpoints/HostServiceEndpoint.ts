@@ -48,7 +48,6 @@ export default class HostServiceEndpoint extends ServiceEndpoint {
    * Used to control the the properties that are
    * output by JSON.parse.
    */
-  // tslint:disable-next-line:function-name
   public static fromJSON (object: any): HostServiceEndpoint { 
     return new HostServiceEndpoint(object['@context'], object['locations']);
   }

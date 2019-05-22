@@ -43,7 +43,7 @@ to allow simple testing and experimentation with the UserAgent SDK.</p></dd>
 <dd><p>abstract class to represent a service endpoint.
 based on: <a href="https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md">https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md</a>.</p></dd>
 <dt><a href="#UserServiceEndpoint">UserServiceEndpoint</a></dt>
-<dd><p>class to represent a host service endpoint.</p></dd>
+<dd><p>Class to represent a host service endpoint.</p></dd>
 <dt><a href="#UserAgentError">UserAgentError</a></dt>
 <dd><p>Base error class for the UserAgent.</p></dd>
 <dt><a href="#UserAgentOptions">UserAgentOptions</a></dt>
@@ -730,7 +730,7 @@ based on: https://github.com/decentralized-identity/identity-hub/blob/master/exp
 <a name="UserServiceEndpoint"></a>
 
 ## UserServiceEndpoint
-<p>class to represent a host service endpoint.</p>
+<p>Class to represent a host service endpoint.</p>
 
 **Kind**: global class  
 
