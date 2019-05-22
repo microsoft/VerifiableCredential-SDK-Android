@@ -1,4 +1,9 @@
-import base64url from "base64url";
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+ import base64url from "base64url";
 import JwsToken from "../../../src/crypto/protocols/jws/JwsToken";
 import { ISigningOptions } from "../../../src/crypto/keyStore/IKeyStore";
 import KeyStoreMem from "../../../src/crypto/keyStore/KeyStoreMem";
@@ -7,11 +12,6 @@ import DefaultCryptoSuite from "../../../src/crypto/plugin/DefaultCryptoSuite";
 import { ProtectionFormat } from "../../../src/crypto/keyStore/ProtectionFormat";
 import RsaPrivateKey from "../../../src/crypto/keys/rsa/RsaPrivateKey";
 import { KeyOperation } from "../../../src/crypto/keys/PublicKey";
-
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
 
 describe('JwsToken standard', () => {
   it('should run RFC 7515 A.2.  Example JWS Using RSASSA-PKCS1-v1_5 SHA-256', async () => {

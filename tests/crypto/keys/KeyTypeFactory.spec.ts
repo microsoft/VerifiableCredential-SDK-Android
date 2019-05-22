@@ -1,4 +1,8 @@
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+ 
 // tslint:disable-next-line: import-name
 import KeyTypeFactory, { KeyType } from '../../../src/crypto/keys/KeyType';
 

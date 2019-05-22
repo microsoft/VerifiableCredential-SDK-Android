@@ -1,4 +1,8 @@
-
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+ 
 import KeyStoreMem from '../../../src/crypto/keyStore/KeyStoreMem';
 import RsaPublicKey from '../../../src/crypto/keys/rsa/RsaPublicKey';
 import { KeyType } from '../../../src/crypto/keys/KeyType';
