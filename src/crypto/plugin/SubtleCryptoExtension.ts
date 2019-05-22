@@ -37,8 +37,23 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
     
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['sign']);
-    return await <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>algorithm: <RsaPssParams>algorithm, key, <ArrayBuffer>data);
+    return <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>algorithm: <RsaPssParams>algorithm, key, <ArrayBuffer>data);
   }
+          
+  /**
+   * Verify with JWK.
+   * @param algorithm used for verification
+   * @param jwk Json web key used to verify
+   * @param signature to verify
+   * @param payload which was signed
+   */
+   public async verifyByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, signature: BufferSource, payload: BufferSource): Promise<boolean> {
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
+    
+    const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['verify']);
+    return crypto.verify(jwk.kty === KeyType.EC ? <EcdsaParams>algorithm: <RsaPssParams>algorithm, key, signature, payload);
+   }  
           
   /**
    * Decrypt with a key referenced in the key store.

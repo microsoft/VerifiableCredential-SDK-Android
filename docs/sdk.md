@@ -581,6 +581,7 @@ Provides support for nodejs and browser</p>
 
 * [SubtleCryptoExtension](#SubtleCryptoExtension)
     * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
+    * [.verifyByJwk(algorithm, jwk, signature, payload)](#SubtleCryptoExtension+verifyByJwk)
     * [.decryptByKeyStore(algorithm, keyReference, cipher)](#SubtleCryptoExtension+decryptByKeyStore)
     * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
     * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
@@ -598,6 +599,20 @@ Provides support for nodejs and browser</p>
 | algorithm | <p>used for signature</p> |
 | keyReference | <p>points to key in the key store</p> |
 | data | <p>to sign</p> |
+
+<a name="SubtleCryptoExtension+verifyByJwk"></a>
+
+### subtleCryptoExtension.verifyByJwk(algorithm, jwk, signature, payload)
+<p>Verify with JWK.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for verification</p> |
+| jwk | <p>Json web key used to verify</p> |
+| signature | <p>to verify</p> |
+| payload | <p>which was signed</p> |
 
 <a name="SubtleCryptoExtension+decryptByKeyStore"></a>
 
@@ -896,6 +911,7 @@ Crypto calls always happen via CryptoFactory</p>
         * [.getHeader(newOptions, manadatory)](#JwsToken+getHeader)
         * [.getAlgorithm(newOptions, manadatory)](#JwsToken+getAlgorithm)
         * [.sign(signingKeyReference, payload, format, options)](#JwsToken+sign) ⇒
+        * [.verify(validationKey, options)](#JwsToken+verify) ⇒
         * [.getPayload()](#JwsToken+getPayload)
     * _static_
         * [.serializeJwsGeneralJson(token)](#JwsToken.serializeJwsGeneralJson)
@@ -1050,6 +1066,19 @@ Crypto calls always happen via CryptoFactory</p>
 | signingKeyReference | <p>Reference to the signing key.</p> |
 | payload | <p>to sign.</p> |
 | format | <p>of the final signature.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JwsToken+verify"></a>
+
+### jwsToken.verify(validationKey, options) ⇒
+<p>Verify the JWS signature.</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+**Returns**: <p>Signed payload in compact JWS format.</p>  
+
+| Param | Description |
+| --- | --- |
+| validationKey | <p>Public JWK key to validate the signature.</p> |
 | options | <p>used for the signature. These options override the options provided in the constructor.</p> |
 
 <a name="JwsToken+getPayload"></a>

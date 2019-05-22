@@ -18,7 +18,7 @@ export default interface IJwsCompact  {
   /**
    * The application-specific non-encoded payload.
    */
-  payload: string,
+  payload: Buffer,
 
   /**
    * The signature

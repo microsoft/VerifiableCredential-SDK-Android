@@ -20,7 +20,7 @@ export default interface IJwsGeneralJson {
   /**
    * The application-specific non-encoded payload.
    */
-  payload: string,
+  payload: Buffer,
 
   /**
    * The signatures

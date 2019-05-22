@@ -17,6 +17,15 @@ export default interface ISubtleCrypto extends SubtleCrypto {
    * @param data to sign
    */
    signByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, data: BufferSource): PromiseLike<ArrayBuffer>;  
+
+   /**
+   * Verify with JWK.
+   * @param algorithm used for verification
+   * @param jwk Json web key used to verify
+   * @param signature to verify
+   * @param payload which was signed
+   */
+   verifyByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, signature: BufferSource, payload: BufferSource): Promise<boolean>;
         
   /**
    * Decrypt with a key referenced in the key store.
