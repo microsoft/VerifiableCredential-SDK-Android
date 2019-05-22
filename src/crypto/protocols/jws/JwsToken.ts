@@ -396,7 +396,7 @@ export default class JwsToken implements IJwsGeneralJson {
     const jwsSignature = new JwsSignature();
 
     // Set payload
-    const jwsToken = new JwsToken();
+    const jwsToken = new JwsToken(this.options);
 
     // Get signing key public key
     const jwk: PublicKey = await <Promise<PublicKey>>keyStore.get(signingKeyReference, true);
@@ -498,6 +498,11 @@ export default class JwsToken implements IJwsGeneralJson {
       throw new Error(`Signature algorithm is not provided in the headers. Cannot validate signature.`)
     }
     const algorithm = CryptoHelpers.jwaToW3c(alg);
-    return validator.verifyByJwk(algorithm, validationKey, payloadSignature.signature, this.payload);
+    const encodedProtected = !protectedHeader ? '' : 
+      JoseHelpers.encodeHeader(protectedHeader);
+    const encodedContent = base64url.encode(this.payload);
+    const signatureInput = `${encodedProtected}.${encodedContent}`;
+
+    return validator.verifyByJwk(algorithm, validationKey, payloadSignature.signature, Buffer.from(signatureInput));
   }
 }

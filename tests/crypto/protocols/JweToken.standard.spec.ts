@@ -91,7 +91,7 @@ describe('JweToken standard', () => {
 
       // Decrypt
       const plaintext = await cipher.decrypt('key');
-      expect(plaintext).toEqual(payload);
+      expect(plaintext).toEqual(Buffer.from(payload));
     });
 
         it('should add kid and default alg', async () => {
@@ -133,7 +133,7 @@ describe('JweToken standard', () => {
 
             // Decrypt
             const plaintext = await cipher.decrypt('key');
-            expect(plaintext).toEqual(payload);
+            expect(plaintext).toEqual(Buffer.from(payload));
         });
         
 });

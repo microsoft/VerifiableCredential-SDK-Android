@@ -311,7 +311,7 @@ export default class JweToken implements IJweGeneralJson {
    * @returns Signed payload in compact Jwe format.
    */
 // tslint:disable-next-line: max-func-body-length
-   public async decrypt (decryptionKeyReference: string, options?: IEncryptionOptions): Promise<string> {
+   public async decrypt (decryptionKeyReference: string, options?: IEncryptionOptions): Promise<Buffer> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
 
     // Get the encryptor extensions
@@ -363,7 +363,7 @@ export default class JweToken implements IJweGeneralJson {
   };
 
   const plaintext =  await decryptor.decryptByJwk(algorithm, contentJwk, Buffer.concat([this.ciphertext, this.tag]));
-  return plaintext.toString();
+  return Buffer.from(plaintext);
   }
 
   private async decryptContentEncryptionKey(recipient: IJweRecipient, decryptor: ISubtleCrypto, decryptionKeyReference: string): Promise<Buffer> {
