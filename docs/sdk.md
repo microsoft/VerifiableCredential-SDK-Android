@@ -20,6 +20,8 @@ self-issued id token.</p></dd>
 HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
 <dd></dd>
+<dt><a href="#HubObject">HubObject</a></dt>
+<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Class for defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
@@ -376,6 +378,33 @@ HubClient, such as hub Identifier and client Identifier.</p>
 creates a hubSession for hub instance that is available/online.</p>
 
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+<a name="HubObject"></a>
+
+## HubObject
+<p>Class that represents an object in a hub.</p>
+
+**Kind**: global class  
+
+* [HubObject](#HubObject)
+    * [new HubObject(objectMetadata)](#new_HubObject_new)
+    * [.getPayload()](#HubObject+getPayload)
+
+<a name="new_HubObject_new"></a>
+
+### new HubObject(objectMetadata)
+<p>Create an instance for Hub Object using hub object's metadata.</p>
+
+
+| Param | Description |
+| --- | --- |
+| objectMetadata | <p>object metadata that represents an object in a hub.</p> |
+
+<a name="HubObject+getPayload"></a>
+
+### hubObject.getPayload()
+<p>If payload is not defined, get the payload from hub session using metadata.</p>
+
+**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
 <a name="HubClientOptions"></a>
 
 ## HubClientOptions
