@@ -26,7 +26,7 @@ export default class CryptoFactory {
   public keyStore: IKeyStore;
 
   /**
-   * LAbel for default algorithm
+   * Label for default algorithm
    */
   private readonly defaultAlgorithm = '*';
 
@@ -44,12 +44,12 @@ export default class CryptoFactory {
     // Set default API
     crypto = new SubtleCryptoOperations();
     }
-    this.keyEncrypters = <CryptoSuiteMap>{defaultAlgorithm: crypto };
-    this.sharedKeyEncrypters =<CryptoSuiteMap>{defaultAlgorithm: crypto };
-    this.symmetricEncrypter = <CryptoSuiteMap>{defaultAlgorithm: crypto };
-    this.messageSigners = <CryptoSuiteMap>{defaultAlgorithm: crypto };
-    this.macSigners = <CryptoSuiteMap>{defaultAlgorithm: crypto };
-    this.messageDigests = <CryptoSuiteMap>{defaultAlgorithm: crypto };
+    this.keyEncrypters = <CryptoSuiteMap>{'*': crypto };
+    this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
+    this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
+    this.messageSigners = <CryptoSuiteMap>{'*': crypto };
+    this.macSigners = <CryptoSuiteMap>{'*': crypto };
+    this.messageDigests = <CryptoSuiteMap>{'*': crypto };
   }
 
   /**
