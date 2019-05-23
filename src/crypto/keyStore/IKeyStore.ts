@@ -52,7 +52,6 @@ export interface IEncryptionOptions extends IKeyStoreOptions {
    */
   contentEncryptionKey?: Buffer,
 
-
   /**
    * The initial vector.
    * Remark: Only used for testing with reference data.
@@ -70,9 +69,9 @@ export default interface IKeyStore {
    * Returns the key associated with the specified
    * key reference.
    * @param keyIdentifier for which to return the key.
-   * @param publicKeyOnly True if only the public key is needed.
+   * @param [publicKeyOnly] True if only the public key is needed.
    */
-  get (keyReference: string, publicKeyOnly: boolean): Promise<Buffer | PrivateKey | PublicKey>;
+  get (keyReference: string, publicKeyOnly?: boolean): Promise<Buffer | PrivateKey | PublicKey>;
 
   /**
    * Saves the specified key to the key store using

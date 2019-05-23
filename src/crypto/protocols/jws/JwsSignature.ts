@@ -25,6 +25,9 @@ export default class JwsSignature implements IJwsSignature {
    */
   public signature: Buffer;
 
+  /**
+   * Creates instance of @class JwsSignature
+   */
   constructor() {
     this.signature = Buffer.from('');
   }

@@ -8,6 +8,22 @@
   * Class for JOSE constants
   */
  export default class JoseConstants {
+   
+  /**
+   * Define JOSE protocol name
+   */
+   public static Jose = 'JOSE';
+   
+  /**
+   * Define JWE protocol name
+   */
+   public static Jwe = 'JWE';
+   
+  /**
+   * Define JWS protocol name
+   */
+   public static Jws = 'JWS';
+
   /**
    * Define JOSE algorithm constants
    */

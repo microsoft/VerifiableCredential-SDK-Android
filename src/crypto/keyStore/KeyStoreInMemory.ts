@@ -10,16 +10,16 @@ import IKeyStore from './IKeyStore';
 /**
  * Class defining methods and properties for a light KeyStore
  */
-export default class KeyStoreMem implements IKeyStore {
+export default class KeyStoreInMemory implements IKeyStore {
   private store: Map<string, Buffer | PrivateKey | PublicKey> = new Map<string, Buffer | PrivateKey | PublicKey>();
 
   /**
    * Returns the key associated with the specified
    * key identifier.
    * @param keyReference for which to return the key.
-   * @param publicKeyOnly True if only the public key is needed.
+   * @param [publicKeyOnly] True if only the public key is needed.
    */
-  get (keyReference: string, publicKeyOnly: boolean): Promise<Buffer | PrivateKey | PublicKey> {
+  get (keyReference: string, publicKeyOnly: boolean = true): Promise<Buffer | PrivateKey | PublicKey> {
     return new Promise((resolve, reject) => {
       if (this.store.has(keyReference)) {
         const key: any = this.store.get(keyReference);

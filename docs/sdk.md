@@ -25,19 +25,20 @@ self-issued id token.</p></dd>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
 <dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code>PublicKey</code></dt>
 <dd><p>Represents an RSA public key</p></dd>
-<dt><a href="#KeyStoreMem">KeyStoreMem</a></dt>
+<dt><a href="#KeyStoreInMemory">KeyStoreInMemory</a></dt>
 <dd><p>Class defining methods and properties for a light KeyStore</p></dd>
 <dt><a href="#CryptoFactory">CryptoFactory</a></dt>
 <dd><p>Utility class to handle all CryptoSuite dependency injection</p></dd>
-<dt><a href="#CryptoSuite">CryptoSuite</a></dt>
+<dt><a href="#CryptoOperations">CryptoOperations</a></dt>
 <dd><p>Interface for the Crypto Algorithms Plugins</p></dd>
-<dt><a href="#DefaultCryptoSuite">DefaultCryptoSuite</a></dt>
-<dd><p>Default crypto suite implementing the default plugable crypto layer</p></dd>
-<dt><a href="#SubtleCryptoDefault">SubtleCryptoDefault</a></dt>
-<dd><p>Subtle crypto class.
-Provides support for nodejs and browser</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
-<dd><p>Default crypto suite</p></dd>
+<dd><p>The class extends the @class SubtleCrypto with addtional methods.
+ Adds methods to work with key references.
+ Extends SubtleCrypto to work with JWK keys.</p></dd>
+<dt><a href="#SubtleCryptoOperations">SubtleCryptoOperations</a></dt>
+<dd><p>Default crypto suite implementing the default plugable crypto layer</p></dd>
+<dt><a href="#CryptoProtocolError">CryptoProtocolError</a></dt>
+<dd><p>Base error class for the crypto protocols.</p></dd>
 <dt><a href="#JoseConstants">JoseConstants</a></dt>
 <dd><p>Class for JOSE constants</p></dd>
 <dt><a href="#JoseHelpers">JoseHelpers</a></dt>
@@ -105,13 +106,13 @@ User Agent, such as resolver and register.</p></dd>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
 <dt><a href="#KeyType">KeyType</a></dt>
-<dd><p>enum to model key types</p></dd>
+<dd><p>Enumeration to model key types.</p></dd>
 <dt><a href="#KeyType">KeyType</a></dt>
-<dd><p>Factory class to create KeyType objects</p></dd>
+<dd><p>Factory class to create @enum KeyType objects</p></dd>
 <dt><a href="#KeyUse">KeyUse</a></dt>
-<dd><p>enum to model key use</p></dd>
+<dd><p>Enumeration to model key use.</p></dd>
 <dt><a href="#KeyUse">KeyUse</a></dt>
-<dd><p>Factory class to create KeyUse objects</p></dd>
+<dd><p>Factory class to create @enum KeyUse objects.</p></dd>
 <dt><a href="#KeyOperation">KeyOperation</a></dt>
 <dd><p>JWK key operations</p></dd>
 <dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
@@ -317,6 +318,13 @@ credential for the specified identifier.</p>
 
 **Kind**: global class  
 **Extends**: [<code>PrivateKey</code>](#PrivateKey)  
+<a name="EcPrivateKey+getPublicKey"></a>
+
+### ecPrivateKey.getPublicKey() ⇒
+<p>Gets the corresponding public key</p>
+
+**Kind**: instance method of [<code>EcPrivateKey</code>](#EcPrivateKey)  
+**Returns**: <p>The corresponding [PublicKey](PublicKey)</p>  
 <a name="EcPublicKey"></a>
 
 ## EcPublicKey ⇐ <code>PublicKey</code>
@@ -348,10 +356,11 @@ credential for the specified identifier.</p>
 **Extends**: [<code>PrivateKey</code>](#PrivateKey)  
 <a name="RsaPrivateKey+getPublicKey"></a>
 
-### rsaPrivateKey.getPublicKey()
-<p>Get the RSA public key</p>
+### rsaPrivateKey.getPublicKey() ⇒
+<p>Gets the corresponding public key</p>
 
 **Kind**: instance method of [<code>RsaPrivateKey</code>](#RsaPrivateKey)  
+**Returns**: <p>The corresponding [PublicKey](PublicKey)</p>  
 <a name="RsaPublicKey"></a>
 
 ## RsaPublicKey ⇐ <code>PublicKey</code>
@@ -359,44 +368,44 @@ credential for the specified identifier.</p>
 
 **Kind**: global class  
 **Extends**: <code>PublicKey</code>  
-<a name="KeyStoreMem"></a>
+<a name="KeyStoreInMemory"></a>
 
-## KeyStoreMem
+## KeyStoreInMemory
 <p>Class defining methods and properties for a light KeyStore</p>
 
 **Kind**: global class  
 
-* [KeyStoreMem](#KeyStoreMem)
-    * [.get(keyReference, publicKeyOnly)](#KeyStoreMem+get)
-    * [.list()](#KeyStoreMem+list)
-    * [.save(keyIdentifier, key)](#KeyStoreMem+save)
+* [KeyStoreInMemory](#KeyStoreInMemory)
+    * [.get(keyReference, [publicKeyOnly])](#KeyStoreInMemory+get)
+    * [.list()](#KeyStoreInMemory+list)
+    * [.save(keyIdentifier, key)](#KeyStoreInMemory+save)
 
-<a name="KeyStoreMem+get"></a>
+<a name="KeyStoreInMemory+get"></a>
 
-### keyStoreMem.get(keyReference, publicKeyOnly)
+### keyStoreInMemory.get(keyReference, [publicKeyOnly])
 <p>Returns the key associated with the specified
 key identifier.</p>
 
-**Kind**: instance method of [<code>KeyStoreMem</code>](#KeyStoreMem)  
+**Kind**: instance method of [<code>KeyStoreInMemory</code>](#KeyStoreInMemory)  
 
-| Param | Description |
-| --- | --- |
-| keyReference | <p>for which to return the key.</p> |
-| publicKeyOnly | <p>True if only the public key is needed.</p> |
+| Param | Default | Description |
+| --- | --- | --- |
+| keyReference |  | <p>for which to return the key.</p> |
+| [publicKeyOnly] | <code>true</code> | <p>True if only the public key is needed.</p> |
 
-<a name="KeyStoreMem+list"></a>
+<a name="KeyStoreInMemory+list"></a>
 
-### keyStoreMem.list()
+### keyStoreInMemory.list()
 <p>Lists all keys with their corresponding key ids</p>
 
-**Kind**: instance method of [<code>KeyStoreMem</code>](#KeyStoreMem)  
-<a name="KeyStoreMem+save"></a>
+**Kind**: instance method of [<code>KeyStoreInMemory</code>](#KeyStoreInMemory)  
+<a name="KeyStoreInMemory+save"></a>
 
-### keyStoreMem.save(keyIdentifier, key)
+### keyStoreInMemory.save(keyIdentifier, key)
 <p>Saves the specified key to the key store using
 the key identifier.</p>
 
-**Kind**: instance method of [<code>KeyStoreMem</code>](#KeyStoreMem)  
+**Kind**: instance method of [<code>KeyStoreInMemory</code>](#KeyStoreInMemory)  
 
 | Param | Description |
 | --- | --- |
@@ -503,86 +512,18 @@ Used for DH algorithms</p>
 | --- | --- |
 | name | <p>The name of the algorithm</p> |
 
-<a name="CryptoSuite"></a>
+<a name="CryptoOperations"></a>
 
-## CryptoSuite
+## CryptoOperations
 <p>Interface for the Crypto Algorithms Plugins</p>
 
 **Kind**: global class  
-<a name="DefaultCryptoSuite"></a>
-
-## DefaultCryptoSuite
-<p>Default crypto suite implementing the default plugable crypto layer</p>
-
-**Kind**: global class  
-
-* [DefaultCryptoSuite](#DefaultCryptoSuite)
-    * [.getKekEncrypters()](#DefaultCryptoSuite+getKekEncrypters) ⇒
-    * [.getSharedKeyEncrypters()](#DefaultCryptoSuite+getSharedKeyEncrypters) ⇒
-    * [.getSymmetricEncrypters()](#DefaultCryptoSuite+getSymmetricEncrypters) ⇒
-    * [.getMessageSigners()](#DefaultCryptoSuite+getMessageSigners) ⇒
-    * [.getMacSigners()](#DefaultCryptoSuite+getMacSigners) ⇒
-    * [.getMessageDigests()](#DefaultCryptoSuite+getMessageDigests) ⇒
-
-<a name="DefaultCryptoSuite+getKekEncrypters"></a>
-
-### defaultCryptoSuite.getKekEncrypters() ⇒
-<p>Gets all of the key encryption Algorithms from the plugin</p>
-
-**Kind**: instance method of [<code>DefaultCryptoSuite</code>](#DefaultCryptoSuite)  
-**Returns**: <p>a subtle crypto object for key encryption/decryption</p>  
-<a name="DefaultCryptoSuite+getSharedKeyEncrypters"></a>
-
-### defaultCryptoSuite.getSharedKeyEncrypters() ⇒
-<p>Gets all of the key sharing encryption Algorithms from the plugin</p>
-
-**Kind**: instance method of [<code>DefaultCryptoSuite</code>](#DefaultCryptoSuite)  
-**Returns**: <p>a subtle crypto object for key sharing encryption/decryption</p>  
-<a name="DefaultCryptoSuite+getSymmetricEncrypters"></a>
-
-### defaultCryptoSuite.getSymmetricEncrypters() ⇒
-<p>Get all of the symmetric encrypter algorithms from the plugin</p>
-
-**Kind**: instance method of [<code>DefaultCryptoSuite</code>](#DefaultCryptoSuite)  
-**Returns**: <p>a subtle crypto object for symmetric encryption/decryption</p>  
-<a name="DefaultCryptoSuite+getMessageSigners"></a>
-
-### defaultCryptoSuite.getMessageSigners() ⇒
-<p>Gets all of the message signing Algorithms from the plugin</p>
-
-**Kind**: instance method of [<code>DefaultCryptoSuite</code>](#DefaultCryptoSuite)  
-**Returns**: <p>a subtle crypto object for message signing</p>  
-<a name="DefaultCryptoSuite+getMacSigners"></a>
-
-### defaultCryptoSuite.getMacSigners() ⇒
-<p>Gets all of the MAC signing Algorithms from the plugin. 
-Will be used for primitive operations such as key generation.</p>
-
-**Kind**: instance method of [<code>DefaultCryptoSuite</code>](#DefaultCryptoSuite)  
-**Returns**: <p>a subtle crypto object for message signing</p>  
-<a name="DefaultCryptoSuite+getMessageDigests"></a>
-
-### defaultCryptoSuite.getMessageDigests() ⇒
-<p>Gets all of the message digest Algorithms from the plugin.</p>
-
-**Kind**: instance method of [<code>DefaultCryptoSuite</code>](#DefaultCryptoSuite)  
-**Returns**: <p>a subtle crypto object for message digests</p>  
-<a name="SubtleCryptoDefault"></a>
-
-## SubtleCryptoDefault
-<p>Subtle crypto class.
-Provides support for nodejs and browser</p>
-
-**Kind**: global class  
-<a name="new_SubtleCryptoDefault_new"></a>
-
-### new SubtleCryptoDefault()
-<p>Constructs a new instance of the class.</p>
-
 <a name="SubtleCryptoExtension"></a>
 
 ## SubtleCryptoExtension
-<p>Default crypto suite</p>
+<p>The class extends the @class SubtleCrypto with addtional methods.
+ Adds methods to work with key references.
+ Extends SubtleCrypto to work with JWK keys.</p>
 
 **Kind**: global class  
 
@@ -661,6 +602,88 @@ The referenced key must be a jwk key.</p>
 | jwk | <p>Json web key public key</p> |
 | data | <p>to encrypt</p> |
 
+<a name="SubtleCryptoOperations"></a>
+
+## SubtleCryptoOperations
+<p>Default crypto suite implementing the default plugable crypto layer</p>
+
+**Kind**: global class  
+
+* [SubtleCryptoOperations](#SubtleCryptoOperations)
+    * [.getKeyEncrypters()](#SubtleCryptoOperations+getKeyEncrypters) ⇒
+    * [.getSharedKeyEncrypters()](#SubtleCryptoOperations+getSharedKeyEncrypters) ⇒
+    * [.getSymmetricEncrypters()](#SubtleCryptoOperations+getSymmetricEncrypters) ⇒
+    * [.getMessageSigners()](#SubtleCryptoOperations+getMessageSigners) ⇒
+    * [.messageAuthenticationCodeSigners()](#SubtleCryptoOperations+messageAuthenticationCodeSigners) ⇒
+    * [.getMessageDigests()](#SubtleCryptoOperations+getMessageDigests) ⇒
+    * [.getSubtleCrypto()](#SubtleCryptoOperations+getSubtleCrypto)
+
+<a name="SubtleCryptoOperations+getKeyEncrypters"></a>
+
+### subtleCryptoOperations.getKeyEncrypters() ⇒
+<p>Gets all of the key encryption Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for key encryption/decryption</p>  
+<a name="SubtleCryptoOperations+getSharedKeyEncrypters"></a>
+
+### subtleCryptoOperations.getSharedKeyEncrypters() ⇒
+<p>Gets all of the key sharing encryption Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for key sharing encryption/decryption</p>  
+<a name="SubtleCryptoOperations+getSymmetricEncrypters"></a>
+
+### subtleCryptoOperations.getSymmetricEncrypters() ⇒
+<p>Get all of the symmetric encrypter algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for symmetric encryption/decryption</p>  
+<a name="SubtleCryptoOperations+getMessageSigners"></a>
+
+### subtleCryptoOperations.getMessageSigners() ⇒
+<p>Gets all of the message signing Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for message signing</p>  
+<a name="SubtleCryptoOperations+messageAuthenticationCodeSigners"></a>
+
+### subtleCryptoOperations.messageAuthenticationCodeSigners() ⇒
+<p>Gets all of the MAC signing Algorithms from the plugin. 
+Will be used for primitive operations such as key generation.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for message signing</p>  
+<a name="SubtleCryptoOperations+getMessageDigests"></a>
+
+### subtleCryptoOperations.getMessageDigests() ⇒
+<p>Gets all of the message digest Algorithms from the plugin.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for message digests</p>  
+<a name="SubtleCryptoOperations+getSubtleCrypto"></a>
+
+### subtleCryptoOperations.getSubtleCrypto()
+<p>Returns the @class SubtleCrypto ipmplementation for the current environment</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+<a name="CryptoProtocolError"></a>
+
+## CryptoProtocolError
+<p>Base error class for the crypto protocols.</p>
+
+**Kind**: global class  
+<a name="new_CryptoProtocolError_new"></a>
+
+### new CryptoProtocolError(protocol, message)
+<p>Create instance of @class CryptoProtocolError</p>
+
+
+| Param | Description |
+| --- | --- |
+| protocol | <p>name</p> |
+| message | <p>for the error</p> |
+
 <a name="JoseConstants"></a>
 
 ## JoseConstants
@@ -677,7 +700,7 @@ The referenced key must be a jwk key.</p>
 * [JoseHelpers](#JoseHelpers)
     * [.headerHasElements(header)](#JoseHelpers.headerHasElements)
     * [.encodeHeader(header, toBase64Url)](#JoseHelpers.encodeHeader)
-    * [.getOptionsProperty(propertyName, initialOptions, overrideOptions, manadatory)](#JoseHelpers.getOptionsProperty)
+    * [.getOptionsProperty(propertyName, [initialOptions], [overrideOptions], [mandatory])](#JoseHelpers.getOptionsProperty)
 
 <a name="JoseHelpers.headerHasElements"></a>
 
@@ -693,7 +716,9 @@ The referenced key must be a jwk key.</p>
 <a name="JoseHelpers.encodeHeader"></a>
 
 ### JoseHelpers.encodeHeader(header, toBase64Url)
-<p>Encode the header to JSON and base 64 url</p>
+<p>Encode the header to JSON and base 64 url.
+The Typescript Map construct does not allow for JSON.stringify returning {}.
+TSMap.toJSON prepares a map so it can be serialized as a dictionary.</p>
 
 **Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
 
@@ -704,7 +729,7 @@ The referenced key must be a jwk key.</p>
 
 <a name="JoseHelpers.getOptionsProperty"></a>
 
-### JoseHelpers.getOptionsProperty(propertyName, initialOptions, overrideOptions, manadatory)
+### JoseHelpers.getOptionsProperty(propertyName, [initialOptions], [overrideOptions], [mandatory])
 <p>Get the Protected to be used from the options</p>
 
 **Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
@@ -712,9 +737,9 @@ The referenced key must be a jwk key.</p>
 | Param | Default | Description |
 | --- | --- | --- |
 | propertyName |  | <p>Property name in options</p> |
-| initialOptions |  | <p>The initial set of options</p> |
-| overrideOptions |  | <p>Options passed in after the constructure</p> |
-| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+| [initialOptions] |  | <p>The initial set of options</p> |
+| [overrideOptions] |  | <p>Options passed in after the constructure</p> |
+| [mandatory] | <code>true</code> | <p>True if property is required</p> |
 
 <a name="JweRecipient"></a>
 
@@ -828,13 +853,13 @@ The key type enforces the key encryption algorithm.
 The options can override certain algorithm choices.</p>
 
 **Kind**: instance method of [<code>JweToken</code>](#JweToken)  
-**Returns**: <p>Signed payload in compact Jwe format.</p>  
+**Returns**: <p>JweToken with encrypted payload.</p>  
 
 | Param | Description |
 | --- | --- |
 | recipients | <p>List of recipients' public keys.</p> |
-| payload | <p>to sign.</p> |
-| format | <p>of the final signature.</p> |
+| payload | <p>to encrypt.</p> |
+| format | <p>of the final serialization.</p> |
 | options | <p>used for the signature. These options override the options provided in the constructor.</p> |
 
 <a name="JweToken+decrypt"></a>
@@ -892,7 +917,7 @@ The options can override certain algorithm choices.</p>
 <a name="new_JwsSignature_new"></a>
 
 ### new JwsSignature()
-<p>The JWS signature.</p>
+<p>Creates instance of @class JwsSignature</p>
 
 <a name="JwsToken"></a>
 
@@ -1147,14 +1172,14 @@ Crypto calls always happen via CryptoFactory</p>
 **Kind**: global class  
 
 * [CryptoHelpers](#CryptoHelpers)
-    * [.getSubtleCryptoForTheAlgorithm(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCryptoForTheAlgorithm)
-    * [.jwaToW3c(jwaAlgorithmName)](#CryptoHelpers.jwaToW3c)
-    * [.w3cToJwa(algorithmName, hash)](#CryptoHelpers.w3cToJwa)
+    * [.getSubtleCryptoForAlgorithm(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCryptoForAlgorithm)
+    * [.jwaToWebCrypto(jwaAlgorithmName)](#CryptoHelpers.jwaToWebCrypto)
+    * [.webCryptoToJwa(algorithmName, hash)](#CryptoHelpers.webCryptoToJwa)
     * [.getKeyImportAlgorithm(algorithm)](#CryptoHelpers.getKeyImportAlgorithm)
 
-<a name="CryptoHelpers.getSubtleCryptoForTheAlgorithm"></a>
+<a name="CryptoHelpers.getSubtleCryptoForAlgorithm"></a>
 
-### CryptoHelpers.getSubtleCryptoForTheAlgorithm(cryptoFactory, algorithmName, hash)
+### CryptoHelpers.getSubtleCryptoForAlgorithm(cryptoFactory, algorithmName, hash)
 <p>The API which implements the requested algorithm</p>
 
 **Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
@@ -1165,9 +1190,9 @@ Crypto calls always happen via CryptoFactory</p>
 | algorithmName | <p>Requested algorithm</p> |
 | hash | <p>Optional hash for the algorithm</p> |
 
-<a name="CryptoHelpers.jwaToW3c"></a>
+<a name="CryptoHelpers.jwaToWebCrypto"></a>
 
-### CryptoHelpers.jwaToW3c(jwaAlgorithmName)
+### CryptoHelpers.jwaToWebCrypto(jwaAlgorithmName)
 <p>Map the JWA algorithm to the W3C crypto API algorithm.
 The method restricts the supported algorithms. This can easily be extended.
 Based on https://<a href="http://www.w3.org/TR/WebCryptoAPI/">www.w3.org/TR/WebCryptoAPI/</a> A. Mapping between JSON Web Key / JSON Web Algorithm</p>
@@ -1178,9 +1203,9 @@ Based on https://<a href="http://www.w3.org/TR/WebCryptoAPI/">www.w3.org/TR/WebC
 | --- | --- |
 | jwaAlgorithmName | <p>Requested algorithm</p> |
 
-<a name="CryptoHelpers.w3cToJwa"></a>
+<a name="CryptoHelpers.webCryptoToJwa"></a>
 
-### CryptoHelpers.w3cToJwa(algorithmName, hash)
+### CryptoHelpers.webCryptoToJwa(algorithmName, hash)
 <p>Maps the subtle crypto algorithm name to the JWA name</p>
 
 **Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
@@ -1743,25 +1768,25 @@ methods of a credential.</p>
 <a name="KeyType"></a>
 
 ## KeyType
-<p>enum to model key types</p>
+<p>Enumeration to model key types.</p>
 
 **Kind**: global variable  
 <a name="KeyType"></a>
 
 ## KeyType
-<p>Factory class to create KeyType objects</p>
+<p>Factory class to create @enum KeyType objects</p>
 
 **Kind**: global variable  
 <a name="KeyUse"></a>
 
 ## KeyUse
-<p>enum to model key use</p>
+<p>Enumeration to model key use.</p>
 
 **Kind**: global variable  
 <a name="KeyUse"></a>
 
 ## KeyUse
-<p>Factory class to create KeyUse objects</p>
+<p>Factory class to create @enum KeyUse objects.</p>
 
 **Kind**: global variable  
 <a name="KeyOperation"></a>

@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
  
-import KeyStoreMem from '../../../src/crypto/keyStore/KeyStoreMem';
+import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
 import RsaPublicKey from '../../../src/crypto/keys/rsa/RsaPublicKey';
 import { KeyType } from '../../../src/crypto/keys/KeyType';
 import PublicKey from '../../../src/crypto/keys/PublicKey';
 
-describe('KeyStoreMem', () => {
+describe('KeyStoreInMemory', () => {
 
   it('should list all keys in the store', async () => {
-    const keyStore = new KeyStoreMem();
+    const keyStore = new KeyStoreInMemory();
     const key1: RsaPublicKey = {
       kty: KeyType.RSA,
       kid: 'kid1',
@@ -44,7 +44,7 @@ describe('KeyStoreMem', () => {
       k: 'AAEE'
     };
 
-    const keyStore = new KeyStoreMem();
+    const keyStore = new KeyStoreInMemory();
     await keyStore.save('key', jwk);
     let throwCaught = false;
     const signature = await keyStore.get('key', true)

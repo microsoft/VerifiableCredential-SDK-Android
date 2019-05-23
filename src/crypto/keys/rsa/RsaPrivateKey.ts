@@ -41,9 +41,10 @@ export default class RsaPrivateKey extends RsaPublicKey implements PrivateKey {
   public qi: string | undefined;
 
   /**
-   * Get the RSA public key
+   * Gets the corresponding public key
+   * @returns The corresponding {@link PublicKey}
    */
-  public getPublicKey (): PublicKey {
+   public getPublicKey (): PublicKey {
     return <RsaPublicKey> {
       kty: this.kty,
       kid: this.kid,

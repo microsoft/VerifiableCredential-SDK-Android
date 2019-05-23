@@ -7,7 +7,7 @@ import CryptoFactory from '../../plugin/CryptoFactory';
 import PublicKey from '../../keys/PublicKey';
 import IJweGeneralJson, { JweHeader } from './IJweGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import { IEncryptionOptions } from '../../keystore/IKeyStore';
+import { IEncryptionOptions } from '../../keyStore/IKeyStore';
 import JweRecipient from './JweRecipient';
 import { TSMap } from 'typescript-map'
 import JoseHelpers from '../jose/JoseHelpers';
@@ -18,6 +18,7 @@ import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import base64url from 'base64url';
 import IJweRecipient from './IJweRecipient';
 import ISubtleCrypto from '../../plugin/ISubtleCrypto';
+import CryptoProtocolError from '../CryptoProtocolError';
 
 /**
  * Class for containing Jwe token operations.
@@ -76,7 +77,7 @@ export default class JweToken implements IJweGeneralJson {
     this.options = options;
   }
 
-  //#region serialization
+//#region serialization
   /**
    * Serialize a Jwe token object from a token
    * @param format Optional specify the serialization format. If not specified, use default format.
@@ -95,7 +96,7 @@ export default class JweToken implements IJweGeneralJson {
           return JweToken.serializeJweFlatJson(this);
     }
     
-    throw new Error(`The format '${this.format}' is not supported`);
+    throw new CryptoProtocolError(JoseConstants.Jwe, `The format '${this.format}' is not supported`);
   }
 
   /**
@@ -174,7 +175,7 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   //#endregion
-
+//#region options section
   /**
    * Get the CryptoFactory to be used
    * @param newOptions Options passed in after the constructure
@@ -203,24 +204,6 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   /**
-   * Get the default protected header to be used from the options
-   * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
-   */
-  //private getProtected(newOptions?: IEncryptionOptions, manadatory: boolean = false): JweHeader {
-  //  return JoseHelpers.getOptionsProperty<JweHeader>('protected', this.options, newOptions, manadatory);
-  //}
-
-  /**
-   * Get the default header to be used from the options
-   * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
-   */
-  //private getHeader(newOptions?: IEncryptionOptions, manadatory: boolean = false): JweHeader {
-  //  return JoseHelpers.getOptionsProperty<JweHeader>('header', this.options, newOptions,manadatory);
-  //}
-
-  /**
    * Get the content encryption algorithm from the options
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
@@ -228,18 +211,18 @@ export default class JweToken implements IJweGeneralJson {
   private getContentEncryptionAlgorithm(newOptions?: IEncryptionOptions, manadatory: boolean = true): string {
     return JoseHelpers.getOptionsProperty<string>('contentEncryptionAlgorithm', this.options, newOptions, manadatory);
   }
-  //#endregion
-  //#region encrypt
+//#endregion
+//#region encryption functions
   /**
    * Encrypt content using the given public keys in JWK format.
    * The key type enforces the key encryption algorithm.
    * The options can override certain algorithm choices.
    * 
    * @param recipients List of recipients' public keys.
-   * @param payload to sign.
-   * @param format of the final signature.
+   * @param payload to encrypt.
+   * @param format of the final serialization.
    * @param options used for the signature. These options override the options provided in the constructor.
-   * @returns Signed payload in compact Jwe format.
+   * @returns JweToken with encrypted payload.
    */
   public async encrypt (recipients: PublicKey[], payload: string, format: ProtectionFormat, options?: IEncryptionOptions): Promise<JweToken> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
@@ -262,8 +245,8 @@ export default class JweToken implements IJweGeneralJson {
       jweToken.iv = this.getInitialVector(options);
 
       // Needs to be improved when alg is not provided.
-            // Decide key encryption algorithm based on given JWK.
-            let publicKey: PublicKey = recipients[0];
+      // Decide key encryption algorithm based on given JWK.
+      let publicKey: PublicKey = recipients[0];
       let keyEncryptionAlgorithm: string  | undefined = publicKey.alg;
       if (!keyEncryptionAlgorithm) {
         if (publicKey.kty == KeyType.EC) {
@@ -301,11 +284,10 @@ export default class JweToken implements IJweGeneralJson {
       // Get key encrypter and encrypt the content key
       jweRecipient.encrypted_key = Buffer.from(
         await encryptor.encryptByJwk(
-          CryptoHelpers.jwaToW3c(<string>keyEncryptionAlgorithm),
+          CryptoHelpers.jwaToWebCrypto(<string>keyEncryptionAlgorithm),
           publicKey,
           contentEncryptionKey));
     }
-
 
     // encrypt content
     const contentEncryptorKey: JsonWebKey = {
@@ -315,17 +297,17 @@ export default class JweToken implements IJweGeneralJson {
 
     const encodedAad = base64url.encode(jweToken.aad);
     const cipherText = await encryptor.encryptByJwk(
-      CryptoHelpers.jwaToW3c(contentEncryptionAlgorithm, new Uint8Array(jweToken.iv), new Uint8Array(Buffer.from(encodedAad))),
+      CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm, new Uint8Array(jweToken.iv), new Uint8Array(Buffer.from(encodedAad))),
       contentEncryptorKey,
       Buffer.from(payload));
 
     jweToken.tag = Buffer.from(cipherText, cipherText.byteLength - 16);
     jweToken.ciphertext = Buffer.from(cipherText, 0 , cipherText.byteLength - 16);
-    //jweToken.ciphertext = Buffer.from(cipherText);
       
     return jweToken;
   }
   //#endregion
+
   //#region decrypt
   /**
    * Decrypt the content.
@@ -363,7 +345,7 @@ export default class JweToken implements IJweGeneralJson {
 
   if (!contentEncryptionKey) {
     // try to decrypt every key
-    for (let inx = 0 ; inx < this.recipients.length ; inx ++) {
+    for (let inx = 0, length = this.recipients.length ; inx < length ; inx ++) {
       const recipient = this.recipients[inx];
       if (contentEncryptionKey = await this.decryptContentEncryptionKey(recipient, decryptor, decryptionKeyReference)) {
         break;
@@ -372,7 +354,7 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   if (!contentEncryptionKey) {
-    throw new Error('Cannot decrypt the content encryption key because of missing key');
+    throw new CryptoProtocolError(JoseConstants.Jwe, 'Cannot decrypt the content encryption key because of missing key');
   }
 
   // Decrypt content
@@ -380,7 +362,7 @@ export default class JweToken implements IJweGeneralJson {
   const iv =  new Uint8Array(this.iv); 
   const encodedAad = base64url.encode(this.aad);
   const aad = new Uint8Array(Buffer.from(encodedAad));
-  const algorithm = CryptoHelpers.jwaToW3c(contentEncryptionAlgorithm, iv, aad);    
+  const algorithm = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm, iv, aad);    
   const contentJwk: JsonWebKey = {
     kty: 'oct',
     k: base64url.encode(contentEncryptionKey)
@@ -398,7 +380,7 @@ export default class JweToken implements IJweGeneralJson {
       keyDecryptionAlgorithm = recipient.header.get('alg') || this.protected.get('alg');
     }
 
-    const algorithm = CryptoHelpers.jwaToW3c(keyDecryptionAlgorithm);    
+    const algorithm = CryptoHelpers.jwaToWebCrypto(keyDecryptionAlgorithm);    
     return Buffer.from(await decryptor.decryptByKeyStore(algorithm, decryptionKeyReference, recipient.encrypted_key));
    }
   //#endregion

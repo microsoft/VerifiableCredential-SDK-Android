@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * enum to model key types
+ * Enumeration to model key types.
  */
 export enum KeyType {
   Oct = 'oct',
@@ -13,11 +13,11 @@ export enum KeyType {
 }
 
 /**
- * Factory class to create KeyType objects
+ * Factory class to create @enum KeyType objects
  */
 export default class KeyTypeFactory {
   /**
-   * Create the key type according to the selected algortihm.
+   * Create the key type according to the selected algorithm.
    * @param algorithm Web crypto compliant algorithm object
    */
   public static create (algorithm: any): KeyType {

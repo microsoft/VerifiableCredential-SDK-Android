@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
- import base64url from "base64url";
+import base64url from "base64url";
 import JwsToken from "../../../src/crypto/protocols/jws/JwsToken";
 import { ISigningOptions } from "../../../src/crypto/keyStore/IKeyStore";
-import KeyStoreMem from "../../../src/crypto/keyStore/KeyStoreMem";
+import KeyStoreInMemory from "../../../src/crypto/keyStore/KeyStoreInMemory";
 import CryptoFactory from "../../../src/crypto/plugin/CryptoFactory";
-import DefaultCryptoSuite from "../../../src/crypto/plugin/DefaultCryptoSuite";
+import SubtleCryptoOperations from "../../../src/crypto/plugin/SubtleCryptoOperations";
 import { ProtectionFormat } from "../../../src/crypto/keyStore/ProtectionFormat";
 import RsaPrivateKey from "../../../src/crypto/keys/rsa/RsaPrivateKey";
 import { KeyOperation } from "../../../src/crypto/keys/PublicKey";
@@ -26,8 +26,8 @@ describe('JwsToken standard', () => {
       expect(payload).toBeDefined();
       expect(payloadBuffer).toBeDefined();
     
-      const keyStore = new KeyStoreMem();
-      const cryptoSuite = new DefaultCryptoSuite();
+      const keyStore = new KeyStoreInMemory();
+      const cryptoSuite = new SubtleCryptoOperations();
       const options: ISigningOptions = {
         algorithm: <Algorithm>{name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'},
         cryptoFactory: new CryptoFactory(keyStore, cryptoSuite)

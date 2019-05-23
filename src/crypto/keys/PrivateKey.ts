@@ -13,7 +13,9 @@
  */
 export default abstract class PrivateKey extends PublicKey {
 
-  // Default Sign Algorithm for JWS 'alg' field
+  /**
+   * Default Sign Algorithm for JWS 'alg' field
+   */
   readonly alg: string = 'none';
 
   /**

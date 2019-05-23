@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CryptoSuite, { CryptoSuiteMap } from './CryptoSuite';
-import DefaultCryptoSuite from './DefaultCryptoSuite';
+import CryptoOperations, { CryptoSuiteMap } from './CryptoOperations';
+import SubtleCryptoOperations from './SubtleCryptoOperations';
 import IKeyStore from '../keyStore/IKeyStore';
 import { SubtleCrypto } from 'webcrypto-core';
 
@@ -20,28 +20,36 @@ export default class CryptoFactory {
   private macSigners: CryptoSuiteMap;
   private messageDigests: CryptoSuiteMap;
 
+  /**
+   * Key store used by the CryptoFactory
+   */
   public keyStore: IKeyStore;
+
+  /**
+   * LAbel for default algorithm
+   */
+  private readonly defaultAlgorithm = '*';
 
   /**
    * Constructs a new CryptoRegistry
    * @param keyStore used to store private jeys
    * @param suite The suite to use for dependency injection
    */
-  constructor (keyStore: IKeyStore, suite?: CryptoSuite) {
+  constructor (keyStore: IKeyStore, suite?: CryptoOperations) {
     this.keyStore = keyStore;
-    let crypto: CryptoSuite; 
+    let crypto: CryptoOperations; 
     if (suite) {
       crypto = suite;
     } else {
     // Set default API
-    crypto = new DefaultCryptoSuite();
+    crypto = new SubtleCryptoOperations();
     }
-    this.keyEncrypters = <CryptoSuiteMap>{'*': crypto };
-    this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
-    this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
-    this.messageSigners = <CryptoSuiteMap>{'*': crypto };
-    this.macSigners = <CryptoSuiteMap>{'*': crypto };
-    this.messageDigests = <CryptoSuiteMap>{'*': crypto };
+    this.keyEncrypters = <CryptoSuiteMap>{defaultAlgorithm: crypto };
+    this.sharedKeyEncrypters =<CryptoSuiteMap>{defaultAlgorithm: crypto };
+    this.symmetricEncrypter = <CryptoSuiteMap>{defaultAlgorithm: crypto };
+    this.messageSigners = <CryptoSuiteMap>{defaultAlgorithm: crypto };
+    this.macSigners = <CryptoSuiteMap>{defaultAlgorithm: crypto };
+    this.messageDigests = <CryptoSuiteMap>{defaultAlgorithm: crypto };
   }
 
   /**
@@ -51,9 +59,9 @@ export default class CryptoFactory {
    */
   public getKeyEncrypter (name: string): SubtleCrypto {
     if (this.keyEncrypters[name]) {
-      return this.keyEncrypters[name].getKekEncrypters();
+      return this.keyEncrypters[name].getKeyEncrypters();
     }
-    return this.keyEncrypters['*'].getKekEncrypters();
+    return this.keyEncrypters[this.defaultAlgorithm].getKeyEncrypters();
   }
 
   /**
@@ -66,7 +74,7 @@ export default class CryptoFactory {
     if (this.sharedKeyEncrypters[name]) {
       return this.sharedKeyEncrypters[name].getSharedKeyEncrypters();
     }
-    return this.sharedKeyEncrypters['*'].getSharedKeyEncrypters();
+    return this.sharedKeyEncrypters[this.defaultAlgorithm].getSharedKeyEncrypters();
   }
 
   /**
@@ -78,7 +86,7 @@ export default class CryptoFactory {
     if (this.symmetricEncrypter[name]) {
       return this.symmetricEncrypter[name].getSymmetricEncrypters();
     }
-    return this.symmetricEncrypter['*'].getSymmetricEncrypters();
+    return this.symmetricEncrypter[this.defaultAlgorithm].getSymmetricEncrypters();
   }
   
   /**
@@ -90,7 +98,7 @@ export default class CryptoFactory {
     if (this.messageSigners[name]) {
       return this.messageSigners[name].getMessageSigners();
     }
-    return this.messageSigners['*'].getMessageSigners();
+    return this.messageSigners[this.defaultAlgorithm].getMessageSigners();
   }
 
   /**
@@ -100,9 +108,9 @@ export default class CryptoFactory {
    */
   getMacSigner (name: string): SubtleCrypto {
     if (this.macSigners[name]) {
-      return this.macSigners[name].getMacSigners();
+      return this.macSigners[name].messageAuthenticationCodeSigners();
     }
-    return this.macSigners['*'].getMacSigners();
+    return this.macSigners[this.defaultAlgorithm].messageAuthenticationCodeSigners();
   }
 
   /**
@@ -114,6 +122,6 @@ export default class CryptoFactory {
     if (this.messageDigests[name]) {
       return this.messageDigests[name].getMessageDigests();
     }
-    return this.messageDigests['*'].getMessageDigests();
+    return this.messageDigests[this.defaultAlgorithm].getMessageDigests();
   }
 }

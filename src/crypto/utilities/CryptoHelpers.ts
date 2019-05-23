@@ -22,8 +22,8 @@ export default class CryptoHelpers {
    * @param algorithmName Requested algorithm
    * @param hash Optional hash for the algorithm
    */
-  public static getSubtleCryptoForTheAlgorithm(cryptoFactory: CryptoFactory, algorithm: any): SubtleCrypto {
-    const jwa = CryptoHelpers.w3cToJwa(algorithm)
+  public static getSubtleCryptoForAlgorithm(cryptoFactory: CryptoFactory, algorithm: any): SubtleCrypto {
+    const jwa = CryptoHelpers.webCryptoToJwa(algorithm)
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':
       case 'ECDSA':
@@ -53,7 +53,7 @@ export default class CryptoHelpers {
    * Based on https://www.w3.org/TR/WebCryptoAPI/ A. Mapping between JSON Web Key / JSON Web Algorithm
    * @param jwaAlgorithmName Requested algorithm
    */
-  public static jwaToW3c(jwa: string, ...args: any): any {
+  public static jwaToWebCrypto(jwa: string, ...args: any): any {
     const regex = new RegExp('\\d+');
     let matches:RegExpExecArray;
 
@@ -83,7 +83,7 @@ export default class CryptoHelpers {
    * @param algorithmName Requested algorithm
    * @param hash Optional hash for the algorithm
    */
-  public static w3cToJwa(algorithm: any): string {
+  public static webCryptoToJwa(algorithm: any): string {
     const hash = algorithm.hash || 'SHA-256';
     switch (algorithm.name.toUpperCase()) {
       case 'RSASSA-PKCS1-V1_5':

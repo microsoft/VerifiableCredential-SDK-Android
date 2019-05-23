@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
  import JweToken from "../../../src/crypto/protocols/jwe/JweToken";
  import { IEncryptionOptions } from "../../../src/crypto/keyStore/IKeyStore";
- import KeyStoreMem from '../../../src/crypto/keyStore/KeyStoreMem';
+ import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
  import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
- import DefaultCryptoSuite from '../../../src/crypto/plugin/DefaultCryptoSuite';
+ import SubtleCryptoOperations from '../../../src/crypto/plugin/SubtleCryptoOperations';
  import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
  import RsaPrivateKey from '../../../src/crypto/keys/rsa/RsaPrivateKey';
  import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
@@ -20,8 +20,8 @@ describe('JweToken standard', () => {
       212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
       234, 64, 252];
     const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
-      const keyStore = new KeyStoreMem();
-      const cryptoSuite = new DefaultCryptoSuite();
+      const keyStore = new KeyStoreInMemory();
+      const cryptoSuite = new SubtleCryptoOperations();
       const options: IEncryptionOptions = {
         cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
         contentEncryptionAlgorithm: 'A256GCM',
@@ -93,8 +93,8 @@ describe('JweToken standard', () => {
             212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
             234, 64, 252];
           const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
-            const keyStore = new KeyStoreMem();
-            const cryptoSuite = new DefaultCryptoSuite();
+            const keyStore = new KeyStoreInMemory();
+            const cryptoSuite = new SubtleCryptoOperations();
             const options: IEncryptionOptions = {
               cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
               contentEncryptionAlgorithm: 'A256GCM',

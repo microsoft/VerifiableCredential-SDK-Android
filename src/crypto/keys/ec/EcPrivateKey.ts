@@ -24,7 +24,11 @@ export default class EcPrivateKey extends EcPublicKey implements PrivateKey {
    */
   public d: string | undefined;
 
-  getPublicKey (): PublicKey {
+    /**
+   * Gets the corresponding public key
+   * @returns The corresponding {@link PublicKey}
+   */
+  public getPublicKey (): PublicKey {
     return <EcPublicKey>{
       kty: this.kty,
       kid: this.kid,

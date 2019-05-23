@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CryptoSuite from './CryptoSuite';
+import CryptoOperations from './CryptoOperations';
 import { SubtleCrypto } from 'webcrypto-core';
 import nodeWebcryptoOssl from 'node-webcrypto-ossl';
 
 /**
  * Default crypto suite implementing the default plugable crypto layer
  *  */
-export default class DefaultCryptoSuite extends CryptoSuite {
+export default class SubtleCryptoOperations extends CryptoOperations {
   private defaultCrypto: SubtleCrypto | undefined;
   public crypto: any;
 
@@ -23,8 +23,8 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * Gets all of the key encryption Algorithms from the plugin
   * @returns a subtle crypto object for key encryption/decryption
   */
- public getKekEncrypters (): SubtleCrypto {
-  return this.subtleCrypto();
+ public getKeyEncrypters (): SubtleCrypto {
+  return this.getSubtleCrypto();
 }
 
  /**
@@ -32,7 +32,7 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * @returns a subtle crypto object for key sharing encryption/decryption
   */
  public getSharedKeyEncrypters (): SubtleCrypto {
-  return this.subtleCrypto();
+  return this.getSubtleCrypto();
 }
 
  /**
@@ -40,7 +40,7 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * @returns a subtle crypto object for symmetric encryption/decryption
    */
   public getSymmetricEncrypters (): SubtleCrypto {
-    return this.subtleCrypto();
+    return this.getSubtleCrypto();
   }
 
  /**
@@ -48,7 +48,7 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  * @returns a subtle crypto object for message signing
    */
   public getMessageSigners (): SubtleCrypto {
-    return this.subtleCrypto();
+    return this.getSubtleCrypto();
   }
 
  /**
@@ -56,8 +56,8 @@ export default class DefaultCryptoSuite extends CryptoSuite {
   * Will be used for primitive operations such as key generation.
  * @returns a subtle crypto object for message signing
    */
-  public getMacSigners (): SubtleCrypto {
-    return this.subtleCrypto();
+  public messageAuthenticationCodeSigners (): SubtleCrypto {
+    return this.getSubtleCrypto();
   }
 
  /**
@@ -65,10 +65,13 @@ export default class DefaultCryptoSuite extends CryptoSuite {
  * @returns a subtle crypto object for message digests
    */
   public getMessageDigests (): SubtleCrypto {
-    return this.subtleCrypto();
+    return this.getSubtleCrypto();
   }
 
-   private subtleCrypto(): SubtleCrypto {
+  /**
+   * Returns the @class SubtleCrypto ipmplementation for the current environment
+   */
+  private getSubtleCrypto(): SubtleCrypto {
   // tslint:disable-next-line:no-typeof-undefined
   if (typeof window !== 'undefined') {
     // return browser api

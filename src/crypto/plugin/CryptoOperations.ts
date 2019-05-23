@@ -7,17 +7,17 @@ import { SubtleCrypto } from 'webcrypto-core';
 /**
  * A dictionary of JWA encryption algorithm names to a crypto object
  */
-export type CryptoSuiteMap = {[name: string]: CryptoSuite};
+export type CryptoSuiteMap = {[name: string]: CryptoOperations };
 
 /**
  * Interface for the Crypto Algorithms Plugins
  */
-export default abstract class CryptoSuite {
+export default abstract class CryptoOperations  {
  /**
   * Gets all of the key encryption Algorithms from the plugin
   * @returns a subtle crypto object for key encryption/decryption
   */
- abstract getKekEncrypters (): SubtleCrypto;
+ abstract getKeyEncrypters (): SubtleCrypto;
 
  /**
   * Gets all of the key sharing encryption Algorithms from the plugin
@@ -38,11 +38,11 @@ export default abstract class CryptoSuite {
   abstract getMessageSigners (): SubtleCrypto;
 
  /**
-  * Gets all of the MAC signing Algorithms from the plugin. 
+  * Gets all of the message authentication code signing Algorithms from the plugin. 
   * Will be used for primitive operations such as key generation.
  * @returns a subtle crypto object for message signing
    */
-  abstract getMacSigners (): SubtleCrypto;
+  abstract messageAuthenticationCodeSigners (): SubtleCrypto;
 
  /**
   * Gets all of the message digest Algorithms from the plugin. 

@@ -10,7 +10,7 @@ import IJwsCompact from './IJwsCompact';
 import IJwsFlatJson from './IJwsFlatJson';
 import IJwsGeneralJson, { JwsHeader } from './IJwsGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import IKeyStore, { ISigningOptions , CryptoAlgorithm } from '../../keystore/IKeyStore';
+import IKeyStore, { ISigningOptions , CryptoAlgorithm } from '../../keyStore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
 import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import JwsSignature from './JwsSignature';
@@ -18,6 +18,8 @@ import { TSMap } from 'typescript-map'
 import JoseHelpers from '../jose/JoseHelpers';
 import IJwsSignature from './IJwsSignature';
 import ISubtleCrypto from '../../plugin/ISubtleCrypto';
+import JoseConstants from '../jose/JoseConstants';
+import CryptoProtocolError from '../CryptoProtocolError';
 
 /**
  * Class for containing JWS token operations.
@@ -71,7 +73,7 @@ export default class JwsToken implements IJwsGeneralJson {
           return JwsToken.serializeJwsFlatJson(this);
     }
     
-    throw new Error(`The format '${this.format}' is not supported`);
+    throw new CryptoProtocolError(JoseConstants.Jws, `The format '${this.format}' is not supported`);
   }
 
   /**
@@ -96,7 +98,7 @@ export default class JwsToken implements IJwsGeneralJson {
         jwsSignature.header = JoseHelpers.encodeHeader(<JwsHeader>tokenSignature.header, false);
       } 
       if (!jwsSignature.protected && ! jwsSignature.header) {
-        throw new Error(`Signature ${inx} is missing header and protected`);
+        throw new CryptoProtocolError(JoseConstants.Jws, `Signature ${inx} is missing header and protected`);
       }
       jws.signatures.push(jwsSignature);
     }
@@ -159,7 +161,7 @@ export default class JwsToken implements IJwsGeneralJson {
         signature.signature = base64url.toBuffer(parts[2]);
         return jwsToken;
       } else {
-        throw new Error(`Invalid compact JWS. Content has ${parts.length} item. Only 3 allowed`);
+        throw new CryptoProtocolError(JoseConstants.Jws, `Invalid compact JWS. Content has ${parts.length} item. Only 3 allowed`);
       }
     }
 
@@ -192,7 +194,7 @@ export default class JwsToken implements IJwsGeneralJson {
         console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
       }
     }
-    throw new Error(`The content does not represent a valid jws token`);
+    throw new CryptoProtocolError(JoseConstants.Jws, `The content does not represent a valid jws token`);
   }
 
   /**
@@ -333,7 +335,7 @@ export default class JwsToken implements IJwsGeneralJson {
     return {result: true, reason: ''};
   }
   //#endregion
-  
+
   /**
    * Get the keyStore to be used
    * @param newOptions Options passed in after the constructure
@@ -392,7 +394,7 @@ export default class JwsToken implements IJwsGeneralJson {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const algorithm: CryptoAlgorithm = this.getAlgorithm(options);
-    const alg: string = CryptoHelpers.w3cToJwa(algorithm);
+    const alg: string = CryptoHelpers.webCryptoToJwa(algorithm);
 
     // tslint:disable-next-line:no-suspicious-comment
     // TODO support for multiple signatures
@@ -498,9 +500,9 @@ export default class JwsToken implements IJwsGeneralJson {
     }
 
     if (!alg) {
-      throw new Error(`Signature algorithm is not provided in the headers. Cannot validate signature.`)
+      throw new CryptoProtocolError(JoseConstants.Jws, `Signature algorithm is not provided in the headers. Cannot validate signature.`)
     }
-    const algorithm = CryptoHelpers.jwaToW3c(alg);
+    const algorithm = CryptoHelpers.jwaToWebCrypto(alg);
     const encodedProtected = !protectedHeader ? '' : 
       JoseHelpers.encodeHeader(protectedHeader);
     const encodedContent = base64url.encode(this.payload);

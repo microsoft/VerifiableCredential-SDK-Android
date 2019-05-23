@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 /**
- * enum to model key use
+ * Enumeration to model key use.
  */
 export enum KeyUse {
   Encryption = 'enc',
@@ -12,11 +12,11 @@ export enum KeyUse {
 }
 
 /**
- * Factory class to create KeyUse objects
+ * Factory class to create @enum KeyUse objects.
  */
 export default class KeyUseFactory {
   /**
-   * Create the key use according to the selected algortihm.
+   * Create the key use according to the selected algorithm.
    * @param algorithm Web crypto compliant algorithm object
    */
   public static create (algorithm: any): KeyUse {

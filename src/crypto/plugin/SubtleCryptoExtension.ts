@@ -3,16 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import ISubtleCrypto from './ISubtleCrypto'
-import IKeyStore, { CryptoAlgorithm } from '../keystore/IKeyStore';
+import IKeyStore, { CryptoAlgorithm } from '../keyStore/IKeyStore';
 import CryptoFactory from './CryptoFactory';
 import CryptoHelpers from '../utilities/CryptoHelpers';
 import PublicKey from '../keys/PublicKey';
+import PrivateKey from '../keys/PrivateKey';
 import { KeyType } from '../keys/KeyType';
 import { SubtleCrypto } from 'webcrypto-core';
-import { PrivateKey } from '@decentralized-identity/did-auth-jose';
 
 /**
- * Default crypto suite
+ * The class extends the @class SubtleCrypto with addtional methods.
+ *  Adds methods to work with key references.
+ *  Extends SubtleCrypto to work with JWK keys.
  */
 export default class SubtleCryptoExtension extends SubtleCrypto implements ISubtleCrypto {
   private keyStore: IKeyStore;
@@ -33,7 +35,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    */
   public async signByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, data: BufferSource): Promise<ArrayBuffer> {
     const jwk: PrivateKey = await <Promise<PrivateKey>>this.keyStore.get(keyReference, false);
-    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
     
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['sign']);
@@ -48,7 +50,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    * @param payload which was signed
    */
    public async verifyByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, signature: BufferSource, payload: BufferSource): Promise<boolean> {
-    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
     
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['verify']);
@@ -64,7 +66,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    */
    public async decryptByKeyStore(algorithm: CryptoAlgorithm, keyReference: string, cipher: BufferSource): Promise<ArrayBuffer> {
     const jwk: PrivateKey = <PrivateKey> await this.keyStore.get(keyReference, false);
-    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
     
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['decrypt']);
@@ -78,7 +80,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    * @param cipher to decrypt
    */
    public async decryptByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, cipher: BufferSource): Promise<ArrayBuffer> {
-    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
     
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['decrypt']);
@@ -93,7 +95,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    */
   public async encryptByJwk(algorithm: CryptoAlgorithm, jwk: PublicKey | JsonWebKey, data: BufferSource): Promise<ArrayBuffer> {
     const keyImportAlgorithm = CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk);
-    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForTheAlgorithm(this.cryptoFactory, algorithm);
+    const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['encrypt']);
     return await <PromiseLike<ArrayBuffer>>crypto.encrypt(algorithm, key, <ArrayBuffer>data);
   }
