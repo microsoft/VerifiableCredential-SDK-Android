@@ -2,20 +2,20 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import nodeWebcryptoOssl from 'node-webcrypto-ossl';
+import { JweHeader } from "./IJweGeneralJson";
 
 /**
- * Class used to model crypto options
+ * JWE recipient object used by the general JSON
  */
-export default class CryptoOptions {
-  /**
-   * Get or set the crypto api to be used
-   */
-  public cryptoApi: any = new nodeWebcryptoOssl();
+export default interface IJweRecipient {
 
   /**
-   * Get or set the algorithm to be used.
-   * Conform to the Web Cryptography Api
+   * The unprotected (unverified) header.
    */
-  public algorithm: any;
+  header?: JweHeader,
+
+  /**
+   * The JWE signature.
+   */
+  encrypted_key: Buffer
 }

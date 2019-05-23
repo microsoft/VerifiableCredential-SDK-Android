@@ -13,6 +13,52 @@ self-issued id token.</p></dd>
 <dt><a href="#VerifiedCredential">VerifiedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
+<dt><a href="#EcPrivateKey">EcPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
+<dd><p>Represents an Elliptic Curve private key</p></dd>
+<dt><a href="#EcPublicKey">EcPublicKey</a> ⇐ <code>PublicKey</code></dt>
+<dd><p>Represents an Elliptic Curve public key</p></dd>
+<dt><a href="#PrivateKey">PrivateKey</a></dt>
+<dd><p>Represents a Private Key in JWK format.</p></dd>
+<dt><a href="#KeyOperation">KeyOperation</a></dt>
+<dd></dd>
+<dt><a href="#RsaPrivateKey">RsaPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
+<dd><p>Represents an Elliptic Curve private key</p></dd>
+<dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code>PublicKey</code></dt>
+<dd><p>Represents an RSA public key</p></dd>
+<dt><a href="#KeyStoreInMemory">KeyStoreInMemory</a></dt>
+<dd><p>Class defining methods and properties for a light KeyStore</p></dd>
+<dt><a href="#CryptoFactory">CryptoFactory</a></dt>
+<dd><p>Utility class to handle all CryptoSuite dependency injection</p></dd>
+<dt><a href="#CryptoOperations">CryptoOperations</a></dt>
+<dd><p>Interface for the Crypto Algorithms Plugins</p></dd>
+<dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
+<dd><p>The class extends the @class SubtleCrypto with addtional methods.
+ Adds methods to work with key references.
+ Extends SubtleCrypto to work with JWK keys.</p></dd>
+<dt><a href="#SubtleCryptoOperations">SubtleCryptoOperations</a></dt>
+<dd><p>Default crypto suite implementing the default plugable crypto layer</p></dd>
+<dt><a href="#CryptoProtocolError">CryptoProtocolError</a></dt>
+<dd><p>Base error class for the crypto protocols.</p></dd>
+<dt><a href="#JoseConstants">JoseConstants</a></dt>
+<dd><p>Class for JOSE constants</p></dd>
+<dt><a href="#JoseHelpers">JoseHelpers</a></dt>
+<dd><p>Crypto helpers support for plugable crypto layer</p></dd>
+<dt><a href="#JweRecipient">JweRecipient</a></dt>
+<dd><p>JWS signature used by the general JSON</p></dd>
+<dt><a href="#JweToken">JweToken</a></dt>
+<dd><p>Class for containing Jwe token operations.
+This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
+Crypto calls always happen via CryptoFactory</p></dd>
+<dt><a href="#JwsSignature">JwsSignature</a></dt>
+<dd><p>JWS signature used by the general JSON</p></dd>
+<dt><a href="#JwsToken">JwsToken</a></dt>
+<dd><p>Class for containing JWS token operations.
+This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
+Crypto calls always happen via CryptoFactory</p></dd>
+<dt><a href="#CryptoHelpers">CryptoHelpers</a></dt>
+<dd><p>Crypto helpers support for plugable crypto layer</p></dd>
+<dt><a href="#W3cCryptoApiConstants">W3cCryptoApiConstants</a></dt>
+<dd><p>Class for W3C Crypto API constants</p></dd>
 <dt><a href="#CryptoOptions">CryptoOptions</a></dt>
 <dd><p>Class used to model crypto options</p></dd>
 <dt><a href="#Identifier">Identifier</a></dt>
@@ -59,6 +105,18 @@ User Agent, such as resolver and register.</p></dd>
 <dt><a href="#CredentialType">CredentialType</a></dt>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
+<dt><a href="#KeyType">KeyType</a></dt>
+<dd><p>Enumeration to model key types.</p></dd>
+<dt><a href="#KeyType">KeyType</a></dt>
+<dd><p>Factory class to create @enum KeyType objects</p></dd>
+<dt><a href="#KeyUse">KeyUse</a></dt>
+<dd><p>Enumeration to model key use.</p></dd>
+<dt><a href="#KeyUse">KeyUse</a></dt>
+<dd><p>Factory class to create @enum KeyUse objects.</p></dd>
+<dt><a href="#KeyOperation">KeyOperation</a></dt>
+<dd><p>JWK key operations</p></dd>
+<dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
+<dd><p>Enum to define different protection formats</p></dd>
 <dt><a href="#SignatureFormat">SignatureFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
 </dl>
@@ -253,6 +311,927 @@ credential for the specified identifier.</p>
 | issuedTo | <p>the specified identifier.</p> |
 | issuedAt | <p>date and time.</p> |
 
+<a name="EcPrivateKey"></a>
+
+## EcPrivateKey ⇐ [<code>PrivateKey</code>](#PrivateKey)
+<p>Represents an Elliptic Curve private key</p>
+
+**Kind**: global class  
+**Extends**: [<code>PrivateKey</code>](#PrivateKey)  
+<a name="EcPrivateKey+getPublicKey"></a>
+
+### ecPrivateKey.getPublicKey() ⇒
+<p>Gets the corresponding public key</p>
+
+**Kind**: instance method of [<code>EcPrivateKey</code>](#EcPrivateKey)  
+**Returns**: <p>The corresponding [PublicKey](PublicKey)</p>  
+<a name="EcPublicKey"></a>
+
+## EcPublicKey ⇐ <code>PublicKey</code>
+<p>Represents an Elliptic Curve public key</p>
+
+**Kind**: global class  
+**Extends**: <code>PublicKey</code>  
+<a name="PrivateKey"></a>
+
+## *PrivateKey*
+<p>Represents a Private Key in JWK format.</p>
+
+**Kind**: global abstract class  
+<a name="KeyOperation"></a>
+
+## *KeyOperation*
+**Kind**: global abstract class  
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
+<a name="RsaPrivateKey"></a>
+
+## RsaPrivateKey ⇐ [<code>PrivateKey</code>](#PrivateKey)
+<p>Represents an Elliptic Curve private key</p>
+
+**Kind**: global class  
+**Extends**: [<code>PrivateKey</code>](#PrivateKey)  
+<a name="RsaPrivateKey+getPublicKey"></a>
+
+### rsaPrivateKey.getPublicKey() ⇒
+<p>Gets the corresponding public key</p>
+
+**Kind**: instance method of [<code>RsaPrivateKey</code>](#RsaPrivateKey)  
+**Returns**: <p>The corresponding [PublicKey](PublicKey)</p>  
+<a name="RsaPublicKey"></a>
+
+## RsaPublicKey ⇐ <code>PublicKey</code>
+<p>Represents an RSA public key</p>
+
+**Kind**: global class  
+**Extends**: <code>PublicKey</code>  
+<a name="KeyStoreInMemory"></a>
+
+## KeyStoreInMemory
+<p>Class defining methods and properties for a light KeyStore</p>
+
+**Kind**: global class  
+
+* [KeyStoreInMemory](#KeyStoreInMemory)
+    * [.get(keyReference, [publicKeyOnly])](#KeyStoreInMemory+get)
+    * [.list()](#KeyStoreInMemory+list)
+    * [.save(keyIdentifier, key)](#KeyStoreInMemory+save)
+
+<a name="KeyStoreInMemory+get"></a>
+
+### keyStoreInMemory.get(keyReference, [publicKeyOnly])
+<p>Returns the key associated with the specified
+key identifier.</p>
+
+**Kind**: instance method of [<code>KeyStoreInMemory</code>](#KeyStoreInMemory)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| keyReference |  | <p>for which to return the key.</p> |
+| [publicKeyOnly] | <code>true</code> | <p>True if only the public key is needed.</p> |
+
+<a name="KeyStoreInMemory+list"></a>
+
+### keyStoreInMemory.list()
+<p>Lists all keys with their corresponding key ids</p>
+
+**Kind**: instance method of [<code>KeyStoreInMemory</code>](#KeyStoreInMemory)  
+<a name="KeyStoreInMemory+save"></a>
+
+### keyStoreInMemory.save(keyIdentifier, key)
+<p>Saves the specified key to the key store using
+the key identifier.</p>
+
+**Kind**: instance method of [<code>KeyStoreInMemory</code>](#KeyStoreInMemory)  
+
+| Param | Description |
+| --- | --- |
+| keyIdentifier | <p>for the key being saved.</p> |
+| key | <p>being saved to the key store.</p> |
+
+<a name="CryptoFactory"></a>
+
+## CryptoFactory
+<p>Utility class to handle all CryptoSuite dependency injection</p>
+
+**Kind**: global class  
+
+* [CryptoFactory](#CryptoFactory)
+    * [new CryptoFactory(keyStore, suite)](#new_CryptoFactory_new)
+    * [.getKeyEncrypter(name)](#CryptoFactory+getKeyEncrypter) ⇒
+    * [.getSharedKeyEncrypter(name)](#CryptoFactory+getSharedKeyEncrypter) ⇒
+    * [.getSymmetricEncrypter(name)](#CryptoFactory+getSymmetricEncrypter) ⇒
+    * [.getMessageSigner(name)](#CryptoFactory+getMessageSigner) ⇒
+    * [.getMacSigner(name)](#CryptoFactory+getMacSigner) ⇒
+    * [.getMessageDigest(name)](#CryptoFactory+getMessageDigest) ⇒
+
+<a name="new_CryptoFactory_new"></a>
+
+### new CryptoFactory(keyStore, suite)
+<p>Constructs a new CryptoRegistry</p>
+
+
+| Param | Description |
+| --- | --- |
+| keyStore | <p>used to store private jeys</p> |
+| suite | <p>The suite to use for dependency injection</p> |
+
+<a name="CryptoFactory+getKeyEncrypter"></a>
+
+### cryptoFactory.getKeyEncrypter(name) ⇒
+<p>Gets the key encrypter object given the encryption algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding crypto API</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getSharedKeyEncrypter"></a>
+
+### cryptoFactory.getSharedKeyEncrypter(name) ⇒
+<p>Gets the shared key encrypter object given the encryption algorithm's name
+Used for DH algorithms</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding crypto API</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getSymmetricEncrypter"></a>
+
+### cryptoFactory.getSymmetricEncrypter(name) ⇒
+<p>Gets the SymmetricEncrypter object given the symmetric encryption algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding crypto API</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getMessageSigner"></a>
+
+### cryptoFactory.getMessageSigner(name) ⇒
+<p>Gets the message signer object given the signing algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding crypto API</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getMacSigner"></a>
+
+### cryptoFactory.getMacSigner(name) ⇒
+<p>Gets the mac signer object given the signing algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding crypto API</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoFactory+getMessageDigest"></a>
+
+### cryptoFactory.getMessageDigest(name) ⇒
+<p>Gets the message digest object given the digest algorithm's name</p>
+
+**Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
+**Returns**: <p>The corresponding crypto API</p>  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the algorithm</p> |
+
+<a name="CryptoOperations"></a>
+
+## CryptoOperations
+<p>Interface for the Crypto Algorithms Plugins</p>
+
+**Kind**: global class  
+<a name="SubtleCryptoExtension"></a>
+
+## SubtleCryptoExtension
+<p>The class extends the @class SubtleCrypto with addtional methods.
+ Adds methods to work with key references.
+ Extends SubtleCrypto to work with JWK keys.</p>
+
+**Kind**: global class  
+
+* [SubtleCryptoExtension](#SubtleCryptoExtension)
+    * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
+    * [.verifyByJwk(algorithm, jwk, signature, payload)](#SubtleCryptoExtension+verifyByJwk)
+    * [.decryptByKeyStore(algorithm, keyReference, cipher)](#SubtleCryptoExtension+decryptByKeyStore)
+    * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
+    * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
+
+<a name="SubtleCryptoExtension+signByKeyStore"></a>
+
+### subtleCryptoExtension.signByKeyStore(algorithm, keyReference, data) ⇒
+<p>Sign with a key referenced in the key store</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+**Returns**: <p>The signature in the requested algorithm</p>  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for signature</p> |
+| keyReference | <p>points to key in the key store</p> |
+| data | <p>to sign</p> |
+
+<a name="SubtleCryptoExtension+verifyByJwk"></a>
+
+### subtleCryptoExtension.verifyByJwk(algorithm, jwk, signature, payload)
+<p>Verify with JWK.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for verification</p> |
+| jwk | <p>Json web key used to verify</p> |
+| signature | <p>to verify</p> |
+| payload | <p>which was signed</p> |
+
+<a name="SubtleCryptoExtension+decryptByKeyStore"></a>
+
+### subtleCryptoExtension.decryptByKeyStore(algorithm, keyReference, cipher)
+<p>Decrypt with a key referenced in the key store.
+The referenced key must be a jwk key.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for signature</p> |
+| keyReference | <p>points to key in the key store</p> |
+| cipher | <p>to decrypt</p> |
+
+<a name="SubtleCryptoExtension+decryptByJwk"></a>
+
+### subtleCryptoExtension.decryptByJwk(algorithm, jwk, cipher)
+<p>Decrypt with JWK.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for decryption</p> |
+| jwk | <p>Json web key to decrypt</p> |
+| cipher | <p>to decrypt</p> |
+
+<a name="SubtleCryptoExtension+encryptByJwk"></a>
+
+### subtleCryptoExtension.encryptByJwk(algorithm, jwk, data)
+<p>Encrypt with a jwk key referenced in the key store</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for encryption</p> |
+| jwk | <p>Json web key public key</p> |
+| data | <p>to encrypt</p> |
+
+<a name="SubtleCryptoOperations"></a>
+
+## SubtleCryptoOperations
+<p>Default crypto suite implementing the default plugable crypto layer</p>
+
+**Kind**: global class  
+
+* [SubtleCryptoOperations](#SubtleCryptoOperations)
+    * [.getKeyEncrypters()](#SubtleCryptoOperations+getKeyEncrypters) ⇒
+    * [.getSharedKeyEncrypters()](#SubtleCryptoOperations+getSharedKeyEncrypters) ⇒
+    * [.getSymmetricEncrypters()](#SubtleCryptoOperations+getSymmetricEncrypters) ⇒
+    * [.getMessageSigners()](#SubtleCryptoOperations+getMessageSigners) ⇒
+    * [.messageAuthenticationCodeSigners()](#SubtleCryptoOperations+messageAuthenticationCodeSigners) ⇒
+    * [.getMessageDigests()](#SubtleCryptoOperations+getMessageDigests) ⇒
+    * [.getSubtleCrypto()](#SubtleCryptoOperations+getSubtleCrypto)
+
+<a name="SubtleCryptoOperations+getKeyEncrypters"></a>
+
+### subtleCryptoOperations.getKeyEncrypters() ⇒
+<p>Gets all of the key encryption Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for key encryption/decryption</p>  
+<a name="SubtleCryptoOperations+getSharedKeyEncrypters"></a>
+
+### subtleCryptoOperations.getSharedKeyEncrypters() ⇒
+<p>Gets all of the key sharing encryption Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for key sharing encryption/decryption</p>  
+<a name="SubtleCryptoOperations+getSymmetricEncrypters"></a>
+
+### subtleCryptoOperations.getSymmetricEncrypters() ⇒
+<p>Get all of the symmetric encrypter algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for symmetric encryption/decryption</p>  
+<a name="SubtleCryptoOperations+getMessageSigners"></a>
+
+### subtleCryptoOperations.getMessageSigners() ⇒
+<p>Gets all of the message signing Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for message signing</p>  
+<a name="SubtleCryptoOperations+messageAuthenticationCodeSigners"></a>
+
+### subtleCryptoOperations.messageAuthenticationCodeSigners() ⇒
+<p>Gets all of the MAC signing Algorithms from the plugin. 
+Will be used for primitive operations such as key generation.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for message signing</p>  
+<a name="SubtleCryptoOperations+getMessageDigests"></a>
+
+### subtleCryptoOperations.getMessageDigests() ⇒
+<p>Gets all of the message digest Algorithms from the plugin.</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+**Returns**: <p>a subtle crypto object for message digests</p>  
+<a name="SubtleCryptoOperations+getSubtleCrypto"></a>
+
+### subtleCryptoOperations.getSubtleCrypto()
+<p>Returns the @class SubtleCrypto ipmplementation for the current environment</p>
+
+**Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
+<a name="CryptoProtocolError"></a>
+
+## CryptoProtocolError
+<p>Base error class for the crypto protocols.</p>
+
+**Kind**: global class  
+<a name="new_CryptoProtocolError_new"></a>
+
+### new CryptoProtocolError(protocol, message)
+<p>Create instance of @class CryptoProtocolError</p>
+
+
+| Param | Description |
+| --- | --- |
+| protocol | <p>name</p> |
+| message | <p>for the error</p> |
+
+<a name="JoseConstants"></a>
+
+## JoseConstants
+<p>Class for JOSE constants</p>
+
+**Kind**: global class  
+<a name="JoseHelpers"></a>
+
+## JoseHelpers
+<p>Crypto helpers support for plugable crypto layer</p>
+
+**Kind**: global class  
+
+* [JoseHelpers](#JoseHelpers)
+    * [.headerHasElements(header)](#JoseHelpers.headerHasElements)
+    * [.encodeHeader(header, toBase64Url)](#JoseHelpers.encodeHeader)
+    * [.getOptionsProperty(propertyName, [initialOptions], [overrideOptions], [mandatory])](#JoseHelpers.getOptionsProperty)
+
+<a name="JoseHelpers.headerHasElements"></a>
+
+### JoseHelpers.headerHasElements(header)
+<p>Return true if the header has elements</p>
+
+**Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
+
+| Param | Description |
+| --- | --- |
+| header | <p>to test</p> |
+
+<a name="JoseHelpers.encodeHeader"></a>
+
+### JoseHelpers.encodeHeader(header, toBase64Url)
+<p>Encode the header to JSON and base 64 url.
+The Typescript Map construct does not allow for JSON.stringify returning {}.
+TSMap.toJSON prepares a map so it can be serialized as a dictionary.</p>
+
+**Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| header |  | <p>to encode</p> |
+| toBase64Url | <code>true</code> | <p>is true when result needs to be base 64 url</p> |
+
+<a name="JoseHelpers.getOptionsProperty"></a>
+
+### JoseHelpers.getOptionsProperty(propertyName, [initialOptions], [overrideOptions], [mandatory])
+<p>Get the Protected to be used from the options</p>
+
+**Kind**: static method of [<code>JoseHelpers</code>](#JoseHelpers)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| propertyName |  | <p>Property name in options</p> |
+| [initialOptions] |  | <p>The initial set of options</p> |
+| [overrideOptions] |  | <p>Options passed in after the constructure</p> |
+| [mandatory] | <code>true</code> | <p>True if property is required</p> |
+
+<a name="JweRecipient"></a>
+
+## JweRecipient
+<p>JWS signature used by the general JSON</p>
+
+**Kind**: global class  
+<a name="new_JweRecipient_new"></a>
+
+### new JweRecipient()
+<p>The JWE signature.</p>
+
+<a name="JweToken"></a>
+
+## JweToken
+<p>Class for containing Jwe token operations.
+This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
+Crypto calls always happen via CryptoFactory</p>
+
+**Kind**: global class  
+
+* [JweToken](#JweToken)
+    * [new JweToken(options)](#new_JweToken_new)
+    * _instance_
+        * [.serialize(format)](#JweToken+serialize)
+        * [.getCryptoFactory(newOptions, manadatory)](#JweToken+getCryptoFactory)
+        * [.getContentEncryptionKey(newOptions, manadatory)](#JweToken+getContentEncryptionKey)
+        * [.getInitialVector(newOptions, manadatory)](#JweToken+getInitialVector)
+        * [.getContentEncryptionAlgorithm(newOptions, manadatory)](#JweToken+getContentEncryptionAlgorithm)
+        * [.encrypt(recipients, payload, format, options)](#JweToken+encrypt) ⇒
+        * [.decrypt(decryptionKeyReference, options)](#JweToken+decrypt) ⇒
+    * _static_
+        * [.serializeJweGeneralJson(token)](#JweToken.serializeJweGeneralJson)
+        * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
+        * [.serializeJweCompact(token)](#JweToken.serializeJweCompact)
+
+<a name="new_JweToken_new"></a>
+
+### new JweToken(options)
+<p>Create an Jwe token object</p>
+
+
+| Param | Description |
+| --- | --- |
+| options | <p>Set of Jwe token options</p> |
+
+<a name="JweToken+serialize"></a>
+
+### jweToken.serialize(format)
+<p>Serialize a Jwe token object from a token</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| format | <p>Optional specify the serialization format. If not specified, use default format.</p> |
+
+<a name="JweToken+getCryptoFactory"></a>
+
+### jweToken.getCryptoFactory(newOptions, manadatory)
+<p>Get the CryptoFactory to be used</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getContentEncryptionKey"></a>
+
+### jweToken.getContentEncryptionKey(newOptions, manadatory)
+<p>Get the key encryption key for testing</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getInitialVector"></a>
+
+### jweToken.getInitialVector(newOptions, manadatory)
+<p>Get the initial vector for testing</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+getContentEncryptionAlgorithm"></a>
+
+### jweToken.getContentEncryptionAlgorithm(newOptions, manadatory)
+<p>Get the content encryption algorithm from the options</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JweToken+encrypt"></a>
+
+### jweToken.encrypt(recipients, payload, format, options) ⇒
+<p>Encrypt content using the given public keys in JWK format.
+The key type enforces the key encryption algorithm.
+The options can override certain algorithm choices.</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>JweToken with encrypted payload.</p>  
+
+| Param | Description |
+| --- | --- |
+| recipients | <p>List of recipients' public keys.</p> |
+| payload | <p>to encrypt.</p> |
+| format | <p>of the final serialization.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JweToken+decrypt"></a>
+
+### jweToken.decrypt(decryptionKeyReference, options) ⇒
+<p>Decrypt the content.</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>Signed payload in compact Jwe format.</p>  
+
+| Param | Description |
+| --- | --- |
+| decryptionKeyReference | <p>Reference to the decryption key.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JweToken.serializeJweGeneralJson"></a>
+
+### JweToken.serializeJweGeneralJson(token)
+<p>Serialize a Jwe token object from a token in General Json format</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Jwe base object</p> |
+
+<a name="JweToken.serializeJweFlatJson"></a>
+
+### JweToken.serializeJweFlatJson(token)
+<p>Serialize a Jwe token object from a token in Flat Json format</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Jwe base object</p> |
+
+<a name="JweToken.serializeJweCompact"></a>
+
+### JweToken.serializeJweCompact(token)
+<p>Serialize a Jwe token object from a token in Compact format</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Jwe base object</p> |
+
+<a name="JwsSignature"></a>
+
+## JwsSignature
+<p>JWS signature used by the general JSON</p>
+
+**Kind**: global class  
+<a name="new_JwsSignature_new"></a>
+
+### new JwsSignature()
+<p>Creates instance of @class JwsSignature</p>
+
+<a name="JwsToken"></a>
+
+## JwsToken
+<p>Class for containing JWS token operations.
+This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
+Crypto calls always happen via CryptoFactory</p>
+
+**Kind**: global class  
+
+* [JwsToken](#JwsToken)
+    * [new JwsToken(options)](#new_JwsToken_new)
+    * _instance_
+        * [.serialize(format)](#JwsToken+serialize)
+        * [.setGeneralParts(content)](#JwsToken+setGeneralParts) ⇒
+        * [.setFlatParts(content)](#JwsToken+setFlatParts) ⇒
+        * [.setCompactParts(content)](#JwsToken+setCompactParts) ⇒
+        * [.setProtected(protectedHeader)](#JwsToken+setProtected)
+        * [.isValidToken()](#JwsToken+isValidToken)
+        * [.getKeyStore(newOptions, manadatory)](#JwsToken+getKeyStore)
+        * [.getCryptoFactory(newOptions, manadatory)](#JwsToken+getCryptoFactory)
+        * [.getProtected(newOptions, manadatory)](#JwsToken+getProtected)
+        * [.getHeader(newOptions, manadatory)](#JwsToken+getHeader)
+        * [.getAlgorithm(newOptions, manadatory)](#JwsToken+getAlgorithm)
+        * [.sign(signingKeyReference, payload, format, options)](#JwsToken+sign) ⇒
+        * [.verify(validationKey, options)](#JwsToken+verify) ⇒
+        * [.getPayload()](#JwsToken+getPayload)
+    * _static_
+        * [.serializeJwsGeneralJson(token)](#JwsToken.serializeJwsGeneralJson)
+        * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
+        * [.serializeJwsCompact(token)](#JwsToken.serializeJwsCompact)
+        * [.create(token, options)](#JwsToken.create)
+
+<a name="new_JwsToken_new"></a>
+
+### new JwsToken(options)
+<p>Create an Jws token object</p>
+
+
+| Param | Description |
+| --- | --- |
+| options | <p>Set of jws token options</p> |
+
+<a name="JwsToken+serialize"></a>
+
+### jwsToken.serialize(format)
+<p>Serialize a Jws token object from a token</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| format | <p>Optional specify the serialization format. If not specified, use default format.</p> |
+
+<a name="JwsToken+setGeneralParts"></a>
+
+### jwsToken.setGeneralParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJwsGeneralJSon token</p> |
+
+<a name="JwsToken+setFlatParts"></a>
+
+### jwsToken.setFlatParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJwsFlatJson token</p> |
+
+<a name="JwsToken+setCompactParts"></a>
+
+### jwsToken.setCompactParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJwsCompact token</p> |
+
+<a name="JwsToken+setProtected"></a>
+
+### jwsToken.setProtected(protectedHeader)
+<p>Set the protected header</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| protectedHeader | <p>to set on the JwsToken object</p> |
+
+<a name="JwsToken+isValidToken"></a>
+
+### jwsToken.isValidToken()
+<p>Check if a valid token was found after decoding</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+<a name="JwsToken+getKeyStore"></a>
+
+### jwsToken.getKeyStore(newOptions, manadatory)
+<p>Get the keyStore to be used</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JwsToken+getCryptoFactory"></a>
+
+### jwsToken.getCryptoFactory(newOptions, manadatory)
+<p>Get the CryptoFactory to be used</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JwsToken+getProtected"></a>
+
+### jwsToken.getProtected(newOptions, manadatory)
+<p>Get the default protected header to be used from the options</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
+
+<a name="JwsToken+getHeader"></a>
+
+### jwsToken.getHeader(newOptions, manadatory)
+<p>Get the default header to be used from the options</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
+
+<a name="JwsToken+getAlgorithm"></a>
+
+### jwsToken.getAlgorithm(newOptions, manadatory)
+<p>Get the algorithm from the options</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Default | Description |
+| --- | --- | --- |
+| newOptions |  | <p>Options passed in after the constructure</p> |
+| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
+
+<a name="JwsToken+sign"></a>
+
+### jwsToken.sign(signingKeyReference, payload, format, options) ⇒
+<p>Signs contents using the given private key in JWK format.</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+**Returns**: <p>Signed payload in compact JWS format.</p>  
+
+| Param | Description |
+| --- | --- |
+| signingKeyReference | <p>Reference to the signing key.</p> |
+| payload | <p>to sign.</p> |
+| format | <p>of the final signature.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JwsToken+verify"></a>
+
+### jwsToken.verify(validationKey, options) ⇒
+<p>Verify the JWS signature.</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+**Returns**: <p>Signed payload in compact JWS format.</p>  
+
+| Param | Description |
+| --- | --- |
+| validationKey | <p>Public JWK key to validate the signature.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JwsToken+getPayload"></a>
+
+### jwsToken.getPayload()
+<p>Gets the base64 URL decrypted payload.</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+<a name="JwsToken.serializeJwsGeneralJson"></a>
+
+### JwsToken.serializeJwsGeneralJson(token)
+<p>Serialize a Jws token object from a token in General Json format</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>JWS base object</p> |
+
+<a name="JwsToken.serializeJwsFlatJson"></a>
+
+### JwsToken.serializeJwsFlatJson(token)
+<p>Serialize a Jws token object from a token in Flat Json format</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>JWS base object</p> |
+
+<a name="JwsToken.serializeJwsCompact"></a>
+
+### JwsToken.serializeJwsCompact(token)
+<p>Serialize a Jws token object from a token in Compact format</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>JWS base object</p> |
+
+<a name="JwsToken.create"></a>
+
+### JwsToken.create(token, options)
+<p>Create an Jws token object from a token</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>Base object used to create this token</p> |
+| options | <p>Set of jws token options</p> |
+
+<a name="CryptoHelpers"></a>
+
+## CryptoHelpers
+<p>Crypto helpers support for plugable crypto layer</p>
+
+**Kind**: global class  
+
+* [CryptoHelpers](#CryptoHelpers)
+    * [.getSubtleCryptoForAlgorithm(cryptoFactory, algorithmName, hash)](#CryptoHelpers.getSubtleCryptoForAlgorithm)
+    * [.jwaToWebCrypto(jwaAlgorithmName)](#CryptoHelpers.jwaToWebCrypto)
+    * [.webCryptoToJwa(algorithmName, hash)](#CryptoHelpers.webCryptoToJwa)
+    * [.getKeyImportAlgorithm(algorithm)](#CryptoHelpers.getKeyImportAlgorithm)
+
+<a name="CryptoHelpers.getSubtleCryptoForAlgorithm"></a>
+
+### CryptoHelpers.getSubtleCryptoForAlgorithm(cryptoFactory, algorithmName, hash)
+<p>The API which implements the requested algorithm</p>
+
+**Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
+
+| Param | Description |
+| --- | --- |
+| cryptoFactory | <p>Crypto suite</p> |
+| algorithmName | <p>Requested algorithm</p> |
+| hash | <p>Optional hash for the algorithm</p> |
+
+<a name="CryptoHelpers.jwaToWebCrypto"></a>
+
+### CryptoHelpers.jwaToWebCrypto(jwaAlgorithmName)
+<p>Map the JWA algorithm to the W3C crypto API algorithm.
+The method restricts the supported algorithms. This can easily be extended.
+Based on https://<a href="http://www.w3.org/TR/WebCryptoAPI/">www.w3.org/TR/WebCryptoAPI/</a> A. Mapping between JSON Web Key / JSON Web Algorithm</p>
+
+**Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
+
+| Param | Description |
+| --- | --- |
+| jwaAlgorithmName | <p>Requested algorithm</p> |
+
+<a name="CryptoHelpers.webCryptoToJwa"></a>
+
+### CryptoHelpers.webCryptoToJwa(algorithmName, hash)
+<p>Maps the subtle crypto algorithm name to the JWA name</p>
+
+**Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
+
+| Param | Description |
+| --- | --- |
+| algorithmName | <p>Requested algorithm</p> |
+| hash | <p>Optional hash for the algorithm</p> |
+
+<a name="CryptoHelpers.getKeyImportAlgorithm"></a>
+
+### CryptoHelpers.getKeyImportAlgorithm(algorithm)
+<p>Derive the key import algorithm</p>
+
+**Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>used for signature</p> |
+
+<a name="W3cCryptoApiConstants"></a>
+
+## W3cCryptoApiConstants
+<p>Class for W3C Crypto API constants</p>
+
+**Kind**: global class  
 <a name="CryptoOptions"></a>
 
 ## CryptoOptions
@@ -784,6 +1763,47 @@ User Agent, such as resolver and register.</p>
 ## CredentialType
 <p>Interface defining common properties and
 methods of a credential.</p>
+
+**Kind**: global variable  
+<a name="KeyType"></a>
+
+## KeyType
+<p>Enumeration to model key types.</p>
+
+**Kind**: global variable  
+<a name="KeyType"></a>
+
+## KeyType
+<p>Factory class to create @enum KeyType objects</p>
+
+**Kind**: global variable  
+<a name="KeyUse"></a>
+
+## KeyUse
+<p>Enumeration to model key use.</p>
+
+**Kind**: global variable  
+<a name="KeyUse"></a>
+
+## KeyUse
+<p>Factory class to create @enum KeyUse objects.</p>
+
+**Kind**: global variable  
+<a name="KeyOperation"></a>
+
+## KeyOperation
+<p>JWK key operations</p>
+
+**Kind**: global variable  
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
+<a name="ProtectionFormat"></a>
+
+## ProtectionFormat
+<p>Enum to define different protection formats</p>
 
 **Kind**: global variable  
 <a name="SignatureFormat"></a>

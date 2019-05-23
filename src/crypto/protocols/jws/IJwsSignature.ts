@@ -1,21 +1,26 @@
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import nodeWebcryptoOssl from 'node-webcrypto-ossl';
+import { JwsHeader } from "./IJwsGeneralJson";
 
 /**
- * Class used to model crypto options
+ * JWS signature used by the general JSON
  */
-export default class CryptoOptions {
+export default interface IJwsSignature {
   /**
-   * Get or set the crypto api to be used
+   * The protected (signed) header.
    */
-  public cryptoApi: any = new nodeWebcryptoOssl();
+  protected?: JwsHeader | undefined,
 
   /**
-   * Get or set the algorithm to be used.
-   * Conform to the Web Cryptography Api
+   * The unprotected (unverified) header.
    */
-  public algorithm: any;
+  header?: JwsHeader | undefined,
+
+  /**
+   * The JWS signature.
+   */
+  signature: Buffer
 }
