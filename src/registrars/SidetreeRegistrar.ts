@@ -12,8 +12,8 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import IKeyStore from '../keystores/IKeyStore';
-import { SignatureFormat } from '../keystores/SignatureFormat';
+import IKeyStore from '../crypto/keyStore/IKeyStore';
+import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -81,7 +81,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       console.log(bodyString);
 
       // registration with signed message for bodyString
-      bodyString = await this.keyStore.sign(keyReference, bodyString, SignatureFormat.FlatJsonJws);
+      bodyString = await this.keyStore.sign(keyReference, bodyString, ProtectionFormat.JwsFlatJson);
 
       const fetchOptions = {
         method: 'POST',

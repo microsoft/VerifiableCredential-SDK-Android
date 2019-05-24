@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import base64url from 'base64url';
-import { KeyType } from './KeyType'
+import { KeyType } from './KeyTypeFactory'
 import { Url } from 'url';
 import { KeyUse } from '@decentralized-identity/did-crypto-typescript';
 const jose = require('node-jose');

@@ -3,15 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey, KeyExport, KeyUseFactory, KeyTypeFactory, KeyUse } from '@decentralized-identity/did-crypto-typescript';
-import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
 import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
-import Protect from './keystores/Protect';
-import { SignatureFormat } from './keystores/SignatureFormat';
+import IKeyStore from './crypto/keyStore/IKeyStore';
+import { ProtectionFormat } from './crypto/keyStore/ProtectionFormat';
+import PairwiseKey from './crypto/keys/PairwiseKey';
+import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
+import KeyUseFactory from './crypto/keys/KeyUseFactory';
 
 /**
  * Class for creating and managing identifiers,
@@ -72,18 +73,16 @@ export default class Identifier {
    */
   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<Identifier> {
     if (this.options && this.options.keyStore) {
-      const keyStore: IKeyStore = this.options.keyStore;
-      const seed: Buffer = <Buffer> await keyStore.getKey(KeyStoreConstants.masterSeed);
 
       // Create DID key
-      const didKey = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
-      const pairwiseKey: DidKey = await didKey.generatePairwise(seed, this.id, target);
-      const jwk: any = await pairwiseKey.getJwkKey(KeyExport.Private);
-      const pubJwk: any = await pairwiseKey.getJwkKey(KeyExport.Public);
+      const cryptoFactory = this.options.cryptoFactory;
+      const algorithm = this.options.cryptoOptions!.algorithm;
+      const generator = new SubtleCryptoExtension(cryptoFactory);
+      const jwk = await generator.generatePairwiseKey(algorithm, KeyStoreConstants.masterSeed, this.id, target, true, ['sign']);
       pubJwk.kid = jwk.kid;
 
-      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(pairwiseKey.algorithm), jwk.kty);
-      await keyStore.save(pairwiseKeyStorageId, jwk);
+      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(algorithm), <string>jwk.kty);
+      await this.options.keyStore.save(pairwiseKeyStorageId, jwk);
 
       // Set key format
       // todo switch by leveraging pairwiseKey
@@ -197,7 +196,7 @@ export default class Identifier {
         } else {
           body = payload;
         }
-        return this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
+        return this.options.keyStore.sign(keyStorageIdentifier, body, ProtectionFormat.JwsFlatJson);
       } else {
         throw new UserAgentError('No KeyStore in Options');
       }

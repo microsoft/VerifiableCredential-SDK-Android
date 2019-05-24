@@ -4,11 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 import { SubtleCrypto } from 'webcrypto-core'
 import { CryptoAlgorithm } from '../keyStore/IKeyStore';
+import PrivateKey from '../keys/PrivateKey';
 
 /**
  * Interface for the Crypto Algorithms Plugins
  */
 export default interface ISubtleCrypto extends SubtleCrypto {
+  /**
+   * Generate a pairwise key
+   * @param algorithm for the key
+   * @param seedReference Reference to the seed
+   * @param personaId Id for the persona
+   * @param peerId Id for the peer
+   * @param extractable True if key is exportable
+   * @param keyops Key operations
+   */
+  generatePairwiseKey(algorithm: CryptoAlgorithm, seedReference: string, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey>;  
+  
   /**
    * Sign with a key referenced in the key store.
    * The referenced key must be a jwk key.

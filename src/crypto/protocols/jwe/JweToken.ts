@@ -11,7 +11,7 @@ import { IEncryptionOptions } from '../../keyStore/IKeyStore';
 import JweRecipient from './JweRecipient';
 import { TSMap } from 'typescript-map'
 import JoseHelpers from '../jose/JoseHelpers';
-import { KeyType } from '../../keys/KeyType';
+import { KeyType } from '../../keys/KeyTypeFactory';
 import JoseConstants from '../jose/JoseConstants'
 import CryptoHelpers from '../../utilities/CryptoHelpers';
 import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';

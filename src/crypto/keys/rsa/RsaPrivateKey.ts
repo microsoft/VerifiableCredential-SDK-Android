@@ -5,7 +5,7 @@
 
 import RsaPublicKey from './RsaPublicKey';
 import PrivateKey from '../PrivateKey';
-import { KeyUse } from '../KeyUse'
+import { KeyUse } from '../KeyUseFactory'
 import PublicKey from '../PublicKey';
 
 /**

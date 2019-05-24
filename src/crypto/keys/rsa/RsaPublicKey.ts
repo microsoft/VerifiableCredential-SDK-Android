@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import PublicKey from '../PublicKey';
-import { KeyType } from '../KeyType';
+import { KeyType } from '../KeyTypeFactory';
 
 /**
  * Represents an RSA public key

@@ -117,7 +117,7 @@ methods of a credential.</p></dd>
 <dd><p>JWK key operations</p></dd>
 <dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
 <dd><p>Enum to define different protection formats</p></dd>
-<dt><a href="#SignatureFormat">SignatureFormat</a></dt>
+<dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
 <dd><p>Enum to define different signature formats</p></dd>
 </dl>
 
@@ -1806,9 +1806,9 @@ methods of a credential.</p>
 <p>Enum to define different protection formats</p>
 
 **Kind**: global variable  
-<a name="SignatureFormat"></a>
+<a name="ProtectionFormat"></a>
 
-## SignatureFormat
+## ProtectionFormat
 <p>Enum to define different signature formats</p>
 
 **Kind**: global variable  

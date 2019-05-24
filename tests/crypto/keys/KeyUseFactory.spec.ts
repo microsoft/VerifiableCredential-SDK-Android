@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
  
 // tslint:disable-next-line: import-name
-import KeyUseFactory, { KeyUse } from '../../../src/crypto/keys/KeyUse';
+import KeyUseFactory, { KeyUse } from '../../../src/crypto/keys/KeyUseFactory';
 
 describe('KeyUseFactory', () => {
   it(`should return the key use of signature for 'hmac'`, () => {

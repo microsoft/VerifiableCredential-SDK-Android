@@ -8,7 +8,8 @@ import CryptoFactory from './CryptoFactory';
 import CryptoHelpers from '../utilities/CryptoHelpers';
 import PublicKey from '../keys/PublicKey';
 import PrivateKey from '../keys/PrivateKey';
-import { KeyType } from '../keys/KeyType';
+import { KeyType } from '../keys/KeyTypeFactory';
+import PairwiseKey from '../keys/PairwiseKey';
 import { SubtleCrypto } from 'webcrypto-core';
 
 /**
@@ -25,6 +26,20 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     this.keyStore = cryptoFactory.keyStore;
     this.cryptoFactory = cryptoFactory;
   }
+
+  /**
+   * Generate a pairwise key for the algorithm
+   * @param algorithm for the key
+   * @param seedReference Reference to the seed
+   * @param personaId Id for the persona
+   * @param peerId Id for the peer
+   * @param extractable True if key is exportable
+   * @param keyops Key operations
+   */
+   public async generatePairwiseKey(algorithm: CryptoAlgorithm, seedReference: string, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey> {
+    const pairwiseKey = new PairwiseKey(this.cryptoFactory);
+    return pairwiseKey.generatePairwiseKey(algorithm, seedReference, personaId, peerId, extractable, keyops);
+   } 
 
   /**
    * Sign with a key referenced in the key store
@@ -98,8 +113,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const key = await crypto.importKey('jwk', jwk, keyImportAlgorithm, true, ['encrypt']);
     return await <PromiseLike<ArrayBuffer>>crypto.encrypt(algorithm, key, <ArrayBuffer>data);
-  }
-        
+  }        
 }
 
  

@@ -37,7 +37,7 @@ export default class CryptoHelpers {
       case 'AES-GCM':
         return cryptoFactory.getSymmetricEncrypter(jwa);
       case 'HMAC':
-        return cryptoFactory.getMacSigner(jwa);
+        return cryptoFactory.getMessageAuthenticationCodeSigners(jwa);
       case 'SHA-256':
       case 'SHA-384':
       case 'SHA-512':

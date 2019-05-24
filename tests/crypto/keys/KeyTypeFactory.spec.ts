@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
  
 // tslint:disable-next-line: import-name
-import KeyTypeFactory, { KeyType } from '../../../src/crypto/keys/KeyType';
+import KeyTypeFactory, { KeyType } from '../../../src/crypto/keys/KeyTypeFactory';
 
 describe('KeyTypeFactory', () => {
   it(`should return the key type for 'hmac'`, () => {

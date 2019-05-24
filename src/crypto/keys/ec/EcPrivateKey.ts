@@ -6,7 +6,7 @@
 import EcPublicKey from './EcPublicKey';
 import PrivateKey from '../PrivateKey';
 import PublicKey from '../PublicKey';
-import { KeyUse } from '../KeyUse'
+import { KeyUse } from '../KeyUseFactory'
 
 /**
  * Represents an Elliptic Curve private key

@@ -56,7 +56,6 @@
     "typescript-map": "0.0.7"
   },
   "dependencies": {
-    "@decentralized-identity/did-auth-jose": "0.1.12",
     "@decentralized-identity/did-common-typescript": "0.1.18",
     "@decentralized-identity/did-crypto-typescript": "0.1.6",
     "@decentralized-identity/hub-node-core": "0.1.4",
