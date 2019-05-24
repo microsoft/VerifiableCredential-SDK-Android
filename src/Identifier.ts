@@ -8,11 +8,12 @@ import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
-import IKeyStore from './crypto/keyStore/IKeyStore';
 import { ProtectionFormat } from './crypto/keyStore/ProtectionFormat';
-import PairwiseKey from './crypto/keys/PairwiseKey';
 import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
-import KeyUseFactory from './crypto/keys/KeyUseFactory';
+import KeyUseFactory, { KeyUse } from './crypto/keys/KeyUseFactory';
+import KeyTypeFactory from './crypto/keys/KeyTypeFactory';
+import JwsToken from './crypto/protocols/jws/JwsToken';
+import { ISigningOptions } from './crypto/keyStore/IKeyStore';
 
 /**
  * Class for creating and managing identifiers,
@@ -78,7 +79,9 @@ export default class Identifier {
       const cryptoFactory = this.options.cryptoFactory;
       const algorithm = this.options.cryptoOptions!.algorithm;
       const generator = new SubtleCryptoExtension(cryptoFactory);
-      const jwk = await generator.generatePairwiseKey(algorithm, KeyStoreConstants.masterSeed, this.id, target, true, ['sign']);
+      const jwk = await generator.generatePairwiseKey(algorithm, KeyStoreConstants.masterSeed, this.id, target);
+      const pubJwk = jwk.getPublicKey();
+      
       pubJwk.kid = jwk.kid;
 
       const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(algorithm), <string>jwk.kty);
@@ -196,7 +199,12 @@ export default class Identifier {
         } else {
           body = payload;
         }
-        return this.options.keyStore.sign(keyStorageIdentifier, body, ProtectionFormat.JwsFlatJson);
+        const signingOptions: ISigningOptions = {
+          cryptoFactory: this.options.cryptoFactory
+        };
+        const jws = new JwsToken(signingOptions);
+        const signature = await jws.sign(keyStorageIdentifier, Buffer.from(body), ProtectionFormat.JwsFlatJson);
+        return signature.serialize();;
       } else {
         throw new UserAgentError('No KeyStore in Options');
       }
@@ -214,6 +222,9 @@ export default class Identifier {
     if (!this.document) {
       this.document = await this.getDocument();
     }
-    return Protect.verify(jws, this.document.publicKeys);
+    const signingOptions: ISigningOptions = {
+      cryptoFactory: <CryptoFactory>this.options.cryptoFactory
+    };
+    return jws.verify(jws, this.document.publicKeys, signingOptions);
   }
 }

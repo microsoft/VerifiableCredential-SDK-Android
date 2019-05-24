@@ -9,6 +9,8 @@ import W3cCryptoApiConstants from "../utilities/W3cCryptoApiConstants";
 import base64url from "base64url";
 import EcPairwiseKey from "./ec/EcPairwiseKey";
 import CryptoError from "../CryptoError";
+import RsaPairwiseKey from "./rsa/RsaPairwiseKey";
+import PrivateKey from "./PrivateKey";
 
 /**
  * Class to model pairwise keys
@@ -37,18 +39,16 @@ import CryptoError from "../CryptoError";
    * @param seedReference Reference to the seed
    * @param personaId Id for the persona
    * @param peerId Id for the peer
-   * @param extractable True if key is exportable
-   * @param keyops Key operations
    */
-   public async generatePairwiseKey(algorithm: CryptoAlgorithm, seedReference: string, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey> {
+   public async generatePairwiseKey(algorithm: EcKeyGenParams | RsaHashedKeyGenParams, seedReference: string, personaId: string, peerId: string): Promise<PrivateKey> {
     const personaMasterKey: Buffer = await this.generatePersonaMasterKey(seedReference, personaId);
 
     const keyType = KeyTypeFactory.create(algorithm);
     switch (keyType) {
       case KeyType.EC:
-        return EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, algorithm, personaId, peerId, extractable, keyops);
+        return EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);
       case KeyType.RSA:
-        return RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, algorithm, personaId, peerId, extractable, keyops);
+        return RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
     
       default:
         throw new CryptoError(algorithm, `Pairwise key for type '${keyType}' is not supported.`);

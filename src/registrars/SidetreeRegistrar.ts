@@ -12,8 +12,10 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import IKeyStore from '../crypto/keyStore/IKeyStore';
+import IKeyStore, { ISigningOptions } from '../crypto/keyStore/IKeyStore';
 import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
+import CryptoFactory from '../crypto/plugin/CryptoFactory';
+import JwsToken from '../crypto/protocols/jws/JwsToken';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -24,6 +26,7 @@ export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
   private serializedOptions: string;
   private keyStore: IKeyStore;
+  private cryptoFactory: CryptoFactory;
 
   /**
    * Constructs a new instance of the Sidetree registrar
@@ -38,6 +41,7 @@ export default class SidetreeRegistrar implements IRegistrar {
 
     this.serializedOptions = JSON.stringify(options);
     this.keyStore = options.keyStore;
+    this.cryptoFactory = options.cryptoFactory;
 
     // Format the url
     this.url = `${url.replace(/\/?$/, '/')}`;
@@ -81,7 +85,12 @@ export default class SidetreeRegistrar implements IRegistrar {
       console.log(bodyString);
 
       // registration with signed message for bodyString
-      bodyString = await this.keyStore.sign(keyReference, bodyString, ProtectionFormat.JwsFlatJson);
+      const signingOptions: ISigningOptions = {
+        cryptoFactory: this.cryptoFactory
+      };
+      const jws = new JwsToken(signingOptions);
+      const signature = await jws.sign(keyReference, Buffer.from(bodyString), ProtectionFormat.JwsFlatJson);
+      bodyString = signature.serialize();
 
       const fetchOptions = {
         method: 'POST',

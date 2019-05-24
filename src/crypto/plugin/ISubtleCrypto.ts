@@ -19,7 +19,7 @@ export default interface ISubtleCrypto extends SubtleCrypto {
    * @param extractable True if key is exportable
    * @param keyops Key operations
    */
-  generatePairwiseKey(algorithm: CryptoAlgorithm, seedReference: string, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey>;  
+  generatePairwiseKey(algorithm: EcKeyGenParams | RsaHashedKeyGenParams, seedReference: string, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey>;  
   
   /**
    * Sign with a key referenced in the key store.

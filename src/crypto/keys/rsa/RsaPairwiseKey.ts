@@ -2,10 +2,10 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
- import CryptoFactory from "../plugin/CryptoFactory";
-import { CryptoAlgorithm } from "../keyStore/IKeyStore";
-import KeyTypeFactory, { KeyType } from "./KeyTypeFactory";
-import W3cCryptoApiConstants from "../utilities/W3cCryptoApiConstants";
+ import CryptoFactory from "../../plugin/CryptoFactory";
+import { CryptoAlgorithm } from "../../keyStore/IKeyStore";
+import { KeyType } from "../KeyTypeFactory";
+import W3cCryptoApiConstants from "../../utilities/W3cCryptoApiConstants";
 import PrivateKey from "../PrivateKey";
 import base64url from "base64url";
 import KeyUseFactory from "../KeyUseFactory";
@@ -23,20 +23,19 @@ import { BigIntegerStatic } from 'big-integer';
    */
   private static deterministicKey: Buffer = Buffer.from('');
   
-  // Statistics on the number of prime tests
-  private static numberOfPrimeTests: number = 0;
+  /**
+   * Statistics on the number of prime tests
+   */
+  public static numberOfPrimeTests: number = 0;
 
   /**
    * Generate a pairwise key for the specified algorithms
    * @param cryptoFactory defining the key store and the used crypto api
    * @param personaMasterKey Master key for the current selected persona
    * @param algorithm for the key
-   * @param personaId Id for the persona
    * @param peerId Id for the peer
-   * @param extractable True if key is exportable
-   * @param keyops Key operations
    */
-  public static async generate(cryptoFactory: CryptoFactory, personaMasterKey: Buffer, algorithm: CryptoAlgorithm, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey> {
+  public static async generate(cryptoFactory: CryptoFactory, personaMasterKey: Buffer, algorithm: RsaHashedKeyGenParams, peerId: string): Promise<PrivateKey> {
     // This method is currently breaking the subtle crypto pattern and needs to be fixed to be platform independent
  
 
@@ -93,7 +92,7 @@ import { BigIntegerStatic } from 'big-integer';
    * @param personaMasterKey The persona master key
    * @param peerId The peer id
    */
-   public static async generateDeterministicNumberForPrime (_cryptoFactory: CryptoFactory, primeSize: number, personaMasterKey: Buffer, peerId: Buffer): Promise<Buffer> {
+   public static async generateDeterministicNumberForPrime (cryptoFactory: CryptoFactory, primeSize: number, personaMasterKey: Buffer, peerId: Buffer): Promise<Buffer> {
     const numberOfRounds: number = primeSize / (8 * 64);
     this.deterministicKey = Buffer.from('');
     const rounds: Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) => Promise<Buffer>> = [];
@@ -103,7 +102,7 @@ import { BigIntegerStatic } from 'big-integer';
       });
     }
 
-    return this.executeRounds(crypto, rounds, 0, personaMasterKey, peerId);
+    return this.executeRounds(cryptoFactory, rounds, 0, personaMasterKey, peerId);
   }
 
   /**
@@ -143,7 +142,7 @@ import { BigIntegerStatic } from 'big-integer';
     if (inx + 1 === rounds.length) {
       return this.deterministicKey;
     } else {
-      await this.executeRounds(crypto, rounds, inx + 1, key, Buffer.from(signature));
+      await this.executeRounds(cryptoFactory, rounds, inx + 1, key, Buffer.from(signature));
       return this.deterministicKey;
     }
   }
@@ -159,14 +158,14 @@ import { BigIntegerStatic } from 'big-integer';
     primeSeed[0] |= 0x80;
     const two = bigInt(2);
     let prime = bigInt.fromArray(primeSeed, 256, false);
-    this._numberOfPrimeTests = 1;
+    RsaPairwiseKey.numberOfPrimeTests = 1;
     while (true) {
       // 64 tests give 128 bit security
       if (prime.isProbablePrime(64)) {
         break;
       }
       prime = prime.add(two);
-      this._numberOfPrimeTests++;
+      RsaPairwiseKey.numberOfPrimeTests++;
     }
 
     return prime;

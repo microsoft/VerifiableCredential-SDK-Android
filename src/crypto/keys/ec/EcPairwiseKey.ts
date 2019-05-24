@@ -2,12 +2,13 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
- import CryptoFactory from "../plugin/CryptoFactory";
-import { CryptoAlgorithm } from "../keyStore/IKeyStore";
-import KeyTypeFactory, { KeyType } from "./KeyTypeFactory";
-import W3cCryptoApiConstants from "../utilities/W3cCryptoApiConstants";
+import W3cCryptoApiConstants from "../../utilities/W3cCryptoApiConstants";
 import base64url from "base64url";
 import PrivateKey from "../PrivateKey";
+import CryptoFactory from "../../plugin/CryptoFactory";
+import { CryptoAlgorithm } from "../../keyStore/IKeyStore";
+import { KeyType } from "../KeyTypeFactory";
+import EcPrivateKey from "./EcPrivateKey";
 
 // Create and initialize EC context
 const BN = require('bn.js');
@@ -26,12 +27,10 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
    * @param cryptoFactory defining the key store and the used crypto api
    * @param personaMasterKey Master key for the current selected persona
    * @param algorithm for the key
-   * @param personaId Id for the persona
    * @param peerId Id for the peer
    * @param extractable True if key is exportable
-   * @param keyops Key operations
    */
-  public static async generate(cryptoFactory: CryptoFactory, personaMasterKey: Buffer, algorithm: CryptoAlgorithm, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey> {
+  public static async generate(cryptoFactory: CryptoFactory, personaMasterKey: Buffer, algorithm: EcKeyGenParams, peerId: string): Promise<PrivateKey> {
     // This method is currently breaking the subtle crypto pattern and needs to be fixed to be platform independent
     // Get the subtle crypto
     const crypto: SubtleCrypto = cryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac);

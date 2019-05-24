@@ -36,9 +36,9 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    * @param extractable True if key is exportable
    * @param keyops Key operations
    */
-   public async generatePairwiseKey(algorithm: CryptoAlgorithm, seedReference: string, personaId: string, peerId: string, extractable: boolean, keyops: string[]): Promise<PrivateKey> {
+   public async generatePairwiseKey(algorithm: EcKeyGenParams | RsaHashedKeyGenParams, seedReference: string, personaId: string, peerId: string): Promise<PrivateKey> {
     const pairwiseKey = new PairwiseKey(this.cryptoFactory);
-    return pairwiseKey.generatePairwiseKey(algorithm, seedReference, personaId, peerId, extractable, keyops);
+    return pairwiseKey.generatePairwiseKey(algorithm, seedReference, personaId, peerId);
    } 
 
   /**
