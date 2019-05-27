@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import KeyStoreConstants from './keystores/KeyStoreConstants';
-import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
@@ -14,7 +13,7 @@ import KeyUseFactory, { KeyUse } from './crypto/keys/KeyUseFactory';
 import KeyTypeFactory from './crypto/keys/KeyTypeFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
 import { ISigningOptions } from './crypto/keyStore/IKeyStore';
-
+import { IdentifierDocumentPublicKey } from './types';
 /**
  * Class for creating and managing identifiers,
  * retrieving identifier documents.
@@ -89,7 +88,7 @@ export default class Identifier {
 
       // Set key format
       // todo switch by leveraging pairwiseKey
-      const publicKey: PublicKey = {
+      const publicKey: IdentifierDocumentPublicKey = {
         id: jwk.kid,
         type: this.getDidDocumentKeyType(),
         publicKeyJwk: pubJwk
@@ -136,7 +135,7 @@ export default class Identifier {
    * key defined in document.
    * @param keyIdentifier the identifier of the public key.
    */
-  public async getPublicKey (keyIdentifier?: string): Promise<PublicKey> {
+  public async getPublicKey (keyIdentifier?: string): Promise<IdentifierDocumentPublicKey> {
     if (!this.document) {
       await this.getDocument();
     }
@@ -171,7 +170,7 @@ export default class Identifier {
   }
 
   // Create an identifier document. Included the public key.
-  private async createIdentifierDocument (id: string, publicKey: PublicKey): Promise <IdentifierDocument> {
+  private async createIdentifierDocument (id: string, publicKey: IdentifierDocumentPublicKey): Promise <IdentifierDocument> {
     return IdentifierDocument.createAndGenerateId(id, [ publicKey ], <UserAgentOptions> this.options);
   }
 
@@ -217,14 +216,19 @@ export default class Identifier {
    * Verify the payload with public key from the Identifier Document.
    * @param jws the signed token to be verified.
    */
-  public async verify (jws: string) {
+  public async verify (jws: string): Promise<string> {
 
     if (!this.document) {
       this.document = await this.getDocument();
     }
     const signingOptions: ISigningOptions = {
-      cryptoFactory: <CryptoFactory>this.options.cryptoFactory
+      cryptoFactory: (<UserAgentOptions>this.options).cryptoFactory
     };
-    return jws.verify(jws, this.document.publicKeys, signingOptions);
+    const token: JwsToken = JwsToken.deserialize(jws, signingOptions);
+    if (token.verify(this.document.getPublicKeysFromDocument(), signingOptions)) {
+      return token.getPayload();
+    }
+
+    throw new UserAgentError('The signature validation failed.');
   }
 }

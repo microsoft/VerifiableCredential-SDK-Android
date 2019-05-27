@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
- import CryptoFactory from "../../plugin/CryptoFactory";
+import CryptoFactory from "../../plugin/CryptoFactory";
 import { CryptoAlgorithm } from "../../keyStore/IKeyStore";
 import { KeyType } from "../KeyTypeFactory";
 import W3cCryptoApiConstants from "../../utilities/W3cCryptoApiConstants";
@@ -12,6 +12,9 @@ import KeyUseFactory from "../KeyUseFactory";
 import RsaPrivateKey from "./RsaPrivateKey";
 const bigInt = require('big-integer');
 import { BigIntegerStatic } from 'big-integer';
+
+// tslint:disable-next-line:prefer-array-literal
+type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) => Promise<Buffer>>;
 
 /**
  * Class to model RSA pairwise keys
@@ -95,7 +98,7 @@ import { BigIntegerStatic } from 'big-integer';
    public static async generateDeterministicNumberForPrime (cryptoFactory: CryptoFactory, primeSize: number, personaMasterKey: Buffer, peerId: Buffer): Promise<Buffer> {
     const numberOfRounds: number = primeSize / (8 * 64);
     this.deterministicKey = Buffer.from('');
-    const rounds: Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) => Promise<Buffer>> = [];
+    const rounds: PrimeDelegate = [];
     for (let inx = 0; inx < numberOfRounds ; inx++) {
       rounds.push((cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) => {
         return this.generateHashForPrime(cryptoFactory, inx, key, data);
@@ -136,8 +139,7 @@ import { BigIntegerStatic } from 'big-integer';
    * @param key Key to sign
    * @param data Data to sign
    */
-  private static async executeRounds (cryptoFactory: CryptoFactory, rounds: Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) =>
-    Promise<Buffer>>, inx: number, key: Buffer, data: Buffer): Promise<Buffer> {
+  private static async executeRounds (cryptoFactory: CryptoFactory, rounds: PrimeDelegate, inx: number, key: Buffer, data: Buffer): Promise<Buffer> {
     const signature: Buffer = await rounds[inx](cryptoFactory, inx, key, data);
     if (inx + 1 === rounds.length) {
       return this.deterministicKey;
@@ -152,6 +154,7 @@ import { BigIntegerStatic } from 'big-integer';
    * isProbablyPrime is based on the Miller-Rabin prime test.
    * @param primeSeed seed for prime generator
    */
+  // tslint:disable-next-line:prefer-array-literal
   private static generatePrime (primeSeed: Array<number>): BigIntegerStatic {
     // make sure candidate is uneven, set high order bit
     primeSeed[primeSeed.length - 1] |= 0x1;
@@ -159,6 +162,7 @@ import { BigIntegerStatic } from 'big-integer';
     const two = bigInt(2);
     let prime = bigInt.fromArray(primeSeed, 256, false);
     RsaPairwiseKey.numberOfPrimeTests = 1;
+    // tslint:disable-next-line:no-constant-condition
     while (true) {
       // 64 tests give 128 bit security
       if (prime.isProbablePrime(64)) {

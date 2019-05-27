@@ -54,7 +54,7 @@ describe('JwsToken standard', () => {
       expect(base64url.encode(signature.signatures[0].signature)).toEqual(encodedSignature);
 
       // Verify signature
-      const success = await signature.verify(key.getPublicKey());
+      const success = await signature.verify([key.getPublicKey()]);
       expect(success).toBeTruthy();      
 
       const compact = signature.serialize(ProtectionFormat.JwsCompactJson);

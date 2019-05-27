@@ -11,10 +11,8 @@ import UserAgentError from '../../src/UserAgentError';
 import UserAgentOptions from '../../src/UserAgentOptions';
 import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
-import { DidKey, KeyExport } from '@decentralized-identity/did-crypto-typescript';
 import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
-import { ProtectionFormat } from '../../src/crypto/keyStore/ProtectionFormat';
 let fetchMock: any;
 
 // Add a document to the cache
@@ -46,28 +44,6 @@ describe('SidetreeRegistrar', () => {
       expect('options and options.keyStore need to be defined').toBe(err.message);
       done();
     }
-  });
-
-  it('should throw when key type not supported for signature', async (done) => {
-        // Setup registration environment
-    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
-    const didKey = new DidKey(
-          (<CryptoOptions> options.cryptoOptions).cryptoApi,
-          { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: 'SHA-256' } },
-          null
-        );
-    const jwk: any = await didKey.getJwkKey(KeyExport.Private);
-    jwk.kty = 'AA';
-    const keyStore = <KeyStoreInMemory> options.keyStore;
-    await keyStore.save('key', jwk);
-    keyStore.sign('key', 'abc', ProtectionFormat.JwsFlatJson)
-        .then(() => {
-          fail('Should throw');
-        })
-        .catch((err: any) => {
-          expect(`The key type 'AA' is not supported.`).toBe(err.message);
-          done();
-        });
   });
 
   it('should construct new instance of the SidetreeRegistrar', async () => {

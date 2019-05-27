@@ -301,9 +301,7 @@ describe('Identifier', () => {
       options.keyStore = new KeyStoreInMemory();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
-      const signMethod = spyOn(Protect, 'sign').and.returnValue(Promise.resolve('signedPayload'));
       const signedPayload = await identifier.sign('examplePayload', 'did:ion', 'did:ion');
-      expect(signMethod).toHaveBeenCalled();
       expect(signedPayload).toBeDefined();
       expect(signedPayload).toEqual('signedPayload');
     });
@@ -314,9 +312,7 @@ describe('Identifier', () => {
       options.keyStore = new KeyStoreInMemory();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
-      const signMethod = spyOn(Protect, 'sign').and.returnValue(Promise.resolve('signedPayload'));
       const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion', 'did:ion');
-      expect(signMethod).toHaveBeenCalled();
       expect(signedPayload).toBeDefined();
       expect(signedPayload).toEqual('signedPayload');
     });
@@ -357,18 +353,14 @@ describe('Identifier', () => {
 
     it('should resolve identifier document and verify jws', async () => {
       (<TestResolver> options.resolver).prepareTest(identifier, identifierDocument);
-      const verifyMethod = spyOn(Protect, 'verify').and.returnValue(Promise.resolve('verifiedPayload'));
       const verifiedPayload = await identifier.verify(testJws);
-      expect(verifyMethod).toHaveBeenCalledWith(testJws, identifierDocument.publicKeys);
       expect(verifiedPayload).toBeDefined();
       expect(verifiedPayload).toBe('verifiedPayload');
     });
 
     it('should verify jws', async () => {
       const testIdentifier = new Identifier(identifierDocument);
-      const verifyMethod = spyOn(Protect, 'verify').and.returnValue(Promise.resolve('verifiedPayload'));
       const verifiedPayload = await testIdentifier.verify(testJws);
-      expect(verifyMethod).toHaveBeenCalledWith(testJws, identifierDocument.publicKeys);
       expect(verifiedPayload).toBeDefined();
       expect(verifiedPayload).toBe('verifiedPayload');
     });

@@ -13,14 +13,22 @@ self-issued id token.</p></dd>
 <dt><a href="#VerifiedCredential">VerifiedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
+<dt><a href="#CryptoError">CryptoError</a></dt>
+<dd><p>Base error class for the crypto.</p></dd>
+<dt><a href="#EcPairwiseKey">EcPairwiseKey</a></dt>
+<dd><p>Class to model EC pairwise keys</p></dd>
 <dt><a href="#EcPrivateKey">EcPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
 <dt><a href="#EcPublicKey">EcPublicKey</a> ⇐ <code>PublicKey</code></dt>
 <dd><p>Represents an Elliptic Curve public key</p></dd>
+<dt><a href="#PairwiseKey">PairwiseKey</a></dt>
+<dd><p>Class to model pairwise keys</p></dd>
 <dt><a href="#PrivateKey">PrivateKey</a></dt>
 <dd><p>Represents a Private Key in JWK format.</p></dd>
 <dt><a href="#KeyOperation">KeyOperation</a></dt>
 <dd></dd>
+<dt><a href="#RsaPairwiseKey">RsaPairwiseKey</a></dt>
+<dd><p>Class to model RSA pairwise keys</p></dd>
 <dt><a href="#RsaPrivateKey">RsaPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
 <dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code>PublicKey</code></dt>
@@ -67,16 +75,8 @@ retrieving identifier documents.</p></dd>
 <dt><a href="#IdentifierDocument">IdentifierDocument</a></dt>
 <dd><p>Class for creating and managing identifiers,
 retrieving identifier documents.</p></dd>
-<dt><a href="#InMemoryKeyStore">InMemoryKeyStore</a></dt>
-<dd><p>An encrypted in memory implementation of IKeyStore using PouchDB
-and memdown. As soon as the process ends or
-the reference to the store is released all data is discarded.</p>
-<p>This implementation is intended as a batteries included approach
-to allow simple testing and experimentation with the UserAgent SDK.</p></dd>
 <dt><a href="#KeyStoreConstants">KeyStoreConstants</a></dt>
 <dd><p>Class for key storage constants</p></dd>
-<dt><a href="#Protect">Protect</a></dt>
-<dd><p>Class to model protection mechanisms</p></dd>
 <dt><a href="#Multihash">Multihash</a></dt>
 <dd><p>Class that performs hashing operations using the multihash format.</p></dd>
 <dt><a href="#SidetreeRegistrar">SidetreeRegistrar</a></dt>
@@ -117,8 +117,6 @@ methods of a credential.</p></dd>
 <dd><p>JWK key operations</p></dd>
 <dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
 <dd><p>Enum to define different protection formats</p></dd>
-<dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
-<dd><p>Enum to define different signature formats</p></dd>
 </dl>
 
 ## Constants
@@ -311,6 +309,44 @@ credential for the specified identifier.</p>
 | issuedTo | <p>the specified identifier.</p> |
 | issuedAt | <p>date and time.</p> |
 
+<a name="CryptoError"></a>
+
+## CryptoError
+<p>Base error class for the crypto.</p>
+
+**Kind**: global class  
+<a name="new_CryptoError_new"></a>
+
+### new CryptoError(protocol, message)
+<p>Create instance of @class CryptoProtocolError</p>
+
+
+| Param | Description |
+| --- | --- |
+| protocol | <p>name</p> |
+| message | <p>for the error</p> |
+
+<a name="EcPairwiseKey"></a>
+
+## EcPairwiseKey
+<p>Class to model EC pairwise keys</p>
+
+**Kind**: global class  
+<a name="EcPairwiseKey.generate"></a>
+
+### EcPairwiseKey.generate(cryptoFactory, personaMasterKey, algorithm, peerId, extractable)
+<p>Generate a pairwise key for the specified algorithms</p>
+
+**Kind**: static method of [<code>EcPairwiseKey</code>](#EcPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| cryptoFactory | <p>defining the key store and the used crypto api</p> |
+| personaMasterKey | <p>Master key for the current selected persona</p> |
+| algorithm | <p>for the key</p> |
+| peerId | <p>Id for the peer</p> |
+| extractable | <p>True if key is exportable</p> |
+
 <a name="EcPrivateKey"></a>
 
 ## EcPrivateKey ⇐ [<code>PrivateKey</code>](#PrivateKey)
@@ -332,6 +368,54 @@ credential for the specified identifier.</p>
 
 **Kind**: global class  
 **Extends**: <code>PublicKey</code>  
+<a name="PairwiseKey"></a>
+
+## PairwiseKey
+<p>Class to model pairwise keys</p>
+
+**Kind**: global class  
+
+* [PairwiseKey](#PairwiseKey)
+    * [new PairwiseKey(cryptoFactory)](#new_PairwiseKey_new)
+    * [.generatePairwiseKey(algorithm, seedReference, personaId, peerId)](#PairwiseKey+generatePairwiseKey)
+    * [.generatePersonaMasterKey(seedReference, personaId)](#PairwiseKey+generatePersonaMasterKey)
+
+<a name="new_PairwiseKey_new"></a>
+
+### new PairwiseKey(cryptoFactory)
+<p>Create an instance of @class PairwiseKey.</p>
+
+
+| Param | Description |
+| --- | --- |
+| cryptoFactory | <p>The crypto factory object.</p> |
+
+<a name="PairwiseKey+generatePairwiseKey"></a>
+
+### pairwiseKey.generatePairwiseKey(algorithm, seedReference, personaId, peerId)
+<p>Generate a pairwise key for the specified algorithms</p>
+
+**Kind**: instance method of [<code>PairwiseKey</code>](#PairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>for the key</p> |
+| seedReference | <p>Reference to the seed</p> |
+| personaId | <p>Id for the persona</p> |
+| peerId | <p>Id for the peer</p> |
+
+<a name="PairwiseKey+generatePersonaMasterKey"></a>
+
+### pairwiseKey.generatePersonaMasterKey(seedReference, personaId)
+<p>Generate a pairwise master key.</p>
+
+**Kind**: instance method of [<code>PairwiseKey</code>](#PairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| seedReference | <p>The master seed for generating pairwise keys</p> |
+| personaId | <p>The owner DID</p> |
+
 <a name="PrivateKey"></a>
 
 ## *PrivateKey*
@@ -346,6 +430,107 @@ credential for the specified identifier.</p>
 
 ### *new exports.KeyOperation()*
 <p>Represents a Public Key in JWK format.</p>
+
+<a name="RsaPairwiseKey"></a>
+
+## RsaPairwiseKey
+<p>Class to model RSA pairwise keys</p>
+
+**Kind**: global class  
+
+* [RsaPairwiseKey](#RsaPairwiseKey)
+    * [.generate(cryptoFactory, personaMasterKey, algorithm, peerId)](#RsaPairwiseKey.generate)
+    * [.getPrime()](#RsaPairwiseKey.getPrime)
+    * [.generateDeterministicNumberForPrime(cryptoFactory, keySize, personaMasterKey, peerId)](#RsaPairwiseKey.generateDeterministicNumberForPrime)
+    * [.generateHashForPrime(crypto, inx, key, data)](#RsaPairwiseKey.generateHashForPrime)
+    * [.executeRounds(rounds, inx, key, data)](#RsaPairwiseKey.executeRounds)
+    * [.generatePrime(primeSeed)](#RsaPairwiseKey.generatePrime)
+    * [.toBase(bigNumber)](#RsaPairwiseKey.toBase)
+
+<a name="RsaPairwiseKey.generate"></a>
+
+### RsaPairwiseKey.generate(cryptoFactory, personaMasterKey, algorithm, peerId)
+<p>Generate a pairwise key for the specified algorithms</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| cryptoFactory | <p>defining the key store and the used crypto api</p> |
+| personaMasterKey | <p>Master key for the current selected persona</p> |
+| algorithm | <p>for the key</p> |
+| peerId | <p>Id for the peer</p> |
+
+<a name="RsaPairwiseKey.getPrime"></a>
+
+### RsaPairwiseKey.getPrime()
+<p>Uses primeBase as reference and generate the closest prime number</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+<a name="RsaPairwiseKey.generateDeterministicNumberForPrime"></a>
+
+### RsaPairwiseKey.generateDeterministicNumberForPrime(cryptoFactory, keySize, personaMasterKey, peerId)
+<p>Generate a deterministic number that can be used as prime</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| cryptoFactory | <p>The crypto factory.</p> |
+| keySize | <p>Desired key size</p> |
+| personaMasterKey | <p>The persona master key</p> |
+| peerId | <p>The peer id</p> |
+
+<a name="RsaPairwiseKey.generateHashForPrime"></a>
+
+### RsaPairwiseKey.generateHashForPrime(crypto, inx, key, data)
+<p>Generate a hash used as component for prime number</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| crypto | <p>The crypto object.</p> |
+| inx | <p>Round number</p> |
+| key | <p>Signature key</p> |
+| data | <p>Data to sign</p> |
+
+<a name="RsaPairwiseKey.executeRounds"></a>
+
+### RsaPairwiseKey.executeRounds(rounds, inx, key, data)
+<p>Execute all rounds</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| rounds | <p>Array of functions to execute</p> |
+| inx | <p>Current step</p> |
+| key | <p>Key to sign</p> |
+| data | <p>Data to sign</p> |
+
+<a name="RsaPairwiseKey.generatePrime"></a>
+
+### RsaPairwiseKey.generatePrime(primeSeed)
+<p>Generate a prime number from the seed.
+isProbablyPrime is based on the Miller-Rabin prime test.</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| primeSeed | <p>seed for prime generator</p> |
+
+<a name="RsaPairwiseKey.toBase"></a>
+
+### RsaPairwiseKey.toBase(bigNumber)
+<p>Convert big number to base64 url.</p>
+
+**Kind**: static method of [<code>RsaPairwiseKey</code>](#RsaPairwiseKey)  
+
+| Param | Description |
+| --- | --- |
+| bigNumber | <p>Number to convert</p> |
 
 <a name="RsaPrivateKey"></a>
 
@@ -425,7 +610,7 @@ the key identifier.</p>
     * [.getSharedKeyEncrypter(name)](#CryptoFactory+getSharedKeyEncrypter) ⇒
     * [.getSymmetricEncrypter(name)](#CryptoFactory+getSymmetricEncrypter) ⇒
     * [.getMessageSigner(name)](#CryptoFactory+getMessageSigner) ⇒
-    * [.getMacSigner(name)](#CryptoFactory+getMacSigner) ⇒
+    * [.getMessageAuthenticationCodeSigners(name)](#CryptoFactory+getMessageAuthenticationCodeSigners) ⇒
     * [.getMessageDigest(name)](#CryptoFactory+getMessageDigest) ⇒
 
 <a name="new_CryptoFactory_new"></a>
@@ -488,9 +673,9 @@ Used for DH algorithms</p>
 | --- | --- |
 | name | <p>The name of the algorithm</p> |
 
-<a name="CryptoFactory+getMacSigner"></a>
+<a name="CryptoFactory+getMessageAuthenticationCodeSigners"></a>
 
-### cryptoFactory.getMacSigner(name) ⇒
+### cryptoFactory.getMessageAuthenticationCodeSigners(name) ⇒
 <p>Gets the mac signer object given the signing algorithm's name</p>
 
 **Kind**: instance method of [<code>CryptoFactory</code>](#CryptoFactory)  
@@ -528,11 +713,28 @@ Used for DH algorithms</p>
 **Kind**: global class  
 
 * [SubtleCryptoExtension](#SubtleCryptoExtension)
+    * [.generatePairwiseKey(algorithm, seedReference, personaId, peerId, extractable, keyops)](#SubtleCryptoExtension+generatePairwiseKey)
     * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
     * [.verifyByJwk(algorithm, jwk, signature, payload)](#SubtleCryptoExtension+verifyByJwk)
     * [.decryptByKeyStore(algorithm, keyReference, cipher)](#SubtleCryptoExtension+decryptByKeyStore)
     * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
     * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
+
+<a name="SubtleCryptoExtension+generatePairwiseKey"></a>
+
+### subtleCryptoExtension.generatePairwiseKey(algorithm, seedReference, personaId, peerId, extractable, keyops)
+<p>Generate a pairwise key for the algorithm</p>
+
+**Kind**: instance method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>for the key</p> |
+| seedReference | <p>Reference to the seed</p> |
+| personaId | <p>Id for the persona</p> |
+| peerId | <p>Id for the peer</p> |
+| extractable | <p>True if key is exportable</p> |
+| keyops | <p>Key operations</p> |
 
 <a name="SubtleCryptoExtension+signByKeyStore"></a>
 
@@ -934,8 +1136,6 @@ Crypto calls always happen via CryptoFactory</p>
         * [.serialize(format)](#JwsToken+serialize)
         * [.setGeneralParts(content)](#JwsToken+setGeneralParts) ⇒
         * [.setFlatParts(content)](#JwsToken+setFlatParts) ⇒
-        * [.setCompactParts(content)](#JwsToken+setCompactParts) ⇒
-        * [.setProtected(protectedHeader)](#JwsToken+setProtected)
         * [.isValidToken()](#JwsToken+isValidToken)
         * [.getKeyStore(newOptions, manadatory)](#JwsToken+getKeyStore)
         * [.getCryptoFactory(newOptions, manadatory)](#JwsToken+getCryptoFactory)
@@ -943,13 +1143,14 @@ Crypto calls always happen via CryptoFactory</p>
         * [.getHeader(newOptions, manadatory)](#JwsToken+getHeader)
         * [.getAlgorithm(newOptions, manadatory)](#JwsToken+getAlgorithm)
         * [.sign(signingKeyReference, payload, format, options)](#JwsToken+sign) ⇒
-        * [.verify(validationKey, options)](#JwsToken+verify) ⇒
+        * [.verify(validationKeys, options)](#JwsToken+verify) ⇒
         * [.getPayload()](#JwsToken+getPayload)
+        * [.setProtected(protectedHeader)](#JwsToken+setProtected)
     * _static_
         * [.serializeJwsGeneralJson(token)](#JwsToken.serializeJwsGeneralJson)
         * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
         * [.serializeJwsCompact(token)](#JwsToken.serializeJwsCompact)
-        * [.create(token, options)](#JwsToken.create)
+        * [.deserialize()](#JwsToken.deserialize)
 
 <a name="new_JwsToken_new"></a>
 
@@ -995,29 +1196,6 @@ Crypto calls always happen via CryptoFactory</p>
 | Param | Description |
 | --- | --- |
 | content | <p>Alledged IJwsFlatJson token</p> |
-
-<a name="JwsToken+setCompactParts"></a>
-
-### jwsToken.setCompactParts(content) ⇒
-<p>Try to parse the input token and set the properties of this JswToken</p>
-
-**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
-**Returns**: <p>true if valid token was parsed</p>  
-
-| Param | Description |
-| --- | --- |
-| content | <p>Alledged IJwsCompact token</p> |
-
-<a name="JwsToken+setProtected"></a>
-
-### jwsToken.setProtected(protectedHeader)
-<p>Set the protected header</p>
-
-**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
-
-| Param | Description |
-| --- | --- |
-| protectedHeader | <p>to set on the JwsToken object</p> |
 
 <a name="JwsToken+isValidToken"></a>
 
@@ -1102,7 +1280,7 @@ Crypto calls always happen via CryptoFactory</p>
 
 <a name="JwsToken+verify"></a>
 
-### jwsToken.verify(validationKey, options) ⇒
+### jwsToken.verify(validationKeys, options) ⇒
 <p>Verify the JWS signature.</p>
 
 **Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
@@ -1110,7 +1288,7 @@ Crypto calls always happen via CryptoFactory</p>
 
 | Param | Description |
 | --- | --- |
-| validationKey | <p>Public JWK key to validate the signature.</p> |
+| validationKeys | <p>Public JWK key to validate the signature.</p> |
 | options | <p>used for the signature. These options override the options provided in the constructor.</p> |
 
 <a name="JwsToken+getPayload"></a>
@@ -1119,6 +1297,17 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Gets the base64 URL decrypted payload.</p>
 
 **Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+<a name="JwsToken+setProtected"></a>
+
+### jwsToken.setProtected(protectedHeader)
+<p>Set the protected header</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| protectedHeader | <p>to set on the JwsToken object</p> |
+
 <a name="JwsToken.serializeJwsGeneralJson"></a>
 
 ### JwsToken.serializeJwsGeneralJson(token)
@@ -1152,18 +1341,12 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- |
 | token | <p>JWS base object</p> |
 
-<a name="JwsToken.create"></a>
+<a name="JwsToken.deserialize"></a>
 
-### JwsToken.create(token, options)
-<p>Create an Jws token object from a token</p>
+### JwsToken.deserialize()
+<p>Deserialize a Jws token object</p>
 
 **Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
-
-| Param | Description |
-| --- | --- |
-| token | <p>Base object used to create this token</p> |
-| options | <p>Set of jws token options</p> |
-
 <a name="CryptoHelpers"></a>
 
 ## CryptoHelpers
@@ -1447,111 +1630,12 @@ The id is generated.</p>
 output by JSON.parse.</p>
 
 **Kind**: static method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-<a name="InMemoryKeyStore"></a>
-
-## InMemoryKeyStore
-<p>An encrypted in memory implementation of IKeyStore using PouchDB
-and memdown. As soon as the process ends or
-the reference to the store is released all data is discarded.</p>
-<p>This implementation is intended as a batteries included approach
-to allow simple testing and experimentation with the UserAgent SDK.</p>
-
-**Kind**: global class  
-
-* [InMemoryKeyStore](#InMemoryKeyStore)
-    * [new InMemoryKeyStore([encryptionKey])](#new_InMemoryKeyStore_new)
-    * [.getKey(keyIdentifier)](#InMemoryKeyStore+getKey)
-    * [.save(keyIdentifier, key)](#InMemoryKeyStore+save)
-    * [.sign(keyIdentifier, data, format)](#InMemoryKeyStore+sign)
-
-<a name="new_InMemoryKeyStore_new"></a>
-
-### new InMemoryKeyStore([encryptionKey])
-<p>Constructs an instance of the in memory key store
-optionally encrypting the contents of the store
-using the specified encryption key.</p>
-
-
-| Param | Description |
-| --- | --- |
-| [encryptionKey] | <p>a 32 byte buffer that will be used as the key or a string which will be used to generate one.</p> |
-
-<a name="InMemoryKeyStore+getKey"></a>
-
-### inMemoryKeyStore.getKey(keyIdentifier)
-<p>Gets the key from the store using the specified identifier.</p>
-
-**Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>for which to return the key.</p> |
-
-<a name="InMemoryKeyStore+save"></a>
-
-### inMemoryKeyStore.save(keyIdentifier, key)
-<p>Saves the specified key to the store using the key identifier.</p>
-
-**Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>to store the key against</p> |
-| key | <p>the key to store.</p> |
-
-<a name="InMemoryKeyStore+sign"></a>
-
-### inMemoryKeyStore.sign(keyIdentifier, data, format)
-<p>Sign the data with the key referenced by keyIdentifier.</p>
-
-**Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>for the key used for signature.</p> |
-| data | <p>Data to sign</p> |
-| format | <p>Signature format</p> |
-
 <a name="KeyStoreConstants"></a>
 
 ## KeyStoreConstants
 <p>Class for key storage constants</p>
 
 **Kind**: global class  
-<a name="Protect"></a>
-
-## Protect
-<p>Class to model protection mechanisms</p>
-
-**Kind**: global class  
-
-* [Protect](#Protect)
-    * [.sign(body)](#Protect.sign)
-    * [.verify(jws, jwk)](#Protect.verify)
-
-<a name="Protect.sign"></a>
-
-### Protect.sign(body)
-<p>Sign the body for the registar</p>
-
-**Kind**: static method of [<code>Protect</code>](#Protect)  
-
-| Param | Description |
-| --- | --- |
-| body | <p>Body to sign</p> |
-
-<a name="Protect.verify"></a>
-
-### Protect.verify(jws, jwk)
-<p>Verify the jws</p>
-
-**Kind**: static method of [<code>Protect</code>](#Protect)  
-
-| Param | Description |
-| --- | --- |
-| jws | <p>token to be verified</p> |
-| jwk | <p>Public Key to be used to verify</p> |
-
 <a name="Multihash"></a>
 
 ## Multihash
@@ -1752,6 +1836,37 @@ output by JSON.parse.</p>
 User Agent, such as resolver and register.</p>
 
 **Kind**: global class  
+
+* [UserAgentOptions](#UserAgentOptions)
+    * [.keyStore](#UserAgentOptions+keyStore)
+    * [.keyStore](#UserAgentOptions+keyStore)
+    * [.cryptoFactory](#UserAgentOptions+cryptoFactory)
+    * [.cryptoFactory](#UserAgentOptions+cryptoFactory)
+
+<a name="UserAgentOptions+keyStore"></a>
+
+### userAgentOptions.keyStore
+<p>Get the key store</p>
+
+**Kind**: instance property of [<code>UserAgentOptions</code>](#UserAgentOptions)  
+<a name="UserAgentOptions+keyStore"></a>
+
+### userAgentOptions.keyStore
+<p>Set the key store</p>
+
+**Kind**: instance property of [<code>UserAgentOptions</code>](#UserAgentOptions)  
+<a name="UserAgentOptions+cryptoFactory"></a>
+
+### userAgentOptions.cryptoFactory
+<p>Get the crypto operations</p>
+
+**Kind**: instance property of [<code>UserAgentOptions</code>](#UserAgentOptions)  
+<a name="UserAgentOptions+cryptoFactory"></a>
+
+### userAgentOptions.cryptoFactory
+<p>Set the key store</p>
+
+**Kind**: instance property of [<code>UserAgentOptions</code>](#UserAgentOptions)  
 <a name="CredentialType"></a>
 
 ## CredentialType
@@ -1804,12 +1919,6 @@ methods of a credential.</p>
 
 ## ProtectionFormat
 <p>Enum to define different protection formats</p>
-
-**Kind**: global variable  
-<a name="ProtectionFormat"></a>
-
-## ProtectionFormat
-<p>Enum to define different signature formats</p>
 
 **Kind**: global variable  
 <a name="context"></a>

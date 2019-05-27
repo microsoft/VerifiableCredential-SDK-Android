@@ -12,7 +12,7 @@ import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import IRegistrar from '../src/registrars/IRegistrar';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
-import KeyTypeFactory from '../src/crypto/keys/KeyTypeFactory';
+import KeyTypeFactory, { KeyType } from '../src/crypto/keys/KeyTypeFactory';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -48,7 +48,7 @@ class Helpers {
     const id = identifier.id;
     const kty = KeyTypeFactory.create(alg);
     console.log(`Identifier: Test key type ${kty}`);
-    expect(kty).toBe((identifier.document!.publicKeys[0].publicKeyJwk).kty);
+    expect(kty).toBe(<KeyType>(identifier.document!.getPublicKeysFromDocument()[0]).kty);
 
     const document: Identifier = new Identifier(<IdentifierDocument> identifier.document);
     expect(id).toBe(document.id);

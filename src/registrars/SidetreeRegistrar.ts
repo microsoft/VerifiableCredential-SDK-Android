@@ -12,10 +12,10 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import IKeyStore, { ISigningOptions } from '../crypto/keyStore/IKeyStore';
 import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
+import { ISigningOptions } from '../crypto/keyStore/IKeyStore';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -25,7 +25,6 @@ declare var fetch: any;
 export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
   private serializedOptions: string;
-  private keyStore: IKeyStore;
   private cryptoFactory: CryptoFactory;
 
   /**
@@ -40,7 +39,6 @@ export default class SidetreeRegistrar implements IRegistrar {
     }
 
     this.serializedOptions = JSON.stringify(options);
-    this.keyStore = options.keyStore;
     this.cryptoFactory = options.cryptoFactory;
 
     // Format the url

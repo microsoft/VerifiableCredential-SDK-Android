@@ -308,7 +308,7 @@ export default class JweToken implements IJweGeneralJson {
   }
   //#endregion
 
-  //#region decrypt
+  //#region decryption functions
   /**
    * Decrypt the content.
    * 
