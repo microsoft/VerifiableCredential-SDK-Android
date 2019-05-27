@@ -5,8 +5,8 @@
 
 import RsaPublicKey from './RsaPublicKey';
 import PrivateKey from '../PrivateKey';
-import { KeyUse } from '../KeyUseFactory'
 import PublicKey from '../PublicKey';
+const clone = require('clone');
 
 /**
  * Represents an Elliptic Curve private key
@@ -26,27 +26,31 @@ export default class RsaPrivateKey extends RsaPublicKey implements PrivateKey {
   /** 
    * Prime q
    */
-  public q: string | undefined;
+  public q: string;
   /** 
    * Private dp
    */
-  public dp: string | undefined;
+  public dp: string;
   /** 
    * Private dq
    */
-  public dq: string | undefined;
+  public dq: string;
   /** 
    * Private qi 
    */
-  public qi: string | undefined;
+  public qi: string;
 
   /**
    * Create instance of @class RsaPrivateKey
    */
-  constructor (key: RsaPrivateKey) {
+  constructor (key: any) {
     super(key)
-    this.e = key.e;
-    this.n = key.n;
+    this.d = key.d;
+    this.p = key.p;
+    this.q = key.q;
+    this.dp = key.dp;
+    this.dq = key.dq;
+    this.qi = key.qi;
   }
 
   /**
@@ -54,13 +58,8 @@ export default class RsaPrivateKey extends RsaPublicKey implements PrivateKey {
    * @returns The corresponding {@link PublicKey}
    */
    public getPublicKey (): PublicKey {
-    return <RsaPublicKey> {
-      kty: this.kty,
-      kid: this.kid,
-      n: this.n,
-      e: this.e,
-      use: KeyUse.Signature,
-      alg: this.alg
-    };
+    const publicKey = clone(this);
+    delete publicKey.d, publicKey.p, publicKey.q, publicKey.dp, publicKey.dq, publicKey.qi;
+    return publicKey;
   }
 }

@@ -43,7 +43,7 @@ import PrivateKey from "./PrivateKey";
    public async generatePairwiseKey(algorithm: EcKeyGenParams | RsaHashedKeyGenParams, seedReference: string, personaId: string, peerId: string): Promise<PrivateKey> {
     const personaMasterKey: Buffer = await this.generatePersonaMasterKey(seedReference, personaId);
 
-    const keyType = KeyTypeFactory.create(algorithm);
+    const keyType = KeyTypeFactory.createViaWebCrypto(algorithm);
     switch (keyType) {
       case KeyType.EC:
         return EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);

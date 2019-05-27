@@ -55,12 +55,14 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
     const d = privateKey.toArrayLike(Buffer, 'be', 32);
     const x = pubKey.x.toArrayLike(Buffer, 'be', 32);
     const y = pubKey.y.toArrayLike(Buffer, 'be', 32);
-    return <EcPrivateKey>{
+    const pairwise =  <EcPrivateKey>{
       crv: algorithm.namedCurve,
       d: base64url.encode(d),
       x: base64url.encode(x),
       y: base64url.encode(y),
       kty:KeyType.EC
     };
+
+    return new EcPrivateKey(pairwise);
   } 
 }

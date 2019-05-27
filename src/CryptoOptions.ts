@@ -16,8 +16,8 @@ export default class CryptoOptions {
   public cryptoFactory: CryptoFactory = new CryptoFactory(new KeyStoreInMemory(), new SubtleCryptoOperations());
 
   /**
-   * Get or set the algorithm to be used.
-   * Conform to the Web Cryptography Api
+   * Get or set the authentication algorithm.
+   * Conform to the JWA standard
    */
-  public algorithm: any;
+  public authenticationSigningJoseAlgorithm: string = 'ES256K';
 }

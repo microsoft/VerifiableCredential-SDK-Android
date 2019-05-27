@@ -7,12 +7,12 @@ import Identifier from '../src/Identifier';
 import IdentifierDocument from '../src/IdentifierDocument';
 import UserAgentOptions from '../src/UserAgentOptions';
 import TestResolver from './resolvers/TestResolver';
-import CryptoOptions from '../src/CryptoOptions';
 import SidetreeRegistrar from '../src/registrars/SidetreeRegistrar';
 import KeyStoreConstants from '../src/keystores/KeyStoreConstants';
 import IRegistrar from '../src/registrars/IRegistrar';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
 import KeyTypeFactory, { KeyType } from '../src/crypto/keys/KeyTypeFactory';
+import CryptoHelpers from '../src/crypto/utilities/CryptoHelpers';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -38,7 +38,7 @@ class Helpers {
     options.registrar = registrar;
 
     const personaId = 'did:ion-test:identifier';
-    options.cryptoOptions!.algorithm = alg;
+    options.cryptoOptions!.authenticationSigningJoseAlgorithm = CryptoHelpers.webCryptoToJwa(alg);
     let identifier = new Identifier(personaId, options);
     expect(personaId).toBe(<string> identifier.identifier);
 
@@ -46,7 +46,7 @@ class Helpers {
     expect(identifier.id).toBeDefined();
     expect<Boolean>(identifier.id.startsWith('did:ion-test:')).toBe(true);
     const id = identifier.id;
-    const kty = KeyTypeFactory.create(alg);
+    const kty = KeyTypeFactory.createViaWebCrypto(alg);
     console.log(`Identifier: Test key type ${kty}`);
     expect(kty).toBe(<KeyType>(identifier.document!.getPublicKeysFromDocument()[0]).kty);
 
@@ -92,7 +92,7 @@ describe('Pairwise Identifier', () => {
 
   it('should throw when creating a linked identifier and no registrar specified in user agent options', async () => {
     const personaId = 'did:ion:identifier';
-    (<CryptoOptions> options.cryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+    options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
     delete options.registrar;
     const identifier = new Identifier(personaId, options);
     let throwDetected: boolean = false;
@@ -113,7 +113,7 @@ describe('Pairwise Identifier', () => {
   ];
 
   // tslint:disable-next-line:mocha-no-side-effect-code
-  fit('should create an identifier EC', async () => {
+  it('should create an identifier EC', async () => {
 
     /* tslint:disable:max-line-length */
     await Helpers
@@ -125,7 +125,7 @@ describe('Pairwise Identifier', () => {
 
 /*
   Not yet supported in sidetree core
-  fit('should create an identifier RSA', async done => {
+  it('should create an identifier RSA', async done => {
     await Helpers
     .testIdentifier(false, testResolver, options.keyStore as KeyStoreInMemory, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
       console.log(`${identifier}-${register}`);
@@ -163,7 +163,7 @@ describe('Pairwise Identifier', () => {
   });
 /*
   Not yet supported in sidetree core
-  fit('should create an identifier and register for RSA', async done => {
+  it('should create an identifier and register for RSA', async done => {
     await Helpers.testIdentifier(
       true, testResolver, options.keyStore as KeyStoreInMemory, alg[1], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(options);

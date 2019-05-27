@@ -13,6 +13,7 @@ import TestRegistrar from './registrars/TestRegistrar';
 import { KeyType } from '../src/crypto/keys/KeyTypeFactory';
 import { KeyUse } from '../src/crypto/keys/KeyUseFactory';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
+import JwsToken from '../src/crypto/protocols/jws/JwsToken';
 
 describe('Identifier', () => {
 
@@ -269,52 +270,26 @@ describe('Identifier', () => {
       options.registrar = new TestRegistrar();
     });
 
-    it('should throw a User Agent Error if no crypto options defined', async () => {
-      try {
-        const identifier = new Identifier('did:ion:identifier', options);
-        await identifier.sign('example payload', 'test', 'testTarget');
-        fail();
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`No Crypto Options in User Agent Options`);
-      }
-    });
-
-    it('should throw a User Agent Error if no keyStore defined', async () => {
-      try {
-        options.cryptoOptions = new CryptoOptions();
-        options.cryptoOptions.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
-        const identifier = new Identifier('did:ion:identifier', options);
-        await identifier.sign('example payload', 'test', 'testTarget');
-        fail();
-      } catch (error) {
-        expect(error).toBeDefined();
-        expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`No KeyStore in Options`);
-      }
-    });
-
     it('should sign a payload that is a string', async () => {
       options.cryptoOptions = new CryptoOptions();
-      options.cryptoOptions.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+      options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
       const signedPayload = await identifier.sign('examplePayload', 'did:ion', 'did:ion');
       expect(signedPayload).toBeDefined();
-      expect(signedPayload).toEqual('signedPayload');
+      expect(JwsToken.deserialize(signedPayload).getPayload()).toEqual('examplePayload');
     });
 
     it('should sign a payload that is an object', async () => {
       options.cryptoOptions = new CryptoOptions();
-      options.cryptoOptions.algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+      options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
       const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion', 'did:ion');
       expect(signedPayload).toBeDefined();
-      expect(signedPayload).toEqual('signedPayload');
+      expect(JwsToken.deserialize(signedPayload).getPayload()).toEqual(`{"payload":"examplePayload"}`);
     });
   });
 

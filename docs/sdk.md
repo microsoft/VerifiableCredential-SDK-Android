@@ -19,7 +19,7 @@ self-issued id token.</p></dd>
 <dd><p>Class to model EC pairwise keys</p></dd>
 <dt><a href="#EcPrivateKey">EcPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
-<dt><a href="#EcPublicKey">EcPublicKey</a> ⇐ <code>PublicKey</code></dt>
+<dt><a href="#EcPublicKey">EcPublicKey</a> ⇐ <code><a href="#PublicKey">PublicKey</a></code></dt>
 <dd><p>Represents an Elliptic Curve public key</p></dd>
 <dt><a href="#PairwiseKey">PairwiseKey</a></dt>
 <dd><p>Class to model pairwise keys</p></dd>
@@ -27,11 +27,13 @@ self-issued id token.</p></dd>
 <dd><p>Represents a Private Key in JWK format.</p></dd>
 <dt><a href="#KeyOperation">KeyOperation</a></dt>
 <dd></dd>
+<dt><a href="#PublicKey">PublicKey</a></dt>
+<dd></dd>
 <dt><a href="#RsaPairwiseKey">RsaPairwiseKey</a></dt>
 <dd><p>Class to model RSA pairwise keys</p></dd>
 <dt><a href="#RsaPrivateKey">RsaPrivateKey</a> ⇐ <code><a href="#PrivateKey">PrivateKey</a></code></dt>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
-<dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code>PublicKey</code></dt>
+<dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code><a href="#PublicKey">PublicKey</a></code></dt>
 <dd><p>Represents an RSA public key</p></dd>
 <dt><a href="#KeyStoreInMemory">KeyStoreInMemory</a></dt>
 <dd><p>Class defining methods and properties for a light KeyStore</p></dd>
@@ -354,20 +356,35 @@ credential for the specified identifier.</p>
 
 **Kind**: global class  
 **Extends**: [<code>PrivateKey</code>](#PrivateKey)  
+
+* [EcPrivateKey](#EcPrivateKey) ⇐ [<code>PrivateKey</code>](#PrivateKey)
+    * [new EcPrivateKey()](#new_EcPrivateKey_new)
+    * [.getPublicKey()](#EcPrivateKey+getPublicKey) ⇒
+
+<a name="new_EcPrivateKey_new"></a>
+
+### new EcPrivateKey()
+<p>Create instance of @class EcPrivateKey</p>
+
 <a name="EcPrivateKey+getPublicKey"></a>
 
 ### ecPrivateKey.getPublicKey() ⇒
 <p>Gets the corresponding public key</p>
 
 **Kind**: instance method of [<code>EcPrivateKey</code>](#EcPrivateKey)  
-**Returns**: <p>The corresponding [PublicKey](PublicKey)</p>  
+**Returns**: <p>The corresponding [PublicKey](#PublicKey)</p>  
 <a name="EcPublicKey"></a>
 
-## EcPublicKey ⇐ <code>PublicKey</code>
+## EcPublicKey ⇐ [<code>PublicKey</code>](#PublicKey)
 <p>Represents an Elliptic Curve public key</p>
 
 **Kind**: global class  
-**Extends**: <code>PublicKey</code>  
+**Extends**: [<code>PublicKey</code>](#PublicKey)  
+<a name="new_EcPublicKey_new"></a>
+
+### new EcPublicKey()
+<p>Create instance of @class EcPublicKey</p>
+
 <a name="PairwiseKey"></a>
 
 ## PairwiseKey
@@ -430,6 +447,31 @@ credential for the specified identifier.</p>
 
 ### *new exports.KeyOperation()*
 <p>Represents a Public Key in JWK format.</p>
+
+<a name="PublicKey"></a>
+
+## PublicKey
+**Kind**: global class  
+
+* [PublicKey](#PublicKey)
+    * [new PublicKey()](#new_PublicKey_new)
+    * [.getThumbprint(jwk)](#PublicKey.getThumbprint)
+
+<a name="new_PublicKey_new"></a>
+
+### new PublicKey()
+<p>Create instance of @class PublicKey</p>
+
+<a name="PublicKey.getThumbprint"></a>
+
+### PublicKey.getThumbprint(jwk)
+<p>Obtains the thumbprint for the jwk parameter</p>
+
+**Kind**: static method of [<code>PublicKey</code>](#PublicKey)  
+
+| Param | Description |
+| --- | --- |
+| jwk | <p>JSON object representation of a JWK</p> |
 
 <a name="RsaPairwiseKey"></a>
 
@@ -539,20 +581,35 @@ isProbablyPrime is based on the Miller-Rabin prime test.</p>
 
 **Kind**: global class  
 **Extends**: [<code>PrivateKey</code>](#PrivateKey)  
+
+* [RsaPrivateKey](#RsaPrivateKey) ⇐ [<code>PrivateKey</code>](#PrivateKey)
+    * [new RsaPrivateKey()](#new_RsaPrivateKey_new)
+    * [.getPublicKey()](#RsaPrivateKey+getPublicKey) ⇒
+
+<a name="new_RsaPrivateKey_new"></a>
+
+### new RsaPrivateKey()
+<p>Create instance of @class RsaPrivateKey</p>
+
 <a name="RsaPrivateKey+getPublicKey"></a>
 
 ### rsaPrivateKey.getPublicKey() ⇒
 <p>Gets the corresponding public key</p>
 
 **Kind**: instance method of [<code>RsaPrivateKey</code>](#RsaPrivateKey)  
-**Returns**: <p>The corresponding [PublicKey](PublicKey)</p>  
+**Returns**: <p>The corresponding [PublicKey](#PublicKey)</p>  
 <a name="RsaPublicKey"></a>
 
-## RsaPublicKey ⇐ <code>PublicKey</code>
+## RsaPublicKey ⇐ [<code>PublicKey</code>](#PublicKey)
 <p>Represents an RSA public key</p>
 
 **Kind**: global class  
-**Extends**: <code>PublicKey</code>  
+**Extends**: [<code>PublicKey</code>](#PublicKey)  
+<a name="new_RsaPublicKey_new"></a>
+
+### new RsaPublicKey()
+<p>Create instance of @class RsaPublicKey</p>
+
 <a name="KeyStoreInMemory"></a>
 
 ## KeyStoreInMemory
@@ -713,12 +770,16 @@ Used for DH algorithms</p>
 **Kind**: global class  
 
 * [SubtleCryptoExtension](#SubtleCryptoExtension)
-    * [.generatePairwiseKey(algorithm, seedReference, personaId, peerId, extractable, keyops)](#SubtleCryptoExtension+generatePairwiseKey)
-    * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
-    * [.verifyByJwk(algorithm, jwk, signature, payload)](#SubtleCryptoExtension+verifyByJwk)
-    * [.decryptByKeyStore(algorithm, keyReference, cipher)](#SubtleCryptoExtension+decryptByKeyStore)
-    * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
-    * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
+    * _instance_
+        * [.generatePairwiseKey(algorithm, seedReference, personaId, peerId, extractable, keyops)](#SubtleCryptoExtension+generatePairwiseKey)
+        * [.signByKeyStore(algorithm, keyReference, data)](#SubtleCryptoExtension+signByKeyStore) ⇒
+        * [.verifyByJwk(algorithm, jwk, signature, payload)](#SubtleCryptoExtension+verifyByJwk)
+        * [.decryptByKeyStore(algorithm, keyReference, cipher)](#SubtleCryptoExtension+decryptByKeyStore)
+        * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
+        * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
+    * _static_
+        * [.normalizeAlgorithm(algorithm)](#SubtleCryptoExtension.normalizeAlgorithm)
+        * [.normalizeJwk(jwk)](#SubtleCryptoExtension.normalizeJwk)
 
 <a name="SubtleCryptoExtension+generatePairwiseKey"></a>
 
@@ -803,6 +864,28 @@ The referenced key must be a jwk key.</p>
 | algorithm | <p>used for encryption</p> |
 | jwk | <p>Json web key public key</p> |
 | data | <p>to encrypt</p> |
+
+<a name="SubtleCryptoExtension.normalizeAlgorithm"></a>
+
+### SubtleCryptoExtension.normalizeAlgorithm(algorithm)
+<p>Normalize the algorithm so it can be used by underlying crypto.</p>
+
+**Kind**: static method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| algorithm | <p>Algorithm to be normalized</p> |
+
+<a name="SubtleCryptoExtension.normalizeJwk"></a>
+
+### SubtleCryptoExtension.normalizeJwk(jwk)
+<p>Normalize the JWK parameters so it can be used by underlying crypto.</p>
+
+**Kind**: static method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| jwk | <p>Json web key to be normalized</p> |
 
 <a name="SubtleCryptoOperations"></a>
 
@@ -1141,7 +1224,6 @@ Crypto calls always happen via CryptoFactory</p>
         * [.getCryptoFactory(newOptions, manadatory)](#JwsToken+getCryptoFactory)
         * [.getProtected(newOptions, manadatory)](#JwsToken+getProtected)
         * [.getHeader(newOptions, manadatory)](#JwsToken+getHeader)
-        * [.getAlgorithm(newOptions, manadatory)](#JwsToken+getAlgorithm)
         * [.sign(signingKeyReference, payload, format, options)](#JwsToken+sign) ⇒
         * [.verify(validationKeys, options)](#JwsToken+verify) ⇒
         * [.getPayload()](#JwsToken+getPayload)
@@ -1250,18 +1332,6 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- | --- |
 | newOptions |  | <p>Options passed in after the constructure</p> |
 | manadatory | <code>false</code> | <p>True if property needs to be defined</p> |
-
-<a name="JwsToken+getAlgorithm"></a>
-
-### jwsToken.getAlgorithm(newOptions, manadatory)
-<p>Get the algorithm from the options</p>
-
-**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| newOptions |  | <p>Options passed in after the constructure</p> |
-| manadatory | <code>true</code> | <p>True if property needs to be defined</p> |
 
 <a name="JwsToken+sign"></a>
 
@@ -1439,7 +1509,7 @@ retrieving identifier documents.</p>
         * [.verify(jws)](#Identifier+verify)
     * _static_
         * [.create([options])](#Identifier.create)
-        * [.keyStorageIdentifier(personaId, target, keyUse, keyType)](#Identifier.keyStorageIdentifier)
+        * [.keyStorageIdentifier(personaId, target, algorithm, keyType)](#Identifier.keyStorageIdentifier)
 
 <a name="new_Identifier_new"></a>
 
@@ -1524,7 +1594,7 @@ key defined in document.</p>
 
 <a name="Identifier.keyStorageIdentifier"></a>
 
-### Identifier.keyStorageIdentifier(personaId, target, keyUse, keyType)
+### Identifier.keyStorageIdentifier(personaId, target, algorithm, keyType)
 <p>Generate a storage identifier to store a key</p>
 
 **Kind**: static method of [<code>Identifier</code>](#Identifier)  
@@ -1533,7 +1603,7 @@ key defined in document.</p>
 | --- | --- |
 | personaId | <p>The identifier for the persona</p> |
 | target | <p>The identifier for the peer. Will be persona for non-pairwise keys</p> |
-| keyUse | <p>Key usage</p> |
+| algorithm | <p>Key algorithm</p> |
 | keyType | <p>Key type</p> |
 
 <a name="IdentifierDocument"></a>

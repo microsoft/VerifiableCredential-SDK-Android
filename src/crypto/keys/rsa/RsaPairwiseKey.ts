@@ -64,9 +64,9 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
     const dp = d.mod(pMinus);
     const dq = d.mod(qMinus);
     const qi = q.modInv(p);
-    return <RsaPrivateKey> {
+    const pairwise = <RsaPrivateKey> {
       kty: KeyType.RSA,
-      use: KeyUseFactory.create(algorithm),
+      use: KeyUseFactory.createViaWebCrypto(algorithm),
       e: RsaPairwiseKey.toBase(e),
       n: RsaPairwiseKey.toBase(modulus),
       d: RsaPairwiseKey.toBase(d),
@@ -76,6 +76,8 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
       dq: RsaPairwiseKey.toBase(dq),
       qi: RsaPairwiseKey.toBase(qi)
     };
+
+    return new RsaPrivateKey(pairwise);
   } 
 
   

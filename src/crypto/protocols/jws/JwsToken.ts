@@ -157,15 +157,13 @@ export default class JwsToken implements IJwsGeneralJson {
       signature.protected = jwsToken.setProtected(parts[0]);
       signature.signature = base64url.toBuffer(parts[2]);
       return jwsToken;
-    } else {
-      throw new CryptoProtocolError(JoseConstants.Jws, `Invalid compact JWS. Content has ${parts.length} item. Only 3 allowed`);
     }
   } else {
     throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable.`);
   }
 
   // Flat or general format
-  let jsonObject: IJwsFlatJson | IJwsGeneralJson;
+  let jsonObject: any;
   try {
     jsonObject = JSON.parse(token);
   } catch (error) {
@@ -173,7 +171,7 @@ export default class JwsToken implements IJwsGeneralJson {
   }
 
      // set payload
-     jwsToken.payload = jsonObject.payload;
+     jwsToken.payload = base64url.toBuffer(<string>jsonObject.payload);
 
      // Try to handle token as IJwsGeneralJSon
      let decodeStatus: { result: boolean, reason: string } = jwsToken.setGeneralParts(<IJwsGeneralJson>jsonObject);
@@ -201,7 +199,7 @@ export default class JwsToken implements IJwsGeneralJson {
   private setGeneralParts(content: IJwsGeneralJson): {result: boolean, reason: string} {
     if (content) {
       if (content.payload) {
-        this.payload = content.payload;
+        this.payload = base64url.toBuffer(<string><any>content.payload);
       } else {
         // manadatory field
         return {result: false, reason: 'missing payload'};
@@ -239,7 +237,7 @@ export default class JwsToken implements IJwsGeneralJson {
       } 
 
       if (content.payload) {
-        this.payload = content.payload;
+        this.payload = base64url.toBuffer(<string><any>content.payload);
       } else {
         // manadatory field
         return {result: false, reason: 'missing payload'};
@@ -319,15 +317,6 @@ export default class JwsToken implements IJwsGeneralJson {
   }
 
   /**
-   * Get the algorithm from the options
-   * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
-   */
-  private getAlgorithm(newOptions?: ISigningOptions, manadatory: boolean = true): CryptoAlgorithm {
-    return JoseHelpers.getOptionsProperty<CryptoAlgorithm>('algorithm', this.options, newOptions, manadatory);
-  }
-
-  /**
    * Signs contents using the given private key in JWK format.
    *
    * @param signingKeyReference Reference to the signing key.
@@ -339,8 +328,6 @@ export default class JwsToken implements IJwsGeneralJson {
   public async sign (signingKeyReference: string, payload: Buffer, format: ProtectionFormat, options?: ISigningOptions): Promise<JwsToken> {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
-    const algorithm: CryptoAlgorithm = this.getAlgorithm(options);
-    const alg: string = CryptoHelpers.webCryptoToJwa(algorithm);
 
     // tslint:disable-next-line:no-suspicious-comment
     // TODO support for multiple signatures
@@ -351,6 +338,8 @@ export default class JwsToken implements IJwsGeneralJson {
 
     // Get signing key public key
     const jwk: PublicKey = await <Promise<PublicKey>>keyStore.get(signingKeyReference, true);
+    const jwaAlgorithm: string = jwk.alg || JoseConstants.DefaultSigningAlgorithm;
+    const algorithm: CryptoAlgorithm = CryptoHelpers.jwaToWebCrypto(jwaAlgorithm);
 
     // Steps according to RTC7515 5.1
     // 2. Compute encoded payload value base64URL(JWS Payload)
@@ -365,7 +354,7 @@ export default class JwsToken implements IJwsGeneralJson {
     // add required fields if missing
     if (!('alg' in jwsSignature.header) && !('alg' in jwsSignature.protected)) {
       // tslint:disable-next-line:no-backbone-get-set-outside-model
-      jwsSignature.protected.set('alg', alg);
+      jwsSignature.protected.set('alg', jwaAlgorithm);
     }
 
     if (jwk.kid && 

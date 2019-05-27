@@ -13,6 +13,7 @@ import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
+
 let fetchMock: any;
 
 // Add a document to the cache
@@ -28,7 +29,7 @@ describe('SidetreeRegistrar', () => {
   beforeAll(() => {
     fetchMock = require('fetch-mock');
     options = new UserAgentOptions();
-    (<CryptoOptions> options.cryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+    (<CryptoOptions> options.cryptoOptions).authenticationSigningJoseAlgorithm = 'ES256K';
     options.registrar = new SidetreeRegistrar('https://registrar.org', options);
   });
 

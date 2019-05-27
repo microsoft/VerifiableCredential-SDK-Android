@@ -9,12 +9,13 @@ import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
 import { ProtectionFormat } from './crypto/keyStore/ProtectionFormat';
 import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
-import KeyUseFactory, { KeyUse } from './crypto/keys/KeyUseFactory';
-import KeyTypeFactory from './crypto/keys/KeyTypeFactory';
+import { KeyUse } from './crypto/keys/KeyUseFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
 import PrivateKey from './crypto/keys/PrivateKey';
 import { ISigningOptions } from './crypto/keyStore/IKeyStore';
 import { IdentifierDocumentPublicKey } from './types';
+import CryptoHelpers from './crypto/utilities/CryptoHelpers';
+import KeyUseFactory from './crypto/keys/KeyUseFactory';
 
 /**
  * Class for creating and managing identifiers,
@@ -78,20 +79,24 @@ export default class Identifier {
 
       // Create DID key
       const cryptoFactory = this.options.cryptoFactory;
-      const algorithm = this.options.cryptoOptions!.algorithm;
+      const signingAlgorithm = CryptoHelpers.jwaToWebCrypto(this.options.cryptoOptions.authenticationSigningJoseAlgorithm)
       const generator = new SubtleCryptoExtension(cryptoFactory);
-      const jwk: PrivateKey = await generator.generatePairwiseKey(algorithm, KeyStoreConstants.masterSeed, this.id, target);
+      const jwk: PrivateKey = await generator.generatePairwiseKey(signingAlgorithm, KeyStoreConstants.masterSeed, this.id, target);
       const pubJwk = jwk.getPublicKey();
       
       pubJwk.kid = jwk.kid;
 
-      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(algorithm), <string>jwk.kty);
+      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(
+        this.id, 
+        target, 
+        this.options.cryptoOptions.authenticationSigningJoseAlgorithm, 
+        KeyUseFactory.createViaJwa(this.options.cryptoOptions.authenticationSigningJoseAlgorithm));
       await this.options.keyStore.save(pairwiseKeyStorageId, jwk);
 
       // Set key format
       // todo switch by leveraging pairwiseKey
       const publicKey: IdentifierDocumentPublicKey = {
-        id: jwk.kid,
+        id: <string>jwk.kid,
         type: this.getDidDocumentKeyType(),
         publicKeyJwk: pubJwk
       };
@@ -164,11 +169,11 @@ export default class Identifier {
    * Generate a storage identifier to store a key
    * @param personaId The identifier for the persona
    * @param target The identifier for the peer. Will be persona for non-pairwise keys
-   * @param keyUse Key usage
+   * @param algorithm Key algorithm
    * @param keyType Key type
    */
-  public static keyStorageIdentifier (personaId: string, target: string, keyUse: string, keyType: string): string {
-    return `${personaId}-${target}-${keyUse}-${keyType}`;
+  public static keyStorageIdentifier (personaId: string, target: string, algorithm: string, keyType: string): string {
+    return `${personaId}-${target}-${algorithm}-${keyType}`;
   }
 
   // Create an identifier document. Included the public key.
@@ -192,8 +197,8 @@ export default class Identifier {
     if (this.options && this.options.cryptoOptions) {
       const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
                                                                    target,
-                                                                   KeyUse.Signature,
-                                                                   KeyTypeFactory.create(this.options.cryptoOptions.algorithm));
+                                                                   this.options.cryptoOptions.authenticationSigningJoseAlgorithm,
+                                                                   KeyUse.Signature);
       if (this.options.keyStore) {
         if (typeof(payload) !== 'string') {
           body = JSON.stringify(payload);

@@ -6,7 +6,6 @@
 import EcPublicKey from './EcPublicKey';
 import PrivateKey from '../PrivateKey';
 import PublicKey from '../PublicKey';
-import { KeyUse } from '../KeyUseFactory'
 const clone = require('clone');
 
 /**
@@ -28,7 +27,7 @@ export default class EcPrivateKey extends EcPublicKey implements PrivateKey {
   /**
    * Create instance of @class EcPrivateKey
    */
-  constructor (key: EcPrivateKey) {
+  constructor (key: any) {
     super(key)
     this.d = key.d;
   }
