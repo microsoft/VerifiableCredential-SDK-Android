@@ -12,8 +12,10 @@ import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import KeyUseFactory, { KeyUse } from './crypto/keys/KeyUseFactory';
 import KeyTypeFactory from './crypto/keys/KeyTypeFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
+import PrivateKey from './crypto/keys/PrivateKey';
 import { ISigningOptions } from './crypto/keyStore/IKeyStore';
 import { IdentifierDocumentPublicKey } from './types';
+
 /**
  * Class for creating and managing identifiers,
  * retrieving identifier documents.
@@ -78,7 +80,7 @@ export default class Identifier {
       const cryptoFactory = this.options.cryptoFactory;
       const algorithm = this.options.cryptoOptions!.algorithm;
       const generator = new SubtleCryptoExtension(cryptoFactory);
-      const jwk = await generator.generatePairwiseKey(algorithm, KeyStoreConstants.masterSeed, this.id, target);
+      const jwk: PrivateKey = await generator.generatePairwiseKey(algorithm, KeyStoreConstants.masterSeed, this.id, target);
       const pubJwk = jwk.getPublicKey();
       
       pubJwk.kid = jwk.kid;

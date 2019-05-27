@@ -28,4 +28,14 @@ export default class EcPublicKey extends PublicKey {
    * Set the EC key type
    */
   kty = KeyType.EC;
+
+  /**
+   * Create instance of @class EcPublicKey
+   */
+  constructor (key: EcPublicKey) {
+    super(key)
+    this.crv = key.crv;
+    this.x = key.x;
+    this.y = key.y;
+  }
 }

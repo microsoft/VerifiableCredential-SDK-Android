@@ -28,4 +28,13 @@ export default class RsaPublicKey extends PublicKey {
    * Set the default algorithm
    */
   alg = 'RS256';
+
+  /**
+   * Create instance of @class RsaPublicKey
+   */
+  constructor (key: RsaPublicKey) {
+    super(key)
+    this.e = key.e;
+    this.n = key.n;
+  }
 }

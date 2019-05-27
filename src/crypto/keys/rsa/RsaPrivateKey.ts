@@ -41,6 +41,15 @@ export default class RsaPrivateKey extends RsaPublicKey implements PrivateKey {
   public qi: string | undefined;
 
   /**
+   * Create instance of @class RsaPrivateKey
+   */
+  constructor (key: RsaPrivateKey) {
+    super(key)
+    this.e = key.e;
+    this.n = key.n;
+  }
+
+  /**
    * Gets the corresponding public key
    * @returns The corresponding {@link PublicKey}
    */
