@@ -184,20 +184,16 @@ export default class Identifier {
    * @param payload object to be signed
    * @param keyStorageIdentifier the identifier for the key used to sign payload.
    */
-  public async sign (payload: any, personaId: string, target: string) {
+  public async sign (payload: any, keyReference: string): Promise<string> {
     let body: string;
     if (this.options && this.options.cryptoOptions) {
-      const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
-                                                                   target,
-                                                                   KeyUse.Signature,
-                                                                   KeyTypeFactory.create(this.options.cryptoOptions.algorithm));
       if (this.options.keyStore) {
         if (typeof(payload) !== 'string') {
           body = JSON.stringify(payload);
         } else {
           body = payload;
         }
-        return this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
+        return this.options.keyStore.sign(keyReference, body, SignatureFormat.FlatJsonJws);
       } else {
         throw new UserAgentError('No KeyStore in Options');
       }
@@ -210,11 +206,28 @@ export default class Identifier {
    * Verify the payload with public key from the Identifier Document.
    * @param jws the signed token to be verified.
    */
-  public async verify (jws: string) {
+  public async verify (jws: string): Promise<any> {
 
     if (!this.document) {
       this.document = await this.getDocument();
     }
     return Protect.verify(jws, this.document.publicKeys);
+  }
+
+  /**
+   * Encrypt payload using Public Key registered on Identifier Document.
+   * @param payload object that will be encrypted.
+   */
+  public async encrypt (payload: any): Promise<Buffer> {
+    throw new UserAgentError('unimplemented');
+  }
+
+  /**
+   * Decrypt cipher using key referenced in keystore.
+   * @param cipher cipher to be decrypted.
+   * @param keyReference string that references what key to use from keystore.
+   */
+  public async decrypt (cipher: Buffer, keyReference: string): Promise<string> {
+    throw new UserAgentError('unimplemented');
   }
 }

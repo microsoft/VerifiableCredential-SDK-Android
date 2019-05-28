@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IHubError, IHubResponse, HubErrorCode } from '@decentralized-identity/hub-common-js';
-import { Authentication, CryptoSuite, IKeyStore } from '@decentralized-identity/did-auth-jose';
+import { Authentication, CryptoSuite } from '@decentralized-identity/did-auth-jose';
 import { IDidResolver } from '@decentralized-identity/did-common-typescript';
 import HubRequest from './requests/HubRequest';
 import HubError from './HubError';
@@ -65,7 +65,7 @@ export interface HubSessionOptions {
    * Instance of KeyStore than can be used
    * to get and save keys.
    */
-  keyStore: IKeyStore;
+  // keyStore: IKeyStore;
 }
 
 /**
@@ -89,7 +89,7 @@ export default class HubSession {
     // Setup authentication context
     this.authentication = new Authentication({
       resolver: options.resolver,
-      keyStore: options.keyStore,
+      // keyStore: options.keyStore,
       keyReferences: [options.clientPrivateKeyReference],
     });
 

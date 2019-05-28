@@ -1,7 +1,11 @@
-import { PrivateKey, JwsToken, CryptoFactory, RsaCryptoSuite, CryptoSuite } from '@decentralized-identity/did-auth-jose';
 import ICommitSigner from './ICommitSigner';
 import Commit from '../Commit';
 import SignedCommit from '../SignedCommit';
+import IKeyStore, { ISigningOptions } from '../../crypto/keyStore/IKeyStore';
+import CryptoFactory from '../../crypto/plugin/CryptoFactory';
+import CryptoOperations from '../../crypto/plugin/CryptoOperations';
+import JwsToken from '../../crypto/protocols/jws/JwsToken';
+import { ProtectionFormat } from '../../crypto/keyStore/ProtectionFormat';
 import objectAssign from 'object-assign';
 
 interface CommitSignerOptions {
@@ -12,14 +16,19 @@ interface CommitSignerOptions {
   did: string;
 
   /** 
-   * The private key to be used to sign the commit. 
+   * The private key reference to be used to sign the commit. 
    */
-  key: PrivateKey;
+  keyReference: string;
+
+  /**
+   * KeyStore that holds the private key to be used to sign the commit.
+   */
+  keystore: IKeyStore;
 
   /** 
    * The CryptoSuite to be used to for the algorithm to use to sign the commit
    */
-  cryptoSuite?: CryptoSuite;
+  suite?: CryptoOperations;
 
 }
 
@@ -29,17 +38,13 @@ interface CommitSignerOptions {
 export default class CommitSigner implements ICommitSigner {
 
   private did: string;
-  private key: PrivateKey;
-  private cryptoSuite: CryptoSuite;
+  private keyRef: string;
+  private cryptoFactory: CryptoFactory;
 
   constructor(options: CommitSignerOptions) {
     this.did = options.did;
-    this.key = options.key;
-    if (!options.cryptoSuite) {
-      this.cryptoSuite = new RsaCryptoSuite();
-    } else {
-      this.cryptoSuite = options.cryptoSuite;
-    }
+    this.keyRef = options.keyReference;
+    this.cryptoFactory = new CryptoFactory(options.keystore, options.suite);
   }
 
   /**
@@ -52,14 +57,17 @@ export default class CommitSigner implements ICommitSigner {
     commit.validate();
 
     const protectedHeaders = commit.getProtectedHeaders();
-    const finalProtectedHeaders = objectAssign({}, protectedHeaders, {
+    const finalProtectedHeaders: any = objectAssign({}, protectedHeaders, {
       iss: this.did,
     });
 
-    const jws = new JwsToken(commit.getPayload(), new CryptoFactory([this.cryptoSuite]));
-    const signed = await jws.sign(this.key, <any> finalProtectedHeaders); // Need to broaden TypeScript definition of JwsToken.sign().
-
-    const [outputHeaders, outputPayload, outputSignature] = signed.split('.');
+    // const jws = new JwsToken(commit.getPayload(), new CryptoFactory([this.cryptoSuite]));
+    // const signed = await jws.sign(key, <any> finalProtectedHeaders); // Need to broaden TypeScript definition of JwsToken.sign().
+    const signingOptions: ISigningOptions = {cryptoFactory: this.cryptoFactory, protected: finalProtectedHeaders};
+    const jws = new JwsToken(signingOptions);
+    const signed = await jws.sign(this.keyRef, commit.getPayload(), ProtectionFormat.JwsCompactJson);
+    const serializedCompactJws = signed.serialize();
+    const [outputHeaders, outputPayload, outputSignature] = serializedCompactJws.split('.');
 
     return new SignedCommit({
       protected: outputHeaders,

@@ -20,6 +20,7 @@
     "insecure-random": false,
     "no-for-in": false,
     "no-consecutive-blank-lines": true,
-    "eofline": true
+    "eofline": true,
+    "no-backbone-get-set-outside-model": false
   }
 }
