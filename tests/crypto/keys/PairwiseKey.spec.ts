@@ -44,13 +44,13 @@ describe('PairwiseKey', () => {
 
   // tslint:disable-next-line:mocha-no-side-effect-code
   const supportedKeyGenerationAlgorithms = [
-    { name: 'RSASSA-PKCS1-v1_5', modulusLength: 1024, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: 'SHA-256' } },
-    { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } }
+      { name: 'RSASSA-PKCS1-v1_5', modulusLength: 1024, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: 'SHA-256' } },
+      { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } }
     ];
 
-    const unsupportedKeyGenerationAlgorithms = [
+  const unsupportedKeyGenerationAlgorithms = [
       { name: 'HMAC', hash: 'SHA-256' }
-      ];
+    ];
 
   // Default Crypto factory
   let keyStore: KeyStoreInMemory;
