@@ -118,7 +118,7 @@ export default class JwsToken implements IJwsGeneralJson {
       jws.protected = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].protected);
     }
     if (JoseHelpers.headerHasElements(token.signatures[0].header)) {
-      jws.header = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].header, false);
+      jws.header = <JwsHeader>token.signatures[0].header;
     }
     jws.signature = base64url.encode(token.signatures[0].signature);
     return JSON.stringify(jws);
@@ -350,21 +350,32 @@ export default class JwsToken implements IJwsGeneralJson {
     jwsSignature.header = this.getHeader(options) || new TSMap<string, string>();
     jwsSignature.protected = this.getProtected(options) || new TSMap<string, string>();
 
-    // Get the required algorithm
-    // add required fields if missing
-    if (!('alg' in jwsSignature.header) && !('alg' in jwsSignature.protected)) {
-      // tslint:disable-next-line:no-backbone-get-set-outside-model
-      jwsSignature.protected.set('alg', jwaAlgorithm);
+    // Check if header specifies certain constants
+    // If defined with no value, the value will be placed in.
+    const algInHeader = jwsSignature.header.has(JoseConstants.Alg);
+    if (algInHeader) {
+      if (!jwsSignature.header.get(JoseConstants.Alg)) {
+        jwsSignature.header.set(JoseConstants.Alg, jwaAlgorithm);
+      }
+    } else {
+      jwsSignature.protected.set(JoseConstants.Alg, jwaAlgorithm);
     }
+    const kidInHeader = jwsSignature.header.has(JoseConstants.Kid);
+    if (kidInHeader) {
+      if (!jwsSignature.header.get(JoseConstants.Kid)) {
+        if (jwk.kid) {
+          jwsSignature.header.set(JoseConstants.Kid, jwk.kid);
+        } else {
+          jwsSignature.header.delete(JoseConstants.Kid);
+        }
+      }
+    } else {
+      if (jwk.kid) {
+        jwsSignature.header.set(JoseConstants.Kid, jwk.kid);
+      }
+  }
 
-    if (jwk.kid && 
-      !(jwsSignature.header && 'kid' in jwsSignature.header) && 
-      !('kid' in jwsSignature.protected)) {
-        // tslint:disable-next-line:no-backbone-get-set-outside-model
-        jwsSignature.protected.set('kid', jwk.kid);
-    }
-
-    const protectedUsed = JoseHelpers.headerHasElements(jwsSignature.protected);
+  const protectedUsed = JoseHelpers.headerHasElements(jwsSignature.protected);
     
     // 4. Compute BASE64URL(UTF8(JWS Header))
     const encodedProtected = !protectedUsed ? '' : 
@@ -424,14 +435,14 @@ export default class JwsToken implements IJwsGeneralJson {
     const protectedHeader = payloadSignature.protected;
     if (protectedHeader) {
 // tslint:disable-next-line: no-backbone-get-set-outside-model
-      alg = protectedHeader.get('alg');
+      alg = protectedHeader.get(JoseConstants.Alg);
     }
 
     const header = payloadSignature.header;
     if (!alg) {
       if (header) {
 // tslint:disable-next-line: no-backbone-get-set-outside-model
-        alg = header.get('alg');
+        alg = header.get(JoseConstants.Alg);
       }      
     }
 

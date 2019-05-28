@@ -73,5 +73,21 @@
     * Define the default signing algorithm
     */
    public static DefaultSigningAlgorithm = JoseConstants.Es256K;
+   
+   /**
+    * Define the JOSE protocol elements
+    */
+   public static Alg = 'alg';
+   
+   /**
+    * Define the JOSE protocol elements
+    */
+   public static Kid = 'kid';
+   
+   /**
+    * Define the JOSE protocol elements
+    */
+   public static Enc = 'enc';
+   
 }
 

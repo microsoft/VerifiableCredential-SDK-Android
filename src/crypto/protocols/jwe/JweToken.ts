@@ -258,11 +258,11 @@ export default class JweToken implements IJweGeneralJson {
       }
     
         // tslint:disable: no-backbone-get-set-outside-model
-        jweToken.protected.set('alg', <string>keyEncryptionAlgorithm);
-        jweToken.protected.set('enc', <string>contentEncryptionAlgorithm);
+        jweToken.protected.set(JoseConstants.Alg, <string>keyEncryptionAlgorithm);
+        jweToken.protected.set(JoseConstants.Enc, <string>contentEncryptionAlgorithm);
     
         if (publicKey.kid) {
-          jweToken.protected.set('kid', publicKey.kid);
+          jweToken.protected.set(JoseConstants.Kid, publicKey.kid);
         }
         
         encodedProtected = JoseHelpers.headerHasElements(jweToken.protected) ?  
@@ -333,7 +333,7 @@ export default class JweToken implements IJweGeneralJson {
     for (let inx = 0 ; inx < this.recipients.length ; inx ++) {
       const recipient = this.recipients[inx];
       if (recipient.header) {
-        const headerKid = recipient.header.get('kid'); 
+        const headerKid = recipient.header.get(JoseConstants.Kid); 
         if (headerKid && headerKid === jwk.kid) {
           if (contentEncryptionKey = await this.decryptContentEncryptionKey(recipient, decryptor, decryptionKeyReference)) {
             break;
@@ -358,7 +358,7 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   // Decrypt content
-  const contentEncryptionAlgorithm = this.protected.get('enc');
+  const contentEncryptionAlgorithm = this.protected.get(JoseConstants.Enc);
   const iv =  new Uint8Array(this.iv); 
   const encodedAad = base64url.encode(this.aad);
   const aad = new Uint8Array(Buffer.from(encodedAad));
@@ -375,9 +375,9 @@ export default class JweToken implements IJweGeneralJson {
   private async decryptContentEncryptionKey(recipient: IJweRecipient, decryptor: ISubtleCrypto, decryptionKeyReference: string): Promise<Buffer> {
     let keyDecryptionAlgorithm = '';
     if (!recipient.header) {
-      keyDecryptionAlgorithm = this.protected.get('alg');
+      keyDecryptionAlgorithm = this.protected.get(JoseConstants.Alg);
     } else {
-      keyDecryptionAlgorithm = recipient.header.get('alg') || this.protected.get('alg');
+      keyDecryptionAlgorithm = recipient.header.get(JoseConstants.Alg) || this.protected.get(JoseConstants.Alg);
     }
 
     const algorithm = CryptoHelpers.jwaToWebCrypto(keyDecryptionAlgorithm);    

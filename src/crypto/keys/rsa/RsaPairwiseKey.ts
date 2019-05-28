@@ -74,7 +74,9 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
       q: RsaPairwiseKey.toBase(q),
       dp: RsaPairwiseKey.toBase(dp),
       dq: RsaPairwiseKey.toBase(dq),
-      qi: RsaPairwiseKey.toBase(qi)
+      qi: RsaPairwiseKey.toBase(qi),
+      // Need an algorithm for kid generation - todo
+      kid: '#key1'
     };
 
     return new RsaPrivateKey(pairwise);

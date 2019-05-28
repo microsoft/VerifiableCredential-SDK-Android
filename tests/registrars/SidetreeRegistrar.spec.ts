@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { FlatJsonJws } from '@decentralized-identity/did-auth-jose';
 import SidetreeRegistrar from '../../src/registrars/SidetreeRegistrar';
 import IdentifierDocument from '../../src/IdentifierDocument';
 import Identifier from '../../src/Identifier';
@@ -13,6 +12,7 @@ import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
+import IJwsFlatJson from '../../src/crypto/protocols/jws/IJwsFlatJson';
 
 let fetchMock: any;
 
@@ -65,7 +65,7 @@ describe('SidetreeRegistrar', () => {
     expect(registrar.url).toEqual('https://registrar.org/');
   });
 
-  it('should return a new identifier ', async () => {
+  it('should return a new identifier', async () => {
     // Setup registration environment
     await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
 
@@ -76,8 +76,9 @@ describe('SidetreeRegistrar', () => {
         expect(url).toEqual('https://registrar.org/');
         expect(opts).toBeDefined();
         // Make sure the document has been passed
-        const body: FlatJsonJws = JSON.parse(opts.body);
+        const body: IJwsFlatJson = JSON.parse(opts.body);
         expect(body.header).toBeDefined();
+        expect(body.protected).toBeUndefined();
         expect(body.payload).toBeDefined();
         expect(body.signature).toBeDefined();
         return true;
@@ -136,7 +137,7 @@ describe('SidetreeRegistrar', () => {
     .catch((error: any) => {
       expect(error).toBeDefined();
       expect(error instanceof UserAgentError).toBeTruthy();
-      expect(error.message).toEqual('Failed to register the identifier document.');
+      expect(error.message).toEqual('Failed to register the identifier document. Status 404');
     })
     .finally(done);
   });

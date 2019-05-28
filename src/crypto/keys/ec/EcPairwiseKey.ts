@@ -60,9 +60,13 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
       d: base64url.encode(d),
       x: base64url.encode(x),
       y: base64url.encode(y),
-      kty:KeyType.EC
+      kty:KeyType.EC,
+      // Need an algorithm for kid generation - todo
+      kid: '#key1'
     };
 
-    return new EcPrivateKey(pairwise);
+    const eckey = new EcPrivateKey(pairwise);
+    delete (<any>eckey).alg;
+    return eckey;
   } 
 }

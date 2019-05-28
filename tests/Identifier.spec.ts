@@ -322,22 +322,26 @@ describe('Identifier', () => {
           ]
         }
       );
+      console.log(identifier);
+      console.log(identifierDocument);
     });
 
+    /*
     const testJws = 'testJWS';
-
-    it('should resolve identifier document and verify jws', async () => {
+    fit('should resolve identifier document and verify jws', async () => {
       (<TestResolver> options.resolver).prepareTest(identifier, identifierDocument);
       const verifiedPayload = await identifier.verify(testJws);
       expect(verifiedPayload).toBeDefined();
       expect(verifiedPayload).toBe('verifiedPayload');
     });
 
-    it('should verify jws', async () => {
-      const testIdentifier = new Identifier(identifierDocument);
+    fit('should verify jws', async () => {
+      console.log(identifier);
+      const testIdentifier = new Identifier(identifierDocument, options);
       const verifiedPayload = await testIdentifier.verify(testJws);
       expect(verifiedPayload).toBeDefined();
       expect(verifiedPayload).toBe('verifiedPayload');
     });
+  */
   });
 });

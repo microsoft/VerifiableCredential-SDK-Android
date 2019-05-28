@@ -59,9 +59,9 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), keyImportAlgorithm, true, ['sign']);
-    return <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? 
-      <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): 
-      <RsaPssParams>algorithm, key, <ArrayBuffer>data);
+    return <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): <RsaPssParams>algorithm, 
+      key, 
+      <ArrayBuffer>data);
   }
           
   /**

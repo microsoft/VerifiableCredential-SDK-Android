@@ -16,6 +16,7 @@ import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
 import { ISigningOptions } from '../crypto/keyStore/IKeyStore';
+import { TSMap } from 'typescript-map';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -84,7 +85,13 @@ export default class SidetreeRegistrar implements IRegistrar {
 
       // registration with signed message for bodyString
       const signingOptions: ISigningOptions = {
-        cryptoFactory: this.cryptoFactory
+        cryptoFactory: this.cryptoFactory,
+        header: new TSMap<string, string>([
+            ['alg', ''],
+            ['kid', ''],
+            ['operation', 'create'],
+            ['proofOfWork', '{}']
+        ])
       };
       const jws = new JwsToken(signingOptions);
       const signature = await jws.sign(keyReference, Buffer.from(bodyString), ProtectionFormat.JwsFlatJson);
@@ -107,7 +114,7 @@ export default class SidetreeRegistrar implements IRegistrar {
 
       if (!response.ok) {
         const error = new UserAgentError(
-          'Failed to register the identifier document.'
+          `Failed to register the identifier document. Status ${response.status}`
         );
         reject(error);
         return;
