@@ -2,20 +2,15 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import nodeWebcryptoOssl from 'node-webcrypto-ossl';
+import IJwsSignature from './IJwsSignature';
 
 /**
- * Class used to model crypto options
+ * JWS flattened json format
  */
-export default class CryptoOptions {
-  /**
-   * Get or set the crypto api to be used
-   */
-  public cryptoApi: any = new nodeWebcryptoOssl();
+export default interface IJwsFlatJson extends IJwsSignature {
 
   /**
-   * Get or set the algorithm to be used.
-   * Conform to the Web Cryptography Api
+   * The application-specific payload.
    */
-  public algorithm: any;
+  payload: Buffer,
 }

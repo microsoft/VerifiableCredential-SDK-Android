@@ -1,21 +1,27 @@
+
+
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import nodeWebcryptoOssl from 'node-webcrypto-ossl';
-
 /**
- * Class used to model crypto options
- */
-export default class CryptoOptions {
+  * Class for W3C Crypto API constants
+  */
+ export default class W3cCryptoApiConstants {
   /**
-   * Get or set the crypto api to be used
+   * Define W3C algorithm constants
    */
-  public cryptoApi: any = new nodeWebcryptoOssl();
+  public static RsaOaep = 'RSA-OAEP-256';
 
   /**
-   * Get or set the algorithm to be used.
-   * Conform to the Web Cryptography Api
+   * Define W3C algorithm constants
    */
-  public algorithm: any;
+  public static RsaSsaPkcs1V15 = 'RSASSA-PKCS1-v1_5';
+
+  /**
+   * Define W3C algorithm constants
+   */
+  public static AesGcm = 'AES-GCM';
 }
+

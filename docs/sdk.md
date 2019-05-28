@@ -13,18 +13,16 @@ self-issued id token.</p></dd>
 <dt><a href="#VerifiedCredential">VerifiedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
-<dt><a href="#CryptoOptions">CryptoOptions</a></dt>
-<dd><p>Class used to model crypto options</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Interface defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
 <dd></dd>
-<dt><a href="#HubObject">HubObject</a></dt>
-<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Class for defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
+<dt><a href="#HubObject">HubObject</a></dt>
+<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#Actions">Actions</a></dt>
 <dd><p>A Class that represents objects</p></dd>
 <dt><a href="#Collections">Collections</a></dt>
@@ -41,34 +39,12 @@ a user&#39;s Identity Hub.</p></dd>
 <dt><a href="#CommitStrategyBasic">CommitStrategyBasic</a></dt>
 <dd><p>Resolves the final state of an object from the constituent set of commits for that object.</p>
 <p>This class works only with objects using the <code>basic</code> commit strategy.</p></dd>
-<dt><a href="#CommitSigner">CommitSigner</a></dt>
-<dd><p>Class which can apply a signature to a commit.</p></dd>
 <dt><a href="#HubError">HubError</a></dt>
 <dd><p>Represents an error returned by an Identity Hub.</p></dd>
 <dt><a href="#HubSession">HubSession</a></dt>
 <dd><p>Represents a communication session with a particular Hub instance.</p></dd>
-<dt><a href="#HubCommitQueryRequest">HubCommitQueryRequest</a></dt>
-<dd><p>Represents a request to a Hub for a set of commits.</p></dd>
-<dt><a href="#HubCommitWriteRequest">HubCommitWriteRequest</a></dt>
-<dd><p>Represents a request to commit the given Commit object to an Identity Hub.</p></dd>
-<dt><a href="#HubObjectQueryRequest">HubObjectQueryRequest</a></dt>
-<dd><p>Represents a request to a Hub to query the available objects.</p></dd>
-<dt><a href="#HubRequest">HubRequest</a></dt>
-<dd><p>The base class for all requests to an Identity Hub.</p></dd>
-<dt><a href="#HubCommitQueryResponse">HubCommitQueryResponse</a></dt>
-<dd><p>Represents the response to a <code>HubCommitQueryRequest</code>.</p></dd>
-<dt><a href="#HubObjectQueryResponse">HubObjectQueryResponse</a></dt>
-<dd><p>Represents the response to a <code>HubObjectQueryRequest</code>.</p></dd>
-<dt><a href="#HubWriteResponse">HubWriteResponse</a></dt>
-<dd><p>Represents the response to a <code>HubWriteRequest</code>.</p></dd>
 <dt><a href="#SignedCommit">SignedCommit</a></dt>
 <dd><p>Class representing a signed commit.</p></dd>
-<dt><a href="#Identifier">Identifier</a></dt>
-<dd><p>Class for creating and managing identifiers,
-retrieving identifier documents.</p></dd>
-<dt><a href="#IdentifierDocument">IdentifierDocument</a></dt>
-<dd><p>Class for creating and managing identifiers,
-retrieving identifier documents.</p></dd>
 <dt><a href="#InMemoryKeyStore">InMemoryKeyStore</a></dt>
 <dd><p>An encrypted in memory implementation of IKeyStore using PouchDB
 and memdown. As soon as the process ends or
@@ -85,11 +61,13 @@ to allow simple testing and experimentation with the UserAgent SDK.</p></dd>
 <dd><p>Registrar implementation for the Sidetree (ION) network</p></dd>
 <dt><a href="#HttpResolver">HttpResolver</a></dt>
 <dd><p>Fetches DID Documents from remote resolvers over http</p></dd>
-<dt><a href="#UserAgentError">UserAgentError</a></dt>
-<dd><p>Base error class for the UserAgent.</p></dd>
-<dt><a href="#UserAgentOptions">UserAgentOptions</a></dt>
-<dd><p>Interface defining options for the
-User Agent, such as resolver and register.</p></dd>
+<dt><a href="#HostServiceEndpoint">HostServiceEndpoint</a></dt>
+<dd><p>class to represent a host service endpoint.</p></dd>
+<dt><a href="#ServiceEndpoint">ServiceEndpoint</a></dt>
+<dd><p>abstract class to represent a service endpoint.
+based on: <a href="https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md">https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md</a>.</p></dd>
+<dt><a href="#UserServiceEndpoint">UserServiceEndpoint</a></dt>
+<dd><p>Class to represent a host service endpoint.</p></dd>
 </dl>
 
 ## Members
@@ -310,12 +288,6 @@ credential for the specified identifier.</p>
 | issuedTo | <p>the specified identifier.</p> |
 | issuedAt | <p>date and time.</p> |
 
-<a name="CryptoOptions"></a>
-
-## CryptoOptions
-<p>Class used to model crypto options</p>
-
-**Kind**: global class  
 <a name="HubClientOptions"></a>
 
 ## HubClientOptions
@@ -378,6 +350,13 @@ HubClient, such as hub Identifier and client Identifier.</p>
 creates a hubSession for hub instance that is available/online.</p>
 
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+<a name="HubClientOptions"></a>
+
+## HubClientOptions
+<p>Class for defining options for the
+HubClient, such as hub Identifier and client Identifier.</p>
+
+**Kind**: global class  
 <a name="HubObject"></a>
 
 ## HubObject
@@ -405,13 +384,6 @@ creates a hubSession for hub instance that is available/online.</p>
 <p>If payload is not defined, get the payload from hub session using metadata.</p>
 
 **Kind**: instance method of [<code>HubObject</code>](#HubObject)  
-<a name="HubClientOptions"></a>
-
-## HubClientOptions
-<p>Class for defining options for the
-HubClient, such as hub Identifier and client Identifier.</p>
-
-**Kind**: global class  
 <a name="Actions"></a>
 
 ## Actions
@@ -555,23 +527,6 @@ more recent.</p>
 | a | <p>The first commit to compare.</p> |
 | b | <p>The second commit to compare.</p> |
 
-<a name="CommitSigner"></a>
-
-## CommitSigner
-<p>Class which can apply a signature to a commit.</p>
-
-**Kind**: global class  
-<a name="CommitSigner+sign"></a>
-
-### commitSigner.sign(commit)
-<p>Signs the given commit.</p>
-
-**Kind**: instance method of [<code>CommitSigner</code>](#CommitSigner)  
-
-| Param | Description |
-| --- | --- |
-| commit | <p>The commit to sign.</p> |
-
 <a name="HubError"></a>
 
 ## HubError
@@ -687,109 +642,6 @@ field of the response.</p>
 | --- | --- |
 | response | <p>The Hub response to be transformed.</p> |
 
-<a name="HubCommitQueryRequest"></a>
-
-## HubCommitQueryRequest
-<p>Represents a request to a Hub for a set of commits.</p>
-
-**Kind**: global class  
-<a name="HubCommitWriteRequest"></a>
-
-## HubCommitWriteRequest
-<p>Represents a request to commit the given Commit object to an Identity Hub.</p>
-
-**Kind**: global class  
-<a name="HubObjectQueryRequest"></a>
-
-## HubObjectQueryRequest
-<p>Represents a request to a Hub to query the available objects.</p>
-
-**Kind**: global class  
-<a name="HubRequest"></a>
-
-## HubRequest
-<p>The base class for all requests to an Identity Hub.</p>
-
-**Kind**: global class  
-<a name="HubRequest+getRequestJson"></a>
-
-### hubRequest.getRequestJson()
-<p>Returns the raw request JSON which will be sent to the Hub.</p>
-
-**Kind**: instance method of [<code>HubRequest</code>](#HubRequest)  
-<a name="HubCommitQueryResponse"></a>
-
-## HubCommitQueryResponse
-<p>Represents the response to a <code>HubCommitQueryRequest</code>.</p>
-
-**Kind**: global class  
-
-* [HubCommitQueryResponse](#HubCommitQueryResponse)
-    * [.getCommits()](#HubCommitQueryResponse+getCommits)
-    * [.hasSkipToken()](#HubCommitQueryResponse+hasSkipToken)
-    * [.getSkipToken()](#HubCommitQueryResponse+getSkipToken)
-
-<a name="HubCommitQueryResponse+getCommits"></a>
-
-### hubCommitQueryResponse.getCommits()
-<p>Returns the set of commits returned by the Hub.</p>
-
-**Kind**: instance method of [<code>HubCommitQueryResponse</code>](#HubCommitQueryResponse)  
-<a name="HubCommitQueryResponse+hasSkipToken"></a>
-
-### hubCommitQueryResponse.hasSkipToken()
-<p>Indicates whether additional pages of results are available.</p>
-
-**Kind**: instance method of [<code>HubCommitQueryResponse</code>](#HubCommitQueryResponse)  
-<a name="HubCommitQueryResponse+getSkipToken"></a>
-
-### hubCommitQueryResponse.getSkipToken()
-<p>Retrieves a token which can be used to fetch subsequent result pages.</p>
-
-**Kind**: instance method of [<code>HubCommitQueryResponse</code>](#HubCommitQueryResponse)  
-<a name="HubObjectQueryResponse"></a>
-
-## HubObjectQueryResponse
-<p>Represents the response to a <code>HubObjectQueryRequest</code>.</p>
-
-**Kind**: global class  
-
-* [HubObjectQueryResponse](#HubObjectQueryResponse)
-    * [.getObjects()](#HubObjectQueryResponse+getObjects)
-    * [.hasSkipToken()](#HubObjectQueryResponse+hasSkipToken)
-    * [.getSkipToken()](#HubObjectQueryResponse+getSkipToken)
-
-<a name="HubObjectQueryResponse+getObjects"></a>
-
-### hubObjectQueryResponse.getObjects()
-<p>Returns the set of objects returned by the Hub.</p>
-<p>NEED TO Map JSON into useful objects, as done for commits.</p>
-
-**Kind**: instance method of [<code>HubObjectQueryResponse</code>](#HubObjectQueryResponse)  
-<a name="HubObjectQueryResponse+hasSkipToken"></a>
-
-### hubObjectQueryResponse.hasSkipToken()
-<p>Indicates whether additional pages of results are available.</p>
-
-**Kind**: instance method of [<code>HubObjectQueryResponse</code>](#HubObjectQueryResponse)  
-<a name="HubObjectQueryResponse+getSkipToken"></a>
-
-### hubObjectQueryResponse.getSkipToken()
-<p>Retrieves a token which can be used to fetch subsequent result pages.</p>
-
-**Kind**: instance method of [<code>HubObjectQueryResponse</code>](#HubObjectQueryResponse)  
-<a name="HubWriteResponse"></a>
-
-## HubWriteResponse
-<p>Represents the response to a <code>HubWriteRequest</code>.</p>
-
-**Kind**: global class  
-<a name="HubWriteResponse+getRevisions"></a>
-
-### hubWriteResponse.getRevisions()
-<p>Returns the list of known revisions for the object which was created/modified.</p>
-
-**Kind**: instance method of [<code>HubWriteResponse</code>](#HubWriteResponse)  
 <a name="SignedCommit"></a>
 
 ## SignedCommit
@@ -834,229 +686,6 @@ field of the response.</p>
 <p>Retrieves the ID of the object to which this commit belongs.</p>
 
 **Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
-<a name="Identifier"></a>
-
-## Identifier
-<p>Class for creating and managing identifiers,
-retrieving identifier documents.</p>
-
-**Kind**: global class  
-
-* [Identifier](#Identifier)
-    * [new Identifier(identifier, [options])](#new_Identifier_new)
-    * _instance_
-        * [.createLinkedIdentifier(target, register)](#Identifier+createLinkedIdentifier)
-        * [.getDocument()](#Identifier+getDocument)
-        * [.getPublicKey(keyIdentifier)](#Identifier+getPublicKey)
-        * [.sign(payload, keyStorageIdentifier)](#Identifier+sign)
-        * [.verify(jws)](#Identifier+verify)
-    * _static_
-        * [.create([options])](#Identifier.create)
-        * [.keyStorageIdentifier(personaId, target, keyUse, keyType)](#Identifier.keyStorageIdentifier)
-
-<a name="new_Identifier_new"></a>
-
-### new Identifier(identifier, [options])
-<p>Constructs an instance of the Identifier
-class using the provided identifier or identifier document.</p>
-
-
-| Param | Description |
-| --- | --- |
-| identifier | <p>either the string representation of an identifier or a identifier document.</p> |
-| [options] | <p>for configuring how to register and resolve identifiers.</p> |
-
-<a name="Identifier+createLinkedIdentifier"></a>
-
-### identifier.createLinkedIdentifier(target, register)
-<p>Creates a new decentralized identifier, using the current identifier
-and the specified target. If the registar flag is true, the newly created
-identifier will be registered using the</p>
-
-**Kind**: instance method of [<code>Identifier</code>](#Identifier)  
-
-| Param | Default | Description |
-| --- | --- | --- |
-| target |  | <p>entity for which to create the linked identifier</p> |
-| register | <code>false</code> | <p>flag indicating whether the new identifier should be registered with a ledger.</p> |
-
-<a name="Identifier+getDocument"></a>
-
-### identifier.getDocument()
-<p>Gets the IdentifierDocument for the identifier
-instance, throwing if no identifier has been
-created.</p>
-
-**Kind**: instance method of [<code>Identifier</code>](#Identifier)  
-<a name="Identifier+getPublicKey"></a>
-
-### identifier.getPublicKey(keyIdentifier)
-<p>Performs a public key lookup using the
-specified key identifier, returning the
-key defined in document.</p>
-
-**Kind**: instance method of [<code>Identifier</code>](#Identifier)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>the identifier of the public key.</p> |
-
-<a name="Identifier+sign"></a>
-
-### identifier.sign(payload, keyStorageIdentifier)
-<p>Sign payload with key specified by keyStorageIdentifier in options.keyStore</p>
-
-**Kind**: instance method of [<code>Identifier</code>](#Identifier)  
-
-| Param | Description |
-| --- | --- |
-| payload | <p>object to be signed</p> |
-| keyStorageIdentifier | <p>the identifier for the key used to sign payload.</p> |
-
-<a name="Identifier+verify"></a>
-
-### identifier.verify(jws)
-<p>Verify the payload with public key from the Identifier Document.</p>
-
-**Kind**: instance method of [<code>Identifier</code>](#Identifier)  
-
-| Param | Description |
-| --- | --- |
-| jws | <p>the signed token to be verified.</p> |
-
-<a name="Identifier.create"></a>
-
-### Identifier.create([options])
-<p>Creates a new decentralized identifier.</p>
-
-**Kind**: static method of [<code>Identifier</code>](#Identifier)  
-
-| Param | Description |
-| --- | --- |
-| [options] | <p>for configuring how to register and resolve identifiers.</p> |
-
-<a name="Identifier.keyStorageIdentifier"></a>
-
-### Identifier.keyStorageIdentifier(personaId, target, keyUse, keyType)
-<p>Generate a storage identifier to store a key</p>
-
-**Kind**: static method of [<code>Identifier</code>](#Identifier)  
-
-| Param | Description |
-| --- | --- |
-| personaId | <p>The identifier for the persona</p> |
-| target | <p>The identifier for the peer. Will be persona for non-pairwise keys</p> |
-| keyUse | <p>Key usage</p> |
-| keyType | <p>Key type</p> |
-
-<a name="IdentifierDocument"></a>
-
-## IdentifierDocument
-<p>Class for creating and managing identifiers,
-retrieving identifier documents.</p>
-
-**Kind**: global class  
-
-* [IdentifierDocument](#IdentifierDocument)
-    * [new IdentifierDocument(document, options)](#new_IdentifierDocument_new)
-    * _instance_
-        * [.addAuthenticationReference(authenticationReference)](#IdentifierDocument+addAuthenticationReference)
-        * [.addServiceReference(serviceReference)](#IdentifierDocument+addServiceReference)
-        * [.getHubInstances()](#IdentifierDocument+getHubInstances)
-        * [.getHubLocations()](#IdentifierDocument+getHubLocations)
-        * [.toJSON()](#IdentifierDocument+toJSON)
-    * _static_
-        * [.create(publicKeys)](#IdentifierDocument.create)
-        * [.createAndGenerateId(idBase, publicKeys, options)](#IdentifierDocument.createAndGenerateId)
-        * [.fromJSON()](#IdentifierDocument.fromJSON)
-
-<a name="new_IdentifierDocument_new"></a>
-
-### new IdentifierDocument(document, options)
-<p>Constructs an instance of the identifier
-document.</p>
-
-
-| Param | Description |
-| --- | --- |
-| document | <p>from which to create the identifier document.</p> |
-| options | <p>for configuring how to register and resolve identifiers.</p> |
-
-<a name="IdentifierDocument+addAuthenticationReference"></a>
-
-### identifierDocument.addAuthenticationReference(authenticationReference)
-<p>Adds an authentication reference to the document.</p>
-
-**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-
-| Param | Description |
-| --- | --- |
-| authenticationReference | <p>to add to the document.</p> |
-
-<a name="IdentifierDocument+addServiceReference"></a>
-
-### identifierDocument.addServiceReference(serviceReference)
-<p>Adds a service reference to the document.</p>
-
-**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-
-| Param | Description |
-| --- | --- |
-| serviceReference | <p>to add to the document.</p> |
-
-<a name="IdentifierDocument+getHubInstances"></a>
-
-### identifierDocument.getHubInstances()
-<p>Get Hub Instances from Identity Service Reference.</p>
-
-**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-<a name="IdentifierDocument+getHubLocations"></a>
-
-### identifierDocument.getHubLocations()
-<p>Get Hub Locations from Identity Service Reference.</p>
-
-**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-<a name="IdentifierDocument+toJSON"></a>
-
-### identifierDocument.toJSON()
-<p>Used to control the the properties that are
-output by JSON.stringify.</p>
-
-**Kind**: instance method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-<a name="IdentifierDocument.create"></a>
-
-### IdentifierDocument.create(publicKeys)
-<p>Creates a new instance of an identifier document using the
-provided public keys.</p>
-
-**Kind**: static method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-
-| Param | Description |
-| --- | --- |
-| publicKeys | <p>to include in the document.</p> |
-
-<a name="IdentifierDocument.createAndGenerateId"></a>
-
-### IdentifierDocument.createAndGenerateId(idBase, publicKeys, options)
-<p>Creates a new instance of an identifier document using the
-provided public keys.
-The id is generated.</p>
-
-**Kind**: static method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| idBase | <code>method</code> | <p>The base id in format did::{id}. {id} will be filled in by this method</p> |
-| publicKeys |  | <p>to include in the document.</p> |
-| options |  | <p>User agent options containing the crypto Api</p> |
-
-<a name="IdentifierDocument.fromJSON"></a>
-
-### IdentifierDocument.fromJSON()
-<p>Used to control the the properties that are
-output by JSON.parse.</p>
-
-**Kind**: static method of [<code>IdentifierDocument</code>](#IdentifierDocument)  
 <a name="InMemoryKeyStore"></a>
 
 ## InMemoryKeyStore
@@ -1271,19 +900,84 @@ specified identifier.</p>
 | --- | --- |
 | identifier | <p>to resolve.</p> |
 
-<a name="UserAgentError"></a>
+<a name="HostServiceEndpoint"></a>
 
-## UserAgentError
-<p>Base error class for the UserAgent.</p>
-
-**Kind**: global class  
-<a name="UserAgentOptions"></a>
-
-## UserAgentOptions
-<p>Interface defining options for the
-User Agent, such as resolver and register.</p>
+## HostServiceEndpoint
+<p>class to represent a host service endpoint.</p>
 
 **Kind**: global class  
+
+* [HostServiceEndpoint](#HostServiceEndpoint)
+    * [new HostServiceEndpoint()](#new_HostServiceEndpoint_new)
+    * _instance_
+        * [.toJSON()](#HostServiceEndpoint+toJSON)
+    * _static_
+        * [.fromJSON()](#HostServiceEndpoint.fromJSON)
+
+<a name="new_HostServiceEndpoint_new"></a>
+
+### new HostServiceEndpoint()
+<p>locations of the hubs.</p>
+
+<a name="HostServiceEndpoint+toJSON"></a>
+
+### hostServiceEndpoint.toJSON()
+<p>Used to control the the properties that are
+output by JSON.stringify.</p>
+
+**Kind**: instance method of [<code>HostServiceEndpoint</code>](#HostServiceEndpoint)  
+<a name="HostServiceEndpoint.fromJSON"></a>
+
+### HostServiceEndpoint.fromJSON()
+<p>Used to control the the properties that are
+output by JSON.parse.</p>
+
+**Kind**: static method of [<code>HostServiceEndpoint</code>](#HostServiceEndpoint)  
+<a name="ServiceEndpoint"></a>
+
+## ServiceEndpoint
+<p>abstract class to represent a service endpoint.
+based on: https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md.</p>
+
+**Kind**: global class  
+<a name="new_ServiceEndpoint_new"></a>
+
+### new ServiceEndpoint()
+<p>The type of the service reference.</p>
+
+<a name="UserServiceEndpoint"></a>
+
+## UserServiceEndpoint
+<p>Class to represent a host service endpoint.</p>
+
+**Kind**: global class  
+
+* [UserServiceEndpoint](#UserServiceEndpoint)
+    * [new UserServiceEndpoint()](#new_UserServiceEndpoint_new)
+    * _instance_
+        * [.toJSON()](#UserServiceEndpoint+toJSON)
+    * _static_
+        * [.fromJSON()](#UserServiceEndpoint.fromJSON)
+
+<a name="new_UserServiceEndpoint_new"></a>
+
+### new UserServiceEndpoint()
+<p>locations of the hubs.</p>
+
+<a name="UserServiceEndpoint+toJSON"></a>
+
+### userServiceEndpoint.toJSON()
+<p>Used to control the the properties that are
+output by JSON.stringify.</p>
+
+**Kind**: instance method of [<code>UserServiceEndpoint</code>](#UserServiceEndpoint)  
+<a name="UserServiceEndpoint.fromJSON"></a>
+
+### UserServiceEndpoint.fromJSON()
+<p>Used to control the the properties that are
+output by JSON.parse.</p>
+
+**Kind**: static method of [<code>UserServiceEndpoint</code>](#UserServiceEndpoint)  
 <a name="CredentialType"></a>
 
 ## CredentialType

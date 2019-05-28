@@ -119,6 +119,7 @@ describe('Pairwise Identifier', () => {
     { name: 'RSASSA-PKCS1-v1_5', hash: { name: 'SHA-256' } }
   ];
 
+  // tslint:disable-next-line:mocha-no-side-effect-code
   it('should create an identifier EC', async () => {
 
     /* tslint:disable:max-line-length */
