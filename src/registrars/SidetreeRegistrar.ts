@@ -81,7 +81,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       // prepare document for registration
       identifierDocument = this.prepareDocForRegistration(identifierDocument);
       let bodyString = JSON.stringify(identifierDocument);
-      console.log(bodyString);
+      console.debug(bodyString);
 
       // registration with signed message for bodyString
       const signingOptions: ISigningOptions = {
@@ -95,14 +95,14 @@ export default class SidetreeRegistrar implements IRegistrar {
       };
       const jws = new JwsToken(signingOptions);
       const signature = await jws.sign(keyReference, Buffer.from(bodyString), ProtectionFormat.JwsFlatJson);
-      bodyString = signature.serialize();
+      const encodedBodyString = signature.serialize();
 
       const fetchOptions = {
         method: 'POST',
-        body: bodyString,
+        body: encodedBodyString,
         headers: {
           'Content-Type': 'application/json',
-          'Content-Length': bodyString.length.toString()
+          'Content-Length': encodedBodyString.length.toString()
         }
       };
 

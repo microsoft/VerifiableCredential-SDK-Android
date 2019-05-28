@@ -113,7 +113,7 @@ describe('Pairwise Identifier', () => {
   ];
 
   // tslint:disable-next-line:mocha-no-side-effect-code
-  fit('should create an identifier EC', async () => {
+  it('should create an identifier EC', async () => {
 
     /* tslint:disable:max-line-length */
     await Helpers
