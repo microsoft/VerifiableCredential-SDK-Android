@@ -30,7 +30,6 @@ describe('CredentialIssuer', () => {
     issuerIdentifier = new Identifier('did:test:example.id');
     consumer = new Identifier('did:test:consumer.id');
 
-    
     inputCredential = {
       issuedBy: consumer,
       issuedTo: issuerIdentifier,

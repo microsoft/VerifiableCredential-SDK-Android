@@ -66,4 +66,3 @@ export { default as CommitStrategyBasic } from './hubSession/CommitStrategyBasic
 export { default as HubError } from './hubSession/HubError';
 export { default as HubSession } from './hubSession/HubSession';
 export { default as SignedCommit } from './hubSession/SignedCommit';
-

@@ -132,7 +132,6 @@ export default class JweToken implements IJweGeneralJson {
     return JSON.stringify(json);
   }
 
-
   /**
    * Serialize a Jwe token object from a token in Flat Json format
    * @param token Jwe base object
@@ -271,7 +270,6 @@ export default class JweToken implements IJweGeneralJson {
 
       // Set aad as the protected header
       jweToken.aad = base64url.toBuffer(encodedProtected);
-
 
     for (let inx = 0 ; inx < recipients.length; inx ++) {
       // Set the recipients structure

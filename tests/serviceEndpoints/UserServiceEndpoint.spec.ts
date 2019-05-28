@@ -8,7 +8,6 @@ import UserServiceEndpoint from '../../src/serviceEndpoints/UserServiceEndpoint'
 const context = 'test.schema.identity.foundation/hub';
 const instance = 'did:test:hub.id';
 
-
 describe('UserServiceEndpoint', () => { 
   const mockServiceEndpoint: any = {
     instances: [

@@ -101,5 +101,3 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
   }
         
 }
-
- 
