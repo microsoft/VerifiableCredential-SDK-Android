@@ -13,7 +13,7 @@ describe('CryptoFactory', () => {
     expect(factory).toBeDefined();
     const keyEncrypter = factory.getKeyEncrypter('*');
     expect(keyEncrypter).toBeDefined();
-    const macSigner = factory.getMacSigner('*');
+    const macSigner = factory.getMessageAuthenticationCodeSigners('*');
     expect(macSigner).toBeDefined();
     const messageDigest = factory.getMessageDigest('*');
     expect(messageDigest).toBeDefined();

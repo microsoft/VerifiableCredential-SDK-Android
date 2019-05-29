@@ -12,8 +12,11 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import IKeyStore from '../keystores/IKeyStore';
-import { SignatureFormat } from '../keystores/SignatureFormat';
+import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
+import CryptoFactory from '../crypto/plugin/CryptoFactory';
+import JwsToken from '../crypto/protocols/jws/JwsToken';
+import { ISigningOptions } from '../crypto/keyStore/IKeyStore';
+import { TSMap } from 'typescript-map';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -23,7 +26,7 @@ declare var fetch: any;
 export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
   private serializedOptions: string;
-  private keyStore: IKeyStore;
+  private cryptoFactory: CryptoFactory;
 
   /**
    * Constructs a new instance of the Sidetree registrar
@@ -37,7 +40,7 @@ export default class SidetreeRegistrar implements IRegistrar {
     }
 
     this.serializedOptions = JSON.stringify(options);
-    this.keyStore = options.keyStore;
+    this.cryptoFactory = options.cryptoFactory;
 
     // Format the url
     this.url = `${url.replace(/\/?$/, '/')}`;
@@ -78,17 +81,28 @@ export default class SidetreeRegistrar implements IRegistrar {
       // prepare document for registration
       identifierDocument = this.prepareDocForRegistration(identifierDocument);
       let bodyString = JSON.stringify(identifierDocument);
-      console.log(bodyString);
+      console.debug(bodyString);
 
       // registration with signed message for bodyString
-      bodyString = await this.keyStore.sign(keyReference, bodyString, SignatureFormat.FlatJsonJws);
+      const signingOptions: ISigningOptions = {
+        cryptoFactory: this.cryptoFactory,
+        header: new TSMap<string, string>([
+            ['alg', ''],
+            ['kid', ''],
+            ['operation', 'create'],
+            ['proofOfWork', '{}']
+        ])
+      };
+      const jws = new JwsToken(signingOptions);
+      const signature = await jws.sign(keyReference, Buffer.from(bodyString), ProtectionFormat.JwsFlatJson);
+      const encodedBodyString = signature.serialize();
 
       const fetchOptions = {
         method: 'POST',
-        body: bodyString,
+        body: encodedBodyString,
         headers: {
           'Content-Type': 'application/json',
-          'Content-Length': bodyString.length.toString()
+          'Content-Length': encodedBodyString.length.toString()
         }
       };
 
@@ -100,7 +114,7 @@ export default class SidetreeRegistrar implements IRegistrar {
 
       if (!response.ok) {
         const error = new UserAgentError(
-          'Failed to register the identifier document.'
+          `Failed to register the identifier document. Status ${response.status}`
         );
         reject(error);
         return;

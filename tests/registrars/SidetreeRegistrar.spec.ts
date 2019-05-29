@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { FlatJsonJws } from '@decentralized-identity/did-auth-jose';
 import SidetreeRegistrar from '../../src/registrars/SidetreeRegistrar';
 import IdentifierDocument from '../../src/IdentifierDocument';
 import Identifier from '../../src/Identifier';
@@ -11,9 +10,10 @@ import UserAgentError from '../../src/UserAgentError';
 import UserAgentOptions from '../../src/UserAgentOptions';
 import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
-import KeyStoreMock from '../keystores/KeyStoreMock';
-import { DidKey, KeyExport } from '@decentralized-identity/did-crypto-typescript';
-import { SignatureFormat } from '../../src/keystores/SignatureFormat';
+import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
+import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
+import IJwsFlatJson from '../../src/crypto/protocols/jws/IJwsFlatJson';
+
 let fetchMock: any;
 
 // Add a document to the cache
@@ -28,11 +28,8 @@ describe('SidetreeRegistrar', () => {
 
   beforeAll(() => {
     fetchMock = require('fetch-mock');
-    options = {
-      keyStore: new KeyStoreMock(),
-      cryptoOptions: new CryptoOptions()
-    };
-    (<CryptoOptions> options.cryptoOptions).algorithm = { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+    options = new UserAgentOptions();
+    (<CryptoOptions> options.cryptoOptions).authenticationSigningJoseAlgorithm = 'ES256K';
     options.registrar = new SidetreeRegistrar('https://registrar.org', options);
   });
 
@@ -42,7 +39,7 @@ describe('SidetreeRegistrar', () => {
 
   it('should throw because of missing options', async (done) => {
     try {
-      await new SidetreeRegistrar('https://registrar.org/', {}).register(new IdentifierDocument(''), '');
+      await new SidetreeRegistrar('https://registrar.org/', <any>{}).register(new IdentifierDocument(''), '');
       fail('Failed to throw because of missing options');
     } catch (err) {
       expect('options and options.keyStore need to be defined').toBe(err.message);
@@ -50,49 +47,27 @@ describe('SidetreeRegistrar', () => {
     }
   });
 
-  it('should throw when key type not supported for signature', async (done) => {
-        // Setup registration environment
-    await (<KeyStoreMock> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
-    const didKey = new DidKey(
-          (<CryptoOptions> options.cryptoOptions).cryptoApi,
-          { name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]), hash: { name: 'SHA-256' } },
-          null
-        );
-    const jwk: any = await didKey.getJwkKey(KeyExport.Private);
-    jwk.kty = 'AA';
-    const keyStore = <KeyStoreMock> options.keyStore;
-    await keyStore.save('key', jwk);
-    keyStore.sign('key', 'abc', SignatureFormat.FlatJsonJws)
-        .then(() => {
-          fail('Should throw');
-        })
-        .catch((err: any) => {
-          expect(`The key type 'AA' is not supported.`).toBe(err.message);
-          done();
-        });
-  });
-
   it('should construct new instance of the SidetreeRegistrar', async () => {
-    const registrar = new SidetreeRegistrar('https://registrar.org/', {
-      keyStore: new KeyStoreMock(),
-      timeoutInSeconds: 30
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    options.cryptoFactory = new CryptoFactory(new KeyStoreInMemory());
+    const registrar = new SidetreeRegistrar('https://registrar.org/', options);
     expect(registrar).toBeDefined();
     expect(registrar.url).toEqual('https://registrar.org/');
   });
 
   it('should construct new instance of the SidetreeRegistrar appending trailing slash', async () => {
-    const registrar = new SidetreeRegistrar('https://registrar.org', {
-      keyStore: new KeyStoreMock(),
-      timeoutInSeconds: 30
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    options.cryptoFactory = new CryptoFactory(new KeyStoreInMemory());
+    const registrar = new SidetreeRegistrar('https://registrar.org', options);
     expect(registrar).toBeDefined();
     expect(registrar.url).toEqual('https://registrar.org/');
   });
 
-  it('should return a new identifier ', async () => {
+  it('should return a new identifier', async () => {
     // Setup registration environment
-    await (<KeyStoreMock> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
+    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
 
     let identifier: Identifier = new Identifier('did:test:identifier', options);
 
@@ -101,8 +76,9 @@ describe('SidetreeRegistrar', () => {
         expect(url).toEqual('https://registrar.org/');
         expect(opts).toBeDefined();
         // Make sure the document has been passed
-        const body: FlatJsonJws = JSON.parse(opts.body);
+        const body: IJwsFlatJson = JSON.parse(opts.body);
         expect(body.header).toBeDefined();
+        expect(body.protected).toBeUndefined();
         expect(body.payload).toBeDefined();
         expect(body.signature).toBeDefined();
         return true;
@@ -121,7 +97,7 @@ describe('SidetreeRegistrar', () => {
     options.registrar = new SidetreeRegistrar('https://registrar.org/', options);
 
     // Setup registration environment
-    await (<KeyStoreMock> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
+    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
     const identifier: Identifier = new Identifier('did:test:identifier', options);
 
     // Set the mock timeout to be greater than the fetch configuration
@@ -148,7 +124,7 @@ describe('SidetreeRegistrar', () => {
 
   it('should throw UserAgentError when error returned by registrar', async done => {
     // Setup registration environment
-    await (<KeyStoreMock> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
+    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
     const identifier: Identifier = new Identifier('did:test:identifier', options);
 
     fetchMock.post('https://registrar.org/', 404);
@@ -161,7 +137,7 @@ describe('SidetreeRegistrar', () => {
     .catch((error: any) => {
       expect(error).toBeDefined();
       expect(error instanceof UserAgentError).toBeTruthy();
-      expect(error.message).toEqual('Failed to register the identifier document.');
+      expect(error.message).toEqual('Failed to register the identifier document. Status 404');
     })
     .finally(done);
   });

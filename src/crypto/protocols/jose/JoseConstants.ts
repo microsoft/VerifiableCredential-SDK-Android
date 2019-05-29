@@ -46,7 +46,12 @@
   /**
    * Define JOSE algorithm constants
    */
-   public static Rs512 = 'RS512';
+  public static Rs512 = 'RS512';
+
+  /**
+   * Define JOSE algorithm constants
+   */
+  public static Es256K = 'ES256K';
 
    /**
    * Define JOSE algorithm constants
@@ -62,4 +67,25 @@
    * Define JOSE algorithm constants
    */
    public static AesGcm256 ='A256GCM';
+
+   /**
+    * Define the default signing algorithm
+    */
+   public static DefaultSigningAlgorithm = JoseConstants.Es256K;
+   
+   /**
+    * Define the JOSE protocol elements
+    */
+   public static Alg = 'alg';
+   
+   /**
+    * Define the JOSE protocol elements
+    */
+   public static Kid = 'kid';
+   
+   /**
+    * Define the JOSE protocol elements
+    */
+   public static Enc = 'enc';
+   
 }

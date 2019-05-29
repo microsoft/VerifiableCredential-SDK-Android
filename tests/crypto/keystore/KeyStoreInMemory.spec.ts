@@ -5,7 +5,7 @@
  
 import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
 import RsaPublicKey from '../../../src/crypto/keys/rsa/RsaPublicKey';
-import { KeyType } from '../../../src/crypto/keys/KeyType';
+import { KeyType } from '../../../src/crypto/keys/KeyTypeFactory';
 import PublicKey from '../../../src/crypto/keys/PublicKey';
 
 describe('KeyStoreInMemory', () => {

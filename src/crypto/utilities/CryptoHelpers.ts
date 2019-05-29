@@ -7,7 +7,6 @@ import PublicKey from '../keys/PublicKey';
 import EcPublicKey from '../keys/ec/EcPublicKey';
 import { CryptoAlgorithm } from '../keyStore/IKeyStore';
 import { SubtleCrypto } from 'webcrypto-core';
-//import JoseConstants from '../protocols/jose/JoseConstants';
 import W3cCryptoApiConstants from './W3cCryptoApiConstants';
 import JoseConstants from '../protocols/jose/JoseConstants';
 
@@ -37,7 +36,7 @@ export default class CryptoHelpers {
       case 'AES-GCM':
         return cryptoFactory.getSymmetricEncrypter(jwa);
       case 'HMAC':
-        return cryptoFactory.getMacSigner(jwa);
+        return cryptoFactory.getMessageAuthenticationCodeSigners(jwa);
       case 'SHA-256':
       case 'SHA-384':
       case 'SHA-512':
@@ -73,6 +72,8 @@ export default class CryptoHelpers {
         const aad = args[1];
         matches = <RegExpExecArray>regex.exec(jwa);
         return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128 };
+      case JoseConstants.Es256K:
+        return { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
     }
 
     throw new Error(`Algorithm '${JSON.stringify(jwa)}' is not supported`);
@@ -89,12 +90,12 @@ export default class CryptoHelpers {
       case 'RSASSA-PKCS1-V1_5':
         return `RS${CryptoHelpers.getHash(hash)}`;
       case 'ECDSA':
-          return `P-256K`;
-          case 'RSA-OAEP-256':
+          return `ES256K`;
+      case 'RSA-OAEP-256':
             return 'RSA-OAEP-256'; 
-          case 'RSA-OAEP': 
+      case 'RSA-OAEP': 
           return `RSA-OAEP-${CryptoHelpers.getHash(hash)}`;
-          case 'ECDH':
+      case 'ECDH':
           return `ECDH-ES`;
       case 'AES-GCM':
         const length = algorithm.length || 128;

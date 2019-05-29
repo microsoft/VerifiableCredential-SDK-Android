@@ -15,19 +15,14 @@ import CredentialIssuer from './credentials/CredentialIssuer';
 import ICredential from './credentials/ICredential';
 import SelfIssuedCredential from './credentials/SelfIssuedCredential';
 import IDataHandler from './credentials/IDataHandler';
+import SidetreeRegistrar from './registrars/SidetreeRegistrar';
+import HttpResolver from './resolvers/HttpResolver';
 export { CredentialManifest, CredentialIssuer, ICredential, SelfIssuedCredential };
 export { IDataHandler };
 
 // Registrar
 import SidetreeRegistrar from './registrars/SidetreeRegistrar';
 export { SidetreeRegistrar };
-
-// KeyStore
-import InMemoryKeyStore from './keystores/InMemoryKeyStore';
-export { InMemoryKeyStore };
-
-// Resolvers
-import HttpResolver from './resolvers/HttpResolver';
 export { HttpResolver };
 
 // Cryptography

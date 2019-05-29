@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import base64url from 'base64url';
-import { KeyType } from './KeyType'
-import { Url } from 'url';
+import { KeyType } from './KeyTypeFactory'
 import { KeyUse } from '@decentralized-identity/did-crypto-typescript';
 const jose = require('node-jose');
 
@@ -33,12 +32,12 @@ export default abstract class PublicKey {
   /**
    * Key type
    */
-  public kty: KeyType | undefined;
+  public kty: KeyType;
    
   /**
    * Key ID
    */
-   public kid: string = '';
+   public kid?: string = '';
   
   /**
    * Intended use
@@ -54,26 +53,17 @@ export default abstract class PublicKey {
    * Algorithm intended for use with this key
    */
    public alg?: string;
-  
-  /**
-   * A resource for a X.509 public key certificate
-   */
-   public x5u?: Url;
-  
-  /**
-   * One or more PKIX certificates as base64 DER
-   */
-   public x5c?: string[];
-  
-  /**
-   * Base64URL SHA-1 thumbprint of the DER of an X.509 certificate
-   */
-   public x5t?: string;
-  
-  /**
-   * base64URL SHA-256 thumbprint of the DER of the X.509 certificate
-   */
-   public x5tS256?: string;
+
+   /**
+    * Create instance of @class PublicKey
+    */
+   constructor(key: PublicKey) {
+    this.kty = key.kty;
+    this.kid = key.kid;
+    this.use = key.use;
+    this.key_ops = key.key_ops;
+    this.alg = key.alg;
+   }
 
   /**
    * Obtains the thumbprint for the jwk parameter

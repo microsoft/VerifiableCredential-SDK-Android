@@ -23,6 +23,10 @@ export default class KeyStoreInMemory implements IKeyStore {
     return new Promise((resolve, reject) => {
       if (this.store.has(keyReference)) {
         const key: any = this.store.get(keyReference);
+        if (key instanceof Buffer) {
+          return resolve(key);
+        }
+
         if (publicKeyOnly) {
           switch (key.kty.toLowerCase()) {
             case 'ec':

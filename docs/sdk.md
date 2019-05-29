@@ -13,6 +13,8 @@ self-issued id token.</p></dd>
 <dt><a href="#VerifiedCredential">VerifiedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
+<dt><a href="#CryptoError">CryptoError</a></dt>
+<dd><p>Base error class for the crypto.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Interface defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
@@ -45,16 +47,8 @@ a user&#39;s Identity Hub.</p></dd>
 <dd><p>Represents a communication session with a particular Hub instance.</p></dd>
 <dt><a href="#SignedCommit">SignedCommit</a></dt>
 <dd><p>Class representing a signed commit.</p></dd>
-<dt><a href="#InMemoryKeyStore">InMemoryKeyStore</a></dt>
-<dd><p>An encrypted in memory implementation of IKeyStore using PouchDB
-and memdown. As soon as the process ends or
-the reference to the store is released all data is discarded.</p>
-<p>This implementation is intended as a batteries included approach
-to allow simple testing and experimentation with the UserAgent SDK.</p></dd>
 <dt><a href="#KeyStoreConstants">KeyStoreConstants</a></dt>
 <dd><p>Class for key storage constants</p></dd>
-<dt><a href="#Protect">Protect</a></dt>
-<dd><p>Class to model protection mechanisms</p></dd>
 <dt><a href="#Multihash">Multihash</a></dt>
 <dd><p>Class that performs hashing operations using the multihash format.</p></dd>
 <dt><a href="#SidetreeRegistrar">SidetreeRegistrar</a></dt>
@@ -94,8 +88,6 @@ And commits and queries for objects in the hub session.</p></dd>
 <dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
 <dt><a href="#HubInterfaceOptions">HubInterfaceOptions</a></dt>
 <dd><p>An Abstract Class for Hub Interfaces.</p></dd>
-<dt><a href="#SignatureFormat">SignatureFormat</a></dt>
-<dd><p>Enum to define different signature formats</p></dd>
 </dl>
 
 ## Constants
@@ -287,6 +279,23 @@ credential for the specified identifier.</p>
 | issuedBy | <p>the specified identifier.</p> |
 | issuedTo | <p>the specified identifier.</p> |
 | issuedAt | <p>date and time.</p> |
+
+<a name="CryptoError"></a>
+
+## CryptoError
+<p>Base error class for the crypto.</p>
+
+**Kind**: global class  
+<a name="new_CryptoError_new"></a>
+
+### new CryptoError(protocol, message)
+<p>Create instance of @class CryptoProtocolError</p>
+
+
+| Param | Description |
+| --- | --- |
+| protocol | <p>name</p> |
+| message | <p>for the error</p> |
 
 <a name="HubClientOptions"></a>
 
@@ -686,111 +695,12 @@ field of the response.</p>
 <p>Retrieves the ID of the object to which this commit belongs.</p>
 
 **Kind**: instance method of [<code>SignedCommit</code>](#SignedCommit)  
-<a name="InMemoryKeyStore"></a>
-
-## InMemoryKeyStore
-<p>An encrypted in memory implementation of IKeyStore using PouchDB
-and memdown. As soon as the process ends or
-the reference to the store is released all data is discarded.</p>
-<p>This implementation is intended as a batteries included approach
-to allow simple testing and experimentation with the UserAgent SDK.</p>
-
-**Kind**: global class  
-
-* [InMemoryKeyStore](#InMemoryKeyStore)
-    * [new InMemoryKeyStore([encryptionKey])](#new_InMemoryKeyStore_new)
-    * [.getKey(keyIdentifier)](#InMemoryKeyStore+getKey)
-    * [.save(keyIdentifier, key)](#InMemoryKeyStore+save)
-    * [.sign(keyIdentifier, data, format)](#InMemoryKeyStore+sign)
-
-<a name="new_InMemoryKeyStore_new"></a>
-
-### new InMemoryKeyStore([encryptionKey])
-<p>Constructs an instance of the in memory key store
-optionally encrypting the contents of the store
-using the specified encryption key.</p>
-
-
-| Param | Description |
-| --- | --- |
-| [encryptionKey] | <p>a 32 byte buffer that will be used as the key or a string which will be used to generate one.</p> |
-
-<a name="InMemoryKeyStore+getKey"></a>
-
-### inMemoryKeyStore.getKey(keyIdentifier)
-<p>Gets the key from the store using the specified identifier.</p>
-
-**Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>for which to return the key.</p> |
-
-<a name="InMemoryKeyStore+save"></a>
-
-### inMemoryKeyStore.save(keyIdentifier, key)
-<p>Saves the specified key to the store using the key identifier.</p>
-
-**Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>to store the key against</p> |
-| key | <p>the key to store.</p> |
-
-<a name="InMemoryKeyStore+sign"></a>
-
-### inMemoryKeyStore.sign(keyIdentifier, data, format)
-<p>Sign the data with the key referenced by keyIdentifier.</p>
-
-**Kind**: instance method of [<code>InMemoryKeyStore</code>](#InMemoryKeyStore)  
-
-| Param | Description |
-| --- | --- |
-| keyIdentifier | <p>for the key used for signature.</p> |
-| data | <p>Data to sign</p> |
-| format | <p>Signature format</p> |
-
 <a name="KeyStoreConstants"></a>
 
 ## KeyStoreConstants
 <p>Class for key storage constants</p>
 
 **Kind**: global class  
-<a name="Protect"></a>
-
-## Protect
-<p>Class to model protection mechanisms</p>
-
-**Kind**: global class  
-
-* [Protect](#Protect)
-    * [.sign(body)](#Protect.sign)
-    * [.verify(jws, jwk)](#Protect.verify)
-
-<a name="Protect.sign"></a>
-
-### Protect.sign(body)
-<p>Sign the body for the registar</p>
-
-**Kind**: static method of [<code>Protect</code>](#Protect)  
-
-| Param | Description |
-| --- | --- |
-| body | <p>Body to sign</p> |
-
-<a name="Protect.verify"></a>
-
-### Protect.verify(jws, jwk)
-<p>Verify the jws</p>
-
-**Kind**: static method of [<code>Protect</code>](#Protect)  
-
-| Param | Description |
-| --- | --- |
-| jws | <p>token to be verified</p> |
-| jwk | <p>Public Key to be used to verify</p> |
-
 <a name="Multihash"></a>
 
 ## Multihash
@@ -1033,12 +943,6 @@ And commits and queries for objects in the hub session.</p>
 
 ## HubInterfaceOptions
 <p>An Abstract Class for Hub Interfaces.</p>
-
-**Kind**: global variable  
-<a name="SignatureFormat"></a>
-
-## SignatureFormat
-<p>Enum to define different signature formats</p>
 
 **Kind**: global variable  
 <a name="context"></a>
