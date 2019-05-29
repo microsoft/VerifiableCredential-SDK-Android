@@ -11,7 +11,6 @@ import SubtleCryptoExtension from '../../../src/crypto/plugin/SubtleCryptoExtens
 import PrivateKey from '../../../src/crypto/keys/PrivateKey';
 import EcPrivateKey from '../../../src/crypto/keys/ec/EcPrivateKey';
 
-
 class Helpers {
   // Make sure we generate the same pairwise key
   public static async generateSamePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
@@ -33,9 +32,7 @@ class Helpers {
       }
     }
     
-        
 }
-
 
 describe('PairwiseKey', () => {
 

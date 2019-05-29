@@ -4,8 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IHubError, IHubResponse, HubErrorCode } from '@decentralized-identity/hub-common-js';
-import { Authentication, CryptoSuite } from '@decentralized-identity/did-auth-jose';
-import { IDidResolver } from '@decentralized-identity/did-common-typescript';
 import HubRequest from './requests/HubRequest';
 import HubError from './HubError';
 import HubCommitWriteRequest from './requests/HubCommitWriteRequest';
@@ -17,6 +15,7 @@ import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
 
 // tslint:disable-next-line:import-name
 import fetch, { Request, RequestInit } from 'node-fetch';
+import Identifier from '../Identifier';
 
 /**
  * Options for instantiating a new Hub session.
@@ -26,7 +25,7 @@ export interface HubSessionOptions {
   /** 
    * The DID of the client, i.e the identity of the user/app using this SDK. 
    */
-  clientDid: string;
+  client: Identifier;
 
   /**
    * The private key to use for decrypting/signing when communicating with the Hub. Must be
@@ -35,37 +34,19 @@ export interface HubSessionOptions {
   clientPrivateKeyReference: string;
 
   /** 
-   * The DID owning the Hub with which we will be communicating. 
+   * The Identfier of the owner of the Hub with which we will be communicating. 
    */
-  targetDid: string;
+  hubOwner: Identifier;
 
   /** 
-   * The DID of the Hub, for addressing request envelopes. 
+   * The Identifier of the Hub, for addressing request envelopes. 
    */
-  hubDid: string;
+  hub: Identifier;
 
   /** 
    * The HTTPS endpoint of the Hub. 
    */
   hubEndpoint: string;
-
-  /** 
-   * A DID resolver instance to be used during authentication. 
-   */
-  resolver: IDidResolver;
-
-  /**
-   * An array of CryptoSuites to use during authentication (optional). Allows the client to provide
-   * a suite which delegates operations to a secure enclave, rather than using a private key
-   * available in-memory.
-   */
-  cryptoSuites?: CryptoSuite[];
-
-  /**
-   * Instance of KeyStore than can be used
-   * to get and save keys.
-   */
-  // keyStore: IKeyStore;
 }
 
 /**
@@ -73,26 +54,17 @@ export interface HubSessionOptions {
  */
 export default class HubSession {
 
-  private clientDid: string;
-  private hubDid: string;
+  private client: Identifier;
+  private hub: Identifier;
   private hubEndpoint: string;
-  private targetDid: string;
+  private hubOwner: Identifier;
   private currentAccessToken: string | undefined;
-  private authentication: Authentication;
 
   constructor(options: HubSessionOptions) {
-    this.clientDid = options.clientDid;
-    this.hubDid = options.hubDid;
+    this.client = options.client;
+    this.hub = options.hub;
     this.hubEndpoint = options.hubEndpoint;
-    this.targetDid = options.targetDid;
-
-    // Setup authentication context
-    this.authentication = new Authentication({
-      resolver: options.resolver,
-      // keyStore: options.keyStore,
-      keyReferences: [options.clientPrivateKeyReference],
-    });
-
+    this.hubOwner = options.hubOwner;
   }
 
   /**
@@ -107,9 +79,9 @@ export default class HubSession {
 
     const rawRequestJson = await request.getRequestJson();
 
-    rawRequestJson.iss = this.clientDid;
-    rawRequestJson.aud = this.hubDid;
-    rawRequestJson.sub = this.targetDid;
+    rawRequestJson.iss = this.client.id;
+    rawRequestJson.aud = this.hub.id;
+    rawRequestJson.sub = this.hubOwner.id;
 
     const rawRequestString = JSON.stringify(rawRequestJson);
     const accessToken = await this.getAccessToken();
@@ -151,14 +123,15 @@ export default class HubSession {
    */
   private async makeRequest(message: string, accessToken?: string): Promise<string> {
 
-    const requestBuffer = await this.authentication.getAuthenticatedRequest(message, this.hubDid, accessToken);
-
+    const requestBuffer = undefined;  
+    // await this.authentication.getAuthenticatedRequest(message, this.hubDid, accessToken);
+  
     const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',
       body: requestBuffer,
       headers: {
         'Content-Type': 'application/jwt',
-        'Content-Length': requestBuffer.length.toString(),
+        'Content-Length': '1' // requestBuffer.length.toString(),
       },
     });
 
@@ -168,7 +141,7 @@ export default class HubSession {
     }
 
     const response = await res.buffer();
-    const plainResponse = await this.authentication.getVerifiedRequest(response, false);
+    const plainResponse = {request: ''}; // await this.authentication.getVerifiedRequest(response, false);
     if (plainResponse instanceof Buffer) {
       // This should never happen as it means we are trying to return an access token in response
       throw new Error('Internal error during decryption.');

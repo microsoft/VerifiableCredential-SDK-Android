@@ -195,10 +195,6 @@ export default class Identifier {
   public async sign (payload: any, keyReference: string): Promise<string> {
     let body: string;
     if (this.options && this.options.cryptoOptions) {
-      const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
-                                                                   target,
-                                                                   this.options.cryptoOptions.authenticationSigningJoseAlgorithm,
-                                                                   KeyUse.Signature);
       if (this.options.keyStore) {
         if (typeof(payload) !== 'string') {
           body = JSON.stringify(payload);
@@ -210,7 +206,7 @@ export default class Identifier {
           cryptoFactory: this.options.cryptoFactory
         };
         const jws = new JwsToken(signingOptions);
-        const signature = await jws.sign(keyStorageIdentifier, Buffer.from(body), ProtectionFormat.JwsFlatJson);
+        const signature = await jws.sign(keyReference, Buffer.from(body), ProtectionFormat.JwsFlatJson);
         return signature.serialize();;
       } else {
         throw new UserAgentError('No KeyStore in Options');

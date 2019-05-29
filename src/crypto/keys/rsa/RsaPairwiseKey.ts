@@ -41,7 +41,6 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
   public static async generate(cryptoFactory: CryptoFactory, personaMasterKey: Buffer, algorithm: RsaHashedKeyGenParams, peerId: string): Promise<PrivateKey> {
     // This method is currently breaking the subtle crypto pattern and needs to be fixed to be platform independent
  
-
     // Set the key size
     const keySize = algorithm.modulusLength || 1024;
 
@@ -82,7 +81,6 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
     return new RsaPrivateKey(pairwise);
   } 
 
-  
   /**
    * Uses primeBase as reference and generate the closest prime number
    */

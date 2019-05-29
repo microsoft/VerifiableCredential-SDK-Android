@@ -9,7 +9,7 @@ import UserAgentError from '../UserAgentError';
 import CommitSigner from '../hubSession/crypto/CommitSigner';
 import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
-import HubSession from '../hubSession/HubSession';
+import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
 import IHubClient from './IHubClient';
 
 /**
@@ -111,6 +111,10 @@ export default class HubClient implements IHubClient {
    * creates a hubSession for hub instance that is available/online.
    */
   public async createHubSession () {
+    // const hubSessionOptions: HubSessionOptions = {
+    //   client: this.clientIdentifier,
+    //   hubOwner: this.hubOwner,
+    // };
     return <HubSession> {}
   }
 }
