@@ -56,7 +56,7 @@ export default class DidProtocol {
    */
   public async decryptAndVerify(keyReference: string, cipher: Buffer): Promise<any> {
     const jws = await this.sender.decrypt(cipher, keyReference);
-    const jwsToken = Jwstoken
+    const jwsToken = new JwsToken({ payload: jws });
   }
 
   /**
