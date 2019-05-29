@@ -50,7 +50,7 @@ export default class UserAgentOptions {
    * Crypto Options
    * contains algorithm and other data about crypto
    */
-   public cryptoOptions: CryptoOptions = new CryptoOptions();
+   public cryptoOptions?: CryptoOptions = new CryptoOptions();
 
   /**
    * Prefix for the generated did.
@@ -61,27 +61,27 @@ export default class UserAgentOptions {
    * Get the key store
    */
    public get keyStore (): IKeyStore {
-    return this.cryptoOptions.cryptoFactory.keyStore;
+    return this.cryptoOptions!.cryptoFactory.keyStore;
   }
 
   /**
    * Set the key store
    */
    public set keyStore (keyStore: IKeyStore) {
-    this.cryptoOptions.cryptoFactory.keyStore = keyStore;
+    this.cryptoOptions!.cryptoFactory.keyStore = keyStore;
   }
 
   /**
    * Get the crypto operations
    */
    public get cryptoFactory (): CryptoFactory {
-    return this.cryptoOptions.cryptoFactory;
+    return this.cryptoOptions!.cryptoFactory;
   }
 
   /**
    * Set the key store
    */
    public set cryptoFactory (cryptoFactory: CryptoFactory) {
-    this.cryptoOptions.cryptoFactory = cryptoFactory;
+    this.cryptoOptions!.cryptoFactory = cryptoFactory;
   }
 }

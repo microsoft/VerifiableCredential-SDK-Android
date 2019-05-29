@@ -283,37 +283,37 @@ export default class JwsToken implements IJwsGeneralJson {
   /**
    * Get the keyStore to be used
    * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
+   * @param mandatory True if property needs to be defined
    */
-  private getKeyStore(newOptions?: ISigningOptions, manadatory: boolean = true): IKeyStore {
-    return this.getCryptoFactory(newOptions, manadatory).keyStore;
+  private getKeyStore(newOptions?: ISigningOptions, mandatory: boolean = true): IKeyStore {
+    return this.getCryptoFactory(newOptions, mandatory).keyStore;
   }
 
   /**
    * Get the CryptoFactory to be used
    * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
+   * @param mandatory True if property needs to be defined
    */
-  private getCryptoFactory(newOptions?: ISigningOptions, manadatory: boolean = true): CryptoFactory {
-    return JoseHelpers.getOptionsProperty<CryptoFactory>('cryptoFactory', this.options, newOptions, manadatory);
+  private getCryptoFactory(newOptions?: ISigningOptions, mandatory: boolean = true): CryptoFactory {
+    return JoseHelpers.getOptionsProperty<CryptoFactory>('cryptoFactory', this.options, newOptions, mandatory);
   }
 
   /**
    * Get the default protected header to be used from the options
    * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
+   * @param mandatory True if property needs to be defined
    */
-  private getProtected(newOptions?: ISigningOptions, manadatory: boolean = false): JwsHeader {
-    return JoseHelpers.getOptionsProperty<JwsHeader>('protected', this.options, newOptions, manadatory);
+  private getProtected(newOptions?: ISigningOptions, mandatory: boolean = false): JwsHeader {
+    return JoseHelpers.getOptionsProperty<JwsHeader>('protected', this.options, newOptions, mandatory);
   }
 
   /**
    * Get the default header to be used from the options
    * @param newOptions Options passed in after the constructure
-   * @param manadatory True if property needs to be defined
+   * @param mandatory True if property needs to be defined
    */
-  private getHeader(newOptions?: ISigningOptions, manadatory: boolean = false): JwsHeader {
-    return JoseHelpers.getOptionsProperty<JwsHeader>('header', this.options, newOptions,manadatory);
+  public getHeader(newOptions?: ISigningOptions, mandatory: boolean = false): JwsHeader {
+    return JoseHelpers.getOptionsProperty<JwsHeader>('header', this.options, newOptions,mandatory);
   }
 
   /**

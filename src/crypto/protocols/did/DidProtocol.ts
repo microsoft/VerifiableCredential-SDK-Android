@@ -6,6 +6,9 @@
 import Identifier from '../../../Identifier';
 import IResolver from '../../../resolvers/IResolver';
 import JwsToken from '../jws/JwsToken';
+import CryptoFactory from '../../plugin/CryptoFactory';
+import KeyStoreInMemory from '../../keyStore/KeyStoreInMemory';
+import UserAgentOptions from '../../../UserAgentOptions';
 
 /**
  * Named Arguments of Did Protocol
@@ -55,8 +58,30 @@ export default class DidProtocol {
    * @param cipher the cipher to be decrypted and verified by client Identifier.
    */
   public async decryptAndVerify(keyReference: string, cipher: Buffer): Promise<any> {
+    
+    // decrypt payload.
     const jws = await this.sender.decrypt(cipher, keyReference);
-    const jwsToken = new JwsToken({ payload: jws });
+
+    // temp to instantiate token.
+    const keystore = new KeyStoreInMemory();
+    const cryptoFactory = new CryptoFactory(keystore);
+    
+    // get identifier id from key id in header.
+    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
+    const tokenHeaders = token.getHeader();
+    const kid = tokenHeaders.get('kid').split('#');
+    const id = kid[0];
+
+    const options: UserAgentOptions = {
+      resolver: this.resolver,
+      keyStore: keystore,
+      cryptoFactory: cryptoFactory
+    }
+
+    const identifier = new Identifier(id, options);
+    const payload = await identifier.verify(jws);
+    return JSON.parse(payload);
+
   }
 
   /**
