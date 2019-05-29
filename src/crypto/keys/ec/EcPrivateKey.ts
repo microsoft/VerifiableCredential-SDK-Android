@@ -6,7 +6,7 @@
 import EcPublicKey from './EcPublicKey';
 import PrivateKey from '../PrivateKey';
 import PublicKey from '../PublicKey';
-import { KeyUse } from '../KeyUse'
+const clone = require('clone');
 
 /**
  * Represents an Elliptic Curve private key
@@ -24,19 +24,21 @@ export default class EcPrivateKey extends EcPublicKey implements PrivateKey {
    */
   public d: string | undefined;
 
+  /**
+   * Create instance of @class EcPrivateKey
+   */
+  constructor (key: any) {
+    super(key)
+    this.d = key.d;
+  }
+
     /**
    * Gets the corresponding public key
    * @returns The corresponding {@link PublicKey}
    */
   public getPublicKey (): PublicKey {
-    return <EcPublicKey>{
-      kty: this.kty,
-      kid: this.kid,
-      crv: this.crv,
-      x: this.x,
-      y: this.y,
-      use: KeyUse.Signature,
-      alg: this.alg
-    };
+    const publicKey = clone(this);
+    delete publicKey.d;
+    return publicKey;
   }
 }

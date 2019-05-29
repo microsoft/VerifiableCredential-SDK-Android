@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationReference, ServiceReference, PublicKey } from './types';
+import { AuthenticationReference, ServiceReference, IdentifierDocumentPublicKey } from './types';
 import UserAgentOptions from './UserAgentOptions';
 import Identifier from './Identifier';
 import HostServiceEndpoint from './serviceEndpoints/HostServiceEndpoint';
 import UserServiceEndpoint from './serviceEndpoints/UserServiceEndpoint';
+import PublicKey from './crypto/keys/PublicKey';
 const cloneDeep = require('lodash/fp/cloneDeep');
 
 /**
@@ -29,7 +30,7 @@ export default class IdentifierDocument {
   /**
    * Array of service entries added to the document.
    */
-  public publicKeys: PublicKey[] = [];
+  public publicKeys: IdentifierDocumentPublicKey[] = [];
 
   /**
    * Array of authentication entries added to the document.
@@ -68,7 +69,6 @@ export default class IdentifierDocument {
         }
       });
     }
-
   }
 
   /**
@@ -76,7 +76,7 @@ export default class IdentifierDocument {
    * provided public keys.
    * @param publicKeys to include in the document.
    */
-  public static create (id: string, publicKeys: PublicKey[]): IdentifierDocument {
+  public static create (id: string, publicKeys: IdentifierDocumentPublicKey[]): IdentifierDocument {
     const createdDate = new Date(Date.now()).toISOString();
     return new IdentifierDocument({ id: id, created: createdDate, publicKeys: publicKeys });
   }
@@ -89,7 +89,7 @@ export default class IdentifierDocument {
    * @param publicKeys to include in the document.
    * @param options User agent options containing the crypto Api
    */
-  public static async createAndGenerateId (idBase: string, publicKeys: PublicKey[], options: UserAgentOptions): Promise<IdentifierDocument> {
+  public static async createAndGenerateId (idBase: string, publicKeys: IdentifierDocumentPublicKey[], options: UserAgentOptions): Promise<IdentifierDocument> {
     const document = IdentifierDocument.create(idBase, publicKeys);
     const identifier: Identifier = await options.registrar!.generateIdentifier(document);
     document.id = identifier.id;
@@ -110,6 +110,10 @@ export default class IdentifierDocument {
    */
   public addServiceReference (serviceReference: ServiceReference) {
     this.serviceReferences.push(serviceReference);
+  }
+
+  public getPublicKeysFromDocument(): PublicKey[] {
+    return this.publicKeys.map(key => key.publicKeyJwk);
   }
 
   /**

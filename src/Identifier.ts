@@ -3,15 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DidKey, KeyExport, KeyUseFactory, KeyTypeFactory, KeyUse } from '@decentralized-identity/did-crypto-typescript';
-import IKeyStore from './keystores/IKeyStore';
 import KeyStoreConstants from './keystores/KeyStoreConstants';
-import { PublicKey } from './types';
 import IdentifierDocument from './IdentifierDocument';
 import UserAgentOptions from './UserAgentOptions';
 import UserAgentError from './UserAgentError';
-import Protect from './keystores/Protect';
-import { SignatureFormat } from './keystores/SignatureFormat';
+import { ProtectionFormat } from './crypto/keyStore/ProtectionFormat';
+import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
+import { KeyUse } from './crypto/keys/KeyUseFactory';
+import JwsToken from './crypto/protocols/jws/JwsToken';
+import PrivateKey from './crypto/keys/PrivateKey';
+import { ISigningOptions } from './crypto/keyStore/IKeyStore';
+import { IdentifierDocumentPublicKey } from './types';
+import CryptoHelpers from './crypto/utilities/CryptoHelpers';
+import KeyUseFactory from './crypto/keys/KeyUseFactory';
 
 /**
  * Class for creating and managing identifiers,
@@ -72,23 +76,27 @@ export default class Identifier {
    */
   public async createLinkedIdentifier (target: string, register: boolean = false): Promise<Identifier> {
     if (this.options && this.options.keyStore) {
-      const keyStore: IKeyStore = this.options.keyStore;
-      const seed: Buffer = <Buffer> await keyStore.getKey(KeyStoreConstants.masterSeed);
 
       // Create DID key
-      const didKey = new DidKey(this.options.cryptoOptions!.cryptoApi, this.options.cryptoOptions!.algorithm);
-      const pairwiseKey: DidKey = await didKey.generatePairwise(seed, this.id, target);
-      const jwk: any = await pairwiseKey.getJwkKey(KeyExport.Private);
-      const pubJwk: any = await pairwiseKey.getJwkKey(KeyExport.Public);
+      const cryptoFactory = this.options.cryptoFactory;
+      const signingAlgorithm = CryptoHelpers.jwaToWebCrypto(this.options.cryptoOptions.authenticationSigningJoseAlgorithm)
+      const generator = new SubtleCryptoExtension(cryptoFactory);
+      const jwk: PrivateKey = await generator.generatePairwiseKey(signingAlgorithm, KeyStoreConstants.masterSeed, this.id, target);
+      const pubJwk = jwk.getPublicKey();
+      
       pubJwk.kid = jwk.kid;
 
-      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(this.id, target, KeyUseFactory.create(pairwiseKey.algorithm), jwk.kty);
-      await keyStore.save(pairwiseKeyStorageId, jwk);
+      const pairwiseKeyStorageId = Identifier.keyStorageIdentifier(
+        this.id, 
+        target, 
+        this.options.cryptoOptions.authenticationSigningJoseAlgorithm, 
+        KeyUseFactory.createViaJwa(this.options.cryptoOptions.authenticationSigningJoseAlgorithm));
+      await this.options.keyStore.save(pairwiseKeyStorageId, jwk);
 
       // Set key format
       // todo switch by leveraging pairwiseKey
-      const publicKey: PublicKey = {
-        id: jwk.kid,
+      const publicKey: IdentifierDocumentPublicKey = {
+        id: <string>jwk.kid,
         type: this.getDidDocumentKeyType(),
         publicKeyJwk: pubJwk
       };
@@ -134,7 +142,7 @@ export default class Identifier {
    * key defined in document.
    * @param keyIdentifier the identifier of the public key.
    */
-  public async getPublicKey (keyIdentifier?: string): Promise<PublicKey> {
+  public async getPublicKey (keyIdentifier?: string): Promise<IdentifierDocumentPublicKey> {
     if (!this.document) {
       await this.getDocument();
     }
@@ -161,15 +169,15 @@ export default class Identifier {
    * Generate a storage identifier to store a key
    * @param personaId The identifier for the persona
    * @param target The identifier for the peer. Will be persona for non-pairwise keys
-   * @param keyUse Key usage
+   * @param algorithm Key algorithm
    * @param keyType Key type
    */
-  public static keyStorageIdentifier (personaId: string, target: string, keyUse: string, keyType: string): string {
-    return `${personaId}-${target}-${keyUse}-${keyType}`;
+  public static keyStorageIdentifier (personaId: string, target: string, algorithm: string, keyType: string): string {
+    return `${personaId}-${target}-${algorithm}-${keyType}`;
   }
 
   // Create an identifier document. Included the public key.
-  private async createIdentifierDocument (id: string, publicKey: PublicKey): Promise <IdentifierDocument> {
+  private async createIdentifierDocument (id: string, publicKey: IdentifierDocumentPublicKey): Promise <IdentifierDocument> {
     return IdentifierDocument.createAndGenerateId(id, [ publicKey ], <UserAgentOptions> this.options);
   }
 
@@ -189,15 +197,20 @@ export default class Identifier {
     if (this.options && this.options.cryptoOptions) {
       const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
                                                                    target,
-                                                                   KeyUse.Signature,
-                                                                   KeyTypeFactory.create(this.options.cryptoOptions.algorithm));
+                                                                   this.options.cryptoOptions.authenticationSigningJoseAlgorithm,
+                                                                   KeyUse.Signature);
       if (this.options.keyStore) {
         if (typeof(payload) !== 'string') {
           body = JSON.stringify(payload);
         } else {
           body = payload;
         }
-        return this.options.keyStore.sign(keyStorageIdentifier, body, SignatureFormat.FlatJsonJws);
+        const signingOptions: ISigningOptions = {
+          cryptoFactory: this.options.cryptoFactory
+        };
+        const jws = new JwsToken(signingOptions);
+        const signature = await jws.sign(keyStorageIdentifier, Buffer.from(body), ProtectionFormat.JwsFlatJson);
+        return signature.serialize();;
       } else {
         throw new UserAgentError('No KeyStore in Options');
       }
@@ -210,11 +223,19 @@ export default class Identifier {
    * Verify the payload with public key from the Identifier Document.
    * @param jws the signed token to be verified.
    */
-  public async verify (jws: string) {
+  public async verify (jws: string): Promise<string> {
 
     if (!this.document) {
       this.document = await this.getDocument();
     }
-    return Protect.verify(jws, this.document.publicKeys);
+    const signingOptions: ISigningOptions = {
+      cryptoFactory: (<UserAgentOptions>this.options).cryptoFactory
+    };
+    const token: JwsToken = JwsToken.deserialize(jws, signingOptions);
+    if (token.verify(this.document.getPublicKeysFromDocument(), signingOptions)) {
+      return token.getPayload();
+    }
+
+    throw new UserAgentError('The signature validation failed.');
   }
 }

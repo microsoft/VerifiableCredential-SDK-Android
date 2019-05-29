@@ -26,6 +26,9 @@ export interface IKeyStoreOptions {
   // The default header
   header?: JwsHeader,
 
+  // The prefix for a kid when key is generated
+  kidPrefix?: string,
+
   // Make the type indexable
   [key: string]: any;
 }

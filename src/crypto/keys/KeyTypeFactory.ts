@@ -1,3 +1,5 @@
+import CryptoHelpers from "../utilities/CryptoHelpers";
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -20,7 +22,7 @@ export default class KeyTypeFactory {
    * Create the key type according to the selected algorithm.
    * @param algorithm Web crypto compliant algorithm object
    */
-  public static create (algorithm: any): KeyType {
+  public static createViaWebCrypto (algorithm: any): KeyType {
     switch (algorithm.name.toLowerCase()) {
       case 'hmac':
         return KeyType.Oct;
@@ -37,5 +39,14 @@ export default class KeyTypeFactory {
       default:
         throw new Error(`The algorithm '${algorithm.name}' is not supported`);
     }
+  }
+  
+  /**
+   * Create the key use according to the selected algorithm.
+   * @param algorithm JWA algorithm constant
+   */
+  public static createViaJwa (algorithm: string): KeyType {
+    const alg = CryptoHelpers.jwaToWebCrypto(algorithm);
+    return KeyTypeFactory.createViaWebCrypto(alg);
   }
 }

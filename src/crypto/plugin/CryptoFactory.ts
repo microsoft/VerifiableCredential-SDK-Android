@@ -17,7 +17,7 @@ export default class CryptoFactory {
   private sharedKeyEncrypters: CryptoSuiteMap;
   private symmetricEncrypter: CryptoSuiteMap;
   private messageSigners: CryptoSuiteMap;
-  private macSigners: CryptoSuiteMap;
+  private messageAuthenticationCodeSigners: CryptoSuiteMap;
   private messageDigests: CryptoSuiteMap;
 
   /**
@@ -48,7 +48,7 @@ export default class CryptoFactory {
     this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
     this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
     this.messageSigners = <CryptoSuiteMap>{'*': crypto };
-    this.macSigners = <CryptoSuiteMap>{'*': crypto };
+    this.messageAuthenticationCodeSigners = <CryptoSuiteMap>{'*': crypto };
     this.messageDigests = <CryptoSuiteMap>{'*': crypto };
   }
 
@@ -106,11 +106,11 @@ export default class CryptoFactory {
    * @param name The name of the algorithm
    * @returns The corresponding crypto API
    */
-  getMacSigner (name: string): SubtleCrypto {
-    if (this.macSigners[name]) {
-      return this.macSigners[name].messageAuthenticationCodeSigners();
+  getMessageAuthenticationCodeSigners (name: string): SubtleCrypto {
+    if (this.messageAuthenticationCodeSigners[name]) {
+      return this.messageAuthenticationCodeSigners[name].messageAuthenticationCodeSigners();
     }
-    return this.macSigners[this.defaultAlgorithm].messageAuthenticationCodeSigners();
+    return this.messageAuthenticationCodeSigners[this.defaultAlgorithm].messageAuthenticationCodeSigners();
   }
 
   /**

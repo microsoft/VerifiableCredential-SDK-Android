@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import ServiceEndpoint from './serviceEndpoints/ServiceEndpoint';
+import PublicKey from './crypto/keys/PublicKey';
 
 /**
  * Interface for defining a identifier document
  * public key.
  */
-export interface PublicKey {
+export interface IdentifierDocumentPublicKey {
   /**
    * The id of the public key in the format
    * #{keyIdentifier}.
@@ -29,7 +30,7 @@ export interface PublicKey {
   /**
    * The JWK public key.
    */
-  publicKeyJwk: any;
+  publicKeyJwk: PublicKey;
 }
 
 /**

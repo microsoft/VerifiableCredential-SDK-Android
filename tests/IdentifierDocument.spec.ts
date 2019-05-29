@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationReference, ServiceReference } from '../src/types';
+import { AuthenticationReference, ServiceReference, IdentifierDocumentPublicKey } from '../src/types';
 import HostServiceEndpoint from '../src/serviceEndpoints/HostServiceEndpoint';
 import UserServiceEndpoint from '../src/serviceEndpoints/UserServiceEndpoint';
 import IdentifierDocument from '../src/IdentifierDocument';
+import { KeyType } from '../src/crypto/keys/KeyTypeFactory';
+import PublicKey, { KeyOperation } from '../src/crypto/keys/PublicKey';
 
 describe('IdentifierDocument', () => {
   it('should construct new instance when provided a document', async () => {
@@ -17,7 +19,7 @@ describe('IdentifierDocument', () => {
         {
           id: '#master',
           type: 'RsaVerificationKey2018',
-          publicKeyJwk: {
+          publicKeyJwk: <PublicKey>{
             kty: 'RSA',
             kid: '#master',
             keyOps: [
@@ -40,16 +42,16 @@ describe('IdentifierDocument', () => {
   });
 
   it('should create a new instance with expected properties', async () => {
-    const publicKeys = [
+    const publicKeys: IdentifierDocumentPublicKey[] = [
       {
         id: '#master',
         type: 'RsaVerificationKey2018',
-        publicKeyJwk: {
-          kty: 'RSA',
+        publicKeyJwk: <PublicKey>{
+          kty: KeyType.RSA,
           kid: '#master',
-          keyOps: [
-            'sign',
-            'verify'
+          keyOps: <KeyOperation[]>[
+            KeyOperation.Sign,
+            KeyOperation.Verify
           ],
           n: 'vdpHn7kNq42UMC1W8bwxgE7K...',
           e: 'AQAB'
@@ -75,7 +77,7 @@ describe('IdentifierDocument', () => {
       {
         id: '#master',
         type: 'RsaVerificationKey2018',
-        publicKeyJwk: {
+        publicKeyJwk: <PublicKey>{
           kty: 'RSA',
           kid: '#master',
           keyOps: [
@@ -108,7 +110,7 @@ describe('IdentifierDocument', () => {
       {
         id: '#master',
         type: 'RsaVerificationKey2018',
-        publicKeyJwk: {
+        publicKeyJwk: <PublicKey>{
           kty: 'RSA',
           kid: '#master',
           keyOps: [
@@ -148,16 +150,16 @@ describe('IdentifierDocument', () => {
   });
 
   it('should add service reference for host service endpoint', async () => {
-    const publicKeys = [
+    const publicKeys: IdentifierDocumentPublicKey[] = [
       {
         id: '#master',
         type: 'RsaVerificationKey2018',
-        publicKeyJwk: {
-          kty: 'RSA',
+        publicKeyJwk: <PublicKey>{
+          kty: KeyType.RSA,
           kid: '#master',
-          keyOps: [
-            'sign',
-            'verify'
+          keyOps: <KeyOperation[]>[
+            KeyOperation.Sign,
+            KeyOperation.Verify
           ],
           n: 'vdpHn7kNq42UMC1W8bwxgE7K...',
           e: 'AQAB'

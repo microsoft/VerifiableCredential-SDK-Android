@@ -6,6 +6,7 @@
 import HttpResolver from '../../src/resolvers/HttpResolver';
 import Identifier from '../../src/Identifier';
 import UserAgentError from '../../src/UserAgentError';
+import { UserAgentOptions } from '../../src';
 
 // Add a document to the cache
 const DOCUMENT = {
@@ -33,28 +34,28 @@ describe('HttpResolver', () => {
   });
 
   it('should construct new instance of the HttpResolver', async () => {
-    const resolver = new HttpResolver('https://resolver.org/', {
-      timeoutInSeconds: 30
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    const resolver = new HttpResolver('https://resolver.org', options);
     expect(resolver).toBeDefined();
     expect(resolver.url).toEqual('https://resolver.org/1.0/identifiers/');
   });
 
   it('should construct new instance of the HttpResolver appending trailing slash', async () => {
-    const resolver = new HttpResolver('https://resolver.org', {
-      timeoutInSeconds: 30
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    const resolver = new HttpResolver('https://resolver.org', options);
     expect(resolver).toBeDefined();
     expect(resolver.url).toEqual('https://resolver.org/1.0/identifiers/');
   });
 
   it('should return a new identifier document', async () => {
-    const resolver = new HttpResolver('https://resolver.org', {
-      timeoutInSeconds: 30
-    });
-    const identifier = new Identifier('did:ion:identifier', {
-      timeoutInSeconds: 5
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    const resolver = new HttpResolver('https://resolver.org', options);
+    options = new UserAgentOptions();
+    options.timeoutInSeconds = 5;
+    const identifier = new Identifier('did:ion:identifier', options);
 
     fetchMock.get(
       'https://resolver.org/1.0/identifiers/did:ion:identifier',
@@ -67,12 +68,12 @@ describe('HttpResolver', () => {
   });
 
   it('should return a new identifier document when document is root', async () => {
-    const resolver = new HttpResolver('https://resolver.org', {
-      timeoutInSeconds: 30
-    });
-    const identifier = new Identifier('did:ion:identifier', {
-      timeoutInSeconds: 5
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    const resolver = new HttpResolver('https://resolver.org', options);
+    options = new UserAgentOptions();
+    options.timeoutInSeconds = 5;
+    const identifier = new Identifier('did:ion:identifier', options);
 
     fetchMock.get(
       'https://resolver.org/1.0/identifiers/did:ion:identifier',
@@ -88,12 +89,12 @@ describe('HttpResolver', () => {
   });
 
   it('should throw UserAgentError when 404 returned by resolver', async done => {
-    const resolver = new HttpResolver('https://resolver.org', {
-      timeoutInSeconds: 30
-    });
-    const identifier = new Identifier('did:ion:identifier', {
-      timeoutInSeconds: 5
-    });
+    let options = new UserAgentOptions();
+    options.timeoutInSeconds = 30;
+    const resolver = new HttpResolver('https://resolver.org', options);
+    options = new UserAgentOptions();
+    options.timeoutInSeconds = 1;
+    const identifier = new Identifier('did:ion:identifier', options);
 
     fetchMock.get('https://resolver.org/1.0/identifiers/did:ion:identifier', 404);
 
@@ -108,10 +109,11 @@ describe('HttpResolver', () => {
   });
 
   it('should throw UserAgentError when 500 returned by resolver', async done => {
+    const options = new UserAgentOptions();
+    options.timeoutInSeconds = 5;
+
     const resolver = new HttpResolver('https://resolver.org');
-    const identifier = new Identifier('did:ion:identifier', {
-      timeoutInSeconds: 5
-    });
+    const identifier = new Identifier('did:ion:identifier', options);
 
     fetchMock.get('https://resolver.org/1.0/identifiers/did:ion:identifier', 500);
 
@@ -126,12 +128,10 @@ describe('HttpResolver', () => {
   });
 
   it('should throw UserAgentError when fetch timeout threshold reached', async done => {
-    const resolver = new HttpResolver('https://resolver.org', {
-      timeoutInSeconds: 1
-    });
-    const identifier = new Identifier('did:ion:identifier', {
-      timeoutInSeconds: 1
-    });
+    const options = new UserAgentOptions();
+    options.timeoutInSeconds = 1;
+    const resolver = new HttpResolver('https://resolver.org', options);
+    const identifier = new Identifier('did:ion:identifier', options);
 
     // Set the mock timeout to be greater than the fetch configuration
     // timeout to ensure that the fetch timeout works as expected.
