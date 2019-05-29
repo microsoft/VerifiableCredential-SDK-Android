@@ -778,6 +778,7 @@ Used for DH algorithms</p>
         * [.decryptByJwk(algorithm, jwk, cipher)](#SubtleCryptoExtension+decryptByJwk)
         * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
     * _static_
+        * [.toDer(elements)](#SubtleCryptoExtension.toDer)
         * [.normalizeAlgorithm(algorithm)](#SubtleCryptoExtension.normalizeAlgorithm)
         * [.normalizeJwk(jwk)](#SubtleCryptoExtension.normalizeJwk)
 
@@ -864,6 +865,17 @@ The referenced key must be a jwk key.</p>
 | algorithm | <p>used for encryption</p> |
 | jwk | <p>Json web key public key</p> |
 | data | <p>to encrypt</p> |
+
+<a name="SubtleCryptoExtension.toDer"></a>
+
+### SubtleCryptoExtension.toDer(elements)
+<p>format the signature output to DER format</p>
+
+**Kind**: static method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| elements | <p>Array of elements to encode in DER</p> |
 
 <a name="SubtleCryptoExtension.normalizeAlgorithm"></a>
 

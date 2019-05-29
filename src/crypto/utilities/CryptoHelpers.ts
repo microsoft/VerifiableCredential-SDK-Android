@@ -73,7 +73,7 @@ export default class CryptoHelpers {
         matches = <RegExpExecArray>regex.exec(jwa);
         return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128 };
       case JoseConstants.Es256K:
-        return { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } };
+        return { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' }, format: 'DER' };
     }
 
     throw new Error(`Algorithm '${JSON.stringify(jwa)}' is not supported`);
