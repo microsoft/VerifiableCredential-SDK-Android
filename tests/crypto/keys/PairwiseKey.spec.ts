@@ -15,7 +15,7 @@ import EcPrivateKey from '../../../src/crypto/keys/ec/EcPrivateKey';
 class Helpers {
   // Make sure we generate the same pairwise key
   public static async generateSamePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
-    // Default Crypto factory
+    // Generate key
       const pairwiseKey1: PrivateKey = await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, peer);
   
       // return the same
@@ -26,7 +26,7 @@ class Helpers {
     // Make sure the pairwise key is unique
     public static async generateUniquePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
       const results: string[] = [];
-      for (let index = 0 ; index < 1000; index++) {
+      for (let index = 0 ; index < 100; index++) {
         const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, `${persona}-${index}`, peer);
         results.push(<string>pairwiseKey.d);
         expect(1).toBe(results.filter(element => element === pairwiseKey.d).length);
@@ -67,7 +67,7 @@ describe('PairwiseKey', () => {
   const cryptoOperations = new SubtleCryptoOperations();
   defaultCryptoFactory = new CryptoFactory(keyStore, cryptoOperations);
   subtleCryptoExtensions = new SubtleCryptoExtension(defaultCryptoFactory);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
   });
 
   afterEach(() => {
@@ -84,7 +84,19 @@ describe('PairwiseKey', () => {
     });
     expect(throwed).toBeTruthy();
   });
-  it('should generate a pairwise identifier', async () => {
+
+  it('should generate a deterministic pairwise key capable of signing', async () => {
+    const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
+    // Generate key
+    const pairwiseKey1: PrivateKey = await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, 'did:persona', 'did:peer');
+    keyStore.save('key', pairwiseKey1);
+    const data = Buffer.from('1234567890');
+    const signature = await subtleCryptoExtensions.signByKeyStore(alg, 'key', Buffer.from('1234567890'));
+    const verify = await subtleCryptoExtensions.verifyByJwk(alg, pairwiseKey1.getPublicKey(), signature, data);
+    expect(verify).toBeTruthy();
+  });
+
+  it('should generate a deterministic pairwise key', async () => {
     supportedKeyGenerationAlgorithms.forEach(async (alg) => {
       const persona = 'did:persona:1';
       const peer = 'did:peer:1';
@@ -92,7 +104,7 @@ describe('PairwiseKey', () => {
     });
   });
 
-  it('should generate unique pairwise identifiers for different personas', async () => {
+  it('should generate unique pairwise keys for different personas', async () => {
     
     supportedKeyGenerationAlgorithms.forEach(async (alg) => {
       const persona = 'did:persona:1';
@@ -106,7 +118,7 @@ describe('PairwiseKey', () => {
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
     const persona = 'did:persona:1';
     const peer = 'did:peer:1';
-    for (let index = 0 ; index < 1000; index++) {
+    for (let index = 0 ; index < 100; index++) {
       const keyReference = `key-${index}`;
       const keyValue = Buffer.from(`1234567890-${index}`);
       keyStore.save(keyReference, keyValue);
@@ -121,7 +133,7 @@ describe('PairwiseKey', () => {
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
     const persona = 'did:persona:1';
     const peer = 'did:peer:1';
-    for (let index = 0 ; index < 1000; index++) {
+    for (let index = 0 ; index < 100; index++) {
       const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona,`${peer}-${index}`);
       results.push(<string>pairwiseKey.d);
       expect(1).toBe(results.filter(element => element === pairwiseKey.d).length);

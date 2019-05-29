@@ -65,8 +65,6 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
       kid: '#key1'
     };
 
-    const eckey = new EcPrivateKey(pairwise);
-    delete (<any>eckey).alg;
-    return eckey;
+    return new EcPrivateKey(pairwise);
   } 
 }
