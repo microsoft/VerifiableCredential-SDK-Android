@@ -26,7 +26,7 @@ class Helpers {
     // Make sure the pairwise key is unique
     public static async generateUniquePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
       const results: string[] = [];
-      for (let index = 0 ; index < 100; index++) {
+      for (let index = 0 ; index < 50; index++) {
         const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, `${persona}-${index}`, peer);
         results.push(<string>pairwiseKey.d);
         expect(1).toBe(results.filter(element => element === pairwiseKey.d).length);
@@ -67,7 +67,7 @@ describe('PairwiseKey', () => {
   const cryptoOperations = new SubtleCryptoOperations();
   defaultCryptoFactory = new CryptoFactory(keyStore, cryptoOperations);
   subtleCryptoExtensions = new SubtleCryptoExtension(defaultCryptoFactory);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
   });
 
   afterEach(() => {
@@ -104,12 +104,14 @@ describe('PairwiseKey', () => {
     });
   });
 
-  it('should generate unique pairwise keys for different personas', async () => {
+  it('should generate unique pairwise keys for different personas', async (done) => {
     
     supportedKeyGenerationAlgorithms.forEach(async (alg) => {
       const persona = 'did:persona:1';
       const peer = 'did:peer:1';
+      console.log('Generate unique pairwise key');
       await Helpers.generateUniquePairwise(subtleCryptoExtensions, seedReference, alg, persona, peer);
+      done();
     });
   });
 
