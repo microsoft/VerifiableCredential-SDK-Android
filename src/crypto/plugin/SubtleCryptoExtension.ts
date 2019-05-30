@@ -11,6 +11,7 @@ import PrivateKey from '../keys/PrivateKey';
 import { KeyType } from '../keys/KeyTypeFactory';
 import PairwiseKey from '../keys/PairwiseKey';
 import { SubtleCrypto } from 'webcrypto-core';
+import CryptoError from '../CryptoError';
 const clone = require('clone');
 
 // Named curves
@@ -59,11 +60,58 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), keyImportAlgorithm, true, ['sign']);
-    return <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): <RsaPssParams>algorithm, 
+    const signature = await <PromiseLike<ArrayBuffer>>crypto.sign(jwk.kty === KeyType.EC ? <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): <RsaPssParams>algorithm, 
       key, 
       <ArrayBuffer>data);
+    if ((<any>algorithm).format) {
+      const format: string =  (<any>algorithm).format;
+      if (format.toUpperCase() !== 'DER') {
+        throw new CryptoError(algorithm, 'Only DER format supported for signature');
+      }
+     
+      return SubtleCryptoExtension.toDer([signature.slice(0, signature.byteLength / 2), signature.slice(signature.byteLength / 2, signature.byteLength)]);
+    }
+
+    return signature;
   }
-          
+  
+  /**
+   * format the signature output to DER format
+   * @param elements Array of elements to encode in DER
+   */
+  private static toDer(elements: ArrayBuffer[]): ArrayBuffer {
+    let index: number = 0;
+    // calculate total size. 
+    let lengthOfRemaining = 0;
+    for (let element = 0 ; element < elements.length; element++) {
+      // Add element format bytes
+      lengthOfRemaining += 2;
+      const buffer = new Uint8Array(elements[element]);
+      const size = (buffer[0] & 0x80) === 0x80 ? buffer.length + 1 : buffer.length;
+      lengthOfRemaining += size;
+    }
+    // Prepare output
+    index = 0;
+    const result = new Uint8Array(lengthOfRemaining + 2);
+    result.set([0x30, lengthOfRemaining], index);
+    index += 2;
+    for (let element = 0 ; element < elements.length; element++) {
+      // Add element format bytes
+      const buffer = new Uint8Array(elements[element]);
+      const size = (buffer[0] & 0x80) === 0x80 ? buffer.length + 1 : buffer.length;
+      result.set([0x02, size], index);
+      index += 2;
+      if (size > buffer.length) {
+        result.set([0x0], index++);
+      }
+      
+      result.set(buffer, index);
+      index += buffer.length;
+    }
+
+    return result;
+  }
+
   /**
    * Verify with JWK.
    * @param algorithm used for verification
