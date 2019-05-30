@@ -174,6 +174,7 @@ export default class Identifier {
    * @param keyType Key type
    */
   public static keyStorageIdentifier (personaId: string, target: string, algorithm: string, keyType: string): string {
+    console.log(`${personaId}-${target}-${algorithm}-${keyType}`);
     return `${personaId}-${target}-${algorithm}-${keyType}`;
   }
 
