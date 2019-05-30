@@ -84,6 +84,31 @@ describe('PairwiseKey', () => {
     });
     expect(throwed).toBeTruthy();
   });
+  // tslint:disable-next-line:mocha-unneeded-done
+  it('should generate the same keys as in the EC reference file', async (done) => {
+    let inx: number = 0;
+    let nrIds: number = 100;
+    const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
+    const pairwiseKeys = require('./Pairwise.EC.json');
+    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seedReference = 'masterkey';
+    await keyStore.save(seedReference, seed);
+    for (inx = 0; inx < nrIds; inx++) {
+      const persona: string = 'abcdef';
+      let id = `${inx}`;
+      
+      // Generate key
+      const pairwiseKey: EcPrivateKey = <EcPrivateKey>await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, id);
+      expect(pairwiseKey.kid).toBeDefined();
+
+      // console.log(`{ "pwid": "${id}", "key": "${jwk.d}"},`);
+      // console.log(`${id}: Check ${pairwiseKeys[inx].pwid}: ${pairwiseKeys[inx].key} == ${jwk.d}`);
+      expect(pairwiseKeys[inx].key).toBe(pairwiseKey.d);
+      expect(1).toBe(pairwiseKeys.filter((element: any) => element.key === pairwiseKey.d).length);
+    }
+
+    done();
+  });
 
   it('should generate a deterministic pairwise key capable of signing', async () => {
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
