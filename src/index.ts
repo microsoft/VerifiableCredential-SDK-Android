@@ -15,7 +15,6 @@ import CredentialIssuer from './credentials/CredentialIssuer';
 import ICredential from './credentials/ICredential';
 import SelfIssuedCredential from './credentials/SelfIssuedCredential';
 import IDataHandler from './credentials/IDataHandler';
-import SidetreeRegistrar from './registrars/SidetreeRegistrar';
 import HttpResolver from './resolvers/HttpResolver';
 export { CredentialManifest, CredentialIssuer, ICredential, SelfIssuedCredential };
 export { IDataHandler };
@@ -30,7 +29,7 @@ import CryptoOptions from './CryptoOptions';
 export { CryptoOptions };
 
 // Hub Client and Methods
-import HubClient from './HubClient';
+import HubClient from './hubClient/HubClient';
 import HubInterface from './hubInterfaces/HubInterface';
 import {HubInterfaceOptions, HubInterfaceType, CommitStrategyType } from './hubInterfaces/HubInterface';
 import Actions from './hubInterfaces/Actions';
