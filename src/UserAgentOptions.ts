@@ -50,7 +50,7 @@ export default class UserAgentOptions {
    * Crypto Options
    * contains algorithm and other data about crypto
    */
-   public cryptoOptions?: CryptoOptions = new CryptoOptions();
+   public cryptoOptions: CryptoOptions = new CryptoOptions();
 
   /**
    * Prefix for the generated did.

@@ -16,6 +16,7 @@ import { ISigningOptions } from './crypto/keyStore/IKeyStore';
 import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
+import JweToken from './crypto/protocols/jwe/JweToken';
 
 /**
  * Class for creating and managing identifiers,
@@ -201,7 +202,6 @@ export default class Identifier {
         } else {
           body = payload;
         }
-        return this.options.keyStore.sign(keyReference, body, SignatureFormat.FlatJsonJws);
         const signingOptions: ISigningOptions = {
           cryptoFactory: this.options.cryptoFactory
         };
@@ -241,6 +241,10 @@ export default class Identifier {
    * @param payload object that will be encrypted.
    */
   public async encrypt (payload: any): Promise<Buffer> {
+    if (!this.options) {
+      throw new UserAgentError('Options Undefined');
+    }
+    // const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory})
     throw new UserAgentError('unimplemented');
   }
 
