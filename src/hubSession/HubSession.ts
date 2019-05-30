@@ -16,37 +16,40 @@ import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
 // tslint:disable-next-line:import-name
 import fetch, { Request, RequestInit } from 'node-fetch';
 import Identifier from '../Identifier';
+import DidProtocol, { DidProtocolOptions } from '../crypto/protocols/did/DidProtocol';
+import HttpResolver from '../resolvers/HttpResolver';
+import IResolver from '../resolvers/IResolver';
 
 /**
  * Options for instantiating a new Hub session.
  */
-export interface HubSessionOptions {
+export class HubSessionOptions {
 
   /** 
    * The DID of the client, i.e the identity of the user/app using this SDK. 
    */
-  client: Identifier;
+  client?: Identifier;
 
   /**
    * The private key to use for decrypting/signing when communicating with the Hub. Must be
    * registered in the DID document of the clientDid.
    */
-  clientPrivateKeyReference: string;
+  clientPrivateKeyReference: string = '';
 
   /** 
    * The Identfier of the owner of the Hub with which we will be communicating. 
    */
-  hubOwner: Identifier;
+  hubOwner?: Identifier;
 
   /** 
    * The Identifier of the Hub, for addressing request envelopes. 
    */
-  hub: Identifier;
+  hubId: string = 'did:test:hub.id';
 
   /** 
    * The HTTPS endpoint of the Hub. 
    */
-  hubEndpoint: string;
+  hubEndpoint: string = 'https://beta.hub.microsoft.com';
 }
 
 /**
@@ -54,17 +57,18 @@ export interface HubSessionOptions {
  */
 export default class HubSession {
 
-  private client: Identifier;
-  private hub: Identifier;
+  private client?: Identifier;
+  private hubId: string;
   private hubEndpoint: string;
-  private hubOwner: Identifier;
-  private currentAccessToken: string | undefined;
+  private hubOwner?: Identifier;
+  private keyReference: string;
 
   constructor(options: HubSessionOptions) {
     this.client = options.client;
-    this.hub = options.hub;
+    this.hubId = options.hubId;
     this.hubEndpoint = options.hubEndpoint;
     this.hubOwner = options.hubOwner;
+    this.keyReference = options.clientPrivateKeyReference;
   }
 
   /**
@@ -79,27 +83,19 @@ export default class HubSession {
 
     const rawRequestJson = await request.getRequestJson();
 
+    if (!this.client || !this.hubOwner) {
+      throw new HubError({
+        error_code: HubErrorCode.NotFound,
+        developer_message: `Identifiers not Specified`,
+      });
+    }
+
     rawRequestJson.iss = this.client.id;
-    rawRequestJson.aud = this.hub.id;
+    rawRequestJson.aud = this.hubId;
     rawRequestJson.sub = this.hubOwner.id;
 
     const rawRequestString = JSON.stringify(rawRequestJson);
-    const accessToken = await this.getAccessToken();
-
-    let responseString: string;
-
-    try {
-      responseString = await this.makeRequest(rawRequestString, accessToken);
-    } catch (e) {
-      // If the access token has expired, renew access token and retry
-      if (HubError.is(e) && e.getErrorCode() === HubErrorCode.AuthenticationFailed) {
-        const newAccessToken = await this.refreshAccessToken();
-        responseString = await this.makeRequest(rawRequestString, newAccessToken);
-      } else {
-        throw e;
-      }
-    }
-
+    const responseString = await this.makeRequest(rawRequestString);
     let responseObject: IHubResponse<string>;
 
     try {
@@ -121,17 +117,36 @@ export default class HubSession {
    * @param message The raw request body to send.
    * @param accessToken The access token to include in the request, if any.
    */
-  private async makeRequest(message: string, accessToken?: string): Promise<string> {
+  private async makeRequest(message: string): Promise<string> {
 
-    const requestBuffer = undefined;  
+    if (!this.client || !this.hubOwner) {
+      throw new HubError({
+        error_code: HubErrorCode.AuthenticationFailed,
+        developer_message: `Client Identifier not specified in options`,
+      });
+    }
+
+    let resolver: IResolver;
+    if (this.client.options && this.client.options.resolver) {
+      resolver = this.client.options.resolver;
+    } else {
+      resolver = new HttpResolver('https://beta.discover.did.microsoft.com/');
+    }
+
     // await this.authentication.getAuthenticatedRequest(message, this.hubDid, accessToken);
+    const didProtocolOptions: DidProtocolOptions = {
+      sender: this.client,
+      resolver
+    };
+    const didProtocol = new DidProtocol(didProtocolOptions);
+    const request = await didProtocol.signAndEncrypt(this.keyReference, message, this.hubOwner.id);
   
     const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',
-      body: requestBuffer,
+      body: request,
       headers: {
         'Content-Type': 'application/jwt',
-        'Content-Length': '1' // requestBuffer.length.toString(),
+        'Content-Length': request.length.toString()
       },
     });
 
@@ -158,25 +173,6 @@ export default class HubSession {
    */
   private async callFetch(url: string | Request, init?: RequestInit) {
     return fetch(url, init);
-  }
-
-  /**
-   * Returns the current access token for the Hub, requesting one if necessary.
-   */
-  private async getAccessToken(): Promise<string> {
-    if (this.currentAccessToken) {
-      return this.currentAccessToken;
-    }
-
-    return this.refreshAccessToken();
-  }
-
-  /**
-   * Requests an updated access token from the Hub.
-   */
-  private async refreshAccessToken(): Promise<string> {
-    this.currentAccessToken = await this.makeRequest('');
-    return this.currentAccessToken!;
   }
 
   /** 

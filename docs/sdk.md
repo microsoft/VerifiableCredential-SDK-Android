@@ -43,8 +43,8 @@ a user&#39;s Identity Hub.</p></dd>
 <p>This class works only with objects using the <code>basic</code> commit strategy.</p></dd>
 <dt><a href="#HubError">HubError</a></dt>
 <dd><p>Represents an error returned by an Identity Hub.</p></dd>
-<dt><a href="#HubSession">HubSession</a></dt>
-<dd><p>Represents a communication session with a particular Hub instance.</p></dd>
+<dt><a href="#HubSessionOptions">HubSessionOptions</a></dt>
+<dd><p>Options for instantiating a new Hub session.</p></dd>
 <dt><a href="#SignedCommit">SignedCommit</a></dt>
 <dd><p>Class representing a signed commit.</p></dd>
 <dt><a href="#KeyStoreConstants">KeyStoreConstants</a></dt>
@@ -88,6 +88,8 @@ And commits and queries for objects in the hub session.</p></dd>
 <dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
 <dt><a href="#HubInterfaceOptions">HubInterfaceOptions</a></dt>
 <dd><p>An Abstract Class for Hub Interfaces.</p></dd>
+<dt><a href="#HubSessionOptions">HubSessionOptions</a></dt>
+<dd><p>Represents a communication session with a particular Hub instance.</p></dd>
 </dl>
 
 ## Constants
@@ -575,82 +577,12 @@ more recent.</p>
 <p>Indicates whether the passed-in object is a HubError instance.</p>
 
 **Kind**: static method of [<code>HubError</code>](#HubError)  
-<a name="HubSession"></a>
+<a name="HubSessionOptions"></a>
 
-## HubSession
-<p>Represents a communication session with a particular Hub instance.</p>
+## HubSessionOptions
+<p>Options for instantiating a new Hub session.</p>
 
 **Kind**: global class  
-
-* [HubSession](#HubSession)
-    * _instance_
-        * [.send(request)](#HubSession+send)
-        * [.makeRequest(message, accessToken)](#HubSession+makeRequest)
-        * [.callFetch(url, init)](#HubSession+callFetch)
-        * [.getAccessToken()](#HubSession+getAccessToken)
-        * [.refreshAccessToken()](#HubSession+refreshAccessToken)
-    * _static_
-        * [.mapResponseToObject(response)](#HubSession.mapResponseToObject)
-
-<a name="HubSession+send"></a>
-
-### hubSession.send(request)
-<p>Sends the given request to the Hub instance, and returns the associated response.</p>
-
-**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
-
-| Param | Description |
-| --- | --- |
-| request | <p>An instance or subclass of HubRequest to be sent.</p> |
-
-<a name="HubSession+makeRequest"></a>
-
-### hubSession.makeRequest(message, accessToken)
-<p>Sends a raw (string) request body to the Hub and receives a response.</p>
-
-**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
-
-| Param | Description |
-| --- | --- |
-| message | <p>The raw request body to send.</p> |
-| accessToken | <p>The access token to include in the request, if any.</p> |
-
-<a name="HubSession+callFetch"></a>
-
-### hubSession.callFetch(url, init)
-<p>Fetch API wrapper, to allow unit testing.</p>
-
-**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
-
-| Param | Description |
-| --- | --- |
-| url | <p>The URL to make a request to.</p> |
-| init | <p>Request initialization details.</p> |
-
-<a name="HubSession+getAccessToken"></a>
-
-### hubSession.getAccessToken()
-<p>Returns the current access token for the Hub, requesting one if necessary.</p>
-
-**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
-<a name="HubSession+refreshAccessToken"></a>
-
-### hubSession.refreshAccessToken()
-<p>Requests an updated access token from the Hub.</p>
-
-**Kind**: instance method of [<code>HubSession</code>](#HubSession)  
-<a name="HubSession.mapResponseToObject"></a>
-
-### HubSession.mapResponseToObject(response)
-<p>Transforms a JSON blob returned by the Hub into a subclass of HubResponse, based on the <code>@type</code>
-field of the response.</p>
-
-**Kind**: static method of [<code>HubSession</code>](#HubSession)  
-
-| Param | Description |
-| --- | --- |
-| response | <p>The Hub response to be transformed.</p> |
-
 <a name="SignedCommit"></a>
 
 ## SignedCommit
@@ -943,6 +875,12 @@ And commits and queries for objects in the hub session.</p>
 
 ## HubInterfaceOptions
 <p>An Abstract Class for Hub Interfaces.</p>
+
+**Kind**: global variable  
+<a name="HubSessionOptions"></a>
+
+## HubSessionOptions
+<p>Represents a communication session with a particular Hub instance.</p>
 
 **Kind**: global variable  
 <a name="context"></a>
