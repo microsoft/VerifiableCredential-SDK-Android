@@ -49,7 +49,7 @@ describe('CommitSigner', () => {
       const signer = new CommitSigner({
         did: testDid,
         keyReference: testKid,
-        keystore: testKeyStore
+        keyStore: testKeyStore
       });
 
       const signedCommit = await signer.sign(commit);

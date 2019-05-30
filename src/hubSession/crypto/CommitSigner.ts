@@ -23,7 +23,7 @@ interface CommitSignerOptions {
   /**
    * KeyStore that holds the private key to be used to sign the commit.
    */
-  keystore: IKeyStore;
+  keyStore: IKeyStore;
 
   /** 
    * The CryptoSuite to be used to for the algorithm to use to sign the commit
@@ -44,7 +44,7 @@ export default class CommitSigner implements ICommitSigner {
   constructor(options: CommitSignerOptions) {
     this.did = options.did;
     this.keyRef = options.keyReference;
-    this.cryptoFactory = new CryptoFactory(options.keystore, options.suite);
+    this.cryptoFactory = new CryptoFactory(options.keyStore, options.suite);
   }
 
   /**

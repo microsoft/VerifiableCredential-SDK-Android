@@ -6,6 +6,9 @@
 import UserAgentError from '../UserAgentError';
 import Commit from '../hubSession/Commit';
 import HubClient from '../hubClient/HubClient';
+import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
+import HubObject from '../hubClient/HubObject';
+import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 
 /**
  * Constants that represent what type of commit strategy to be used.
@@ -117,12 +120,47 @@ export default abstract class HubInterface {
     this.hubClient.commit(commit);
   }
   
-  public async getItems() {
-    throw new UserAgentError('Not Implemented');
+  /**
+   * Get items with just metadata.
+   */
+  public async getPartialItems() {
+  
+    const queryRequest = new HubObjectQueryRequest({
+      interface: this.hubInterface,
+      context: this.context,
+      type: this.type,
+    });
+
+    const objects = await this.hubClient.queryObjects(queryRequest);
+    console.log(objects);
+    return objects;
   }
 
-  public async getItem() {
-    throw new UserAgentError('Not Implemented');
+  /**
+   * create and return fully-formed hubObject.
+   * @param hubObject partial hubObject with metadata
+   */
+  public async getItem(hubObject: HubObject): Promise<HubObject> {
+
+    const metadata = hubObject.getMetadata();
+
+    const commitQueryRequest = new HubCommitQueryRequest({
+      object_id: [metadata.id],
+    });
+    return this.hubClient.queryObject(commitQueryRequest, hubObject);
+  }
+
+  /**
+   * Get a list of fully-formed HubObjects with metadata and payload.
+   */
+  public async getFullItems(): Promise<HubObject[]> {
+    const items = await this.getPartialItems();
+
+    items.forEach(async item => {
+      item = await this.getItem(item); 
+    });
+
+    return items;
   }
 
   public async updateItem() {

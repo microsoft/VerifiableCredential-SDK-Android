@@ -5,6 +5,9 @@
 
 import { IObjectMetadata } from "@decentralized-identity/hub-common-js";
 import UserAgentError from "../UserAgentError";
+import { HubSession } from "..";
+import HubCommitQueryRequest from "../hubSession/requests/HubCommitQueryRequest";
+import CommitStrategyBasic from '../hubSession/CommitStrategyBasic';
 
 /**
  * Class that represents an object in a hub.
@@ -32,10 +35,32 @@ export default class HubObject {
   /**
    * If payload is not defined, get the payload from hub session using metadata.
    */
-  public getPayload(): any {
+  public async setPayload(hubSession: HubSession, commitQueryRequest: HubCommitQueryRequest): Promise<any> {
     if (this.payload) {
       return this.payload;
     }
-    throw new UserAgentError(`Not Implemented yet`);
+    if (this.objectMetadata.commit_strategy !== 'basic') {
+      throw new UserAgentError('Currently only the basic commit strategy is supported.');
+    }
+    const commitQueryResponse = await hubSession.send(commitQueryRequest);
+    const commits = commitQueryResponse.getCommits();
+    const strategy = new CommitStrategyBasic();
+    this.payload = await strategy.resolveObject(commits);
+    return this.payload;
+  }
+
+  /**
+   * 
+   */
+  public getPayload() {
+    if (this.payload) {
+      return this.payload;
+    }
+    throw new UserAgentError(`payload undefined for '${this.objectMetadata.id}'`);
+    
+  }
+
+  public getMetadata(): IObjectMetadata {
+    return this.objectMetadata;
   }
 }

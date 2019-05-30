@@ -20,11 +20,11 @@ self-issued id token.</p></dd>
 HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
 <dd></dd>
+<dt><a href="#HubObject">HubObject</a></dt>
+<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Class for defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
-<dt><a href="#HubObject">HubObject</a></dt>
-<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#Actions">Actions</a></dt>
 <dd><p>A Class that represents objects</p></dd>
 <dt><a href="#Collections">Collections</a></dt>
@@ -315,6 +315,7 @@ HubClient, such as hub Identifier and client Identifier.</p>
     * [new HubClient(hubClientOptions)](#new_HubClient_new)
     * [.commit(commit)](#HubClient+commit)
     * [.queryObjects(queryRequest)](#HubClient+queryObjects)
+    * [.queryObject(commitQueryRequest)](#HubClient+queryObject)
     * [.getHubInstances()](#HubClient+getHubInstances)
     * [.createHubSession()](#HubClient+createHubSession)
 
@@ -348,6 +349,17 @@ HubClient, such as hub Identifier and client Identifier.</p>
 | --- | --- |
 | queryRequest | <p>object that tells the hub what objec to get.</p> |
 
+<a name="HubClient+queryObject"></a>
+
+### hubClient.queryObject(commitQueryRequest)
+<p>Query Object specified by certain id</p>
+
+**Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+
+| Param | Description |
+| --- | --- |
+| commitQueryRequest | <p>HubCommitQueryRequest object to request object of specific id.</p> |
+
 <a name="HubClient+getHubInstances"></a>
 
 ### hubClient.getHubInstances()
@@ -361,13 +373,6 @@ HubClient, such as hub Identifier and client Identifier.</p>
 creates a hubSession for hub instance that is available/online.</p>
 
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
-<a name="HubClientOptions"></a>
-
-## HubClientOptions
-<p>Class for defining options for the
-HubClient, such as hub Identifier and client Identifier.</p>
-
-**Kind**: global class  
 <a name="HubObject"></a>
 
 ## HubObject
@@ -377,6 +382,7 @@ HubClient, such as hub Identifier and client Identifier.</p>
 
 * [HubObject](#HubObject)
     * [new HubObject(objectMetadata)](#new_HubObject_new)
+    * [.setPayload()](#HubObject+setPayload)
     * [.getPayload()](#HubObject+getPayload)
 
 <a name="new_HubObject_new"></a>
@@ -389,12 +395,23 @@ HubClient, such as hub Identifier and client Identifier.</p>
 | --- | --- |
 | objectMetadata | <p>object metadata that represents an object in a hub.</p> |
 
-<a name="HubObject+getPayload"></a>
+<a name="HubObject+setPayload"></a>
 
-### hubObject.getPayload()
+### hubObject.setPayload()
 <p>If payload is not defined, get the payload from hub session using metadata.</p>
 
 **Kind**: instance method of [<code>HubObject</code>](#HubObject)  
+<a name="HubObject+getPayload"></a>
+
+### hubObject.getPayload()
+**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
+<a name="HubClientOptions"></a>
+
+## HubClientOptions
+<p>Class for defining options for the
+HubClient, such as hub Identifier and client Identifier.</p>
+
+**Kind**: global class  
 <a name="Actions"></a>
 
 ## Actions
@@ -411,6 +428,13 @@ HubClient, such as hub Identifier and client Identifier.</p>
 
 ## HubInterface
 **Kind**: global class  
+
+* [HubInterface](#HubInterface)
+    * [new HubInterface([hubInterfaceOptions])](#new_HubInterface_new)
+    * [.getPartialItems()](#HubInterface+getPartialItems)
+    * [.getItem(hubObject)](#HubInterface+getItem)
+    * [.getFullItems()](#HubInterface+getFullItems)
+
 <a name="new_HubInterface_new"></a>
 
 ### new HubInterface([hubInterfaceOptions])
@@ -421,6 +445,29 @@ HubClient, such as hub Identifier and client Identifier.</p>
 | --- | --- |
 | [hubInterfaceOptions] | <p>for configuring how to form hub requests and responses.</p> |
 
+<a name="HubInterface+getPartialItems"></a>
+
+### hubInterface.getPartialItems()
+<p>Get items with just metadata.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
+<a name="HubInterface+getItem"></a>
+
+### hubInterface.getItem(hubObject)
+<p>create and return fully-formed hubObject.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
+
+| Param | Description |
+| --- | --- |
+| hubObject | <p>partial hubObject with metadata</p> |
+
+<a name="HubInterface+getFullItems"></a>
+
+### hubInterface.getFullItems()
+<p>Get a list of fully-formed HubObjects with metadata and payload.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
 <a name="Permissions"></a>
 
 ## Permissions

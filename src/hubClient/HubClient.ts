@@ -11,6 +11,8 @@ import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest'
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
 import IHubClient from './IHubClient';
+import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
+import HubObject from './HubObject';
 
 /**
  * Interface defining options for the
@@ -79,8 +81,13 @@ export default class HubClient implements IHubClient {
 
     const session = await this.createHubSession();
 
-    // NEED: change implementation of commit signer to use keyStore
-    const commitSigner = <CommitSigner> {};
+    const commitSignerOptions = {
+      did: this.clientIdentifier.id, 
+      keyReference: this.keyReference,
+      keyStore: this.clientIdentifier.options.keyStore
+    };
+
+    const commitSigner = new CommitSigner(commitSignerOptions);
 
     const signedCommit = await commitSigner.sign(commit);
 
@@ -92,10 +99,29 @@ export default class HubClient implements IHubClient {
    * Query Objects of certain type in Hub.
    * @param queryRequest object that tells the hub what objec to get.
    */
-  public async queryObjects (queryRequest: HubObjectQueryRequest) {
+  public async queryObjects (queryRequest: HubObjectQueryRequest): Promise<HubObject[]> {
     const session = await this.createHubSession();
     const queryResponse = await session.send(queryRequest);
-    return queryResponse.getObjects();
+
+    const objects = queryResponse.getObjects();
+
+    let hubObjects: HubObject[] = [];
+
+    objects.forEach(object => {
+      hubObjects.push(new HubObject(object));
+    });
+    return hubObjects;
+  }
+
+  /**
+   * Query Object specified by certain id 
+   * @param commitQueryRequest HubCommitQueryRequest object to request object of specific id.
+   */
+  public async queryObject (commitQueryRequest: HubCommitQueryRequest, hubObject: HubObject): Promise<HubObject> {
+    const session = await this.createHubSession();
+    await hubObject.setPayload(session, commitQueryRequest);
+    return hubObject;
+
   }
 
   /**
@@ -110,11 +136,14 @@ export default class HubClient implements IHubClient {
    * Implement createHubSession method once HubSession is refactored.
    * creates a hubSession for hub instance that is available/online.
    */
-  public async createHubSession () {
-    // const hubSessionOptions: HubSessionOptions = {
-    //   client: this.clientIdentifier,
-    //   hubOwner: this.hubOwner,
-    // };
-    return <HubSession> {}
+  private async createHubSession () {
+    const options: HubSessionOptions = {
+      client: this.clientIdentifier,
+      hubOwner: this.hubOwner,
+      clientPrivateKeyReference: this.keyReference,
+      hubId: 'did:test:hub.id',
+      hubEndpoint: 'https://beta.discover.did.microsoft.com'
+    };
+    return new HubSession(options);
   }
 }
