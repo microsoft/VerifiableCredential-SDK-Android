@@ -135,6 +135,7 @@ export default class IdentifierDocument {
     }
     const serviceEndpoint = <HostServiceEndpoint> filteredServiceReferences[0].serviceEndpoint;
     return serviceEndpoint.locations;
+  }
 
   public getPublicKeysFromDocument(): PublicKey[] {
     return this.publicKeys.map(key => key.publicKeyJwk);

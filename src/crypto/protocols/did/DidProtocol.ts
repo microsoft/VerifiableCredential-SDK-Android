@@ -92,7 +92,7 @@ export default class DidProtocol {
    * Sign a payload using [PrivateKey] in client's keystore and encrypt payload using [PublicKey] 
    * @param payload the payload to be signed and encrypted by client Identifier.
    */
-  public async signAndEncrypt(keyReference: string, payload: any, receiverId: string): Promise<Buffer> {
+  public async signAndEncrypt(keyReference: string, payload: any, receiverId: string): Promise<string> {
     
     const jws = await this.sender.sign(payload, keyReference);
 

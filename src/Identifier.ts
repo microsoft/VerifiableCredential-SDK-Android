@@ -240,12 +240,23 @@ export default class Identifier {
    * Encrypt payload using Public Key registered on Identifier Document.
    * @param payload object that will be encrypted.
    */
-  public async encrypt (payload: any): Promise<Buffer> {
+  public async encrypt (payload: any): Promise<string> {
     if (!this.options) {
       throw new UserAgentError('Options Undefined');
     }
-    // const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory})
-    throw new UserAgentError('unimplemented');
+    // get document if undefined
+    if (!this.document) {
+      this.document = await this.getDocument();
+    }
+
+    // create a jweToken with temp cryptoFactory and algorithm.
+    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: ''});
+
+    // encrypt payload using public keys.
+    const encryptedToken = await jweToken.encrypt(this.document.getPublicKeysFromDocument(), payload, ProtectionFormat.JweCompactJson);
+
+    // return serialized token.
+    return encryptedToken.serialize();
   }
 
   /**
@@ -254,6 +265,17 @@ export default class Identifier {
    * @param keyReference string that references what key to use from keystore.
    */
   public async decrypt (cipher: Buffer, keyReference: string): Promise<string> {
-    throw new UserAgentError('unimplemented');
+    if (!this.options) {
+      throw new UserAgentError('Options Undefined');
+    }
+
+    // get key to get key alg
+    const key = <PrivateKey> await this.options.keyStore.get(keyReference);
+
+    // create jweToken, feed in ciphertext, and decrypt.
+    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: key.alg});
+    jweToken.ciphertext = cipher;
+    const payload = await jweToken.decrypt(keyReference);
+    return payload.toString();
   }
 }
