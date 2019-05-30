@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IObjectMetadata } from "@decentralized-identity/hub-common-js";
-import UserAgentError from "../UserAgentError";
-import { HubSession } from "..";
-import HubCommitQueryRequest from "../hubSession/requests/HubCommitQueryRequest";
+import { IObjectMetadata } from '@decentralized-identity/hub-common-js';
+import UserAgentError from '../UserAgentError';
+import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 import CommitStrategyBasic from '../hubSession/CommitStrategyBasic';
+import HubSession from '../hubSession/HubSession';
 
 /**
  * Class that represents an object in a hub.
