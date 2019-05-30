@@ -26,7 +26,7 @@ class Helpers {
     // Make sure the pairwise key is unique
     public static async generateUniquePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
       const results: string[] = [];
-      for (let index = 0 ; index < 100; index++) {
+      for (let index = 0 ; index < 50; index++) {
         const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, `${persona}-${index}`, peer);
         results.push(<string>pairwiseKey.d);
         expect(1).toBe(results.filter(element => element === pairwiseKey.d).length);
@@ -67,7 +67,7 @@ describe('PairwiseKey', () => {
   const cryptoOperations = new SubtleCryptoOperations();
   defaultCryptoFactory = new CryptoFactory(keyStore, cryptoOperations);
   subtleCryptoExtensions = new SubtleCryptoExtension(defaultCryptoFactory);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
   });
 
   afterEach(() => {
@@ -83,6 +83,31 @@ describe('PairwiseKey', () => {
       expect(`Pairwise key for type 'oct' is not supported.`).toBe(err.message);
     });
     expect(throwed).toBeTruthy();
+  });
+  // tslint:disable-next-line:mocha-unneeded-done
+  it('should generate the same keys as in the EC reference file', async (done) => {
+    let inx: number = 0;
+    let nrIds: number = 100;
+    const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
+    const pairwiseKeys = require('./Pairwise.EC.json');
+    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seedReference = 'masterkey';
+    await keyStore.save(seedReference, seed);
+    for (inx = 0; inx < nrIds; inx++) {
+      const persona: string = 'abcdef';
+      let id = `${inx}`;
+      
+      // Generate key
+      const pairwiseKey: EcPrivateKey = <EcPrivateKey>await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, id);
+      expect(pairwiseKey.kid).toBeDefined();
+
+      // console.log(`{ "pwid": "${id}", "key": "${jwk.d}"},`);
+      // console.log(`${id}: Check ${pairwiseKeys[inx].pwid}: ${pairwiseKeys[inx].key} == ${jwk.d}`);
+      expect(pairwiseKeys[inx].key).toBe(pairwiseKey.d);
+      expect(1).toBe(pairwiseKeys.filter((element: any) => element.key === pairwiseKey.d).length);
+    }
+
+    done();
   });
 
   it('should generate a deterministic pairwise key capable of signing', async () => {
@@ -104,12 +129,14 @@ describe('PairwiseKey', () => {
     });
   });
 
-  it('should generate unique pairwise keys for different personas', async () => {
+  it('should generate unique pairwise keys for different personas', async (done) => {
     
     supportedKeyGenerationAlgorithms.forEach(async (alg) => {
       const persona = 'did:persona:1';
       const peer = 'did:peer:1';
+      console.log('Generate unique pairwise key');
       await Helpers.generateUniquePairwise(subtleCryptoExtensions, seedReference, alg, persona, peer);
+      done();
     });
   });
 

@@ -14,17 +14,12 @@ const bigInt = require('big-integer');
 import { BigIntegerStatic } from 'big-integer';
 
 // tslint:disable-next-line:prefer-array-literal
-type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) => Promise<Buffer>>;
+type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer, deterministicKey: Buffer) => Promise<Buffer>>;
 
 /**
  * Class to model RSA pairwise keys
  */
  export default class RsaPairwiseKey {
-
-  /**
-   * Buffer used for prime generation
-   */
-  private static deterministicKey: Buffer = Buffer.from('');
   
   /**
    * Statistics on the number of prime tests
@@ -101,15 +96,16 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
    */
    public static async generateDeterministicNumberForPrime (cryptoFactory: CryptoFactory, primeSize: number, personaMasterKey: Buffer, peerId: Buffer): Promise<Buffer> {
     const numberOfRounds: number = primeSize / (8 * 64);
-    this.deterministicKey = Buffer.from('');
+    let deterministicKey: Buffer = Buffer.from('');
     const rounds: PrimeDelegate = [];
     for (let inx = 0; inx < numberOfRounds ; inx++) {
-      rounds.push((cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer) => {
-        return this.generateHashForPrime(cryptoFactory, inx, key, data);
+      rounds.push(async (cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer, deterministicKey: Buffer) => {
+        deterministicKey = await this.generateHashForPrime(cryptoFactory, inx, key, data, deterministicKey);
+        return deterministicKey;
       });
     }
 
-    return this.executeRounds(cryptoFactory, rounds, 0, personaMasterKey, peerId);
+    return this.executeRounds(cryptoFactory, rounds, 0, personaMasterKey, peerId, deterministicKey);
   }
 
   /**
@@ -119,7 +115,7 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
    * @param key Signature key
    * @param data Data to sign
    */
-  private static async generateHashForPrime (cryptoFactory: CryptoFactory, _inx: number, key: Buffer, data: Buffer): Promise<Buffer> {
+  private static async generateHashForPrime (cryptoFactory: CryptoFactory, _inx: number, key: Buffer, data: Buffer, deterministicKey: Buffer): Promise<Buffer> {
     // Get the subtle crypto
     const crypto: SubtleCrypto = cryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac);
 
@@ -132,8 +128,7 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
 
     const importedKey = await crypto.importKey(W3cCryptoApiConstants.Jwk, signingKey, alg, false, ['sign']);
     const signature = await crypto.sign(alg, importedKey, data);
-    RsaPairwiseKey.deterministicKey = Buffer.concat([RsaPairwiseKey.deterministicKey, Buffer.from(signature)]);
-    return RsaPairwiseKey.deterministicKey;
+    return Buffer.concat([deterministicKey, Buffer.from(signature)]);
   }
 
   /**
@@ -143,13 +138,13 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
    * @param key Key to sign
    * @param data Data to sign
    */
-  private static async executeRounds (cryptoFactory: CryptoFactory, rounds: PrimeDelegate, inx: number, key: Buffer, data: Buffer): Promise<Buffer> {
-    const signature: Buffer = await rounds[inx](cryptoFactory, inx, key, data);
+  private static async executeRounds (cryptoFactory: CryptoFactory, rounds: PrimeDelegate, inx: number, key: Buffer, data: Buffer, deterministicKey: Buffer): Promise<Buffer> {
+    deterministicKey = await rounds[inx](cryptoFactory, inx, key, data, deterministicKey);
     if (inx + 1 === rounds.length) {
-      return this.deterministicKey;
+      return deterministicKey;
     } else {
-      await this.executeRounds(cryptoFactory, rounds, inx + 1, key, Buffer.from(signature));
-      return this.deterministicKey;
+      deterministicKey = await this.executeRounds(cryptoFactory, rounds, inx + 1, key, Buffer.from(deterministicKey), deterministicKey);
+      return deterministicKey;
     }
   }
 
