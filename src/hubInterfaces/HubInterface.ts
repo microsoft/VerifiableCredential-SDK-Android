@@ -6,8 +6,8 @@
 import UserAgentError from '../UserAgentError';
 import Commit from '../hubSession/Commit';
 import HubClient from '../hubClient/HubClient';
-import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubObject from '../hubClient/HubObject';
+import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 
 /**

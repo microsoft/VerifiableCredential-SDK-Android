@@ -30,6 +30,7 @@ export { CryptoOptions };
 
 // Hub Client and Methods
 import HubClient from './hubClient/HubClient';
+import HubObject from './hubClient/HubObject';
 import HubInterface from './hubInterfaces/HubInterface';
 import {HubInterfaceOptions, HubInterfaceType, CommitStrategyType } from './hubInterfaces/HubInterface';
 import Actions from './hubInterfaces/Actions';
@@ -37,7 +38,11 @@ import Collections from './hubInterfaces/Collections';
 import Permissions from './hubInterfaces/Permissions';
 import Profile from './hubInterfaces/Profile';
 export { HubClient, HubInterface, Actions, Collections, Permissions, Profile };
-export { HubInterfaceOptions, HubInterfaceType, CommitStrategyType };
+export { HubInterfaceOptions, HubInterfaceType, CommitStrategyType, HubObject };
+
+// User Agent Session
+import UserAgentSession from './userAgentSession/UserAgentSession';
+export { UserAgentSession };
 
 // CommitSigners
 export { default as CommitSigner } from './hubSession/crypto/CommitSigner';
