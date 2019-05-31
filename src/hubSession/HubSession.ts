@@ -12,8 +12,6 @@ import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubObjectQueryResponse from './responses/HubObjectQueryResponse';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
 import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
-
-// tslint:disable-next-line:import-name
 import fetch, { Request, RequestInit } from 'node-fetch';
 import Identifier from '../Identifier';
 import DidProtocol, { DidProtocolOptions } from '../crypto/protocols/did/DidProtocol';
@@ -95,11 +93,11 @@ export default class HubSession {
     rawRequestJson.sub = this.hubOwner.id;
 
     const rawRequestString = JSON.stringify(rawRequestJson);
-    const responseString = await this.makeRequest(rawRequestString);
+    const response = await this.makeRequest(rawRequestString);
     let responseObject: IHubResponse<string>;
 
     try {
-      responseObject = JSON.parse(responseString);
+      responseObject = response;
     } catch (e) {
       throw new HubError({
         error_code: HubErrorCode.ServerError,
@@ -117,7 +115,7 @@ export default class HubSession {
    * @param message The raw request body to send.
    * @param accessToken The access token to include in the request, if any.
    */
-  private async makeRequest(message: string): Promise<string> {
+  private async makeRequest(message: string): Promise<any> {
 
     if (!this.client || !this.hubOwner) {
       throw new HubError({
@@ -156,13 +154,13 @@ export default class HubSession {
     }
 
     const response = await res.buffer();
-    const plainResponse = {request: ''}; // await this.authentication.getVerifiedRequest(response, false);
+    const plainResponse = await didProtocol.decryptAndVerify(this.keyReference, response);
     if (plainResponse instanceof Buffer) {
       // This should never happen as it means we are trying to return an access token in response
       throw new Error('Internal error during decryption.');
     }
 
-    return plainResponse.request;
+    return plainResponse;
   }
 
   /**

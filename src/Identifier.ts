@@ -234,7 +234,7 @@ export default class Identifier {
       return token.getPayload();
     }
 
-    throw new UserAgentError('The signature validation failed.');
+    throw new UserAgentError(`The signature validation for '${this.id}' failed.`);
   }
 
   /**

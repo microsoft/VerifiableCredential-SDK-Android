@@ -16,7 +16,7 @@ self-issued id token.</p></dd>
 <dt><a href="#CryptoError">CryptoError</a></dt>
 <dd><p>Base error class for the crypto.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
-<dd><p>Interface defining options for the
+<dd><p>Class defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
 <dd></dd>
@@ -62,6 +62,9 @@ a user&#39;s Identity Hub.</p></dd>
 based on: <a href="https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md">https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md</a>.</p></dd>
 <dt><a href="#UserServiceEndpoint">UserServiceEndpoint</a></dt>
 <dd><p>Class to represent a host service endpoint.</p></dd>
+<dt><a href="#UserAgentSession">UserAgentSession</a></dt>
+<dd><p>Class for creating a User Agent Session for sending and verifying
+Authentication Requests and Responses.</p></dd>
 </dl>
 
 ## Members
@@ -302,7 +305,7 @@ credential for the specified identifier.</p>
 <a name="HubClientOptions"></a>
 
 ## HubClientOptions
-<p>Interface defining options for the
+<p>Class defining options for the
 HubClient, such as hub Identifier and client Identifier.</p>
 
 **Kind**: global class  
@@ -867,6 +870,58 @@ output by JSON.stringify.</p>
 output by JSON.parse.</p>
 
 **Kind**: static method of [<code>UserServiceEndpoint</code>](#UserServiceEndpoint)  
+<a name="UserAgentSession"></a>
+
+## UserAgentSession
+<p>Class for creating a User Agent Session for sending and verifying
+Authentication Requests and Responses.</p>
+
+**Kind**: global class  
+
+* [UserAgentSession](#UserAgentSession)
+    * [.signRequest(redirectUrl, nonce, claimRequests, state)](#UserAgentSession+signRequest)
+    * [.signResponse(redirectUrl, nonce, state, claims)](#UserAgentSession+signResponse)
+    * [.verify(jws)](#UserAgentSession+verify)
+
+<a name="UserAgentSession+signRequest"></a>
+
+### userAgentSession.signRequest(redirectUrl, nonce, claimRequests, state)
+<p>Sign a User Agent Request.</p>
+
+**Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+
+| Param | Description |
+| --- | --- |
+| redirectUrl | <p>url that recipient should send response back to.</p> |
+| nonce | <p>nonce that will come back in response.</p> |
+| claimRequests | <p>any claims that sender is requesting from the recipient.</p> |
+| state | <p>optional stringified JSON state opaque object that will come back in response.</p> |
+
+<a name="UserAgentSession+signResponse"></a>
+
+### userAgentSession.signResponse(redirectUrl, nonce, state, claims)
+<p>Sign a User Agent Response.</p>
+
+**Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+
+| Param | Description |
+| --- | --- |
+| redirectUrl | <p>url that request was sent to.</p> |
+| nonce | <p>nonce to return to sender of the request.</p> |
+| state | <p>opaque object to return to sender of the request.</p> |
+| claims | <p>any claims that request asked for.</p> |
+
+<a name="UserAgentSession+verify"></a>
+
+### userAgentSession.verify(jws)
+<p>Verify a request was signed and sent by Identifier.</p>
+
+**Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+
+| Param | Description |
+| --- | --- |
+| jws | <p>Signed Payload</p> |
+
 <a name="CredentialType"></a>
 
 ## CredentialType

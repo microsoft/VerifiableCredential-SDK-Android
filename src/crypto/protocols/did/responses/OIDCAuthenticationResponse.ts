@@ -12,7 +12,7 @@ export default interface AuthenticationResponse {
    */
   iss: 'https://self-issued.me';
   /** 
-   * DID used to sign the response 
+   * thumbprint of the key used to sign response
    */
   sub: string;
   /** 

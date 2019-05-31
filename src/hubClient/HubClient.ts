@@ -15,7 +15,7 @@ import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest'
 import HubObject from './HubObject';
 
 /**
- * Interface defining options for the
+ * Class defining options for the
  * HubClient, such as hub Identifier and client Identifier.
  */
 export class HubClientOptions {
