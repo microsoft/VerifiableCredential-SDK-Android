@@ -39,7 +39,7 @@ class Helpers {
 
 describe('PairwiseKey', () => {
 
-  //const KeyGenerationAlgorithm_RSA256 = 0;
+  const KeyGenerationAlgorithm_RSA256 = 0;
   const KeyGenerationAlgorithm_ECDSA =  1;
 
   // tslint:disable-next-line:mocha-no-side-effect-code
@@ -67,7 +67,7 @@ describe('PairwiseKey', () => {
   const cryptoOperations = new SubtleCryptoOperations();
   defaultCryptoFactory = new CryptoFactory(keyStore, cryptoOperations);
   subtleCryptoExtensions = new SubtleCryptoExtension(defaultCryptoFactory);
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
   });
 
   afterEach(() => {
@@ -84,6 +84,7 @@ describe('PairwiseKey', () => {
     });
     expect(throwed).toBeTruthy();
   });
+
   // tslint:disable-next-line:mocha-unneeded-done
   it('should generate the same keys as in the EC reference file', async (done) => {
     let inx: number = 0;
@@ -107,6 +108,46 @@ describe('PairwiseKey', () => {
       expect(1).toBe(pairwiseKeys.filter((element: any) => element.key === pairwiseKey.d).length);
     }
 
+    done();
+  });
+
+  // tslint:disable-next-line:mocha-unneeded-done
+  it('should generate the same keys as in the RSA reference file', async (done) => {
+    const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_RSA256];
+    const pairwiseKeys = require('./Pairwise.RSA.json');
+    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seedReference = 'masterkey';
+    await keyStore.save(seedReference, seed);
+    for (let inx = 0; inx < 30; inx++) {
+      const persona: string = 'abcdef';
+      let id = `${inx}`;
+      // Generate key
+      const pairwiseKey: EcPrivateKey = <EcPrivateKey>await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, id);
+      expect(pairwiseKey.kid).toBeDefined();
+
+      // console.log(`{ "pwid": "${id}", "key": "${pairwiseKey.d}"},`);
+      expect(pairwiseKeys[inx].key).toBe(pairwiseKey.d);
+      expect(1).toBe(pairwiseKeys.filter((element: any) => element.key === pairwiseKey.d).length);
+    }
+
+    done();
+  });
+
+  // tslint:disable-next-line:mocha-unneeded-done
+  it('should generate a 2048 bit pairwise RSA key', async (done) => {
+    const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_RSA256];
+    alg.modulusLength = 2048;
+    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seedReference = 'masterkey';
+    await keyStore.save(seedReference, seed);
+    const persona: string = 'did:persona';
+    const peer = 'did:peer';
+
+    // Generate key
+    const pairwiseKey: EcPrivateKey = <EcPrivateKey>await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, peer);
+    expect(pairwiseKey.kid).toBeDefined();
+
+    expect(pairwiseKey.d).toBe('LrJvTmCSQsIZajmSHGw98j7pOE1-umx7gemMxXS29cWPmaw8XZGnrpp6PG3zvIC5mF0zu8BtbRl8Bws-fZGqJXiqJNBFcA03erU22yNEsbA-IeylCIZ34Qk34hcRCzP9Q7AkOn5EaS9I2k22Bk0qgOjJS8WVByj-B-ll9GHzahI1Vq76BVTh8lahHI6TEf5kdg5byndw-pFwab_zZ5ftdAPtmIu61mPr5wA0ykxn-MzSTZVvggpvNef-Obdj32sCp1Rz2x8KCrkrWUD7W4hhVF2QLHve4Cm9IpfzPZttSp-OlIdTYEAJhd3nj2BhStKK-K6FGgi65VrbPYSbh21cAQ');
     done();
   });
 
