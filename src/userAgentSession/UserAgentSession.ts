@@ -10,7 +10,6 @@ import CryptoOptions from '../CryptoOptions';
 import IResolver from '../resolvers/IResolver';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../crypto/keyStore/KeyStoreInMemory';
-import fetch, { Request, RequestInit } from 'node-fetch';
 import OIDCAuthenticationRequest from '../crypto/protocols/did/requests/OIDCAuthenticationRequest';
 import OIDCAuthenticationResponse from '../crypto/protocols/did/responses/OIDCAuthenticationResponse';
 import UserAgentError from '../UserAgentError';
