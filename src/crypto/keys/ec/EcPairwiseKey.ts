@@ -9,6 +9,7 @@ import CryptoFactory from "../../plugin/CryptoFactory";
 import { CryptoAlgorithm } from "../../keyStore/IKeyStore";
 import { KeyType } from "../KeyTypeFactory";
 import EcPrivateKey from "./EcPrivateKey";
+import CryptoError from "../../CryptoError";
 
 // Create and initialize EC context
 const BN = require('bn.js');
@@ -46,7 +47,7 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
     const pairwiseKeySeed = await crypto.sign(alg, key, Buffer.from(peerId));
  
     if (SUPPORTED_CURVES.indexOf(algorithm.namedCurve) === -1) {
-      throw new Error(`Curve ${algorithm.namedCurve} is not supported`);
+      throw new CryptoError(algorithm, `Curve ${algorithm.namedCurve} is not supported`);
     }
 
     const privateKey = new BN(Buffer.from(pairwiseKeySeed));

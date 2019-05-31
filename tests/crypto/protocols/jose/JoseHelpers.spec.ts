@@ -5,6 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 import JoseHelpers from "../../../../src/crypto/protocols/jose/JoseHelpers";
 import { JweHeader } from "../../../../src/crypto/protocols/jwe/IJweGeneralJson";
+import CryptoProtocolError from "../../../../src/crypto/protocols/CryptoProtocolError";
 import { TSMap } from "typescript-map";
 
 describe('JoseHelpers', () => {
@@ -16,6 +17,7 @@ describe('JoseHelpers', () => {
     header.set('key', 'value');
     expect(JoseHelpers.headerHasElements(header)).toBeTruthy();
   });
+
   it('should encode headers', () => {
     
     const header: JweHeader = new TSMap();
@@ -31,4 +33,15 @@ describe('JoseHelpers', () => {
     expect(encoded).toEqual('{"key":"value"}');
   });
 
+  it('should throw because header element does not exist', () => {
+    let throwed = false;
+    try {
+      JoseHelpers.getOptionsProperty('xxxx', undefined, undefined);
+    } catch(err) {
+      throwed = true;
+      expect(err.message).toBe(`The property 'xxxx' is missing from options`);
+      expect(err.constructor === CryptoProtocolError).toBeTruthy();
+    }
+    expect(throwed).toBeTruthy();
+  });
 });

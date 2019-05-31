@@ -10,6 +10,8 @@ import SubtleCryptoOperations from '../../../src/crypto/plugin/SubtleCryptoOpera
 import SubtleCryptoExtension from '../../../src/crypto/plugin/SubtleCryptoExtension';
 import PrivateKey from '../../../src/crypto/keys/PrivateKey';
 import EcPrivateKey from '../../../src/crypto/keys/ec/EcPrivateKey';
+import PairwiseKey from '../../../src/crypto/keys/PairwiseKey';
+import base64url from 'base64url';
 
 
 class Helpers {
@@ -26,7 +28,7 @@ class Helpers {
     // Make sure the pairwise key is unique
     public static async generateUniquePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
       const results: string[] = [];
-      for (let index = 0 ; index < 50; index++) {
+      for (let index = 0 ; index < 10; index++) {
         const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, `${persona}-${index}`, peer);
         results.push(<string>pairwiseKey.d);
         expect(1).toBe(results.filter(element => element === pairwiseKey.d).length);
@@ -85,10 +87,38 @@ describe('PairwiseKey', () => {
     expect(throwed).toBeTruthy();
   });
 
+  it(`should throw because the EC curve is not supported for pairwise key generation`, async () => {
+    const alg =  { name: 'ECDSA', namedCurve: 'P-256', hash: { name: 'SHA-256' } };
+    let throwed = false;
+    await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, 'did:persona', 'did:peer')    
+    .catch((err: any) => {
+      throwed = true;
+      expect(err.message).toBe('Curve P-256 is not supported');
+    });
+    expect(throwed).toBeTruthy();
+  });
+
+// tslint:disable-next-line: mocha-unneeded-done
+  it('should generate a masterkey', async (done) => {
+    const keyStore = new KeyStoreInMemory();
+    await keyStore.save('mk', Buffer.from('abcdefg'));
+    const pairwise = new PairwiseKey(new CryptoFactory(keyStore));
+    let masterkey = await (<any>pairwise).generatePersonaMasterKey('mk', 'persona');
+    let encoded = base64url.encode(masterkey);
+    expect(encoded).toEqual('h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw');
+
+    masterkey = await (<any>pairwise).generatePersonaMasterKey('mk', 'persona');
+    encoded = base64url.encode(masterkey);
+    expect(encoded).toEqual('h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw');
+    masterkey = await (<any>pairwise).generatePersonaMasterKey('mk', 'persona1');
+    encoded = base64url.encode(masterkey);
+    expect(encoded).not.toEqual('h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw');
+    done();
+  });
   // tslint:disable-next-line:mocha-unneeded-done
   it('should generate the same keys as in the EC reference file', async (done) => {
     let inx: number = 0;
-    let nrIds: number = 100;
+    let nrIds: number = 10;
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
     const pairwiseKeys = require('./Pairwise.EC.json');
     const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
@@ -99,11 +129,10 @@ describe('PairwiseKey', () => {
       let id = `${inx}`;
       
       // Generate key
-      const pairwiseKey: EcPrivateKey = <EcPrivateKey>await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, id);
+      const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, seedReference, persona, id);
       expect(pairwiseKey.kid).toBeDefined();
 
       // console.log(`{ "pwid": "${id}", "key": "${jwk.d}"},`);
-      // console.log(`${id}: Check ${pairwiseKeys[inx].pwid}: ${pairwiseKeys[inx].key} == ${jwk.d}`);
       expect(pairwiseKeys[inx].key).toBe(pairwiseKey.d);
       expect(1).toBe(pairwiseKeys.filter((element: any) => element.key === pairwiseKey.d).length);
     }
