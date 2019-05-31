@@ -55,4 +55,25 @@ describe('KeyStoreInMemory', () => {
     expect(signature).toBeUndefined();
     expect(throwCaught).toBe(true);
   });
+
+  it('should throw because the key does not exist', async () => {
+
+  // Setup registration environment
+  const jwk: any = {
+    kty: 'oct',
+    use: 'sig',
+    k: 'AAEE'
+  };
+
+  const keyStore = new KeyStoreInMemory();
+  await keyStore.save('key', jwk);
+  let throwCaught = false;
+  const signature = await keyStore.get('key1', true)
+  .catch((err) => {
+    throwCaught = true;
+    expect(err).toBe('key1 not found');
+  });
+  expect(signature).toBeUndefined();
+  expect(throwCaught).toBe(true);
+  });
 });

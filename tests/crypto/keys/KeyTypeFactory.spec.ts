@@ -7,6 +7,14 @@
 import KeyTypeFactory, { KeyType } from '../../../src/crypto/keys/KeyTypeFactory';
 
 describe('KeyTypeFactory', () => {
+  it(`should return the key type for 'EC' via JWA`, () => {
+    expect(KeyTypeFactory.createViaJwa('ES256K')).toEqual(KeyType.EC);
+  });
+  
+  it(`should return the key type for 'RSA' via JWA`, () => {
+    expect(KeyTypeFactory.createViaJwa('RS256')).toEqual(KeyType.RSA);
+  });
+  
   it(`should return the key type for 'hmac'`, () => {
     const alg = { name: 'hmac' };
     expect(KeyTypeFactory.createViaWebCrypto(alg)).toBe(KeyType.Oct);
