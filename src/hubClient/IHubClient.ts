@@ -6,6 +6,8 @@
 import Identifier from '../Identifier';
 import Commit from '../hubSession/Commit';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
+import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
+import HubObject from './HubObject';
 
 /**
  * Class for defining options for the
@@ -40,10 +42,17 @@ export default interface IHubClient {
    */
   commit (commit: Commit): Promise<void>;
 
-  /**
+   /**
    * Query Objects of certain type in Hub.
-   * @param queryRequest object that tells the hub what objects to get.
+   * @param queryRequest object that tells the hub what object to get.
    */
-  queryObjects (queryRequest: HubObjectQueryRequest): Promise<any>;
+  queryObjects (queryRequest: HubObjectQueryRequest): Promise<HubObject[]>
+
+    /**
+   * Query Object specified by certain id 
+   * @param commitQueryRequest HubCommitQueryRequest object to request object of specific id.
+   * @param hubObject a HubObject containing metadata such as object id.
+   */
+  queryObject (commitQueryRequest: HubCommitQueryRequest, hubObject: HubObject): Promise<HubObject> 
 
 }

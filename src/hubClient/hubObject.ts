@@ -34,8 +34,10 @@ export default class HubObject {
 
   /**
    * If payload is not defined, get the payload from hub session using metadata.
+   * @param hubSession the hub session that will be used to query object
+   * @param commitQueryRequest the commit query requests for getting all commits for certain object.
    */
-  public async setPayload(hubSession: HubSession, commitQueryRequest: HubCommitQueryRequest): Promise<any> {
+  public async hydrate(hubSession: HubSession, commitQueryRequest: HubCommitQueryRequest): Promise<any> {
     if (this.payload) {
       return this.payload;
     }

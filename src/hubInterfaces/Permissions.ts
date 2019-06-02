@@ -10,8 +10,8 @@ import HubInterface, { HubInterfaceOptions, HubInterfaceType } from './HubInterf
 */
 export default class Permissions extends HubInterface {
 
-  constructor (hubMethodsOptions: HubInterfaceOptions) {
-    hubMethodsOptions.hubInterface = HubInterfaceType.Permissions;
-    super(hubMethodsOptions);
+  constructor (hubInterfaceOptions: HubInterfaceOptions) {
+    hubInterfaceOptions.hubInterface = HubInterfaceType.Permissions;
+    super(hubInterfaceOptions);
   }
 }

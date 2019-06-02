@@ -9,6 +9,7 @@ import HubClient from '../hubClient/HubClient';
 import HubObject from '../hubClient/HubObject';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
+import { HubClientOptions } from '../hubClient/IHubClient';
 
 /**
  * Constants that represent what type of commit strategy to be used.
@@ -39,34 +40,29 @@ export enum Operation {
 }
 
 /**
- * Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.
+ * Interface for defining options for HubInterface.
  */
-export class HubInterfaceOptions {
+export class HubInterfaceOptions extends HubClientOptions {
 
   /**
-   * Hub Client that will be used to commit and query a hub.
-   */
-  hubClient: HubClient | undefined;
-
-  /**
-   * the schema for the object that will be committed.
+   * The schema for the object that will be committed.
    */
   context: string | undefined;
 
   /**
-   * the type of the object that will be committed.
+   * The type of the object that will be committed.
    */
   type: string | undefined;
 
   /**
-   * Optional Commit Strategy to define what strategy to use when compiling commits.
+   * Commit Strategy to define what strategy to use when compiling commits.
    */
   commitStrategy: CommitStrategyType = CommitStrategyType.Basic;
 
   /**
-   * Optional Hub Interface to define the type of interface the hub request payload will be.
+   * Hub Interface to define the type of interface the hub request payload will be.
    */
-  hubInterface?: HubInterfaceType;
+  hubInterface: HubInterfaceType = HubInterfaceType.Collections;
 }
 
 /**
@@ -87,22 +83,29 @@ export default abstract class HubInterface {
    */
   constructor (hubInterfaceOptions: HubInterfaceOptions) {
 
-    if (!hubInterfaceOptions.context || !hubInterfaceOptions.type || !hubInterfaceOptions.hubClient) {
+    if (!hubInterfaceOptions.context || !hubInterfaceOptions.type) {
       throw new UserAgentError(`Hub Interface Options missing parameters`);
     }
     
     this.context = hubInterfaceOptions.context;
     this.type = hubInterfaceOptions.type;
-    this.hubClient = hubInterfaceOptions.hubClient;
-
-    if (!hubInterfaceOptions.hubInterface) {
-      throw new UserAgentError('Hub Interface is not defined in the Hub Method Options');
-    }
     this.hubInterface = hubInterfaceOptions.hubInterface;
     this.commitStrategy = hubInterfaceOptions.commitStrategy;
+
+    // set up hub client
+    const hubClientOptions: HubClientOptions = {
+      hubOwner: hubInterfaceOptions.hubOwner,
+      clientIdentifier: hubInterfaceOptions.clientIdentifier,
+      keyReference: hubInterfaceOptions.keyReference
+    };
+    this.hubClient = new HubClient(hubClientOptions);
   }
 
-  public async addItem(payload: any): Promise<void> {
+  /**
+   * Add object to Hub Owner's hub.
+   * @param object object to be added to hub owned by hub owner.
+   */
+  public async addObject(object: any): Promise<void> {
 
     const commit = new Commit({
       protected: {
@@ -115,15 +118,15 @@ export default abstract class HubInterface {
         operation: Operation.Create,
         commit_strategy: this.commitStrategy,
       },
-      payload
+      payload: object
     });
     this.hubClient.commit(commit);
   }
   
   /**
-   * Get items with just metadata.
+   * Get all unhydrated hubObjects of specific type.
    */
-  public async getPartialItems() {
+  public async getUnHydratedObjects(): Promise<HubObject[]> {
   
     const queryRequest = new HubObjectQueryRequest({
       interface: this.hubInterface,
@@ -137,10 +140,10 @@ export default abstract class HubInterface {
   }
 
   /**
-   * create and return fully-formed hubObject.
-   * @param hubObject partial hubObject with metadata
+   * create and return hydrated hubObject.
+   * @param hubObject unhydrated hubObject containing on object metadata.
    */
-  public async getItem(hubObject: HubObject): Promise<HubObject> {
+  public async getObject(hubObject: HubObject): Promise<HubObject> {
 
     const metadata = hubObject.getMetadata();
 
@@ -151,23 +154,29 @@ export default abstract class HubInterface {
   }
 
   /**
-   * Get a list of fully-formed HubObjects with metadata and payload.
+   * Get a list of all hydrated HubObjects containing both metadata and payload.
    */
-  public async getFullItems(): Promise<HubObject[]> {
-    const items = await this.getPartialItems();
+  public async getObjects(): Promise<HubObject[]> {
+    const objects = await this.getUnHydratedObjects();
 
-    items.forEach(async item => {
-      item = await this.getItem(item); 
+    objects.forEach(async obj => {
+      obj = await this.getObject(obj); 
     });
 
-    return items;
+    return objects;
   }
 
-  public async updateItem() {
-    throw new UserAgentError('Not Implemented');
+  /**
+   * Update Hub Object in hub owner's hub.
+   */
+  public async updateObject(hubObject: HubObject) {
+    throw new UserAgentError(`Not Implemented for ${hubObject}`);
   }
 
-  public async deleteItem() {
-    throw new UserAgentError('Not Implemented');
+  /**
+   * Update Hub Object in hub owner's hub.
+   */
+  public async deleteObject(hubObject: HubObject) {
+    throw new UserAgentError(`Not Implemented for ${hubObject}`);
   }
 }

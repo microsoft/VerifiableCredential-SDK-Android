@@ -17,6 +17,7 @@ import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
 import JweToken from './crypto/protocols/jwe/JweToken';
+import JoseConstants from './crypto/protocols/jose/JoseConstants';
 
 /**
  * Class for creating and managing identifiers,
@@ -229,7 +230,7 @@ export default class Identifier {
     const signingOptions: ISigningOptions = {
       cryptoFactory: (<UserAgentOptions>this.options).cryptoFactory
     };
-    const token: JwsToken = JwsToken.deserialize(jws, signingOptions);
+    const token = JwsToken.deserialize(jws, signingOptions);
     if (token.verify(this.document.getPublicKeysFromDocument(), signingOptions)) {
       return token.getPayload();
     }
@@ -251,7 +252,7 @@ export default class Identifier {
     }
 
     // create a jweToken with temp cryptoFactory and algorithm.
-    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: ''});
+    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: JoseConstants.AesGcm128});
 
     // encrypt payload using public keys.
     const encryptedToken = await jweToken.encrypt(this.document.getPublicKeysFromDocument(), payload, ProtectionFormat.JweCompactJson);
@@ -266,6 +267,7 @@ export default class Identifier {
    * @param keyReference string that references what key to use from keystore.
    */
   public async decrypt (cipher: Buffer, keyReference: string): Promise<string> {
+    
     if (!this.options) {
       throw new UserAgentError('Options Undefined');
     }

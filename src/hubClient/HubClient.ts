@@ -10,30 +10,9 @@ import CommitSigner from '../hubSession/crypto/CommitSigner';
 import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
-import IHubClient from './IHubClient';
+import IHubClient, {HubClientOptions } from './IHubClient';
 import HubObject from './HubObject';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
-
-/**
- * Class defining options for the
- * HubClient, such as hub Identifier and client Identifier.
- */
-export class HubClientOptions {
-  /**
-   * The Identifier of the owner of the hub.
-   */
-  hubOwner: Identifier | undefined;
-
-  /**
-   * The Identifier of the Client that wants to start hub session.
-   */
-  clientIdentifier: Identifier | undefined;
-
-  /**
-   * Key reference to private key to be used to sign commits and create HubSession
-   */
-  keyReference: string | undefined;
-}
 
 /**
  * Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
@@ -62,8 +41,8 @@ export default class HubClient implements IHubClient {
   }
 
   /**
-   * 
-   * @param commit Signs and sends a commit to the hub owner's hub.
+   * Signs and sends a commit to the hub owner's hub.
+   * @param commit commit to be sent to hub owner's hub.
    */
   public async commit (commit: Commit) {
 
@@ -97,7 +76,7 @@ export default class HubClient implements IHubClient {
 
   /**
    * Query Objects of certain type in Hub.
-   * @param queryRequest object that tells the hub what objec to get.
+   * @param queryRequest object that tells the hub what object to get.
    */
   public async queryObjects (queryRequest: HubObjectQueryRequest): Promise<HubObject[]> {
     const session = await this.createHubSession();
@@ -116,10 +95,11 @@ export default class HubClient implements IHubClient {
   /**
    * Query Object specified by certain id 
    * @param commitQueryRequest HubCommitQueryRequest object to request object of specific id.
+   * @param hubObject a HubObject containing metadata such as object id.
    */
   public async queryObject (commitQueryRequest: HubCommitQueryRequest, hubObject: HubObject): Promise<HubObject> {
     const session = await this.createHubSession();
-    await hubObject.setPayload(session, commitQueryRequest);
+    await hubObject.hydrate(session, commitQueryRequest);
     return hubObject;
 
   }

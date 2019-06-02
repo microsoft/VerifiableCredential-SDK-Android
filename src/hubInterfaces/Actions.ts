@@ -6,12 +6,12 @@
 import HubInterface, { HubInterfaceOptions, HubInterfaceType } from './HubInterface';
 
 /**
-* A Class that represents objects 
+* A Class that does CRUD operations for storing objects as Actions in the Hub
 */
 export default class Actions extends HubInterface {
 
-  constructor (hubMethodsOptions: HubInterfaceOptions) {
-    hubMethodsOptions.hubInterface = HubInterfaceType.Action;
-    super(hubMethodsOptions);
+  constructor (hubInterfaceOptions: HubInterfaceOptions) {
+    hubInterfaceOptions.hubInterface = HubInterfaceType.Action;
+    super(hubInterfaceOptions);
   }
 }

@@ -15,26 +15,24 @@ self-issued id token.</p></dd>
 self-issued id token.</p></dd>
 <dt><a href="#CryptoError">CryptoError</a></dt>
 <dd><p>Base error class for the crypto.</p></dd>
-<dt><a href="#HubClientOptions">HubClientOptions</a></dt>
-<dd><p>Class defining options for the
-HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
-<dd></dd>
+<dd><p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
+In a Hub.</p></dd>
 <dt><a href="#HubObject">HubObject</a></dt>
 <dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Class for defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dt><a href="#Actions">Actions</a></dt>
-<dd><p>A Class that represents objects</p></dd>
+<dd><p>A Class that does CRUD operations for storing objects as Actions in the Hub</p></dd>
 <dt><a href="#Collections">Collections</a></dt>
-<dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
+<dd><p>A Class that does CRUD operations for storing objects as Collections in the Hub</p></dd>
 <dt><a href="#HubInterface">HubInterface</a></dt>
 <dd></dd>
 <dt><a href="#Permissions">Permissions</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Permissions in the Hub</p></dd>
 <dt><a href="#Profile">Profile</a></dt>
-<dd><p>A Class that does CRUD operations for storing items as Collections in the Hub</p></dd>
+<dd><p>A Class that does CRUD operations for storing objects as Profile in the Hub.</p></dd>
 <dt><a href="#Commit">Commit</a></dt>
 <dd><p>Represents a new (i.e pending, unsigned) commit which will create, update, or delete an object in
 a user&#39;s Identity Hub.</p></dd>
@@ -76,9 +74,6 @@ Authentication Requests and Responses.</p></dd>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
-<dd><p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
-In a Hub.</p></dd>
-<dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Interface for HubClient class that manages which hub instance to create hub session with
 And commits and queries for objects in the hub session.</p></dd>
 <dt><a href="#CommitStrategyType">CommitStrategyType</a></dt>
@@ -88,7 +83,7 @@ And commits and queries for objects in the hub session.</p></dd>
 <dt><a href="#HubInterfaceType">HubInterfaceType</a></dt>
 <dd><p>Hub Operations</p></dd>
 <dt><a href="#Operation">Operation</a></dt>
-<dd><p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p></dd>
+<dd><p>Interface for defining options for HubInterface.</p></dd>
 <dt><a href="#HubInterfaceOptions">HubInterfaceOptions</a></dt>
 <dd><p>An Abstract Class for Hub Interfaces.</p></dd>
 <dt><a href="#HubSessionOptions">HubSessionOptions</a></dt>
@@ -302,23 +297,19 @@ credential for the specified identifier.</p>
 | protocol | <p>name</p> |
 | message | <p>for the error</p> |
 
-<a name="HubClientOptions"></a>
-
-## HubClientOptions
-<p>Class defining options for the
-HubClient, such as hub Identifier and client Identifier.</p>
-
-**Kind**: global class  
 <a name="HubClient"></a>
 
 ## HubClient
+<p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
+In a Hub.</p>
+
 **Kind**: global class  
 
 * [HubClient](#HubClient)
     * [new HubClient(hubClientOptions)](#new_HubClient_new)
     * [.commit(commit)](#HubClient+commit)
     * [.queryObjects(queryRequest)](#HubClient+queryObjects)
-    * [.queryObject(commitQueryRequest)](#HubClient+queryObject)
+    * [.queryObject(commitQueryRequest, hubObject)](#HubClient+queryObject)
     * [.getHubInstances()](#HubClient+getHubInstances)
     * [.createHubSession()](#HubClient+createHubSession)
 
@@ -335,11 +326,13 @@ HubClient, such as hub Identifier and client Identifier.</p>
 <a name="HubClient+commit"></a>
 
 ### hubClient.commit(commit)
+<p>Signs and sends a commit to the hub owner's hub.</p>
+
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
 
 | Param | Description |
 | --- | --- |
-| commit | <p>Signs and sends a commit to the hub owner's hub.</p> |
+| commit | <p>commit to be sent to hub owner's hub.</p> |
 
 <a name="HubClient+queryObjects"></a>
 
@@ -350,11 +343,11 @@ HubClient, such as hub Identifier and client Identifier.</p>
 
 | Param | Description |
 | --- | --- |
-| queryRequest | <p>object that tells the hub what objec to get.</p> |
+| queryRequest | <p>object that tells the hub what object to get.</p> |
 
 <a name="HubClient+queryObject"></a>
 
-### hubClient.queryObject(commitQueryRequest)
+### hubClient.queryObject(commitQueryRequest, hubObject)
 <p>Query Object specified by certain id</p>
 
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
@@ -362,6 +355,7 @@ HubClient, such as hub Identifier and client Identifier.</p>
 | Param | Description |
 | --- | --- |
 | commitQueryRequest | <p>HubCommitQueryRequest object to request object of specific id.</p> |
+| hubObject | <p>a HubObject containing metadata such as object id.</p> |
 
 <a name="HubClient+getHubInstances"></a>
 
@@ -385,7 +379,7 @@ creates a hubSession for hub instance that is available/online.</p>
 
 * [HubObject](#HubObject)
     * [new HubObject(objectMetadata)](#new_HubObject_new)
-    * [.setPayload()](#HubObject+setPayload)
+    * [.hydrate(hubSession, commitQueryRequest)](#HubObject+hydrate)
     * [.getPayload()](#HubObject+getPayload)
 
 <a name="new_HubObject_new"></a>
@@ -398,12 +392,18 @@ creates a hubSession for hub instance that is available/online.</p>
 | --- | --- |
 | objectMetadata | <p>object metadata that represents an object in a hub.</p> |
 
-<a name="HubObject+setPayload"></a>
+<a name="HubObject+hydrate"></a>
 
-### hubObject.setPayload()
+### hubObject.hydrate(hubSession, commitQueryRequest)
 <p>If payload is not defined, get the payload from hub session using metadata.</p>
 
 **Kind**: instance method of [<code>HubObject</code>](#HubObject)  
+
+| Param | Description |
+| --- | --- |
+| hubSession | <p>the hub session that will be used to query object</p> |
+| commitQueryRequest | <p>the commit query requests for getting all commits for certain object.</p> |
+
 <a name="HubObject+getPayload"></a>
 
 ### hubObject.getPayload()
@@ -418,13 +418,13 @@ HubClient, such as hub Identifier and client Identifier.</p>
 <a name="Actions"></a>
 
 ## Actions
-<p>A Class that represents objects</p>
+<p>A Class that does CRUD operations for storing objects as Actions in the Hub</p>
 
 **Kind**: global class  
 <a name="Collections"></a>
 
 ## Collections
-<p>A Class that does CRUD operations for storing items as Collections in the Hub</p>
+<p>A Class that does CRUD operations for storing objects as Collections in the Hub</p>
 
 **Kind**: global class  
 <a name="HubInterface"></a>
@@ -434,9 +434,12 @@ HubClient, such as hub Identifier and client Identifier.</p>
 
 * [HubInterface](#HubInterface)
     * [new HubInterface([hubInterfaceOptions])](#new_HubInterface_new)
-    * [.getPartialItems()](#HubInterface+getPartialItems)
-    * [.getItem(hubObject)](#HubInterface+getItem)
-    * [.getFullItems()](#HubInterface+getFullItems)
+    * [.addObject(object)](#HubInterface+addObject)
+    * [.getUnHydratedObjects()](#HubInterface+getUnHydratedObjects)
+    * [.getObject(hubObject)](#HubInterface+getObject)
+    * [.getObjects()](#HubInterface+getObjects)
+    * [.updateObject()](#HubInterface+updateObject)
+    * [.deleteObject()](#HubInterface+deleteObject)
 
 <a name="new_HubInterface_new"></a>
 
@@ -448,27 +451,50 @@ HubClient, such as hub Identifier and client Identifier.</p>
 | --- | --- |
 | [hubInterfaceOptions] | <p>for configuring how to form hub requests and responses.</p> |
 
-<a name="HubInterface+getPartialItems"></a>
+<a name="HubInterface+addObject"></a>
 
-### hubInterface.getPartialItems()
-<p>Get items with just metadata.</p>
-
-**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
-<a name="HubInterface+getItem"></a>
-
-### hubInterface.getItem(hubObject)
-<p>create and return fully-formed hubObject.</p>
+### hubInterface.addObject(object)
+<p>Add object to Hub Owner's hub.</p>
 
 **Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
 
 | Param | Description |
 | --- | --- |
-| hubObject | <p>partial hubObject with metadata</p> |
+| object | <p>object to be added to hub owned by hub owner.</p> |
 
-<a name="HubInterface+getFullItems"></a>
+<a name="HubInterface+getUnHydratedObjects"></a>
 
-### hubInterface.getFullItems()
-<p>Get a list of fully-formed HubObjects with metadata and payload.</p>
+### hubInterface.getUnHydratedObjects()
+<p>Get all unhydrated hubObjects of specific type.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
+<a name="HubInterface+getObject"></a>
+
+### hubInterface.getObject(hubObject)
+<p>create and return hydrated hubObject.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
+
+| Param | Description |
+| --- | --- |
+| hubObject | <p>unhydrated hubObject containing on object metadata.</p> |
+
+<a name="HubInterface+getObjects"></a>
+
+### hubInterface.getObjects()
+<p>Get a list of all hydrated HubObjects containing both metadata and payload.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
+<a name="HubInterface+updateObject"></a>
+
+### hubInterface.updateObject()
+<p>Update Hub Object in hub owner's hub.</p>
+
+**Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
+<a name="HubInterface+deleteObject"></a>
+
+### hubInterface.deleteObject()
+<p>Update Hub Object in hub owner's hub.</p>
 
 **Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
 <a name="Permissions"></a>
@@ -480,7 +506,7 @@ HubClient, such as hub Identifier and client Identifier.</p>
 <a name="Profile"></a>
 
 ## Profile
-<p>A Class that does CRUD operations for storing items as Collections in the Hub</p>
+<p>A Class that does CRUD operations for storing objects as Profile in the Hub.</p>
 
 **Kind**: global class  
 <a name="Commit"></a>
@@ -938,13 +964,6 @@ methods of a credential.</p>
 <a name="HubClientOptions"></a>
 
 ## HubClientOptions
-<p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
-In a Hub.</p>
-
-**Kind**: global variable  
-<a name="HubClientOptions"></a>
-
-## HubClientOptions
 <p>Interface for HubClient class that manages which hub instance to create hub session with
 And commits and queries for objects in the hub session.</p>
 
@@ -970,7 +989,7 @@ And commits and queries for objects in the hub session.</p>
 <a name="Operation"></a>
 
 ## Operation
-<p>Interface for defining options for HubMethods such as hubSession, commitSigner, and hubInterface.</p>
+<p>Interface for defining options for HubInterface.</p>
 
 **Kind**: global variable  
 <a name="HubInterfaceOptions"></a>

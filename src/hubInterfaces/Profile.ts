@@ -6,12 +6,12 @@
 import HubInterface, { HubInterfaceOptions, HubInterfaceType } from './HubInterface';
 
 /**
-* A Class that does CRUD operations for storing items as Collections in the Hub
+* A Class that does CRUD operations for storing objects as Profile in the Hub.
 */
 export default class Profile extends HubInterface {
 
-  constructor (hubMethodOptions: HubInterfaceOptions) {
-    hubMethodOptions.hubInterface = HubInterfaceType.Profile;
-    super(hubMethodOptions);
+  constructor (hubInterfaceOptions: HubInterfaceOptions) {
+    hubInterfaceOptions.hubInterface = HubInterfaceType.Profile;
+    super(hubInterfaceOptions);
   }
 }
