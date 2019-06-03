@@ -11,7 +11,7 @@ import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest'
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
 import IHubClient, {HubClientOptions } from './IHubClient';
-import HubObject from './HubObject';
+import HubObject from '../hubInterfaces/HubObject';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 
 /**

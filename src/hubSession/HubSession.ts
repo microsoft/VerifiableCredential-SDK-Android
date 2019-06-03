@@ -12,7 +12,7 @@ import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubObjectQueryResponse from './responses/HubObjectQueryResponse';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
 import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
-import fetch, { Request, RequestInit } from 'node-fetch';
+import nodeFetch, { Request, RequestInit } from 'node-fetch';
 import Identifier from '../Identifier';
 import DidProtocol, { DidProtocolOptions } from '../crypto/protocols/did/DidProtocol';
 import HttpResolver from '../resolvers/HttpResolver';
@@ -170,7 +170,7 @@ export default class HubSession {
    * @param init Request initialization details.
    */
   private async callFetch(url: string | Request, init?: RequestInit) {
-    return fetch(url, init);
+    return nodeFetch(url, init);
   }
 
   /** 

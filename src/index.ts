@@ -30,7 +30,7 @@ export { CryptoOptions };
 
 // Hub Client and Methods
 import HubClient from './hubClient/HubClient';
-import HubObject from './hubClient/HubObject';
+import HubObject from './hubInterfaces/HubObject';
 import HubInterface from './hubInterfaces/HubInterface';
 import {HubInterfaceOptions, HubInterfaceType, CommitStrategyType } from './hubInterfaces/HubInterface';
 import Actions from './hubInterfaces/Actions';

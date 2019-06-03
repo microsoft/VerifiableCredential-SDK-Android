@@ -7,7 +7,7 @@ import Identifier from '../Identifier';
 import Commit from '../hubSession/Commit';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
-import HubObject from './HubObject';
+import HubObject from '../hubInterfaces/HubObject';
 
 /**
  * Class for defining options for the
