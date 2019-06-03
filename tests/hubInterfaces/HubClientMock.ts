@@ -17,4 +17,9 @@ export default class HubClientMock implements IHubClient {
   public async queryObjects(obj: any) {
     return obj;
   }
+
+  public async queryObject(queryRequest: any, hubObject: any) {
+    console.log(queryRequest);
+    return hubObject;
+  }
 }
