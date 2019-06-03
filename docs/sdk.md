@@ -76,6 +76,8 @@ Crypto calls always happen via CryptoFactory</p></dd>
 <dt><a href="#HubClient">HubClient</a></dt>
 <dd><p>Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
 In a Hub.</p></dd>
+<dt><a href="#HubObject">HubObject</a></dt>
+<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Class for defining options for the
 HubClient, such as hub Identifier and client Identifier.</p></dd>
@@ -85,8 +87,6 @@ HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dd><p>A Class that does CRUD operations for storing objects as Collections in the Hub</p></dd>
 <dt><a href="#HubInterface">HubInterface</a></dt>
 <dd></dd>
-<dt><a href="#HubObject">HubObject</a></dt>
-<dd><p>Class that represents an object in a hub.</p></dd>
 <dt><a href="#Permissions">Permissions</a></dt>
 <dd><p>A Class that does CRUD operations for storing items as Permissions in the Hub</p></dd>
 <dt><a href="#Profile">Profile</a></dt>
@@ -1689,6 +1689,54 @@ In a Hub.</p>
 creates a hubSession for hub instance that is available/online.</p>
 
 **Kind**: instance method of [<code>HubClient</code>](#HubClient)  
+<a name="HubObject"></a>
+
+## HubObject
+<p>Class that represents an object in a hub.</p>
+
+**Kind**: global class  
+
+* [HubObject](#HubObject)
+    * [new HubObject(objectMetadata)](#new_HubObject_new)
+    * [.hydrate(hubSession, commitQueryRequest)](#HubObject+hydrate)
+    * [.getPayload()](#HubObject+getPayload)
+    * [.getMetadata()](#HubObject+getMetadata)
+
+<a name="new_HubObject_new"></a>
+
+### new HubObject(objectMetadata)
+<p>Create an instance for Hub Object using hub object's metadata.</p>
+
+
+| Param | Description |
+| --- | --- |
+| objectMetadata | <p>object metadata that represents an object in a hub.</p> |
+
+<a name="HubObject+hydrate"></a>
+
+### hubObject.hydrate(hubSession, commitQueryRequest)
+<p>If payload is not defined, get the payload from hub session using metadata.</p>
+
+**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
+
+| Param | Description |
+| --- | --- |
+| hubSession | <p>the hub session that will be used to query object</p> |
+| commitQueryRequest | <p>the commit query requests for getting all commits for certain object.</p> |
+
+<a name="HubObject+getPayload"></a>
+
+### hubObject.getPayload()
+<p>Get the Payload of the Hub Object if object is hydrated.
+Throws an Error if object is not hydrated.</p>
+
+**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
+<a name="HubObject+getMetadata"></a>
+
+### hubObject.getMetadata()
+<p>Get The Metadata of the Hub Object.</p>
+
+**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
 <a name="HubClientOptions"></a>
 
 ## HubClientOptions
@@ -1778,54 +1826,6 @@ HubClient, such as hub Identifier and client Identifier.</p>
 <p>Update Hub Object in hub owner's hub.</p>
 
 **Kind**: instance method of [<code>HubInterface</code>](#HubInterface)  
-<a name="HubObject"></a>
-
-## HubObject
-<p>Class that represents an object in a hub.</p>
-
-**Kind**: global class  
-
-* [HubObject](#HubObject)
-    * [new HubObject(objectMetadata)](#new_HubObject_new)
-    * [.hydrate(hubSession, commitQueryRequest)](#HubObject+hydrate)
-    * [.getPayload()](#HubObject+getPayload)
-    * [.getMetadata()](#HubObject+getMetadata)
-
-<a name="new_HubObject_new"></a>
-
-### new HubObject(objectMetadata)
-<p>Create an instance for Hub Object using hub object's metadata.</p>
-
-
-| Param | Description |
-| --- | --- |
-| objectMetadata | <p>object metadata that represents an object in a hub.</p> |
-
-<a name="HubObject+hydrate"></a>
-
-### hubObject.hydrate(hubSession, commitQueryRequest)
-<p>If payload is not defined, get the payload from hub session using metadata.</p>
-
-**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
-
-| Param | Description |
-| --- | --- |
-| hubSession | <p>the hub session that will be used to query object</p> |
-| commitQueryRequest | <p>the commit query requests for getting all commits for certain object.</p> |
-
-<a name="HubObject+getPayload"></a>
-
-### hubObject.getPayload()
-<p>Get the Payload of the Hub Object if object is hydrated.
-Throws an Error if object is not hydrated.</p>
-
-**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
-<a name="HubObject+getMetadata"></a>
-
-### hubObject.getMetadata()
-<p>Get The Metadata of the Hub Object.</p>
-
-**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
 <a name="Permissions"></a>
 
 ## Permissions

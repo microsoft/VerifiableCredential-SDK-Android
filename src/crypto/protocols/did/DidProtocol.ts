@@ -74,12 +74,8 @@ export default class DidProtocol {
     const id = kid[0];
 
     // create User Agent Options for Identifier
-    const options: UserAgentOptions = {
-      resolver: this.resolver,
-      cryptoOptions: new CryptoOptions(),
-      keyStore: keystore,
-      cryptoFactory: cryptoFactory
-    }
+    const options = new UserAgentOptions();
+    options.resolver = this.resolver;
 
     const identifier = new Identifier(id, options);
     const payload = await identifier.verify(jws);
@@ -96,17 +92,9 @@ export default class DidProtocol {
     
     const jws = await this.sender.sign(payload, keyReference);
 
-    // temp to instantiate Identifier.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
-
     // create User Agent Options for Identifier
-    const options: UserAgentOptions = {
-      resolver: this.resolver,
-      cryptoOptions: new CryptoOptions(),
-      keyStore: keystore,
-      cryptoFactory: cryptoFactory
-    };
+    const options = new UserAgentOptions();
+    options.resolver = this.resolver;
 
     const receiverIdentifier = new Identifier(receiverId, options);
     return receiverIdentifier.encrypt(jws);

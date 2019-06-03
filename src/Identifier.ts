@@ -103,7 +103,7 @@ export default class Identifier {
         publicKeyJwk: pubJwk
       };
       if (this.options.registrar) {
-        const document = await this.createIdentifierDocument(this.id, publicKey);
+        const document = await this.createIdentifierDocument(this.id, [publicKey]);
         if (register) {
             // register did document
           const identifier = await this.options.registrar.register(document, pairwiseKeyStorageId);
@@ -180,8 +180,8 @@ export default class Identifier {
   }
 
   // Create an identifier document. Included the public key.
-  private async createIdentifierDocument (id: string, publicKey: IdentifierDocumentPublicKey): Promise <IdentifierDocument> {
-    return IdentifierDocument.createAndGenerateId(id, [ publicKey ], <UserAgentOptions> this.options);
+  private async createIdentifierDocument (id: string, publicKeys: IdentifierDocumentPublicKey[]): Promise <IdentifierDocument> {
+    return IdentifierDocument.createAndGenerateId(id, publicKeys, <UserAgentOptions> this.options);
   }
 
   // Get the did document public key type

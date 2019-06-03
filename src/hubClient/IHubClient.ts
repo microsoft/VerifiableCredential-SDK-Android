@@ -7,7 +7,7 @@ import Identifier from '../Identifier';
 import Commit from '../hubSession/Commit';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
-import HubObject from '../hubInterfaces/HubObject';
+import HubObject from './HubObject';
 
 /**
  * Class for defining options for the
@@ -27,7 +27,7 @@ export class HubClientOptions {
   /**
    * Key reference to private key to be used to sign commits and create HubSession
    */
-  keyReference: string | undefined;
+  keyReference: string = '';
 }
 
 /**

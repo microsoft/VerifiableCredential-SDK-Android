@@ -27,10 +27,25 @@ export { HttpResolver };
 // Cryptography
 import CryptoOptions from './CryptoOptions';
 export { CryptoOptions };
+import CryptoHelpers from './crypto/utilities/CryptoHelpers';
+import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
+import KeyUseFactory from './crypto/keys/KeyUseFactory';
+export { CryptoHelpers, SubtleCryptoExtension, KeyUseFactory };
+import PrivateKey from './crypto/keys/PrivateKey';
+import PublicKey from './crypto/keys/PublicKey';
+import EcPrivateKey from './crypto/keys/ec/EcPrivateKey';
+import EcPublicKey from './crypto/keys/ec/EcPublicKey';
+import RsaPrivateKey from './crypto/keys/rsa/RsaPrivateKey';
+import RsaPublicKey from './crypto/keys/rsa/RsaPublicKey';
+export { PrivateKey, PublicKey, EcPrivateKey, EcPublicKey, RsaPrivateKey, RsaPublicKey };
 
-// Hub Client and Methods
+// KeyStore
+import KeyStoreInMemory from './crypto/keyStore/KeyStoreInMemory';
+export {KeyStoreInMemory };
+
+// Hub Client and Interfaces
 import HubClient from './hubClient/HubClient';
-import HubObject from './hubInterfaces/HubObject';
+import HubObject from './hubClient/HubObject';
 import HubInterface from './hubInterfaces/HubInterface';
 import {HubInterfaceOptions, HubInterfaceType, CommitStrategyType } from './hubInterfaces/HubInterface';
 import Actions from './hubInterfaces/Actions';

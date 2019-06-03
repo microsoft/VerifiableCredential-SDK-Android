@@ -11,7 +11,7 @@ import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest'
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
 import IHubClient, {HubClientOptions } from './IHubClient';
-import HubObject from '../hubInterfaces/HubObject';
+import HubObject from './HubObject';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 
 /**
@@ -32,7 +32,7 @@ export default class HubClient implements IHubClient {
    */
   constructor (hubClientOptions: HubClientOptions) {
 
-    if (!hubClientOptions.hubOwner || !hubClientOptions.clientIdentifier || !hubClientOptions.keyReference) {
+    if (!hubClientOptions.hubOwner || !hubClientOptions.clientIdentifier) {
       throw new UserAgentError(`HubClientOptions does not contain all properties`);
     }
     this.hubOwner = hubClientOptions.hubOwner;
