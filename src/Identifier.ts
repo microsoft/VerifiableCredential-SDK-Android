@@ -252,7 +252,7 @@ export default class Identifier {
     }
 
     // create a jweToken with temp cryptoFactory and algorithm.
-    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: JoseConstants.AesGcm128});
+    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: JoseConstants.AesGcm128, contentEncryptionKey: payload});
 
     // encrypt payload using public keys.
     const encryptedToken = await jweToken.encrypt(this.document.getPublicKeysFromDocument(), payload, ProtectionFormat.JweCompactJson);

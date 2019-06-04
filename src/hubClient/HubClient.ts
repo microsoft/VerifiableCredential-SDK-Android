@@ -71,7 +71,7 @@ export default class HubClient implements IHubClient {
     const signedCommit = await commitSigner.sign(commit);
 
     const commitRequest = new HubCommitWriteRequest(signedCommit);
-    session.send(commitRequest);
+    return session.send(commitRequest);
   }
 
   /**
@@ -121,8 +121,8 @@ export default class HubClient implements IHubClient {
       client: this.clientIdentifier,
       hubOwner: this.hubOwner,
       clientPrivateKeyReference: this.keyReference,
-      hubId: 'did:test:hub.id',
-      hubEndpoint: 'https://beta.discover.did.microsoft.com'
+      hubId: 'did:test:7e037d71-7d74-4c06-ad6d-adb3db5634af',
+      hubEndpoint: 'http://localhost:8080/'
     };
     return new HubSession(options);
   }

@@ -89,8 +89,15 @@ export default class DidProtocol {
    * @param payload the payload to be signed and encrypted by client Identifier.
    */
   public async signAndEncrypt(keyReference: string, payload: any, receiverId: string): Promise<string> {
+
+    let stringifiedPayload: string;
+    if (typeof(payload) === 'string') {
+      stringifiedPayload = payload;
+    } else {
+      stringifiedPayload = JSON.stringify(payload);
+    }
     
-    const jws = await this.sender.sign(payload, keyReference);
+    const jws = await this.sender.sign(stringifiedPayload, keyReference);
 
     // create User Agent Options for Identifier
     const options = new UserAgentOptions();

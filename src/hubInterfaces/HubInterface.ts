@@ -105,7 +105,7 @@ export default abstract class HubInterface {
    * Add object to Hub Owner's hub.
    * @param object object to be added to hub owned by hub owner.
    */
-  public async addObject(object: any): Promise<void> {
+  public async addObject(object: any): Promise<any> {
 
     const commit = new Commit({
       protected: {
@@ -120,7 +120,7 @@ export default abstract class HubInterface {
       },
       payload: object
     });
-    this.hubClient.commit(commit);
+    return this.hubClient.commit(commit);
   }
   
   /**

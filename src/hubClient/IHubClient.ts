@@ -40,7 +40,7 @@ export default interface IHubClient {
    * Signs and sends a commit to the hub owner's hub.
    * @param commit 
    */
-  commit (commit: Commit): Promise<void>;
+  commit (commit: Commit): Promise<any>;
 
    /**
    * Query Objects of certain type in Hub.

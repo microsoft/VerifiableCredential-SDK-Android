@@ -137,7 +137,7 @@ export default class HubSession {
       resolver
     };
     const didProtocol = new DidProtocol(didProtocolOptions);
-    const request = await didProtocol.signAndEncrypt(this.keyReference, message, this.hubOwner.id);
+    const request = await didProtocol.signAndEncrypt(this.keyReference, message, this.hubId);
   
     const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',

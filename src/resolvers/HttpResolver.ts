@@ -73,7 +73,7 @@ export default class HttpResolver implements IResolver {
       }
 
       const responseJson = await response.json();
-      const identifierDocument = new IdentifierDocument(responseJson.document || responseJson);
+      const identifierDocument = IdentifierDocument.fromJSON(responseJson.document || responseJson);
       resolve(identifierDocument);
     });
   }
