@@ -12,7 +12,7 @@ Creating an instance of an Identifier Example:
 
 ```typescript
 // create a new keystore instance
-const keyStore = new InMemoryKeyStore('secretString');
+const keyStore = new KeyStoreInMemory();
 // save a master seed in keystore for key generation.
 await keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
 
