@@ -11,7 +11,7 @@ import HubInterface, { HubInterfaceOptions, HubInterfaceType } from './HubInterf
 export default class Actions extends HubInterface {
 
   constructor (hubInterfaceOptions: HubInterfaceOptions) {
-    hubInterfaceOptions.hubInterface = HubInterfaceType.Action;
+    hubInterfaceOptions.hubInterface = HubInterfaceType.Actions;
     super(hubInterfaceOptions);
   }
 }

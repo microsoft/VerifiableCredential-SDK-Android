@@ -154,13 +154,7 @@ export default class HubSession {
     }
 
     const response = await res.buffer();
-    const plainResponse = await didProtocol.decryptAndVerify(this.keyReference, response);
-    if (plainResponse instanceof Buffer) {
-      // This should never happen as it means we are trying to return an access token in response
-      throw new Error('Internal error during decryption.');
-    }
-
-    return plainResponse;
+    return didProtocol.decryptAndVerify(this.keyReference, response);
   }
 
   /**

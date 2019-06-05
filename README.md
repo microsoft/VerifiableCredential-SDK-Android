@@ -58,7 +58,7 @@ console.log(tasks[0].getPayload().task);
 
 ## User Agent Session
 
-A User Agent Session is a class for creating Authentication Requests and Response in compliance with [OpenID Connect Self-Issued Tokens](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued).
+A User Agent Session is a class for creating Authentication Requests and Responses using [OpenID Connect Self-Issued Tokens](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued).
 
 ## Contributing
 

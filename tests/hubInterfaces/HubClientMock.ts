@@ -12,6 +12,7 @@ export default class HubClientMock implements IHubClient {
 
   public async commit(commit: Commit) {
     console.log(commit);
+    return commit;
   }
 
   public async queryObjects(obj: any) {

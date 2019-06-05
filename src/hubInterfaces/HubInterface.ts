@@ -23,7 +23,7 @@ export enum CommitStrategyType {
  * Constants that represent what interface type the hub request payload will be.
  */
 export enum HubInterfaceType {
-  Action = 'Actions',
+  Actions = 'Actions',
   Collections = 'Collections',
   Permissions = 'Permissions',
   Profile = 'Profile'
@@ -71,11 +71,11 @@ export class HubInterfaceOptions extends HubClientOptions {
  */
 export default abstract class HubInterface {
 
-  private hubInterface: HubInterfaceType;
-  private commitStrategy: CommitStrategyType;
-  private type: string;
-  private context: string;
-  private hubClient: HubClient;
+  public readonly hubInterface: HubInterfaceType;
+  public readonly commitStrategy: CommitStrategyType;
+  public readonly type: string;
+  public readonly context: string;
+  public hubClient: HubClient;
 
   /**
    * Creates an instance of HubMethods that will be used to send hub requests and responses.
@@ -83,8 +83,12 @@ export default abstract class HubInterface {
    */
   constructor (hubInterfaceOptions: HubInterfaceOptions) {
 
-    if (!hubInterfaceOptions.context || !hubInterfaceOptions.type) {
-      throw new UserAgentError(`Hub Interface Options missing parameters`);
+    if (!hubInterfaceOptions.context) {
+      throw new UserAgentError(`Hub Interface Options missing context parameter`);
+    }
+
+    if (!hubInterfaceOptions.type) {
+      throw new UserAgentError(`Hub Interface Options missing type parameter`);
     }
     
     this.context = hubInterfaceOptions.context;
