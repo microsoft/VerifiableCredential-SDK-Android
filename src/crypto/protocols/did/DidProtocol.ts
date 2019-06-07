@@ -10,6 +10,8 @@ import CryptoFactory from '../../plugin/CryptoFactory';
 import KeyStoreInMemory from '../../keyStore/KeyStoreInMemory';
 import UserAgentOptions from '../../../UserAgentOptions';
 import CryptoOptions from '../../../CryptoOptions';
+import ProtectionStrategy from '../../strategies/ProtectionStrategy';
+import { IJwsSigningOptions } from '../jose/IJoseOptions';
 
 /**
  * Named Arguments of Did Protocol
@@ -41,7 +43,12 @@ export default class DidProtocol {
   /**
    * Resolver for resolving Identifier Documents
    */
-  private resolver: IResolver;
+   private resolver: IResolver;
+
+  /**
+   * user agent options
+   */
+   private options: UserAgentOptions;
 
   /**
    * Authentication constructor
@@ -50,6 +57,7 @@ export default class DidProtocol {
   constructor (options: DidProtocolOptions) {
     this.sender = options.sender;
     this.resolver = options.resolver;
+    this.options = <UserAgentOptions>options.sender.options;
   }
 
   /**
@@ -64,24 +72,20 @@ export default class DidProtocol {
     const jws = await this.sender.decrypt(cipher, keyReference);
 
     // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
+    const cryptoFactory = (<UserAgentOptions>this.sender.options).cryptoFactory;
     
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
+    const signingOptions: IJwsSigningOptions = {
+      cryptoFactory: cryptoFactory
+    }
+    const token : JwsToken = await JwsToken.deserialize(jws, signingOptions);
     const tokenHeaders = token.getHeader();
     const kid = tokenHeaders.get('kid').split('#');
     const id = kid[0];
 
     // create User Agent Options for Identifier
-    const options: UserAgentOptions = {
-      resolver: this.resolver,
-      cryptoOptions: new CryptoOptions(),
-      keyStore: keystore,
-      cryptoFactory: cryptoFactory
-    }
-
-    const identifier = new Identifier(id, options);
+   
+    const identifier = new Identifier(id, this.options);
     const payload = await identifier.verify(jws);
     return JSON.parse(payload);
 
@@ -93,22 +97,17 @@ export default class DidProtocol {
    * @param payload the payload to be signed and encrypted by client Identifier.
    */
   public async signAndEncrypt(keyReference: string, payload: any, receiverId: string): Promise<string> {
+
+    let stringifiedPayload: string;
+    if (typeof(payload) === 'string') {
+      stringifiedPayload = payload;
+    } else {
+      stringifiedPayload = JSON.stringify(payload);
+    }
     
-    const jws = await this.sender.sign(payload, keyReference);
+    const jws = await this.sender.sign(stringifiedPayload, keyReference);
 
-    // temp to instantiate Identifier.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
-
-    // create User Agent Options for Identifier
-    const options: UserAgentOptions = {
-      resolver: this.resolver,
-      cryptoOptions: new CryptoOptions(),
-      keyStore: keystore,
-      cryptoFactory: cryptoFactory
-    };
-
-    const receiverIdentifier = new Identifier(receiverId, options);
+    const receiverIdentifier = new Identifier(receiverId, this.options);
     return receiverIdentifier.encrypt(jws);
   }
 

@@ -96,7 +96,9 @@ export default abstract class HubInterface {
     const hubClientOptions: HubClientOptions = {
       hubOwner: hubInterfaceOptions.hubOwner,
       clientIdentifier: hubInterfaceOptions.clientIdentifier,
-      keyReference: hubInterfaceOptions.keyReference
+      keyReference: hubInterfaceOptions.keyReference,
+      hubProtectionStrategy: hubInterfaceOptions.hubProtectionStrategy,
+      cryptoOptions: hubInterfaceOptions.cryptoOptions
     };
     this.hubClient = new HubClient(hubClientOptions);
   }

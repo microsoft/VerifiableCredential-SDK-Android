@@ -5,6 +5,7 @@
 
 import IHubClient from '../../src/hubClient/IHubClient';
 import Commit from '../../src/hubSession/Commit';
+import { HubCommitQueryRequest, HubObject } from '../../src';
 
 export default class HubClientMock implements IHubClient {
 
@@ -12,9 +13,15 @@ export default class HubClientMock implements IHubClient {
 
   public async commit(commit: Commit) {
     console.log(commit);
+    return commit;
   }
 
   public async queryObjects(obj: any) {
     return obj;
+  }
+
+  public async queryObject(queryRequest: any, hubObject: any) {
+    console.log(queryRequest);
+    return hubObject;
   }
 }

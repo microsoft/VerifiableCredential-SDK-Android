@@ -6,7 +6,7 @@
 import { JweHeader } from "../jwe/IJweGeneralJson";
 import { JwsHeader } from "../jws/IJwsGeneralJson";
 import base64url from 'base64url';
-import { IEncryptionOptions, ISigningOptions } from "../../keyStore/IKeyStore";
+import { IJweEncryptionOptions, IJwsSigningOptions } from "../../protocols/jose/IJoseOptions";
 import JoseConstants from "./JoseConstants";
 import CryptoProtocolError from "../CryptoProtocolError";
 
@@ -48,7 +48,7 @@ export default class JoseHelpers {
    * @param [overrideOptions] Options passed in after the constructure
    * @param [mandatory] True if property is required
    */
-  public static getOptionsProperty<T>(propertyName: string, initialOptions?: IEncryptionOptions | ISigningOptions, overrideOptions?: IEncryptionOptions | ISigningOptions,  mandatory: boolean = true): T {
+  public static getOptionsProperty<T>(propertyName: string, initialOptions?: IJweEncryptionOptions | IJwsSigningOptions, overrideOptions?: IJweEncryptionOptions | IJwsSigningOptions,  mandatory: boolean = true): T {
     let overrideOption: T | undefined;
     let initialOption: T | undefined;
 

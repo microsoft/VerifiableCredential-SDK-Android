@@ -12,12 +12,12 @@ import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import { KeyUse } from './crypto/keys/KeyUseFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
 import PrivateKey from './crypto/keys/PrivateKey';
-import { ISigningOptions } from './crypto/keyStore/IKeyStore';
 import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
 import JweToken from './crypto/protocols/jwe/JweToken';
 import JoseConstants from './crypto/protocols/jose/JoseConstants';
+import { IJwsSigningOptions } from './crypto/protocols/jose/IJoseOptions';
 
 /**
  * Class for creating and managing identifiers,
@@ -204,7 +204,7 @@ export default class Identifier {
         } else {
           body = payload;
         }
-        const signingOptions: ISigningOptions = {
+        const signingOptions: IJwsSigningOptions = {
           cryptoFactory: this.options.cryptoFactory
         };
         const jws = new JwsToken(signingOptions);
@@ -227,7 +227,7 @@ export default class Identifier {
     if (!this.document) {
       this.document = await this.getDocument();
     }
-    const signingOptions: ISigningOptions = {
+    const signingOptions: IJwsSigningOptions = {
       cryptoFactory: (<UserAgentOptions>this.options).cryptoFactory
     };
     const token = JwsToken.deserialize(jws, signingOptions);

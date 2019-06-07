@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
  import JweToken from "../../../src/crypto/protocols/jwe/JweToken";
- import { IEncryptionOptions } from "../../../src/crypto/keyStore/IKeyStore";
  import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
  import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
  import SubtleCryptoOperations from '../../../src/crypto/plugin/SubtleCryptoOperations';
@@ -12,6 +11,7 @@
  import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
  import JoseHelpers from '../../../src/crypto/protocols/jose/JoseHelpers';
  import base64url from 'base64url';
+import { IJweEncryptionOptions } from "../../../src/crypto/protocols/jose/IJoseOptions";
  
 describe('JweToken standard', () => {
   it('should run RFC 7516 A.1.  Example JWE using RSAES-OAEP and AES GCM', async () => {
@@ -22,7 +22,7 @@ describe('JweToken standard', () => {
     const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
       const keyStore = new KeyStoreInMemory();
       const cryptoSuite = new SubtleCryptoOperations();
-      const options: IEncryptionOptions = {
+      const options: IJweEncryptionOptions = {
         cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
         contentEncryptionAlgorithm: 'A256GCM',
         contentEncryptionKey: Buffer.from(contentEncryptionKey),
@@ -98,7 +98,7 @@ describe('JweToken standard', () => {
           const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
             const keyStore = new KeyStoreInMemory();
             const cryptoSuite = new SubtleCryptoOperations();
-            const options: IEncryptionOptions = {
+            const options: IJweEncryptionOptions = {
               cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
               contentEncryptionAlgorithm: 'A256GCM',
               contentEncryptionKey: Buffer.from(contentEncryptionKey),

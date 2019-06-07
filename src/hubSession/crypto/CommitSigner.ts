@@ -1,12 +1,13 @@
 import ICommitSigner from './ICommitSigner';
 import Commit from '../Commit';
 import SignedCommit from '../SignedCommit';
-import IKeyStore, { ISigningOptions } from '../../crypto/keyStore/IKeyStore';
+import IKeyStore from '../../crypto/keyStore/IKeyStore';
 import CryptoFactory from '../../crypto/plugin/CryptoFactory';
 import CryptoOperations from '../../crypto/plugin/CryptoOperations';
 import JwsToken from '../../crypto/protocols/jws/JwsToken';
 import { ProtectionFormat } from '../../crypto/keyStore/ProtectionFormat';
 import objectAssign from 'object-assign';
+import { IJwsSigningOptions } from '../../crypto/protocols/jose/IJoseOptions';
 
 interface CommitSignerOptions {
 
@@ -63,7 +64,7 @@ export default class CommitSigner implements ICommitSigner {
 
     // const jws = new JwsToken(commit.getPayload(), new CryptoFactory([this.cryptoSuite]));
     // const signed = await jws.sign(key, <any> finalProtectedHeaders); // Need to broaden TypeScript definition of JwsToken.sign().
-    const signingOptions: ISigningOptions = {cryptoFactory: this.cryptoFactory, protected: finalProtectedHeaders};
+    const signingOptions: IJwsSigningOptions = {cryptoFactory: this.cryptoFactory, protected: finalProtectedHeaders};
     const jws = new JwsToken(signingOptions);
     const signed = await jws.sign(this.keyRef, commit.getPayload(), ProtectionFormat.JwsCompactJson);
     const serializedCompactJws = signed.serialize();

@@ -68,6 +68,11 @@
    */
    public static AesGcm256 ='A256GCM';
 
+  /**
+   * Define JOSE algorithm constants
+   */
+   public static Sha256 ='SHA-256';
+
    /**
     * Define the default signing algorithm
     */

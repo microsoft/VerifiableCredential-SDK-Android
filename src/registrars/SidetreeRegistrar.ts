@@ -15,8 +15,8 @@ import Multihash from './Multihash';
 import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
-import { ISigningOptions } from '../crypto/keyStore/IKeyStore';
 import { TSMap } from 'typescript-map';
+import { IJwsSigningOptions } from '../crypto/protocols/jose/IJoseOptions';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -84,7 +84,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       console.debug(bodyString);
 
       // registration with signed message for bodyString
-      const signingOptions: ISigningOptions = {
+      const signingOptions: IJwsSigningOptions = {
         cryptoFactory: this.cryptoFactory,
         header: new TSMap<string, string>([
             ['alg', ''],
