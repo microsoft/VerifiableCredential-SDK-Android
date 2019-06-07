@@ -12,12 +12,14 @@ import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import { KeyUse } from './crypto/keys/KeyUseFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
 import PrivateKey from './crypto/keys/PrivateKey';
+import { IJwsSigningOptions, IJweEncryptionOptions } from "./crypto/protocols/jose/IJoseOptions";
 import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
 import JweToken from './crypto/protocols/jwe/JweToken';
 import JoseConstants from './crypto/protocols/jose/JoseConstants';
-import { IJwsSigningOptions } from './crypto/protocols/jose/IJoseOptions';
+import SubtleCryptoOperations from './crypto/plugin/SubtleCryptoOperations';
+import CryptoFactory from './crypto/plugin/CryptoFactory';
 
 /**
  * Class for creating and managing identifiers,
@@ -258,7 +260,7 @@ export default class Identifier {
     const keyStore = this.options.keyStore;
     const cryptoSuite = new SubtleCryptoOperations();
 
-    const options: IEncryptionOptions = {
+    const options: IJweEncryptionOptions = {
       cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
       contentEncryptionAlgorithm: JoseConstants.AesGcm256,
       contentEncryptionKey: Buffer.from(contentEncryptionKey),
