@@ -12,7 +12,6 @@ import { TSMap } from 'typescript-map'
  */
 export type JweHeader = TSMap<string, string>;
 
-
 /**
  * JWE general json format
  */

@@ -276,7 +276,9 @@ describe('Identifier', () => {
       options.keyStore = new KeyStoreInMemory();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
-      const signedPayload = await identifier.sign('examplePayload', 'did:ion', 'did:ion');
+      const keystore = await options.keyStore.list();
+      console.log(keystore);
+      const signedPayload = await identifier.sign('examplePayload', 'did:ion-did:ion-ES256K-sig');
       expect(signedPayload).toBeDefined();
       expect(JwsToken.deserialize(signedPayload).getPayload()).toEqual('examplePayload');
     });
@@ -287,7 +289,7 @@ describe('Identifier', () => {
       options.keyStore = new KeyStoreInMemory();
       await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
       const identifier = await Identifier.create(options);
-      const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion', 'did:ion');
+      const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion-did:ion-ES256K-sig');
       expect(signedPayload).toBeDefined();
       expect(JwsToken.deserialize(signedPayload).getPayload()).toEqual(`{"payload":"examplePayload"}`);
     });

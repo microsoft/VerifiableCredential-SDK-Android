@@ -132,7 +132,6 @@ export default class JweToken implements IJweGeneralJson {
     return JSON.stringify(json);
   }
 
-
   /**
    * Serialize a Jwe token object from a token in Flat Json format
    * @param token Jwe base object
@@ -236,17 +235,23 @@ export default class JweToken implements IJweGeneralJson {
     const jweToken: JweToken = new JweToken(options || this.options);
 
     // Set the content encryption key
-    const contentEncryptionKey: Buffer = this.getContentEncryptionKey(options);
+    const contentEncryptionKey: Buffer = this.getContentEncryptionKey(options, false);
 
     // Get the encryptor extensions
     const encryptor = new SubtleCryptoExtension(cryptoFactory);
     
       // Set the initial vector
-      jweToken.iv = this.getInitialVector(options);
+      jweToken.iv = this.getInitialVector(options, false);
 
       // Needs to be improved when alg is not provided.
       // Decide key encryption algorithm based on given JWK.
       let publicKey: PublicKey = recipients[0];
+      for (let key of recipients) {
+        if (key.alg === JoseConstants.RsaOaep256) {
+          publicKey = key;
+          break;
+        }
+      }
       let keyEncryptionAlgorithm: string  | undefined = publicKey.alg;
       if (!keyEncryptionAlgorithm) {
         if (publicKey.kty == KeyType.EC) {
@@ -271,7 +276,6 @@ export default class JweToken implements IJweGeneralJson {
 
       // Set aad as the protected header
       jweToken.aad = base64url.toBuffer(encodedProtected);
-
 
     for (let inx = 0 ; inx < recipients.length; inx ++) {
       // Set the recipients structure

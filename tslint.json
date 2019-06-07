@@ -15,6 +15,12 @@
         "static-method-regex": "^[a-z][\\w\\d]+$"
       }
     ],
-    "no-relative-imports": false
+    "no-relative-imports": false,
+    "mocha-no-side-effect-code": false,
+    "insecure-random": false,
+    "no-for-in": false,
+    "no-consecutive-blank-lines": true,
+    "eofline": true,
+    "no-backbone-get-set-outside-model": false
   }
 }

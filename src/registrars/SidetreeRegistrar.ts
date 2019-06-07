@@ -113,8 +113,14 @@ export default class SidetreeRegistrar implements IRegistrar {
       clearTimeout(timer);
 
       if (!response.ok) {
+        let msg: string;
+        if (response.body) {
+          msg = response.body.read().toString();;
+        } else {
+          msg = `Status ${response.status}`;
+        }
         const error = new UserAgentError(
-          `Failed to register the identifier document. Status ${response.status}`
+          `Failed to register the identifier document: ${msg}`
         );
         reject(error);
         return;

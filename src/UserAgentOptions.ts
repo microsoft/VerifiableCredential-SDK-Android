@@ -31,20 +31,20 @@ export default class UserAgentOptions {
    * The timeout when making requests to
    * external services.
    */
-   public timeoutInSeconds?: number = 30;
+   public timeoutInSeconds: number = 30;
 
   /**
    * The locale to be used by the
    * user agent.
    */
-   public locale?: string = 'en';
+   public locale: string = 'en';
 
   /**
    * The lifetime of any self-issued credentials.
    * Used to determine the expiry time of the
    * credential.
    */
-   public selfIssuedCredentialLifetimeInSeconds?: number = 300; // 5 mins
+   public selfIssuedCredentialLifetimeInSeconds: number = 300; // 5 mins
 
   /**
    * Crypto Options
@@ -55,33 +55,33 @@ export default class UserAgentOptions {
   /**
    * Prefix for the generated did.
    */
-   public didPrefix?: string = 'did:ion';
+   public didPrefix: string = 'did:ion';
 
   /**
    * Get the key store
    */
    public get keyStore (): IKeyStore {
-    return this.cryptoOptions.cryptoFactory.keyStore;
+    return this.cryptoOptions!.cryptoFactory.keyStore;
   }
 
   /**
    * Set the key store
    */
    public set keyStore (keyStore: IKeyStore) {
-    this.cryptoOptions.cryptoFactory.keyStore = keyStore;
+    this.cryptoOptions!.cryptoFactory.keyStore = keyStore;
   }
 
   /**
    * Get the crypto operations
    */
    public get cryptoFactory (): CryptoFactory {
-    return this.cryptoOptions.cryptoFactory;
+    return this.cryptoOptions!.cryptoFactory;
   }
 
   /**
    * Set the key store
    */
    public set cryptoFactory (cryptoFactory: CryptoFactory) {
-    this.cryptoOptions.cryptoFactory = cryptoFactory;
+    this.cryptoOptions!.cryptoFactory = cryptoFactory;
   }
 }

@@ -21,7 +21,6 @@ export default class JweRecipient implements IJweRecipient {
    */
   public encrypted_key: Buffer
 
-
   constructor() {
     this.encrypted_key = Buffer.from('');
   }

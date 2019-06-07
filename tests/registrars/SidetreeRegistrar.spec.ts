@@ -137,7 +137,7 @@ describe('SidetreeRegistrar', () => {
     .catch((error: any) => {
       expect(error).toBeDefined();
       expect(error instanceof UserAgentError).toBeTruthy();
-      expect(error.message).toEqual('Failed to register the identifier document. Status 404');
+      expect(error.message).toEqual('Failed to register the identifier document: Status 404');
     })
     .finally(done);
   });

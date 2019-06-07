@@ -13,7 +13,6 @@ import EcPrivateKey from '../../../src/crypto/keys/ec/EcPrivateKey';
 import PairwiseKey from '../../../src/crypto/keys/PairwiseKey';
 import base64url from 'base64url';
 
-
 class Helpers {
   // Make sure we generate the same pairwise key
   public static async generateSamePairwise (subtleCryptoExtensions: SubtleCryptoExtension, seedReference: string, alg: any, persona: string, peer: string) {
@@ -35,9 +34,7 @@ class Helpers {
       }
     }
     
-        
 }
-
 
 describe('PairwiseKey', () => {
 

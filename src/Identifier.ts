@@ -12,10 +12,14 @@ import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import { KeyUse } from './crypto/keys/KeyUseFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
 import PrivateKey from './crypto/keys/PrivateKey';
-import { ISigningOptions } from './crypto/keyStore/IKeyStore';
+import { ISigningOptions, IEncryptionOptions } from './crypto/keyStore/IKeyStore';
 import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
+import JweToken from './crypto/protocols/jwe/JweToken';
+import JoseConstants from './crypto/protocols/jose/JoseConstants';
+import SubtleCryptoOperations from './crypto/plugin/SubtleCryptoOperations';
+import CryptoFactory from './crypto/plugin/CryptoFactory';
 
 /**
  * Class for creating and managing identifiers,
@@ -101,7 +105,7 @@ export default class Identifier {
         publicKeyJwk: pubJwk
       };
       if (this.options.registrar) {
-        const document = await this.createIdentifierDocument(this.id, publicKey);
+        const document = await this.createIdentifierDocument(this.id, [publicKey]);
         if (register) {
             // register did document
           const identifier = await this.options.registrar.register(document, pairwiseKeyStorageId);
@@ -173,12 +177,13 @@ export default class Identifier {
    * @param keyType Key type
    */
   public static keyStorageIdentifier (personaId: string, target: string, algorithm: string, keyType: string): string {
+    console.log(`${personaId}-${target}-${algorithm}-${keyType}`);
     return `${personaId}-${target}-${algorithm}-${keyType}`;
   }
 
   // Create an identifier document. Included the public key.
-  private async createIdentifierDocument (id: string, publicKey: IdentifierDocumentPublicKey): Promise <IdentifierDocument> {
-    return IdentifierDocument.createAndGenerateId(id, [ publicKey ], <UserAgentOptions> this.options);
+  private async createIdentifierDocument (id: string, publicKeys: IdentifierDocumentPublicKey[]): Promise <IdentifierDocument> {
+    return IdentifierDocument.createAndGenerateId(id, publicKeys, <UserAgentOptions> this.options);
   }
 
   // Get the did document public key type
@@ -192,13 +197,9 @@ export default class Identifier {
    * @param payload object to be signed
    * @param keyStorageIdentifier the identifier for the key used to sign payload.
    */
-  public async sign (payload: any, personaId: string, target: string) {
+  public async sign (payload: any, keyReference: string): Promise<string> {
     let body: string;
     if (this.options && this.options.cryptoOptions) {
-      const keyStorageIdentifier = Identifier.keyStorageIdentifier(personaId,
-                                                                   target,
-                                                                   this.options.cryptoOptions.authenticationSigningJoseAlgorithm,
-                                                                   KeyUse.Signature);
       if (this.options.keyStore) {
         if (typeof(payload) !== 'string') {
           body = JSON.stringify(payload);
@@ -209,7 +210,7 @@ export default class Identifier {
           cryptoFactory: this.options.cryptoFactory
         };
         const jws = new JwsToken(signingOptions);
-        const signature = await jws.sign(keyStorageIdentifier, Buffer.from(body), ProtectionFormat.JwsFlatJson);
+        const signature = await jws.sign(keyReference, Buffer.from(body), ProtectionFormat.JwsFlatJson);
         return signature.serialize();;
       } else {
         throw new UserAgentError('No KeyStore in Options');
@@ -231,11 +232,69 @@ export default class Identifier {
     const signingOptions: ISigningOptions = {
       cryptoFactory: (<UserAgentOptions>this.options).cryptoFactory
     };
-    const token: JwsToken = JwsToken.deserialize(jws, signingOptions);
+    const token = JwsToken.deserialize(jws, signingOptions);
     if (token.verify(this.document.getPublicKeysFromDocument(), signingOptions)) {
       return token.getPayload();
     }
 
-    throw new UserAgentError('The signature validation failed.');
+    throw new UserAgentError(`The signature validation for '${this.id}' failed.`);
+  }
+
+  /**
+   * Encrypt payload using Public Key registered on Identifier Document.
+   * @param payload object that will be encrypted.
+   */
+  public async encrypt (payload: any): Promise<string> {
+    if (!this.options) {
+      throw new UserAgentError('Options Undefined');
+    }
+    // get document if undefined
+    if (!this.document) {
+      this.document = await this.getDocument();
+    }
+
+    const contentEncryptionKey = [177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154,
+      212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
+      234, 64, 252];
+    const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
+    const keyStore = this.options.keyStore;
+    const cryptoSuite = new SubtleCryptoOperations();
+
+    const options: IEncryptionOptions = {
+      cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
+      contentEncryptionAlgorithm: JoseConstants.AesGcm256,
+      contentEncryptionKey: Buffer.from(contentEncryptionKey),
+      initialVector: Buffer.from(iv)
+    };
+
+    // create a jweToken with temp cryptoFactory and algorithm.
+    const jweToken = new JweToken(options);
+
+    // encrypt payload using public keys.
+    const encryptedToken = await jweToken.encrypt(this.document.getPublicKeysFromDocument(), payload, ProtectionFormat.JweCompactJson);
+
+    // return serialized token.
+    return encryptedToken.serialize();
+  }
+
+  /**
+   * Decrypt cipher using key referenced in keystore.
+   * @param cipher cipher to be decrypted.
+   * @param keyReference string that references what key to use from keystore.
+   */
+  public async decrypt (cipher: Buffer, keyReference: string): Promise<string> {
+    
+    if (!this.options) {
+      throw new UserAgentError('Options Undefined');
+    }
+
+    // get key to get key alg
+    const key = <PrivateKey> await this.options.keyStore.get(keyReference);
+
+    // create jweToken, feed in ciphertext, and decrypt.
+    const jweToken = new JweToken({cryptoFactory: this.options.cryptoFactory, contentEncryptionAlgorithm: key.alg});
+    jweToken.ciphertext = cipher;
+    const payload = await jweToken.decrypt(keyReference);
+    return payload.toString();
   }
 }
