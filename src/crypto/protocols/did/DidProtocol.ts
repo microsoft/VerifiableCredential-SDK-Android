@@ -84,8 +84,10 @@ export default class DidProtocol {
     const id = kid[0];
 
     // create User Agent Options for Identifier
-   
-    const identifier = new Identifier(id, this.options);
+    const options = new UserAgentOptions();
+    options.resolver = this.resolver;
+
+    const identifier = new Identifier(id, options);
     const payload = await identifier.verify(jws);
     return JSON.parse(payload);
 
@@ -106,6 +108,10 @@ export default class DidProtocol {
     }
     
     const jws = await this.sender.sign(stringifiedPayload, keyReference);
+
+    // create User Agent Options for Identifier
+    const options = new UserAgentOptions();
+    options.resolver = this.resolver;
 
     const receiverIdentifier = new Identifier(receiverId, this.options);
     return receiverIdentifier.encrypt(jws);

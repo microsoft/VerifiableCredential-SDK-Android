@@ -12,7 +12,7 @@ Creating an instance of an Identifier Example:
 
 ```typescript
 // create a new keystore instance
-const keyStore = new InMemoryKeyStore('secretString');
+const keyStore = new KeyStoreInMemory();
 // save a master seed in keystore for key generation.
 await keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
 
@@ -20,7 +20,8 @@ await keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
 const resolver = new HttpResolver('https://beta.discover.microsoft.com');
 
 // set up options.
-const options = new UserAgentOptions({ keyStore, resolver});
+const options = new UserAgentOptions();
+options.resolver = resolver;
 const registrar = new SidetreeRegistrar(sidetreeUrl, options);
 options.registrar = registrar;
 
@@ -36,12 +37,12 @@ Hub Interfaces can be used to make requests to [Decentralized Identity Hubs](htt
 
 ```typescript
 // create options for collections.
-const options: HubInterfaceOptions = new HubInterfaceOptions({
-  hubOwner: identifier,
-  clientIdentifie: identifier,
-  context: 'https://schema.org/tasks',
-  type: 'tasks',
-});
+const options: HubInterfaceOptions = new HubInterfaceOptions();
+options.clientIdentifier = identifier;
+options.hubOwner = identifier;
+options.context = 'https://schema.org/tasks';
+options.type = 'tasks';
+
 // create a new instance as options as the parameter.
 const collection = new Collections(options);
 
@@ -57,7 +58,7 @@ console.log(tasks[0].getPayload().task);
 
 ## User Agent Session
 
-A User Agent Session is a class for creating Authentication Requests and Response in compliance with [OpenID Connect Self-Issued Tokens](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued).
+A User Agent Session is a class for creating Authentication Requests and Responses using [OpenID Connect Self-Issued Tokens](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued).
 
 ## Contributing
 

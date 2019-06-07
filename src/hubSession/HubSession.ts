@@ -12,7 +12,7 @@ import HubObjectQueryRequest from './requests/HubObjectQueryRequest';
 import HubObjectQueryResponse from './responses/HubObjectQueryResponse';
 import HubCommitQueryRequest from './requests/HubCommitQueryRequest';
 import HubCommitQueryResponse from './responses/HubCommitQueryResponse';
-import fetch, { Request, RequestInit } from 'node-fetch';
+import nodeFetch, { Request, RequestInit } from 'node-fetch';
 import Identifier from '../Identifier';
 import DidProtocol, { DidProtocolOptions } from '../crypto/protocols/did/DidProtocol';
 import HttpResolver from '../resolvers/HttpResolver';
@@ -137,7 +137,7 @@ export default class HubSession {
       resolver
     };
     const didProtocol = new DidProtocol(didProtocolOptions);
-    const request = await didProtocol.signAndEncrypt(this.keyReference, message, this.hubOwner.id);
+    const request = await didProtocol.signAndEncrypt(this.keyReference, message, this.hubId);
   
     const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',
@@ -154,13 +154,7 @@ export default class HubSession {
     }
 
     const response = await res.buffer();
-    const plainResponse = await didProtocol.decryptAndVerify(this.keyReference, response);
-    if (plainResponse instanceof Buffer) {
-      // This should never happen as it means we are trying to return an access token in response
-      throw new Error('Internal error during decryption.');
-    }
-
-    return plainResponse;
+    return didProtocol.decryptAndVerify(this.keyReference, response);
   }
 
   /**
@@ -170,7 +164,7 @@ export default class HubSession {
    * @param init Request initialization details.
    */
   private async callFetch(url: string | Request, init?: RequestInit) {
-    return fetch(url, init);
+    return nodeFetch(url, init);
   }
 
   /** 

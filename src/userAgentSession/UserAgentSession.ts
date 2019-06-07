@@ -115,12 +115,8 @@ export default class UserAgentSession {
     const id = kid[0];
 
     // create User Agent Options for Identifier
-    const options: UserAgentOptions = {
-      resolver: this.resolver,
-      cryptoOptions: new CryptoOptions(),
-      keyStore: keystore,
-      cryptoFactory: cryptoFactory
-    }
+    const options = new UserAgentOptions();
+    options.resolver = this.resolver;
 
     // verify jws and return payload. 
     const identifier = new Identifier(id, options);

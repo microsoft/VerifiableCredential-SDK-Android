@@ -1720,6 +1720,7 @@ creates a hubSession for hub instance that is available/online.</p>
     * [new HubObject(objectMetadata)](#new_HubObject_new)
     * [.hydrate(hubSession, commitQueryRequest)](#HubObject+hydrate)
     * [.getPayload()](#HubObject+getPayload)
+    * [.getMetadata()](#HubObject+getMetadata)
 
 <a name="new_HubObject_new"></a>
 
@@ -1746,6 +1747,15 @@ creates a hubSession for hub instance that is available/online.</p>
 <a name="HubObject+getPayload"></a>
 
 ### hubObject.getPayload()
+<p>Get the Payload of the Hub Object if object is hydrated.
+Throws an Error if object is not hydrated.</p>
+
+**Kind**: instance method of [<code>HubObject</code>](#HubObject)  
+<a name="HubObject+getMetadata"></a>
+
+### hubObject.getMetadata()
+<p>Get The Metadata of the Hub Object.</p>
+
 **Kind**: instance method of [<code>HubObject</code>](#HubObject)  
 <a name="HubClientOptions"></a>
 

@@ -52,16 +52,19 @@ export default class HubObject {
   }
 
   /**
-   * 
+   * Get the Payload of the Hub Object if object is hydrated.
+   * Throws an Error if object is not hydrated.
    */
   public getPayload() {
     if (this.payload) {
       return this.payload;
     }
     throw new UserAgentError(`payload undefined for '${this.objectMetadata.id}'`);
-    
   }
 
+  /**
+   * Get The Metadata of the Hub Object.
+   */
   public getMetadata(): IObjectMetadata {
     return this.objectMetadata;
   }
