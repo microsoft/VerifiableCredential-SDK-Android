@@ -71,7 +71,7 @@ export default class CryptoHelpers {
         const iv = args[0];
         const aad = args[1];
         matches = <RegExpExecArray>regex.exec(jwa);
-        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128 };
+        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128,  length: `${CryptoHelpers.getRegexMatch(<RegExpExecArray>matches, 0)}` };
       case JoseConstants.Es256K:
         return { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' }, format: 'DER' };
     }

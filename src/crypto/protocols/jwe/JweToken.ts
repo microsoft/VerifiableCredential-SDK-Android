@@ -234,14 +234,25 @@ export default class JweToken implements IJweGeneralJson {
     // Set the resulting token
     const jweToken: JweToken = new JweToken(options || this.options);
 
-    // Set the content encryption key
-    const contentEncryptionKey: Buffer = this.getContentEncryptionKey(options, false);
-
     // Get the encryptor extensions
     const encryptor = new SubtleCryptoExtension(cryptoFactory);
+
+    // Set the content encryption key
+    let randomGenerator = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm);
+    let contentEncryptionKey: Buffer = this.getContentEncryptionKey(options, false);
+    if (!contentEncryptionKey) {
+      const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
+      const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
+      contentEncryptionKey = base64url.toBuffer(jwk.k);
+    }
     
       // Set the initial vector
       jweToken.iv = this.getInitialVector(options, false);
+      if (!jweToken.iv) {
+        const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
+        const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
+        jweToken.iv = base64url.toBuffer(jwk.k);
+      }
 
       // Needs to be improved when alg is not provided.
       // Decide key encryption algorithm based on given JWK.
