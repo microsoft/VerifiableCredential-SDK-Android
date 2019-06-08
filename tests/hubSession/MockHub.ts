@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { PrivateKey, Authentication, VerifiedRequest } from "@decentralized-identity/did-auth-jose";
-import { IDidResolver } from "@decentralized-identity/did-common-typescript";
 import { Response, Request } from 'node-fetch';
+import { IDidResolver } from "@decentralized-identity/did-common-typescript";
 
 /** 
  * Handler to intercept requests before they are authenticated. 

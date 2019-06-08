@@ -7,7 +7,7 @@ import CryptoFactory from '../../plugin/CryptoFactory';
 import PublicKey from '../../keys/PublicKey';
 import IJweGeneralJson, { JweHeader } from './IJweGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import { IEncryptionOptions } from '../../keyStore/IKeyStore';
+import { IJweEncryptionOptions } from "../../protocols/jose/IJoseOptions";
 import JweRecipient from './JweRecipient';
 import { TSMap } from 'typescript-map'
 import JoseHelpers from '../jose/JoseHelpers';
@@ -67,13 +67,13 @@ export default class JweToken implements IJweGeneralJson {
   public format: ProtectionFormat = ProtectionFormat.JweGeneralJson;
 
   // Options passed into the constructor
-  private options: IEncryptionOptions | undefined;
+  private options: IJweEncryptionOptions | undefined;
 
   /**
    * Create an Jwe token object
    * @param options Set of Jwe token options
    */
-  constructor (options?: IEncryptionOptions) {
+  constructor (options?: IJweEncryptionOptions) {
     this.options = options;
   }
 
@@ -180,7 +180,7 @@ export default class JweToken implements IJweGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getCryptoFactory(newOptions?: IEncryptionOptions, manadatory: boolean = true): CryptoFactory {
+  private getCryptoFactory(newOptions?: IJweEncryptionOptions, manadatory: boolean = true): CryptoFactory {
     return JoseHelpers.getOptionsProperty<CryptoFactory>('cryptoFactory', this.options, newOptions, manadatory);
   }
 
@@ -189,7 +189,7 @@ export default class JweToken implements IJweGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getContentEncryptionKey(newOptions?: IEncryptionOptions, manadatory: boolean = true): Buffer {
+  private getContentEncryptionKey(newOptions?: IJweEncryptionOptions, manadatory: boolean = true): Buffer {
     return JoseHelpers.getOptionsProperty<Buffer>('contentEncryptionKey', this.options, newOptions, manadatory);
   }
 
@@ -198,7 +198,7 @@ export default class JweToken implements IJweGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getInitialVector(newOptions?: IEncryptionOptions, manadatory: boolean = true): Buffer {
+  private getInitialVector(newOptions?: IJweEncryptionOptions, manadatory: boolean = true): Buffer {
     return JoseHelpers.getOptionsProperty<Buffer>('initialVector', this.options, newOptions, manadatory);
   }
 
@@ -207,7 +207,7 @@ export default class JweToken implements IJweGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param manadatory True if property needs to be defined
    */
-  private getContentEncryptionAlgorithm(newOptions?: IEncryptionOptions, manadatory: boolean = true): string {
+  private getContentEncryptionAlgorithm(newOptions?: IJweEncryptionOptions, manadatory: boolean = true): string {
     return JoseHelpers.getOptionsProperty<string>('contentEncryptionAlgorithm', this.options, newOptions, manadatory);
   }
 //#endregion
@@ -223,7 +223,7 @@ export default class JweToken implements IJweGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns JweToken with encrypted payload.
    */
-  public async encrypt (recipients: PublicKey[], payload: string, format: ProtectionFormat, options?: IEncryptionOptions): Promise<JweToken> {
+  public async encrypt (recipients: PublicKey[], payload: string, format: ProtectionFormat, options?: IJweEncryptionOptions): Promise<JweToken> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const contentEncryptionAlgorithm = this.getContentEncryptionAlgorithm(options);
     this.format = format;
@@ -234,14 +234,25 @@ export default class JweToken implements IJweGeneralJson {
     // Set the resulting token
     const jweToken: JweToken = new JweToken(options || this.options);
 
-    // Set the content encryption key
-    const contentEncryptionKey: Buffer = this.getContentEncryptionKey(options, false);
-
     // Get the encryptor extensions
     const encryptor = new SubtleCryptoExtension(cryptoFactory);
+
+    // Set the content encryption key
+    let randomGenerator = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm);
+    let contentEncryptionKey: Buffer = this.getContentEncryptionKey(options, false);
+    if (!contentEncryptionKey) {
+      const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
+      const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
+      contentEncryptionKey = base64url.toBuffer(jwk.k);
+    }
     
       // Set the initial vector
       jweToken.iv = this.getInitialVector(options, false);
+      if (!jweToken.iv) {
+        const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
+        const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
+        jweToken.iv = base64url.toBuffer(jwk.k);
+      }
 
       // Needs to be improved when alg is not provided.
       // Decide key encryption algorithm based on given JWK.
@@ -321,7 +332,7 @@ export default class JweToken implements IJweGeneralJson {
    * @returns Signed payload in compact Jwe format.
    */
 // tslint:disable-next-line: max-func-body-length
-   public async decrypt (decryptionKeyReference: string, options?: IEncryptionOptions): Promise<Buffer> {
+   public async decrypt (decryptionKeyReference: string, options?: IJweEncryptionOptions): Promise<Buffer> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
 
     // Get the encryptor extensions

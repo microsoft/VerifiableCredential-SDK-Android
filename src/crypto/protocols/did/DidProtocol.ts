@@ -10,6 +10,8 @@ import CryptoFactory from '../../plugin/CryptoFactory';
 import KeyStoreInMemory from '../../keyStore/KeyStoreInMemory';
 import UserAgentOptions from '../../../UserAgentOptions';
 import CryptoOptions from '../../../CryptoOptions';
+import ProtectionStrategy from '../../strategies/ProtectionStrategy';
+import { IJwsSigningOptions } from '../jose/IJoseOptions';
 
 /**
  * Named Arguments of Did Protocol
@@ -41,7 +43,12 @@ export default class DidProtocol {
   /**
    * Resolver for resolving Identifier Documents
    */
-  private resolver: IResolver;
+   private resolver: IResolver;
+
+  /**
+   * user agent options
+   */
+   private options: UserAgentOptions;
 
   /**
    * Authentication constructor
@@ -50,6 +57,7 @@ export default class DidProtocol {
   constructor (options: DidProtocolOptions) {
     this.sender = options.sender;
     this.resolver = options.resolver;
+    this.options = <UserAgentOptions>options.sender.options;
   }
 
   /**
@@ -64,11 +72,13 @@ export default class DidProtocol {
     const jws = await this.sender.decrypt(cipher, keyReference);
 
     // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
+    const cryptoFactory = (<UserAgentOptions>this.sender.options).cryptoFactory;
     
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
+    const signingOptions: IJwsSigningOptions = {
+      cryptoFactory: cryptoFactory
+    }
+    const token : JwsToken = await JwsToken.deserialize(jws, signingOptions);
     const tokenHeaders = token.getHeader();
     const kid = tokenHeaders.get('kid').split('#');
     const id = kid[0];
@@ -103,7 +113,7 @@ export default class DidProtocol {
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
 
-    const receiverIdentifier = new Identifier(receiverId, options);
+    const receiverIdentifier = new Identifier(receiverId, this.options);
     return receiverIdentifier.encrypt(jws);
   }
 

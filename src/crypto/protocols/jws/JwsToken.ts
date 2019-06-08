@@ -9,7 +9,8 @@ import PublicKey from '../../keys/PublicKey';
 import IJwsFlatJson from './IJwsFlatJson';
 import IJwsGeneralJson, { JwsHeader } from './IJwsGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import IKeyStore, { ISigningOptions , CryptoAlgorithm } from '../../keyStore/IKeyStore';
+import { IJwsSigningOptions } from "../../protocols/jose/IJoseOptions";
+import IKeyStore, { CryptoAlgorithm } from '../../keyStore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
 import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import JwsSignature from './JwsSignature';
@@ -43,13 +44,13 @@ export default class JwsToken implements IJwsGeneralJson {
   public format: ProtectionFormat = ProtectionFormat.JweGeneralJson;
 
   // Options passed into the constructor
-  private options: ISigningOptions | undefined;
+  private options: IJwsSigningOptions | undefined;
 
   /**
    * Create an Jws token object
    * @param options Set of jws token options
    */
-  constructor (options?: ISigningOptions) {
+  constructor (options?: IJwsSigningOptions) {
     this.options = options;
   }
 
@@ -145,7 +146,7 @@ export default class JwsToken implements IJwsGeneralJson {
   /**
    * Deserialize a Jws token object
    */
-  public static deserialize (token: string, options?: ISigningOptions): JwsToken {
+  public static deserialize (token: string, options?: IJwsSigningOptions): JwsToken {
     const jwsToken = new JwsToken(options);
       
     // check for JWS compact format
@@ -285,7 +286,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param mandatory True if property needs to be defined
    */
-  private getKeyStore(newOptions?: ISigningOptions, mandatory: boolean = true): IKeyStore {
+  private getKeyStore(newOptions?: IJwsSigningOptions, mandatory: boolean = true): IKeyStore {
     return this.getCryptoFactory(newOptions, mandatory).keyStore;
   }
 
@@ -294,7 +295,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param mandatory True if property needs to be defined
    */
-  private getCryptoFactory(newOptions?: ISigningOptions, mandatory: boolean = true): CryptoFactory {
+  private getCryptoFactory(newOptions?: IJwsSigningOptions, mandatory: boolean = true): CryptoFactory {
     return JoseHelpers.getOptionsProperty<CryptoFactory>('cryptoFactory', this.options, newOptions, mandatory);
   }
 
@@ -303,7 +304,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param mandatory True if property needs to be defined
    */
-  private getProtected(newOptions?: ISigningOptions, mandatory: boolean = false): JwsHeader {
+  private getProtected(newOptions?: IJwsSigningOptions, mandatory: boolean = false): JwsHeader {
     return JoseHelpers.getOptionsProperty<JwsHeader>('protected', this.options, newOptions, mandatory);
   }
 
@@ -312,7 +313,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param mandatory True if property needs to be defined
    */
-  public getHeader(newOptions?: ISigningOptions, mandatory: boolean = false): JwsHeader {
+  public getHeader(newOptions?: IJwsSigningOptions, mandatory: boolean = false): JwsHeader {
     return JoseHelpers.getOptionsProperty<JwsHeader>('header', this.options, newOptions,mandatory);
   }
 
@@ -325,7 +326,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact JWS format.
    */
-  public async sign (signingKeyReference: string, payload: Buffer, format: ProtectionFormat, options?: ISigningOptions): Promise<JwsToken> {
+  public async sign (signingKeyReference: string, payload: Buffer, format: ProtectionFormat, options?: IJwsSigningOptions): Promise<JwsToken> {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
 
@@ -403,7 +404,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact JWS format.
    */
-   public async verify (validationKeys: PublicKey[], options?: ISigningOptions) {
+   public async verify (validationKeys: PublicKey[], options?: IJwsSigningOptions) {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const validator = new SubtleCryptoExtension(cryptoFactory);
 

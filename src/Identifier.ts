@@ -12,7 +12,7 @@ import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import { KeyUse } from './crypto/keys/KeyUseFactory';
 import JwsToken from './crypto/protocols/jws/JwsToken';
 import PrivateKey from './crypto/keys/PrivateKey';
-import { ISigningOptions, IEncryptionOptions } from './crypto/keyStore/IKeyStore';
+import { IJwsSigningOptions, IJweEncryptionOptions } from "./crypto/protocols/jose/IJoseOptions";
 import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
@@ -206,7 +206,7 @@ export default class Identifier {
         } else {
           body = payload;
         }
-        const signingOptions: ISigningOptions = {
+        const signingOptions: IJwsSigningOptions = {
           cryptoFactory: this.options.cryptoFactory
         };
         const jws = new JwsToken(signingOptions);
@@ -229,7 +229,7 @@ export default class Identifier {
     if (!this.document) {
       this.document = await this.getDocument();
     }
-    const signingOptions: ISigningOptions = {
+    const signingOptions: IJwsSigningOptions = {
       cryptoFactory: (<UserAgentOptions>this.options).cryptoFactory
     };
     const token = JwsToken.deserialize(jws, signingOptions);
@@ -253,18 +253,12 @@ export default class Identifier {
       this.document = await this.getDocument();
     }
 
-    const contentEncryptionKey = [177, 161, 244, 128, 84, 143, 225, 115, 63, 180, 3, 255, 107, 154,
-      212, 246, 138, 7, 110, 91, 112, 46, 34, 105, 47, 130, 203, 46, 122,
-      234, 64, 252];
-    const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
     const keyStore = this.options.keyStore;
     const cryptoSuite = new SubtleCryptoOperations();
 
-    const options: IEncryptionOptions = {
+    const options: IJweEncryptionOptions = {
       cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
-      contentEncryptionAlgorithm: JoseConstants.AesGcm256,
-      contentEncryptionKey: Buffer.from(contentEncryptionKey),
-      initialVector: Buffer.from(iv)
+      contentEncryptionAlgorithm: JoseConstants.AesGcm256
     };
 
     // create a jweToken with temp cryptoFactory and algorithm.

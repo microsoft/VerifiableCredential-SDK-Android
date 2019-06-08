@@ -14,56 +14,6 @@ import { JwsHeader } from '../protocols/jws/IJwsGeneralJson';
 export type CryptoAlgorithm = RsaPssParams | EcdsaParams | Algorithm;
 
 /**
- * Interface defining IKeyStore options.
- */
-export interface IKeyStoreOptions {
-  // The crypto algorithm suites used for signing
-  cryptoFactory: CryptoFactory,
-
-  // The default protected header
-  protected?: JwsHeader,
-
-  // The default header
-  header?: JwsHeader,
-
-  // The prefix for a kid when key is generated
-  kidPrefix?: string,
-
-  // Make the type indexable
-  [key: string]: any;
-}
-
-/**
- * Interface defining signature options.
- */
-export interface ISigningOptions extends IKeyStoreOptions {
-}
-
-/**
- * Interface defining encryption options.
- */
-export interface IEncryptionOptions extends IKeyStoreOptions {
-  /**
-   * The content encryption algorithm in JWA format
-   */ 
-  contentEncryptionAlgorithm: string,
-
-  /**
-   * The content key encryption key.
-   * Remark: Only used for testing with reference data.
-   * Should be undefined in production code.
-   */
-  contentEncryptionKey?: Buffer,
-
-  /**
-   * The initial vector.
-   * Remark: Only used for testing with reference data.
-   * Should be undefined in production code.
-   */
-  initialVector?: Buffer
-}
-
-/**
  * Interface defining methods and properties to
  * be implemented by specific key stores.
  */
