@@ -23,7 +23,8 @@
     "test": "nyc jasmine-ts --config=./tests/jasmine.json",
     "lint": "tslint --fix --project . --config ./tslint.json",
     "lint-pr": "tslint --project . --config ./tslint.json",
-    "build:docs": "jsdoc2md --files src/**/*.ts --configure jsdoc2md.json > docs/sdk.md"
+    "build:docs": "jsdoc2md --files src/**/*.ts --configure jsdoc2md.json > docs/sdk.md",
+    "bundle": "webpack --config ./webpack.config.js --display-error-details"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",
@@ -48,17 +49,22 @@
     "jasmine-ts": "0.3.0",
     "jsdoc-babel": "0.5.0",
     "jsdoc-to-markdown": "4.0.1",
+    "node-loader": "^0.6.0",
     "nyc": "14.1.0",
+    "ts-loader": "^6.0.2",
     "ts-node": "8.1.0",
     "tsconfig-paths": "3.8.0",
     "tslint": "5.16.0",
     "tslint-config-standard": "8.0.1",
     "tslint-microsoft-contrib": "6.1.1",
     "typescript": "3.4.5",
-    "typescript-map": "0.0.7"
+    "typescript-map": "0.0.7",
+    "webpack": "^4.33.0",
+    "node-webcrypto-ossl": "1.0.44",
+    "webpack-cli": "^3.3.3"
   },
   "dependencies": {
-    "@decentralized-identity/did-common-typescript": "0.1.18",
+    "@decentralized-identity/did-common-typescript": "0.1.19",
     "@decentralized-identity/did-crypto-typescript": "0.1.6",
     "@decentralized-identity/hub-node-core": "0.1.4",
     "@decentralized-identity/hub-sdk-js": "0.1.3",
