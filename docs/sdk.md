@@ -1869,10 +1869,8 @@ a user's Identity Hub.</p>
 * [Commit](#Commit)
     * [.validate()](#Commit+validate)
     * [.isValid()](#Commit+isValid)
-    * [.getProtectedHeaders()](#Commit+getProtectedHeaders)
-    * [.getUnprotectedHeaders()](#Commit+getUnprotectedHeaders)
+    * [.getCommitFields()](#Commit+getCommitFields)
     * [.getPayload()](#Commit+getPayload)
-    * [.sign(signer)](#Commit+sign)
 
 <a name="Commit+validate"></a>
 
@@ -1889,16 +1887,10 @@ signed/encrypted and stored in an Identity Hub.</p>
 <p>Returns true if the validate() method would pass without error.</p>
 
 **Kind**: instance method of [<code>Commit</code>](#Commit)  
-<a name="Commit+getProtectedHeaders"></a>
+<a name="Commit+getCommitFields"></a>
 
-### commit.getProtectedHeaders()
-<p>Returns the headers which will be signed/encrypted.</p>
-
-**Kind**: instance method of [<code>Commit</code>](#Commit)  
-<a name="Commit+getUnprotectedHeaders"></a>
-
-### commit.getUnprotectedHeaders()
-<p>Returns the (optional) headers which will not be signed/encrypted.</p>
+### commit.getCommitFields()
+<p>Returns the fields of the commit.</p>
 
 **Kind**: instance method of [<code>Commit</code>](#Commit)  
 <a name="Commit+getPayload"></a>
@@ -1907,17 +1899,6 @@ signed/encrypted and stored in an Identity Hub.</p>
 <p>Returns the application-specific payload for this commit.</p>
 
 **Kind**: instance method of [<code>Commit</code>](#Commit)  
-<a name="Commit+sign"></a>
-
-### commit.sign(signer)
-<p>Returns a copy of this commit signed with the given signer.</p>
-
-**Kind**: instance method of [<code>Commit</code>](#Commit)  
-
-| Param | Description |
-| --- | --- |
-| signer | <p>The signer to use to sign the commit.</p> |
-
 <a name="CommitStrategyBasic"></a>
 
 ## CommitStrategyBasic

@@ -65,21 +65,21 @@ export default class CommitSigner implements ICommitSigner {
 
     commit.validate();
 
-    const protectedHeaders = commit.getProtectedHeaders();
-    const finalProtectedHeaders = new TSMap<string, string>([
+    const commitFields = commit.getCommitFields();
+    const finalcommitFields = new TSMap<string, string>([
                                     ['iss', this.did],
-                                    ['commit_strategy', <string> protectedHeaders.commit_strategy],
-                                    ['commited_at', <string> protectedHeaders.committed_at],
-                                    ['context', <string> protectedHeaders.context],
-                                    ['interface', <string> protectedHeaders.interface],
-                                    ['operation', <string> protectedHeaders.operation],
-                                    ['sub', <string> protectedHeaders.sub],
-                                    ['type', <string> protectedHeaders.type]
+                                    ['commit_strategy', <string> commitFields.commit_strategy],
+                                    ['commited_at', <string> commitFields.committed_at],
+                                    ['context', <string> commitFields.context],
+                                    ['interface', <string> commitFields.interface],
+                                    ['operation', <string> commitFields.operation],
+                                    ['sub', <string> commitFields.sub],
+                                    ['type', <string> commitFields.type]
                                   ]);
 
     // const jws = new JwsToken(commit.getPayload(), new CryptoFactory([this.cryptoSuite]));
-    // const signed = await jws.sign(key, <any> finalProtectedHeaders); // Need to broaden TypeScript definition of JwsToken.sign().
-    const signingOptions: IJwsSigningOptions = {cryptoFactory: this.cryptoFactory, protected: finalProtectedHeaders};
+    // const signed = await jws.sign(key, <any> finalcommitFields); // Need to broaden TypeScript definition of JwsToken.sign().
+    const signingOptions: IJwsSigningOptions = {cryptoFactory: this.cryptoFactory, protected: finalcommitFields};
     const jws = new JwsToken(signingOptions);
     const signed = await jws.sign(this.keyRef, Buffer.from(payload), ProtectionFormat.JwsCompactJson);
     const serializedCompactJws = signed.serialize();
@@ -88,7 +88,7 @@ export default class CommitSigner implements ICommitSigner {
     return new SignedCommit({
       protected: outputHeaders,
       payload: outputPayload,
-      header: commit.getUnprotectedHeaders(),
+      header: undefined,
       signature: outputSignature,
     });
   }

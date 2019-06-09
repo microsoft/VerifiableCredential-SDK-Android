@@ -46,12 +46,12 @@ export default class HubClient implements IHubClient {
    */
   public async commit (commit: Commit) {
 
-    if (commit.getProtectedHeaders().iss !== this.clientIdentifier.id) {
-      throw new UserAgentError(`Issuer, '${commit.getProtectedHeaders().iss},' is not valid for this HubClient Instance.`);
+    if (commit.getCommitFields().iss !== this.clientIdentifier.id) {
+      throw new UserAgentError(`Issuer, '${commit.getCommitFields().iss},' is not valid for this HubClient Instance.`);
     }
 
-    if (commit.getProtectedHeaders().sub !== this.hubOwner.id) {
-      throw new UserAgentError(`Subject, '${commit.getProtectedHeaders().sub},' is not valid for this HubClient Instance.`);
+    if (commit.getCommitFields().sub !== this.hubOwner.id) {
+      throw new UserAgentError(`Subject, '${commit.getCommitFields().sub},' is not valid for this HubClient Instance.`);
     }
 
     if (!this.clientIdentifier.options || !this.clientIdentifier.options.keyStore) {
