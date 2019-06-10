@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
 import SubtleCryptoOperations from './SubtleCryptoOperations';
+import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * Default crypto suite implementing the default plugable crypto layer
@@ -19,6 +20,6 @@ export default class SubtleCryptoBrowserOperations extends SubtleCryptoOperation
   * @returns a subtle crypto object for message signing
   */
   public getMessageSigners (): SubtleCrypto {
-    return new SubtleCryptoElliptic();
+    return <SubtleCrypto> new SubtleCryptoElliptic();
   }
 }

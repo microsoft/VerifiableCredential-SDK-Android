@@ -12,6 +12,7 @@ import KeyUseFactory from "../KeyUseFactory";
 import RsaPrivateKey from "./RsaPrivateKey";
 const bigInt = require('big-integer');
 import { BigIntegerStatic } from 'big-integer';
+import { SubtleCrypto } from 'webcrypto-core';
 
 // tslint:disable-next-line:prefer-array-literal
 type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer, deterministicKey: Buffer) => Promise<Buffer>>;
@@ -124,7 +125,7 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
       k: base64url.encode(key)
     };
 
-    const importedKey = await crypto.importKey(W3cCryptoApiConstants.Jwk, signingKey, alg, false, ['sign']);
+    const importedKey = await crypto.importKey('jwk', signingKey, alg, false, ['sign']);
     const signature = await crypto.sign(alg, importedKey, data);
     return Buffer.concat([deterministicKey, Buffer.from(signature)]);
   }

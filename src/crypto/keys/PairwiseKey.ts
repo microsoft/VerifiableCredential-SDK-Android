@@ -11,6 +11,7 @@ import EcPairwiseKey from "./ec/EcPairwiseKey";
 import CryptoError from "../CryptoError";
 import RsaPairwiseKey from "./rsa/RsaPairwiseKey";
 import PrivateKey from "./PrivateKey";
+import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * Class to model pairwise keys
@@ -80,7 +81,7 @@ import PrivateKey from "./PrivateKey";
       k: base64url.encode(seed)
     };
 
-    const key = await crypto.importKey(W3cCryptoApiConstants.Jwk, jwk, alg, false, ['sign']);
+    const key = await crypto.importKey('jwk', jwk, alg, false, ['sign']);
     const masterKey = await crypto.sign(alg, key, Buffer.from(personaId));
     mk = Buffer.from(masterKey);
     this.masterKeys.set(personaId, mk); 

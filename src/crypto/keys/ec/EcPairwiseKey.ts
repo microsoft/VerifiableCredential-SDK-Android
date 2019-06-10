@@ -10,6 +10,7 @@ import { CryptoAlgorithm } from "../../keyStore/IKeyStore";
 import { KeyType } from "../KeyTypeFactory";
 import EcPrivateKey from "./EcPrivateKey";
 import CryptoError from "../../CryptoError";
+import { SubtleCrypto } from 'webcrypto-core';
 
 // Create and initialize EC context
 const BN = require('bn.js');
@@ -43,7 +44,7 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
       k: base64url.encode(personaMasterKey)
     };
 
-    const key = await crypto.importKey(W3cCryptoApiConstants.Jwk, signingKey, alg, false, ['sign']);
+    const key = await crypto.importKey('jwk', signingKey, alg, false, ['sign']);
     const pairwiseKeySeed = await crypto.sign(alg, key, Buffer.from(peerId));
  
     if (SUPPORTED_CURVES.indexOf(algorithm.namedCurve) === -1) {

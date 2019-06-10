@@ -10,7 +10,7 @@ import PublicKey from '../keys/PublicKey';
 import PrivateKey from '../keys/PrivateKey';
 import { KeyType } from '../keys/KeyTypeFactory';
 import PairwiseKey from '../keys/PairwiseKey';
-// import { SubtleCrypto } from 'webcrypto-core';
+import { SubtleCrypto } from 'webcrypto-core';
 import CryptoError from '../CryptoError';
 const clone = require('clone');
 

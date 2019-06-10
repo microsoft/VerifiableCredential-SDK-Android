@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import CryptoOperations from './CryptoOperations';
-// import { SubtleCrypto } from 'webcrypto-core';
+import { SubtleCrypto } from 'webcrypto-core';
 // import nodeWebcryptoOssl from 'node-webcrypto-ossl';
 
 /**

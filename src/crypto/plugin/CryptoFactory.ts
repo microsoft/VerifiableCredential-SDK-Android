@@ -7,6 +7,7 @@ import CryptoOperations, { CryptoSuiteMap } from './CryptoOperations';
 import SubtleCryptoOperations from './SubtleCryptoOperations';
 import IKeyStore from '../keyStore/IKeyStore';
 import SubtleCryptoBrowserOperations from './SubtleCryptoBrowserOperations';
+import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * Utility class to handle all CryptoSuite dependency injection

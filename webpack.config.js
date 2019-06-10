@@ -12,13 +12,16 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.node']
   },
+  optimization: {
+    minimize: false
+  },
   node: {
     fs: 'empty',
     crypto: true,
   },
-  // externals: [
-  //   "node-webcrypto-ossl"
-  // ],
+  externals: [
+     "Buffer"
+  ],
   target: 'web',
   module: {
     noParse: /node\-webcrypto\-ossl/,
