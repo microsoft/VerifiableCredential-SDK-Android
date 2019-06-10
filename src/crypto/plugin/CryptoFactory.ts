@@ -6,7 +6,8 @@
 import CryptoOperations, { CryptoSuiteMap } from './CryptoOperations';
 import SubtleCryptoOperations from './SubtleCryptoOperations';
 import IKeyStore from '../keyStore/IKeyStore';
-import { SubtleCrypto } from 'webcrypto-core';
+import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
+import SubtleCryptoBrowserOperations from './SubtleCryptoBrowserOperations';
 
 /**
  * Utility class to handle all CryptoSuite dependency injection
@@ -48,6 +49,7 @@ export default class CryptoFactory {
     this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
     this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
     this.messageSigners = <CryptoSuiteMap>{'*': crypto };
+    this.messageSigners['ECDSA'] = new SubtleCryptoBrowserOperations();
     this.messageAuthenticationCodeSigners = <CryptoSuiteMap>{'*': crypto };
     this.messageDigests = <CryptoSuiteMap>{'*': crypto };
   }
