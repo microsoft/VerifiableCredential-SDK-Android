@@ -6,7 +6,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname),
-    library: 'UserAgent',
+    // library: 'UserAgent',
     libraryTarget: 'commonjs'
   },
   resolve: {
