@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { SubtleCrypto } from 'webcrypto-core';
+// import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * A dictionary of JWA encryption algorithm names to a crypto object

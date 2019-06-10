@@ -7,8 +7,7 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname),
     library: 'useragentSdk',
-    libraryExport: 'default',
-    libraryTarget: 'commonjs2'
+    libraryTarget: 'commonjs'
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.node']
@@ -30,7 +29,7 @@ module.exports = {
             loader: 'ts-loader',
             options: {
               compilerOptions: {
-                lib: ['es2018']
+                lib: ['es2018', 'dom']
               }
             }
           },
