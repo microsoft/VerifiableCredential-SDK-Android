@@ -10,7 +10,7 @@ import PublicKey from '../keys/PublicKey';
 import PrivateKey from '../keys/PrivateKey';
 import { KeyType } from '../keys/KeyTypeFactory';
 import PairwiseKey from '../keys/PairwiseKey';
-import { SubtleCrypto } from 'webcrypto-core';
+// import { SubtleCrypto } from 'webcrypto-core';
 import CryptoError from '../CryptoError';
 const clone = require('clone');
 
@@ -126,7 +126,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), keyImportAlgorithm, true, ['verify']);
     return crypto.verify(jwk.kty === KeyType.EC ? 
       <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): 
-      <RsaPssParams>algorithm, key, signature, payload);
+      <RsaPssParams>algorithm, key, <ArrayBuffer>signature, <ArrayBuffer>payload);
    }  
           
   /**
@@ -142,7 +142,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), SubtleCryptoExtension.normalizeAlgorithm(keyImportAlgorithm), true, ['decrypt']);
-    return crypto.decrypt(algorithm, key, cipher);
+    return crypto.decrypt(algorithm, key, <ArrayBuffer>cipher);
    }  
           
   /**
@@ -156,7 +156,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), SubtleCryptoExtension.normalizeAlgorithm(keyImportAlgorithm), true, ['decrypt']);
-    return crypto.decrypt(algorithm, key, cipher);
+    return crypto.decrypt(algorithm, key, <ArrayBuffer>cipher);
    }  
 
   /**

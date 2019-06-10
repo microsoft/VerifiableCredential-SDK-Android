@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import CryptoOperations from './CryptoOperations';
-import { SubtleCrypto } from 'webcrypto-core';
-import nodeWebcryptoOssl from 'node-webcrypto-ossl';
+// import { SubtleCrypto } from 'webcrypto-core';
+// import nodeWebcryptoOssl from 'node-webcrypto-ossl';
 
 /**
  * Default crypto suite implementing the default plugable crypto layer
@@ -16,7 +16,7 @@ export default class SubtleCryptoOperations extends CryptoOperations {
 
   constructor () {
     super();
-    this.crypto = new nodeWebcryptoOssl();
+    // this.crypto = new nodeWebcryptoOssl();
   }
 
  /**

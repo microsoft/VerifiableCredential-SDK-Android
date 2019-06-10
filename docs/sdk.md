@@ -41,6 +41,8 @@ self-issued id token.</p></dd>
 <dd><p>Utility class to handle all CryptoSuite dependency injection</p></dd>
 <dt><a href="#CryptoOperations">CryptoOperations</a></dt>
 <dd><p>Interface for the Crypto Algorithms Plugins</p></dd>
+<dt><a href="#SubtleCryptoBrowserOperations">SubtleCryptoBrowserOperations</a></dt>
+<dd><p>Default crypto suite implementing the default plugable crypto layer</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
 <dd><p>The class extends the @class SubtleCrypto with addtional methods.
  Adds methods to work with key references.
@@ -826,6 +828,19 @@ Used for DH algorithms</p>
 <p>Interface for the Crypto Algorithms Plugins</p>
 
 **Kind**: global class  
+<a name="SubtleCryptoBrowserOperations"></a>
+
+## SubtleCryptoBrowserOperations
+<p>Default crypto suite implementing the default plugable crypto layer</p>
+
+**Kind**: global class  
+<a name="SubtleCryptoBrowserOperations+getMessageSigners"></a>
+
+### subtleCryptoBrowserOperations.getMessageSigners() ⇒
+<p>Gets all of the message signing Algorithms from the plugin</p>
+
+**Kind**: instance method of [<code>SubtleCryptoBrowserOperations</code>](#SubtleCryptoBrowserOperations)  
+**Returns**: <p>a subtle crypto object for message signing</p>  
 <a name="SubtleCryptoExtension"></a>
 
 ## SubtleCryptoExtension

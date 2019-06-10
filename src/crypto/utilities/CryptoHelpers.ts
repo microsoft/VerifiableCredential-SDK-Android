@@ -6,7 +6,7 @@ import CryptoFactory from '../plugin/CryptoFactory';
 import PublicKey from '../keys/PublicKey';
 import EcPublicKey from '../keys/ec/EcPublicKey';
 import { CryptoAlgorithm } from '../keyStore/IKeyStore';
-import { SubtleCrypto } from 'webcrypto-core';
+// import { SubtleCrypto } from 'webcrypto-core';
 import W3cCryptoApiConstants from './W3cCryptoApiConstants';
 import JoseConstants from '../protocols/jose/JoseConstants';
 

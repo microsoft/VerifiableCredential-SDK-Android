@@ -6,7 +6,6 @@
 import CryptoOperations, { CryptoSuiteMap } from './CryptoOperations';
 import SubtleCryptoOperations from './SubtleCryptoOperations';
 import IKeyStore from '../keyStore/IKeyStore';
-import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
 import SubtleCryptoBrowserOperations from './SubtleCryptoBrowserOperations';
 
 /**
