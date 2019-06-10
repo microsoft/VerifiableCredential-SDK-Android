@@ -51,19 +51,25 @@ export interface IProtocolInterface {
    * Decrypt the content.
    * 
    * @param decryptionKeyReference Reference to the decryption key.
+   * @param token The crypto token to decrypt.
    * @param options used for the decryption. These options override the options provided in the constructor.
    * @returns Decrypted payload.
    */
    decrypt (decryptionKeyReference: string, cipher: ICryptoToken, options?: IProtocolOptions): Promise<Buffer>;
 
-   /**
+  /**
    * Serialize a cryptographic token
-   * @param format Optional specify the serialization format. If not specified, use default format.
+   * @param token The crypto token to serialize.
+   * @param format Specify the serialization format. If not specified, use default format.
+   * @param options used for the decryption. These options override the options provided in the constructor.
    */
-   serialize (format?: any): string;
+   serialize (token: ICryptoToken, format: string, options?: IProtocolOptions): string;
 
   /**
    * Deserialize a cryptographic token
+   * @param token The crypto token to serialize.
+   * @param format Specify the serialization format. If not specified, use default format.
+   * @param options used for the decryption. These options override the options provided in the constructor.
    */
-  deserialize (token: string, options?: IProtocolOptions): ICryptoToken;
+   deserialize (token: string, format: string, options?: IProtocolOptions): ICryptoToken;
 }

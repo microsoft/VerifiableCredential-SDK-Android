@@ -174,6 +174,145 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   //#endregion
+
+  //#region deserialization
+  /**
+   * Deserialize a Jwe token object
+   */
+   public static deserialize (token: string, options?: IJweEncryptionOptions): JweToken {
+    const jweToken = new JweToken(options);
+      
+    // check for JWS compact format
+  if (typeof token === 'string') {
+    const parts = token.split('.');
+    if (parts.length === 3) {
+      jweToken.payload = base64url.toBuffer(parts[1]);
+      const signature = new JwsSignature();
+      signature.protected = jweToken.setProtected(parts[0]);
+      signature.signature = base64url.toBuffer(parts[2]);
+      return jweToken;
+    }
+  } else {
+    throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable.`);
+  }
+
+  // Flat or general format
+  let jsonObject: any;
+  try {
+    jsonObject = JSON.parse(token);
+  } catch (error) {
+    throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable and is no compact format.`);
+  }
+
+     // set payload
+     jweToken.payload = base64url.toBuffer(<string>jsonObject.payload);
+
+     // Try to handle token as IJwsGeneralJSon
+     let decodeStatus: { result: boolean, reason: string } = jweToken.setGeneralParts(<IJwsGeneralJson>jsonObject);
+     if (decodeStatus.result) {
+         return jweToken;
+     } else {
+       console.debug(`Failed parsing as IJwsGeneralJSon. Reasom: ${decodeStatus.reason}`)
+     }
+
+     // Try to handle token as IJwsFlatJson
+     decodeStatus = jweToken.setFlatParts(<IJwsFlatJson>jsonObject);
+     if (decodeStatus.result) {
+         return jweToken;
+     } else {
+       console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
+     }
+   throw new CryptoProtocolError(JoseConstants.Jws, `The content does not represent a valid jws token`);  return jweToken;
+  }
+
+  /**
+   * Try to parse the input token and set the properties of this JswToken
+   * @param content Alledged IJwsGeneralJSon token
+   * @returns true if valid token was parsed
+   */
+  private setGeneralParts(content: IJwsGeneralJson): {result: boolean, reason: string} {
+    if (content) {
+      if (content.payload) {
+        this.payload = base64url.toBuffer(<string><any>content.payload);
+      } else {
+        // manadatory field
+        return {result: false, reason: 'missing payload'};
+      }
+
+      this.signatures = content.signatures;
+      return this.isValidToken();
+    }
+
+    return {result: false, reason: 'no content passed'};
+  }
+
+  /**
+   * Try to parse the input token and set the properties of this JswToken
+   * @param content Alledged IJwsFlatJson token
+   * @returns true if valid token was parsed
+   */
+  private setFlatParts(content: IJwsFlatJson): {result: boolean, reason: string} {
+    if (content) {
+      const signature = new JwsSignature();
+
+      if (content.signature) {
+        signature.signature = content.signature;
+      } else {
+        // manadatory field
+        return {result: false, reason: 'missing signature'};
+      }
+
+      if (JoseHelpers.headerHasElements(content.protected)) {
+        signature.protected = this.setProtected(<JwsHeader>content.protected);
+      } 
+
+      if (JoseHelpers.headerHasElements(content.header)) {
+        signature.header = content.header;
+      } 
+
+      if (content.payload) {
+        this.payload = base64url.toBuffer(<string><any>content.payload);
+      } else {
+        // manadatory field
+        return {result: false, reason: 'missing payload'};
+      }
+
+      this.signatures = [signature];
+      return this.isValidToken();
+    } 
+
+    return {result: false, reason: 'no content passed'};
+  }
+
+  /**
+   * Check if a valid token was found after decoding
+   */
+  private isValidToken(): {result: boolean, reason: string} {
+    if (!this.payload) {
+      return {result: false, reason: 'missing payload'};
+    }
+
+    if (!this.signatures) {
+      return {result: false, reason: 'missing signatures'};
+    }
+
+    if (this.signatures.length == 0) {
+      return {result: false, reason: 'signatures array is empty'};
+    }
+
+    for (let inx = 0; inx < this.signatures.length; inx++) {
+      const signature = this.signatures[inx];
+      if (!signature.signature) {
+        return {result: false, reason: `signature ${inx} is missing signature`};
+      }
+      if (!signature.header && !signature.protected) {
+        return {result: false, reason: `signature ${inx} is missing header and protected`};
+      }
+    }
+
+    return {result: true, reason: ''};
+  }
+//#endregion
 //#region options section
   /**
    * Get the CryptoFactory to be used
