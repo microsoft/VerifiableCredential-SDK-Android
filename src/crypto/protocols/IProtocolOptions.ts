@@ -5,7 +5,7 @@
 import CryptoFactory from "../plugin/CryptoFactory";
 import { TSMap } from "typescript-map";
 import { IProtocolInterface } from "./IProtocolInterface";
- 
+
 /**
  * Interface defining options for the selected protocol.
  */
