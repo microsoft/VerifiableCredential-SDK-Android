@@ -1487,7 +1487,7 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Verify the JWS signature.</p>
 
 **Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
-**Returns**: <p>Signed payload in compact JWS format.</p>  
+**Returns**: <p>True if signature validated.</p>  
 
 | Param | Description |
 | --- | --- |

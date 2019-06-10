@@ -402,9 +402,9 @@ export default class JwsToken implements IJwsGeneralJson {
    *
    * @param validationKeys Public JWK key to validate the signature.
    * @param options used for the signature. These options override the options provided in the constructor.
-   * @returns Signed payload in compact JWS format.
+   * @returns True if signature validated.
    */
-   public async verify (validationKeys: PublicKey[], options?: IJwsSigningOptions) {
+   public async verify (validationKeys: PublicKey[], options?: IJwsSigningOptions): Promise<boolean> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const validator = new SubtleCryptoExtension(cryptoFactory);
 
