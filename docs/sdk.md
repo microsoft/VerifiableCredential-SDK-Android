@@ -21,6 +21,10 @@ self-issued id token.</p></dd>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
 <dt><a href="#EcPublicKey">EcPublicKey</a> ⇐ <code><a href="#PublicKey">PublicKey</a></code></dt>
 <dd><p>Represents an Elliptic Curve public key</p></dd>
+<dt><a href="#KeyOperation">KeyOperation</a></dt>
+<dd></dd>
+<dt><a href="#JsonWebKey">JsonWebKey</a></dt>
+<dd></dd>
 <dt><a href="#PairwiseKey">PairwiseKey</a></dt>
 <dd><p>Class to model pairwise keys</p></dd>
 <dt><a href="#PrivateKey">PrivateKey</a></dt>
@@ -35,6 +39,8 @@ self-issued id token.</p></dd>
 <dd><p>Represents an Elliptic Curve private key</p></dd>
 <dt><a href="#RsaPublicKey">RsaPublicKey</a> ⇐ <code><a href="#PublicKey">PublicKey</a></code></dt>
 <dd><p>Represents an RSA public key</p></dd>
+<dt><a href="#SecretKey">SecretKey</a> ⇐ <code><a href="#JsonWebKey">JsonWebKey</a></code></dt>
+<dd><p>Represents an OCT key</p></dd>
 <dt><a href="#KeyStoreInMemory">KeyStoreInMemory</a></dt>
 <dd><p>Class defining methods and properties for a light KeyStore</p></dd>
 <dt><a href="#CryptoFactory">CryptoFactory</a></dt>
@@ -160,6 +166,8 @@ Authentication Requests and Responses.</p></dd>
 <dt><a href="#CredentialType">CredentialType</a></dt>
 <dd><p>Interface defining common properties and
 methods of a credential.</p></dd>
+<dt><a href="#KeyOperation">KeyOperation</a></dt>
+<dd><p>JWK key operations</p></dd>
 <dt><a href="#KeyType">KeyType</a></dt>
 <dd><p>Enumeration to model key types.</p></dd>
 <dt><a href="#KeyType">KeyType</a></dt>
@@ -453,6 +461,50 @@ credential for the specified identifier.</p>
 ### new EcPublicKey()
 <p>Create instance of @class EcPublicKey</p>
 
+<a name="KeyOperation"></a>
+
+## *KeyOperation*
+**Kind**: global abstract class  
+
+* *[KeyOperation](#KeyOperation)*
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
+<a name="JsonWebKey"></a>
+
+## JsonWebKey
+**Kind**: global class  
+
+* [JsonWebKey](#JsonWebKey)
+    * [new JsonWebKey()](#new_JsonWebKey_new)
+    * [.getThumbprint(jwk)](#JsonWebKey.getThumbprint)
+
+<a name="new_JsonWebKey_new"></a>
+
+### new JsonWebKey()
+<p>Create instance of @class JsonWebKey</p>
+
+<a name="JsonWebKey.getThumbprint"></a>
+
+### JsonWebKey.getThumbprint(jwk)
+<p>Obtains the thumbprint for the jwk parameter</p>
+
+**Kind**: static method of [<code>JsonWebKey</code>](#JsonWebKey)  
+
+| Param | Description |
+| --- | --- |
+| jwk | <p>JSON object representation of a JWK</p> |
+
 <a name="PairwiseKey"></a>
 
 ## PairwiseKey
@@ -511,6 +563,16 @@ credential for the specified identifier.</p>
 
 ## *KeyOperation*
 **Kind**: global abstract class  
+
+* *[KeyOperation](#KeyOperation)*
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
 <a name="new_KeyOperation_new"></a>
 
 ### *new exports.KeyOperation()*
@@ -677,6 +739,18 @@ isProbablyPrime is based on the Miller-Rabin prime test.</p>
 
 ### new RsaPublicKey()
 <p>Create instance of @class RsaPublicKey</p>
+
+<a name="SecretKey"></a>
+
+## SecretKey ⇐ [<code>JsonWebKey</code>](#JsonWebKey)
+<p>Represents an OCT key</p>
+
+**Kind**: global class  
+**Extends**: [<code>JsonWebKey</code>](#JsonWebKey)  
+<a name="new_SecretKey_new"></a>
+
+### new SecretKey()
+<p>Create instance of @class EcPublicKey</p>
 
 <a name="KeyStoreInMemory"></a>
 
@@ -2717,6 +2791,27 @@ Authentication Requests and Responses.</p>
 methods of a credential.</p>
 
 **Kind**: global variable  
+<a name="KeyOperation"></a>
+
+## KeyOperation
+<p>JWK key operations</p>
+
+**Kind**: global variable  
+
+* [KeyOperation](#KeyOperation)
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
 <a name="KeyType"></a>
 
 ## KeyType
@@ -2747,6 +2842,16 @@ methods of a credential.</p>
 <p>JWK key operations</p>
 
 **Kind**: global variable  
+
+* [KeyOperation](#KeyOperation)
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+    * *[new exports.KeyOperation()](#new_KeyOperation_new)*
+
+<a name="new_KeyOperation_new"></a>
+
+### *new exports.KeyOperation()*
+<p>Represents a Public Key in JWK format.</p>
+
 <a name="new_KeyOperation_new"></a>
 
 ### *new exports.KeyOperation()*

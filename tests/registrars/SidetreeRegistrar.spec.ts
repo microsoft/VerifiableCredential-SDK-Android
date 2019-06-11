@@ -13,6 +13,7 @@ import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
 import IJwsFlatJson from '../../src/crypto/protocols/jws/IJwsFlatJson';
+import SecretKey from '../../src/crypto/keys/SecretKey';
 
 let fetchMock: any;
 
@@ -67,7 +68,8 @@ describe('SidetreeRegistrar', () => {
 
   it('should return a new identifier', async () => {
     // Setup registration environment
-    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
+    const seed = new SecretKey('ABDE');
+    await options.keyStore.save('masterSeed', seed);
 
     let identifier: Identifier = new Identifier('did:test:identifier', options);
 
@@ -97,7 +99,8 @@ describe('SidetreeRegistrar', () => {
     options.registrar = new SidetreeRegistrar('https://registrar.org/', options);
 
     // Setup registration environment
-    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
+    const seed = new SecretKey('ABDE');
+    await options.keyStore.save('masterSeed', seed);
     const identifier: Identifier = new Identifier('did:test:identifier', options);
 
     // Set the mock timeout to be greater than the fetch configuration
@@ -124,7 +127,8 @@ describe('SidetreeRegistrar', () => {
 
   it('should throw UserAgentError when error returned by registrar', async done => {
     // Setup registration environment
-    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('xxxxxxxxxxxxxxxxx'));
+    const seed = new SecretKey('ABDE');
+    await options.keyStore.save('masterSeed', seed);
     const identifier: Identifier = new Identifier('did:test:identifier', options);
 
     fetchMock.post('https://registrar.org/', 404);

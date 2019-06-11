@@ -49,7 +49,7 @@ export default class CryptoFactory {
     this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
     this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
     this.messageSigners = <CryptoSuiteMap>{'*': crypto };
-    this.messageSigners['ECDSA'] = new SubtleCryptoBrowserOperations();
+    this.messageSigners['ES256K'] = new SubtleCryptoBrowserOperations();
     this.messageAuthenticationCodeSigners = <CryptoSuiteMap>{'*': crypto };
     this.messageDigests = <CryptoSuiteMap>{'*': crypto };
   }

@@ -13,6 +13,7 @@ import IRegistrar from '../src/registrars/IRegistrar';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
 import KeyTypeFactory, { KeyType } from '../src/crypto/keys/KeyTypeFactory';
 import CryptoHelpers from '../src/crypto/utilities/CryptoHelpers';
+import SecretKey from '../src/crypto/keys/SecretKey';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -71,7 +72,8 @@ describe('Pairwise Identifier', () => {
     options.didPrefix = 'did:ion';
     testResolver = new TestResolver();
     options.keyStore = new KeyStoreInMemory();
-    await (<KeyStoreInMemory> options.keyStore).save(KeyStoreConstants.masterSeed, Buffer.from('my master seed'));
+    const seed = new SecretKey('ABDE');
+    await options.keyStore.save(KeyStoreConstants.masterSeed, seed);
     options.registrar = new SidetreeRegistrar('https://example.com', options);
   });
 

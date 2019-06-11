@@ -14,6 +14,7 @@ import { KeyType } from '../src/crypto/keys/KeyTypeFactory';
 import { KeyUse } from '../src/crypto/keys/KeyUseFactory';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
 import JwsToken from '../src/crypto/protocols/jws/JwsToken';
+import SecretKey from '../src/crypto/keys/SecretKey';
 
 describe('Identifier', () => {
 
@@ -274,7 +275,8 @@ describe('Identifier', () => {
       options.cryptoOptions = new CryptoOptions();
       options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
-      await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
+      const seed = new SecretKey('ABDE');
+      await options.keyStore.save('masterSeed', seed);
       const identifier = await Identifier.create(options);
       const keystore = await options.keyStore.list();
       console.log(keystore);
@@ -287,7 +289,8 @@ describe('Identifier', () => {
       options.cryptoOptions = new CryptoOptions();
       options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
-      await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
+      const seed = new SecretKey('ABDE');
+      await options.keyStore.save('masterSeed', seed);
       const identifier = await Identifier.create(options);
       const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion-did:ion-ES256K-sig');
       expect(signedPayload).toBeDefined();
