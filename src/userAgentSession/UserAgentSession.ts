@@ -6,7 +6,6 @@
 import Identifier from '../Identifier';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
 import UserAgentOptions from '../UserAgentOptions';
-import CryptoOptions from '../CryptoOptions';
 import IResolver from '../resolvers/IResolver';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../crypto/keyStore/KeyStoreInMemory';
@@ -110,17 +109,19 @@ export default class UserAgentSession {
 
     // get identifier id from key id in header.
     const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
-    const tokenHeaders = token.getHeader();
-    const kid = tokenHeaders.get('kid').split('#');
-    const id = kid[0];
+    const payload = JSON.parse(token.payload.toString());
+
+    if (!payload.did) {
+      throw new UserAgentError('The provided token did not include the DID claim.');
+    }
 
     // create User Agent Options for Identifier
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
 
     // verify jws and return payload. 
-    const identifier = new Identifier(id, options);
-    const payload = await identifier.verify(jws);
-    return JSON.parse(payload);
+    const identifier = new Identifier(payload.did, options);
+    const verifiedToken = await identifier.verify(jws);
+    return JSON.parse(verifiedToken);
   }
 }
