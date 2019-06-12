@@ -40,17 +40,26 @@ export default class UserAgentSession {
    */
   public async signRequest(redirectUrl: string, nonce: string, claimRequests?: any, state?: string) {
 
-    const request: OIDCAuthenticationRequest = {
+    const request: Partial<OIDCAuthenticationRequest> = {
       iss: this.sender.id,
       response_type: 'id_token',
+      response_mode: 'form_post',
       client_id: redirectUrl,
       scope: 'openid',
-      state,
-      nonce: nonce,
-      claims: {
-        id_token: claimRequests
-      }
     };
+
+    if (state) {
+      Object.assign(request, {state});
+    }
+
+    if (nonce) {
+      Object.assign(request, {nonce});
+    }
+
+    if (claimRequests) {
+      Object.assign(request, {id_token: {claims: claimRequests}});
+    }
+
     return this.sender.sign(request, this.keyReference);
   }
 
