@@ -68,8 +68,10 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
       if (format.toUpperCase() !== 'DER') {
         throw new CryptoError(algorithm, 'Only DER format supported for signature');
       }
-     
-      return SubtleCryptoExtension.toDer([signature.slice(0, signature.byteLength / 2), signature.slice(signature.byteLength / 2, signature.byteLength)]);
+
+      const r = signature.slice(0, signature.byteLength / 2);
+      const s = signature.slice(signature.byteLength / 2, signature.byteLength)
+      return SubtleCryptoExtension.toDer([r, s]);
     }
 
     return signature;
