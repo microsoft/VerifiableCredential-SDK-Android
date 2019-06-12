@@ -20,6 +20,7 @@ export default class SubtleCryptoBrowserOperations extends SubtleCryptoOperation
   * @returns a subtle crypto object for message signing
   */
   public getMessageSigners (): SubtleCrypto {
-    return <SubtleCrypto> new SubtleCryptoElliptic();
+    return <any> new SubtleCryptoElliptic();
   }
+
 }
