@@ -49,4 +49,9 @@ export default abstract class CryptoOperations  {
  * @returns a subtle crypto object for message digests
    */
   abstract getMessageDigests (): SubtleCrypto;
+
+/**
+ * Returns the @class SubtleCrypto ipmplementation for the current environment
+ */
+  abstract getSubtleCrypto(): SubtleCrypto;
 }

@@ -178,7 +178,7 @@ export default class JwsToken implements IJwsGeneralJson {
      if (decodeStatus.result) {
          return jwsToken;
      } else {
-       console.debug(`Failed parsing as IJwsGeneralJSon. Reasom: ${decodeStatus.reason}`)
+       console.debug(`Failed parsing as IJwsGeneralJSon. Reason: ${decodeStatus.reason}`)
      }
 
      // Try to handle token as IJwsFlatJson
@@ -186,7 +186,7 @@ export default class JwsToken implements IJwsGeneralJson {
      if (decodeStatus.result) {
          return jwsToken;
      } else {
-       console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
+       console.debug(`Failed parsing as IJwsFlatJson. Reason: ${decodeStatus.reason}`);
      }
    throw new CryptoProtocolError(JoseConstants.Jws, `The content does not represent a valid jws token`);  return jwsToken;
   }

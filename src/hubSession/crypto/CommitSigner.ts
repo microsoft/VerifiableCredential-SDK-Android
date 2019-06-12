@@ -29,7 +29,7 @@ interface CommitSignerOptions {
   /** 
    * The CryptoSuite to be used to for the algorithm to use to sign the commit
    */
-  suite?: CryptoOperations;
+  cryptoFactory: CryptoFactory;
 
 }
 
@@ -45,7 +45,7 @@ export default class CommitSigner implements ICommitSigner {
   constructor(options: CommitSignerOptions) {
     this.did = options.did;
     this.keyRef = options.keyReference;
-    this.cryptoFactory = new CryptoFactory(options.keyStore, options.suite);
+    this.cryptoFactory = options.cryptoFactory;
   }
 
   /**

@@ -160,7 +160,7 @@ export default class SidetreeRegistrar implements IRegistrar {
 
     // Now update the identifier property in
     // the genesis document
-    genesisDocument.id = `did:ion-test:${encodedDocument}`;
+    genesisDocument.id = `did:ion:test:${encodedDocument}`;
     return new Identifier(genesisDocument);
   }
 }

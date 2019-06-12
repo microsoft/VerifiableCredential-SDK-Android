@@ -15,6 +15,8 @@ import { KeyUse } from '../src/crypto/keys/KeyUseFactory';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
 import JwsToken from '../src/crypto/protocols/jws/JwsToken';
 import SecretKey from '../src/crypto/keys/SecretKey';
+import CryptoFactory from '../src/crypto/plugin/CryptoFactory';
+import SubtleCryptoNodeOperations from '../src/crypto/plugin/SubtleCryptoNodeOperations';
 
 describe('Identifier', () => {
 
@@ -273,6 +275,7 @@ describe('Identifier', () => {
 
     it('should sign a payload that is a string', async () => {
       options.cryptoOptions = new CryptoOptions();
+      options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
       options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
       const seed = new SecretKey('ABDE');
@@ -287,6 +290,7 @@ describe('Identifier', () => {
 
     it('should sign a payload that is an object', async () => {
       options.cryptoOptions = new CryptoOptions();
+      options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
       options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
       const seed = new SecretKey('ABDE');

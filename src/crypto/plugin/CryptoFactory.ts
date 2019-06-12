@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import CryptoOperations, { CryptoSuiteMap } from './CryptoOperations';
-import SubtleCryptoOperations from './SubtleCryptoOperations';
-import IKeyStore from '../keyStore/IKeyStore';
 import SubtleCryptoBrowserOperations from './SubtleCryptoBrowserOperations';
+import IKeyStore from '../keyStore/IKeyStore';
 import { SubtleCrypto } from 'webcrypto-core';
 
 /**
@@ -14,12 +13,35 @@ import { SubtleCrypto } from 'webcrypto-core';
  */
 export default class CryptoFactory {
 
-  private keyEncrypters: CryptoSuiteMap;
-  private sharedKeyEncrypters: CryptoSuiteMap;
-  private symmetricEncrypter: CryptoSuiteMap;
-  private messageSigners: CryptoSuiteMap;
-  private messageAuthenticationCodeSigners: CryptoSuiteMap;
-  private messageDigests: CryptoSuiteMap;
+  /**
+   * The key encryptors
+   */
+  public keyEncrypters: CryptoSuiteMap;
+
+  /**
+   * The shared key encryptors
+   */
+  public sharedKeyEncrypters: CryptoSuiteMap;
+  
+  /**
+   * The symmetric content encryptors
+   */
+  public symmetricEncrypter: CryptoSuiteMap;
+  
+  /**
+   * The message signer
+   */
+  public messageSigners: CryptoSuiteMap;
+  
+  /**
+   * The hmac operations
+   */
+  public messageAuthenticationCodeSigners: CryptoSuiteMap;
+  
+  /**
+   * The digest operations
+   */
+  public messageDigests: CryptoSuiteMap;
 
   /**
    * Key store used by the CryptoFactory
@@ -34,22 +56,14 @@ export default class CryptoFactory {
   /**
    * Constructs a new CryptoRegistry
    * @param keyStore used to store private jeys
-   * @param suite The suite to use for dependency injection
+   * @param crypto The suite to use for dependency injection
    */
-  constructor (keyStore: IKeyStore, suite?: CryptoOperations) {
+  constructor (keyStore: IKeyStore, crypto: CryptoOperations) {
     this.keyStore = keyStore;
-    let crypto: CryptoOperations; 
-    if (suite) {
-      crypto = suite;
-    } else {
-    // Set default API
-    crypto = new SubtleCryptoOperations();
-    }
     this.keyEncrypters = <CryptoSuiteMap>{'*': crypto };
-    this.sharedKeyEncrypters =<CryptoSuiteMap>{'*': crypto };
+    this.sharedKeyEncrypters = <CryptoSuiteMap>{'*': crypto };
     this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
     this.messageSigners = <CryptoSuiteMap>{'*': crypto };
-    this.messageSigners['ES256K'] = new SubtleCryptoBrowserOperations();
     this.messageAuthenticationCodeSigners = <CryptoSuiteMap>{'*': crypto };
     this.messageDigests = <CryptoSuiteMap>{'*': crypto };
   }

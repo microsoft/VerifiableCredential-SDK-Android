@@ -13,6 +13,7 @@ import RsaPrivateKey from "./RsaPrivateKey";
 const bigInt = require('big-integer');
 import { BigIntegerStatic } from 'big-integer';
 import { SubtleCrypto } from 'webcrypto-core';
+import JoseConstants from "../../protocols/jose/JoseConstants";
 
 // tslint:disable-next-line:prefer-array-literal
 type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buffer, data: Buffer, deterministicKey: Buffer) => Promise<Buffer>>;
@@ -122,6 +123,7 @@ type PrimeDelegate = Array<(cryptoFactory: CryptoFactory, inx: number, key: Buff
     const alg: CryptoAlgorithm = { name: W3cCryptoApiConstants.Hmac, hash: W3cCryptoApiConstants.Sha512 };
     const signingKey: JsonWebKey = {
       kty: 'oct',
+      alg: JoseConstants.Hs512,
       k: base64url.encode(key)
     };
 

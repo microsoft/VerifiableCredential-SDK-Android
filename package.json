@@ -60,7 +60,6 @@
     "typescript": "3.4.5",
     "typescript-map": "0.0.7",
     "webpack": "^4.33.0",
-    "node-webcrypto-ossl": "1.0.44",
     "webpack-cli": "^3.3.3"
   },
   "dependencies": {
@@ -69,6 +68,7 @@
     "@decentralized-identity/hub-node-core": "0.1.4",
     "@decentralized-identity/hub-sdk-js": "0.1.3",
     "@microsoft/useragent-plugin-secp256k1": "1.0.7",
+    "@peculiar/webcrypto": "^1.0.12",
     "base64url": "3.0.1",
     "bn.js": "4.11.8",
     "clone": "^2.1.2",

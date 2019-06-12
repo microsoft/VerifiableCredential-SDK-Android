@@ -11,12 +11,13 @@ import Actions from "../../src/hubInterfaces/Actions";
 import Profile from "../../src/hubInterfaces/Profile";
 import UserAgentError from "../../src/UserAgentError";
 import HubClientMock from "./HubClientMock";
+import { UserAgentOptions } from "../../src";
 
 describe('Hub Interface', () => {
 
   let options: HubInterfaceOptions
 
-  const identifier = new Identifier('did:test:12345');
+  const identifier = new Identifier('did:test:12345', new UserAgentOptions());
 
   beforeEach(() => {
 

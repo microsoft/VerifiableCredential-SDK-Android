@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from './crypto/plugin/CryptoFactory';
-import SubtleCryptoOperations from './crypto/plugin/SubtleCryptoOperations';
+import SubtleCryptoBrowserOperations from './crypto/plugin/SubtleCryptoBrowserOperations';
 import KeyStoreInMemory from './crypto/keyStore/KeyStoreInMemory';
 
 /**
@@ -13,7 +13,7 @@ export default class CryptoOptions {
   /**
    * Get or set the crypto api to be used. Initialize the default crypto plugin.
    */
-  public cryptoFactory: CryptoFactory = new CryptoFactory(new KeyStoreInMemory(), new SubtleCryptoOperations());
+  public cryptoFactory: CryptoFactory = new CryptoFactory(new KeyStoreInMemory(), new SubtleCryptoBrowserOperations());
 
   /**
    * Get or set the authentication algorithm.

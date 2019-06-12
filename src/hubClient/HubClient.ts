@@ -13,6 +13,8 @@ import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
 import IHubClient, {HubClientOptions } from './IHubClient';
 import HubObject from './HubObject';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
+import CryptoFactory from '../crypto/plugin/CryptoFactory';
+import UserAgentOptions from '../UserAgentOptions';
 
 /**
  * Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
@@ -26,6 +28,8 @@ export default class HubClient implements IHubClient {
 
   private readonly keyReference: string;
 
+  private readonly cryptoFactory: CryptoFactory;
+
   /**
    * Constructs an instance of the Hub Client Class for hub operations
    * @param hubClientOptions hub client options used to create instance.
@@ -38,6 +42,7 @@ export default class HubClient implements IHubClient {
     this.hubOwner = hubClientOptions.hubOwner;
     this.clientIdentifier = hubClientOptions.clientIdentifier;
     this.keyReference = hubClientOptions.keyReference;
+    this.cryptoFactory = (<UserAgentOptions>hubClientOptions.clientIdentifier.options).cryptoFactory;
   }
 
   /**
@@ -63,7 +68,8 @@ export default class HubClient implements IHubClient {
     const commitSignerOptions = {
       did: this.clientIdentifier.id, 
       keyReference: this.keyReference,
-      keyStore: this.clientIdentifier.options.keyStore
+      keyStore: this.clientIdentifier.options.keyStore,
+      cryptoFactory: this.cryptoFactory 
     };
 
     const commitSigner = new CommitSigner(commitSignerOptions);

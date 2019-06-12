@@ -14,6 +14,7 @@ import OIDCAuthenticationRequest from '../crypto/protocols/did/requests/OIDCAuth
 import OIDCAuthenticationResponse from '../crypto/protocols/did/responses/OIDCAuthenticationResponse';
 import UserAgentError from '../UserAgentError';
 import PublicKey from '../crypto/keys/PublicKey';
+import { ISigningOptions } from '../crypto/keyStore/IKeyStore';
 
 /**
  * Class for creating a User Agent Session for sending and verifying
@@ -23,12 +24,14 @@ export default class UserAgentSession {
 
   private sender: Identifier;
   private resolver: IResolver;
-  private keyReference: string
+  private keyReference: string;
+  private cryptoFactory: CryptoFactory;
   
   constructor (sender: Identifier, keyReference: string, resolver: IResolver) {
     this.sender = sender;
     this.resolver = resolver;
     this.keyReference = keyReference;
+    this.cryptoFactory = (<UserAgentOptions>sender.options).cryptoFactory;
   }
 
   /**
@@ -104,12 +107,9 @@ export default class UserAgentSession {
    */
   public async verify(jws: string): Promise<any> {
 
-    // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
-
-    // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
+     // get identifier id from key id in header.
+    const token : JwsToken = await JwsToken.deserialize(jws, <ISigningOptions> {
+      cryptoFactory: this.cryptoFactory});
     const tokenHeaders = token.getHeader();
     const kid = tokenHeaders.get('kid').split('#');
     const id = kid[0];

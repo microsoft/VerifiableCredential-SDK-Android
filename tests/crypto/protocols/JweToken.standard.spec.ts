@@ -6,7 +6,7 @@
  import { IEncryptionOptions } from "../../../src/crypto/keyStore/IKeyStore";
  import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
  import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
- import SubtleCryptoOperations from '../../../src/crypto/plugin/SubtleCryptoOperations';
+ import SubtleCryptoNodeOperations from '../../../src/crypto/plugin/SubtleCryptoNodeOperations';
  import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
  import RsaPrivateKey from '../../../src/crypto/keys/rsa/RsaPrivateKey';
  import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
@@ -21,7 +21,7 @@ describe('JweToken standard', () => {
       234, 64, 252];
     const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
       const keyStore = new KeyStoreInMemory();
-      const cryptoSuite = new SubtleCryptoOperations();
+      const cryptoSuite = new SubtleCryptoNodeOperations();
       const options: IEncryptionOptions = {
         cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
         contentEncryptionAlgorithm: 'A256GCM',
@@ -97,7 +97,7 @@ describe('JweToken standard', () => {
             234, 64, 252];
           const iv = [227, 197, 117, 252, 2, 219, 233, 68, 180, 225, 77, 219];
             const keyStore = new KeyStoreInMemory();
-            const cryptoSuite = new SubtleCryptoOperations();
+            const cryptoSuite = new SubtleCryptoNodeOperations();
             const options: IEncryptionOptions = {
               cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
               contentEncryptionAlgorithm: 'A256GCM',

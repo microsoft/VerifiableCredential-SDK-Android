@@ -13,6 +13,7 @@ import RsaPairwiseKey from "./rsa/RsaPairwiseKey";
 import PrivateKey from "./PrivateKey";
 import { SubtleCrypto } from 'webcrypto-core';
 import SecretKey from "./SecretKey";
+import JoseConstants from "../protocols/jose/JoseConstants";
 
 /**
  * Class to model pairwise keys
@@ -70,7 +71,7 @@ import SecretKey from "./SecretKey";
     }
 
     // Get the seed
-    const jwk = <SecretKey> await this.cryptoFactory.keyStore.get(seedReference);
+    const jwk = <SecretKey> await this.cryptoFactory.keyStore.get(seedReference, false);
 
     // Get the subtle crypto
     const crypto: SubtleCrypto = this.cryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac);
@@ -79,11 +80,10 @@ import SecretKey from "./SecretKey";
     const alg: CryptoAlgorithm = { name: W3cCryptoApiConstants.Hmac, hash: W3cCryptoApiConstants.Sha512 };
     const masterJwk = {
       kty: 'oct',
+      alg: JoseConstants.Hs512,
       k: jwk.k
     };
-    let key = await window.crypto.subtle.importKey('jwk', masterJwk, alg, false, ['sign']);
-
-    //const key = await crypto.importKey('jwk', jwk, alg, false, ['sign']);
+    let key = await crypto.importKey('jwk', masterJwk, alg, false, ['sign']);
     const masterKey = await crypto.sign(alg, key, Buffer.from(personaId));
     mk = Buffer.from(masterKey);
     this.masterKeys.set(personaId, mk); 

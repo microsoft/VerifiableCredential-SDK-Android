@@ -14,6 +14,7 @@ import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
 import IJwsFlatJson from '../../src/crypto/protocols/jws/IJwsFlatJson';
 import SecretKey from '../../src/crypto/keys/SecretKey';
+import SubtleCryptoNodeOperations from '../../src/crypto/plugin/SubtleCryptoNodeOperations';
 
 let fetchMock: any;
 
@@ -31,6 +32,7 @@ describe('SidetreeRegistrar', () => {
     fetchMock = require('fetch-mock');
     options = new UserAgentOptions();
     (<CryptoOptions> options.cryptoOptions).authenticationSigningJoseAlgorithm = 'ES256K';
+    options.cryptoFactory = new CryptoFactory(new KeyStoreInMemory(), new SubtleCryptoNodeOperations());
     options.registrar = new SidetreeRegistrar('https://registrar.org', options);
   });
 
@@ -51,7 +53,7 @@ describe('SidetreeRegistrar', () => {
   it('should construct new instance of the SidetreeRegistrar', async () => {
     let options = new UserAgentOptions();
     options.timeoutInSeconds = 30;
-    options.cryptoFactory = new CryptoFactory(new KeyStoreInMemory());
+    options.keyStore = new KeyStoreInMemory();
     const registrar = new SidetreeRegistrar('https://registrar.org/', options);
     expect(registrar).toBeDefined();
     expect(registrar.url).toEqual('https://registrar.org/');
@@ -60,7 +62,7 @@ describe('SidetreeRegistrar', () => {
   it('should construct new instance of the SidetreeRegistrar appending trailing slash', async () => {
     let options = new UserAgentOptions();
     options.timeoutInSeconds = 30;
-    options.cryptoFactory = new CryptoFactory(new KeyStoreInMemory());
+    options.keyStore = new KeyStoreInMemory();
     const registrar = new SidetreeRegistrar('https://registrar.org', options);
     expect(registrar).toBeDefined();
     expect(registrar.url).toEqual('https://registrar.org/');

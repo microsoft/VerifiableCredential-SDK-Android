@@ -8,7 +8,7 @@ import JwsToken from "../../../src/crypto/protocols/jws/JwsToken";
 import { ISigningOptions } from "../../../src/crypto/keyStore/IKeyStore";
 import KeyStoreInMemory from "../../../src/crypto/keyStore/KeyStoreInMemory";
 import CryptoFactory from "../../../src/crypto/plugin/CryptoFactory";
-import SubtleCryptoOperations from "../../../src/crypto/plugin/SubtleCryptoOperations";
+import SubtleCryptoNodeOperations from "../../../src/crypto/plugin/SubtleCryptoNodeOperations";
 import { ProtectionFormat } from "../../../src/crypto/keyStore/ProtectionFormat";
 import RsaPrivateKey from "../../../src/crypto/keys/rsa/RsaPrivateKey";
 import { KeyOperation } from "../../../src/crypto/keys/PublicKey";
@@ -27,7 +27,7 @@ describe('JwsToken standard', () => {
       expect(payloadBuffer).toBeDefined();
     
       const keyStore = new KeyStoreInMemory();
-      const cryptoSuite = new SubtleCryptoOperations();
+      const cryptoSuite = new SubtleCryptoNodeOperations();
       const options: ISigningOptions = {
         algorithm: <Algorithm>{name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256'},
         cryptoFactory: new CryptoFactory(keyStore, cryptoSuite)

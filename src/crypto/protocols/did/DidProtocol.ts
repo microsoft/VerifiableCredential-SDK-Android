@@ -10,6 +10,7 @@ import CryptoFactory from '../../plugin/CryptoFactory';
 import KeyStoreInMemory from '../../keyStore/KeyStoreInMemory';
 import UserAgentOptions from '../../../UserAgentOptions';
 import CryptoOptions from '../../../CryptoOptions';
+import IKeyStore, { ISigningOptions } from '../../keyStore/IKeyStore';
 
 /**
  * Named Arguments of Did Protocol
@@ -41,7 +42,17 @@ export default class DidProtocol {
   /**
    * Resolver for resolving Identifier Documents
    */
-  private resolver: IResolver;
+   private resolver: IResolver;
+
+  /**
+   * Crypto factory defining the crypto API
+   */
+   private cryptoFactory: CryptoFactory;
+
+  /**
+   * Key store for storing keys
+   */
+   private keyStore: IKeyStore;
 
   /**
    * Authentication constructor
@@ -50,6 +61,8 @@ export default class DidProtocol {
   constructor (options: DidProtocolOptions) {
     this.sender = options.sender;
     this.resolver = options.resolver;
+    this.cryptoFactory = (<UserAgentOptions>this.sender.options).cryptoFactory;
+    this.keyStore = (<UserAgentOptions>this.sender.options).keyStore;
   }
 
   /**
@@ -62,13 +75,10 @@ export default class DidProtocol {
     
     // decrypt payload.
     const jws = await this.sender.decrypt(cipher, keyReference);
-
-    // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
     
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
+    const token : JwsToken = await JwsToken.deserialize(jws, <ISigningOptions> {
+      cryptoFactory: this.cryptoFactory});
     const tokenHeaders = token.getHeader();
     const kid = tokenHeaders.get('kid').split('#');
     const id = kid[0];
@@ -80,7 +90,6 @@ export default class DidProtocol {
     const identifier = new Identifier(id, options);
     const payload = await identifier.verify(jws);
     return JSON.parse(payload);
-
   }
 
   /**

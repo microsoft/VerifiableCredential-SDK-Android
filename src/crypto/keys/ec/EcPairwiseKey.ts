@@ -11,6 +11,7 @@ import { KeyType } from "../KeyTypeFactory";
 import EcPrivateKey from "./EcPrivateKey";
 import CryptoError from "../../CryptoError";
 import { SubtleCrypto } from 'webcrypto-core';
+import JoseConstants from "../../protocols/jose/JoseConstants";
 
 // Create and initialize EC context
 const BN = require('bn.js');
@@ -41,6 +42,7 @@ const SUPPORTED_CURVES = ['K-256', 'P-256K'];
     const alg: CryptoAlgorithm = { name: W3cCryptoApiConstants.Hmac, hash: W3cCryptoApiConstants.Sha256 };
     const signingKey: JsonWebKey = {
       kty: 'oct',
+      alg: JoseConstants.Hs256,
       k: base64url.encode(personaMasterKey)
     };
 

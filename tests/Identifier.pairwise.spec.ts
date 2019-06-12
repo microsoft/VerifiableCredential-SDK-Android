@@ -14,6 +14,8 @@ import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
 import KeyTypeFactory, { KeyType } from '../src/crypto/keys/KeyTypeFactory';
 import CryptoHelpers from '../src/crypto/utilities/CryptoHelpers';
 import SecretKey from '../src/crypto/keys/SecretKey';
+import CryptoFactory from '../src/crypto/plugin/CryptoFactory';
+import SubtleCryptoNodeOperations from '../src/crypto/plugin/SubtleCryptoNodeOperations';
 
 interface CreateIdentifier {
   (options: UserAgentOptions, identifier: Identifier, register: boolean): Promise<Identifier>;
@@ -33,19 +35,20 @@ class Helpers {
     options.resolver = testResolver;
     options.timeoutInSeconds = 30;
     options.keyStore = keyStore;
-    options.didPrefix = 'did:ion-test';
+    options.didPrefix = 'did:ion:test';
+    options.cryptoFactory = new CryptoFactory(keyStore, new SubtleCryptoNodeOperations());
 
     const registrar: IRegistrar = new SidetreeRegistrar('https://beta.ion.microsoft.com/api/1.0/register', options);
     options.registrar = registrar;
 
-    const personaId = 'did:ion-test:identifier';
+    const personaId = 'did:ion:test:identifier';
     options.cryptoOptions!.authenticationSigningJoseAlgorithm = CryptoHelpers.webCryptoToJwa(alg);
     let identifier = new Identifier(personaId, options);
     expect(personaId).toBe(<string> identifier.identifier);
 
     identifier = await create(options, identifier, register);
     expect(identifier.id).toBeDefined();
-    expect<Boolean>(identifier.id.startsWith('did:ion-test:')).toBe(true);
+    expect<Boolean>(identifier.id.startsWith('did:ion:test:')).toBe(true);
     const id = identifier.id;
     const kty = KeyTypeFactory.createViaWebCrypto(alg);
     console.log(`Identifier: Test key type ${kty}`);
@@ -72,6 +75,7 @@ describe('Pairwise Identifier', () => {
     options.didPrefix = 'did:ion';
     testResolver = new TestResolver();
     options.keyStore = new KeyStoreInMemory();
+    options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
     const seed = new SecretKey('ABDE');
     await options.keyStore.save(KeyStoreConstants.masterSeed, seed);
     options.registrar = new SidetreeRegistrar('https://example.com', options);
@@ -160,7 +164,7 @@ describe('Pairwise Identifier', () => {
     await Helpers.testIdentifier(
       true, testResolver, <KeyStoreInMemory> options.keyStore, alg[0], async (options: UserAgentOptions, identifier: Identifier, register: boolean) => {
         console.log(options);
-        return identifier.createLinkedIdentifier('did:ion-test:peerforregister', register);
+        return identifier.createLinkedIdentifier('did:ion:test:peerforregister', register);
       });
   });
 /*
