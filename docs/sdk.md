@@ -6,7 +6,7 @@
 credentials from an issuer.</p></dd>
 <dt><a href="#CredentialManifest">CredentialManifest</a></dt>
 <dd><p>Class defining methods and properties for a ClaimManifest object.
- based off of the CredentialManifest spec: <a href="https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md">https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md</a></p></dd>
+ based off of the CredentialManifest spec: [https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md](https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md)</p></dd>
 <dt><a href="#SelfIssuedCredential">SelfIssuedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
@@ -97,7 +97,7 @@ HubClient, such as hub Identifier and client Identifier.</p></dd>
 <dd><p>A Class that does CRUD operations for storing objects as Profile in the Hub.</p></dd>
 <dt><a href="#Commit">Commit</a></dt>
 <dd><p>Represents a new (i.e pending, unsigned) commit which will create, update, or delete an object in
-a user&#39;s Identity Hub.</p></dd>
+a user's Identity Hub.</p></dd>
 <dt><a href="#CommitStrategyBasic">CommitStrategyBasic</a></dt>
 <dd><p>Resolves the final state of an object from the constituent set of commits for that object.</p>
 <p>This class works only with objects using the <code>basic</code> commit strategy.</p></dd>
@@ -143,7 +143,7 @@ retrieving identifier documents.</p></dd>
 <dd><p>class to represent a host service endpoint.</p></dd>
 <dt><a href="#ServiceEndpoint">ServiceEndpoint</a></dt>
 <dd><p>abstract class to represent a service endpoint.
-based on: <a href="https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md">https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md</a>.</p></dd>
+based on: https://github.com/decentralized-identity/identity-hub/blob/master/explainer.md.</p></dd>
 <dt><a href="#UserServiceEndpoint">UserServiceEndpoint</a></dt>
 <dd><p>Class to represent a host service endpoint.</p></dd>
 <dt><a href="#UserAgentError">UserAgentError</a></dt>
