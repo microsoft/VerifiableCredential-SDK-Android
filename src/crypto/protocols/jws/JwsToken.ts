@@ -9,12 +9,12 @@ import PublicKey from '../../keys/PublicKey';
 import IJwsFlatJson from './IJwsFlatJson';
 import IJwsGeneralJson, { JwsHeader } from './IJwsGeneralJson';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import { IJwsSigningOptions } from "../../protocols/jose/IJoseOptions";
+import { IJwsSigningOptions } from '../../protocols/jose/IJoseOptions';
 import IKeyStore, { CryptoAlgorithm } from '../../keyStore/IKeyStore';
 import CryptoHelpers from '../../utilities/CryptoHelpers';
 import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
 import JwsSignature from './JwsSignature';
-import { TSMap } from 'typescript-map'
+import { TSMap } from 'typescript-map';
 import JoseHelpers from '../jose/JoseHelpers';
 import IJwsSignature from './IJwsSignature';
 import ISubtleCrypto from '../../plugin/ISubtleCrypto';
@@ -27,12 +27,11 @@ import CryptoProtocolError from '../CryptoProtocolError';
  * Crypto calls always happen via CryptoFactory
  */
 export default class JwsToken implements IJwsGeneralJson {
-
   /**
    * Payload (base64url encoded)
    */
   public payload: Buffer = Buffer.from('');
-  
+
   /**
    * Signatures on content
    */
@@ -50,7 +49,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * Create an Jws token object
    * @param options Set of jws token options
    */
-  constructor (options?: IJwsSigningOptions) {
+  constructor(options?: IJwsSigningOptions) {
     this.options = options;
   }
 
@@ -59,20 +58,20 @@ export default class JwsToken implements IJwsGeneralJson {
    * Serialize a Jws token object from a token
    * @param format Optional specify the serialization format. If not specified, use default format.
    */
-  public serialize (format?: ProtectionFormat): string {
+  public serialize(format?: ProtectionFormat): string {
     if (format === undefined) {
       format = this.format;
     }
 
-      switch (format) {
-        case ProtectionFormat.JwsGeneralJson:
-          return JwsToken.serializeJwsGeneralJson(this);          
-        case ProtectionFormat.JwsCompactJson: 
-          return JwsToken.serializeJwsCompact(this);
-        case ProtectionFormat.JwsFlatJson: 
-          return JwsToken.serializeJwsFlatJson(this);
+    switch (format) {
+      case ProtectionFormat.JwsGeneralJson:
+        return JwsToken.serializeJwsGeneralJson(this);
+      case ProtectionFormat.JwsCompactJson:
+        return JwsToken.serializeJwsCompact(this);
+      case ProtectionFormat.JwsFlatJson:
+        return JwsToken.serializeJwsFlatJson(this);
     }
-    
+
     throw new CryptoProtocolError(JoseConstants.Jws, `The format '${this.format}' is not supported`);
   }
 
@@ -80,24 +79,24 @@ export default class JwsToken implements IJwsGeneralJson {
    * Serialize a Jws token object from a token in General Json format
    * @param token JWS base object
    */
-  private static serializeJwsGeneralJson (token: JwsToken): string {
+  private static serializeJwsGeneralJson(token: JwsToken): string {
     const jws = {
       payload: base64url.encode(token.payload),
       signatures: <any[]>[]
-    }
+    };
 
-    for (let inx = 0; inx < token.signatures.length; inx ++) {
+    for (let inx = 0; inx < token.signatures.length; inx++) {
       const tokenSignature: JwsSignature = token.signatures[inx];
       const jwsSignature: any = {
-        signature:  base64url.encode(tokenSignature.signature),
+        signature: base64url.encode(tokenSignature.signature)
       };
       if (JoseHelpers.headerHasElements(tokenSignature.protected)) {
         jwsSignature.protected = JoseHelpers.encodeHeader(<JwsHeader>tokenSignature.protected);
       }
       if (JoseHelpers.headerHasElements(tokenSignature.header)) {
         jwsSignature.header = JoseHelpers.encodeHeader(<JwsHeader>tokenSignature.header, false);
-      } 
-      if (!jwsSignature.protected && ! jwsSignature.header) {
+      }
+      if (!jwsSignature.protected && !jwsSignature.header) {
         throw new CryptoProtocolError(JoseConstants.Jws, `Signature ${inx} is missing header and protected`);
       }
       jws.signatures.push(jwsSignature);
@@ -110,10 +109,10 @@ export default class JwsToken implements IJwsGeneralJson {
    * Serialize a Jws token object from a token in Flat Json format
    * @param token JWS base object
    */
-  private static serializeJwsFlatJson (token: JwsToken): string {
+  private static serializeJwsFlatJson(token: JwsToken): string {
     const jws: any = {
       payload: base64url.encode(token.payload)
-    }
+    };
 
     if (JoseHelpers.headerHasElements(token.signatures[0].protected)) {
       jws.protected = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].protected);
@@ -129,8 +128,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * Serialize a Jws token object from a token in Compact format
    * @param token JWS base object
    */
-  private static serializeJwsCompact (token: JwsToken): string {
-
+  private static serializeJwsCompact(token: JwsToken): string {
     let encodedProtected: string = '';
     if (JoseHelpers.headerHasElements(token.signatures[0].protected)) {
       encodedProtected = JoseHelpers.encodeHeader(<JwsHeader>token.signatures[0].protected);
@@ -146,50 +144,55 @@ export default class JwsToken implements IJwsGeneralJson {
   /**
    * Deserialize a Jws token object
    */
-  public static deserialize (token: string, options?: IJwsSigningOptions): JwsToken {
+  public static deserialize(token: string, options?: IJwsSigningOptions): JwsToken {
     const jwsToken = new JwsToken(options);
-      
+
     // check for JWS compact format
-  if (typeof token === 'string') {
-    const parts = token.split('.');
-    if (parts.length === 3) {
-      jwsToken.payload = base64url.toBuffer(parts[1]);
-      const signature = new JwsSignature();
-      signature.protected = jwsToken.setProtected(parts[0]);
-      signature.signature = base64url.toBuffer(parts[2]);
-      return jwsToken;
+    if (typeof token === 'string') {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        jwsToken.payload = base64url.toBuffer(parts[1]);
+        const signature = new JwsSignature();
+        signature.protected = jwsToken.setProtected(parts[0]);
+        signature.signature = base64url.toBuffer(parts[2]);
+        return jwsToken;
+      }
+    } else {
+      throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable.`);
     }
-  } else {
-    throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable.`);
-  }
 
-  // Flat or general format
-  let jsonObject: any;
-  try {
-    jsonObject = JSON.parse(token);
-  } catch (error) {
-    throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable and is no compact format.`);
-  }
+    // Flat or general format
+    let jsonObject: any;
+    try {
+      jsonObject = JSON.parse(token);
+    } catch (error) {
+      throw new CryptoProtocolError(
+        JoseConstants.Jws,
+        `The presented object is not deserializable and is no compact format.`
+      );
+    }
 
-     // set payload
-     jwsToken.payload = base64url.toBuffer(<string>jsonObject.payload);
+    // set payload
+    jwsToken.payload = base64url.toBuffer(<string>jsonObject.payload);
 
-     // Try to handle token as IJwsGeneralJSon
-     let decodeStatus: { result: boolean, reason: string } = jwsToken.setGeneralParts(<IJwsGeneralJson>jsonObject);
-     if (decodeStatus.result) {
-         return jwsToken;
-     } else {
-       console.debug(`Failed parsing as IJwsGeneralJSon. Reasom: ${decodeStatus.reason}`)
-     }
+    // Try to handle token as IJwsGeneralJSon
+    let decodeStatus: { result: boolean; reason: string } = jwsToken.setGeneralParts(<IJwsGeneralJson>jsonObject);
+    if (decodeStatus.result) {
+      return jwsToken;
+    } else {
+      console.debug(`Failed parsing as IJwsGeneralJSon. Reason: ${decodeStatus.reason}`);
+    }
 
-     // Try to handle token as IJwsFlatJson
-     decodeStatus = jwsToken.setFlatParts(<IJwsFlatJson>jsonObject);
-     if (decodeStatus.result) {
-         return jwsToken;
-     } else {
-       console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
-     }
-   throw new CryptoProtocolError(JoseConstants.Jws, `The content does not represent a valid jws token`);  return jwsToken;
+    // Try to handle token as IJwsFlatJson
+    decodeStatus = jwsToken.setFlatParts(<IJwsFlatJson>jsonObject);
+    if (decodeStatus.result) {
+      return jwsToken;
+    } else {
+      console.debug(`Failed parsing as IJwsFlatJson. Reason: ${decodeStatus.reason}`);
+    }
+
+    // If this point is reached we have not been passed a usable JWS token. 
+    throw new CryptoProtocolError(JoseConstants.Jws, 'The provided token is not a valid JWS token.');
   }
 
   /**
@@ -197,20 +200,20 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param content Alledged IJwsGeneralJSon token
    * @returns true if valid token was parsed
    */
-  private setGeneralParts(content: IJwsGeneralJson): {result: boolean, reason: string} {
+  private setGeneralParts(content: IJwsGeneralJson): { result: boolean; reason: string } {
     if (content) {
       if (content.payload) {
-        this.payload = base64url.toBuffer(<string><any>content.payload);
+        this.payload = base64url.toBuffer(<string>(<any>content.payload));
       } else {
         // manadatory field
-        return {result: false, reason: 'missing payload'};
+        return { result: false, reason: 'missing payload' };
       }
 
       this.signatures = content.signatures;
       return this.isValidToken();
     }
 
-    return {result: false, reason: 'no content passed'};
+    return { result: false, reason: 'no content passed' };
   }
 
   /**
@@ -218,7 +221,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param content Alledged IJwsFlatJson token
    * @returns true if valid token was parsed
    */
-  private setFlatParts(content: IJwsFlatJson): {result: boolean, reason: string} {
+  private setFlatParts(content: IJwsFlatJson): { result: boolean; reason: string } {
     if (content) {
       const signature = new JwsSignature();
 
@@ -226,60 +229,61 @@ export default class JwsToken implements IJwsGeneralJson {
         signature.signature = content.signature;
       } else {
         // manadatory field
-        return {result: false, reason: 'missing signature'};
+        return { result: false, reason: 'missing signature' };
       }
 
       if (JoseHelpers.headerHasElements(content.protected)) {
         signature.protected = this.setProtected(<JwsHeader>content.protected);
-      } 
+      }
 
       if (JoseHelpers.headerHasElements(content.header)) {
         signature.header = content.header;
-      } 
+      }
 
       if (content.payload) {
-        this.payload = base64url.toBuffer(<string><any>content.payload);
+        this.payload = base64url.toBuffer(<string>(<any>content.payload));
       } else {
         // manadatory field
-        return {result: false, reason: 'missing payload'};
+        return { result: false, reason: 'missing payload' };
       }
 
       this.signatures = [signature];
       return this.isValidToken();
-    } 
+    }
 
-    return {result: false, reason: 'no content passed'};
+    return { result: false, reason: 'no content passed' };
   }
 
   /**
    * Check if a valid token was found after decoding
    */
-  private isValidToken(): {result: boolean, reason: string} {
+  private isValidToken(): { result: boolean; reason: string } {
     if (!this.payload) {
-      return {result: false, reason: 'missing payload'};
+      return { result: false, reason: 'missing payload' };
     }
 
     if (!this.signatures) {
-      return {result: false, reason: 'missing signatures'};
+      return { result: false, reason: 'missing signatures' };
     }
 
-    if (this.signatures.length == 0) {
-      return {result: false, reason: 'signatures array is empty'};
+    const noOfSignatures = this.signatures.length;
+    if (noOfSignatures === 0) {
+      return { result: false, reason: 'signatures array is empty' };
     }
 
-    for (let inx = 0; inx < this.signatures.length; inx++) {
+    for (let inx = 0; inx < noOfSignatures; inx++) {
       const signature = this.signatures[inx];
       if (!signature.signature) {
-        return {result: false, reason: `signature ${inx} is missing signature`};
+        return { result: false, reason: `signature ${inx} is missing signature` };
       }
       if (!signature.header && !signature.protected) {
-        return {result: false, reason: `signature ${inx} is missing header and protected`};
+        return { result: false, reason: `signature ${inx} is missing header and protected` };
       }
     }
 
-    return {result: true, reason: ''};
+    return { result: true, reason: '' };
   }
-//#endregion
+  //#endregion
 
   /**
    * Get the keyStore to be used
@@ -314,7 +318,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param mandatory True if property needs to be defined
    */
   public getHeader(newOptions?: IJwsSigningOptions, mandatory: boolean = false): JwsHeader {
-    return JoseHelpers.getOptionsProperty<JwsHeader>('header', this.options, newOptions,mandatory);
+    return JoseHelpers.getOptionsProperty<JwsHeader>('header', this.options, newOptions, mandatory);
   }
 
   /**
@@ -326,7 +330,12 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact JWS format.
    */
-  public async sign (signingKeyReference: string, payload: Buffer, format: ProtectionFormat, options?: IJwsSigningOptions): Promise<JwsToken> {
+  public async sign(
+    signingKeyReference: string,
+    payload: Buffer,
+    format: ProtectionFormat,
+    options?: IJwsSigningOptions
+  ): Promise<JwsToken> {
     const keyStore: IKeyStore = this.getKeyStore(options);
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
 
@@ -338,7 +347,7 @@ export default class JwsToken implements IJwsGeneralJson {
     const jwsToken = new JwsToken(this.options);
 
     // Get signing key public key
-    const jwk: PublicKey = await <Promise<PublicKey>>keyStore.get(signingKeyReference, true);
+    const jwk: PublicKey = await (<Promise<PublicKey>>keyStore.get(signingKeyReference, true));
     const jwaAlgorithm: string = jwk.alg || JoseConstants.DefaultSigningAlgorithm;
     const algorithm: CryptoAlgorithm = CryptoHelpers.jwaToWebCrypto(jwaAlgorithm);
 
@@ -347,7 +356,7 @@ export default class JwsToken implements IJwsGeneralJson {
     jwsToken.payload = payload;
     const encodedContent = base64url.encode(payload);
 
-    // 3. Compute the headers. 
+    // 3. Compute the headers.
     jwsSignature.header = this.getHeader(options) || new TSMap<string, string>();
     jwsSignature.protected = this.getProtected(options) || new TSMap<string, string>();
 
@@ -374,13 +383,12 @@ export default class JwsToken implements IJwsGeneralJson {
       if (jwk.kid) {
         jwsSignature.header.set(JoseConstants.Kid, jwk.kid);
       }
-  }
+    }
 
-  const protectedUsed = JoseHelpers.headerHasElements(jwsSignature.protected);
-    
+    const protectedUsed = JoseHelpers.headerHasElements(jwsSignature.protected);
+
     // 4. Compute BASE64URL(UTF8(JWS Header))
-    const encodedProtected = !protectedUsed ? '' : 
-    JoseHelpers.encodeHeader(jwsSignature.protected);
+    const encodedProtected = !protectedUsed ? '' : JoseHelpers.encodeHeader(jwsSignature.protected);
 
     // 5. Compute the signature using data ASCII(BASE64URL(UTF8(JWS protected Header))) || . || . BASE64URL(JWS Payload)
     //    using the "alg" signature algorithm.
@@ -389,7 +397,7 @@ export default class JwsToken implements IJwsGeneralJson {
     // call base layer plugable crypto API for signing with a key reference
     const signer = new SubtleCryptoExtension(cryptoFactory);
     const signature = await signer.signByKeyStore(algorithm, signingKeyReference, Buffer.from(signatureInput));
-    
+
     // Compose result
     jwsSignature.signature = Buffer.from(signature);
     jwsToken.signatures.push(jwsSignature);
@@ -404,20 +412,20 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in compact JWS format.
    */
-   public async verify (validationKeys: PublicKey[], options?: IJwsSigningOptions) {
+  public async verify(validationKeys: PublicKey[], options?: IJwsSigningOptions) {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
     const validator = new SubtleCryptoExtension(cryptoFactory);
 
     // Get the encrypted key
     // Check if kid matches
     let success: boolean | undefined;
-     for (let inx = 0 ; inx < this.signatures.length ; inx ++) {
+    for (let inx = 0; inx < this.signatures.length; inx++) {
       const payloadSignature = this.signatures[inx];
       // We need to support an array of public keys todo
-      if (success = await this.validate(payloadSignature, validator, validationKeys[0])) {
+      if ((success = await this.validate(payloadSignature, validator, validationKeys[0]))) {
         if (success) {
           return true;
-        };
+        }
       }
     }
 
@@ -427,32 +435,38 @@ export default class JwsToken implements IJwsGeneralJson {
   /**
    * Gets the base64 URL decrypted payload.
    */
-  public getPayload (): string {
+  public getPayload(): string {
     return this.payload.toString('utf8');
   }
 
-  private async validate(payloadSignature: IJwsSignature, validator: ISubtleCrypto, validationKey: PublicKey): Promise<boolean> {
+  private async validate(
+    payloadSignature: IJwsSignature,
+    validator: ISubtleCrypto,
+    validationKey: PublicKey
+  ): Promise<boolean> {
     let alg: string | undefined;
     const protectedHeader = payloadSignature.protected;
     if (protectedHeader) {
-// tslint:disable-next-line: no-backbone-get-set-outside-model
+      // tslint:disable-next-line: no-backbone-get-set-outside-model
       alg = protectedHeader.get(JoseConstants.Alg);
     }
 
     const header = payloadSignature.header;
     if (!alg) {
       if (header) {
-// tslint:disable-next-line: no-backbone-get-set-outside-model
+        // tslint:disable-next-line: no-backbone-get-set-outside-model
         alg = header.get(JoseConstants.Alg);
-      }      
+      }
     }
 
     if (!alg) {
-      throw new CryptoProtocolError(JoseConstants.Jws, `Signature algorithm is not provided in the headers. Cannot validate signature.`)
+      throw new CryptoProtocolError(
+        JoseConstants.Jws,
+        'Unable to validate signature as no signature algorithm has been specified in the header.'
+      );
     }
     const algorithm = CryptoHelpers.jwaToWebCrypto(alg);
-    const encodedProtected = !protectedHeader ? '' : 
-      JoseHelpers.encodeHeader(protectedHeader);
+    const encodedProtected = !protectedHeader ? '' : JoseHelpers.encodeHeader(protectedHeader);
     const encodedContent = base64url.encode(this.payload);
     const signatureInput = `${encodedProtected}.${encodedContent}`;
 
@@ -463,11 +477,12 @@ export default class JwsToken implements IJwsGeneralJson {
    * Set the protected header
    * @param protectedHeader to set on the JwsToken object
    */
-  private setProtected(protectedHeader: string | JwsHeader ) {
-    if (typeof protectedHeader === 'string' ) {
+  private setProtected(protectedHeader: string | JwsHeader) {
+    if (typeof protectedHeader === 'string') {
       const json = base64url.decode(protectedHeader);
       return <JwsHeader>JSON.parse(json);
     }
 
     return protectedHeader;
-  }}
+  }
+}
