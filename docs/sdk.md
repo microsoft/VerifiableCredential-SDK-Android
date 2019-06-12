@@ -6,7 +6,7 @@
 credentials from an issuer.</p></dd>
 <dt><a href="#CredentialManifest">CredentialManifest</a></dt>
 <dd><p>Class defining methods and properties for a ClaimManifest object.
- based off of the CredentialManifest spec: [https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md](https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md)</p></dd>
+based off of the CredentialManifest spec: [https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md](https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md)</p></dd>
 <dt><a href="#SelfIssuedCredential">SelfIssuedCredential</a></dt>
 <dd><p>Implementation of an OpenID Connect
 self-issued id token.</p></dd>
@@ -43,8 +43,8 @@ self-issued id token.</p></dd>
 <dd><p>Interface for the Crypto Algorithms Plugins</p></dd>
 <dt><a href="#SubtleCryptoExtension">SubtleCryptoExtension</a></dt>
 <dd><p>The class extends the @class SubtleCrypto with addtional methods.
- Adds methods to work with key references.
- Extends SubtleCrypto to work with JWK keys.</p></dd>
+Adds methods to work with key references.
+Extends SubtleCrypto to work with JWK keys.</p></dd>
 <dt><a href="#SubtleCryptoOperations">SubtleCryptoOperations</a></dt>
 <dd><p>Default crypto suite implementing the default plugable crypto layer</p></dd>
 <dt><a href="#CryptoProtocolError">CryptoProtocolError</a></dt>
@@ -286,7 +286,7 @@ based on the specified credential manifest.</p>
 
 ## CredentialManifest
 <p>Class defining methods and properties for a ClaimManifest object.
- based off of the CredentialManifest spec: [https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md](https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md)</p>
+based off of the CredentialManifest spec: [https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md](https://github.com/decentralized-identity/credential-manifest/blob/master/explainer.md)</p>
 
 **Kind**: global class  
 
@@ -838,8 +838,8 @@ Used for DH algorithms</p>
 
 ## SubtleCryptoExtension
 <p>The class extends the @class SubtleCrypto with addtional methods.
- Adds methods to work with key references.
- Extends SubtleCrypto to work with JWK keys.</p>
+Adds methods to work with key references.
+Extends SubtleCrypto to work with JWK keys.</p>
 
 **Kind**: global class  
 
@@ -1020,7 +1020,7 @@ The referenced key must be a jwk key.</p>
 <a name="SubtleCryptoOperations+messageAuthenticationCodeSigners"></a>
 
 ### subtleCryptoOperations.messageAuthenticationCodeSigners() ⇒
-<p>Gets all of the MAC signing Algorithms from the plugin. 
+<p>Gets all of the MAC signing Algorithms from the plugin.
 Will be used for primitive operations such as key generation.</p>
 
 **Kind**: instance method of [<code>SubtleCryptoOperations</code>](#SubtleCryptoOperations)  
@@ -1593,7 +1593,7 @@ Crypto calls always happen via CryptoFactory</p>
 ### CryptoHelpers.jwaToWebCrypto(jwaAlgorithmName)
 <p>Map the JWA algorithm to the W3C crypto API algorithm.
 The method restricts the supported algorithms. This can easily be extended.
-Based on https://<a href="http://www.w3.org/TR/WebCryptoAPI/">www.w3.org/TR/WebCryptoAPI/</a> A. Mapping between JSON Web Key / JSON Web Algorithm</p>
+Based on https://www.w3.org/TR/WebCryptoAPI/ A. Mapping between JSON Web Key / JSON Web Algorithm</p>
 
 **Kind**: static method of [<code>CryptoHelpers</code>](#CryptoHelpers)  
 
