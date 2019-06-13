@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import IJweRecipient from './IJweRecipient';
-import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 import { TSMap } from 'typescript-map'
+import IJweBase from './IJweBase';
 
 /**
  * Defines a header in JWE
@@ -15,45 +15,10 @@ export type JweHeader = TSMap<string, string>;
 /**
  * JWE general json format
  */
-export default interface IJweGeneralJson {
-
-  /**
-   * The protected header.
-   */
-  protected: JweHeader,
-
-  /**
-   * The unprotected header.
-   */
-  unprotected: JweHeader,
-
-  /**
-   * The initial vector.
-   */
-  iv: Buffer,
-
-  /**
-   * The additional authenticated data.
-   */
-  aad: Buffer,
-
-  /**
-   * The encrypted data.
-   */
-  ciphertext: Buffer,
-
-  /**
-   * The authentication tag used by GCM.
-   */
-  tag: Buffer,
+export default interface IJweGeneralJson extends IJweBase {
 
   /**
    * The recipients that can decrypt
    */
-  recipients: IJweRecipient[],
-
-  /**
-   * The serialization format
-   */
-  format: ProtectionFormat
+  recipients: IJweRecipient[]
 }

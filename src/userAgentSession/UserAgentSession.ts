@@ -6,7 +6,6 @@
 import Identifier from '../Identifier';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
 import UserAgentOptions from '../UserAgentOptions';
-import CryptoOptions from '../CryptoOptions';
 import IResolver from '../resolvers/IResolver';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../crypto/keyStore/KeyStoreInMemory';
@@ -24,11 +23,13 @@ export default class UserAgentSession {
   private sender: Identifier;
   private resolver: IResolver;
   private keyReference: string
-  
+  private cryptoFactory: CryptoFactory;
+
   constructor (sender: Identifier, keyReference: string, resolver: IResolver) {
     this.sender = sender;
     this.resolver = resolver;
     this.keyReference = keyReference;
+    this.cryptoFactory = (<UserAgentOptions>sender.options).cryptoFactory;
   }
 
   /**
@@ -104,23 +105,22 @@ export default class UserAgentSession {
    */
   public async verify(jws: string): Promise<any> {
 
-    // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
-
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
-    const tokenHeaders = token.getHeader();
-    const kid = tokenHeaders.get('kid').split('#');
-    const id = kid[0];
+    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory: this.cryptoFactory});
+    const payload = JSON.parse(token.payload.toString());
+
+    if (!payload.did) {
+      throw new UserAgentError('The provided token did not include the DID claim.');
+    }
 
     // create User Agent Options for Identifier
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
-
+    options.cryptoFactory = this.cryptoFactory;
+    
     // verify jws and return payload. 
-    const identifier = new Identifier(id, options);
-    const payload = await identifier.verify(jws);
-    return JSON.parse(payload);
+    const identifier = new Identifier(payload.did, options);
+    const verifiedToken = await identifier.verify(jws);
+    return JSON.parse(verifiedToken);
   }
 }

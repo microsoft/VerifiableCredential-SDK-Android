@@ -2,17 +2,15 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import IProtocolOptions from "./IProtocolOptions";
-import { PublicKey } from "../..";
-import IVerificationResult from "./IVerificationResult";
-import { ICryptoToken } from "./ICryptoToken";
-import { IProtocolInterface } from "../IProtocolInterface";
-import IProtocolOptions from "../IProtocolOptions";
-import JwsToken from "../jws/JwsToken";
-import { ProtectionFormat } from "../../keyStore/ProtectionFormat";
-import CryptoProtocolError from "../CryptoProtocolError";
-import JoseConstants from "./JoseConstants";
-import JweToken from "../jwe/JweToken";
+import IVerificationResult from '../IVerificationResult';
+import { ICryptoToken } from '../ICryptoToken';
+import { IProtocolInterface } from '../IProtocolInterface';
+import IProtocolOptions from '../IProtocolOptions';
+import JwsToken from '../jws/JwsToken';
+import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
+import CryptoProtocolError from '../CryptoProtocolError';
+import JoseConstants from './JoseConstants';
+import JweToken from '../jwe/JweToken';
 
 /**
  * Class to implement the JOSE protocol.

@@ -3,14 +3,21 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import IJweRecipient from './IJweRecipient';
+import IJweBase from './IJweBase';
+import { JweHeader } from './IJweGeneralJson';
 
 /**
  * JWS flattened json format
  */
-export default interface IJweFlatJson extends IJweRecipient {
+export default interface IJweFlatJson extends IJweBase {
 
   /**
-   * The application-specific payload.
+   * The encrypted key.
    */
-  payload: string,
+  encrypted_key: Buffer,
+
+  /**
+   * The header.
+   */
+  header: JweHeader
 }

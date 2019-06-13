@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
  import PublicKey from './PublicKey';
+import JsonWebKey from './JsonWebKey';
 
 /**
  * Represents a Private Key in JWK format.
@@ -11,7 +12,7 @@
  * @abstract
  * @hideconstructor
  */
-export default abstract class PrivateKey extends PublicKey {
+export default abstract class PrivateKey extends JsonWebKey {
 
   /**
    * Default Sign Algorithm for JWS 'alg' field

@@ -18,7 +18,6 @@ import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
 import JweToken from './crypto/protocols/jwe/JweToken';
 import JoseConstants from './crypto/protocols/jose/JoseConstants';
-import SubtleCryptoOperations from './crypto/plugin/SubtleCryptoOperations';
 import CryptoFactory from './crypto/plugin/CryptoFactory';
 
 /**
@@ -254,10 +253,10 @@ export default class Identifier {
     }
 
     const keyStore = this.options.keyStore;
-    const cryptoSuite = new SubtleCryptoOperations();
+    const cryptoFactory = this.options.cryptoFactory;
 
     const options: IJweEncryptionOptions = {
-      cryptoFactory: new CryptoFactory(keyStore, cryptoSuite),
+      cryptoFactory: cryptoFactory,
       contentEncryptionAlgorithm: JoseConstants.AesGcm256
     };
 

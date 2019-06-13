@@ -6,7 +6,6 @@ import CryptoFactory from '../../crypto/plugin/CryptoFactory';
 import CryptoOperations from '../../crypto/plugin/CryptoOperations';
 import JwsToken from '../../crypto/protocols/jws/JwsToken';
 import { ProtectionFormat } from '../../crypto/keyStore/ProtectionFormat';
-import objectAssign from 'object-assign';
 import { IJwsSigningOptions } from '../../crypto/protocols/jose/IJoseOptions';
 import { TSMap } from 'typescript-map';
 
@@ -30,7 +29,7 @@ interface CommitSignerOptions {
   /** 
    * The CryptoSuite to be used to for the algorithm to use to sign the commit
    */
-  suite?: CryptoOperations;
+  cryptoFactory: CryptoFactory;
 
 }
 
@@ -46,7 +45,7 @@ export default class CommitSigner implements ICommitSigner {
   constructor(options: CommitSignerOptions) {
     this.did = options.did;
     this.keyRef = options.keyReference;
-    this.cryptoFactory = new CryptoFactory(options.keyStore, options.suite);
+    this.cryptoFactory = options.cryptoFactory;
   }
 
   /**

@@ -71,7 +71,17 @@
   /**
    * Define JOSE algorithm constants
    */
+   public static Hs256 = 'HS256';
+   
+  /**
+   * Define JOSE algorithm constants
+   */
    public static Sha256 ='SHA-256';
+   
+  /**
+   * Define JOSE algorithm constants
+   */
+   public static Hs512 = 'HS512';
 
    /**
     * Define the default signing algorithm

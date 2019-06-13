@@ -15,7 +15,7 @@ export default interface IJweRecipient {
   header?: JweHeader,
 
   /**
-   * The JWE signature.
+   * The encrypted key.
    */
   encrypted_key: Buffer
 }

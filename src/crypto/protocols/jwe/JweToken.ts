@@ -19,6 +19,7 @@ import base64url from 'base64url';
 import IJweRecipient from './IJweRecipient';
 import ISubtleCrypto from '../../plugin/ISubtleCrypto';
 import CryptoProtocolError from '../CryptoProtocolError';
+import IJweFlatJson from './IJweFlatJson';
 
 /**
  * Class for containing Jwe token operations.
@@ -182,18 +183,22 @@ export default class JweToken implements IJweGeneralJson {
    public static deserialize (token: string, options?: IJweEncryptionOptions): JweToken {
     const jweToken = new JweToken(options);
       
-    // check for JWS compact format
+    // check for JWE compact format
   if (typeof token === 'string') {
     const parts = token.split('.');
-    if (parts.length === 3) {
-      jweToken.payload = base64url.toBuffer(parts[1]);
-      const signature = new JwsSignature();
-      signature.protected = jweToken.setProtected(parts[0]);
-      signature.signature = base64url.toBuffer(parts[2]);
+    if (parts.length === 5) {
+      jweToken.protected = JweToken.setProtected(parts[0]);
+      const recipient = new JweRecipient();
+      recipient.encrypted_key = base64url.toBuffer(parts[1]);
+      jweToken.recipients = [recipient];
+      jweToken.ciphertext = base64url.toBuffer(parts[3]);
+      jweToken.iv = base64url.toBuffer(parts[2]);
+      jweToken.tag = base64url.toBuffer(parts[4]);
+      jweToken.aad = base64url.toBuffer(parts[5]);
       return jweToken;
     }
   } else {
-    throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable.`);
+    throw new CryptoProtocolError(JoseConstants.Jwe, `The presented object is not deserializable.`);
   }
 
   // Flat or general format
@@ -201,45 +206,51 @@ export default class JweToken implements IJweGeneralJson {
   try {
     jsonObject = JSON.parse(token);
   } catch (error) {
-    throw new CryptoProtocolError(JoseConstants.Jws, `The presented object is not deserializable and is no compact format.`);
+    throw new CryptoProtocolError(JoseConstants.Jwe, `The presented object is not deserializable and is no compact format.`);
   }
 
-     // set payload
-     jweToken.payload = base64url.toBuffer(<string>jsonObject.payload);
-
-     // Try to handle token as IJwsGeneralJSon
-     let decodeStatus: { result: boolean, reason: string } = jweToken.setGeneralParts(<IJwsGeneralJson>jsonObject);
+  // Try to handle token as IJweGeneralJSon
+  let decodeStatus: { result: boolean, reason: string } = jweToken.setGeneralParts(<IJweGeneralJson>jsonObject);
      if (decodeStatus.result) {
          return jweToken;
      } else {
-       console.debug(`Failed parsing as IJwsGeneralJSon. Reasom: ${decodeStatus.reason}`)
+       console.debug(`Failed parsing as IJweGeneralJSon. Reason: ${decodeStatus.reason}`)
      }
 
-     // Try to handle token as IJwsFlatJson
-     decodeStatus = jweToken.setFlatParts(<IJwsFlatJson>jsonObject);
+     // Try to handle token as IJweFlatJson
+     decodeStatus = jweToken.setFlatParts(<IJweFlatJson>jsonObject);
      if (decodeStatus.result) {
          return jweToken;
      } else {
-       console.debug(`Failed parsing as IJwsFlatJson. Reasom: ${decodeStatus.reason}`);
+       console.debug(`Failed parsing as IJweFlatJson. Reason: ${decodeStatus.reason}`);
      }
-   throw new CryptoProtocolError(JoseConstants.Jws, `The content does not represent a valid jws token`);  return jweToken;
+   throw new CryptoProtocolError(JoseConstants.Jwe, `The content does not represent a valid jwe token`);  
   }
 
   /**
    * Try to parse the input token and set the properties of this JswToken
-   * @param content Alledged IJwsGeneralJSon token
+   * @param content Alledged IJweGeneralJSon token
    * @returns true if valid token was parsed
    */
-  private setGeneralParts(content: IJwsGeneralJson): {result: boolean, reason: string} {
+  private setGeneralParts(content: IJweGeneralJson): {result: boolean, reason: string} {
     if (content) {
-      if (content.payload) {
-        this.payload = base64url.toBuffer(<string><any>content.payload);
+      if (content.recipients) {
+        this.ciphertext = base64url.toBuffer(<string><any>content.ciphertext);
+        this.aad = base64url.toBuffer(<string><any>content.aad);
+        this.iv = base64url.toBuffer(<string><any>content.iv);
+        this.protected = JweToken.setProtected(content.protected);
+        this.tag = base64url.toBuffer(<string><any>content.tag);
+        this.recipients = [];
+        for (let inx = 0; inx < content.recipients.length; inx ++) {
+          const recipient = new JweRecipient();
+          recipient.encrypted_key = base64url.toBuffer(<string><any>this.recipients[inx].encrypted_key);          
+          recipient.header = this.recipients[inx].header;          
+        }
       } else {
         // manadatory field
-        return {result: false, reason: 'missing payload'};
+        return {result: false, reason: 'missing recipients'};
       }
 
-      this.signatures = content.signatures;
       return this.isValidToken();
     }
 
@@ -248,36 +259,47 @@ export default class JweToken implements IJweGeneralJson {
 
   /**
    * Try to parse the input token and set the properties of this JswToken
-   * @param content Alledged IJwsFlatJson token
+   * @param content Alledged IJweFlatJson token
    * @returns true if valid token was parsed
    */
-  private setFlatParts(content: IJwsFlatJson): {result: boolean, reason: string} {
+  private setFlatParts(content: IJweFlatJson): {result: boolean, reason: string} {
     if (content) {
-      const signature = new JwsSignature();
+      const recipient = new JweRecipient();
 
-      if (content.signature) {
-        signature.signature = content.signature;
+      if (content.ciphertext) {
+        this.ciphertext = content.ciphertext;
       } else {
         // manadatory field
-        return {result: false, reason: 'missing signature'};
+        return {result: false, reason: 'missing ciphertext'};
+      }
+
+      if (content.encrypted_key) {
+        recipient.encrypted_key = content.encrypted_key;
+      } else {
+        // manadatory field
+        return {result: false, reason: 'missing encrypted_key'};
+      }
+
+      if (content.iv) {
+        this.iv = content.iv;
+      } else {
+        // manadatory field
+        return {result: false, reason: 'missing iv'};
       }
 
       if (JoseHelpers.headerHasElements(content.protected)) {
-        signature.protected = this.setProtected(<JwsHeader>content.protected);
+        this.protected = JweToken.setProtected(<JweHeader>content.protected);
+      } 
+
+      if (JoseHelpers.headerHasElements(content.unprotected)) {
+        this.unprotected = content.unprotected;
       } 
 
       if (JoseHelpers.headerHasElements(content.header)) {
-        signature.header = content.header;
+        recipient.header = content.header;
       } 
 
-      if (content.payload) {
-        this.payload = base64url.toBuffer(<string><any>content.payload);
-      } else {
-        // manadatory field
-        return {result: false, reason: 'missing payload'};
-      }
-
-      this.signatures = [signature];
+      this.recipients = [recipient];
       return this.isValidToken();
     } 
 
@@ -288,25 +310,29 @@ export default class JweToken implements IJweGeneralJson {
    * Check if a valid token was found after decoding
    */
   private isValidToken(): {result: boolean, reason: string} {
-    if (!this.payload) {
-      return {result: false, reason: 'missing payload'};
+    if (!this.ciphertext) {
+      return {result: false, reason: 'missing ciphertext'};
     }
 
-    if (!this.signatures) {
-      return {result: false, reason: 'missing signatures'};
+    if (!this.iv) {
+      return {result: false, reason: 'missing iv'};
     }
 
-    if (this.signatures.length == 0) {
-      return {result: false, reason: 'signatures array is empty'};
+    if (!this.recipients) {
+      return {result: false, reason: 'missing recipients'};
     }
 
-    for (let inx = 0; inx < this.signatures.length; inx++) {
-      const signature = this.signatures[inx];
-      if (!signature.signature) {
-        return {result: false, reason: `signature ${inx} is missing signature`};
+    if (this.recipients.length == 0) {
+      return {result: false, reason: 'recipients array is empty'};
+    }
+
+    for (let inx = 0; inx < this.recipients.length; inx++) {
+      const recipient = this.recipients[inx];
+      if (!recipient.encrypted_key) {
+        return {result: false, reason: `recipient ${inx} is missing encrypted_key`};
       }
-      if (!signature.header && !signature.protected) {
-        return {result: false, reason: `signature ${inx} is missing header and protected`};
+      if (!this.protected && !recipient.header) {
+        return {result: false, reason: `recipient ${inx} is missing header and protected is also missing`};
       }
     }
 
@@ -446,6 +472,7 @@ export default class JweToken implements IJweGeneralJson {
     // encrypt content
     const contentEncryptorKey: JsonWebKey = {
       k: base64url.encode(contentEncryptionKey),
+      alg: contentEncryptionAlgorithm,
       kty: 'oct'
     };
 
@@ -519,6 +546,7 @@ export default class JweToken implements IJweGeneralJson {
   const algorithm = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm, iv, aad);    
   const contentJwk: JsonWebKey = {
     kty: 'oct',
+    alg: contentEncryptionAlgorithm,
     k: base64url.encode(contentEncryptionKey)
   };
 
@@ -538,4 +566,18 @@ export default class JweToken implements IJweGeneralJson {
     return Buffer.from(await decryptor.decryptByKeyStore(algorithm, decryptionKeyReference, recipient.encrypted_key));
    }
   //#endregion
+  
+  /**
+   * Set the protected header
+   * @param protectedHeader to set on the JwsToken object
+   */
+  private static setProtected(protectedHeader: string | JweHeader) {
+    if (typeof protectedHeader === 'string') {
+      const json = base64url.decode(protectedHeader);
+      return <JweHeader>JSON.parse(json);
+    }
+
+    return protectedHeader;
+  }
+
 }

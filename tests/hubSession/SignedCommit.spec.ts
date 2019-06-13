@@ -6,7 +6,6 @@
 import { ICommitProtectedHeaders, IFlattenedJws } from '@decentralized-identity/hub-common-js';
 import base64url from 'base64url';
 import SignedCommit from '../../src/hubSession/SignedCommit';
-import objectAssign from 'object-assign';
 
 const createHeaders: ICommitProtectedHeaders = {
   interface: 'Collections',
@@ -109,7 +108,7 @@ describe('SignedCommit', () => {
 
     it('should return the revision for an update commit', async () => {
       
-      const updateHeaders = objectAssign({}, createHeaders, {
+      const updateHeaders = Object.assign({}, createHeaders, {
         operation: 'update',
         object_id: 'abc123'
       });

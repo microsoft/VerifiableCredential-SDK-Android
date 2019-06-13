@@ -6,12 +6,13 @@
 import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
 import IKeyStore from './IKeyStore';
+import SecretKey from '../keys/SecretKey';
 
 /**
  * Class defining methods and properties for a light KeyStore
  */
 export default class KeyStoreInMemory implements IKeyStore {
-  private store: Map<string, Buffer | PrivateKey | PublicKey> = new Map<string, Buffer | PrivateKey | PublicKey>();
+  private store: Map<string, SecretKey | PrivateKey | PublicKey> = new Map<string, SecretKey | PrivateKey | PublicKey>();
 
   /**
    * Returns the key associated with the specified
@@ -19,11 +20,11 @@ export default class KeyStoreInMemory implements IKeyStore {
    * @param keyReference for which to return the key.
    * @param [publicKeyOnly] True if only the public key is needed.
    */
-  get (keyReference: string, publicKeyOnly: boolean = true): Promise<Buffer | PrivateKey | PublicKey> {
+  get (keyReference: string, publicKeyOnly: boolean = true): Promise<SecretKey | PrivateKey | PublicKey> {
     return new Promise((resolve, reject) => {
       if (this.store.has(keyReference)) {
         const key: any = this.store.get(keyReference);
-        if (key instanceof Buffer) {
+        if (key instanceof SecretKey) {
           return resolve(key);
         }
 
@@ -66,7 +67,7 @@ export default class KeyStoreInMemory implements IKeyStore {
    * @param keyIdentifier for the key being saved.
    * @param key being saved to the key store.
    */
-  save (keyIdentifier: string, key: Buffer | PrivateKey | PublicKey): Promise<void> {
+  save (keyIdentifier: string, key: SecretKey | PrivateKey | PublicKey): Promise<void> {
     console.log(this.store.toString() + keyIdentifier + key.toString());
     this.store.set(keyIdentifier, key);
     return new Promise((resolve) => {

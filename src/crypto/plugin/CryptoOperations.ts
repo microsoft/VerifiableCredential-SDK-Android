@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { SubtleCrypto } from 'webcrypto-core';
+ import { SubtleCrypto } from 'webcrypto-core';
 
 /**
  * A dictionary of JWA encryption algorithm names to a crypto object
@@ -49,4 +49,9 @@ export default abstract class CryptoOperations  {
  * @returns a subtle crypto object for message digests
    */
   abstract getMessageDigests (): SubtleCrypto;
+
+/**
+ * Returns the @class SubtleCrypto ipmplementation for the current environment
+ */
+  abstract getSubtleCrypto(): SubtleCrypto;
 }
