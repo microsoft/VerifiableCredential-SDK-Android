@@ -6,12 +6,14 @@
 // tslint:disable-next-line: import-name
 import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
-import SubtleCryptoOperations from '../../../src/crypto/plugin/SubtleCryptoOperations';
+import SubtleCryptoNodeOperations from '../../../src/crypto/plugin/SubtleCryptoNodeOperations';
 import SubtleCryptoExtension from '../../../src/crypto/plugin/SubtleCryptoExtension';
 import PrivateKey from '../../../src/crypto/keys/PrivateKey';
 import EcPrivateKey from '../../../src/crypto/keys/ec/EcPrivateKey';
 import PairwiseKey from '../../../src/crypto/keys/PairwiseKey';
 import base64url from 'base64url';
+import SecretKey from '../../../src/crypto/keys/SecretKey';
+import { KeyType } from '../../../src/crypto/keys/KeyTypeFactory';
 
 class Helpers {
   // Make sure we generate the same pairwise key
@@ -55,15 +57,16 @@ describe('PairwiseKey', () => {
   let keyStore: KeyStoreInMemory;
   let defaultCryptoFactory: CryptoFactory;
   let subtleCryptoExtensions:SubtleCryptoExtension;
+  const cryptoOperations = new SubtleCryptoNodeOperations();
 
-  const seedReference = 'masterkey';
+  const seedReference = 'masterSeed';
 
   let originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
-  beforeEach(() => {
+  beforeEach(async() => {
   // Default Crypto factory
   keyStore = new KeyStoreInMemory();
-  keyStore.save(seedReference, Buffer.from('abcdefghijklmnop'));
-  const cryptoOperations = new SubtleCryptoOperations();
+  const seed = new SecretKey('ABDE');
+  await keyStore.save(seedReference, seed);
   defaultCryptoFactory = new CryptoFactory(keyStore, cryptoOperations);
   subtleCryptoExtensions = new SubtleCryptoExtension(defaultCryptoFactory);
     jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
@@ -98,16 +101,17 @@ describe('PairwiseKey', () => {
 // tslint:disable-next-line: mocha-unneeded-done
   it('should generate a masterkey', async (done) => {
     const keyStore = new KeyStoreInMemory();
-    await keyStore.save('mk', Buffer.from('abcdefg'));
-    const pairwise = new PairwiseKey(new CryptoFactory(keyStore));
-    let masterkey = await (<any>pairwise).generatePersonaMasterKey('mk', 'persona');
+    const seed = new SecretKey(base64url.encode(Buffer.from('abcdefg')));
+    await keyStore.save(seedReference, seed);
+    const pairwise = new PairwiseKey(new CryptoFactory(keyStore, cryptoOperations));
+    let masterkey = await (<any>pairwise).generatePersonaMasterKey(seedReference, 'persona');
     let encoded = base64url.encode(masterkey);
     expect(encoded).toEqual('h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw');
 
-    masterkey = await (<any>pairwise).generatePersonaMasterKey('mk', 'persona');
+    masterkey = await (<any>pairwise).generatePersonaMasterKey(seedReference, 'persona');
     encoded = base64url.encode(masterkey);
     expect(encoded).toEqual('h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw');
-    masterkey = await (<any>pairwise).generatePersonaMasterKey('mk', 'persona1');
+    masterkey = await (<any>pairwise).generatePersonaMasterKey(seedReference, 'persona1');
     encoded = base64url.encode(masterkey);
     expect(encoded).not.toEqual('h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw');
     done();
@@ -118,7 +122,9 @@ describe('PairwiseKey', () => {
     let nrIds: number = 10;
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_ECDSA];
     const pairwiseKeys = require('./Pairwise.EC.json');
-    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seed = new SecretKey(base64url.encode('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi'));
+    await keyStore.save('masterSeed', seed);
+ 
     const seedReference = 'masterkey';
     await keyStore.save(seedReference, seed);
     for (inx = 0; inx < nrIds; inx++) {
@@ -141,7 +147,7 @@ describe('PairwiseKey', () => {
   it('should generate the same keys as in the RSA reference file', async (done) => {
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_RSA256];
     const pairwiseKeys = require('./Pairwise.RSA.json');
-    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seed = new SecretKey(base64url.encode(Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi')));
     const seedReference = 'masterkey';
     await keyStore.save(seedReference, seed);
     for (let inx = 0; inx < 30; inx++) {
@@ -163,7 +169,7 @@ describe('PairwiseKey', () => {
   it('should generate a 2048 bit pairwise RSA key', async (done) => {
     const alg = supportedKeyGenerationAlgorithms[KeyGenerationAlgorithm_RSA256];
     alg.modulusLength = 2048;
-    const seed = Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi');
+    const seed = new SecretKey(base64url.encode(Buffer.from('xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi')));
     const seedReference = 'masterkey';
     await keyStore.save(seedReference, seed);
     const persona: string = 'did:persona';
@@ -214,7 +220,8 @@ describe('PairwiseKey', () => {
     const peer = 'did:peer:1';
     for (let index = 0 ; index < 100; index++) {
       const keyReference = `key-${index}`;
-      const keyValue = Buffer.from(`1234567890-${index}`);
+      const keyValue = new SecretKey(base64url.encode(`1234567890-${index}`));
+      await keyStore.save(seedReference, keyValue);
       keyStore.save(keyReference, keyValue);
       const pairwiseKey: EcPrivateKey = <EcPrivateKey> await subtleCryptoExtensions.generatePairwiseKey(<any>alg, keyReference, persona, peer);
       results.push(<string>pairwiseKey.d);

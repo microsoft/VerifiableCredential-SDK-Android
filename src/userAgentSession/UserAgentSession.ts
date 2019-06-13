@@ -6,7 +6,6 @@
 import Identifier from '../Identifier';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
 import UserAgentOptions from '../UserAgentOptions';
-import CryptoOptions from '../CryptoOptions';
 import IResolver from '../resolvers/IResolver';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../crypto/keyStore/KeyStoreInMemory';

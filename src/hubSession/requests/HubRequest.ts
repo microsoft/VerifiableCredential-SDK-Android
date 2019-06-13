@@ -3,8 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import objectAssign from 'object-assign';
-
 /**
  * The base class for all requests to an Identity Hub.
  */
@@ -22,7 +20,7 @@ export default class HubRequest {
    * Returns the raw request JSON which will be sent to the Hub.
    */
   public async getRequestJson() {
-    return objectAssign(
+    return Object.assign(
       {
         '@context': 'https://schema.identity.foundation/0.1',
         '@type': this.requestType,

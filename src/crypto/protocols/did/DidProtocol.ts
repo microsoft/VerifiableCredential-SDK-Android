@@ -7,10 +7,8 @@ import Identifier from '../../../Identifier';
 import IResolver from '../../../resolvers/IResolver';
 import JwsToken from '../jws/JwsToken';
 import CryptoFactory from '../../plugin/CryptoFactory';
-import KeyStoreInMemory from '../../keyStore/KeyStoreInMemory';
 import UserAgentOptions from '../../../UserAgentOptions';
-import CryptoOptions from '../../../CryptoOptions';
-import ProtectionStrategy from '../../strategies/ProtectionStrategy';
+import IKeyStore from '../../keyStore/IKeyStore';
 import { IJwsSigningOptions } from '../jose/IJoseOptions';
 
 /**
@@ -46,9 +44,14 @@ export default class DidProtocol {
    private resolver: IResolver;
 
   /**
-   * user agent options
+   * Crypto factory defining the crypto API
    */
-   private options: UserAgentOptions;
+   private cryptoFactory: CryptoFactory;
+
+  /**
+   * Key store for storing keys
+   */
+   private keyStore: IKeyStore;
 
   /**
    * Authentication constructor
@@ -57,7 +60,8 @@ export default class DidProtocol {
   constructor (options: DidProtocolOptions) {
     this.sender = options.sender;
     this.resolver = options.resolver;
-    this.options = <UserAgentOptions>options.sender.options;
+    this.cryptoFactory = (<UserAgentOptions>this.sender.options).cryptoFactory;
+    this.keyStore = (<UserAgentOptions>this.sender.options).keyStore;
   }
 
   /**
@@ -70,15 +74,10 @@ export default class DidProtocol {
     
     // decrypt payload.
     const jws = await this.sender.decrypt(cipher, keyReference);
-
-    // temp to instantiate token.
-    const cryptoFactory = (<UserAgentOptions>this.sender.options).cryptoFactory;
     
     // get identifier id from key id in header.
-    const signingOptions: IJwsSigningOptions = {
-      cryptoFactory: cryptoFactory
-    }
-    const token : JwsToken = await JwsToken.deserialize(jws, signingOptions);
+    const token : JwsToken = await JwsToken.deserialize(jws, <IJwsSigningOptions> {
+      cryptoFactory: this.cryptoFactory});
     const tokenHeaders = token.getHeader();
     const kid = tokenHeaders.get('kid').split('#');
     const id = kid[0];
@@ -90,7 +89,6 @@ export default class DidProtocol {
     const identifier = new Identifier(id, options);
     const payload = await identifier.verify(jws);
     return JSON.parse(payload);
-
   }
 
   /**
@@ -113,7 +111,7 @@ export default class DidProtocol {
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
 
-    const receiverIdentifier = new Identifier(receiverId, this.options);
+    const receiverIdentifier = new Identifier(receiverId, options);
     return receiverIdentifier.encrypt(jws);
   }
 

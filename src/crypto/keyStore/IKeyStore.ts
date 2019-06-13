@@ -7,6 +7,7 @@ import PrivateKey from '../keys/PrivateKey';
 import PublicKey from '../keys/PublicKey';
 import CryptoFactory from '../plugin/CryptoFactory';
 import { JwsHeader } from '../protocols/jws/IJwsGeneralJson';
+import SecretKey from '../keys/SecretKey';
 
 /**
  * Define different types for the algorithm parameter
@@ -24,7 +25,7 @@ export default interface IKeyStore {
    * @param keyIdentifier for which to return the key.
    * @param [publicKeyOnly] True if only the public key is needed.
    */
-  get (keyReference: string, publicKeyOnly?: boolean): Promise<Buffer | PrivateKey | PublicKey>;
+  get (keyReference: string, publicKeyOnly?: boolean): Promise<SecretKey | PrivateKey | PublicKey>;
 
   /**
    * Saves the specified key to the key store using
@@ -32,7 +33,7 @@ export default interface IKeyStore {
    * @param keyReference Reference for the key being saved.
    * @param key being saved to the key store.
    */
-  save (keyReference: string, key: Buffer | PrivateKey | PublicKey): Promise<void>;
+  save (keyReference: string, key: SecretKey | PrivateKey | PublicKey): Promise<void>;
 
   /**
    * Lists all key references with their corresponding key ids

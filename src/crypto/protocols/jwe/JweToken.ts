@@ -307,6 +307,7 @@ export default class JweToken implements IJweGeneralJson {
     // encrypt content
     const contentEncryptorKey: JsonWebKey = {
       k: base64url.encode(contentEncryptionKey),
+      alg: contentEncryptionAlgorithm,
       kty: 'oct'
     };
 
@@ -380,6 +381,7 @@ export default class JweToken implements IJweGeneralJson {
   const algorithm = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm, iv, aad);    
   const contentJwk: JsonWebKey = {
     kty: 'oct',
+    alg: contentEncryptionAlgorithm,
     k: base64url.encode(contentEncryptionKey)
   };
 
