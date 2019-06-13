@@ -6,7 +6,6 @@
 import Identifier from '../Identifier';
 import JwsToken from '../crypto/protocols/jws/JwsToken';
 import UserAgentOptions from '../UserAgentOptions';
-import CryptoOptions from '../CryptoOptions';
 import IResolver from '../resolvers/IResolver';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../crypto/keyStore/KeyStoreInMemory';
@@ -14,7 +13,6 @@ import OIDCAuthenticationRequest from '../crypto/protocols/did/requests/OIDCAuth
 import OIDCAuthenticationResponse from '../crypto/protocols/did/responses/OIDCAuthenticationResponse';
 import UserAgentError from '../UserAgentError';
 import PublicKey from '../crypto/keys/PublicKey';
-import { ISigningOptions } from '../crypto/keyStore/IKeyStore';
 
 /**
  * Class for creating a User Agent Session for sending and verifying
@@ -24,9 +22,9 @@ export default class UserAgentSession {
 
   private sender: Identifier;
   private resolver: IResolver;
-  private keyReference: string;
+  private keyReference: string
   private cryptoFactory: CryptoFactory;
-  
+
   constructor (sender: Identifier, keyReference: string, resolver: IResolver) {
     this.sender = sender;
     this.resolver = resolver;
@@ -107,20 +105,22 @@ export default class UserAgentSession {
    */
   public async verify(jws: string): Promise<any> {
 
-     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, <ISigningOptions> {
-      cryptoFactory: this.cryptoFactory});
-    const tokenHeaders = token.getHeader();
-    const kid = tokenHeaders.get('kid').split('#');
-    const id = kid[0];
+    // get identifier id from key id in header.
+    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory: this.cryptoFactory});
+    const payload = JSON.parse(token.payload.toString());
+
+    if (!payload.did) {
+      throw new UserAgentError('The provided token did not include the DID claim.');
+    }
 
     // create User Agent Options for Identifier
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
-
+    options.cryptoFactory = this.cryptoFactory;
+    
     // verify jws and return payload. 
-    const identifier = new Identifier(id, options);
-    const payload = await identifier.verify(jws);
-    return JSON.parse(payload);
+    const identifier = new Identifier(payload.did, options);
+    const verifiedToken = await identifier.verify(jws);
+    return JSON.parse(verifiedToken);
   }
 }

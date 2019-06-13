@@ -7,10 +7,9 @@ import Identifier from '../../../Identifier';
 import IResolver from '../../../resolvers/IResolver';
 import JwsToken from '../jws/JwsToken';
 import CryptoFactory from '../../plugin/CryptoFactory';
-import KeyStoreInMemory from '../../keyStore/KeyStoreInMemory';
 import UserAgentOptions from '../../../UserAgentOptions';
-import CryptoOptions from '../../../CryptoOptions';
-import IKeyStore, { ISigningOptions } from '../../keyStore/IKeyStore';
+import IKeyStore from '../../keyStore/IKeyStore';
+import { IJwsSigningOptions } from '../jose/IJoseOptions';
 
 /**
  * Named Arguments of Did Protocol
@@ -77,7 +76,7 @@ export default class DidProtocol {
     const jws = await this.sender.decrypt(cipher, keyReference);
     
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, <ISigningOptions> {
+    const token : JwsToken = await JwsToken.deserialize(jws, <IJwsSigningOptions> {
       cryptoFactory: this.cryptoFactory});
     const tokenHeaders = token.getHeader();
     const kid = tokenHeaders.get('kid').split('#');

@@ -1,20 +1,18 @@
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { JweHeader } from "../jwe/IJweGeneralJson";
-import { JwsHeader } from "../jws/IJwsGeneralJson";
+import { JweHeader } from '../jwe/IJweGeneralJson';
+import { JwsHeader } from '../jws/IJwsGeneralJson';
 import base64url from 'base64url';
-import { IEncryptionOptions, ISigningOptions } from "../../keyStore/IKeyStore";
-import JoseConstants from "./JoseConstants";
-import CryptoProtocolError from "../CryptoProtocolError";
+import { IJweEncryptionOptions, IJwsSigningOptions } from '../../protocols/jose/IJoseOptions';
+import JoseConstants from './JoseConstants';
+import CryptoProtocolError from '../CryptoProtocolError';
 
 /**
  * Crypto helpers support for plugable crypto layer
  */
 export default class JoseHelpers {
-
   /**
    * Return true if the header has elements
    * @param header to test
@@ -23,7 +21,8 @@ export default class JoseHelpers {
     if (!header) {
       return false;
     }
-    return header.length > 0;
+
+    return Object.keys(header).length > 0;
   }
 
   /**
@@ -48,7 +47,12 @@ export default class JoseHelpers {
    * @param [overrideOptions] Options passed in after the constructure
    * @param [mandatory] True if property is required
    */
-  public static getOptionsProperty<T>(propertyName: string, initialOptions?: IEncryptionOptions | ISigningOptions, overrideOptions?: IEncryptionOptions | ISigningOptions,  mandatory: boolean = true): T {
+  public static getOptionsProperty<T>(
+    propertyName: string,
+    initialOptions?: IJweEncryptionOptions | IJwsSigningOptions,
+    overrideOptions?: IJweEncryptionOptions | IJwsSigningOptions,
+    mandatory: boolean = true
+  ): T {
     let overrideOption: T | undefined;
     let initialOption: T | undefined;
 
@@ -65,5 +69,4 @@ export default class JoseHelpers {
 
     return overrideOption || <T>initialOption;
   }
-
 }

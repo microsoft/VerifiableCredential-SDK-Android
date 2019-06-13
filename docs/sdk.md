@@ -77,6 +77,10 @@ Crypto calls always happen via CryptoFactory</p></dd>
 <dd><p>Class for containing JWS token operations.
 This class hides the JOSE and crypto library dependencies to allow support for additional crypto algorithms.
 Crypto calls always happen via CryptoFactory</p></dd>
+<dt><a href="#EncryptionStrategy">EncryptionStrategy</a></dt>
+<dd><p>Class used to model encryption strategies</p></dd>
+<dt><a href="#MessageSigningStrategy">MessageSigningStrategy</a></dt>
+<dd><p>Class used to model the message signing strategy</p></dd>
 <dt><a href="#CryptoHelpers">CryptoHelpers</a></dt>
 <dd><p>Crypto helpers support for plugable crypto layer</p></dd>
 <dt><a href="#W3cCryptoApiConstants">W3cCryptoApiConstants</a></dt>
@@ -113,6 +117,8 @@ a user&#39;s Identity Hub.</p></dd>
 <dd><p>Represents an error returned by an Identity Hub.</p></dd>
 <dt><a href="#HubSessionOptions">HubSessionOptions</a></dt>
 <dd><p>Options for instantiating a new Hub session.</p></dd>
+<dt><a href="#KeyStoreConstants">KeyStoreConstants</a></dt>
+<dd><p>Class for key storage constants</p></dd>
 <dt><a href="#HubCommitQueryRequest">HubCommitQueryRequest</a></dt>
 <dd><p>Represents a request to a Hub for a set of commits.</p></dd>
 <dt><a href="#HubCommitWriteRequest">HubCommitWriteRequest</a></dt>
@@ -182,6 +188,8 @@ methods of a credential.</p></dd>
 <dd><p>JWK key operations</p></dd>
 <dt><a href="#ProtectionFormat">ProtectionFormat</a></dt>
 <dd><p>Enum to define different protection formats</p></dd>
+<dt><a href="#ProtectionStrategyScope">ProtectionStrategyScope</a></dt>
+<dd><p>Class used to model protection strategy</p></dd>
 <dt><a href="#HubClientOptions">HubClientOptions</a></dt>
 <dd><p>Interface for HubClient class that manages which hub instance to create hub session with
 And commits and queries for objects in the hub session.</p></dd>
@@ -1702,6 +1710,18 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Deserialize a Jws token object</p>
 
 **Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+<a name="EncryptionStrategy"></a>
+
+## EncryptionStrategy
+<p>Class used to model encryption strategies</p>
+
+**Kind**: global class  
+<a name="MessageSigningStrategy"></a>
+
+## MessageSigningStrategy
+<p>Class used to model the message signing strategy</p>
+
+**Kind**: global class  
 <a name="CryptoHelpers"></a>
 
 ## CryptoHelpers
@@ -2163,6 +2183,12 @@ more recent.</p>
 
 ## HubSessionOptions
 <p>Options for instantiating a new Hub session.</p>
+
+**Kind**: global class  
+<a name="KeyStoreConstants"></a>
+
+## KeyStoreConstants
+<p>Class for key storage constants</p>
 
 **Kind**: global class  
 <a name="HubCommitQueryRequest"></a>
@@ -2932,6 +2958,12 @@ methods of a credential.</p>
 
 ## ProtectionFormat
 <p>Enum to define different protection formats</p>
+
+**Kind**: global variable  
+<a name="ProtectionStrategyScope"></a>
+
+## ProtectionStrategyScope
+<p>Class used to model protection strategy</p>
 
 **Kind**: global variable  
 <a name="HubClientOptions"></a>

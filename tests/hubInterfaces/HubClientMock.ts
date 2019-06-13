@@ -5,6 +5,7 @@
 
 import IHubClient from '../../src/hubClient/IHubClient';
 import Commit from '../../src/hubSession/Commit';
+import { HubCommitQueryRequest, HubObject } from '../../src';
 
 export default class HubClientMock implements IHubClient {
 

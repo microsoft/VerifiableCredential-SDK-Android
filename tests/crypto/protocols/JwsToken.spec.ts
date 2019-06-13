@@ -12,7 +12,7 @@ import SubtleCryptoNodeOperations from "../../../src/crypto/plugin/SubtleCryptoN
 import { ProtectionFormat } from "../../../src/crypto/keyStore/ProtectionFormat";
 import { SubtleCryptoExtension } from "../../../src";
 import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
-import { ISigningOptions } from "../../../src/crypto/keyStore/IKeyStore";
+import { IJwsSigningOptions } from "../../../src/crypto/protocols/jose/IJoseOptions";
 
 describe('JwsToken', () => {
   it('should create a jws token', async () => {
@@ -21,7 +21,7 @@ describe('JwsToken', () => {
     const seedReference = 'seed';
     await keyStore.save(seedReference, new SecretKey('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'));
     const cryptoSuite = new SubtleCryptoNodeOperations();
-    const options: ISigningOptions = {
+    const options: IJwsSigningOptions = {
         algorithm: <Algorithm> { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' } },
         cryptoFactory: new CryptoFactory(keyStore, cryptoSuite)
       };
