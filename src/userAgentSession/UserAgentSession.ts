@@ -38,7 +38,7 @@ export default class UserAgentSession {
    * @param claimRequests any claims that sender is requesting from the recipient.
    * @param state optional stringified JSON state opaque object that will come back in response.
    */
-  public async signRequest(redirectUrl: string, nonce: string, claimRequests?: any, state?: string) {
+  public async signRequest(redirectUrl: string, nonce: string, claimRequests?: any, state?: string, manifestEndpoint?: string) {
 
     const request: Partial<OIDCAuthenticationRequest> = {
       iss: this.sender.id,
@@ -58,6 +58,10 @@ export default class UserAgentSession {
 
     if (claimRequests) {
       Object.assign(request, {id_token: {claims: claimRequests}});
+    }
+
+    if (manifestEndpoint) {
+      Object.assign(request, {registration: manifestEndpoint});
     }
 
     return this.sender.sign(request, this.keyReference);
