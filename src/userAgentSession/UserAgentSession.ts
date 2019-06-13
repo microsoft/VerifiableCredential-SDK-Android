@@ -127,6 +127,12 @@ export default class UserAgentSession {
     options.resolver = this.resolver;
     options.cryptoFactory = this.cryptoFactory;
 
+    /**
+     * If iss parameter is 'https://selfissued.me', payload is an OIDC auth request
+     * and did is in the did parameter. Else the payload is a OIDC auth response,
+     * so the did is in the iss parameter. If either parameter is undefined,
+     * the payload is not formatted properly, so throw an error.
+     */
     const issuerIdentifier = payload.iss === 'https://selfissued.me' ? payload.did : payload.iss;
 
     if (!issuerIdentifier) {
