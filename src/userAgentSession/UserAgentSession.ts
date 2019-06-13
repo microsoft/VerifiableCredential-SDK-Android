@@ -24,11 +24,13 @@ export default class UserAgentSession {
   private sender: Identifier;
   private resolver: IResolver;
   private keyReference: string
+  private cryptoFactory: CryptoFactory;
   
   constructor (sender: Identifier, keyReference: string, resolver: IResolver) {
     this.sender = sender;
     this.resolver = resolver;
     this.keyReference = keyReference;
+    this.cryptoFactory = (<UserAgentOptions>sender.options).cryptoFactory;
   }
 
   /**
@@ -57,7 +59,7 @@ export default class UserAgentSession {
     }
 
     if (claimRequests) {
-      Object.assign(request, {id_token: {claims: claimRequests}});
+      Object.assign(request, {claims: {id_token: claimRequests}});
     }
 
     if (manifestEndpoint) {
@@ -117,23 +119,30 @@ export default class UserAgentSession {
    */
   public async verify(jws: string): Promise<any> {
 
-    // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
-
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
-    const tokenHeaders = token.getHeader();
-    const kid = tokenHeaders.get('kid').split('#');
-    const id = kid[0];
+    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory: this.cryptoFactory});
+    const payload = JSON.parse(token.payload.toString());
 
     // create User Agent Options for Identifier
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
+    options.cryptoFactory = this.cryptoFactory;
 
-    // verify jws and return payload. 
-    const identifier = new Identifier(id, options);
-    const payload = await identifier.verify(jws);
-    return JSON.parse(payload);
+    // for Authentication Responses.
+    if (payload.did) {
+      // verify jws and return payload. 
+      const identifier = new Identifier(payload.did, options);
+      const verifiedToken = await identifier.verify(jws);
+      return JSON.parse(verifiedToken);
+    }
+
+    // for Authentication Requests.
+    if (payload.iss) {
+      // verify jws and return payload. 
+      const identifier = new Identifier(payload.iss, options);
+      const verifiedToken = await identifier.verify(jws);
+      return JSON.parse(verifiedToken);
+    }
+    throw new UserAgentError('Payload does not contain the correct parameters');
   }
 }
