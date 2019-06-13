@@ -127,21 +127,15 @@ export default class UserAgentSession {
     options.resolver = this.resolver;
     options.cryptoFactory = this.cryptoFactory;
 
-    // for Authentication Responses.
-    if (payload.did) {
-      // verify jws and return payload. 
-      const identifier = new Identifier(payload.did, options);
-      const verifiedToken = await identifier.verify(jws);
-      return JSON.parse(verifiedToken);
+    const issuerIdentifier = payload.iss === 'https://selfissued.me' ? payload.did : payload.iss;
+
+    if (!issuerIdentifier) {
+      throw new UserAgentError('Unable to identify issuer of the token.');
     }
 
-    // for Authentication Requests.
-    if (payload.iss) {
-      // verify jws and return payload. 
-      const identifier = new Identifier(payload.iss, options);
-      const verifiedToken = await identifier.verify(jws);
-      return JSON.parse(verifiedToken);
-    }
-    throw new UserAgentError('Payload does not contain the correct parameters');
+    // verify jws and return payload. 
+    const identifier = new Identifier(issuerIdentifier, options);
+    const verifiedToken = await identifier.verify(jws);
+    return JSON.parse(verifiedToken);
   }
 }
