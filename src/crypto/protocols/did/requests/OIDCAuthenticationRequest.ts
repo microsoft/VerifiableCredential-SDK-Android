@@ -15,6 +15,10 @@ export default interface OIDCAuthenticationRequest {
    * MUST be set as 'id_token' in order to match OIDC self-issued protocol 
    */
   response_type: 'id_token';
+  /**
+   * MUST be set as 'form_post' in order to match OIDC self-issued protocol
+   */
+  response_mode: 'form_post'
   /** 
    * The redirect url as specified in the OIDC self-issued protocol
    */
