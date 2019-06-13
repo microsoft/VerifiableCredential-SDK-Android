@@ -23,11 +23,13 @@ export default class UserAgentSession {
   private sender: Identifier;
   private resolver: IResolver;
   private keyReference: string
-  
+  private cryptoFactory: CryptoFactory;
+
   constructor (sender: Identifier, keyReference: string, resolver: IResolver) {
     this.sender = sender;
     this.resolver = resolver;
     this.keyReference = keyReference;
+    this.cryptoFactory = (<UserAgentOptions>sender.options).cryptoFactory;
   }
 
   /**
@@ -103,12 +105,8 @@ export default class UserAgentSession {
    */
   public async verify(jws: string): Promise<any> {
 
-    // temp to instantiate token.
-    const keystore = new KeyStoreInMemory();
-    const cryptoFactory = new CryptoFactory(keystore);
-
     // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory});
+    const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory: this.cryptoFactory});
     const payload = JSON.parse(token.payload.toString());
 
     if (!payload.did) {
@@ -118,7 +116,8 @@ export default class UserAgentSession {
     // create User Agent Options for Identifier
     const options = new UserAgentOptions();
     options.resolver = this.resolver;
-
+    options.cryptoFactory = this.cryptoFactory;
+    
     // verify jws and return payload. 
     const identifier = new Identifier(payload.did, options);
     const verifiedToken = await identifier.verify(jws);

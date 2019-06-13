@@ -4,12 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
+import SubtleCryptoNodeOperations from '../../../src/crypto/plugin/SubtleCryptoNodeOperations';
 
 describe('CryptoFactory', () => {
   it('should create a crypto suite',() => {
     const keyStore = new KeyStoreInMemory();
     
-    const factory = new CryptoFactory(keyStore);
+    const factory = new CryptoFactory(keyStore, new SubtleCryptoNodeOperations());
     expect(factory).toBeDefined();
     const keyEncrypter = factory.getKeyEncrypter('*');
     expect(keyEncrypter).toBeDefined();

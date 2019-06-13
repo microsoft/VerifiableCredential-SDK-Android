@@ -37,7 +37,8 @@ import EcPrivateKey from './crypto/keys/ec/EcPrivateKey';
 import EcPublicKey from './crypto/keys/ec/EcPublicKey';
 import RsaPrivateKey from './crypto/keys/rsa/RsaPrivateKey';
 import RsaPublicKey from './crypto/keys/rsa/RsaPublicKey';
-export { PrivateKey, PublicKey, EcPrivateKey, EcPublicKey, RsaPrivateKey, RsaPublicKey };
+import SecretKey from './crypto/keys/SecretKey';
+export { PrivateKey, PublicKey, EcPrivateKey, EcPublicKey, RsaPrivateKey, RsaPublicKey, SecretKey };
 
 // KeyStore
 import KeyStoreInMemory from './crypto/keyStore/KeyStoreInMemory';

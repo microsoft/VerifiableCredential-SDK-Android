@@ -68,8 +68,10 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
       if (format.toUpperCase() !== 'DER') {
         throw new CryptoError(algorithm, 'Only DER format supported for signature');
       }
-     
-      return SubtleCryptoExtension.toDer([signature.slice(0, signature.byteLength / 2), signature.slice(signature.byteLength / 2, signature.byteLength)]);
+
+      const r = signature.slice(0, signature.byteLength / 2);
+      const s = signature.slice(signature.byteLength / 2, signature.byteLength)
+      return SubtleCryptoExtension.toDer([r, s]);
     }
 
     return signature;
@@ -126,7 +128,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), keyImportAlgorithm, true, ['verify']);
     return crypto.verify(jwk.kty === KeyType.EC ? 
       <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): 
-      <RsaPssParams>algorithm, key, signature, payload);
+      <RsaPssParams>algorithm, key, <ArrayBuffer>signature, <ArrayBuffer>payload);
    }  
           
   /**
@@ -142,7 +144,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), SubtleCryptoExtension.normalizeAlgorithm(keyImportAlgorithm), true, ['decrypt']);
-    return crypto.decrypt(algorithm, key, cipher);
+    return crypto.decrypt(algorithm, key, <ArrayBuffer>cipher);
    }  
           
   /**
@@ -156,7 +158,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), SubtleCryptoExtension.normalizeAlgorithm(keyImportAlgorithm), true, ['decrypt']);
-    return crypto.decrypt(algorithm, key, cipher);
+    return crypto.decrypt(algorithm, key, <ArrayBuffer>cipher);
    }  
 
   /**

@@ -14,6 +14,9 @@ import { KeyType } from '../src/crypto/keys/KeyTypeFactory';
 import { KeyUse } from '../src/crypto/keys/KeyUseFactory';
 import KeyStoreInMemory from '../src/crypto/keyStore/KeyStoreInMemory';
 import JwsToken from '../src/crypto/protocols/jws/JwsToken';
+import SecretKey from '../src/crypto/keys/SecretKey';
+import CryptoFactory from '../src/crypto/plugin/CryptoFactory';
+import SubtleCryptoNodeOperations from '../src/crypto/plugin/SubtleCryptoNodeOperations';
 
 describe('Identifier', () => {
 
@@ -272,9 +275,11 @@ describe('Identifier', () => {
 
     it('should sign a payload that is a string', async () => {
       options.cryptoOptions = new CryptoOptions();
+      options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
       options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
-      await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
+      const seed = new SecretKey('ABDE');
+      await options.keyStore.save('masterSeed', seed);
       const identifier = await Identifier.create(options);
       const keystore = await options.keyStore.list();
       console.log(keystore);
@@ -285,9 +290,11 @@ describe('Identifier', () => {
 
     it('should sign a payload that is an object', async () => {
       options.cryptoOptions = new CryptoOptions();
+      options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
       options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
-      await options.keyStore.save('masterSeed', Buffer.from('xxxxxxxxxxxxxxxxx'));
+      const seed = new SecretKey('ABDE');
+      await options.keyStore.save('masterSeed', seed);
       const identifier = await Identifier.create(options);
       const signedPayload = await identifier.sign({ payload: 'examplePayload' }, 'did:ion-did:ion-ES256K-sig');
       expect(signedPayload).toBeDefined();

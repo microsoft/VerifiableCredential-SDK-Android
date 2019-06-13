@@ -2,16 +2,15 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
- 
-import PublicKey from '../PublicKey';
 import { KeyType } from '../KeyTypeFactory';
+import JsonWebKey from '../JsonWebKey';
 
 /**
  * Represents an Elliptic Curve public key
  * @class
  * @extends PublicKey
  */
-export default class EcPublicKey extends PublicKey {
+export default class EcPublicKey extends JsonWebKey {
   /** 
    * curve 
    */
