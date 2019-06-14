@@ -133,7 +133,7 @@ export default class UserAgentSession {
      * so the did is in the iss parameter. If either parameter is undefined,
      * the payload is not formatted properly, so throw an error.
      */
-    const issuerIdentifier = payload.iss === 'https://selfissued.me' ? payload.did : payload.iss;
+    const issuerIdentifier = payload.iss === 'https://self-issued.me' ? payload.did : payload.iss;
 
     if (!issuerIdentifier) {
       throw new UserAgentError('Unable to identify issuer of the token.');
