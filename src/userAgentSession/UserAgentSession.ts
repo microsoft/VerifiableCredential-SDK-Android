@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import Identifier from '../Identifier';
-import JwsToken from '../crypto/protocols/jws/JwsToken';
+import JwsToken from '../crypto/protocols/jose/jws/JwsToken';
 import UserAgentOptions from '../UserAgentOptions';
 import IResolver from '../resolvers/IResolver';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';

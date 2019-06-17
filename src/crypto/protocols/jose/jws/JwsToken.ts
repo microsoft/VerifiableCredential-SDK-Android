@@ -4,22 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import base64url from 'base64url';
-import CryptoFactory from '../../plugin/CryptoFactory';
-import PublicKey from '../../keys/PublicKey';
+import CryptoFactory from '../../../plugin/CryptoFactory';
+import PublicKey from '../../../keys/PublicKey';
 import IJwsFlatJson from './IJwsFlatJson';
 import IJwsGeneralJson, { JwsHeader } from './IJwsGeneralJson';
-import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import { IJwsSigningOptions } from '../../protocols/jose/IJoseOptions';
-import IKeyStore, { CryptoAlgorithm } from '../../keyStore/IKeyStore';
-import CryptoHelpers from '../../utilities/CryptoHelpers';
-import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
+import { ProtectionFormat } from '../../../keyStore/ProtectionFormat';
+import { IJwsSigningOptions } from '../IJoseOptions';
+import IKeyStore, { CryptoAlgorithm } from '../../../keyStore/IKeyStore';
+import CryptoHelpers from '../../../utilities/CryptoHelpers';
+import SubtleCryptoExtension from '../../../plugin/SubtleCryptoExtension';
 import JwsSignature from './JwsSignature';
 import { TSMap } from 'typescript-map';
-import JoseHelpers from '../jose/JoseHelpers';
+import JoseHelpers from '../JoseHelpers';
 import IJwsSignature from './IJwsSignature';
-import ISubtleCrypto from '../../plugin/ISubtleCrypto';
-import JoseConstants from '../jose/JoseConstants';
-import CryptoProtocolError from '../CryptoProtocolError';
+import ISubtleCrypto from '../../../plugin/ISubtleCrypto';
+import JoseConstants from '../JoseConstants';
+import CryptoProtocolError from '../../CryptoProtocolError';
+import { ICryptoToken } from '../../ICryptoToken';
 
 /**
  * Class for containing JWS token operations.
@@ -439,6 +440,16 @@ export default class JwsToken implements IJwsGeneralJson {
     return this.payload.toString('utf8');
   }
 
+  /**
+   * Convert a @class ICryptoToken into a @class JwsToken
+   * @param cryptoToken to convert
+   */
+  public static fromCryptoToken(cryptoToken: ICryptoToken, options: IJwsSigningOptions): JwsToken {
+    const jwsToken = new JwsToken(options);
+    return jwsToken;
+  }
+
+  // Validate the current state for completeness
   private async validate(
     payloadSignature: IJwsSignature,
     validator: ISubtleCrypto,

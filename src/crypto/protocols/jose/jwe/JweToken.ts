@@ -3,22 +3,22 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import CryptoFactory from '../../plugin/CryptoFactory';
-import PublicKey from '../../keys/PublicKey';
+import CryptoFactory from '../../../plugin/CryptoFactory';
+import PublicKey from '../../../keys/PublicKey';
 import IJweGeneralJson, { JweHeader } from './IJweGeneralJson';
-import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
-import { IJweEncryptionOptions } from "../../protocols/jose/IJoseOptions";
+import { ProtectionFormat } from '../../../keyStore/ProtectionFormat';
+import { IJweEncryptionOptions } from "../IJoseOptions";
 import JweRecipient from './JweRecipient';
 import { TSMap } from 'typescript-map'
-import JoseHelpers from '../jose/JoseHelpers';
-import { KeyType } from '../../keys/KeyTypeFactory';
-import JoseConstants from '../jose/JoseConstants'
-import CryptoHelpers from '../../utilities/CryptoHelpers';
-import SubtleCryptoExtension from '../../plugin/SubtleCryptoExtension';
+import JoseHelpers from '../JoseHelpers';
+import { KeyType } from '../../../keys/KeyTypeFactory';
+import JoseConstants from '../JoseConstants'
+import CryptoHelpers from '../../../utilities/CryptoHelpers';
+import SubtleCryptoExtension from '../../../plugin/SubtleCryptoExtension';
 import base64url from 'base64url';
 import IJweRecipient from './IJweRecipient';
-import ISubtleCrypto from '../../plugin/ISubtleCrypto';
-import CryptoProtocolError from '../CryptoProtocolError';
+import ISubtleCrypto from '../../../plugin/ISubtleCrypto';
+import CryptoProtocolError from '../../CryptoProtocolError';
 import IJweFlatJson from './IJweFlatJson';
 
 /**

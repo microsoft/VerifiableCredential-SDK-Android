@@ -4,4 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import { TSMap } from "typescript-map";
 
+/**
+ * Genereric type to model crypto tokens
+ */
 export type ICryptoToken = TSMap<string, any>;

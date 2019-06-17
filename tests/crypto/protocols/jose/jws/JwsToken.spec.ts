@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import base64url from "base64url";
-import JwsToken from "../../../src/crypto/protocols/jws/JwsToken";
-import SecretKey from "../../../src/crypto/keys/SecretKey";
-import KeyStoreInMemory from "../../../src/crypto/keyStore/KeyStoreInMemory";
-import CryptoFactory from "../../../src/crypto/plugin/CryptoFactory";
-import SubtleCryptoNodeOperations from "../../../src/crypto/plugin/SubtleCryptoNodeOperations";
-import { ProtectionFormat } from "../../../src/crypto/keyStore/ProtectionFormat";
-import { SubtleCryptoExtension } from "../../../src";
+import JwsToken from "../../../../../src/crypto/protocols/jose/jws/JwsToken";
+import SecretKey from "../../../../../src/crypto/keys/SecretKey";
+import KeyStoreInMemory from "../../../../../src/crypto/keyStore/KeyStoreInMemory";
+import CryptoFactory from "../../../../../src/crypto/plugin/CryptoFactory";
+import SubtleCryptoNodeOperations from "../../../../../src/crypto/plugin/SubtleCryptoNodeOperations";
+import { ProtectionFormat } from "../../../../../src/crypto/keyStore/ProtectionFormat";
+import { SubtleCryptoExtension } from "../../../../../src";
 import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
-import { IJwsSigningOptions } from "../../../src/crypto/protocols/jose/IJoseOptions";
+import { IJwsSigningOptions } from "../../../../../src/crypto/protocols/jose/IJoseOptions";
 
 describe('JwsToken', () => {
   it('should create a jws token', async () => {

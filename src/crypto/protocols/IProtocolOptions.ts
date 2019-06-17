@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from "../plugin/CryptoFactory";
 import { TSMap } from "typescript-map";
-import { IProtocolInterface } from "./IProtocolInterface";
+import { IProtocolInterface } from "./IPayloadProtectionProtocolInterface";
 
 /**
  * Interface defining options for the selected protocol.

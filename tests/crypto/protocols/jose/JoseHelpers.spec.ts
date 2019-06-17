@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import JoseHelpers from '../../../../src/crypto/protocols/jose/JoseHelpers';
-import { JweHeader } from '../../../../src/crypto/protocols/jwe/IJweGeneralJson';
+import { JweHeader } from '../../../../src/crypto/protocols/jose/jwe/IJweGeneralJson';
 import CryptoProtocolError from '../../../../src/crypto/protocols/CryptoProtocolError';
 import { TSMap } from 'typescript-map';
 

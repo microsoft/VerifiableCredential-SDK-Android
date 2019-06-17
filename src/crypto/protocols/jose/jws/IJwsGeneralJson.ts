@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import IJwsSignature from './IJwsSignature';
-import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
+import { ProtectionFormat } from '../../../keyStore/ProtectionFormat';
 import { TSMap } from 'typescript-map'
 
 /**

@@ -14,7 +14,7 @@ import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
 import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
-import JwsToken from '../crypto/protocols/jws/JwsToken';
+import JwsToken from '../crypto/protocols/jose/jws/JwsToken';
 import { TSMap } from 'typescript-map';
 import { IJwsSigningOptions } from '../crypto/protocols/jose/IJoseOptions';
 const cloneDeep = require('lodash/fp/cloneDeep');

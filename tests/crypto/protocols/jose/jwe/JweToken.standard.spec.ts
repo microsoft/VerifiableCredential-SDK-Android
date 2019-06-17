@@ -2,16 +2,16 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
- import JweToken from "../../../src/crypto/protocols/jwe/JweToken";
- import KeyStoreInMemory from '../../../src/crypto/keyStore/KeyStoreInMemory';
- import CryptoFactory from '../../../src/crypto/plugin/CryptoFactory';
- import SubtleCryptoNodeOperations from '../../../src/crypto/plugin/SubtleCryptoNodeOperations';
- import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
- import RsaPrivateKey from '../../../src/crypto/keys/rsa/RsaPrivateKey';
- import { KeyOperation } from '../../../src/crypto/keys/PublicKey';
- import JoseHelpers from '../../../src/crypto/protocols/jose/JoseHelpers';
+ import JweToken from "../../../../../src/crypto/protocols/jose/jwe/JweToken";
+ import KeyStoreInMemory from '../../../../../src/crypto/keyStore/KeyStoreInMemory';
+ import CryptoFactory from '../../../../../src/crypto/plugin/CryptoFactory';
+ import SubtleCryptoNodeOperations from '../../../../../src/crypto/plugin/SubtleCryptoNodeOperations';
+ import { ProtectionFormat } from '../../../../../src/crypto/keyStore/ProtectionFormat';
+ import RsaPrivateKey from '../../../../../src/crypto/keys/rsa/RsaPrivateKey';
+ import { KeyOperation } from '../../../../../src/crypto/keys/PublicKey';
+ import JoseHelpers from '../../../../../src/crypto/protocols/jose/JoseHelpers';
  import base64url from 'base64url';
-import { IJweEncryptionOptions } from "../../../src/crypto/protocols/jose/IJoseOptions";
+import { IJweEncryptionOptions } from "../../../../../src/crypto/protocols/jose/IJoseOptions";
  
 describe('JweToken standard', () => {
   it('should run RFC 7516 A.1.  Example JWE using RSAES-OAEP and AES GCM', async () => {

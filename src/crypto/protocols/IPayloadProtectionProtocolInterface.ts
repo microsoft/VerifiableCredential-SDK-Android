@@ -10,7 +10,7 @@ import { ICryptoToken } from "./ICryptoToken";
 /**
  * Interface defining the implementation of the selected protocol.
  */
-export interface IProtocolInterface {
+export interface IPayloadProtectionProtocolInterface {
 
   /**
    * Signs contents using the given private key reference.

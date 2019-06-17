@@ -4,7 +4,7 @@ import SignedCommit from '../SignedCommit';
 import IKeyStore from '../../crypto/keyStore/IKeyStore';
 import CryptoFactory from '../../crypto/plugin/CryptoFactory';
 import CryptoOperations from '../../crypto/plugin/CryptoOperations';
-import JwsToken from '../../crypto/protocols/jws/JwsToken';
+import JwsToken from '../../crypto/protocols/jose/jws/JwsToken';
 import { ProtectionFormat } from '../../crypto/keyStore/ProtectionFormat';
 import { IJwsSigningOptions } from '../../crypto/protocols/jose/IJoseOptions';
 import { TSMap } from 'typescript-map';
