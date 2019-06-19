@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 import IVerificationResult from '../IVerificationResult';
 import { ICryptoToken } from '../ICryptoToken';
-import { IProtocolInterface } from '../IPayloadProtectionProtocolInterface';
-import IProtocolOptions from '../IProtocolOptions';
+import { IPayloadProtectionProtocolInterface } from '../IPayloadProtectionProtocolInterface';
+import IPayloadProtectionProtocolOptions from '../IPayloadProtectionProtocolOptions';
 import JwsToken from './jws/JwsToken';
 import { ProtectionFormat } from '../../keyStore/ProtectionFormat';
 import CryptoProtocolError from '../CryptoProtocolError';
@@ -18,7 +18,7 @@ import { IJwsSigningOptions, IJweEncryptionOptions } from './IJoseOptions';
 /**
  * Class to implement the JOSE protocol.
  */
-export default class JoseProtocol implements IProtocolInterface {
+export default class JoseProtocol implements IPayloadProtectionProtocolInterface {
 
   /**
    * Signs contents using the given private key reference.
@@ -29,16 +29,11 @@ export default class JoseProtocol implements IProtocolInterface {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in requested format.
    */
-   public async sign (signingKeyReference: string, payload: Buffer, format: string, options: IProtocolOptions): Promise<ICryptoToken> {
-    const jwsOptions: IJwsSigningOptions = this.mapJwsOptions(options);
+   public async sign (signingKeyReference: string, payload: Buffer, format: string, options: IPayloadProtectionProtocolOptions): Promise<ICryptoToken> {
+    const jwsOptions: IJwsSigningOptions = JwsToken.fromPayloadProtectionOptions(options);
     const token: JwsToken = new JwsToken(jwsOptions);
     const protocolFormat: ProtectionFormat = this.getProtectionFormat(format);
-    return this.toCryptoToken(protocolFormat, await token.sign(signingKeyReference, payload, protocolFormat));
-   }
-
-   // Map IProtocolOptions to IJwsSigningOptions
-   private mapJwsOptions(options?: IProtocolOptions): IJwsSigningOptions {
-    return <IJwsSigningOptions> options;
+    return JwsToken.toCryptoToken(protocolFormat, await token.sign(signingKeyReference, payload, protocolFormat));
    }
 
   /**
@@ -50,10 +45,9 @@ export default class JoseProtocol implements IProtocolInterface {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns True if signature validated.
    */
-   public async verify (validationKeys: PublicKey[], _payload: Buffer, signature: ICryptoToken, options?: IProtocolOptions): Promise<IVerificationResult> {
-    const jwsOptions: IJwsSigningOptions = this.mapJwsOptions(options);
-    const token: JwsToken = JwsToken.fromCryptoToken(signature, jwsOptions);
-    (<any>token).options = options;
+   public async verify (validationKeys: PublicKey[], _payload: Buffer, signature: ICryptoToken, options?: IPayloadProtectionProtocolOptions): Promise<IVerificationResult> {
+    const jwsOptions: IJwsSigningOptions = JwsToken.fromPayloadProtectionOptions(<IPayloadProtectionProtocolOptions>options);
+    const token: JwsToken = JwsToken.fromCryptoToken(signature, <IPayloadProtectionProtocolOptions>options);
     const result = await token.verify(validationKeys);
     return {
       result: result,
@@ -72,20 +66,14 @@ export default class JoseProtocol implements IProtocolInterface {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns JweToken with encrypted payload.
    */
-   public async encrypt (recipients: PublicKey[], payload: Buffer, format: string, options?: IProtocolOptions): Promise<ICryptoToken> {
-    const jweOptions: IJweEncryptionOptions = this.mapJweOptions(options);
+   public async encrypt (recipients: PublicKey[], payload: Buffer, format: string, options: IPayloadProtectionProtocolOptions): Promise<ICryptoToken> {
+    const jweOptions: IJweEncryptionOptions = JweToken.fromPayloadProtectionOptions(options);
     const token: JweToken = new JweToken(jweOptions);
     const protocolFormat: ProtectionFormat = this.getProtectionFormat(format);
     return this.toCryptoToken(protocolFormat, await token.encrypt(recipients, payload.toString('utf8'), protocolFormat));
    }
 
-   // Map IProtocolOptions to IJwsSigningOptions
-   private mapJweOptions(options?: IProtocolOptions): IJweEncryptionOptions {
-    return <IJweEncryptionOptions> options;
-   }
-
-
-  /**
+   /**
    * Decrypt the content.
    * 
    * @param decryptionKeyReference Reference to the decryption key.
@@ -93,9 +81,9 @@ export default class JoseProtocol implements IProtocolInterface {
    * @param options used for the decryption. These options override the options provided in the constructor.
    * @returns Decrypted payload.
    */
-   public async decrypt (decryptionKeyReference: string, token: ICryptoToken, options?: IProtocolOptions): Promise<Buffer> {
-    const cipher: JweToken = <JweToken>token;
-    (<any>token).options = this.mapJweOptions(options);
+   public async decrypt (decryptionKeyReference: string, token: ICryptoToken, options: IPayloadProtectionProtocolOptions): Promise<Buffer> {
+    const cipher: JweToken = JweToken.fromCryptoToken(token, options);
+    (<any>cipher).options = JweToken.fromPayloadProtectionOptions(options);
     return await cipher.decrypt(decryptionKeyReference);
    }
 
@@ -105,21 +93,21 @@ export default class JoseProtocol implements IProtocolInterface {
    * @param format Specify the serialization format. If not specified, use default format.
    * @param options used for the decryption. These options override the options provided in the constructor.
    */
-   public serialize (token: ICryptoToken, format: string, options?: IProtocolOptions): string {
+   public serialize (token: ICryptoToken, format: string, options: IPayloadProtectionProtocolOptions): string {
     const protocolFormat: ProtectionFormat = this.getProtectionFormat(format);
     
     switch (protocolFormat) {
       case ProtectionFormat.JwsFlatJson:
       case ProtectionFormat.JwsCompactJson:
       case ProtectionFormat.JwsGeneralJson:
-        const signature: JwsToken = <JwsToken>token;
-        return signature.serialize(options);
+        const signature: JwsToken = JwsToken.fromCryptoToken(token, options);
+        return signature.serialize(protocolFormat);
       case ProtectionFormat.JweFlatJson:
       case ProtectionFormat.JweCompactJson:
       case ProtectionFormat.JweGeneralJson:
-        const cipher: JweToken = <JweToken>token;
-        return cipher.serialize(options);
-      default:
+        const cipher: JweToken = JweToken.fromCryptoToken(token, options);
+        return cipher.serialize(protocolFormat);
+    default:
         throw new CryptoProtocolError(JoseConstants.Jose, `Serialization format '${format}' is not supported`);
     }
    }
@@ -130,18 +118,19 @@ export default class JoseProtocol implements IProtocolInterface {
    * @param format Specify the serialization format. If not specified, use default format.
    * @param options used for the decryption. These options override the options provided in the constructor.
    */
-   public deserialize (token: string, format: string, options?: IProtocolOptions): ICryptoToken {
+   public deserialize (token: string, format: string, options: IPayloadProtectionProtocolOptions): ICryptoToken {
     const protocolFormat: ProtectionFormat = this.getProtectionFormat(format);
-    
     switch (protocolFormat) {
       case ProtectionFormat.JwsFlatJson:
       case ProtectionFormat.JwsCompactJson:
       case ProtectionFormat.JwsGeneralJson:
-        return JwsToken.deserialize(token, options);
+        const jwsProtectOptions = JwsToken.fromPayloadProtectionOptions(options);
+        return JwsToken.toCryptoToken(protocolFormat, JwsToken.deserialize(token, jwsProtectOptions));
       case ProtectionFormat.JweFlatJson:
       case ProtectionFormat.JweCompactJson:
       case ProtectionFormat.JweGeneralJson:
-        return JweToken.deserialize(token, options);
+        const jweProtectOptions = JweToken.fromPayloadProtectionOptions(options);
+        return JweToken.toCryptoToken(protocolFormat, JweToken.deserialize(token, jweProtectOptions));
       default:
         throw new CryptoProtocolError(JoseConstants.Jose, `Serialization format '${format}' is not supported`);
     }

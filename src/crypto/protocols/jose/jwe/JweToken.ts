@@ -20,6 +20,9 @@ import IJweRecipient from './IJweRecipient';
 import ISubtleCrypto from '../../../plugin/ISubtleCrypto';
 import CryptoProtocolError from '../../CryptoProtocolError';
 import IJweFlatJson from './IJweFlatJson';
+import IPayloadProtectionProtocolOptions from '../../IPayloadProtectionProtocolOptions';
+import JoseProtocol from '../JoseProtocol';
+import { ICryptoToken } from '../../ICryptoToken';
 
 /**
  * Class for containing Jwe token operations.
@@ -409,8 +412,8 @@ export default class JweToken implements IJweGeneralJson {
       const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
       const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
       contentEncryptionKey = base64url.toBuffer(jwk.k);
+      
     }
-    
       // Set the initial vector
       jweToken.iv = this.getInitialVector(options, false);
       if (!jweToken.iv) {
@@ -566,10 +569,88 @@ export default class JweToken implements IJweGeneralJson {
     return Buffer.from(await decryptor.decryptByKeyStore(algorithm, decryptionKeyReference, recipient.encrypted_key));
    }
   //#endregion
+
+  /**
+   * Convert a @class ICryptoToken into a @class JweToken
+   * @param cryptoToken to convert
+   * @param protectOptions options for the token
+   */
+   public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionProtocolOptions): JweToken {
+    const options = JweToken.fromPayloadProtectionOptions(protectOptions);
+    return <JweToken> {
+      protected: cryptoToken.has(JoseConstants.tokenProtected) ? cryptoToken.get(JoseConstants.tokenProtected) : undefined,
+      unprotected: cryptoToken.has(JoseConstants.tokenUnprotected) ? cryptoToken.get(JoseConstants.tokenUnprotected) : undefined,
+      format: <ProtectionFormat>cryptoToken.get(JoseConstants.tokenFormat),
+      aad: cryptoToken.get(JoseConstants.tokenAad),
+      iv: cryptoToken.get(JoseConstants.tokenIv),
+      ciphertext: cryptoToken.get(JoseConstants.tokenCiphertext),
+      tag: cryptoToken.get(JoseConstants.tokenTag),
+      recipients: <JweRecipient[]>cryptoToken.get(JoseConstants.tokenRecipients)
+    };
+  }
+
+  /**
+   * Convert a @class JweToken into a @class ICryptoToken
+   * @param protocolFormat format of the token
+   * @param jweToken to convert
+   */
+   public static toCryptoToken(protocolFormat: ProtectionFormat, jweToken: JweToken): ICryptoToken {
+    const cryptoToken = new TSMap<string, any>();
+    if (jweToken.protected) {
+      cryptoToken.set(JoseConstants.tokenProtected, jweToken.protected);
+    }
+    if (jweToken.unprotected) {
+      cryptoToken.set(JoseConstants.tokenUnprotected, jweToken.unprotected);
+    }
+    cryptoToken.set(JoseConstants.tokenFormat, protocolFormat);
+    cryptoToken.set(JoseConstants.tokenAad, jweToken.aad);
+    cryptoToken.set(JoseConstants.tokenIv, jweToken.iv);
+    cryptoToken.set(JoseConstants.tokenCiphertext, jweToken.ciphertext);
+    cryptoToken.set(JoseConstants.tokenTag, jweToken.tag);
+    return cryptoToken;
+  }
+
+  /**
+   * Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions
+   * @param protectOptions to convert
+   */
+   public static fromPayloadProtectionOptions(protectOptions: IPayloadProtectionProtocolOptions): IJweEncryptionOptions {
+    return <IJweEncryptionOptions>{
+      cryptoFactory: protectOptions.cryptoFactory,
+      protected: protectOptions.protocolOption.has(JoseConstants.optionProtectedHeader) ? <JweHeader>protectOptions.protocolOption.get(JoseConstants.optionProtectedHeader) : undefined, 
+      header: protectOptions.protocolOption.has(JoseConstants.optionHeader) ? <JweHeader>protectOptions.protocolOption.get(JoseConstants.optionHeader) : undefined,
+      kidPrefix:  protectOptions.protocolOption.has(JoseConstants.optionKidPrefix) ? <JweHeader>protectOptions.protocolOption.get(JoseConstants.optionKidPrefix) : undefined,
+      contentEncryptionAlgorithm:  protectOptions.protocolOption.get(JoseConstants.optionContentEncryptionAlgorithm)
+    };
+  }
+
+  /**
+   * Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions
+   * @param encryptionOptions to convert
+   */
+   public static toPayloadProtectionOptions(encryptionOptions: IJweEncryptionOptions): IPayloadProtectionProtocolOptions {
+    const protectOptions = {
+      cryptoFactory: encryptionOptions.cryptoFactory,
+      protocolInterface: new JoseProtocol(),
+      protocolOption: new TSMap<string, any>(),
+      contentEncryptionAlgorithm: encryptionOptions.contentEncryptionAlgorithm 
+    };
+    if (encryptionOptions.header) {
+      protectOptions.protocolOption.set(JoseConstants.optionHeader, encryptionOptions.header);
+    }
+    if (encryptionOptions.protected) {
+      protectOptions.protocolOption.set(JoseConstants.optionProtectedHeader, encryptionOptions.protected);
+    }
+    if (encryptionOptions.kidPrefix) {
+      protectOptions.protocolOption.set(JoseConstants.optionKidPrefix, encryptionOptions.kidPrefix);
+    }
+    
+    return protectOptions;
+  }
   
   /**
    * Set the protected header
-   * @param protectedHeader to set on the JwsToken object
+   * @param protectedHeader to set on the JweToken object
    */
   private static setProtected(protectedHeader: string | JweHeader) {
     if (typeof protectedHeader === 'string') {

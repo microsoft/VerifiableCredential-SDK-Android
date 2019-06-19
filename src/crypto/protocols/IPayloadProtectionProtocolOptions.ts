@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 import CryptoFactory from "../plugin/CryptoFactory";
 import { TSMap } from "typescript-map";
-import { IProtocolInterface } from "./IPayloadProtectionProtocolInterface";
+import { IPayloadProtectionProtocolInterface } from "./IPayloadProtectionProtocolInterface";
 
 /**
  * Interface defining options for the selected protocol.
  */
-export default interface IProtocolOptions {
+export default interface IPayloadProtectionProtocolOptions {
   // The crypto algorithm suites used for cryptography
   cryptoFactory: CryptoFactory,
 
@@ -17,7 +17,7 @@ export default interface IProtocolOptions {
   protocolOption: TSMap<string, any>,
 
   // The implementation of the selected protocol
-  protocolInterface: IProtocolInterface,
+  protocolInterface: IPayloadProtectionProtocolInterface,
 
   // Make the type indexable
   [key: string]: any;

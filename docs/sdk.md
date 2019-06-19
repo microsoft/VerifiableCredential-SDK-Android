@@ -1335,6 +1335,7 @@ TSMap.toJSON prepares a map so it can be serialized as a dictionary.</p>
     * [.decrypt(decryptionKeyReference, token, options)](#JoseProtocol+decrypt) ⇒
     * [.serialize(token, format, options)](#JoseProtocol+serialize)
     * [.deserialize(token, format, options)](#JoseProtocol+deserialize)
+    * [.toCryptoToken(format, token)](#JoseProtocol+toCryptoToken)
 
 <a name="JoseProtocol+sign"></a>
 
@@ -1423,6 +1424,18 @@ The options can override certain algorithm choices.</p>
 | format | <p>Specify the serialization format. If not specified, use default format.</p> |
 | options | <p>used for the decryption. These options override the options provided in the constructor.</p> |
 
+<a name="JoseProtocol+toCryptoToken"></a>
+
+### joseProtocol.toCryptoToken(format, token)
+<p>Map a JWE token to the crypto token format</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+
+| Param | Description |
+| --- | --- |
+| format | <p>of the token</p> |
+| token | <p>to map</p> |
+
 <a name="JweRecipient"></a>
 
 ## JweRecipient
@@ -1461,6 +1474,10 @@ Crypto calls always happen via CryptoFactory</p>
         * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
         * [.serializeJweCompact(token)](#JweToken.serializeJweCompact)
         * [.deserialize()](#JweToken.deserialize)
+        * [.fromCryptoToken(cryptoToken, protectOptions)](#JweToken.fromCryptoToken)
+        * [.toCryptoToken(protocolFormat, jweToken)](#JweToken.toCryptoToken)
+        * [.fromPayloadProtectionOptions(protectOptions)](#JweToken.fromPayloadProtectionOptions)
+        * [.toPayloadProtectionOptions(encryptionOptions)](#JweToken.toPayloadProtectionOptions)
         * [.setProtected(protectedHeader)](#JweToken.setProtected)
 
 <a name="new_JweToken_new"></a>
@@ -1631,6 +1648,52 @@ The options can override certain algorithm choices.</p>
 <p>Deserialize a Jwe token object</p>
 
 **Kind**: static method of [<code>JweToken</code>](#JweToken)  
+<a name="JweToken.fromCryptoToken"></a>
+
+### JweToken.fromCryptoToken(cryptoToken, protectOptions)
+<p>Convert a @class ICryptoToken into a @class JweToken</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| cryptoToken | <p>to convert</p> |
+| protectOptions | <p>options for the token</p> |
+
+<a name="JweToken.toCryptoToken"></a>
+
+### JweToken.toCryptoToken(protocolFormat, jweToken)
+<p>Convert a @class JweToken into a @class ICryptoToken</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| protocolFormat | <p>format of the token</p> |
+| jweToken | <p>to convert</p> |
+
+<a name="JweToken.fromPayloadProtectionOptions"></a>
+
+### JweToken.fromPayloadProtectionOptions(protectOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| protectOptions | <p>to convert</p> |
+
+<a name="JweToken.toPayloadProtectionOptions"></a>
+
+### JweToken.toPayloadProtectionOptions(encryptionOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| encryptionOptions | <p>to convert</p> |
+
 <a name="JweToken.setProtected"></a>
 
 ### JweToken.setProtected(protectedHeader)
@@ -1640,7 +1703,7 @@ The options can override certain algorithm choices.</p>
 
 | Param | Description |
 | --- | --- |
-| protectedHeader | <p>to set on the JwsToken object</p> |
+| protectedHeader | <p>to set on the JweToken object</p> |
 
 <a name="JwsSignature"></a>
 
@@ -1682,6 +1745,10 @@ Crypto calls always happen via CryptoFactory</p>
         * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
         * [.serializeJwsCompact(token)](#JwsToken.serializeJwsCompact)
         * [.deserialize()](#JwsToken.deserialize)
+        * [.fromCryptoToken(cryptoToken, protectOptions)](#JwsToken.fromCryptoToken)
+        * [.toCryptoToken(protocolFormat, jwsToken)](#JwsToken.toCryptoToken)
+        * [.fromPayloadProtectionOptions(protectOptions)](#JwsToken.fromPayloadProtectionOptions)
+        * [.toPayloadProtectionOptions(signingOptions)](#JwsToken.toPayloadProtectionOptions)
 
 <a name="new_JwsToken_new"></a>
 
@@ -1866,6 +1933,52 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Deserialize a Jws token object</p>
 
 **Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+<a name="JwsToken.fromCryptoToken"></a>
+
+### JwsToken.fromCryptoToken(cryptoToken, protectOptions)
+<p>Convert a @class ICryptoToken into a @class JwsToken</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| cryptoToken | <p>to convert</p> |
+| protectOptions | <p>options for the token</p> |
+
+<a name="JwsToken.toCryptoToken"></a>
+
+### JwsToken.toCryptoToken(protocolFormat, jwsToken)
+<p>Convert a @class JwsToken into a @class ICryptoToken</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| protocolFormat | <p>format of the token</p> |
+| jwsToken | <p>to convert</p> |
+
+<a name="JwsToken.fromPayloadProtectionOptions"></a>
+
+### JwsToken.fromPayloadProtectionOptions(protectOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJwsSigningOptions</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| protectOptions | <p>to convert</p> |
+
+<a name="JwsToken.toPayloadProtectionOptions"></a>
+
+### JwsToken.toPayloadProtectionOptions(signingOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJwsSigningOptions</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| signingOptions | <p>to convert</p> |
+
 <a name="EncryptionStrategy"></a>
 
 ## EncryptionStrategy

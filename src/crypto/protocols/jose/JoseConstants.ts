@@ -103,4 +103,74 @@
     */
    public static Enc = 'enc';
    
-}
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenProtected = 'Protected'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenUnprotected = 'Unprotected'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenAad = 'Aad'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenIv = 'Iv'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenCiphertext = 'Ciphertext'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenTag = 'Tag'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenRecipients = 'Recipients'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenPayload = 'Payload'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenSignatures = 'Signatures'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
+    public static tokenFormat = 'Format'; 
+
+   /**
+    * Define elements in the JOSE options
+    */
+    public static optionProtectedHeader = 'ProtectedHeader'; 
+     
+   /**
+    * Define elements in the JOSE options
+    */
+    public static optionHeader = 'Header'; 
+     
+   /**
+    * Define elements in the JOSE options
+    */
+    public static optionKidPrefix = 'KidPrefix'; 
+
+   /**
+    * Define elements in the JOSE options
+    */
+    public static optionContentEncryptionAlgorithm = 'ContentEncryptionAlgorithm'; 
+    
+  }

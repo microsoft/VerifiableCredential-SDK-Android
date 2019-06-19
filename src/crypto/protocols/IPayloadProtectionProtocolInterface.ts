@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import IProtocolOptions from "./IProtocolOptions";
+import IPayloadProtectionProtocolOptions from "./IPayloadProtectionProtocolOptions";
 import { PublicKey } from "../..";
 import IVerificationResult from "./IVerificationResult";
 import { ICryptoToken } from "./ICryptoToken";
@@ -21,7 +21,7 @@ export interface IPayloadProtectionProtocolInterface {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns Signed payload in requested format.
    */
-   sign (signingKeyReference: string, payload: Buffer, format: string, options?: IProtocolOptions): Promise<ICryptoToken>;
+   sign (signingKeyReference: string, payload: Buffer, format: string, options?: IPayloadProtectionProtocolOptions): Promise<ICryptoToken>;
 
   /**
    * Verify the signature.
@@ -32,7 +32,7 @@ export interface IPayloadProtectionProtocolInterface {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns True if signature validated.
    */
-   verify (validationKeys: PublicKey[], payload: Buffer, signature: ICryptoToken, options?: IProtocolOptions): Promise<IVerificationResult>;
+   verify (validationKeys: PublicKey[], payload: Buffer, signature: ICryptoToken, options?: IPayloadProtectionProtocolOptions): Promise<IVerificationResult>;
 
   /**
    * Encrypt content using the given public keys in JWK format.
@@ -45,7 +45,7 @@ export interface IPayloadProtectionProtocolInterface {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns JweToken with encrypted payload.
    */
-   encrypt (recipients: PublicKey[], payload: Buffer, format: string, options?: IProtocolOptions): Promise<ICryptoToken>;
+   encrypt (recipients: PublicKey[], payload: Buffer, format: string, options?: IPayloadProtectionProtocolOptions): Promise<ICryptoToken>;
 
   /**
    * Decrypt the content.
@@ -55,7 +55,7 @@ export interface IPayloadProtectionProtocolInterface {
    * @param options used for the decryption. These options override the options provided in the constructor.
    * @returns Decrypted payload.
    */
-   decrypt (decryptionKeyReference: string, cipher: ICryptoToken, options?: IProtocolOptions): Promise<Buffer>;
+   decrypt (decryptionKeyReference: string, cipher: ICryptoToken, options?: IPayloadProtectionProtocolOptions): Promise<Buffer>;
 
   /**
    * Serialize a cryptographic token
@@ -63,7 +63,7 @@ export interface IPayloadProtectionProtocolInterface {
    * @param format Specify the serialization format. If not specified, use default format.
    * @param options used for the decryption. These options override the options provided in the constructor.
    */
-   serialize (token: ICryptoToken, format: string, options?: IProtocolOptions): string;
+   serialize (token: ICryptoToken, format: string, options?: IPayloadProtectionProtocolOptions): string;
 
   /**
    * Deserialize a cryptographic token
@@ -71,5 +71,5 @@ export interface IPayloadProtectionProtocolInterface {
    * @param format Specify the serialization format. If not specified, use default format.
    * @param options used for the decryption. These options override the options provided in the constructor.
    */
-   deserialize (token: string, format: string, options?: IProtocolOptions): ICryptoToken;
+   deserialize (token: string, format: string, options?: IPayloadProtectionProtocolOptions): ICryptoToken;
 }
