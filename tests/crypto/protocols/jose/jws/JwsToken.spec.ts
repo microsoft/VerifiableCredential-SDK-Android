@@ -13,6 +13,10 @@ import { ProtectionFormat } from "../../../../../src/crypto/keyStore/ProtectionF
 import { SubtleCryptoExtension } from "../../../../../src";
 import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
 import { IJwsSigningOptions } from "../../../../../src/crypto/protocols/jose/IJoseOptions";
+import IPayloadProtectionProtocolOptions from "../../../../../src/crypto/protocols/IPayloadProtectionProtocolOptions";
+import JoseProtocol from "../../../../../src/crypto/protocols/jose/JoseProtocol";
+import { TSMap } from "typescript-map";
+import JoseConstants from "../../../../../src/crypto/protocols/jose/JoseConstants";
 
 describe('JwsToken', () => {
   it('should create a jws token', async () => {
@@ -36,4 +40,48 @@ describe('JwsToken', () => {
       const signature = await jwsToken.sign('key', Buffer.from(payload), ProtectionFormat.JwsGeneralJson);
       expect(signature).toBeDefined();
   });
+  it('should create, validate and serialize a JwsToken', async () => {
+    const payload = 'The true sign of intelligence is not knowledge but imagination.';      
+    const keyStore = new KeyStoreInMemory();
+    await keyStore.save('seed', new SecretKey('ABEE'));
+    const cryptoFactory = new CryptoFactory(keyStore, new SubtleCryptoNodeOperations())
+    const options: IPayloadProtectionProtocolOptions = {
+        cryptoFactory: cryptoFactory,
+        protocolOption: new TSMap<string, any>(),
+        protocolInterface: new JoseProtocol()
+    };
+ 
+    const alg = { name: 'RSASSA-PKCS1-V1_5', hash: 'SHA-256', modulusLength: 2048, publicExponent: new Uint8Array([0x01, 0x00, 0x01]) };
+    const generator = new SubtleCryptoExtension(cryptoFactory);
+    const privateKey = await generator.generatePairwiseKey(alg, 'seed', 'persona','peer');
+    (<any>privateKey).alg = 'RS256';
+    await keyStore.save('key', privateKey);
+
+    // sign
+    const signature = await options.protocolInterface.sign('key', Buffer.from(payload), 'JwsGeneralJson', options);
+    const signatures = signature.get(JoseConstants.tokenSignatures);
+    expect(signatures[0].protected).toBeDefined();
+    expect(signatures[0].signature).toBeDefined();
+    expect(signature.get(JoseConstants.tokenPayload)).toEqual(Buffer.from(payload));
+
+    // serialize
+    let serialized = options.protocolInterface.serialize(signature, 'JwsGeneralJson', options);
+    const parsed = JSON.parse(serialized);
+    expect(parsed['payload']).toBeDefined();
+    expect(parsed['signatures']).toBeDefined();
+
+    // deserialize
+    const deserialized = options.protocolInterface.deserialize(serialized, 'JwsGeneralJson', options);
+    const deSignatures = deserialized.get(JoseConstants.tokenSignatures);
+    expect(deSignatures[0].protected).toEqual(signatures[0].protected);
+    expect(deSignatures[0].signature).toEqual(signatures[0].signature);
+    expect(deserialized.get(JoseConstants.tokenPayload)).toEqual(signature.get(JoseConstants.tokenPayload));
+
+    // validate
+    const result = await options.protocolInterface.verify([await keyStore.get('key', true)], Buffer.from(payload), signature, options);
+    expect(result.result).toBeTruthy();
+    });
+
+    // Flat serialization
+
 });

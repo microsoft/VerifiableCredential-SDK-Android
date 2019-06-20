@@ -1727,6 +1727,7 @@ Crypto calls always happen via CryptoFactory</p>
         * [.verify(validationKeys, options)](#JwsToken+verify) ⇒
         * [.getPayload()](#JwsToken+getPayload)
         * [.setProtected(protectedHeader)](#JwsToken+setProtected)
+        * [.setHeader(header)](#JwsToken+setHeader)
     * _static_
         * [.serializeJwsGeneralJson(token)](#JwsToken.serializeJwsGeneralJson)
         * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
@@ -1880,6 +1881,17 @@ Crypto calls always happen via CryptoFactory</p>
 | Param | Description |
 | --- | --- |
 | protectedHeader | <p>to set on the JwsToken object</p> |
+
+<a name="JwsToken+setHeader"></a>
+
+### jwsToken.setHeader(header)
+<p>Set the header for the signature</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| header | <p>to set on the JwsToken object</p> |
 
 <a name="JwsToken.serializeJwsGeneralJson"></a>
 

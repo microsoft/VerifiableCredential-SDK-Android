@@ -213,7 +213,24 @@ export default class JwsToken implements IJwsGeneralJson {
         return { result: false, reason: 'missing payload' };
       }
 
-      this.signatures = content.signatures;
+      if (!content.signatures) {
+       // manadatory field
+        return { result: false, reason: 'missing signatures' };
+      }
+
+      this.signatures = [];
+      for (let inx = 0 ; inx < content.signatures.length ; inx ++) {
+        const jwsSignature = new JwsSignature();
+        jwsSignature.signature = base64url.toBuffer((<any>content).signatures[inx].signature);
+        if (content.signatures[inx].header) {
+          jwsSignature.header = this.setHeader((<any>content).signatures[inx].header);
+        }
+        if (content.signatures[inx].protected) {
+          jwsSignature.protected = this.setProtected((<any>content).signatures[inx].protected);
+        }
+        this.signatures.push(jwsSignature);
+      }
+
       return this.isValidToken();
     }
 
@@ -450,11 +467,11 @@ export default class JwsToken implements IJwsGeneralJson {
    */
    public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionProtocolOptions): JwsToken {
     const options = JwsToken.fromPayloadProtectionOptions(protectOptions);
-    return <JwsToken> {
-      payload: <Buffer>cryptoToken.get(JoseConstants.tokenPayload),
-      format: <ProtectionFormat>cryptoToken.get(JoseConstants.tokenFormat),
-      signatures: <JwsSignature[]>cryptoToken.get(JoseConstants.tokenSignatures)
-    };
+    const jwsToken = new JwsToken(options);
+    jwsToken.payload = <Buffer>cryptoToken.get(JoseConstants.tokenPayload);
+    jwsToken.format = <ProtectionFormat>cryptoToken.get(JoseConstants.tokenFormat);
+    jwsToken.signatures =  <JwsSignature[]>cryptoToken.get(JoseConstants.tokenSignatures);
+    return jwsToken;
   }
 
   /**
@@ -545,12 +562,24 @@ export default class JwsToken implements IJwsGeneralJson {
    * Set the protected header
    * @param protectedHeader to set on the JwsToken object
    */
-  private setProtected(protectedHeader: string | JwsHeader) {
+   private setProtected(protectedHeader: string | JwsHeader) {
     if (typeof protectedHeader === 'string') {
       const json = base64url.decode(protectedHeader);
-      return <JwsHeader>JSON.parse(json);
+      return new TSMap<string, string>().fromJSON(JSON.parse(json));
     }
 
     return protectedHeader;
+  }
+
+  /**
+   * Set the header for the signature
+   * @param header to set on the JwsToken object
+   */
+   private setHeader(header: string | JwsHeader) {
+    if (typeof header === 'string') {
+      return new TSMap<string, string>().fromJSON(JSON.parse(header));
+    }
+
+    return header;
   }
 }
