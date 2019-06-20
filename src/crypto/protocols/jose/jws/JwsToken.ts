@@ -159,6 +159,7 @@ export default class JwsToken implements IJwsGeneralJson {
         const signature = new JwsSignature();
         signature.protected = jwsToken.setProtected(parts[0]);
         signature.signature = base64url.toBuffer(parts[2]);
+        jwsToken.signatures = [signature];
         return jwsToken;
       }
     } else {
@@ -247,7 +248,7 @@ export default class JwsToken implements IJwsGeneralJson {
       const signature = new JwsSignature();
 
       if (content.signature) {
-        signature.signature = content.signature;
+        signature.signature = base64url.toBuffer(<any>content.signature);
       } else {
         // manadatory field
         return { result: false, reason: 'missing signature' };

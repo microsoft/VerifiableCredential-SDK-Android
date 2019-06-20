@@ -47,8 +47,8 @@ describe('JweToken', () => {
     expect(cipher.get(JoseConstants.tokenPayload)).toBeUndefined();
 
     // serialize
-    const serialized = options.protocolInterface.serialize(cipher, 'JweGeneralJson', options);
-    const parsed = JSON.parse(serialized);
+    let serialized = options.protocolInterface.serialize(cipher, 'JweGeneralJson', options);
+    let parsed = JSON.parse(serialized);
     expect(parsed['aad']).toBeDefined();
     expect(parsed['ciphertext']).toBeDefined();
     expect(parsed['iv']).toBeDefined();
@@ -58,7 +58,7 @@ describe('JweToken', () => {
     expect(parsed[JoseConstants.tokenPayload]).toBeUndefined();
 
     // serialize
-    const deserialized = options.protocolInterface.deserialize(serialized, 'JweGeneralJson', options);
+    let deserialized = options.protocolInterface.deserialize(serialized, 'JweGeneralJson', options);
     expect(deserialized.get(JoseConstants.tokenAad)).toEqual(cipher.get(JoseConstants.tokenAad));
     expect(deserialized.get(JoseConstants.tokenCiphertext)).toEqual(cipher.get(JoseConstants.tokenCiphertext));
     expect(deserialized.get(JoseConstants.tokenFormat)).toEqual(ProtectionFormat.JweGeneralJson);
@@ -69,6 +69,39 @@ describe('JweToken', () => {
     // decrypt
     const decrypted = await options.protocolInterface.decrypt('key', deserialized, options);
     expect(decrypted).toEqual(Buffer.from(payload));
+
+    // Flat serialization
+    serialized = options.protocolInterface.serialize(cipher, 'JweFlatJson', options);
+    parsed = JSON.parse(serialized);
+    expect(parsed['aad']).toBeDefined();
+    expect(parsed['ciphertext']).toBeDefined();
+    expect(parsed['iv']).toBeDefined();
+    expect(parsed['protected']).toBeDefined();
+    expect(parsed['encrypted_key']).toBeDefined();
+    expect(parsed['recipients']).toBeUndefined();
+    expect(parsed['tag']).toBeDefined();
+    expect(parsed[JoseConstants.tokenPayload]).toBeUndefined();
+
+    deserialized = options.protocolInterface.deserialize(serialized, 'JweFlatJson', options);
+    expect(deserialized.get(JoseConstants.tokenAad)).toEqual(cipher.get(JoseConstants.tokenAad));
+    expect(deserialized.get(JoseConstants.tokenCiphertext)).toEqual(cipher.get(JoseConstants.tokenCiphertext));
+    expect(deserialized.get(JoseConstants.tokenFormat)).toEqual(ProtectionFormat.JweFlatJson);
+    expect(deserialized.get(JoseConstants.tokenIv)).toEqual(cipher.get(JoseConstants.tokenIv));
+    expect(deserialized.get(JoseConstants.tokenProtected)).toEqual(cipher.get(JoseConstants.tokenProtected));
+    expect(deserialized.get(JoseConstants.tokenRecipients)).toEqual(cipher.get(JoseConstants.tokenRecipients));
+
+    // Compact serialization
+    serialized = options.protocolInterface.serialize(cipher, 'JweCompactJson', options);
+    parsed = serialized.split('.');
+    expect(parsed.length).toEqual(5);
+
+    deserialized = options.protocolInterface.deserialize(serialized, 'JweCompactJson', options);
+    expect(deserialized.get(JoseConstants.tokenAad)).toEqual(cipher.get(JoseConstants.tokenAad));
+    expect(deserialized.get(JoseConstants.tokenCiphertext)).toEqual(cipher.get(JoseConstants.tokenCiphertext));
+    expect(deserialized.get(JoseConstants.tokenFormat)).toEqual(ProtectionFormat.JweCompactJson);
+    expect(deserialized.get(JoseConstants.tokenIv)).toEqual(cipher.get(JoseConstants.tokenIv));
+    expect(deserialized.get(JoseConstants.tokenProtected)).toEqual(cipher.get(JoseConstants.tokenProtected));
+    expect(deserialized.get(JoseConstants.tokenRecipients)).toEqual(cipher.get(JoseConstants.tokenRecipients));
     });
 
     it('should add kid and default alg', async () => {

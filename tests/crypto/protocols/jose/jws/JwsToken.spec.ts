@@ -66,13 +66,13 @@ describe('JwsToken', () => {
 
     // serialize
     let serialized = options.protocolInterface.serialize(signature, 'JwsGeneralJson', options);
-    const parsed = JSON.parse(serialized);
+    let parsed = JSON.parse(serialized);
     expect(parsed['payload']).toBeDefined();
     expect(parsed['signatures']).toBeDefined();
 
     // deserialize
-    const deserialized = options.protocolInterface.deserialize(serialized, 'JwsGeneralJson', options);
-    const deSignatures = deserialized.get(JoseConstants.tokenSignatures);
+    let deserialized = options.protocolInterface.deserialize(serialized, 'JwsGeneralJson', options);
+    let deSignatures = deserialized.get(JoseConstants.tokenSignatures);
     expect(deSignatures[0].protected).toEqual(signatures[0].protected);
     expect(deSignatures[0].signature).toEqual(signatures[0].signature);
     expect(deserialized.get(JoseConstants.tokenPayload)).toEqual(signature.get(JoseConstants.tokenPayload));
@@ -80,8 +80,31 @@ describe('JwsToken', () => {
     // validate
     const result = await options.protocolInterface.verify([await keyStore.get('key', true)], Buffer.from(payload), signature, options);
     expect(result.result).toBeTruthy();
-    });
 
     // Flat serialization
+    serialized = options.protocolInterface.serialize(signature, 'JwsFlatJson', options);
+    parsed = JSON.parse(serialized);
+    expect(parsed['payload']).toBeDefined();
+    expect(parsed['protected']).toBeDefined();
+    expect(parsed['signature']).toBeDefined();
+    
+    deserialized = options.protocolInterface.deserialize(serialized, 'JwsFlatJson', options);
+    deSignatures = deserialized.get(JoseConstants.tokenSignatures);
+    expect(deSignatures[0].protected).toEqual(signatures[0].protected);
+    expect(deSignatures[0].signature).toEqual(signatures[0].signature);
+    expect(deserialized.get(JoseConstants.tokenPayload)).toEqual(signature.get(JoseConstants.tokenPayload));
+
+    // Compact serialization
+    serialized = options.protocolInterface.serialize(signature, 'JwsCompactJson', options);
+    parsed = serialized.split('.');
+    expect(parsed.length).toEqual(3);
+    
+    deserialized = options.protocolInterface.deserialize(serialized, 'JwsCompactJson', options);
+    deSignatures = deserialized.get(JoseConstants.tokenSignatures);
+    expect(deSignatures[0].protected).toEqual(signatures[0].protected);
+    expect(deSignatures[0].signature).toEqual(signatures[0].signature);
+    expect(deserialized.get(JoseConstants.tokenPayload)).toEqual(signature.get(JoseConstants.tokenPayload));
+
+    });
 
 });

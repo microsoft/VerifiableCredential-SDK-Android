@@ -1465,6 +1465,7 @@ Crypto calls always happen via CryptoFactory</p>
         * [.toCryptoToken(protocolFormat, jweToken)](#JweToken.toCryptoToken)
         * [.fromPayloadProtectionOptions(protectOptions)](#JweToken.fromPayloadProtectionOptions)
         * [.toPayloadProtectionOptions(encryptionOptions)](#JweToken.toPayloadProtectionOptions)
+        * [.setUnprotected(unprotectedHeader)](#JweToken.setUnprotected)
         * [.setProtected(protectedHeader)](#JweToken.setProtected)
 
 <a name="new_JweToken_new"></a>
@@ -1680,6 +1681,17 @@ The options can override certain algorithm choices.</p>
 | Param | Description |
 | --- | --- |
 | encryptionOptions | <p>to convert</p> |
+
+<a name="JweToken.setUnprotected"></a>
+
+### JweToken.setUnprotected(unprotectedHeader)
+<p>Set the unprotected header</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| unprotectedHeader | <p>to set on the JweToken object</p> |
 
 <a name="JweToken.setProtected"></a>
 

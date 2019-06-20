@@ -199,7 +199,7 @@ export default class JweToken implements IJweGeneralJson {
       jweToken.ciphertext = base64url.toBuffer(parts[3]);
       jweToken.iv = base64url.toBuffer(parts[2]);
       jweToken.tag = base64url.toBuffer(parts[4]);
-      jweToken.aad = base64url.toBuffer(parts[5]);
+      jweToken.aad = base64url.toBuffer(parts[0]);
       return jweToken;
     }
   } else {
@@ -275,24 +275,28 @@ export default class JweToken implements IJweGeneralJson {
       const recipient = new JweRecipient();
 
       if (content.ciphertext) {
-        this.ciphertext = content.ciphertext;
+        this.ciphertext = base64url.toBuffer(<any>content.ciphertext);
       } else {
         // manadatory field
         return {result: false, reason: 'missing ciphertext'};
       }
 
       if (content.encrypted_key) {
-        recipient.encrypted_key = content.encrypted_key;
+        recipient.encrypted_key = base64url.toBuffer(<any>content.encrypted_key);
       } else {
         // manadatory field
         return {result: false, reason: 'missing encrypted_key'};
       }
 
       if (content.iv) {
-        this.iv = content.iv;
+        this.iv = base64url.toBuffer(<any>content.iv);
       } else {
         // manadatory field
         return {result: false, reason: 'missing iv'};
+      }
+
+      if (content.aad) {
+        this.aad = base64url.toBuffer(<any>content.aad);
       }
 
       if (JoseHelpers.headerHasElements(content.protected)) {
@@ -304,7 +308,7 @@ export default class JweToken implements IJweGeneralJson {
       } 
 
       if (JoseHelpers.headerHasElements(content.header)) {
-        recipient.header = content.header;
+        recipient.header = JweToken.setUnprotected(<JweHeader>content.header);
       } 
 
       this.recipients = [recipient];
@@ -656,10 +660,22 @@ export default class JweToken implements IJweGeneralJson {
   }
   
   /**
+   * Set the unprotected header
+   * @param unprotectedHeader to set on the JweToken object
+   */
+   private static setUnprotected(unprotectedHeader: string | JweHeader) {
+    if (typeof unprotectedHeader === 'string') {
+      return new TSMap<string, string>().fromJSON(JSON.parse(unprotectedHeader));
+    }
+
+    return unprotectedHeader;
+  }
+  
+  /**
    * Set the protected header
    * @param protectedHeader to set on the JweToken object
    */
-  private static setProtected(protectedHeader: string | JweHeader) {
+   private static setProtected(protectedHeader: string | JweHeader) {
     if (typeof protectedHeader === 'string') {
       const json = base64url.decode(protectedHeader);
       return new TSMap<string, string>().fromJSON(JSON.parse(json));
