@@ -1335,7 +1335,6 @@ TSMap.toJSON prepares a map so it can be serialized as a dictionary.</p>
     * [.decrypt(decryptionKeyReference, token, options)](#JoseProtocol+decrypt) ⇒
     * [.serialize(token, format, options)](#JoseProtocol+serialize)
     * [.deserialize(token, format, options)](#JoseProtocol+deserialize)
-    * [.toCryptoToken(format, token)](#JoseProtocol+toCryptoToken)
 
 <a name="JoseProtocol+sign"></a>
 
@@ -1423,18 +1422,6 @@ The options can override certain algorithm choices.</p>
 | token | <p>The crypto token to serialize.</p> |
 | format | <p>Specify the serialization format. If not specified, use default format.</p> |
 | options | <p>used for the decryption. These options override the options provided in the constructor.</p> |
-
-<a name="JoseProtocol+toCryptoToken"></a>
-
-### joseProtocol.toCryptoToken(format, token)
-<p>Map a JWE token to the crypto token format</p>
-
-**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
-
-| Param | Description |
-| --- | --- |
-| format | <p>of the token</p> |
-| token | <p>to map</p> |
 
 <a name="JweRecipient"></a>
 

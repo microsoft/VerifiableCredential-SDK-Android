@@ -70,7 +70,7 @@ export default class JoseProtocol implements IPayloadProtectionProtocolInterface
     const jweOptions: IJweEncryptionOptions = JweToken.fromPayloadProtectionOptions(options);
     const token: JweToken = new JweToken(jweOptions);
     const protocolFormat: ProtectionFormat = this.getProtectionFormat(format);
-    return this.toCryptoToken(protocolFormat, await token.encrypt(recipients, payload.toString('utf8'), protocolFormat));
+    return JweToken.toCryptoToken(protocolFormat, await token.encrypt(recipients, payload.toString('utf8'), protocolFormat, jweOptions));
    }
 
    /**
@@ -134,22 +134,6 @@ export default class JoseProtocol implements IPayloadProtectionProtocolInterface
       default:
         throw new CryptoProtocolError(JoseConstants.Jose, `Serialization format '${format}' is not supported`);
     }
-   }
-
-   /**
-    * Map a JWE token to the crypto token format
-    * @param format of the token 
-    * @param token to map
-    */
-   public toCryptoToken(_format: ProtectionFormat, token: JwsToken | JweToken): ICryptoToken {
-    const cryptoToken: ICryptoToken = new TSMap<string, any>();
-    const keys = Object.keys(token);
-    const values = Object.values(token);
-    for (let inx = 0; inx < Object.keys(token).length; inx++) {
-      cryptoToken.set(keys[inx], values[inx]);
-    }
-
-    return cryptoToken;
    }
 
    // Map string to protection format

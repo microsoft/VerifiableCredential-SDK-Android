@@ -33,7 +33,11 @@ export default class KeyTypeFactory {
       case 'ecdh':
         return KeyType.EC;
 
-      case 'rsassa-pkcs1-v1_5':
+        case 'rsassa-pkcs1-v1_5':
+        return KeyType.RSA;
+
+      case 'rsa-oaep':
+      case 'rsa-oaep-256':
         return KeyType.RSA;
 
       default:

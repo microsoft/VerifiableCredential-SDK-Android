@@ -23,6 +23,8 @@ import IJweFlatJson from './IJweFlatJson';
 import IPayloadProtectionProtocolOptions from '../../IPayloadProtectionProtocolOptions';
 import JoseProtocol from '../JoseProtocol';
 import { ICryptoToken } from '../../ICryptoToken';
+import { SubtleCrypto } from 'webcrypto-core'
+import { stringify } from 'querystring';
 
 /**
  * Class for containing Jwe token operations.
@@ -246,8 +248,11 @@ export default class JweToken implements IJweGeneralJson {
         this.recipients = [];
         for (let inx = 0; inx < content.recipients.length; inx ++) {
           const recipient = new JweRecipient();
-          recipient.encrypted_key = base64url.toBuffer(<string><any>this.recipients[inx].encrypted_key);          
-          recipient.header = this.recipients[inx].header;          
+          recipient.encrypted_key = base64url.toBuffer(<string><any>content.recipients[inx].encrypted_key);   
+          if (content.recipients[inx].header) {
+            recipient.header = content.recipients[inx].header;   
+          }       
+          this.recipients.push(recipient);       
         }
       } else {
         // manadatory field
@@ -404,21 +409,22 @@ export default class JweToken implements IJweGeneralJson {
 
     // Get the encryptor extensions
     const encryptor = new SubtleCryptoExtension(cryptoFactory);
+    let randomGenerator = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm);
+    const generator: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(cryptoFactory, randomGenerator);
 
     // Set the content encryption key
-    let randomGenerator = CryptoHelpers.jwaToWebCrypto(contentEncryptionAlgorithm);
     let contentEncryptionKey: Buffer = this.getContentEncryptionKey(options, false);
     if (!contentEncryptionKey) {
-      const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
-      const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
+      const key = await generator.generateKey(randomGenerator, true, ['encrypt']);
+      const jwk: any = await generator.exportKey('jwk', <CryptoKey>key);
       contentEncryptionKey = base64url.toBuffer(jwk.k);
       
     }
       // Set the initial vector
       jweToken.iv = this.getInitialVector(options, false);
       if (!jweToken.iv) {
-        const key = await encryptor.generateKey(randomGenerator, true, ['encrypt']);
-        const jwk: any = await encryptor.exportKey('jwk', <CryptoKey>key);
+        const key = await generator.generateKey(randomGenerator, true, ['encrypt']);
+        const jwk: any = await generator.exportKey('jwk', <CryptoKey>key);
         jweToken.iv = base64url.toBuffer(jwk.k);
       }
 
@@ -577,16 +583,16 @@ export default class JweToken implements IJweGeneralJson {
    */
    public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionProtocolOptions): JweToken {
     const options = JweToken.fromPayloadProtectionOptions(protectOptions);
-    return <JweToken> {
-      protected: cryptoToken.has(JoseConstants.tokenProtected) ? cryptoToken.get(JoseConstants.tokenProtected) : undefined,
-      unprotected: cryptoToken.has(JoseConstants.tokenUnprotected) ? cryptoToken.get(JoseConstants.tokenUnprotected) : undefined,
-      format: <ProtectionFormat>cryptoToken.get(JoseConstants.tokenFormat),
-      aad: cryptoToken.get(JoseConstants.tokenAad),
-      iv: cryptoToken.get(JoseConstants.tokenIv),
-      ciphertext: cryptoToken.get(JoseConstants.tokenCiphertext),
-      tag: cryptoToken.get(JoseConstants.tokenTag),
-      recipients: <JweRecipient[]>cryptoToken.get(JoseConstants.tokenRecipients)
-    };
+    const token = new JweToken(options);
+      token.protected = cryptoToken.has(JoseConstants.tokenProtected) ? cryptoToken.get(JoseConstants.tokenProtected) : undefined;
+      token.unprotected = cryptoToken.has(JoseConstants.tokenUnprotected) ? cryptoToken.get(JoseConstants.tokenUnprotected) : undefined;
+      token.format = <ProtectionFormat>cryptoToken.get(JoseConstants.tokenFormat);
+      token.aad = cryptoToken.get(JoseConstants.tokenAad);
+      token.iv = cryptoToken.get(JoseConstants.tokenIv);
+      token.ciphertext = cryptoToken.get(JoseConstants.tokenCiphertext);
+      token.tag = cryptoToken.get(JoseConstants.tokenTag);
+      token.recipients = <JweRecipient[]>cryptoToken.get(JoseConstants.tokenRecipients);
+    return token;
   }
 
   /**
@@ -607,6 +613,7 @@ export default class JweToken implements IJweGeneralJson {
     cryptoToken.set(JoseConstants.tokenIv, jweToken.iv);
     cryptoToken.set(JoseConstants.tokenCiphertext, jweToken.ciphertext);
     cryptoToken.set(JoseConstants.tokenTag, jweToken.tag);
+    cryptoToken.set(JoseConstants.tokenRecipients, jweToken.recipients);
     return cryptoToken;
   }
 
@@ -655,7 +662,7 @@ export default class JweToken implements IJweGeneralJson {
   private static setProtected(protectedHeader: string | JweHeader) {
     if (typeof protectedHeader === 'string') {
       const json = base64url.decode(protectedHeader);
-      return <JweHeader>JSON.parse(json);
+      return new TSMap<string, string>().fromJSON(JSON.parse(json));
     }
 
     return protectedHeader;

@@ -35,6 +35,10 @@ export default class KeyUseFactory {
       case 'rsassa-pkcs1-v1_5':
         return KeyUse.Signature;
 
+      case 'rsa-oaep':
+      case 'rsa-oaep-256':
+        return KeyUse.Signature;
+
       default:
         throw new Error(`The algorithm '${algorithm.name}' is not supported`);
     }
