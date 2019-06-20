@@ -39,6 +39,9 @@ import RsaPrivateKey from './crypto/keys/rsa/RsaPrivateKey';
 import RsaPublicKey from './crypto/keys/rsa/RsaPublicKey';
 import SecretKey from './crypto/keys/SecretKey';
 export { PrivateKey, PublicKey, EcPrivateKey, EcPublicKey, RsaPrivateKey, RsaPublicKey, SecretKey };
+import SubtleCryptoNodeOperations from './crypto/plugin/SubtleCryptoNodeOperations';
+import SubtleCryptoBrowserOperations from './crypto/plugin/SubtleCryptoBrowserOperations';
+export { SubtleCryptoNodeOperations, SubtleCryptoBrowserOperations };
 
 // KeyStore
 import KeyStoreInMemory from './crypto/keyStore/KeyStoreInMemory';
