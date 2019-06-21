@@ -15,7 +15,7 @@ import JsonWebKey from './JsonWebKey';
 export default abstract class PrivateKey extends JsonWebKey {
 
   /**
-   * Default Sign Algorithm for JWS 'alg' field
+   * Default Sign Algorithm for JWK 'alg' field
    */
   readonly alg: string = 'none';
 

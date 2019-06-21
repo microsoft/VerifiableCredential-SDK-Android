@@ -259,7 +259,7 @@ export default class JwsToken implements IJwsGeneralJson {
       }
 
       if (JoseHelpers.headerHasElements(content.header)) {
-        signature.header = content.header;
+        signature.header = this.setHeader(JSON.stringify(content.header));
       }
 
       if (content.payload) {

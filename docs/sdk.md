@@ -496,26 +496,10 @@ credential for the specified identifier.</p>
 
 ## JsonWebKey
 **Kind**: global class  
-
-* [JsonWebKey](#JsonWebKey)
-    * [new JsonWebKey()](#new_JsonWebKey_new)
-    * [.getThumbprint(jwk)](#JsonWebKey.getThumbprint)
-
 <a name="new_JsonWebKey_new"></a>
 
 ### new JsonWebKey()
 <p>Create instance of @class JsonWebKey</p>
-
-<a name="JsonWebKey.getThumbprint"></a>
-
-### JsonWebKey.getThumbprint(jwk)
-<p>Obtains the thumbprint for the jwk parameter</p>
-
-**Kind**: static method of [<code>JsonWebKey</code>](#JsonWebKey)  
-
-| Param | Description |
-| --- | --- |
-| jwk | <p>JSON object representation of a JWK</p> |
 
 <a name="PairwiseKey"></a>
 
@@ -1015,6 +999,7 @@ Will be used for primitive operations such as key generation.</p>
         * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
     * _static_
         * [.toDer(elements)](#SubtleCryptoExtension.toDer)
+        * [.fromDer(signature)](#SubtleCryptoExtension.fromDer)
         * [.normalizeAlgorithm(algorithm)](#SubtleCryptoExtension.normalizeAlgorithm)
         * [.normalizeJwk(jwk)](#SubtleCryptoExtension.normalizeJwk)
 
@@ -1112,6 +1097,17 @@ The referenced key must be a jwk key.</p>
 | Param | Description |
 | --- | --- |
 | elements | <p>Array of elements to encode in DER</p> |
+
+<a name="SubtleCryptoExtension.fromDer"></a>
+
+### SubtleCryptoExtension.fromDer(signature)
+<p>format the signature output from DER format</p>
+
+**Kind**: static method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| signature | <p>to decode from DER</p> |
 
 <a name="SubtleCryptoExtension.normalizeAlgorithm"></a>
 
