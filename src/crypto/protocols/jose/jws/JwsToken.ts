@@ -576,11 +576,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * Set the header for the signature
    * @param header to set on the JwsToken object
    */
-   private setHeader(header: string | JwsHeader) {
-    if (typeof header === 'string') {
-      return new TSMap<string, string>().fromJSON(JSON.parse(header));
-    }
-
-    return header;
+   private setHeader(header: string ) {
+    return new TSMap<string, string>().fromJSON(JSON.parse(header));
   }
 }

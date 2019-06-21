@@ -22,6 +22,10 @@ export default class JoseHelpers {
       return false;
     }
 
+    if (header.length !== undefined) {
+      return header.length > 0;
+    }
+
     return Object.keys(header).length > 0;
   }
 

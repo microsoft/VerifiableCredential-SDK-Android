@@ -104,54 +104,54 @@
    public static Enc = 'enc';
    
    /**
-    * Define elements in the JWS Crypto Token
+    * Define elements in the JWE Crypto Token
     */
-    public static tokenProtected = 'Protected'; 
+    public static tokenProtected = 'protected'; 
+   
+   /**
+    * Define elements in the JWE Crypto Token
+    */
+    public static tokenUnprotected = 'unprotected'; 
+   
+   /**
+    * Define elements in the JWE Crypto Token
+    */
+    public static tokenAad = 'aad'; 
+   
+   /**
+    * Define elements in the JWE Crypto Token
+    */
+    public static tokenIv = 'iv'; 
+   
+   /**
+    * Define elements in the JWE Crypto Token
+    */
+    public static tokenCiphertext = 'ciphertext'; 
    
    /**
     * Define elements in the JWS Crypto Token
     */
-    public static tokenUnprotected = 'Unprotected'; 
+    public static tokenTag = 'tag'; 
+   
+   /**
+    * Define elements in the JWE Crypto Token
+    */
+    public static tokenRecipients = 'recipients'; 
    
    /**
     * Define elements in the JWS Crypto Token
     */
-    public static tokenAad = 'Aad'; 
+    public static tokenPayload = 'payload'; 
    
    /**
     * Define elements in the JWS Crypto Token
     */
-    public static tokenIv = 'Iv'; 
+    public static tokenSignatures = 'signatures'; 
    
    /**
     * Define elements in the JWS Crypto Token
     */
-    public static tokenCiphertext = 'Ciphertext'; 
-   
-   /**
-    * Define elements in the JWS Crypto Token
-    */
-    public static tokenTag = 'Tag'; 
-   
-   /**
-    * Define elements in the JWS Crypto Token
-    */
-    public static tokenRecipients = 'Recipients'; 
-   
-   /**
-    * Define elements in the JWS Crypto Token
-    */
-    public static tokenPayload = 'Payload'; 
-   
-   /**
-    * Define elements in the JWS Crypto Token
-    */
-    public static tokenSignatures = 'Signatures'; 
-   
-   /**
-    * Define elements in the JWS Crypto Token
-    */
-    public static tokenFormat = 'Format'; 
+    public static tokenFormat = 'format'; 
 
    /**
     * Define elements in the JOSE options

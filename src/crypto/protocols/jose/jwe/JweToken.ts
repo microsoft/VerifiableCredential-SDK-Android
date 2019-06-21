@@ -121,7 +121,7 @@ export default class JweToken implements IJweGeneralJson {
       json.protected = JoseHelpers.encodeHeader(<JweHeader>token.protected);
     }
     if (JoseHelpers.headerHasElements(token.unprotected)) {
-      json.unprotected = JoseHelpers.encodeHeader(<JweHeader>token.unprotected);
+      json.unprotected = JoseHelpers.encodeHeader(<JweHeader>token.unprotected, false);
     }
 
     for (let inx = 0 ; inx < token.recipients.length ; inx++ ) {
@@ -129,7 +129,7 @@ export default class JweToken implements IJweGeneralJson {
         encrypted_key: base64url.encode(token.recipients[inx].encrypted_key)
       }
       if (JoseHelpers.headerHasElements(token.recipients[inx].header)) {
-        recipient.header = JoseHelpers.encodeHeader(<JweHeader>token.recipients[inx].header);
+        recipient.header = JoseHelpers.encodeHeader(<JweHeader>token.recipients[inx].header, false);
       }
       
       json.recipients.push(recipient);
@@ -243,14 +243,19 @@ export default class JweToken implements IJweGeneralJson {
         this.ciphertext = base64url.toBuffer(<string><any>content.ciphertext);
         this.aad = base64url.toBuffer(<string><any>content.aad);
         this.iv = base64url.toBuffer(<string><any>content.iv);
-        this.protected = JweToken.setProtected(content.protected);
+        if (content.protected) {
+          this.protected = JweToken.setProtected(content.protected);
+        }
+        if (content.unprotected && <any>content.unprotected !== 'e30') {
+          this.unprotected = JweToken.setUnprotected(content.unprotected);
+        }
         this.tag = base64url.toBuffer(<string><any>content.tag);
         this.recipients = [];
         for (let inx = 0; inx < content.recipients.length; inx ++) {
           const recipient = new JweRecipient();
           recipient.encrypted_key = base64url.toBuffer(<string><any>content.recipients[inx].encrypted_key);   
           if (content.recipients[inx].header) {
-            recipient.header = content.recipients[inx].header;   
+            recipient.header = JweToken.setUnprotected(<any>content.recipients[inx].header);   
           }       
           this.recipients.push(recipient);       
         }
@@ -304,7 +309,7 @@ export default class JweToken implements IJweGeneralJson {
       } 
 
       if (JoseHelpers.headerHasElements(content.unprotected)) {
-        this.unprotected = content.unprotected;
+        this.unprotected = JweToken.setUnprotected(<JweHeader>content.unprotected);
       } 
 
       if (JoseHelpers.headerHasElements(content.header)) {

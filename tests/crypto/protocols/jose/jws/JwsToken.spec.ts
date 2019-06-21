@@ -108,6 +108,7 @@ describe('JwsToken', () => {
 
     });
 
+// tslint:disable-next-line: max-func-body-length
     it('should set headers in JwsToken', async () => {
       const payload = 'The true sign of intelligence is not knowledge but imagination.';      
       const keyStore = new KeyStoreInMemory();
@@ -116,8 +117,8 @@ describe('JwsToken', () => {
       const options: IPayloadProtectionProtocolOptions = {
           cryptoFactory: cryptoFactory,
           protocolOption: new TSMap<string, any>([
-            [JoseConstants.optionHeader,new TSMap([['test', 'ES256K']]) ],
-            [JoseConstants.optionProtectedHeader,new TSMap([['test', 'elo']]) ]
+            [JoseConstants.optionHeader, new TSMap([['test', 'ES256K']]) ],
+            [JoseConstants.optionProtectedHeader, new TSMap([['test', 'elo']]) ]
         ]),
           protocolInterface: new JoseProtocol()
       };
@@ -181,5 +182,34 @@ describe('JwsToken', () => {
       expect(deSignatures[0].signature).toEqual(signatures[0].signature);
       expect(deserialized.get(JoseConstants.tokenPayload)).toEqual(signature.get(JoseConstants.tokenPayload));
   
+      // negative cases
+      let throwed = false;
+      try {
+        options.protocolInterface.serialize(signature, 'bluesky', options);
+      } catch (err) {
+        throwed = true;
+        expect(err.message).toEqual(`Format 'bluesky' is not supported`);
+      }
+      expect(throwed).toBeTruthy();
+
+      throwed = false;
+      try {
+        options.protocolInterface.deserialize(serialized, 'bluesky', options);
+      } catch (err) {
+        throwed = true;
+        expect(err.message).toEqual(`Format 'bluesky' is not supported`);
+      }
+      expect(throwed).toBeTruthy();
+
+      const sigs = signature.get(JoseConstants.tokenSignatures);
+      sigs[0].protected.set('alg', '');
+      throwed = false;
+      try {
+        await options.protocolInterface.verify([publicKey], Buffer.from(payload), signature, options);
+      } catch (err) {
+        expect(err.message).toEqual('Unable to validate signature as no signature algorithm has been specified in the header.');
+        throwed = true;
+      }
+      expect(throwed).toBeTruthy();
       });
   });
