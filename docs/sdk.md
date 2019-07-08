@@ -65,6 +65,8 @@ self-issued id token.</p></dd>
 <dd><p>Class for JOSE constants</p></dd>
 <dt><a href="#JoseHelpers">JoseHelpers</a></dt>
 <dd><p>Crypto helpers support for plugable crypto layer</p></dd>
+<dt><a href="#JoseProtocol">JoseProtocol</a></dt>
+<dd><p>Class to implement the JOSE protocol.</p></dd>
 <dt><a href="#JweRecipient">JweRecipient</a></dt>
 <dd><p>JWS signature used by the general JSON</p></dd>
 <dt><a href="#JweToken">JweToken</a></dt>
@@ -494,26 +496,10 @@ credential for the specified identifier.</p>
 
 ## JsonWebKey
 **Kind**: global class  
-
-* [JsonWebKey](#JsonWebKey)
-    * [new JsonWebKey()](#new_JsonWebKey_new)
-    * [.getThumbprint(jwk)](#JsonWebKey.getThumbprint)
-
 <a name="new_JsonWebKey_new"></a>
 
 ### new JsonWebKey()
 <p>Create instance of @class JsonWebKey</p>
-
-<a name="JsonWebKey.getThumbprint"></a>
-
-### JsonWebKey.getThumbprint(jwk)
-<p>Obtains the thumbprint for the jwk parameter</p>
-
-**Kind**: static method of [<code>JsonWebKey</code>](#JsonWebKey)  
-
-| Param | Description |
-| --- | --- |
-| jwk | <p>JSON object representation of a JWK</p> |
 
 <a name="PairwiseKey"></a>
 
@@ -1013,6 +999,7 @@ Will be used for primitive operations such as key generation.</p>
         * [.encryptByJwk(algorithm, jwk, data)](#SubtleCryptoExtension+encryptByJwk)
     * _static_
         * [.toDer(elements)](#SubtleCryptoExtension.toDer)
+        * [.fromDer(signature)](#SubtleCryptoExtension.fromDer)
         * [.normalizeAlgorithm(algorithm)](#SubtleCryptoExtension.normalizeAlgorithm)
         * [.normalizeJwk(jwk)](#SubtleCryptoExtension.normalizeJwk)
 
@@ -1110,6 +1097,17 @@ The referenced key must be a jwk key.</p>
 | Param | Description |
 | --- | --- |
 | elements | <p>Array of elements to encode in DER</p> |
+
+<a name="SubtleCryptoExtension.fromDer"></a>
+
+### SubtleCryptoExtension.fromDer(signature)
+<p>format the signature output from DER format</p>
+
+**Kind**: static method of [<code>SubtleCryptoExtension</code>](#SubtleCryptoExtension)  
+
+| Param | Description |
+| --- | --- |
+| signature | <p>to decode from DER</p> |
 
 <a name="SubtleCryptoExtension.normalizeAlgorithm"></a>
 
@@ -1319,6 +1317,108 @@ TSMap.toJSON prepares a map so it can be serialized as a dictionary.</p>
 | [overrideOptions] |  | <p>Options passed in after the constructure</p> |
 | [mandatory] | <code>true</code> | <p>True if property is required</p> |
 
+<a name="JoseProtocol"></a>
+
+## JoseProtocol
+<p>Class to implement the JOSE protocol.</p>
+
+**Kind**: global class  
+
+* [JoseProtocol](#JoseProtocol)
+    * [.sign(signingKeyReference, payload, format, options)](#JoseProtocol+sign) ⇒
+    * [.verify(validationKeys, payload, signature, options)](#JoseProtocol+verify) ⇒
+    * [.encrypt(recipients, payload, format, options)](#JoseProtocol+encrypt) ⇒
+    * [.decrypt(decryptionKeyReference, token, options)](#JoseProtocol+decrypt) ⇒
+    * [.serialize(token, format, options)](#JoseProtocol+serialize)
+    * [.deserialize(token, format, options)](#JoseProtocol+deserialize)
+
+<a name="JoseProtocol+sign"></a>
+
+### joseProtocol.sign(signingKeyReference, payload, format, options) ⇒
+<p>Signs contents using the given private key reference.</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+**Returns**: <p>Signed payload in requested format.</p>  
+
+| Param | Description |
+| --- | --- |
+| signingKeyReference | <p>Reference to the signing key.</p> |
+| payload | <p>to sign.</p> |
+| format | <p>of the final signature.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JoseProtocol+verify"></a>
+
+### joseProtocol.verify(validationKeys, payload, signature, options) ⇒
+<p>Verify the signature.</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+**Returns**: <p>True if signature validated.</p>  
+
+| Param | Description |
+| --- | --- |
+| validationKeys | <p>Public key to validate the signature.</p> |
+| payload | <p>that was signed</p> |
+| signature | <p>on payload</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JoseProtocol+encrypt"></a>
+
+### joseProtocol.encrypt(recipients, payload, format, options) ⇒
+<p>Encrypt content using the given public keys in JWK format.
+The key type enforces the key encryption algorithm.
+The options can override certain algorithm choices.</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+**Returns**: <p>JweToken with encrypted payload.</p>  
+
+| Param | Description |
+| --- | --- |
+| recipients | <p>List of recipients' public keys.</p> |
+| payload | <p>to encrypt.</p> |
+| format | <p>of the final serialization.</p> |
+| options | <p>used for the signature. These options override the options provided in the constructor.</p> |
+
+<a name="JoseProtocol+decrypt"></a>
+
+### joseProtocol.decrypt(decryptionKeyReference, token, options) ⇒
+<p>Decrypt the content.</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+**Returns**: <p>Decrypted payload.</p>  
+
+| Param | Description |
+| --- | --- |
+| decryptionKeyReference | <p>Reference to the decryption key.</p> |
+| token | <p>The crypto token to decrypt.</p> |
+| options | <p>used for the decryption. These options override the options provided in the constructor.</p> |
+
+<a name="JoseProtocol+serialize"></a>
+
+### joseProtocol.serialize(token, format, options)
+<p>Serialize a cryptographic token</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>The crypto token to serialize.</p> |
+| format | <p>Specify the serialization format. If not specified, use default format.</p> |
+| options | <p>used for the decryption. These options override the options provided in the constructor.</p> |
+
+<a name="JoseProtocol+deserialize"></a>
+
+### joseProtocol.deserialize(token, format, options)
+<p>Deserialize a cryptographic token</p>
+
+**Kind**: instance method of [<code>JoseProtocol</code>](#JoseProtocol)  
+
+| Param | Description |
+| --- | --- |
+| token | <p>The crypto token to serialize.</p> |
+| format | <p>Specify the serialization format. If not specified, use default format.</p> |
+| options | <p>used for the decryption. These options override the options provided in the constructor.</p> |
+
 <a name="JweRecipient"></a>
 
 ## JweRecipient
@@ -1343,6 +1443,9 @@ Crypto calls always happen via CryptoFactory</p>
     * [new JweToken(options)](#new_JweToken_new)
     * _instance_
         * [.serialize(format)](#JweToken+serialize)
+        * [.setGeneralParts(content)](#JweToken+setGeneralParts) ⇒
+        * [.setFlatParts(content)](#JweToken+setFlatParts) ⇒
+        * [.isValidToken()](#JweToken+isValidToken)
         * [.getCryptoFactory(newOptions, manadatory)](#JweToken+getCryptoFactory)
         * [.getContentEncryptionKey(newOptions, manadatory)](#JweToken+getContentEncryptionKey)
         * [.getInitialVector(newOptions, manadatory)](#JweToken+getInitialVector)
@@ -1353,6 +1456,13 @@ Crypto calls always happen via CryptoFactory</p>
         * [.serializeJweGeneralJson(token)](#JweToken.serializeJweGeneralJson)
         * [.serializeJweFlatJson(token)](#JweToken.serializeJweFlatJson)
         * [.serializeJweCompact(token)](#JweToken.serializeJweCompact)
+        * [.deserialize()](#JweToken.deserialize)
+        * [.fromCryptoToken(cryptoToken, protectOptions)](#JweToken.fromCryptoToken)
+        * [.toCryptoToken(protocolFormat, jweToken)](#JweToken.toCryptoToken)
+        * [.fromPayloadProtectionOptions(protectOptions)](#JweToken.fromPayloadProtectionOptions)
+        * [.toPayloadProtectionOptions(encryptionOptions)](#JweToken.toPayloadProtectionOptions)
+        * [.setUnprotected(unprotectedHeader)](#JweToken.setUnprotected)
+        * [.setProtected(protectedHeader)](#JweToken.setProtected)
 
 <a name="new_JweToken_new"></a>
 
@@ -1375,6 +1485,36 @@ Crypto calls always happen via CryptoFactory</p>
 | --- | --- |
 | format | <p>Optional specify the serialization format. If not specified, use default format.</p> |
 
+<a name="JweToken+setGeneralParts"></a>
+
+### jweToken.setGeneralParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJweGeneralJSon token</p> |
+
+<a name="JweToken+setFlatParts"></a>
+
+### jweToken.setFlatParts(content) ⇒
+<p>Try to parse the input token and set the properties of this JswToken</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
+**Returns**: <p>true if valid token was parsed</p>  
+
+| Param | Description |
+| --- | --- |
+| content | <p>Alledged IJweFlatJson token</p> |
+
+<a name="JweToken+isValidToken"></a>
+
+### jweToken.isValidToken()
+<p>Check if a valid token was found after decoding</p>
+
+**Kind**: instance method of [<code>JweToken</code>](#JweToken)  
 <a name="JweToken+getCryptoFactory"></a>
 
 ### jweToken.getCryptoFactory(newOptions, manadatory)
@@ -1486,6 +1626,80 @@ The options can override certain algorithm choices.</p>
 | --- | --- |
 | token | <p>Jwe base object</p> |
 
+<a name="JweToken.deserialize"></a>
+
+### JweToken.deserialize()
+<p>Deserialize a Jwe token object</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+<a name="JweToken.fromCryptoToken"></a>
+
+### JweToken.fromCryptoToken(cryptoToken, protectOptions)
+<p>Convert a @class ICryptoToken into a @class JweToken</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| cryptoToken | <p>to convert</p> |
+| protectOptions | <p>options for the token</p> |
+
+<a name="JweToken.toCryptoToken"></a>
+
+### JweToken.toCryptoToken(protocolFormat, jweToken)
+<p>Convert a @class JweToken into a @class ICryptoToken</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| protocolFormat | <p>format of the token</p> |
+| jweToken | <p>to convert</p> |
+
+<a name="JweToken.fromPayloadProtectionOptions"></a>
+
+### JweToken.fromPayloadProtectionOptions(protectOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| protectOptions | <p>to convert</p> |
+
+<a name="JweToken.toPayloadProtectionOptions"></a>
+
+### JweToken.toPayloadProtectionOptions(encryptionOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| encryptionOptions | <p>to convert</p> |
+
+<a name="JweToken.setUnprotected"></a>
+
+### JweToken.setUnprotected(unprotectedHeader)
+<p>Set the unprotected header</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| unprotectedHeader | <p>to set on the JweToken object</p> |
+
+<a name="JweToken.setProtected"></a>
+
+### JweToken.setProtected(protectedHeader)
+<p>Set the protected header</p>
+
+**Kind**: static method of [<code>JweToken</code>](#JweToken)  
+
+| Param | Description |
+| --- | --- |
+| protectedHeader | <p>to set on the JweToken object</p> |
+
 <a name="JwsSignature"></a>
 
 ## JwsSignature
@@ -1521,11 +1735,16 @@ Crypto calls always happen via CryptoFactory</p>
         * [.verify(validationKeys, options)](#JwsToken+verify) ⇒
         * [.getPayload()](#JwsToken+getPayload)
         * [.setProtected(protectedHeader)](#JwsToken+setProtected)
+        * [.setHeader(header)](#JwsToken+setHeader)
     * _static_
         * [.serializeJwsGeneralJson(token)](#JwsToken.serializeJwsGeneralJson)
         * [.serializeJwsFlatJson(token)](#JwsToken.serializeJwsFlatJson)
         * [.serializeJwsCompact(token)](#JwsToken.serializeJwsCompact)
         * [.deserialize()](#JwsToken.deserialize)
+        * [.fromCryptoToken(cryptoToken, protectOptions)](#JwsToken.fromCryptoToken)
+        * [.toCryptoToken(protocolFormat, jwsToken)](#JwsToken.toCryptoToken)
+        * [.fromPayloadProtectionOptions(protectOptions)](#JwsToken.fromPayloadProtectionOptions)
+        * [.toPayloadProtectionOptions(signingOptions)](#JwsToken.toPayloadProtectionOptions)
 
 <a name="new_JwsToken_new"></a>
 
@@ -1647,7 +1866,7 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Verify the JWS signature.</p>
 
 **Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
-**Returns**: <p>Signed payload in compact JWS format.</p>  
+**Returns**: <p>True if signature validated.</p>  
 
 | Param | Description |
 | --- | --- |
@@ -1670,6 +1889,17 @@ Crypto calls always happen via CryptoFactory</p>
 | Param | Description |
 | --- | --- |
 | protectedHeader | <p>to set on the JwsToken object</p> |
+
+<a name="JwsToken+setHeader"></a>
+
+### jwsToken.setHeader(header)
+<p>Set the header for the signature</p>
+
+**Kind**: instance method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| header | <p>to set on the JwsToken object</p> |
 
 <a name="JwsToken.serializeJwsGeneralJson"></a>
 
@@ -1710,6 +1940,52 @@ Crypto calls always happen via CryptoFactory</p>
 <p>Deserialize a Jws token object</p>
 
 **Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+<a name="JwsToken.fromCryptoToken"></a>
+
+### JwsToken.fromCryptoToken(cryptoToken, protectOptions)
+<p>Convert a @class ICryptoToken into a @class JwsToken</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| cryptoToken | <p>to convert</p> |
+| protectOptions | <p>options for the token</p> |
+
+<a name="JwsToken.toCryptoToken"></a>
+
+### JwsToken.toCryptoToken(protocolFormat, jwsToken)
+<p>Convert a @class JwsToken into a @class ICryptoToken</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| protocolFormat | <p>format of the token</p> |
+| jwsToken | <p>to convert</p> |
+
+<a name="JwsToken.fromPayloadProtectionOptions"></a>
+
+### JwsToken.fromPayloadProtectionOptions(protectOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJwsSigningOptions</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| protectOptions | <p>to convert</p> |
+
+<a name="JwsToken.toPayloadProtectionOptions"></a>
+
+### JwsToken.toPayloadProtectionOptions(signingOptions)
+<p>Convert a @class IPayloadProtectionProtocolOptions into a @class IJwsSigningOptions</p>
+
+**Kind**: static method of [<code>JwsToken</code>](#JwsToken)  
+
+| Param | Description |
+| --- | --- |
+| signingOptions | <p>to convert</p> |
+
 <a name="EncryptionStrategy"></a>
 
 ## EncryptionStrategy
@@ -2029,10 +2305,8 @@ a user's Identity Hub.</p>
 * [Commit](#Commit)
     * [.validate()](#Commit+validate)
     * [.isValid()](#Commit+isValid)
-    * [.getProtectedHeaders()](#Commit+getProtectedHeaders)
-    * [.getUnprotectedHeaders()](#Commit+getUnprotectedHeaders)
+    * [.getCommitFields()](#Commit+getCommitFields)
     * [.getPayload()](#Commit+getPayload)
-    * [.sign(signer)](#Commit+sign)
 
 <a name="Commit+validate"></a>
 
@@ -2049,16 +2323,10 @@ signed/encrypted and stored in an Identity Hub.</p>
 <p>Returns true if the validate() method would pass without error.</p>
 
 **Kind**: instance method of [<code>Commit</code>](#Commit)  
-<a name="Commit+getProtectedHeaders"></a>
+<a name="Commit+getCommitFields"></a>
 
-### commit.getProtectedHeaders()
-<p>Returns the headers which will be signed/encrypted.</p>
-
-**Kind**: instance method of [<code>Commit</code>](#Commit)  
-<a name="Commit+getUnprotectedHeaders"></a>
-
-### commit.getUnprotectedHeaders()
-<p>Returns the (optional) headers which will not be signed/encrypted.</p>
+### commit.getCommitFields()
+<p>Returns the fields of the commit.</p>
 
 **Kind**: instance method of [<code>Commit</code>](#Commit)  
 <a name="Commit+getPayload"></a>
@@ -2067,17 +2335,6 @@ signed/encrypted and stored in an Identity Hub.</p>
 <p>Returns the application-specific payload for this commit.</p>
 
 **Kind**: instance method of [<code>Commit</code>](#Commit)  
-<a name="Commit+sign"></a>
-
-### commit.sign(signer)
-<p>Returns a copy of this commit signed with the given signer.</p>
-
-**Kind**: instance method of [<code>Commit</code>](#Commit)  
-
-| Param | Description |
-| --- | --- |
-| signer | <p>The signer to use to sign the commit.</p> |
-
 <a name="CommitStrategyBasic"></a>
 
 ## CommitStrategyBasic

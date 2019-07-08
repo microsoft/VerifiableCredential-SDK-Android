@@ -43,7 +43,7 @@ export default abstract class JsonWebKey {
   /**
    * Intended use
    */
-   public use?: KeyUse; // "sig" "enc"
+   public use?: KeyUse;
   
   /**
    * Valid key operations (key_ops)
@@ -70,9 +70,11 @@ export default abstract class JsonWebKey {
    * Obtains the thumbprint for the jwk parameter
    * @param jwk JSON object representation of a JWK
    */
+   /* We need to change the key id to a format #key<n>-<original thumbprint>-<key thumbprint> - todo
   static async getThumbprint (publicKey: PublicKey): Promise<string> {
     const key = await jose.JWK.asKey(publicKey);
     const thumbprint = await key.thumbprint('SHA-512');
     return base64url.encode(thumbprint);
   }
+  */
 }

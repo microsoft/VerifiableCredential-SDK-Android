@@ -30,9 +30,6 @@ export default class CryptoHelpers {
         case 'RSA-OAEP': 
         case 'RSA-OAEP-256': 
         return cryptoFactory.getKeyEncrypter(jwa);
-      case 'ECDH':
-      case 'DH':
-        return cryptoFactory.getSharedKeyEncrypter(jwa);
       case 'AES-GCM':
         return cryptoFactory.getSymmetricEncrypter(jwa);
       case 'HMAC':
@@ -71,12 +68,13 @@ export default class CryptoHelpers {
         const iv = args[0];
         const aad = args[1];
         matches = <RegExpExecArray>regex.exec(jwa);
-        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128,  length: `${CryptoHelpers.getRegexMatch(<RegExpExecArray>matches, 0)}` };
+        const length = parseInt(CryptoHelpers.getRegexMatch(<RegExpExecArray>matches, 0));
+        return { name: W3cCryptoApiConstants.AesGcm, iv: iv, additionalData: aad, tagLength: 128,  length: length };
       case JoseConstants.Es256K:
         return { name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' }, format: 'DER' };
     }
 
-    throw new Error(`Algorithm '${JSON.stringify(jwa)}' is not supported`);
+    throw new Error(`Algorithm ${JSON.stringify(jwa)} is not supported`);
   }
 
   /**
@@ -95,19 +93,18 @@ export default class CryptoHelpers {
             return 'RSA-OAEP-256'; 
       case 'RSA-OAEP': 
           return `RSA-OAEP-${CryptoHelpers.getHash(hash)}`;
-      case 'ECDH':
-          return `ECDH-ES`;
       case 'AES-GCM':
         const length = algorithm.length || 128;
         return `A${length}GCMKW`;
+      
       case 'HMAC':
         return `HS${CryptoHelpers.getHash(hash)}`;
 
-        case 'SHA-256':
-        case 'SHA-384':
-        case 'SHA-512':
-            return `SHA${CryptoHelpers.getHash(hash)}`;
-          }
+      case 'SHA-256':
+      case 'SHA-384':
+      case 'SHA-512':
+        return `SHA${CryptoHelpers.getHash(hash)}`;
+    }
 
     throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
   }
@@ -147,10 +144,6 @@ export default class CryptoHelpers {
   }
 
   private static getRegexMatch(matches: RegExpExecArray, index: number): string {
-    if (matches[index]) {
-      return matches[index];
-    }
-
-    throw new Error(`No match found for regex`);
+    return matches[index];
   }
 }

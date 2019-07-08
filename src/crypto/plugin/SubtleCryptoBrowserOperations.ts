@@ -6,7 +6,6 @@
  import CryptoOperations from './CryptoOperations';
  import { SubtleCrypto } from 'webcrypto-core';
  import { SubtleCryptoElliptic } from '@microsoft/useragent-plugin-secp256k1';
- // import nodeWebcryptoOssl from 'node-webcrypto-ossl';
  
  /**
   * Default crypto suite implementing the default plugable crypto layer

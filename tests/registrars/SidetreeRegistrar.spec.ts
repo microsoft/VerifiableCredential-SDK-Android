@@ -12,7 +12,7 @@ import CryptoOptions from '../../src/CryptoOptions';
 import KeyStoreConstants from '../../src/keystores/KeyStoreConstants';
 import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
 import KeyStoreInMemory from '../../src/crypto/keyStore/KeyStoreInMemory';
-import IJwsFlatJson from '../../src/crypto/protocols/jws/IJwsFlatJson';
+import IJwsFlatJson from '../../src/crypto/protocols/jose/jws/IJwsFlatJson';
 import SecretKey from '../../src/crypto/keys/SecretKey';
 import SubtleCryptoNodeOperations from '../../src/crypto/plugin/SubtleCryptoNodeOperations';
 

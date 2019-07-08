@@ -126,10 +126,50 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), keyImportAlgorithm, true, ['verify']);
+    if ((<any>algorithm).format) {
+      const format: string =  (<any>algorithm).format;
+      if (format.toUpperCase() !== 'DER') {
+        throw new CryptoError(algorithm, 'Only DER format supported for signature');
+      }
+      const elements = SubtleCryptoExtension.fromDer(<Uint8Array>signature);
+      signature = new Uint8Array(elements[0].length + elements[1].length);
+      (<Uint8Array>signature).set(elements[0]);
+      (<Uint8Array>signature).set(elements[1], elements[1].length);      
+    }
     return crypto.verify(jwk.kty === KeyType.EC ? 
       <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): 
       <RsaPssParams>algorithm, key, <ArrayBuffer>signature, <ArrayBuffer>payload);
    }  
+  
+  /**
+   * format the signature output from DER format
+   * @param signature to decode from DER
+   */
+   private static fromDer(signature: Uint8Array): Uint8Array[] {
+    if (signature[0] !== 0x30) {
+      throw new Error('No DER format to decode');
+    }
+
+    const lengthOfRemaining = signature[1];
+    const results: Uint8Array[] = [];
+    let index: number = 2;
+    while (index < lengthOfRemaining) {
+      const marker = signature[index++];
+      if (marker !== 0x02) {
+        throw new Error(`Marker on index ${index-1} must be 0x02`);
+      }
+
+      let length = signature[index++];
+      while (signature[index] === 0) {
+        index ++;
+        length --;
+      }
+      const data = signature.slice(index, index + length);
+      results.push(data);
+      index = index + length;
+    }
+    return results;
+  }
           
   /**
    * Decrypt with a key referenced in the key store.

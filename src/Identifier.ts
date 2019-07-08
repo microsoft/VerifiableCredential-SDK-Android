@@ -10,13 +10,13 @@ import UserAgentError from './UserAgentError';
 import { ProtectionFormat } from './crypto/keyStore/ProtectionFormat';
 import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import { KeyUse } from './crypto/keys/KeyUseFactory';
-import JwsToken from './crypto/protocols/jws/JwsToken';
+import JwsToken from './crypto/protocols/jose/jws/JwsToken';
 import PrivateKey from './crypto/keys/PrivateKey';
 import { IJwsSigningOptions, IJweEncryptionOptions } from "./crypto/protocols/jose/IJoseOptions";
 import { IdentifierDocumentPublicKey } from './types';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
-import JweToken from './crypto/protocols/jwe/JweToken';
+import JweToken from './crypto/protocols/jose/jwe/JweToken';
 import JoseConstants from './crypto/protocols/jose/JoseConstants';
 import CryptoFactory from './crypto/plugin/CryptoFactory';
 

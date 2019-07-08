@@ -6,7 +6,7 @@
 import PrivateKey from '../../keys/PrivateKey';
 import PublicKey from '../../keys/PublicKey';
 import CryptoFactory from '../../plugin/CryptoFactory';
-import { JwsHeader } from '../../protocols/jws/IJwsGeneralJson';
+import { JwsHeader } from './jws/IJwsGeneralJson';
 
 /**
  * Define different types for the algorithm parameter

@@ -5,7 +5,7 @@
 
 import Identifier from '../../../Identifier';
 import IResolver from '../../../resolvers/IResolver';
-import JwsToken from '../jws/JwsToken';
+import JwsToken from '../jose/jws/JwsToken';
 import CryptoFactory from '../../plugin/CryptoFactory';
 import UserAgentOptions from '../../../UserAgentOptions';
 import IKeyStore from '../../keyStore/IKeyStore';

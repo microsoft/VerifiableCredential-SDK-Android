@@ -2,8 +2,8 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { JweHeader } from '../jwe/IJweGeneralJson';
-import { JwsHeader } from '../jws/IJwsGeneralJson';
+import { JweHeader } from './jwe/IJweGeneralJson';
+import { JwsHeader } from './jws/IJwsGeneralJson';
 import base64url from 'base64url';
 import { IJweEncryptionOptions, IJwsSigningOptions } from '../../protocols/jose/IJoseOptions';
 import JoseConstants from './JoseConstants';
@@ -20,6 +20,10 @@ export default class JoseHelpers {
   public static headerHasElements(header: JweHeader | JwsHeader | undefined): boolean {
     if (!header) {
       return false;
+    }
+
+    if (header.length !== undefined) {
+      return header.length > 0;
     }
 
     return Object.keys(header).length > 0;

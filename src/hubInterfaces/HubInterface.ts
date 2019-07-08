@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import UserAgentError from '../UserAgentError';
-import Commit from '../hubSession/Commit';
+import Commit, { ICommitFields } from '../hubSession/Commit';
 import HubClient from '../hubClient/HubClient';
 import HubObject from '../hubClient/HubObject';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
@@ -113,17 +113,15 @@ export default abstract class HubInterface {
    */
   public async addObject(object: any): Promise<any> {
 
-    const commit = new Commit({
-      protected: {
-        committed_at: (new Date()).toISOString(),
-        iss: this.hubClient.clientIdentifier.id,
-        sub: this.hubClient.hubOwner.id,
-        interface: this.hubInterface,
-        context: this.context,
-        type: this.type,
-        operation: Operation.Create,
-        commit_strategy: this.commitStrategy,
-      },
+    const commit = new Commit(<ICommitFields>{
+      committed_at: (new Date()).toISOString(),
+      iss: this.hubClient.clientIdentifier.id,
+      sub: this.hubClient.hubOwner.id,
+      interface: this.hubInterface,
+      context: this.context,
+      type: this.type,
+      operation: Operation.Create,
+      commit_strategy: this.commitStrategy,
       payload: object
     });
     return this.hubClient.commit(commit);

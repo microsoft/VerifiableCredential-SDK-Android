@@ -7,17 +7,18 @@ import SubtleCryptoBrowserOperations from './SubtleCryptoBrowserOperations';
 import CryptoOperations from './CryptoOperations';
 import { SubtleCrypto } from 'webcrypto-core';
 const { Crypto } = require("@peculiar/webcrypto");
+// var WebCrypto = require("node-webcrypto-ossl");
 
 /**
  * Default crypto suite implementing the default plugable crypto layer for node
  *  */
  export default class SubtleCryptoNodeOperations  extends CryptoOperations {
-  private defaultCrypto: SubtleCrypto | undefined;
   public crypto: any;
 
   constructor () {
     super();
     this.crypto = new Crypto();
+    // this.crypto = new WebCrypto();
   }
 
  /**
