@@ -24,19 +24,23 @@ export default interface OIDCAuthenticationRequest {
    */
   client_id: string;
   /** 
-   * MUST be set to 'openid' 
+   * MUST start with 'openid' 
    */
-  scope: 'openid';
+  scope: string;
   /** 
    * Opaque value used by issuer for state 
    */
-  state: string | undefined;
+  state?: string;
   /** 
    * Request Nonce 
    */
   nonce: string;
   /** 
-   * Claims that are requested 
+   * Claims that are requested
    */
-  claims: {id_token: {[key: string]: any}};
+  claims?: {id_token: {[key: string]: any}};
+  /**
+   * URL encoded object containing information about the requester
+   */
+  registration?: string;
 }

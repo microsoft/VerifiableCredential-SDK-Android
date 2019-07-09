@@ -43,4 +43,8 @@ export default interface AuthenticationResponse {
    * Opaque value used by issuer for state, will contain values such as session ID. 
    */
   state: string | undefined;
+  /**
+   * Additional claims requested
+   */
+  claims?: any;
 }

@@ -207,6 +207,10 @@ And commits and queries for objects in the hub session.</p></dd>
 <dd><p>An Abstract Class for Hub Interfaces.</p></dd>
 <dt><a href="#HubSessionOptions">HubSessionOptions</a></dt>
 <dd><p>Represents a communication session with a particular Hub instance.</p></dd>
+<dt><a href="#PERMISSION_GRANT_CONTEXT">PERMISSION_GRANT_CONTEXT</a></dt>
+<dd><p>Type of the permission grant object</p></dd>
+<dt><a href="#PERMISSION_GRANT_TYPE">PERMISSION_GRANT_TYPE</a></dt>
+<dd><p>A Permission Grant object used to authorize access to certain schemas.</p></dd>
 </dl>
 
 ## Constants
@@ -216,6 +220,8 @@ And commits and queries for objects in the hub session.</p></dd>
 <dd><p>context for credentialManifest</p></dd>
 <dt><a href="#type">type</a></dt>
 <dd><p>type for credentialManifest</p></dd>
+<dt><a href="#PERMISSION_GRANT_CONTEXT">PERMISSION_GRANT_CONTEXT</a></dt>
+<dd><p>Context of the permission grant object</p></dd>
 </dl>
 
 <a name="CredentialIssuer"></a>
@@ -3089,13 +3095,16 @@ Authentication Requests and Responses.</p>
 **Kind**: global class  
 
 * [UserAgentSession](#UserAgentSession)
-    * [.signRequest(redirectUrl, nonce, claimRequests, state)](#UserAgentSession+signRequest)
-    * [.signResponse(redirectUrl, nonce, state, claims)](#UserAgentSession+signResponse)
+    * [.signRequest(redirectUrl, nonce, options)](#UserAgentSession+signRequest)
+    * [.sendResponse(request, claims, grants)](#UserAgentSession+sendResponse)
     * [.verify(jws)](#UserAgentSession+verify)
+    * [.verifyResponse(responseJws)](#UserAgentSession+verifyResponse)
+    * [.verifyAndHydrateRequest(request)](#UserAgentSession+verifyAndHydrateRequest)
+    * [.parseScopeValue(requester, encodedScope)](#UserAgentSession+parseScopeValue) ⇒
 
 <a name="UserAgentSession+signRequest"></a>
 
-### userAgentSession.signRequest(redirectUrl, nonce, claimRequests, state)
+### userAgentSession.signRequest(redirectUrl, nonce, options)
 <p>Sign a User Agent Request.</p>
 
 **Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
@@ -3104,22 +3113,24 @@ Authentication Requests and Responses.</p>
 | --- | --- |
 | redirectUrl | <p>url that recipient should send response back to.</p> |
 | nonce | <p>nonce that will come back in response.</p> |
-| claimRequests | <p>any claims that sender is requesting from the recipient.</p> |
-| state | <p>optional stringified JSON state opaque object that will come back in response.</p> |
+| options | <p>Open ID Connect optional parameters</p> |
 
-<a name="UserAgentSession+signResponse"></a>
+<a name="UserAgentSession+sendResponse"></a>
 
-### userAgentSession.signResponse(redirectUrl, nonce, state, claims)
-<p>Sign a User Agent Response.</p>
+### userAgentSession.sendResponse(request, claims, grants)
+<p>Send an Open ID Connect User Agent Response.</p>
 
 **Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+**Throws**:
+
+- <p>Throws if claims are included</p>
+
 
 | Param | Description |
 | --- | --- |
-| redirectUrl | <p>url that request was sent to.</p> |
-| nonce | <p>nonce to return to sender of the request.</p> |
-| state | <p>opaque object to return to sender of the request.</p> |
-| claims | <p>any claims that request asked for.</p> |
+| request | <p>Open ID Connect request to respond to.</p> |
+| claims | <p>Future Feature: any claims the request asked for.</p> |
+| grants | <p>any permissionGrants approved by the user.</p> |
 
 <a name="UserAgentSession+verify"></a>
 
@@ -3131,6 +3142,41 @@ Authentication Requests and Responses.</p>
 | Param | Description |
 | --- | --- |
 | jws | <p>Signed Payload</p> |
+
+<a name="UserAgentSession+verifyResponse"></a>
+
+### userAgentSession.verifyResponse(responseJws)
+<p>Verify an Open ID Connect response was signed and sent by response.did.</p>
+
+**Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+
+| Param | Description |
+| --- | --- |
+| responseJws | <p>Signed response token</p> |
+
+<a name="UserAgentSession+verifyAndHydrateRequest"></a>
+
+### userAgentSession.verifyAndHydrateRequest(request)
+<p>Verify an Open ID Connect request was signed and sent by Identifier, and return all contents</p>
+
+**Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+
+| Param | Description |
+| --- | --- |
+| request | <p>Signed request token</p> |
+
+<a name="UserAgentSession+parseScopeValue"></a>
+
+### userAgentSession.parseScopeValue(requester, encodedScope) ⇒
+<p>Parses a encoded scope value and constructs IPermissionRequestPrompts</p>
+
+**Kind**: instance method of [<code>UserAgentSession</code>](#UserAgentSession)  
+**Returns**: <p>IPermissionRequestPrompt(s) corresponding to the scopes requested</p>  
+
+| Param | Description |
+| --- | --- |
+| requester | <p>the DID of the requester for this permission</p> |
+| encodedScope | <p>The Encoded scope value</p> |
 
 <a name="CredentialType"></a>
 
@@ -3266,6 +3312,18 @@ And commits and queries for objects in the hub session.</p>
 <p>Represents a communication session with a particular Hub instance.</p>
 
 **Kind**: global variable  
+<a name="PERMISSION_GRANT_CONTEXT"></a>
+
+## PERMISSION\_GRANT\_CONTEXT
+<p>Type of the permission grant object</p>
+
+**Kind**: global variable  
+<a name="PERMISSION_GRANT_TYPE"></a>
+
+## PERMISSION\_GRANT\_TYPE
+<p>A Permission Grant object used to authorize access to certain schemas.</p>
+
+**Kind**: global variable  
 <a name="context"></a>
 
 ## context
@@ -3276,5 +3334,11 @@ And commits and queries for objects in the hub session.</p>
 
 ## type
 <p>type for credentialManifest</p>
+
+**Kind**: global constant  
+<a name="PERMISSION_GRANT_CONTEXT"></a>
+
+## PERMISSION\_GRANT\_CONTEXT
+<p>Context of the permission grant object</p>
 
 **Kind**: global constant  
