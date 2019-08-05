@@ -4,12 +4,24 @@ plugins {
 repositories {
     mavenCentral()
 }
-group 'com.example'
+group 'com.microsoft'
 version '0.0.1'
 
-apply plugin: 'maven-publish'
+apply plugin: 'kotlin-multiplatform'
 
 kotlin {
+    targets {
+        final def iOSTarget = System.getenv('SDK_NAME')?.startsWith("iphoneos") \
+                              ? presets.iosArm64 : presets.iosX64
+
+        fromPreset(iOSTarget, 'ios') {
+            binaries {
+                framework('UserAgentSdk')
+            }
+        }
+
+        fromPreset(presets.jvm, 'android')
+    }
     jvm()
     js {
         browser {
@@ -59,5 +71,34 @@ kotlin {
         }
         macosTest {
         }
+        iosMain {
+        }
+        iosTest {
+        }
     }
 }
+
+// workaround for https://youtrack.jetbrains.com/issue/KT-27170
+configurations {
+    compileClasspath
+}
+
+task packForXCode(type: Sync) {
+    final File frameworkDir = new File(buildDir, "xcode-frameworks")
+    final String mode = project.findProperty("XCODE_CONFIGURATION")?.toUpperCase() ?: 'DEBUG'
+    final def framework = kotlin.targets.ios.binaries.getFramework("UserAgentSdk", mode)
+
+    inputs.property "mode", mode
+    dependsOn framework.linkTask
+
+    from { framework.outputFile.parentFile }
+    into frameworkDir
+
+    doLast {
+        new File(frameworkDir, 'gradlew').with {
+            text = "#!/bin/bash\nexport 'JAVA_HOME=${System.getProperty("java.home")}'\ncd '${rootProject.rootDir}'\n./gradlew \$@\n"
+            setExecutable(true)
+        }
+    }
+}
+tasks.build.dependsOn packForXCode
