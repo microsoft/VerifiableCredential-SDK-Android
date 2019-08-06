@@ -1,6 +1,7 @@
 package com.microsoft.useragentSdk.crypto.plugins
 
 import com.microsoft.useragentSdk.crypto.keyStore.IKeyStore
+import com.microsoft.useragentSdk.crypto.models.SubtleCrypto
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -10,73 +11,59 @@ import com.microsoft.useragentSdk.crypto.keyStore.IKeyStore
 /**
  * Utility class to handle all CryptoSuite dependency injection
  */
-class CryptoFactory {
+class CryptoFactory(keyStore: IKeyStore, crypto: CryptoOperations) {
 
     /**
      * The key encryptors
      */
-    var keyEncrypters: Map<String, CryptoOperations>
+    var keyEncrypters: Map<String, CryptoOperations> = mapOf("*" to crypto)
 
     /**
      * The shared key encryptors
      */
-    var sharedKeyEncrypters: Map<String, CryptoOperations>
+    var sharedKeyEncrypters: Map<String, CryptoOperations> = mapOf("*" to crypto)
 
     /**
      * The symmetric content encryptors
      */
-    var symmetricEncrypter: Map<String, CryptoOperations>
+    var symmetricEncrypter: Map<String, CryptoOperations> = mapOf("*" to crypto)
 
     /**
      * The message signer
      */
-    var messageSigners: Map<String, CryptoOperations>
+    var messageSigners: Map<String, CryptoOperations> = mapOf("*" to crypto)
 
     /**
      * The hmac operations
      */
-    var messageAuthenticationCodeSigners: Map<String, CryptoOperations>
+    var messageAuthenticationCodeSigners: Map<String, CryptoOperations> = mapOf("*" to crypto)
 
     /**
      * The digest operations
      */
-    var messageDigests: Map<String, CryptoOperations>
+    var messageDigests: Map<String, CryptoOperations> = mapOf("*" to crypto)
 
     /**
      * Key store used by the CryptoFactory
      */
-    var keyStore: IKeyStore;
+    var keyStore: IKeyStore = keyStore
 
     /**
      * Label for default algorithm
      */
-    private val defaultAlgorithm = '*';
-
-    /**
-     * Constructs a new CryptoRegistry
-     * @param keyStore used to store private jeys
-     * @param crypto The suite to use for dependency injection
-     */
-    constructor (keyStore: IKeyStore, crypto: CryptoOperations) {
-        this.keyStore = keyStore;
-        this.keyEncrypters = <CryptoSuiteMap>{'*': crypto };
-        this.sharedKeyEncrypters = <CryptoSuiteMap>{'*': crypto };
-        this.symmetricEncrypter = <CryptoSuiteMap>{'*': crypto };
-        this.messageSigners = <CryptoSuiteMap>{'*': crypto };
-        this.messageAuthenticationCodeSigners = <CryptoSuiteMap>{'*': crypto };
-        this.messageDigests = <CryptoSuiteMap>{'*': crypto };
-    }
+    private val defaultAlgorithm: String = "*"
 
     /**
      * Gets the key encrypter object given the encryption algorithm's name
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    public getKeyEncrypter (name: string): SubtleCrypto {
-        if (this.keyEncrypters[name]) {
-            return this.keyEncrypters[name].getKeyEncrypters();
+    fun getKeyEncrypter (name: String): SubtleCrypto {
+        if (this.keyEncrypters.containsKey(name)) {
+            return (this.keyEncrypters[name] ?: error("")).getKeyEncrypters();
         }
-        return this.keyEncrypters[this.defaultAlgorithm].getKeyEncrypters();
+        return (this.keyEncrypters[this.defaultAlgorithm] ?: error("Default algorithm not implemented " +
+                "for key encrypters")).getKeyEncrypters();
     }
 
     /**
@@ -85,11 +72,12 @@ class CryptoFactory {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    getSharedKeyEncrypter (name: string): SubtleCrypto {
-        if (this.sharedKeyEncrypters[name]) {
-            return this.sharedKeyEncrypters[name].getSharedKeyEncrypters();
+    fun getSharedKeyEncrypter (name: String): SubtleCrypto {
+        if (this.sharedKeyEncrypters.containsKey(name)) {
+            return (this.sharedKeyEncrypters[name] ?: error("")).getSharedKeyEncrypters();
         }
-        return this.sharedKeyEncrypters[this.defaultAlgorithm].getSharedKeyEncrypters();
+        return (this.sharedKeyEncrypters[this.defaultAlgorithm] ?: error("Default algorithm not implemented " +
+                "for shared key encrypters")).getSharedKeyEncrypters();
     }
 
     /**
@@ -97,11 +85,12 @@ class CryptoFactory {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    getSymmetricEncrypter (name: string): SubtleCrypto {
-        if (this.symmetricEncrypter[name]) {
-            return this.symmetricEncrypter[name].getSymmetricEncrypters();
+    fun getSymmetricEncrypter (name: String): SubtleCrypto {
+        if (this.symmetricEncrypter.containsKey(name)) {
+            return (this.symmetricEncrypter[name] ?: error("")).getSymmetricEncrypters();
         }
-        return this.symmetricEncrypter[this.defaultAlgorithm].getSymmetricEncrypters();
+        return (this.symmetricEncrypter[this.defaultAlgorithm] ?: error("Default algorithm not implemented for " +
+                "symmetric encrypters")).getSymmetricEncrypters();
     }
 
     /**
@@ -109,11 +98,12 @@ class CryptoFactory {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    getMessageSigner (name: string): SubtleCrypto {
-        if (this.messageSigners[name]) {
-            return this.messageSigners[name].getMessageSigners();
+    fun getMessageSigner (name: String): SubtleCrypto {
+        if (this.messageSigners.containsKey(name)) {
+            return (this.messageSigners[name] ?: error("")).getMessageSigners();
         }
-        return this.messageSigners[this.defaultAlgorithm].getMessageSigners();
+        return (this.messageSigners[this.defaultAlgorithm] ?: error("Default algorithm not implemented for " +
+                "message signers")).getMessageSigners();
     }
 
     /**
@@ -121,11 +111,12 @@ class CryptoFactory {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    getMessageAuthenticationCodeSigners (name: string): SubtleCrypto {
-        if (this.messageAuthenticationCodeSigners[name]) {
-            return this.messageAuthenticationCodeSigners[name].messageAuthenticationCodeSigners();
+    fun getMessageAuthenticationCodeSigners (name: String): SubtleCrypto {
+        if (this.messageAuthenticationCodeSigners.containsKey(name)) {
+            return (this.messageAuthenticationCodeSigners[name] ?: error("")).messageAuthenticationCodeSigners();
         }
-        return this.messageAuthenticationCodeSigners[this.defaultAlgorithm].messageAuthenticationCodeSigners();
+        return (this.messageAuthenticationCodeSigners[this.defaultAlgorithm] ?: error("Default algorithm not " +
+                "implemented for message authentication code signers")).messageAuthenticationCodeSigners();
     }
 
     /**
@@ -133,10 +124,11 @@ class CryptoFactory {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    getMessageDigest (name: string): SubtleCrypto {
-        if (this.messageDigests[name]) {
-            return this.messageDigests[name].getMessageDigests();
+    fun getMessageDigest (name: String): SubtleCrypto {
+        if (this.messageDigests.containsKey(name)) {
+            return this.messageDigests[name]!!.getMessageDigests();
         }
-        return this.messageDigests[this.defaultAlgorithm].getMessageDigests();
+        return (this.messageDigests[this.defaultAlgorithm] ?: error("Default algorithm not implemented " +
+                "for message digests")).getMessageDigests();
     }
 }
