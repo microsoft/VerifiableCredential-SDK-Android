@@ -33,14 +33,10 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
         val personaMasterKey: ByteArray = this.generatePersonaMasterKey(seedReference, personaId);
 
         val keyType = KeyTypeFactory.createViaWebCrypto(algorithm);
-        switch (keyType) {
-            case KeyType.EC:
-            return EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);
-            case KeyType.RSA:
-            return RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
-
-            default:
-            throw new CryptoError(algorithm, `Pairwise key for type '${keyType}' is not supported.`);
+        return when (keyType) {
+            KeyType.EllipticCurve -> EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);
+            KeyType.RSA ->RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
+            else -> error("Pairwise key for type '${keyType.value}' is not supported.");
         }
     }
 
@@ -70,7 +66,7 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
             )
         val masterJwk: KeyData = KeyData(
             jwk = JsonWebKey(
-                kty = KeyType.Octet.value,
+                kty = KeyType.Octets.value,
                 alg = JoseConstants.Hs512.value,
                 k = jwk.k
                 )
