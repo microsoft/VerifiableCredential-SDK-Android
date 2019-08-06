@@ -6,9 +6,7 @@ package com.microsoft.useragentSdk.crypto.keys
 
 import com.microsoft.useragentSdk.crypto.models.Algorithm
 import com.microsoft.useragentSdk.crypto.models.RsaPssParams
-import com.microsoft.useragentSdk.crypto.models.SubtleCrypto
 import com.microsoft.useragentSdk.crypto.models.W3cCryptoApiConstants
-import com.microsoft.useragentSdk.crypto.plugins.CryptoFactory
 import com.microsoft.useragentSdk.crypto.protocols.jose.JoseConstants
 
 object CryptoHelpers {
@@ -48,6 +46,8 @@ object CryptoHelpers {
      */
     fun jwaToWebCrypto(jwa: String, vararg args: List<Any>): Algorithm {
         val regex = Regex("\\d+")
+        TODO("the typescript method does not specify the Algorithm Params returned between different alg cases. " +
+                "These Algorithm Parameters must be defined as inherited classes in the models (like RsaPssParams or EcdsaParams)")
         return when (jwa.toUpperCase()) {
             JoseConstants.Rs256.value,
             JoseConstants.Rs384.value,
