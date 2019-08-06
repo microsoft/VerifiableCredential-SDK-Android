@@ -3,7 +3,7 @@ package com.microsoft.useragentSdk.crypto.models
 /**
  * Specifies a serialization format for a key.
  */
-enum class KeyFormat(var keyFormat: String) {
+enum class KeyFormat(var value: String) {
     /** An unformatted sequence of bytes. Intended for secret keys. */
     Raw("raw"),
     /** The DER encoding of the PrivateKeyInfo structure from RFC 5208. */

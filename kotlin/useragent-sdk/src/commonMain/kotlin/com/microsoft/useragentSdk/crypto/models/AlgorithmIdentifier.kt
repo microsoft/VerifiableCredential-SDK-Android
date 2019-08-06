@@ -1,6 +1,5 @@
 package com.microsoft.useragentSdk.crypto.models
 
-object AlgorithmIdentifier {
-    var name: String? = null
-    var algorithm: Map<String, Any>? = null
-}
+data class AlgorithmIdentifier(
+    val name: String? = null,
+    val algorithm: Algorithm? = null)

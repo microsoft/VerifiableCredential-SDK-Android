@@ -1,6 +1,6 @@
 package com.microsoft.useragentSdk.crypto.models
 
-enum class KeyUse(keyUse: String) {
+enum class KeyUse(val value: String) {
     Signature("sig"),
     Encryption("enc")
 }
