@@ -10,6 +10,7 @@ object RsaOtherPrimesInfo {
 object JsonWebKey {
     // The following fields are defined in Section 3.1 of JSON Web Key
     var kty: String = ""
+    var kid: String? = null
     var use: String? = null
     var key_ops: List<String>? = null
     var alg: String? = null
