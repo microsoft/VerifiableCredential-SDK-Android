@@ -19,7 +19,7 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
     private var cryptoFactory: CryptoFactory = cryptoFactory
 
     // Set of master keys for the different persona's
-    private var masterKeys: Map<String, ByteArray> = emptyMap()
+    private var masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
 
 
     /**
@@ -63,22 +63,21 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
         val crypto: SubtleCrypto = this.cryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value);
 
         // Generate the master key
-        val alg: AlgorithmIdentifier = AlgorithmIdentifier(
-            algorithm = EcdsaParams(W3cCryptoApiConstants.Hmac.value, AlgorithmIdentifier(
-                W3cCryptoApiConstants.Sha512.value, null))
-        )
+        val alg: Algorithm = EcdsaParams(
+            name = W3cCryptoApiConstants.Hmac.value,
+            hash = Algorithm(
+                W3cCryptoApiConstants.Sha512.value)
+            )
         val masterJwk: KeyData = KeyData(
-            JsonWebKey(
+            jwk = JsonWebKey(
                 kty = KeyType.Octet.value,
                 alg = JoseConstants.Hs512.value,
                 k = jwk.k
-                ),
-            null
+                )
         )
         val key = crypto.importKey(KeyFormat.Jwk, masterJwk, alg, false, listOf(KeyUsage.Sign));
-        const masterKey = await crypto.sign(alg, key, Buffer.from(personaId));
-        mk = Buffer.from(masterKey);
-        this.masterKeys.set(personaId, mk);
-        return mk;
+        val masterKey = crypto.sign(alg, key, personaId.map { it.toByte() }.toByteArray());
+        this.masterKeys[personaId] = masterKey;
+        return masterKey;
     }
 }
