@@ -12,19 +12,20 @@ import Profile from "../../src/hubInterfaces/Profile";
 import UserAgentError from "../../src/UserAgentError";
 import HubClientMock from "./HubClientMock";
 import { UserAgentOptions } from "../../src";
+import { PERMISSION_GRANT_TYPE, PERMISSION_GRANT_CONTEXT } from "../../src/hubSession/objects/IPermissionGrant";
 
 describe('Hub Interface', () => {
 
   let options: HubInterfaceOptions
 
   const identifier = new Identifier('did:test:12345', new UserAgentOptions());
+  (<UserAgentOptions>identifier.options).cryptoOptions.signingKeyReference = 'testKey';
 
   beforeEach(() => {
 
     options = new HubInterfaceOptions();
     options.context = 'https://schema.org/test';
     options.type = 'test';
-    options.keyReference = 'testKey';
     options.clientIdentifier = identifier;
     options.hubOwner = identifier;
   });
@@ -87,10 +88,10 @@ describe('Hub Interface', () => {
     it('should create a new Instance of Permissions', () => {
       const collections = new Permissions(options);
       expect(collections).toBeDefined();
-      expect(collections.type).toBe('test');
+      expect(collections.type).toBe(PERMISSION_GRANT_TYPE);
       expect(collections.commitStrategy).toBe('basic');
       expect(collections.hubInterface).toBe(HubInterfaceType.Permissions);
-      expect(collections.context).toBe('https://schema.org/test');
+      expect(collections.context).toBe(PERMISSION_GRANT_CONTEXT);
     });
   });
 

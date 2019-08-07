@@ -21,9 +21,9 @@ import ISubtleCrypto from '../../../plugin/ISubtleCrypto';
 import JoseConstants from '../JoseConstants';
 import CryptoProtocolError from '../../CryptoProtocolError';
 import { ICryptoToken } from '../../ICryptoToken';
-import IPayloadProtectionProtocolOptions from '../../IPayloadProtectionProtocolOptions';
+import IPayloadProtectionOptions from '../../IPayloadProtectionOptions';
 import JoseProtocol from '../JoseProtocol';
-import { stringify } from 'querystring';
+import JoseToken from '../JoseToken';
 
 /**
  * Class for containing JWS token operations.
@@ -330,7 +330,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param newOptions Options passed in after the constructure
    * @param mandatory True if property needs to be defined
    */
-  private getProtected(newOptions?: IJwsSigningOptions, mandatory: boolean = false): JwsHeader {
+  public getProtected(newOptions?: IJwsSigningOptions, mandatory: boolean = false): JwsHeader {
     return JoseHelpers.getOptionsProperty<JwsHeader>('protected', this.options, newOptions, mandatory);
   }
 
@@ -384,7 +384,7 @@ export default class JwsToken implements IJwsGeneralJson {
 
     // Check if header specifies certain constants
     // If defined with no value, the value will be placed in.
-    const algInHeader = jwsSignature.header.has(JoseConstants.Alg);
+    let algInHeader = jwsSignature.header.has(JoseConstants.Alg);
     if (algInHeader) {
       if (!jwsSignature.header.get(JoseConstants.Alg)) {
         jwsSignature.header.set(JoseConstants.Alg, jwaAlgorithm);
@@ -392,7 +392,7 @@ export default class JwsToken implements IJwsGeneralJson {
     } else {
       jwsSignature.protected.set(JoseConstants.Alg, jwaAlgorithm);
     }
-    const kidInHeader = jwsSignature.header.has(JoseConstants.Kid);
+    let kidInHeader = jwsSignature.header.has(JoseConstants.Kid);
     if (kidInHeader) {
       if (!jwsSignature.header.get(JoseConstants.Kid)) {
         if (jwk.kid) {
@@ -404,6 +404,28 @@ export default class JwsToken implements IJwsGeneralJson {
     } else {
       if (jwk.kid) {
         jwsSignature.header.set(JoseConstants.Kid, jwk.kid);
+      }
+    }
+    algInHeader = jwsSignature.protected.has(JoseConstants.Alg);
+    if (algInHeader) {
+      if (!jwsSignature.protected.get(JoseConstants.Alg)) {
+        jwsSignature.protected.set(JoseConstants.Alg, jwaAlgorithm);
+      }
+    } else {
+      jwsSignature.protected.set(JoseConstants.Alg, jwaAlgorithm);
+    }
+    kidInHeader = jwsSignature.protected.has(JoseConstants.Kid);
+    if (kidInHeader) {
+      if (!jwsSignature.protected.get(JoseConstants.Kid)) {
+        if (jwk.kid) {
+          jwsSignature.protected.set(JoseConstants.Kid, jwk.kid);
+        } else {
+          jwsSignature.protected.delete(JoseConstants.Kid);
+        }
+      }
+    } else {
+      if (jwk.kid) {
+        jwsSignature.protected.set(JoseConstants.Kid, jwk.kid);
       }
     }
 
@@ -466,7 +488,7 @@ export default class JwsToken implements IJwsGeneralJson {
    * @param cryptoToken to convert
    * @param protectOptions options for the token
    */
-   public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionProtocolOptions): JwsToken {
+   public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionOptions): JwsToken {
     const options = JwsToken.fromPayloadProtectionOptions(protectOptions);
     const jwsToken = new JwsToken(options);
     jwsToken.payload = <Buffer>cryptoToken.get(JoseConstants.tokenPayload);
@@ -479,9 +501,10 @@ export default class JwsToken implements IJwsGeneralJson {
    * Convert a @class JwsToken into a @class ICryptoToken
    * @param protocolFormat format of the token
    * @param jwsToken to convert
+   * @param options used for the signature. These options override the options provided in the constructor.
    */
-   public static toCryptoToken(protocolFormat: ProtectionFormat, jwsToken: JwsToken): ICryptoToken {
-    const cryptoToken = new TSMap<string, any>();
+   public static toCryptoToken(protocolFormat: ProtectionFormat, jwsToken: JwsToken, options: IPayloadProtectionOptions): ICryptoToken {
+    const cryptoToken = new JoseToken(options);
     cryptoToken.set(JoseConstants.tokenPayload, jwsToken.payload);
     cryptoToken.set(JoseConstants.tokenSignatures, jwsToken.signatures);
     cryptoToken.set(JoseConstants.tokenFormat, protocolFormat);
@@ -489,36 +512,36 @@ export default class JwsToken implements IJwsGeneralJson {
   }
 
   /**
-   * Convert a @class IPayloadProtectionProtocolOptions into a @class IJwsSigningOptions
+   * Convert a @class IPayloadProtectionOptions into a @class IJwsSigningOptions
    * @param protectOptions to convert
    */
-   public static fromPayloadProtectionOptions(protectOptions: IPayloadProtectionProtocolOptions): IJwsSigningOptions {
+   public static fromPayloadProtectionOptions(protectOptions: IPayloadProtectionOptions): IJwsSigningOptions {
     return <IJwsSigningOptions>{
       cryptoFactory: protectOptions.cryptoFactory,
-      protected: protectOptions.protocolOption.has(JoseConstants.optionProtectedHeader) ? <JwsHeader>protectOptions.protocolOption.get(JoseConstants.optionProtectedHeader) : undefined, 
-      header: protectOptions.protocolOption.has(JoseConstants.optionHeader) ? <JwsHeader>protectOptions.protocolOption.get(JoseConstants.optionHeader) : undefined,
-      kidPrefix:  protectOptions.protocolOption.has(JoseConstants.optionKidPrefix) ? <JwsHeader>protectOptions.protocolOption.get(JoseConstants.optionKidPrefix) : undefined
+      protected: protectOptions.options && protectOptions.options.has(JoseConstants.optionProtectedHeader) ? <JwsHeader>protectOptions.options.get(JoseConstants.optionProtectedHeader) : undefined, 
+      header: protectOptions.options && protectOptions.options.has(JoseConstants.optionHeader) ? <JwsHeader>protectOptions.options.get(JoseConstants.optionHeader) : undefined,
+      kidPrefix:  protectOptions.options && protectOptions.options.has(JoseConstants.optionKidPrefix) ? <JwsHeader>protectOptions.options.get(JoseConstants.optionKidPrefix) : undefined
     };
   }
 
   /**
-   * Convert a @class IPayloadProtectionProtocolOptions into a @class IJwsSigningOptions
+   * Convert a @class IPayloadProtectionOptions into a @class IJwsSigningOptions
    * @param signingOptions to convert
    */
-   public static toPayloadProtectionOptions(signingOptions: IJwsSigningOptions): IPayloadProtectionProtocolOptions {
+   public static toPayloadProtectionOptions(signingOptions: IJwsSigningOptions): IPayloadProtectionOptions {
     const protectOptions = {
       cryptoFactory: signingOptions.cryptoFactory,
-      protocolInterface: new JoseProtocol(),
-      protocolOption: new TSMap<string, any>() 
+      payloadProtection: new JoseProtocol(),
+      options: new TSMap<string, any>() 
     };
     if (signingOptions.header) {
-      protectOptions.protocolOption.set(JoseConstants.optionHeader, signingOptions.header);
+      protectOptions.options.set(JoseConstants.optionHeader, signingOptions.header);
     }
     if (signingOptions.protected) {
-      protectOptions.protocolOption.set(JoseConstants.optionProtectedHeader, signingOptions.protected);
+      protectOptions.options.set(JoseConstants.optionProtectedHeader, signingOptions.protected);
     }
     if (signingOptions.kidPrefix) {
-      protectOptions.protocolOption.set(JoseConstants.optionKidPrefix, signingOptions.kidPrefix);
+      protectOptions.options.set(JoseConstants.optionKidPrefix, signingOptions.kidPrefix);
     }
     
     return protectOptions;

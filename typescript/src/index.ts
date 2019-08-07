@@ -27,10 +27,13 @@ export { HttpResolver };
 // Cryptography
 import CryptoOptions from './CryptoOptions';
 export { CryptoOptions };
+import CryptoFactory from './crypto/plugin/CryptoFactory';
 import CryptoHelpers from './crypto/utilities/CryptoHelpers';
 import SubtleCryptoExtension from './crypto/plugin/SubtleCryptoExtension';
 import KeyUseFactory from './crypto/keys/KeyUseFactory';
-export { CryptoHelpers, SubtleCryptoExtension, KeyUseFactory };
+export { CryptoHelpers, SubtleCryptoExtension, KeyUseFactory, CryptoFactory };
+import IKeyStore from './crypto/keyStore/IKeyStore'
+export { IKeyStore };
 import PrivateKey from './crypto/keys/PrivateKey';
 import PublicKey from './crypto/keys/PublicKey';
 import EcPrivateKey from './crypto/keys/ec/EcPrivateKey';
@@ -42,6 +45,12 @@ export { PrivateKey, PublicKey, EcPrivateKey, EcPublicKey, RsaPrivateKey, RsaPub
 import SubtleCryptoNodeOperations from './crypto/plugin/SubtleCryptoNodeOperations';
 import SubtleCryptoBrowserOperations from './crypto/plugin/SubtleCryptoBrowserOperations';
 export { SubtleCryptoNodeOperations, SubtleCryptoBrowserOperations };
+import { IPayloadProtectionStrategy } from './crypto/strategies/IPayloadProtectionStrategy';
+import ProtectionStrategy from './crypto/strategies/ProtectionStrategy';
+export {IPayloadProtectionStrategy, ProtectionStrategy};
+import { ICryptoToken } from './crypto/protocols/ICryptoToken';
+import JoseProtocol from './crypto/protocols/jose/JoseProtocol';
+export {ICryptoToken, JoseProtocol };
 
 // KeyStore
 import KeyStoreInMemory from './crypto/keyStore/KeyStoreInMemory';
@@ -64,8 +73,8 @@ import UserAgentSession from './userAgentSession/UserAgentSession';
 export { UserAgentSession };
 
 // CommitSigners
-export { default as CommitSigner } from './hubSession/crypto/CommitSigner';
-export { default as ICommitSigner } from './hubSession/crypto/ICommitSigner';
+export { default as CommitProtector } from './hubSession/crypto/CommitProtector';
+export { default as ICommitProtector } from './hubSession/crypto/ICommitProtector';
 
 // Hub Requests
 export { default as HubRequest } from './hubSession/requests/HubRequest';
@@ -83,4 +92,4 @@ export { default as Commit } from './hubSession/Commit';
 export { default as CommitStrategyBasic } from './hubSession/CommitStrategyBasic';
 export { default as HubError } from './hubSession/HubError';
 export { default as HubSession } from './hubSession/HubSession';
-export { default as SignedCommit } from './hubSession/SignedCommit';
+export { default as ProtectedCommit } from './hubSession/ProtectedCommit';

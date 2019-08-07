@@ -16,19 +16,19 @@ export default interface IRequestPrompt extends OIDCAuthenticationRequest {
   /**
    * Requester Logo location
    */
-  logoUrl?: URL,
+  logoUrl?: string,
   /**
    * Requester homepage location
    */
-  homepage?: URL,
+  homepage?: string,
   /**
    * Requester data usage policy location
    */
-  dataUsePolicy?: URL,
+  dataUsePolicy?: string,
   /**
    * Requester terms of service location
    */
-  termsOfService?: URL,
+  termsOfService?: string,
   /**
    * Credentials requested
    */
@@ -62,7 +62,7 @@ export interface IPermissionRequestPrompt {
   /**
    * Icon to represent the objects or data requested in this permission
    */
-  iconUrl?: URL
+  iconUrl?: string
   /**
    * Permission Grant to be used
    */

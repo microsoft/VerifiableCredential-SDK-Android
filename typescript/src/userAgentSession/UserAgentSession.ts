@@ -17,11 +17,11 @@ import IRequestPrompt, { IPermissionRequestPrompt } from './oidc/requests/IReque
 import IScopeDefinition, { IScopeRequest } from './oidc/requests/IScopeDefinition';
 import nodeFetch from 'node-fetch';
 import { URL } from 'url';
-import IPermissionGrant, { PERMISSION_GRANT_CONTEXT, PERMISSION_GRANT_TYPE } from '../hubSession/objects/IPermissionGrant';
+import { PERMISSION_GRANT_CONTEXT, PERMISSION_GRANT_TYPE } from '../hubSession/objects/IPermissionGrant';
 import Permissions from '../hubInterfaces/Permissions';
 import { HubInterfaceType, CommitStrategyType } from '../hubInterfaces/HubInterface';
 import IResponseReceipt, { IPermissionReceipt } from './oidc/response/IResponseReceipt';
-import { HubWriteResponse } from '..';
+import { HubWriteResponse, CryptoOptions } from '..';
 
 /**
  * OIDC optional parameters
@@ -56,6 +56,7 @@ export default class UserAgentSession {
   private sender: Identifier;
   private resolver: IResolver;
   private keyReference: string
+  private options: UserAgentOptions;
   private cryptoFactory: CryptoFactory;
   private permissions: Permissions | undefined;
   
@@ -63,7 +64,8 @@ export default class UserAgentSession {
     this.sender = sender;
     this.resolver = resolver;
     this.keyReference = keyReference;
-    this.cryptoFactory = (<UserAgentOptions>sender.options).cryptoFactory;
+    this.options = <UserAgentOptions>sender.options;
+    this.cryptoFactory = this.options.cryptoFactory;
   }
 
   /**
@@ -113,7 +115,7 @@ export default class UserAgentSession {
    * @param grants any permissionGrants approved by the user.
    * @throws Throws if claims are included
    */
-  public async sendResponse (request: OIDCAuthenticationRequest, claims?: any, grants?: IPermissionRequestPrompt[]): Promise<IResponseReceipt> {
+  public async sendResponse (request: OIDCAuthenticationRequest, grants?: IPermissionRequestPrompt[], claims?: any): Promise<any> {
 
     // check if sender has keystore
     if (!this.sender.options || !this.sender.options.keyStore) {
@@ -145,7 +147,7 @@ export default class UserAgentSession {
 
     // add requested claims to response
     if (claims) {
-      throw new Error('UserAgent does not currently support open ID Connect claims');
+      response = Object.assign(response, claims);
     }
     // response = Object.assign(response, claims);
 
@@ -160,12 +162,12 @@ export default class UserAgentSession {
         this.permissions = new Permissions({
           hubOwner: this.sender,
           clientIdentifier: this.sender,
-          keyReference: this.keyReference,
+          recipientsPublicKeys: undefined,
           context: PERMISSION_GRANT_CONTEXT,
           type: PERMISSION_GRANT_TYPE,
           hubInterface: HubInterfaceType.Permissions,
           commitStrategy: CommitStrategyType.Basic,
-          cryptoOptions: undefined,
+          cryptoOptions: new CryptoOptions(),
           hubProtectionStrategy: undefined
         });
       }
@@ -178,7 +180,7 @@ export default class UserAgentSession {
           definition: {
             name: permissionBundle.name,
             description: permissionBundle.description,
-            iconUrl: permissionBundle.iconUrl ? permissionBundle.iconUrl.href : undefined
+            iconUrl: permissionBundle.iconUrl
           },
           objects: [],
         };
@@ -206,7 +208,10 @@ export default class UserAgentSession {
     if (oidcResponse.status !== 200) {
       throw new Error(`OpenID Connect response failed to send: ${oidcResponse.text()}`);
     }
-    // Return minted claims. ish.
+    
+    if (!claims && !grants) {
+      return oidcResponse;
+    }
     return receipt;
   }
 
@@ -219,11 +224,6 @@ export default class UserAgentSession {
     // get identifier id from key id in header.
     const token : JwsToken = await JwsToken.deserialize(jws, {cryptoFactory: this.cryptoFactory});
     const payload = JSON.parse(token.payload.toString());
-
-    // create User Agent Options for Identifier
-    const options = new UserAgentOptions();
-    options.resolver = this.resolver;
-    options.cryptoFactory = this.cryptoFactory;
 
     /**
      * If iss parameter is 'https://selfissued.me', payload is an OIDC auth request
@@ -238,9 +238,38 @@ export default class UserAgentSession {
     }
 
     // verify jws and return payload. 
-    const identifier = new Identifier(issuerIdentifier, options);
-    const verifiedToken = await identifier.verify(jws);
-    return JSON.parse(verifiedToken);
+    const identifier = new Identifier(issuerIdentifier, this.options);
+    const document = await identifier.getDocument();
+
+    const publicKeysFromDocument = document.getPublicKeysFromDocument();
+    if (token.signatures.length < 0) {
+      throw new UserAgentError('No signature included');
+    }
+    let keyMatches: RegExpMatchArray | null = null;
+    const keyIdRegex = /([^#]*)#?(.+$)/;
+    if (token.signatures[0].protected && (token.signatures[0].protected).has('kid')) {
+      const keyIdentifier: string = (token.signatures[0].protected).get('kid');
+      keyMatches = keyIdentifier.match(keyIdRegex);
+    } else if (token.signatures[0].header && (token.signatures[0].header).has('kid')) {
+      const keyIdentifier: string = (token.signatures[0].header).get('kid');
+      keyMatches = keyIdentifier.match(keyIdRegex);
+    }
+    if (keyMatches ===  null) {
+      throw new UserAgentError('Cannot locate keyID');
+    }
+    if (keyMatches[1].length > 0 && keyMatches[1] !== identifier.id) {
+      throw new UserAgentError('Issuer signer does not match issuer');
+    }
+    const keyId = keyMatches[2];
+
+    const matchingPublicKeys = publicKeysFromDocument.filter((publicKey) => {
+      return publicKey.kid && publicKey.kid.endsWith(keyId);
+    });
+
+    if (!await token.verify(matchingPublicKeys)) {
+      throw new UserAgentError('Invalid signature');
+    }
+    return JSON.parse(payload);
   }
 
   /**
@@ -280,12 +309,17 @@ export default class UserAgentSession {
 
     // if there is a registration, pull requester information
     if (request.registration) {
-      const manifest = <IManifest> JSON.parse(request.registration);
+      let manifest: IManifest;
+      if (typeof(request.registration) === 'string') {
+        manifest = <IManifest> JSON.parse(request.registration);
+      } else {
+        manifest = request.registration;
+      }
       prompt.name = manifest.client_name;
-      prompt.logoUrl = manifest.logo_uri ? new URL(manifest.logo_uri) : undefined;
-      prompt.dataUsePolicy = manifest.policy_uri ? new URL(manifest.policy_uri) : undefined;
-      prompt.homepage = manifest.client_uri ? new URL(manifest.client_uri) : undefined;
-      prompt.termsOfService = manifest.tos_uri ? new URL(manifest.tos_uri) : undefined;
+      prompt.logoUrl = manifest.logo_uri;
+      prompt.dataUsePolicy = manifest.policy_uri;
+      prompt.homepage = manifest.client_uri;
+      prompt.termsOfService = manifest.tos_uri;
     }
 
     // any additional scraping we can do from the request metadata itself
@@ -320,7 +354,7 @@ export default class UserAgentSession {
         required: scopeModifiers && scopeModifiers.essential ? scopeModifiers.essential : false,
         name: scopeDefinition.resourceBundle.name,
         description: scopeDefinition.resourceBundle.description,
-        iconUrl: scopeDefinition.resourceBundle.icon_uri ? new URL(scopeDefinition.resourceBundle.icon_uri) : undefined,
+        iconUrl: scopeDefinition.resourceBundle.icon_uri,
         grants: scopeDefinition.access.map((grantRequest) => {
           const contextTypeRegex = /(^[^\/]+\/\/.*)\/(.*)$/i;
           const matches = grantRequest.resource_type.match(contextTypeRegex);

@@ -31,7 +31,7 @@ describe('SidetreeRegistrar', () => {
   beforeAll(() => {
     fetchMock = require('fetch-mock');
     options = new UserAgentOptions();
-    (<CryptoOptions> options.cryptoOptions).authenticationSigningJoseAlgorithm = 'ES256K';
+    (<CryptoOptions> options.cryptoOptions).signingAlgorithm = 'ES256K';
     options.cryptoFactory = new CryptoFactory(new KeyStoreInMemory(), new SubtleCryptoNodeOperations());
     options.registrar = new SidetreeRegistrar('https://registrar.org', options);
   });

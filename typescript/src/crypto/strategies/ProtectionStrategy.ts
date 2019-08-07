@@ -2,8 +2,8 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
- import MessageSigningStrategy from "./MessageSigningStrategy";
- import EncryptionStrategy from "./EncryptionStrategy";
+ import PayloadSigningStrategy from "./PayloadSigningStrategy";
+ import PayloadEncryptionStrategy from "./PayloadEncryptionStrategy";
 
  export enum ProtectionStrategyScope {
   /**
@@ -29,10 +29,10 @@ export default class ProtectionStrategy {
   /**
    * Gets or sets the message signing strategy.
    */
-  public messageSigningStrategies: MessageSigningStrategy = new MessageSigningStrategy();
+  public payloadSigningStrategy: PayloadSigningStrategy = new PayloadSigningStrategy();
 
   /**
    * Gets or sets the message signing strategy.
    */
-   public encryptionStrategy: EncryptionStrategy = new EncryptionStrategy();
+   public PayloadEncryptionStrategy: PayloadEncryptionStrategy = new PayloadEncryptionStrategy();
   }

@@ -3,23 +3,25 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ICommitProtectedHeaders, IFlattenedJws } from '@decentralized-identity/hub-common-js';
 import base64url from 'base64url';
 import * as crypto from 'crypto';
+import { ICryptoToken } from '../crypto/protocols/ICryptoToken';
+import JoseConstants from '../crypto/protocols/jose/JoseConstants';
+import { ICommitProtectedHeaders } from '@decentralized-identity/hub-common-js';
 
 /**
- * Class representing a signed commit.
+ * Class representing a protected commit.
  */
-export default class SignedCommit {
+export default class ProtectedCommit {
 
-  constructor(private json: IFlattenedJws) {
+  constructor(private json: ICryptoToken) {
 
   }
 
   /**
-   * Returns the signed commit data in the Flattened JWS JSON Serialization.
+   * Returns the protected commit data in the Flattened JWS JSON Serialization.
    */
-  toFlattenedJson(): IFlattenedJws {
+  toFlattenedJson(): ICryptoToken {
     return this.json;
   }
 
@@ -27,8 +29,8 @@ export default class SignedCommit {
    * Returns the decoded protected headers for this commit.
    */
   getProtectedHeaders(): ICommitProtectedHeaders {
-    if (this.json && this.json.protected) {
-      return JSON.parse(base64url.decode(this.json.protected));
+    if (this.json && this.json.get(JoseConstants.tokenProtected)) {
+      return JSON.parse(base64url.decode(this.json.get(JoseConstants.tokenProtected)));
     }
 
     throw new Error('Commit does not have a protected field.');
@@ -38,8 +40,8 @@ export default class SignedCommit {
    * Returns the decoded payload for this commit.
    */
   getPayload(): any {
-    if (this.json && this.json.payload) {
-      const decoded = base64url.decode(this.json.payload);
+    if (this.json && this.json.get(JoseConstants.tokenPayload)) {
+      const decoded = base64url.decode(this.json.get(JoseConstants.tokenPayload).toString());
       try {
         return JSON.parse(decoded);
       } catch (e) {
@@ -57,7 +59,7 @@ export default class SignedCommit {
   getRevision(): string {
     // NEED: Verify signature; cache result
     const sha256 = crypto.createHash('sha256');
-    sha256.update(`${this.json.protected}.${this.json.payload}`);
+    sha256.update(`${this.json.get(JoseConstants.tokenProtected)}.${this.json.get(JoseConstants.tokenPayload)}`);
     return sha256.digest('hex');
   }
 

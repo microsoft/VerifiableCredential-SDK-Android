@@ -20,10 +20,11 @@ import IJweRecipient from './IJweRecipient';
 import ISubtleCrypto from '../../../plugin/ISubtleCrypto';
 import CryptoProtocolError from '../../CryptoProtocolError';
 import IJweFlatJson from './IJweFlatJson';
-import IPayloadProtectionProtocolOptions from '../../IPayloadProtectionProtocolOptions';
+import IPayloadProtectionOptions from '../../IPayloadProtectionOptions';
 import JoseProtocol from '../JoseProtocol';
 import { ICryptoToken } from '../../ICryptoToken';
 import { SubtleCrypto } from 'webcrypto-core'
+import JoseToken from '../JoseToken';
 import { stringify } from 'querystring';
 
 /**
@@ -157,7 +158,7 @@ export default class JweToken implements IJweGeneralJson {
       json.unprotected = JoseHelpers.encodeHeader(<JweHeader>token.unprotected);
     }
     if (JoseHelpers.headerHasElements(token.recipients[0].header)) {
-      json.header = JoseHelpers.encodeHeader(<JweHeader>token.recipients[0].header);
+      json.header = JoseHelpers.encodeHeader(<JweHeader>token.recipients[0].header, false);
     }
 
     return JSON.stringify(json);
@@ -405,9 +406,10 @@ export default class JweToken implements IJweGeneralJson {
    * @param options used for the signature. These options override the options provided in the constructor.
    * @returns JweToken with encrypted payload.
    */
+  // tslint:disable-next-line: max-func-body-length
   public async encrypt (recipients: PublicKey[], payload: string, format: ProtectionFormat, options?: IJweEncryptionOptions): Promise<JweToken> {
     const cryptoFactory: CryptoFactory = this.getCryptoFactory(options);
-    const contentEncryptionAlgorithm = this.getContentEncryptionAlgorithm(options);
+    const contentEncryptionAlgorithm = this.getContentEncryptionAlgorithm(options, false) || JoseConstants.AesGcm256;
     this.format = format;
 
     // encoded protected header
@@ -457,6 +459,8 @@ export default class JweToken implements IJweGeneralJson {
       }
     
         // tslint:disable: no-backbone-get-set-outside-model
+        jweToken.unprotected = this.getUnprotected(options) || new TSMap<string, string>();
+        jweToken.protected = this.getProtected(options) || new TSMap<string, string>();
         jweToken.protected.set(JoseConstants.Alg, <string>keyEncryptionAlgorithm);
         jweToken.protected.set(JoseConstants.Enc, <string>contentEncryptionAlgorithm);
     
@@ -485,6 +489,10 @@ export default class JweToken implements IJweGeneralJson {
           CryptoHelpers.jwaToWebCrypto(<string>keyEncryptionAlgorithm),
           publicKey,
           contentEncryptionKey));
+      const header = new TSMap<string, string>([
+        [JoseConstants.Kid, <string>publicKey.kid]
+      ]);
+      jweRecipient.header = JweToken.setHeader(header);
     }
 
     // encrypt content
@@ -586,11 +594,38 @@ export default class JweToken implements IJweGeneralJson {
   //#endregion
 
   /**
+   * Get the default protected header to be used from the options
+   * @param newOptions Options passed in after the constructure
+   * @param mandatory True if property needs to be defined
+   */
+   private getProtected(newOptions?: IJweEncryptionOptions, mandatory: boolean = false): JweHeader {
+    return JoseHelpers.getOptionsProperty<JweHeader>('protected', this.options, newOptions, mandatory);
+  }
+
+  /**
+   * Get the default header to be used from the options
+   * @param newOptions Options passed in after the constructure
+   * @param mandatory True if property needs to be defined
+   */
+   public getUnprotected(newOptions?: IJweEncryptionOptions, mandatory: boolean = false): JweHeader {
+    return JoseHelpers.getOptionsProperty<JweHeader>('unprotected', this.options, newOptions, mandatory);
+  }
+
+  /**
+   * Get the default header to be used from the options
+   * @param newOptions Options passed in after the constructure
+   * @param mandatory True if property needs to be defined
+   */
+   public getHeader(newOptions?: IJweEncryptionOptions, mandatory: boolean = false): JweHeader {
+    return JoseHelpers.getOptionsProperty<JweHeader>('header', this.options, newOptions, mandatory);
+  }
+
+  /**
    * Convert a @class ICryptoToken into a @class JweToken
    * @param cryptoToken to convert
    * @param protectOptions options for the token
    */
-   public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionProtocolOptions): JweToken {
+   public static fromCryptoToken(cryptoToken: ICryptoToken, protectOptions: IPayloadProtectionOptions): JweToken {
     const options = JweToken.fromPayloadProtectionOptions(protectOptions);
     const token = new JweToken(options);
       token.protected = cryptoToken.has(JoseConstants.tokenProtected) ? cryptoToken.get(JoseConstants.tokenProtected) : undefined;
@@ -608,9 +643,10 @@ export default class JweToken implements IJweGeneralJson {
    * Convert a @class JweToken into a @class ICryptoToken
    * @param protocolFormat format of the token
    * @param jweToken to convert
+   * @param options used for the encryption. These options override the options provided in the constructor.
    */
-   public static toCryptoToken(protocolFormat: ProtectionFormat, jweToken: JweToken): ICryptoToken {
-    const cryptoToken = new TSMap<string, any>();
+   public static toCryptoToken(protocolFormat: ProtectionFormat, jweToken: JweToken, options: IPayloadProtectionOptions): ICryptoToken {
+    const cryptoToken = new JoseToken(options);
     if (jweToken.protected) {
       cryptoToken.set(JoseConstants.tokenProtected, jweToken.protected);
     }
@@ -627,43 +663,55 @@ export default class JweToken implements IJweGeneralJson {
   }
 
   /**
-   * Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions
+   * Convert a @class IPayloadProtectionOptions into a @class IJweEncryptionOptions
    * @param protectOptions to convert
    */
-   public static fromPayloadProtectionOptions(protectOptions: IPayloadProtectionProtocolOptions): IJweEncryptionOptions {
+   public static fromPayloadProtectionOptions(protectOptions: IPayloadProtectionOptions): IJweEncryptionOptions {
     return <IJweEncryptionOptions>{
       cryptoFactory: protectOptions.cryptoFactory,
-      protected: protectOptions.protocolOption.has(JoseConstants.optionProtectedHeader) ? <JweHeader>protectOptions.protocolOption.get(JoseConstants.optionProtectedHeader) : undefined, 
-      header: protectOptions.protocolOption.has(JoseConstants.optionHeader) ? <JweHeader>protectOptions.protocolOption.get(JoseConstants.optionHeader) : undefined,
-      kidPrefix:  protectOptions.protocolOption.has(JoseConstants.optionKidPrefix) ? <JweHeader>protectOptions.protocolOption.get(JoseConstants.optionKidPrefix) : undefined,
-      contentEncryptionAlgorithm:  protectOptions.protocolOption.get(JoseConstants.optionContentEncryptionAlgorithm)
+      protected: protectOptions.options.has(JoseConstants.optionProtectedHeader) ? <JweHeader>protectOptions.options.get(JoseConstants.optionProtectedHeader) : undefined, 
+      header: protectOptions.options.has(JoseConstants.optionHeader) ? <JweHeader>protectOptions.options.get(JoseConstants.optionHeader) : undefined,
+      kidPrefix:  protectOptions.options.has(JoseConstants.optionKidPrefix) ? <JweHeader>protectOptions.options.get(JoseConstants.optionKidPrefix) : undefined,
+      contentEncryptionAlgorithm:  protectOptions.options.get(JoseConstants.optionContentEncryptionAlgorithm)
     };
   }
 
   /**
-   * Convert a @class IPayloadProtectionProtocolOptions into a @class IJweEncryptionOptions
+   * Convert a @class IPayloadProtectionOptions into a @class IJweEncryptionOptions
    * @param encryptionOptions to convert
    */
-   public static toPayloadProtectionOptions(encryptionOptions: IJweEncryptionOptions): IPayloadProtectionProtocolOptions {
+   public static toPayloadProtectionOptions(encryptionOptions: IJweEncryptionOptions): IPayloadProtectionOptions {
     const protectOptions = {
       cryptoFactory: encryptionOptions.cryptoFactory,
-      protocolInterface: new JoseProtocol(),
-      protocolOption: new TSMap<string, any>(),
+      payloadProtection: new JoseProtocol(),
+      options: new TSMap<string, any>(),
       contentEncryptionAlgorithm: encryptionOptions.contentEncryptionAlgorithm 
     };
     if (encryptionOptions.header) {
-      protectOptions.protocolOption.set(JoseConstants.optionHeader, encryptionOptions.header);
+      protectOptions.options.set(JoseConstants.optionHeader, encryptionOptions.header);
     }
     if (encryptionOptions.protected) {
-      protectOptions.protocolOption.set(JoseConstants.optionProtectedHeader, encryptionOptions.protected);
+      protectOptions.options.set(JoseConstants.optionProtectedHeader, encryptionOptions.protected);
     }
     if (encryptionOptions.kidPrefix) {
-      protectOptions.protocolOption.set(JoseConstants.optionKidPrefix, encryptionOptions.kidPrefix);
+      protectOptions.options.set(JoseConstants.optionKidPrefix, encryptionOptions.kidPrefix);
     }
     
     return protectOptions;
   }
   
+  /**
+   * Set the header in the recipients object
+   * @param header to set on the JweToken recipients object
+   */
+  private static setHeader(header: string | JweHeader) {
+    if (typeof header === 'string') {
+      return new TSMap<string, string>().fromJSON(JSON.parse(header));
+    }
+
+    return header;
+  }
+
   /**
    * Set the unprotected header
    * @param unprotectedHeader to set on the JweToken object

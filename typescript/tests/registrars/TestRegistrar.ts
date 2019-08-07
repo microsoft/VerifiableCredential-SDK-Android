@@ -6,6 +6,10 @@
 import IRegistrar from '../../src/registrars/IRegistrar';
 import Identifier from '../../src/Identifier';
 import IdentifierDocument from '../../src/IdentifierDocument';
+import RegistrarCryptoOptions from '../../src/registrars/RegistrarCryptoOptions';
+import CryptoFactory from '../../src/crypto/plugin/CryptoFactory';
+import { KeyStoreInMemory, SubtleCryptoBrowserOperations } from '../../src';
+import JoseProtocol from '../../src/crypto/protocols/jose/JoseProtocol';
 
 /**
  * Implementation of a registrar for testing.
@@ -13,6 +17,13 @@ import IdentifierDocument from '../../src/IdentifierDocument';
 export default class TestRegistrar implements IRegistrar {
   private identifier: any;
   private identifierDocument: any;
+
+  /**
+   * Crypto options for the Registrar
+   */
+  public registrarCryptoOptions: RegistrarCryptoOptions = new RegistrarCryptoOptions(
+    new CryptoFactory(new KeyStoreInMemory(), new SubtleCryptoBrowserOperations()), 
+    new JoseProtocol());
 
   /**
    * Prepares the resolver for the test run.

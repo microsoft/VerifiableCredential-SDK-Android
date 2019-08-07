@@ -37,7 +37,7 @@ export default class KeyUseFactory {
 
       case 'rsa-oaep':
       case 'rsa-oaep-256':
-        return KeyUse.Signature;
+        return KeyUse.Encryption;
 
       default:
         throw new Error(`The algorithm '${algorithm.name}' is not supported`);

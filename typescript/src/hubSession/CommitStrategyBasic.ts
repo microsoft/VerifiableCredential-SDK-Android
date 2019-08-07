@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import SignedCommit from './SignedCommit';
+import ProtectedCommit from './ProtectedCommit';
 
 /**
  * Resolves the final state of an object from the constituent set of commits for that object.
@@ -23,7 +23,7 @@ export default class CommitStrategyBasic {
    *
    * @param commits The entire known set of commits for the object.
    */
-  async resolveObject(commits: SignedCommit[]) {
+  async resolveObject(commits: ProtectedCommit[]) {
 
     if (!commits || commits.length === 0) {
       return null;
@@ -53,7 +53,7 @@ export default class CommitStrategyBasic {
    * @param a The first commit to compare.
    * @param b The second commit to compare.
    */
-  protected compareCommits(a: SignedCommit, b: SignedCommit) {
+  protected compareCommits(a: ProtectedCommit, b: ProtectedCommit) {
     if (a.getObjectId() !== b.getObjectId()) {
       throw new Error('Cannot compare commits from different objects.');
     }

@@ -3,9 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ICommitProtectedHeaders, IFlattenedJws } from '@decentralized-identity/hub-common-js';
 import base64url from 'base64url';
-import SignedCommit from '../../src/hubSession/SignedCommit';
+import ProtectedCommit from '../../src/hubSession/ProtectedCommit';
+import JoseToken from '../../src/crypto/protocols/jose/JoseToken';
+import ProtocolTest from '../crypto/protocols/jose/ProtocolTest';
+import JoseConstants from '../../src/crypto/protocols/jose/JoseConstants';
+import { ProtectionFormat } from '../../src/crypto/keyStore/ProtectionFormat';
+import IPayloadProtectionOptions from '../../src/crypto/protocols/IPayloadProtectionOptions';
+import { ICommitProtectedHeaders } from '@decentralized-identity/hub-common-js';
 
 const createHeaders: ICommitProtectedHeaders = {
   interface: 'Collections',
@@ -19,25 +24,29 @@ const createHeaders: ICommitProtectedHeaders = {
   iss: 'did:example:client.id',
 };
 
-describe('SignedCommit', () => {
+describe('ProtectedCommit', () => {
 
   describe('getProtectedHeaders()', () => {
 
     it('should return the headers', async () => {
-      const signedCommit = new SignedCommit({
-        protected: base64url(JSON.stringify(createHeaders)),
-        payload: base64url(JSON.stringify({ name: 'test' })),
-        signature: 'abc',
-      });
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, base64url(JSON.stringify({ name: 'test' }))],
+        [JoseConstants.tokenProtected, base64url(JSON.stringify(createHeaders))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
 
       expect(signedCommit.getProtectedHeaders()).toEqual(createHeaders);
     });
 
     it('should throw if protected headers are missing', async () => {
-      const signedCommit = new SignedCommit(<IFlattenedJws> {
-        payload: base64url(JSON.stringify({ name: 'test' })),
-        signature: 'abc',
-      });
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, base64url(JSON.stringify({ name: 'test' }))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
 
       try {
         signedCommit.getProtectedHeaders();
@@ -55,33 +64,37 @@ describe('SignedCommit', () => {
       const payload = {
         name: 'test'
       };
-
-      const signedCommit = new SignedCommit({
-        protected: base64url(JSON.stringify(createHeaders)),
-        payload: base64url(JSON.stringify(payload)),
-        signature: 'abc',
-      });
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, base64url(JSON.stringify(payload))],
+        [JoseConstants.tokenProtected, base64url(JSON.stringify(createHeaders))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
 
       expect(signedCommit.getPayload()).toEqual(payload);
     });
 
     it('should return a non-json payload', async () => {
       const payload = 'test';
-
-      const signedCommit = new SignedCommit({
-        protected: base64url(JSON.stringify(createHeaders)),
-        payload: base64url(payload),
-        signature: 'abc',
-      });
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, base64url(payload)],
+        [JoseConstants.tokenProtected, base64url(JSON.stringify(createHeaders))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
 
       expect(signedCommit.getPayload()).toEqual(payload);
     });
 
     it('should throw if a payload is missing', async () => {
-      const signedCommit = new SignedCommit(<IFlattenedJws> {
-        protected: base64url(JSON.stringify(createHeaders)),
-        signature: 'abc',
-      });
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenProtected, base64url(JSON.stringify(createHeaders))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
 
       try {
         signedCommit.getPayload();
@@ -96,13 +109,13 @@ describe('SignedCommit', () => {
   describe('getObjectId()', () => {
 
     it('should return the revision for a create commit', async () => {
-      
-      const signedCommit = new SignedCommit({
-        protected: base64url(JSON.stringify(createHeaders)),
-        payload: base64url(JSON.stringify({ name: 'test '})),
-        signature: 'abc',
-      });
-
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, base64url(JSON.stringify({ name: 'test '}))],
+        [JoseConstants.tokenProtected, base64url(JSON.stringify(createHeaders))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
       expect(signedCommit.getObjectId()).toEqual(signedCommit.getRevision());
     });
 
@@ -113,11 +126,13 @@ describe('SignedCommit', () => {
         object_id: 'abc123'
       });
 
-      const signedCommit = new SignedCommit({
-        protected: base64url(JSON.stringify(updateHeaders)),
-        payload: base64url(JSON.stringify({ name: 'test '})),
-        signature: 'abc',
-      });
+      const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, base64url(JSON.stringify({ name: 'test' }))],
+        [JoseConstants.tokenProtected, base64url(JSON.stringify(updateHeaders))],
+        [JoseConstants.tokenSignatures, ['abc']]]);
+    
+      const signedCommit =  new ProtectedCommit(token);
 
       expect(signedCommit.getObjectId()).toEqual('abc123');
     });

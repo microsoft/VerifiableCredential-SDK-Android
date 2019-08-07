@@ -59,7 +59,12 @@ export default class RsaPrivateKey extends RsaPublicKey implements PrivateKey {
    */
    public getPublicKey (): PublicKey {
     const publicKey = clone(this);
-    delete publicKey.d, publicKey.p, publicKey.q, publicKey.dp, publicKey.dq, publicKey.qi;
+    delete publicKey.d;
+    delete publicKey.p; 
+    delete publicKey.q; 
+    delete publicKey.dp;
+    delete publicKey.dq; 
+    delete publicKey.qi;
     return publicKey;
   }
 }

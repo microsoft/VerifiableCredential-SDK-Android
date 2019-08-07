@@ -151,6 +151,11 @@
    /**
     * Define elements in the JWS Crypto Token
     */
+    public static tokenSignature = 'signature'; 
+   
+   /**
+    * Define elements in the JWS Crypto Token
+    */
     public static tokenFormat = 'format'; 
 
    /**
@@ -171,6 +176,26 @@
    /**
     * Define elements in the JOSE options
     */
-    public static optionContentEncryptionAlgorithm = 'ContentEncryptionAlgorithm'; 
-    
+   public static optionContentEncryptionAlgorithm = 'ContentEncryptionAlgorithm'; 
+   
+   /**
+    * Define JOSE serialization formats
+    */
+    public static serializationJwsFlatJson = 'JwsFlatJson'; 
+   
+    /**
+     * Define JOSE serialization formats
+     */
+    public static serializationJweFlatJson = 'JweFlatJson'; 
+   
+   /**
+    * Define JOSE serialization formats
+    */
+    public static serializationJwsGeneralJson = 'JwsGeneralJson'; 
+   
+   /**
+    * Define JOSE serialization formats
+    */
+    public static serializationJweGeneralJson = 'JweGeneralJson'; 
+      
   }

@@ -6,7 +6,7 @@
 import Identifier from '../Identifier';
 import Commit from '../hubSession/Commit';
 import UserAgentError from '../UserAgentError';
-import CommitSigner from '../hubSession/crypto/CommitSigner';
+import CommitProtector, { CommitProtectorOptions } from '../hubSession/crypto/CommitProtector';
 import HubCommitWriteRequest from '../hubSession/requests/HubCommitWriteRequest';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubSession, { HubSessionOptions } from '../hubSession/HubSession';
@@ -14,7 +14,13 @@ import IHubClient, {HubClientOptions } from './IHubClient';
 import HubObject from './HubObject';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
-import UserAgentOptions from '../UserAgentOptions';
+import { IPayloadProtection } from '../crypto/protocols/IPayloadProtection';
+import ProtectionStrategy from '../crypto/strategies/ProtectionStrategy';
+import { PublicKey, UserAgentOptions } from '..';
+import JoseConstants from '../crypto/protocols/jose/JoseConstants';
+import IPayloadProtectionOptions from '../crypto/protocols/IPayloadProtectionOptions';
+import JoseProtocol from '../crypto/protocols/jose/JoseProtocol';
+import { TSMap } from 'typescript-map';
 
 /**
  * Class for doing CRUD operations to Actions, Collections, Permissions, and Profile
@@ -26,9 +32,17 @@ export default class HubClient implements IHubClient {
 
   public clientIdentifier: Identifier;
 
-  private readonly keyReference: string;
+  private readonly signingKeyReference: string | undefined;
+
+  private readonly encryptionKeyReference: string | undefined;
+
+  private readonly recipientsPublicKeys: PublicKey[] | undefined;
 
   private readonly cryptoFactory: CryptoFactory;
+
+  private readonly payloadProtection: IPayloadProtection;
+
+  private readonly hubProtectionStrategy: ProtectionStrategy | undefined;
 
   /**
    * Constructs an instance of the Hub Client Class for hub operations
@@ -41,12 +55,16 @@ export default class HubClient implements IHubClient {
     }
     this.hubOwner = hubClientOptions.hubOwner;
     this.clientIdentifier = hubClientOptions.clientIdentifier;
-    this.keyReference = hubClientOptions.keyReference;
-    this.cryptoFactory = (<UserAgentOptions>hubClientOptions.clientIdentifier.options).cryptoFactory;
+    this.signingKeyReference = (<UserAgentOptions>hubClientOptions.clientIdentifier.options).cryptoOptions.signingKeyReference;
+    this.encryptionKeyReference = (<UserAgentOptions>hubClientOptions.clientIdentifier.options).cryptoOptions.encryptionKeyReference;
+    this.recipientsPublicKeys = hubClientOptions.recipientsPublicKeys;
+    this.cryptoFactory = hubClientOptions.cryptoOptions.cryptoFactory;
+    this.payloadProtection = hubClientOptions.cryptoOptions.payloadProtection;
+    this.hubProtectionStrategy = hubClientOptions.hubProtectionStrategy;
   }
 
   /**
-   * Signs and sends a commit to the hub owner's hub.
+   * Protect and sends a commit to the hub owner's hub.
    * @param commit commit to be sent to hub owner's hub.
    */
   public async commit (commit: Commit) {
@@ -63,20 +81,36 @@ export default class HubClient implements IHubClient {
       throw new UserAgentError(`No KeyStore defined for '${this.clientIdentifier}`);
     }
 
-    const session = await this.createHubSession();
+    const fields = commit.getCommitFields();
+    fields.kid = '';
+    
+    const map = Object.keys(fields).map((field) => {
+      return [field, fields[field]];
+    });
+    
+    const options: IPayloadProtectionOptions = {
+      cryptoFactory: this.cryptoFactory,
+      options: new TSMap<string, any>([
+        [JoseConstants.optionProtectedHeader, new TSMap(map) ]
+    ]),
+      payloadProtection: new JoseProtocol()
+  };
 
-    const commitSignerOptions = {
+    const commitProtectOptions: CommitProtectorOptions = {
       did: this.clientIdentifier.id, 
-      keyReference: this.keyReference,
-      keyStore: this.clientIdentifier.options.keyStore,
-      cryptoFactory: this.cryptoFactory 
+      signingKeyReference: this.signingKeyReference,
+      recipientsPublicKeys: this.recipientsPublicKeys,
+      payloadProtection: this.payloadProtection,
+      payloadProtectionOptions: options,
+      hubProtectionStrategy: this.hubProtectionStrategy
     };
 
-    const commitSigner = new CommitSigner(commitSignerOptions);
+    // protect the commit
+    const commitProtector = new CommitProtector(commitProtectOptions);
+    const protectedCommit = await commitProtector.protect(commit);
+    const commitRequest = new HubCommitWriteRequest(protectedCommit);
 
-    const signedCommit = await commitSigner.sign(commit);
-
-    const commitRequest = new HubCommitWriteRequest(signedCommit);
+    const session = await this.createHubSession();
     return session.send(commitRequest);
   }
 
@@ -126,9 +160,10 @@ export default class HubClient implements IHubClient {
     const options: HubSessionOptions = {
       client: this.clientIdentifier,
       hubOwner: this.hubOwner,
-      clientPrivateKeyReference: this.keyReference,
-      hubId: 'did:test:7e037d71-7d74-4c06-ad6d-adb3db5634af',
-      hubEndpoint: 'http://localhost:8080/'
+      hubId: 'did:ion:test:EiANVcAJKiAdVQRId8IYrQHxJE4nU4-_pW041qh-z5tVZQ',
+      hubEndpoint: 'http://localhost:8080/',
+      signingKeyReference: this.signingKeyReference,
+      encryptionKeyReference: this.encryptionKeyReference
     };
     return new HubSession(options);
   }

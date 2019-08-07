@@ -3,24 +3,36 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
  import JoseConstants from "../protocols/jose/JoseConstants";
+import { IPayloadProtectionStrategy } from "./IPayloadProtectionStrategy";
+import IPayloadProtectionOptions from "../protocols/IPayloadProtectionOptions";
 
 /**
  * Class used to model encryption strategies
  */
-export default class EncryptionStrategy {
+export default class PayloadEncryptionStrategy implements IPayloadProtectionStrategy {
   /**
    * Get or set a value to enable or disable encryption
    */
   public enabled: boolean = true;
+    
+  /**
+   * Get or set the serialization format.
+   */
+  public serializationFormat: string = JoseConstants.serializationJweFlatJson;
+  
+  /**
+   * Options used for the protection mechanisms
+   */
+  public protectionOptions: IPayloadProtectionOptions = <IPayloadProtectionOptions>{};
 
   /**
    * Get or set the key encryption algorithm as JWA.
    */
-   public keyEncrypterJoseAlgorithm: string = JoseConstants.RsaOaep256;
+   public keyEncrypterAlgorithm: string = JoseConstants.RsaOaep256;
    
   /**
    * Get or set the key encryption algorithm as JWA.
    */
-   public symmetricEncrypterJoseAlgorithm: string = JoseConstants.AesGcm128;
-   
+   public symmetricEncrypterAlgorithm: string = JoseConstants.AesGcm128;
+  
 }

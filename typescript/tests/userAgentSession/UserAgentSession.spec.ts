@@ -188,10 +188,10 @@ describe('UserAgentSession', () => {
       },
       expected: Object.assign({}, defaultPrompt, {
         name: 'Test Client 123',
-        logoUrl: new URL('https://localhost/icon'),
-        homepage: new URL('https://localhost/index.html'),
-        dataUsePolicy: new URL('https://localhost/cookies'),
-        termsOfService: new URL('https://localhost/tos')
+        logoUrl: 'http://localhost/icon',
+        homepage: 'http://localhost/index.html',
+        dataUsePolicy: 'http://localhost/cookies',
+        termsOfService: 'http://localhost/tos'
       })
     },
     {
@@ -252,7 +252,7 @@ describe('UserAgentSession', () => {
             required: true,
             name: "Test Status",
             description: "Read access to all test statuses",
-            iconUrl: new URL('http://localhost/icon.ico'),
+            iconUrl: 'http://localhost/icon.ico',
             grants: [
               {
                 owner: 'did:test:responder',
@@ -310,7 +310,7 @@ describe('UserAgentSession', () => {
             required: true,
             name: "Test Status",
             description: "Read access to all test statuses",
-            iconUrl: new URL('http://localhost/icon.ico'),
+            iconUrl: 'http://localhost/icon.ico',
             grants: [
               {
                 owner: 'did:test:responder',
@@ -325,7 +325,7 @@ describe('UserAgentSession', () => {
             required: false,
             name: "Test Status",
             description: "Write access to all test statuses",
-            iconUrl: new URL('http://localhost/icon.ico'),
+            iconUrl: 'http://localhost/icon.ico',
             grants: [
               {
                 owner: 'did:test:responder',
@@ -587,7 +587,7 @@ describe('UserAgentSession', () => {
           });
         });
 
-        await responderSession.sendResponse(formedRequest!, testCase.claims, testCase.grants)
+        await responderSession.sendResponse(formedRequest!, testCase.grants, testCase.claims)
 
         expect(signSpy).toHaveBeenCalled();
         expect(fetchSpy).toHaveBeenCalled();

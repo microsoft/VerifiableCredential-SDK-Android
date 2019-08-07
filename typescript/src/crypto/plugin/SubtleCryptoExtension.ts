@@ -121,16 +121,14 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
    * @param signature to verify
    * @param payload which was signed
    */
-   public async verifyByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, signature: BufferSource, payload: BufferSource): Promise<boolean> {
+  public async verifyByJwk(algorithm: CryptoAlgorithm, jwk: JsonWebKey, signature: BufferSource, payload: BufferSource): Promise<boolean> {
     const crypto: SubtleCrypto = CryptoHelpers.getSubtleCryptoForAlgorithm(this.cryptoFactory, algorithm);
     const keyImportAlgorithm = SubtleCryptoExtension.normalizeAlgorithm(CryptoHelpers.getKeyImportAlgorithm(algorithm, jwk));
     
     const key = await crypto.importKey('jwk', SubtleCryptoExtension.normalizeJwk(jwk), keyImportAlgorithm, true, ['verify']);
-    if ((<any>algorithm).format) {
-      const format: string =  (<any>algorithm).format;
-      if (format.toUpperCase() !== 'DER') {
-        throw new CryptoError(algorithm, 'Only DER format supported for signature');
-      }
+    
+    if (algorithm.name === 'ECDSA' && signature.byteLength > 64) {
+    
       const elements = SubtleCryptoExtension.fromDer(<Uint8Array>signature);
       signature = new Uint8Array(elements[0].length + elements[1].length);
       (<Uint8Array>signature).set(elements[0]);
@@ -140,7 +138,7 @@ export default class SubtleCryptoExtension extends SubtleCrypto implements ISubt
       <EcdsaParams>SubtleCryptoExtension.normalizeAlgorithm(algorithm): 
       <RsaPssParams>algorithm, key, <ArrayBuffer>signature, <ArrayBuffer>payload);
    }  
-  
+
   /**
    * format the signature output from DER format
    * @param signature to decode from DER

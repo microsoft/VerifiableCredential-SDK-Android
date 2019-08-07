@@ -180,7 +180,7 @@ describe('Identifier', () => {
       .getPublicKey('#notInDocument')
       .catch(error => {
         expect(error instanceof UserAgentError).toBeTruthy();
-        expect(error.message).toEqual(`Document does not contain a key with id '#notInDocument'`);
+        expect(error.message).toEqual(`No matching public key found for #notInDocument`);
       })
       .finally(done);
   });
@@ -276,7 +276,7 @@ describe('Identifier', () => {
     it('should sign a payload that is a string', async () => {
       options.cryptoOptions = new CryptoOptions();
       options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
-      options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
+      options.cryptoOptions.signingAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
       const seed = new SecretKey('ABDE');
       await options.keyStore.save('masterSeed', seed);
@@ -291,7 +291,7 @@ describe('Identifier', () => {
     it('should sign a payload that is an object', async () => {
       options.cryptoOptions = new CryptoOptions();
       options.cryptoFactory = new CryptoFactory(options.keyStore, new SubtleCryptoNodeOperations());
-      options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
+      options.cryptoOptions.signingAlgorithm = 'ES256K';
       options.keyStore = new KeyStoreInMemory();
       const seed = new SecretKey('ABDE');
       await options.keyStore.save('masterSeed', seed);

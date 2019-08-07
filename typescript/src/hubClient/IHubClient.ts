@@ -8,7 +8,7 @@ import Commit from '../hubSession/Commit';
 import HubObjectQueryRequest from '../hubSession/requests/HubObjectQueryRequest';
 import HubCommitQueryRequest from '../hubSession/requests/HubCommitQueryRequest';
 import ProtectionStrategy from '../crypto/strategies/ProtectionStrategy';
-import { CryptoOptions, HubObject } from '..';
+import { CryptoOptions, HubObject, PublicKey } from '..';
 
 /**
  * Class for defining options for the
@@ -26,11 +26,10 @@ export class HubClientOptions {
   clientIdentifier: Identifier | undefined;
 
   /**
-   * Key reference to private key to be used to sign commits and create HubSession
-   * We need to extend this to a set of keys including an encryption key - todo
+   * The public keys used for encrypting the payload
    */
-  keyReference: string = '';
-
+  recipientsPublicKeys: PublicKey[] | undefined;
+ 
   /**
    * Defines the protection strategy that will be used to protect the commit.
    */
@@ -40,7 +39,7 @@ export class HubClientOptions {
    * Crypto Options
    * contains algorithm and other data about crypto
    */
-   public cryptoOptions: CryptoOptions | undefined;
+   public cryptoOptions: CryptoOptions = new CryptoOptions();
 }
 
 /**

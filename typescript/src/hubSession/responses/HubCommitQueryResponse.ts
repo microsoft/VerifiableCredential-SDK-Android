@@ -2,9 +2,8 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
-import { IHubCommitQueryResponse } from '@decentralized-identity/hub-common-js';
-import SignedCommit from '../SignedCommit';
+import ProtectedCommit from '../ProtectedCommit';
+import IHubCommitQueryResponse from './IHubCommitQueryResponse';
 
 /**
  * Represents the response to a `HubCommitQueryRequest`.
@@ -22,7 +21,7 @@ export default class HubCommitQueryResponse {
    */
   public getCommits() {
     return this.response.commits.map((commit) => {
-      return new SignedCommit(commit);
+      return new ProtectedCommit(commit);
     });
   }
 

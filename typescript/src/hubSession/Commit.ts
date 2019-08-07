@@ -60,6 +60,9 @@ import { Operation } from '../hubInterfaces/HubInterface';
     * Identifier for the object
     */
    object_id: string | undefined;
+
+  // Make the type indexable
+  [key: string]: any;
  
  }
  

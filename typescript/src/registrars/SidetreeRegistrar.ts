@@ -12,11 +12,11 @@ import UserAgentError from '../UserAgentError';
 import UserAgentOptions from '../UserAgentOptions';
 import IRegistrar from './IRegistrar';
 import Multihash from './Multihash';
-import { ProtectionFormat } from '../crypto/keyStore/ProtectionFormat';
 import CryptoFactory from '../crypto/plugin/CryptoFactory';
-import JwsToken from '../crypto/protocols/jose/jws/JwsToken';
-import { TSMap } from 'typescript-map';
-import { IJwsSigningOptions } from '../crypto/protocols/jose/IJoseOptions';
+import RegistrarCryptoOptions from './RegistrarCryptoOptions';
+import IPayloadProtectionOptions from '../crypto/protocols/IPayloadProtectionOptions';
+import PayloadSigningStrategy from '../crypto/strategies/PayloadSigningStrategy';
+import JoseProtocol from '../crypto/protocols/jose/JoseProtocol';
 const cloneDeep = require('lodash/fp/cloneDeep');
 declare var fetch: any;
 
@@ -27,6 +27,11 @@ export default class SidetreeRegistrar implements IRegistrar {
   private timeoutInMilliseconds: number;
   private serializedOptions: string;
   private cryptoFactory: CryptoFactory;
+
+  /**
+   * Crypto options for the Registrar
+   */
+  public registrarCryptoOptions: RegistrarCryptoOptions;
 
   /**
    * Constructs a new instance of the Sidetree registrar
@@ -41,6 +46,7 @@ export default class SidetreeRegistrar implements IRegistrar {
 
     this.serializedOptions = JSON.stringify(options);
     this.cryptoFactory = options.cryptoFactory;
+    this.registrarCryptoOptions = options.registrar ? options.registrar.registrarCryptoOptions : new RegistrarCryptoOptions(this.cryptoFactory, new JoseProtocol());
 
     // Format the url
     this.url = `${url.replace(/\/?$/, '/')}`;
@@ -84,18 +90,7 @@ export default class SidetreeRegistrar implements IRegistrar {
       console.debug(bodyString);
 
       // registration with signed message for bodyString
-      const signingOptions: IJwsSigningOptions = {
-        cryptoFactory: this.cryptoFactory,
-        header: new TSMap<string, string>([
-            ['alg', ''],
-            ['kid', ''],
-            ['operation', 'create'],
-            ['proofOfWork', '{}']
-        ])
-      };
-      const jws = new JwsToken(signingOptions);
-      const signature = await jws.sign(keyReference, Buffer.from(bodyString), ProtectionFormat.JwsFlatJson);
-      const encodedBodyString = signature.serialize();
+      const encodedBodyString = await this.sign(keyReference, bodyString);
 
       const fetchOptions = {
         method: 'POST',
@@ -130,6 +125,19 @@ export default class SidetreeRegistrar implements IRegistrar {
       const identifier = new Identifier(responseJson, <UserAgentOptions> JSON.parse(this.serializedOptions));
       resolve(identifier);
     });
+  }
+
+  /**
+   * Sign the registration payload
+   * @param keyReference Reference to signature key
+   * @param bodyString original payload to sign
+   */
+  public async sign(keyReference: string, bodyString: string): Promise<string> {
+    const strategy: PayloadSigningStrategy = this.registrarCryptoOptions.protectionStrategy.payloadSigningStrategy;
+    const options: IPayloadProtectionOptions = strategy.protectionOptions;
+    const protocol = options.payloadProtection;
+    const signature = await protocol.sign(keyReference, Buffer.from(bodyString), strategy.serializationFormat, options);
+    return protocol.serialize(signature, strategy.serializationFormat, options);
   }
 
   /**

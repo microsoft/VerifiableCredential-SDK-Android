@@ -3,116 +3,131 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Identifier from '../../../Identifier';
-import IResolver from '../../../resolvers/IResolver';
-import JwsToken from '../jose/jws/JwsToken';
-import CryptoFactory from '../../plugin/CryptoFactory';
-import UserAgentOptions from '../../../UserAgentOptions';
-import IKeyStore from '../../keyStore/IKeyStore';
-import { IJwsSigningOptions } from '../jose/IJoseOptions';
-
-/**
- * Named Arguments of Did Protocol
- */
-export interface DidProtocolOptions {
-  
-  /**
-   * Identifier who wants to send requests.
-   */
-  sender: Identifier;
-
-  /**
-   * Resolver for resolving identifier documents
-   */
-  resolver: IResolver;
-
-}
-
-/**
- * Hub Protocol for decrypting/verifying and encrypting/signing payloads
- */
-export default class DidProtocol {
-
-  /**
-   * Client's Identifier to be used for signing and decrypting.
-   */
-  private sender: Identifier;
-
-  /**
-   * Resolver for resolving Identifier Documents
-   */
-   private resolver: IResolver;
-
-  /**
-   * Crypto factory defining the crypto API
-   */
-   private cryptoFactory: CryptoFactory;
-
-  /**
-   * Key store for storing keys
-   */
-   private keyStore: IKeyStore;
-
-  /**
-   * Authentication constructor
-   * @param options Arguments to a constructor in a named object
-   */
-  constructor (options: DidProtocolOptions) {
-    this.sender = options.sender;
-    this.resolver = options.resolver;
-    this.cryptoFactory = (<UserAgentOptions>this.sender.options).cryptoFactory;
-    this.keyStore = (<UserAgentOptions>this.sender.options).keyStore;
-  }
-
-  /**
-   * Unwrapping method for unwrapping requests/responses.
-   * Decrypt a cipher using [PrivateKey] of Client Identifier and then verify payload.
-   * @param keyReference key reference of private key in keystore used to decrypt.
-   * @param cipher the cipher to be decrypted and verified by client Identifier.
-   */
-  public async decryptAndVerify(keyReference: string, cipher: Buffer): Promise<any> {
-    
-    // decrypt payload.
-    const jws = await this.sender.decrypt(cipher, keyReference);
-    
-    // get identifier id from key id in header.
-    const token : JwsToken = await JwsToken.deserialize(jws, <IJwsSigningOptions> {
-      cryptoFactory: this.cryptoFactory});
-    const tokenHeaders = token.getHeader();
-    const kid = tokenHeaders.get('kid').split('#');
-    const id = kid[0];
-
-    // create User Agent Options for Identifier
-    const options = new UserAgentOptions();
-    options.resolver = this.resolver;
-
-    const identifier = new Identifier(id, options);
-    const payload = await identifier.verify(jws);
-    return JSON.parse(payload);
-  }
-
-  /**
-   * Wrapping method for wrapping requests/responses.
-   * Sign a payload using [PrivateKey] in client's keystore and encrypt payload using [PublicKey] 
-   * @param payload the payload to be signed and encrypted by client Identifier.
-   */
-  public async signAndEncrypt(keyReference: string, payload: any, receiverId: string): Promise<string> {
-
-    let stringifiedPayload: string;
-    if (typeof(payload) === 'string') {
-      stringifiedPayload = payload;
-    } else {
-      stringifiedPayload = JSON.stringify(payload);
+ import Identifier from '../../../Identifier';
+ import IResolver from '../../../resolvers/IResolver';
+ import JwsToken from '../jose/jws/JwsToken';
+ import CryptoFactory from '../../plugin/CryptoFactory';
+ import UserAgentOptions from '../../../UserAgentOptions';
+ import IKeyStore from '../../keyStore/IKeyStore';
+ import { IJwsSigningOptions } from '../jose/IJoseOptions';
+ import { PublicKey } from '../../..';
+ import { TSMap } from 'typescript-map';
+ import JoseConstants from '../jose/JoseConstants';
+ import CryptoProtocolError from '../CryptoProtocolError';
+ 
+ /**
+  * Named Arguments of Did Protocol
+  */
+ export interface DidProtocolOptions {
+   
+   /**
+    * Identifier who wants to send requests.
+    */
+   sender: Identifier;
+ 
+   /**
+    * Resolver for resolving identifier documents
+    */
+   resolver: IResolver;
+ 
+ }
+ 
+ /**
+  * Hub Protocol for decrypting/verifying and encrypting/signing payloads
+  */
+ export default class DidProtocol {
+ 
+   /**
+    * Client's Identifier to be used for signing and decrypting.
+    */
+   private sender: Identifier;
+ 
+   /**
+    * Resolver for resolving Identifier Documents
+    */
+    private resolver: IResolver;
+ 
+   /**
+    * Crypto factory defining the crypto API
+    */
+    private cryptoFactory: CryptoFactory;
+ 
+   /**
+    * Key store for storing keys
+    */
+    private keyStore: IKeyStore;
+ 
+    /**
+     * User agent options
+     */
+    private options: UserAgentOptions;
+ 
+   /**
+    * Authentication constructor
+    * @param options Arguments to a constructor in a named object
+    */
+   constructor (options: DidProtocolOptions) {
+     this.sender = options.sender;
+     this.resolver = options.resolver;
+     this.options = <UserAgentOptions>this.sender.options;
+     this.cryptoFactory = this.options.cryptoFactory;
+     this.keyStore = this.options.keyStore;
+   }
+ 
+   /**
+    * Unwrapping method for unwrapping requests/responses.
+    * Decrypt a cipher using [PrivateKey] of Client Identifier and then verify payload.
+    * @param encryptionKeyReference key reference of private key in keystore used to decrypt.
+    * @param cipher the cipher to be decrypted and verified by client Identifier.
+    */
+   public async decryptAndVerify(encryptionKeyReference: string, cipher: Buffer): Promise<any> {
+     
+     // decrypt payload.
+     const jws = await this.sender.decrypt(cipher, encryptionKeyReference);
+     
+     // get identifier id from key id in header.
+     const options = <IJwsSigningOptions> {
+       cryptoFactory: this.cryptoFactory};
+     const token : JwsToken = await JwsToken.deserialize(jws, options);
+     let kid = undefined;
+     if (token.signatures[0].protected && token.signatures[0].protected.get(JoseConstants.Kid)) {
+       kid = token.signatures[0].protected.get(JoseConstants.Kid);
+     } else if (token.signatures[0].header && token.signatures[0].header.get(JoseConstants.Kid)) {
+       kid = token.signatures[0].header.get(JoseConstants.Kid);
+     }
+ 
+     if (!kid) {
+       throw new CryptoProtocolError('DidProtocol', 'The jws token does not contain a kid in protected or header');
+     }
+ 
+     const id = kid.split('#')[0];
+ 
+     const identifier = new Identifier(id, this.options);
+     let payload = await identifier.verify(jws);
+     return JSON.parse(payload);
     }
-    
-    const jws = await this.sender.sign(stringifiedPayload, keyReference);
-
-    // create User Agent Options for Identifier
-    const options = new UserAgentOptions();
-    options.resolver = this.resolver;
-
-    const receiverIdentifier = new Identifier(receiverId, options);
-    return receiverIdentifier.encrypt(jws);
-  }
-
-}
+ 
+   /**
+    * Wrapping method for wrapping requests/responses.
+    * Sign a payload using [PrivateKey] in client's keystore and encrypt payload using [PublicKey] 
+    * @param payload the payload to be signed and encrypted by client Identifier.
+    * #param receiverId identifier for the receiver.
+    */
+   public async signAndEncrypt(payload: any, receiverId: string): Promise<string> {
+ 
+     let stringifiedPayload: string;
+     if (typeof(payload) === 'string') {
+       stringifiedPayload = payload;
+     } else {
+       stringifiedPayload = JSON.stringify(payload);
+     }
+     
+     const jws = await this.sender.sign(stringifiedPayload, <string>(<UserAgentOptions>this.sender.options).cryptoOptions.signingKeyReference);
+ 
+     // create User Agent Options for Identifier
+ 
+     const receiverIdentifier = new Identifier(receiverId, this.options);
+     return receiverIdentifier.encrypt(jws);
+   }
+ 
+ }

@@ -17,6 +17,7 @@ import Identifier from '../Identifier';
 import DidProtocol, { DidProtocolOptions } from '../crypto/protocols/did/DidProtocol';
 import HttpResolver from '../resolvers/HttpResolver';
 import IResolver from '../resolvers/IResolver';
+import UserAgentError from '../UserAgentError';
 
 /**
  * Options for instantiating a new Hub session.
@@ -29,10 +30,16 @@ export class HubSessionOptions {
   client?: Identifier;
 
   /**
-   * The private key to use for decrypting/signing when communicating with the Hub. Must be
+   * The reference to the private key to use for signing when communicating with the Hub. Must be
    * registered in the DID document of the clientDid.
    */
-  clientPrivateKeyReference: string = '';
+  signingKeyReference: string | undefined;
+
+  /**
+   * The reference to the private key to use for decrypting the hub communication. Must be
+   * registered in the DID document of the clientDid.
+   */
+  encryptionKeyReference: string | undefined;
 
   /** 
    * The Identfier of the owner of the Hub with which we will be communicating. 
@@ -59,14 +66,16 @@ export default class HubSession {
   private hubId: string;
   private hubEndpoint: string;
   private hubOwner?: Identifier;
-  private keyReference: string;
+  private signingKeyReference: string | undefined;
+  private encryptionKeyReference: string | undefined;
 
   constructor(options: HubSessionOptions) {
     this.client = options.client;
     this.hubId = options.hubId;
     this.hubEndpoint = options.hubEndpoint;
     this.hubOwner = options.hubOwner;
-    this.keyReference = options.clientPrivateKeyReference;
+    this.signingKeyReference = options.signingKeyReference;
+    this.encryptionKeyReference = options.encryptionKeyReference;
   }
 
   /**
@@ -92,6 +101,7 @@ export default class HubSession {
     rawRequestJson.aud = this.hubId;
     rawRequestJson.sub = this.hubOwner.id;
 
+    //rawRequestJson.commit = rawRequestJson.commit.serialize();
     const rawRequestString = JSON.stringify(rawRequestJson);
     const response = await this.makeRequest(rawRequestString);
     let responseObject: IHubResponse<string>;
@@ -137,7 +147,11 @@ export default class HubSession {
       resolver
     };
     const didProtocol = new DidProtocol(didProtocolOptions);
-    const request = await didProtocol.signAndEncrypt(this.keyReference, message, this.hubId);
+    if (!this.signingKeyReference) {
+      throw new UserAgentError('Signing key reference is not defined');
+    }
+
+    const request = await didProtocol.signAndEncrypt(message, this.hubId);
   
     const res = await this.callFetch(this.hubEndpoint, {
       method: 'POST',
@@ -154,7 +168,7 @@ export default class HubSession {
     }
 
     const response = await res.buffer();
-    return didProtocol.decryptAndVerify(this.keyReference, response);
+    return didProtocol.decryptAndVerify(<string>this.encryptionKeyReference, response);
   }
 
   /**

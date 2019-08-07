@@ -7,4 +7,19 @@ import { TSMap } from "typescript-map";
 /**
  * Genereric type to model crypto tokens
  */
-export type ICryptoToken = TSMap<string, any>;
+export interface ICryptoToken extends TSMap<string, any> {
+  /**
+   * get the format of the crypto token
+   */
+  tokenFormat(): string;
+
+  /**
+   * Serialize a a @interface ICryptoToken 
+   */
+   serialize(): string;
+  
+  /**
+   * Convert token to json 
+   */
+   toJson(): any;
+  }

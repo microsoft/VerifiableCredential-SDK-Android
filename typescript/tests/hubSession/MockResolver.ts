@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IDidResolver, DidDocument } from '@decentralized-identity/did-common-typescript';
-import { PublicKey } from '@decentralized-identity/did-auth-jose';
+import PublicKey from '../../src/crypto/keys/PublicKey';
 
 /**
  * Mock implementation of a DidResolver which will return the configured DID documents.
@@ -41,7 +41,7 @@ export default class MockResolver implements IDidResolver {
       didDocument: new DidDocument({
         "@context": "https://w3id.org/did/v1",
         id: did,
-        publicKey: [{
+        publicKey: <any>[{
           id: key.kid,
           type: 'RsaVerificationKey2018',
           controller: did,

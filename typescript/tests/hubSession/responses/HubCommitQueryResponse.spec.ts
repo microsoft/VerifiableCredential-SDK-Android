@@ -4,22 +4,28 @@
  *--------------------------------------------------------------------------------------------*/
 
 import HubCommitQueryResponse from '../../../src/hubSession/responses/HubCommitQueryResponse';
+import JoseToken from '../../../src/crypto/protocols/jose/JoseToken';
+import ProtocolTest from '../../crypto/protocols/jose/ProtocolTest';
+import JoseConstants from '../../../src/crypto/protocols/jose/JoseConstants';
+import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
+import IPayloadProtectionOptions from '../../../src/crypto/protocols/IPayloadProtectionOptions';
 
-const flattenedCommitJson = {
-  protected: 'test',
-  payload: 'test',
-  signature: 'test',
-};
+const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+  [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+  [JoseConstants.tokenPayload, 'test'],
+  [JoseConstants.tokenProtected, 'test'],
+  [JoseConstants.tokenSignatures, ['test']]]);
 
 describe('HubCommitQueryResponse', () => {
 
   let response: HubCommitQueryResponse;
 
   beforeAll(() => {
+    
     response = new HubCommitQueryResponse({
       '@context': 'https://schema.identity.foundation/0.1',
       '@type': 'CommitQueryResponse',
-      commits: [flattenedCommitJson],
+      commits: [token],
       skip_token: 'abc',
     });
   });
@@ -42,7 +48,7 @@ describe('HubCommitQueryResponse', () => {
       const returnedCommits = await response.getCommits();
 
       expect(returnedCommits.length).toEqual(1);
-      expect(returnedCommits[0].toFlattenedJson()).toEqual(flattenedCommitJson);
+      expect(returnedCommits[0].toFlattenedJson()).toEqual(token);
     });
   });
 

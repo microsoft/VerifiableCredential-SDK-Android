@@ -4,27 +4,36 @@
  *--------------------------------------------------------------------------------------------*/
 
 import HubCommitWriteRequest from '../../../src/hubSession/requests/HubCommitWriteRequest';
-import SignedCommit from '../../../src/hubSession/SignedCommit';
+import JoseToken from '../../../src/crypto/protocols/jose/JoseToken';
+import { ProtectionFormat } from '../../../src/crypto/keyStore/ProtectionFormat';
+import JoseConstants from '../../../src/crypto/protocols/jose/JoseConstants';
+import IPayloadProtectionOptions from '../../../src/crypto/protocols/IPayloadProtectionOptions';
+import ProtocolTest from '../../crypto/protocols/jose/ProtocolTest';
+import { TSMap } from 'typescript-map';
+import JoseProtocol from '../../../src/crypto/protocols/jose/JoseProtocol';
 
 describe('HubWriteRequest', () => {
 
   describe('getRequestJson()', () => {
     it('should return a complete request body', async () => {
-
-      const flattenedCommitJson = {
-        protected: 'test',
-        payload: 'test',
-        signature: 'test',
+      const  options = <any> {
+        payloadProtection: new JoseProtocol()
       };
+      const protectedHeader = new TSMap();
+      const flattenedCommitJson = new JoseToken(options, new ProtocolTest(), [
+        [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+        [JoseConstants.tokenPayload, 'test'],
+        [JoseConstants.tokenProtected, 'test'],
+        [JoseConstants.tokenSignatures, [{signature: 'test',protected: protectedHeader}]]]);
 
-      const req = new HubCommitWriteRequest(new SignedCommit(flattenedCommitJson));
+      const req = new HubCommitWriteRequest(flattenedCommitJson);
 
       const json = await req.getRequestJson();
 
       expect(json).toEqual({
         '@context': 'https://schema.identity.foundation/0.1',
         '@type': 'WriteRequest',
-        commit: flattenedCommitJson,
+        commit: '{"format":"JwsFlatJson","payload":"test","protected":"test","signatures":[{"signature":"test","protected":{}}]}',
       });
 
     });

@@ -7,7 +7,12 @@ import base64url from 'base64url';
 import { ICommitProtectedHeaders } from '@decentralized-identity/hub-common-js';
 import { alter } from './TestUtils';
 import CommitStrategyBasic from '../../src/hubSession/CommitStrategyBasic';
-import SignedCommit from '../../src/hubSession/SignedCommit';
+import ProtectedCommit from '../../src/hubSession/ProtectedCommit';
+import JoseToken from '../../src/crypto/protocols/jose/JoseToken';
+import ProtocolTest from '../crypto/protocols/jose/ProtocolTest';
+import JoseConstants from '../../src/crypto/protocols/jose/JoseConstants';
+import { ProtectionFormat } from '../../src/crypto/keyStore/ProtectionFormat';
+import IPayloadProtectionOptions from '../../src/crypto/protocols/IPayloadProtectionOptions';
 
 const commitHeaders: Partial<ICommitProtectedHeaders> = {
   interface: 'Collections',
@@ -29,13 +34,16 @@ let strategy: CommitStrategyBasic;
  * @param headers Headers to be merged with the default headers.
  */
 const buildSignedCommit = (headers: Partial<ICommitProtectedHeaders>, payload?: any) => {
-  const finalHeaders = alter(commitHeaders, headers);
-  const finalPayload = payload || { title: 'My Playlist' };
-  return new SignedCommit({
-    protected: base64url(JSON.stringify(finalHeaders)),
-    payload: base64url(JSON.stringify(finalPayload)),
-    signature: 'abcdef',
-  });
+const finalHeaders = alter(commitHeaders, headers);
+const finalPayload = payload || { title: 'My Playlist' };
+
+const token = new JoseToken(<IPayloadProtectionOptions> {}, new ProtocolTest(), [
+    [JoseConstants.tokenFormat, ProtectionFormat.JwsFlatJson],
+    [JoseConstants.tokenPayload, base64url(JSON.stringify(finalPayload))],
+    [JoseConstants.tokenProtected, base64url(JSON.stringify(finalHeaders))],
+    [JoseConstants.tokenSignatures, ['abcdef']]]);
+
+  return new ProtectedCommit(token);
 };
 
 /**
@@ -44,7 +52,7 @@ const buildSignedCommit = (headers: Partial<ICommitProtectedHeaders>, payload?: 
  * @param a The commit expected to come first.
  * @param b The commit expected to come second.
  */
-const expectBefore = async (a: SignedCommit, b: SignedCommit) => {
+const expectBefore = async (a: ProtectedCommit, b: ProtectedCommit) => {
   expect(strategy['compareCommits'](a, b)).toEqual(-1);
   expect(strategy['compareCommits'](b, a)).toEqual(1);
 };

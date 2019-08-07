@@ -25,4 +25,8 @@ describe('CryptoFactory', () => {
     const symmetricEncrypter = factory.getSymmetricEncrypter('*');
     expect(symmetricEncrypter).toBeDefined();
   })
+
+  it('should sign a message', async() => {
+    
+  })
 });

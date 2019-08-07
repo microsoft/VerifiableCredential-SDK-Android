@@ -42,7 +42,7 @@ class Helpers {
     options.registrar = registrar;
 
     const personaId = 'did:ion:test:identifier';
-    options.cryptoOptions!.authenticationSigningJoseAlgorithm = CryptoHelpers.webCryptoToJwa(alg);
+    options.cryptoOptions!.signingAlgorithm = CryptoHelpers.webCryptoToJwa(alg);
     let identifier = new Identifier(personaId, options);
     expect(personaId).toBe(<string> identifier.identifier);
 
@@ -98,7 +98,7 @@ describe('Pairwise Identifier', () => {
 
   it('should throw when creating a linked identifier and no registrar specified in user agent options', async () => {
     const personaId = 'did:ion:identifier';
-    options.cryptoOptions.authenticationSigningJoseAlgorithm = 'ES256K';
+    options.cryptoOptions.signingAlgorithm = 'ES256K';
     delete options.registrar;
     const identifier = new Identifier(personaId, options);
     let throwDetected: boolean = false;

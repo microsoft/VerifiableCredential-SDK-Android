@@ -25,7 +25,7 @@ export default class UserAgentOptions {
    * Instance of Registrar than can be used
    * to register identifiers.
    */
-   public registrar?: IRegistrar;
+  public registrar?: IRegistrar;
 
   /**
    * The timeout when making requests to
