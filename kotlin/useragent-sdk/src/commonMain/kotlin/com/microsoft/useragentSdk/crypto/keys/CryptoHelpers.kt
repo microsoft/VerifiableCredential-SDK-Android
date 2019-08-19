@@ -53,7 +53,7 @@ object CryptoHelpers {
                 return Algorithm (
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
-                        "hash" to Algorithm( name = "SHA-${matches[1]}")
+                        "hash" to Algorithm( name = "SHA-${matches.first().value}")
                     )
                 )
             }
@@ -82,12 +82,12 @@ object CryptoHelpers {
                 )
             }
             JoseConstants.Es256K.value -> EcdsaParams( name = "ECDSA",
-                    hash =  { name: 'SHA-256' },
+                    hash =  Algorithm( name = "SHA-256" ),
                 additionalParams = mapOf(
                     "namedCurve" to "P-256K",
                     "format" to "DER"
                 )
-            );
+            )
             else -> error("Algorithm $jwa is not supported")
         }
     }
