@@ -34,8 +34,8 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
 
         val keyType = KeyTypeFactory.createViaWebCrypto(algorithm);
         return when (keyType) {
-            KeyType.EllipticCurve -> EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);
-            KeyType.RSA ->RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
+//            KeyType.EllipticCurve -> EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);
+//            KeyType.RSA -> RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
             else -> error("Pairwise key for type '${keyType.value}' is not supported.");
         }
     }
