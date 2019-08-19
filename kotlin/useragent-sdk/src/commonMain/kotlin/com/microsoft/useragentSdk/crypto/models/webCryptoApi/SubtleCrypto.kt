@@ -1,43 +1,43 @@
 package com.microsoft.useragentSdk.crypto.models.webCryptoApi
 
 interface SubtleCrypto {
-    fun encrypt(algorithm: AlgorithmIdentifier,
+    fun encrypt(algorithm: Algorithm,
                 key: CryptoKey,
                 data: ByteArray): ByteArray
 
-    fun decrypt(algorithm: AlgorithmIdentifier,
+    fun decrypt(algorithm: Algorithm,
                 key: CryptoKey,
                 data: ByteArray): ByteArray
 
-    fun sign(algorithm: AlgorithmIdentifier,
+    fun sign(algorithm: Algorithm,
              key: CryptoKey,
              data: ByteArray): ByteArray
 
-    fun verify(algorithm: AlgorithmIdentifier,
+    fun verify(algorithm: Algorithm,
                key: CryptoKey,
                signature: ByteArray,
                data: ByteArray): ByteArray
 
-    fun digest(algorithm: AlgorithmIdentifier,
+    fun digest(algorithm: Algorithm,
     data: ByteArray): ByteArray
 
-    fun generateKey(algorithm: AlgorithmIdentifier,
+    fun generateKey(algorithm: Algorithm,
     extractable: Boolean,
     keyUsages: List<KeyUsage>): ByteArray;
 
-    fun deriveKey(algorithm: AlgorithmIdentifier,
+    fun deriveKey(algorithm: Algorithm,
                   baseKey: CryptoKey,
-                  derivedKeyType: AlgorithmIdentifier,
+                  derivedKeyType: Algorithm,
                   extractable: Boolean,
                   keyUsages: List<KeyUsage> ): ByteArray
 
-    fun deriveBits(algorithm: AlgorithmIdentifier,
+    fun deriveBits(algorithm: Algorithm,
                    baseKey: CryptoKey,
                    length: ULong ): ByteArray;
 
     fun importKey(format: KeyFormat,
                   keyData: KeyData,
-                  algorithm: AlgorithmIdentifier,
+                  algorithm: Algorithm,
                   extractable: Boolean,
                   keyUsages: List<KeyUsage>): CryptoKey;
 
@@ -46,13 +46,13 @@ interface SubtleCrypto {
     fun wrapKey(format: KeyFormat,
                 key: CryptoKey,
                 wrappingKey: CryptoKey,
-                wrapAlgorithm: AlgorithmIdentifier): ByteArray
+                wrapAlgorithm: Algorithm): ByteArray
 
     fun unwrapKey(format: KeyFormat,
                   wrappedKey: ByteArray,
                   unwrappingKey: CryptoKey,
-                  unwrapAlgorithm: AlgorithmIdentifier,
-                  unwrappedKeyAlgorithm: AlgorithmIdentifier,
+                  unwrapAlgorithm: Algorithm,
+                  unwrappedKeyAlgorithm: Algorithm,
                   extractable: Boolean,
                   keyUsages: List<KeyUsage> ): CryptoKey;
 }

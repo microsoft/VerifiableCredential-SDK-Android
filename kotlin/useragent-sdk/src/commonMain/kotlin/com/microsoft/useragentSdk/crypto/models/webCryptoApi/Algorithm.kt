@@ -6,4 +6,6 @@ open class Algorithm(name: String, additionalParams: Map<String, Any>):
     constructor(name: String) : this(name, emptyMap()) {
     }
 
+    val name: String
+        get() = get("name") as String
 }

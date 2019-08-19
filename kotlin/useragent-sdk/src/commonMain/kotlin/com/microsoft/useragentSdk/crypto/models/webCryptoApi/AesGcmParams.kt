@@ -10,4 +10,13 @@ class AesGcmParams(name: String, iv: ByteArray, additionalData: ByteArray, tagLe
     // iv may be up to 2^64-1 bytes long.
     // tagLength must be enforced between 0 and 128
     constructor(name: String, iv: ByteArray, additionalData: ByteArray, tagLength: Byte): this(name, iv, additionalData, tagLength, emptyMap()) {}
+
+    val iv: ByteArray
+        get() = get("iv") as ByteArray
+
+    val additionalData: ByteArray
+        get() = get("additionalData") as ByteArray
+
+    val tagLength: Byte
+        get() = get("tagLength") as Byte
 }

@@ -4,4 +4,7 @@ class EcdsaParams(name: String, hash: Algorithm, additionalParams: Map<String, A
     additionalParams + mapOf("hash" to hash)) {
 
     constructor(name: String, hash: Algorithm): this(name, hash, emptyMap())
+
+    val hash: Algorithm
+        get() = get("hash") as Algorithm
 }
