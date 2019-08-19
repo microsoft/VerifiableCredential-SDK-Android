@@ -2,7 +2,7 @@ package com.microsoft.useragentSdk.crypto.keys.ellipticCurve
 
 import com.microsoft.useragentSdk.crypto.keys.KeyType
 import com.microsoft.useragentSdk.crypto.keys.PublicKey
-import com.microsoft.useragentSdk.crypto.models.JsonWebKey
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.JsonWebKey
 
  class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
      override fun getThumbprint(): String {

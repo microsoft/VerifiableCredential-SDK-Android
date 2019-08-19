@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.useragentSdk.crypto.keys
 
-import com.microsoft.useragentSdk.crypto.models.*
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.*
 import com.microsoft.useragentSdk.crypto.plugins.CryptoFactory
 import com.microsoft.useragentSdk.crypto.protocols.jose.JoseConstants
 
@@ -59,19 +59,24 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
         val crypto: SubtleCrypto = this.cryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value);
 
         // Generate the master key
-        val alg: Algorithm = EcdsaParams(
-            name = W3cCryptoApiConstants.Hmac.value,
-            hash = Algorithm(
-                W3cCryptoApiConstants.Sha512.value)
-            )
-        val masterJwk: KeyData = KeyData(
-            jwk = JsonWebKey(
-                kty = KeyType.Octets.value,
-                alg = JoseConstants.Hs512.value,
-                k = jwk.k
+        val alg: Algorithm =
+            EcdsaParams(
+                name = W3cCryptoApiConstants.Hmac.value,
+                hash = Algorithm(
+                    W3cCryptoApiConstants.Sha512.value
                 )
-        )
-        val key = crypto.importKey(KeyFormat.Jwk, masterJwk, alg, false, listOf(KeyUsage.Sign));
+            )
+        val masterJwk: KeyData =
+            KeyData(
+                jwk = JsonWebKey(
+                    kty = KeyType.Octets.value,
+                    alg = JoseConstants.Hs512.value,
+                    k = jwk.k
+                )
+            )
+        val key = crypto.importKey(
+            KeyFormat.Jwk, masterJwk, alg, false, listOf(
+                KeyUsage.Sign));
         val masterKey = crypto.sign(alg, key, personaId.map { it.toByte() }.toByteArray());
         this.masterKeys[personaId] = masterKey;
         return masterKey;

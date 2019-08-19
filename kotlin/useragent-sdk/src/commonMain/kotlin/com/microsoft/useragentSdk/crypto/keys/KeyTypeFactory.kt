@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.useragentSdk.crypto.keys
 
-import com.microsoft.useragentSdk.crypto.models.Algorithm
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.Algorithm
 
 /**
  * Factory class to create @enum KeyType objects

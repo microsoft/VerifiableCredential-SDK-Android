@@ -1,7 +1,7 @@
 package com.microsoft.useragentSdk.crypto.keys
 
-import com.microsoft.useragentSdk.crypto.models.JsonWebKey
-import com.microsoft.useragentSdk.crypto.models.KeyUsage
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.useragentSdk.crypto.models.KeyUse
 
 /**

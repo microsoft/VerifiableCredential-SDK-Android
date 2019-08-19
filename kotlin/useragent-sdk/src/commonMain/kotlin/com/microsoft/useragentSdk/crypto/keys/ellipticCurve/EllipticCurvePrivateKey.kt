@@ -3,7 +3,7 @@ package com.microsoft.useragentSdk.crypto.keys.ellipticCurve
 import com.microsoft.useragentSdk.crypto.keys.KeyType
 import com.microsoft.useragentSdk.crypto.keys.PrivateKey
 import com.microsoft.useragentSdk.crypto.keys.PublicKey
-import com.microsoft.useragentSdk.crypto.models.JsonWebKey
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.JsonWebKey
 
 class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     var crv = key.crv
@@ -14,12 +14,14 @@ class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     var d = key.d
 
     override fun getPublicKey(): PublicKey {
-        return EllipticCurvePublicKey(JsonWebKey(
-            kty = this.kty.value,
-            alg = this.alg,
-            crv = this.crv,
-            x = this.x,
-            y = this.y
-        ))
+        return EllipticCurvePublicKey(
+            JsonWebKey(
+                kty = this.kty.value,
+                alg = this.alg,
+                crv = this.crv,
+                x = this.x,
+                y = this.y
+            )
+        )
     }
 }

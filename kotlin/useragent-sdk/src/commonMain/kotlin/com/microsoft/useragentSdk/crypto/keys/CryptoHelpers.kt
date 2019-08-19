@@ -4,9 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.useragentSdk.crypto.keys
 
-import com.microsoft.useragentSdk.crypto.models.Algorithm
-import com.microsoft.useragentSdk.crypto.models.RsaPssParams
-import com.microsoft.useragentSdk.crypto.models.W3cCryptoApiConstants
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.*
 import com.microsoft.useragentSdk.crypto.protocols.jose.JoseConstants
 
 object CryptoHelpers {
@@ -43,35 +41,53 @@ object CryptoHelpers {
      * The method restricts the supported algorithms. This can easily be extended.
      * Based on https://www.w3.org/TR/WebCryptoAPI/ A. Mapping between JSON Web Key / JSON Web Algorithm
      * @param jwaAlgorithmName Requested algorithm
+     * @see https://www.w3.org/TR/WebCryptoAPI/#jwk-mapping
      */
     fun jwaToWebCrypto(jwa: String, vararg args: List<Any>): Algorithm {
         val regex = Regex("\\d+")
-        TODO("the typescript method does not specify the Algorithm Params returned between different alg cases. " +
-                "These Algorithm Parameters must be defined as inherited classes in the models (like RsaPssParams or EcdsaParams)")
         return when (jwa.toUpperCase()) {
             JoseConstants.Rs256.value,
             JoseConstants.Rs384.value,
             JoseConstants.Rs512.value -> {
                 val matches = regex.findAll(jwa)
-                return RsaPssParams(
+                return Algorithm (
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
-                    saltLength = matches.first().value.toULong()
+                    additionalParams = mapOf(
+                        "hash" to Algorithm( name = "SHA-${matches[1]}")
+                    )
                 )
             }
-            JoseConstants.RsaOaep.value,
-            JoseConstants.RsaOaep256.value -> RsaPssParams(
-                name = 'RSA-OAEP',
-                saltLength = ULong(256))
+            JoseConstants.RsaOaep.value, // According to the spec, this should point to SHA-1
+            JoseConstants.RsaOaep256.value -> RsaOaepParams(
+                name = "RSA-OAEP",
+                additionalParams = mapOf(
+                    "hash" to Algorithm ( name = "SHA-256")
+                )
+            )
             JoseConstants.AesGcm128.value,
             JoseConstants.AesGcm192.value,
             JoseConstants.AesGcm256.value -> {
-                val iv = args[0]
-                val aad = args[1]
+                val iv = args[0] as ByteArray
+                val aad = args[1] as ByteArray
                 val matches = regex.findAll(jwa)
-                val length = matches.first().value.toInt()
-                return { name: W3cCryptoApiConstants.AesGcm.value, iv: iv, additionalData: aad, tagLength: 128, length: length }
+                val length = matches.first().value.toUShort()
+                return AesGcmParams(
+                    name = W3cCryptoApiConstants.AesGcm.value,
+                    iv = iv,
+                    additionalData = aad,
+                    tagLength = 128.toByte(),
+                    additionalParams = mapOf(
+                        "length" to length
+                    )
+                )
             }
-            JoseConstants.Es256K.value -> EcdsaParams{ name: 'ECDSA', namedCurve: 'P-256K', hash: { name: 'SHA-256' }, format: 'DER' };
+            JoseConstants.Es256K.value -> EcdsaParams( name = "ECDSA",
+                    hash =  { name: 'SHA-256' },
+                additionalParams = mapOf(
+                    "namedCurve" to "P-256K",
+                    "format" to "DER"
+                )
+            );
             else -> error("Algorithm $jwa is not supported")
         }
     }

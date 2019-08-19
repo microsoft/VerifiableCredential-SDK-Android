@@ -1,7 +1,7 @@
 package com.microsoft.useragentSdk.crypto.plugins
 
 import com.microsoft.useragentSdk.crypto.keyStore.IKeyStore
-import com.microsoft.useragentSdk.crypto.models.SubtleCrypto
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.SubtleCrypto
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.

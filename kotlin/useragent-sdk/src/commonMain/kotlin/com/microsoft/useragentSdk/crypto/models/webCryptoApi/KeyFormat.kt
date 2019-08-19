@@ -1,4 +1,4 @@
-package com.microsoft.useragentSdk.crypto.models
+package com.microsoft.useragentSdk.crypto.models.webCryptoApi
 
 /**
  * Specifies a serialization format for a key.

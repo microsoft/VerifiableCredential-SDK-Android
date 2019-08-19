@@ -1,4 +1,4 @@
-package com.microsoft.useragentSdk.crypto.models
+package com.microsoft.useragentSdk.crypto.models.webCryptoApi
 
 /**
  * A type of operation that may be performed using a key.

@@ -1,4 +1,4 @@
-package com.microsoft.useragentSdk.crypto.models
+package com.microsoft.useragentSdk.crypto.models.webCryptoApi
 
 /** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
 data class RsaOtherPrimesInfo (val r: String, val d: String, val t: String)

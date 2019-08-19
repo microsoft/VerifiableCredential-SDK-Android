@@ -1,4 +1,4 @@
-package com.microsoft.useragentSdk.crypto.models
+package com.microsoft.useragentSdk.crypto.models.webCryptoApi
 
 interface CryptoKey {
     val type: KeyType

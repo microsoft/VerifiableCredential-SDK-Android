@@ -3,8 +3,8 @@ package com.microsoft.useragentSdk.crypto.keys
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import com.microsoft.useragentSdk.crypto.models.JsonWebKey
-import com.microsoft.useragentSdk.crypto.models.KeyUsage
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.useragentSdk.crypto.models.KeyUse
 
 /**

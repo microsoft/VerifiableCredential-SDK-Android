@@ -1,6 +1,6 @@
 package com.microsoft.useragentSdk.crypto.keys
 
-import com.microsoft.useragentSdk.crypto.models.JsonWebKey
+import com.microsoft.useragentSdk.crypto.models.webCryptoApi.JsonWebKey
 
 abstract class PrivateKey(key: JsonWebKey): PublicKey(key) {
     /**
