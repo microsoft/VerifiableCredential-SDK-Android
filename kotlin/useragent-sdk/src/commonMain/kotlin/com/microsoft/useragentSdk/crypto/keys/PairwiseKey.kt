@@ -66,13 +66,10 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
                     W3cCryptoApiConstants.Sha512.value
                 )
             )
-        val masterJwk: KeyData =
-            KeyData(
-                jwk = JsonWebKey(
-                    kty = KeyType.Octets.value,
-                    alg = JoseConstants.Hs512.value,
-                    k = jwk.k
-                )
+        val masterJwk = JsonWebKey(
+                kty = KeyType.Octets.value,
+                alg = JoseConstants.Hs512.value,
+                k = jwk.k
             )
         val key = crypto.importKey(
             KeyFormat.Jwk, masterJwk, alg, false, listOf(

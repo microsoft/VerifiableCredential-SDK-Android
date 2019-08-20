@@ -116,20 +116,18 @@ class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
         var keyData: ByteArray
         if (format == KeyFormat.Jwk) {
             val keyJwk = this.exportKeyJwk(key)
-            keyJwk.
+            val jwkSequence = keyJwk.toJson().asSequence()
+            keyData = ByteArray(jwkSequence.count())
+            jwkSequence.forEachIndexed { index, character ->
+                keyData[index] = character.toByte()
+            }
         } else {
             keyData = this.exportKey(format, key);
         }
-        if (format === "jwk") {
-            const json = JSON.stringify(keyData);
-            keyData = Convert.FromUtf8String(json);
-        }
 
         // encrypt key data
-        const preparedAlgorithm = this.prepareAlgorithm(wrapAlgorithm);
-        const preparedData = BufferSourceConverter.toArrayBuffer(keyData as ArrayBuffer);
-        const provider = this.getProvider(preparedAlgorithm.name);
-        return provider.encrypt({ ...preparedAlgorithm, name: provider.name }, wrappingKey, preparedData, { keyUsage: false });
+        val provider = this.getProvider(wrapAlgorithm.name);
+        return provider.encrypt(wrapAlgorithm, wrappingKey, keyData);
     }
 
     override fun unwrapKey(
@@ -141,6 +139,20 @@ class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
         extractable: Boolean,
         keyUsages: List<KeyUsage>
     ): CryptoKey {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // decrypt wrapped key
+        val provider = this.getProvider(unwrapAlgorithm.name);
+        val keyData = provider.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey);
+        if (format == KeyFormat.Jwk) {
+            try {
+                val jwk = JsonWebKey(keyData.toList().joinToString());
+                // import key
+                return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
+            } catch (error: Error) {
+                throw Error("wrappedKey is not a JSON web key")
+            }
+        }
+
+        // import key
+        return this.importKey(format, keyData, unwrappedKeyAlgorithm, extractable, keyUsages)
     }
 }
