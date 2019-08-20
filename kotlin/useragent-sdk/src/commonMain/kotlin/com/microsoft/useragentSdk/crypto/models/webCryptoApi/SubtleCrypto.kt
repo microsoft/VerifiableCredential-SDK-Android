@@ -22,26 +22,38 @@ interface SubtleCrypto {
     data: ByteArray): ByteArray
 
     fun generateKey(algorithm: Algorithm,
-    extractable: Boolean,
-    keyUsages: List<KeyUsage>): ByteArray;
+                    extractable: Boolean,
+                    keyUsages: List<KeyUsage>): CryptoKey;
+
+    fun generateKeyPair(algorithm: Algorithm,
+                        extractable: Boolean,
+                        keyUsages: List<KeyUsage>): CryptoKeyPair;
 
     fun deriveKey(algorithm: Algorithm,
                   baseKey: CryptoKey,
                   derivedKeyType: Algorithm,
                   extractable: Boolean,
-                  keyUsages: List<KeyUsage> ): ByteArray
+                  keyUsages: List<KeyUsage> ): CryptoKey
 
     fun deriveBits(algorithm: Algorithm,
                    baseKey: CryptoKey,
                    length: ULong ): ByteArray;
 
     fun importKey(format: KeyFormat,
-                  keyData: KeyData,
+                  keyData: ByteArray,
                   algorithm: Algorithm,
                   extractable: Boolean,
                   keyUsages: List<KeyUsage>): CryptoKey;
 
+    fun importKey(format: KeyFormat,
+                  keyData: JsonWebKey,
+                  algorithm: Algorithm,
+                  extractable: Boolean,
+                  keyUsages: List<KeyUsage>): CryptoKey
+
     fun exportKey(format: KeyFormat, key: CryptoKey): ByteArray
+
+    fun exportKeyJwk(key: CryptoKey): JsonWebKey
 
     fun wrapKey(format: KeyFormat,
                 key: CryptoKey,

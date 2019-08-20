@@ -8,36 +8,45 @@ abstract class Provider {
     public abstract val publicKeyUsage: Set<KeyUsage>?
     public abstract val symmetricKeyUsage: Set<KeyUsage>?
 
-    protected fun onDigest(algorithm: Algorithm, data: ByteArray): ByteArray {
+    protected open fun onDigest(algorithm: Algorithm, data: ByteArray): ByteArray {
         throw Error("Digest not supported.")
     }
-    protected fun onGenerateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
+    protected open fun onGenerateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
         throw Error("GenerateKey not supported.")
     }
-    protected fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+    protected open fun onGenerateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
+        throw Error("GenerateKeyPair not supported.")
+    }
+    protected open fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         throw Error("Sign not supported.")
     }
-    protected fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
+    protected open fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         throw Error("Verify not supported.")
     }
-    protected fun onEncrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+    protected open fun onEncrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         throw Error("Encrypt not supported.")
     }
-    protected fun onDecrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+    protected open fun onDecrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         throw Error("Decrypt not supported.")
     }
-    protected fun onDeriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
+    protected open fun onDeriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
         throw Error("DeriveBits not supported.")
     }
-    protected fun onExportKey(format: KeyFormat, key: CryptoKey): KeyData {
+    protected open fun onExportKey(format: KeyFormat, key: CryptoKey): ByteArray {
         throw Error("ExportKey not supported.")
     }
-    protected fun onImportKey(format: KeyFormat, keyData: KeyData, algorithm: Algorithm,
+    protected open fun onExportKeyJwk(key: CryptoKey): JsonWebKey {
+        throw Error("ExportKeyJwk not supported.")
+    }
+    protected open fun onImportKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm,
                               extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
         throw Error("ImportKey not supported.")
     }
-
-    protected fun checkGenerateKeyParams(algorithm: Algorithm) {
+    protected open fun onImportKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm,
+                                   extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
+        throw Error("ImportKey not supported.")
+    }
+    protected open fun checkGenerateKeyParams(algorithm: Algorithm) {
         throw Error("GenerateKey params check not implemented")
     }
 
@@ -48,6 +57,10 @@ abstract class Provider {
     public fun generateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
         checkGenerateKey(algorithm, extractable, keyUsages)
         return onGenerateKey(algorithm, extractable, keyUsages)
+    }
+    public fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
+        checkGenerateKey(algorithm, extractable, keyUsages)
+        return onGenerateKeyPair(algorithm, extractable, keyUsages)
     }
     public fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         checkSign(algorithm, key)
@@ -69,16 +82,30 @@ abstract class Provider {
         checkDeriveBits(algorithm, baseKey, length)
         return  onDeriveBits(algorithm, baseKey, length)
     }
-    public fun exportKey(format: KeyFormat, key: CryptoKey): KeyData {
+    public fun exportKey(format: KeyFormat, key: CryptoKey): ByteArray {
         checkExportKey(format, key)
         return onExportKey(format, key)
     }
-    public fun importKey(format: KeyFormat, keyData: KeyData, algorithm: Algorithm, extractable: Boolean,
+    public fun exportKeyJwk(key: CryptoKey): JsonWebKey {
+        checkExportKey(KeyFormat.Jwk, key)
+        return onExportKeyJwk(key)
+    }
+    public fun importKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
-        checkImportKey(format, keyData, algorithm, extractable, keyUsages)
+        if (format == KeyFormat.Jwk) {
+            throw Error("KeyData does not match format")
+        }
+        checkImportKey(format, algorithm, extractable, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
     }
-
+    public fun importKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm, extractable: Boolean,
+                         keyUsages: Set<KeyUsage>): CryptoKey {
+        if (format != KeyFormat.Jwk) {
+            throw Error("KeyData does not match format")
+        }
+        checkImportKey(format, algorithm, extractable, keyUsages)
+        return onImportKey(format, keyData, algorithm, extractable, keyUsages)
+    }
 
     private fun checkDigest(algorithm: Algorithm) {
         checkAlgorithmName(algorithm)
@@ -129,8 +156,7 @@ abstract class Provider {
             throw Error("Key is not extractable")
         }
     }
-    private fun checkImportKey(format: KeyFormat, keyData: KeyData, algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
-        checkKeyData(format, keyData)
+    private fun checkImportKey(format: KeyFormat, algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
         checkAlgorithmName(algorithm)
         checkAlgorithmParams(algorithm)
         checkImportParams(algorithm)
@@ -173,23 +199,5 @@ abstract class Provider {
 
     protected open fun checkImportParams(algorithm: Algorithm) {
         // there are no generic checks to perform
-    }
-
-    protected open fun checkKeyData(format: KeyFormat, keyData: KeyData) {
-        if (keyData.data == null && keyData.jwk == null) {
-            throw Error("keyData cannot be empty")
-        }
-        when (format) {
-            KeyFormat.Jwk -> {
-                if (keyData.jwk == null) {
-                    throw Error("keyData is not a Json Web Token")
-                }
-            }
-            else -> {
-                if (keyData.data == null) {
-                    throw Error("keyData is not a ByteArray")
-                }
-            }
-        }
     }
 }
