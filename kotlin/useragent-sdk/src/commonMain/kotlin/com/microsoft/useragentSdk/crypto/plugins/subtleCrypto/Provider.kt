@@ -49,6 +49,9 @@ abstract class Provider {
     protected open fun checkGenerateKeyParams(algorithm: Algorithm) {
         throw Error("GenerateKey params check not implemented")
     }
+    public open fun checkDerivedKeyParams(algorithm: Algorithm) {
+        throw Error("DerivedKey params check not implemented")
+    }
 
     public fun digest(algorithm: Algorithm, data: ByteArray): ByteArray {
         checkDigest(algorithm)
@@ -190,7 +193,7 @@ abstract class Provider {
         }
     }
 
-    protected open fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
+    public open fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
         checkAlgorithmName(key.algorithm)
         if (!key.usages.contains(keyUsage)) {
             throw Error("Key does not allow ${keyUsage.name}")

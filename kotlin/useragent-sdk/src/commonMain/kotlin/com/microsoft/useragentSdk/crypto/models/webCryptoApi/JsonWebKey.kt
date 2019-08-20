@@ -28,4 +28,55 @@ data class JsonWebKey(
     var qi: String? = null,
     var oth: List<RsaOtherPrimesInfo>? = null,
     var k: String? = null
-)
+) {
+    fun toJson(): String {
+        var json = StringBuilder()
+        json.append("{\"kty\": \"$kty\"")
+        appendIfNonNull("kid", kid, json)
+        appendIfNonNull("use", use, json)
+        appendIfNonNull("key_ops", key_ops, json) { it }
+        appendIfNonNull("alg", alg, json)
+        appendIfNonNull("ext", ext?.toString(), json)
+        appendIfNonNull("crv", crv, json)
+        appendIfNonNull("x", x, json)
+        appendIfNonNull("y", y, json)
+        appendIfNonNull("d", d, json)
+        appendIfNonNull("n", n, json)
+        appendIfNonNull("e", e, json)
+        appendIfNonNull("p", p, json)
+        appendIfNonNull("q", q, json)
+        appendIfNonNull("dp", dp, json)
+        appendIfNonNull("dq", dq, json)
+        appendIfNonNull("qi", qi, json)
+        appendIfNonNull("oth", oth, json) {
+            "{ \"r\": \"${it.r}\", \"d\": \"${it.d}\", \"t\": \"${it.t}\" }"
+        }
+        appendIfNonNull("k", k, json)
+        json.append("}")
+        return json.toString()
+    }
+
+    private fun appendIfNonNull(name: String, value: String?, builder: StringBuilder) {
+        if (value != null) {
+            builder.append(", \"$name\": \"$value\"")
+        }
+    }
+
+    private fun <E> appendIfNonNull(name: String, value: List<E>?, builder: StringBuilder, transform: (E) -> String) {
+        if (value != null) {
+            builder.append(", \"$name\": [")
+            val ops = value.iterator()
+            while(ops.hasNext()) {
+                val it = ops.next()
+                builder.append("\"${transform(it)}\"")
+                if (ops.hasNext()) {
+                    builder.append(", ")
+                }
+            }
+            builder.append("]")
+        }
+    }
+
+    constructor(json: String): this() {
+    }
+}

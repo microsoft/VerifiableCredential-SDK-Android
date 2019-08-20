@@ -16,7 +16,7 @@ interface SubtleCrypto {
     fun verify(algorithm: Algorithm,
                key: CryptoKey,
                signature: ByteArray,
-               data: ByteArray): ByteArray
+               data: ByteArray): Boolean
 
     fun digest(algorithm: Algorithm,
     data: ByteArray): ByteArray
