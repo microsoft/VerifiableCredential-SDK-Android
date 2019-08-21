@@ -39,6 +39,7 @@ abstract class PublicKey (key: JsonWebKey) {
     /**
      * Obtains the thumbprint for the jwk parameter
      * @param jwk JSON object representation of a JWK
+     * @see https://tools.ietf.org/html/rfc7638
      */
     abstract fun getThumbprint (): String;
 }

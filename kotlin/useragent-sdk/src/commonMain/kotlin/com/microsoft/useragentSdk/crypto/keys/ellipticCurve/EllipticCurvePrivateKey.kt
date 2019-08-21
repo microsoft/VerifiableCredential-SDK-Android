@@ -8,7 +8,7 @@ import com.microsoft.useragentSdk.crypto.models.webCryptoApi.JsonWebKey
 class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     override fun getThumbprint(): String {
         val publicKey = getPublicKey() as EllipticCurvePublicKey
-        return ellipticCurvePublicKeyThumbprint(publicKey)
+        return publicKey.getThumbprint()
     }
 
     var crv = key.crv

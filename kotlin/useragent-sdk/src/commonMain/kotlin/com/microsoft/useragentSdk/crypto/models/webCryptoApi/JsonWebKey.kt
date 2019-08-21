@@ -78,5 +78,6 @@ data class JsonWebKey(
     }
 
     constructor(json: String): this() {
+        TODO("JSON parse and assign values into this instance.")
     }
 }
