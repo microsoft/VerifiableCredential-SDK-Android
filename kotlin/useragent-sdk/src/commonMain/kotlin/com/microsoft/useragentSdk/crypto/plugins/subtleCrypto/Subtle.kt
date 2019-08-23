@@ -59,7 +59,7 @@ class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
         // check derivedKeyType
         val importProvider = this.getProvider(derivedKeyType.name);
         importProvider.checkDerivedKeyParams(derivedKeyType)
-        val deriveKeyLength = (derivedKeyType["length"] as ULong? ?: throw Error("DerivedKeyType must include a length parameter"))
+        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw Error("DerivedKeyType must include a length parameter"))
 
         // derive bits
         val provider = this.getProvider(algorithm.name);
