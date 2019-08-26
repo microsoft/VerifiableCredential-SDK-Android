@@ -41,5 +41,13 @@ enum class W3cCryptoApiConstants(val value: String) {
     /**
      * Define W3C algorithm constants
      */
-    Hmac("HMAC")
+    Hmac("HMAC"),
+
+    /**
+     * @see https://www.w3.org/TR/WebCryptoAPI/#dfn-NamedCurve
+     */
+    Secp256r1("P-256"),
+    Secp384r1("P-384"),
+    Secp521r1("P-521"),
+    Secp256k1("P-256K")
 }

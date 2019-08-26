@@ -15,6 +15,7 @@ class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
          json.forEachIndexed() { index, character ->
              jsonUtf8[index] = character.toByte()
          }
+         TODO("Get a SubtleCrypto or some way to hash, somehow.")
          val subtle: SubtleCrypto
          val hash = subtle.digest(Algorithm("SHA-512"), jsonUtf8)
          // undocumented, but assumed base64url of hash is returned
