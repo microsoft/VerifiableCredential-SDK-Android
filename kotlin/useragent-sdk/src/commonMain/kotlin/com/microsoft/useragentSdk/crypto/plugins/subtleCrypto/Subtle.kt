@@ -6,7 +6,7 @@ import com.microsoft.useragentSdk.crypto.models.webCryptoApi.SubtleCrypto
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
-class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
+open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
     val provider = providers.map({
         Pair<String, Provider>(it.name.toLowerCase(), it)
     }).toMap()

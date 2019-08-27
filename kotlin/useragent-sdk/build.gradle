@@ -6,6 +6,9 @@ repositories {
     mavenCentral()
     google()
     jcenter()
+    flatDir {
+        dirs("lib")
+    }
 }
 
 group 'com.microsoft'
@@ -40,6 +43,7 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation kotlin('stdlib-jdk8')
+                implementation ("org.bitcoin:org.bitcoin")
             }
         }
         jvmTest {
