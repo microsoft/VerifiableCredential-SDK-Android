@@ -33,10 +33,15 @@ version '0.0.1'
 
 android() {
     defaultConfig {
-        versionCode = 0
-        versionName = "0.1"
-        minSdkVersion = 19
-        compileSdkVersion = 29
+        versionCode 0
+        versionName "0.1"
+        minSdkVersion 19
+        compileSdkVersion 29
+    }
+    sourceSets {
+        main {
+            setRoot("src/android/main")
+        }
     }
 }
 
@@ -58,6 +63,11 @@ kotlin {
     // For Windows, should be changed to e.g. mingwX64
     macosX64("macos")
     sourceSets {
+        androidMain {
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+            }
+        }
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
@@ -80,8 +90,6 @@ kotlin {
                 implementation kotlin('test')
                 implementation kotlin('test-junit')
             }
-        }
-        android {
         }
         jsMain {
             dependencies {
