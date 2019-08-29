@@ -31,7 +31,7 @@ group 'com.microsoft.did.sdk'
 version '0.0.1'
 
 
-android() {
+android {
     defaultConfig {
         versionCode 0
         versionName "0.1"
@@ -40,14 +40,25 @@ android() {
     }
     sourceSets {
         main {
-            setRoot("src/android/main")
+            java.srcDir("src/androidMain/kotlin")
+            manifest.srcFile("src/androidMain/AndroidManifest.xml")
+            resources.srcDir("src/androidMain/resources")
+            dependencies {
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+                implementation ("org.bitcoin:org.bitcoin")
+            }
+        }
+        debug {
+            jniLibs.srcDir("src/androidMain/resources/jni")
+        }
+        release {
+            jniLibs.srcDir("src/androidMain/resources/jni")
         }
     }
 }
 
 kotlin {
-    android() {
-    }
+    android()
     jvm()
     iosArm64("ios")
     js {
@@ -66,6 +77,7 @@ kotlin {
         androidMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+                implementation ("org.bitcoin:org.bitcoin")
             }
         }
         commonMain {
@@ -82,7 +94,6 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation kotlin('stdlib-jdk8')
-                implementation ("org.bitcoin:org.bitcoin")
             }
         }
         jvmTest {
