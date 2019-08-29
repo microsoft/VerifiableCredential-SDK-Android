@@ -69,3 +69,6 @@ dist
 
 # nunit test results
 nunitresults.xml
+
+# macOS metadata files
+.DS_Store
