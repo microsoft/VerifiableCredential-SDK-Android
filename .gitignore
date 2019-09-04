@@ -72,3 +72,5 @@ nunitresults.xml
 
 # macOS metadata files
 .DS_Store
+
+*.iml
