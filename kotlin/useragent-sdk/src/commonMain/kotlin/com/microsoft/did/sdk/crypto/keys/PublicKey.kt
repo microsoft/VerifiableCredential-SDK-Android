@@ -8,7 +8,6 @@ import com.microsoft.did.sdk.crypto.models.KeyUse
  * Represents a Public Key in JWK format.
  * @class
  * @abstract
- * @hideconstructor
  */
 abstract class PublicKey (key: JsonWebKey) {
     /**
