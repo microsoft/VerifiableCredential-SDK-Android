@@ -17,7 +17,7 @@ class HttpResolver(url : String): IResolver {
      * to resolver specified Identifier
      * @param identifier to resolve
      */
-    override fun resolve(identifier: Identifier): IdentifierDocument {
+    override fun resolve(identifier: String): IdentifierDocument {
         TODO("not implemented")
     }
 }

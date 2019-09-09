@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk
 
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
@@ -18,14 +19,17 @@ const val defaultResolverUrl = "beta.ion.microsoft.com"
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class Agent (keyStore: IKeyStore,
-             registrationUrl: String = defaultRegistrationUrl,
+class Agent (registrationUrl: String = defaultRegistrationUrl,
              resolverUrl: String = defaultResolverUrl) {
 
     /**
+     * CryptoOperations
+     */
+    private val cryptoOperations =  CryptoOperations()
+    /**
      * Registrar to be used when registering Identifiers.
      */
-    private val registrar = SidetreeRegistrar(registrationUrl, keyStore)
+    private val registrar = SidetreeRegistrar(registrationUrl, cryptoOperations)
 
     /**
      * Resolver to be used when resolving Identifier Documents.

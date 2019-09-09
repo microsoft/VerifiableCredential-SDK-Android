@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.registrars
 
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.identifier.IdentifierDocument
 
@@ -8,9 +9,9 @@ import com.microsoft.did.sdk.identifier.IdentifierDocument
  * @class
  * @implements IRegistrar
  * @param url to the registration endpoint
- * @param keyStore
+ * @param cryptoOperations
  */
-class SidetreeRegistrar(url: String, keyStore: IKeyStore): IRegistrar {
+class SidetreeRegistrar(url: String, cryptoOperations: CryptoOperations): IRegistrar {
 
     /**
      * Registers the identifier document on the ledger

@@ -1,19 +1,18 @@
 package com.microsoft.did.sdk.identifier
 
 import com.microsoft.did.sdk.IResolver
-import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.registrars.IRegistrar
-import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 
 /**
  * Class for creating and managing identifiers,
  * retrieving identifier documents.
  * @class
- * @param keyStore to store keys associated with Identifier.
+ * @param cryptoOperations Crypto Operations.
  * @param resolver to resolve the Identifier Document for Identifier.
  * @param registrar to register Identifiers.
  */
-class Identifier(keyStore: IKeyStore?,
+class Identifier(cryptoOperations: CryptoOperations                                                                                                                                                                                                                                                                 ,
                  resolver: IResolver?,
                  registrar: IRegistrar?) {
 
@@ -27,9 +26,9 @@ class Identifier(keyStore: IKeyStore?,
      * Initialize Identifier with Identifier Document.
      */
     constructor(document: IdentifierDocument,
-                keyStore: IKeyStore?,
+                cryptoOperations: CryptoOperations,
                 resolver: IResolver?,
-                registrar: IRegistrar?): this(keyStore, resolver, registrar) {
+                registrar: IRegistrar?): this(cryptoOperations, resolver, registrar) {
         this.document = document
     }
 
@@ -37,9 +36,9 @@ class Identifier(keyStore: IKeyStore?,
      * Initialize Identifier with Identifier string.
      */
     constructor(identifier: String,
-                keyStore: IKeyStore?,
+                cryptoOperations: CryptoOperations,
                 resolver: IResolver?,
-                registrar: IRegistrar?): this(keyStore, resolver, registrar){
+                registrar: IRegistrar?): this(cryptoOperations, resolver, registrar){
         this.document = this.getDocument(identifier)
     }
 
