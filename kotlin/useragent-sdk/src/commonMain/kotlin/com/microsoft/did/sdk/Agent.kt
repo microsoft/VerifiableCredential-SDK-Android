@@ -22,8 +22,14 @@ class Agent (keyStore: IKeyStore,
              registrationUrl: String = defaultRegistrationUrl,
              resolverUrl: String = defaultResolverUrl) {
 
+    /**
+     * Registrar to be used when registering Identifiers.
+     */
     private val registrar = SidetreeRegistrar(registrationUrl, keyStore)
 
+    /**
+     * Resolver to be used when resolving Identifier Documents.
+     */
     private val resolver = HttpResolver(resolverUrl)
 
     /**
