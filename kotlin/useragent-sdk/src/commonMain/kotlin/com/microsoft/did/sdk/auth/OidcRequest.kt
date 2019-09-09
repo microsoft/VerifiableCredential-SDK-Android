@@ -11,15 +11,10 @@ const val scope = "openid did_authn"
  * @class
  */
 class OidcRequest(
-    val sender: Identifier,
-    val redirectUrl: String,
-    val nonce: String
+    sender: Identifier,
+    redirectUrl: String,
+    nonce: String
 ) {
-
-    /**
-     * Parses and verifies the OIDC Request
-     */
-    constructor(val request: String) {}
 
     /**
      * Respond to OIDC Request using identifier.

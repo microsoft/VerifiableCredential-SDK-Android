@@ -1,7 +1,15 @@
 package com.microsoft.did.sdk.identifier
 
+/**
+ * Class for creating and managing identifiers,
+ * retrieving identifier documents.
+ * @class
+ */
 class Identifier {
 
+    /**
+     * The identifier document for the identifier.
+     */
     private val document: IdentifierDocument
 
     /**
@@ -23,7 +31,7 @@ class Identifier {
     /**
      * Fetch Identifier Document from the Discovery Service.
      */
-    fun getDocument(identifier: String): IdentifierDocument {
+    private fun getDocument(identifier: String): IdentifierDocument {
         throw Error("Not Implemented")
     }
 }

@@ -6,41 +6,65 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.auth.OidcRequest
+import com.microsoft.did.sdk.registrars.SidetreeRegistrar
+import com.microsoft.did.sdk.resolvers.HttpResolver
 
 const val defaultRegistrationUrl = "beta.discover.did.microsoft.com"
 const val defaultResolverUrl = "beta.ion.microsoft.com"
 
-class Agent (keyStore: IKeyStore?,
+/**
+ * Class for creating identifiers and
+ * sending and parsing OIDC Requests and Responses.
+ * @class
+ */
+class Agent (keyStore: IKeyStore,
              registrationUrl: String = defaultRegistrationUrl,
              resolverUrl: String = defaultResolverUrl) {
 
+    private val registrar = SidetreeRegistrar(registrationUrl, keyStore)
+
+    private val resolver = HttpResolver(resolverUrl)
+
     /**
-     * Creates a master Identifier.
+     * Creates and registers an Identifier.
      */
-    fun createIdentifier() {}
+    fun createIdentifier() {
+
+    }
 
     /**
      * Creates an OIDC Request.
      */
     fun createOidcRequest(signer: Identifier,
-                          signingKeyReference: String,
+                          signingKeyReference: String?,
                           redirectUrl: String,
                           nonce: String?,
                           state: String?) {}
 
     /**
-     * Verify the signature and parse the OIDC Request
+     * Verify the signature and
+     * return OIDC Request object.
      */
     fun parseOidcRequest(request: String) {
-        return OidcRequest(request)
+        throw Error("Not implemented")
     }
 
     /**
-     * Verify the signature and parse the OIDC Response
+     * Create an OIDC Response.
      */
-    fun parseOidcResponse(response: String) {}
+    fun createOidcResponse(signer: Identifier,
+                           signingKeyReference: String?,
+                           request: OidcRequest) {
+        throw Error("Not implemented")
+    }
+
+    /**
+     * Verify the signature and
+     * parse the OIDC Response object.
+     */
+    fun parseOidcResponse(response: String) {
+        throw Error("Not implemented")
+    }
 
 }
