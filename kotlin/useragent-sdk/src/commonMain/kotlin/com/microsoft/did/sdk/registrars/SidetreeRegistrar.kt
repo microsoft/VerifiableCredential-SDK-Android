@@ -21,5 +21,19 @@ class SidetreeRegistrar(url: String, cryptoOperations: CryptoOperations): IRegis
      */
     override fun register(identifierDocument: IdentifierDocument, signingKeyReference: String?) {
         throw Error("Not Implemented")
+//        val client = HttpClient(HttpClientEngine) {
+//            install(JsonFeature) {
+//                serializer = KotlinxSerializer()
+//            }
+//        }
     }
+
+    /**
+     * Sign the Registration Payload
+     * @param bodyString original payload to sign.
+     * @param signingKeyReference reference to signature key if not default key.
+     */
+    private fun signPayload(bodyString: String, signingKeyReference: String?) {}
+
+
 }
