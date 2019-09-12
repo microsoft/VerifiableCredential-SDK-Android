@@ -3,13 +3,14 @@ package com.microsoft.did.sdk.crypto
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
 
 /**
  * Class that encompasses all of Crypto
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations {
+class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), keyStore: IKeyStore? = null) {
 
     /**
      * Sign payload with key stored in keyStore.

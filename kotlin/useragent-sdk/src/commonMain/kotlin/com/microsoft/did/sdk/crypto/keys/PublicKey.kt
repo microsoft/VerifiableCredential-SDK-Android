@@ -3,12 +3,15 @@ package com.microsoft.did.sdk.crypto.keys
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.KeyUse
+//import kotlinx.serialization.Serializable
+//import kotlinx.serialization.Transient
 
 /**
  * Represents a Public Key in JWK format.
  * @class
  * @abstract
  */
+//@Serializable
 abstract class PublicKey (key: JsonWebKey) {
     /**
      * Key type

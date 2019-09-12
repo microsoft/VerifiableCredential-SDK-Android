@@ -124,9 +124,9 @@ private fun encode(data: ByteArray, dictionary: List<String>, padding: String): 
 //        +--1.index--+--2.index--+--3.index--+--4.index--+
         // bit shifting is only available in Int and Long. Int is 32, capable of holding all bytes.
         val inputGroupInt = inputGroup[0].toInt().shl(16) + inputGroup[1].toInt().shl(8) + inputGroup[2].toInt()
-        val index1 = inputGroupInt.and(0x00fc0000)
-        val index2 = inputGroupInt.and(0x0003f000)
-        val index3 = inputGroupInt.and(0x00000fc0)
+        val index1 = inputGroupInt.and(0x00fc0000).shr(18)
+        val index2 = inputGroupInt.and(0x0003f000).shr(12)
+        val index3 = inputGroupInt.and(0x00000fc0).shr(6)
         val index4 = inputGroupInt.and(0x0000003f)
         return "${dictionary[index1]}${dictionary[index2]}${dictionary[index3]}${dictionary[index4]}"
     }
@@ -143,13 +143,13 @@ private fun encode(data: ByteArray, dictionary: List<String>, padding: String): 
     if (inputIndex != 0) {
         if (inputIndex == 1) { // we have 1 valid byte
             val inputByte = inputGrouping[0].toInt()
-            val index1 = inputByte.and(0xfc)
+            val index1 = inputByte.and(0xfc).shr(2)
             val index2 = inputByte.and(0x3).shl(4)
             output.append("${dictionary[index1]}${dictionary[index2]}$padding$padding")
         } else if (inputIndex == 2) { // we have 2 valid bytes
             val inputByte = inputGrouping[0].toInt().shl(8) + inputGrouping[1].toInt()
-            val index1 = inputByte.and(0xfc00)
-            val index2 = inputByte.and(0x03f0)
+            val index1 = inputByte.and(0xfc00).shr(10)
+            val index2 = inputByte.and(0x03f0).shr(4)
             val index3 = inputByte.and(0x000f).shl(2)
             output.append("${dictionary[index1]}${dictionary[index2]}${dictionary[index3]}$padding")
         }

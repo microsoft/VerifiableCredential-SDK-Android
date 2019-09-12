@@ -1,10 +1,10 @@
 package com.microsoft.did.sdk.identifier
 
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+//import kotlinx.serialization.json.*
+//import kotlinx.serialization.Serializable
 
-@Serializable
-data class Document(val id: String, val publicKeys: ArrayList<IdentifierDocumentPublicKey>)
+//@Serializable
+data class Document(val id: String, val publicKeys: ArrayList<IdentifierDocumentPublicKey>) {}
 
 /**
  * Class to represent Identifier Documents.

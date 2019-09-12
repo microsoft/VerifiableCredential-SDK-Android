@@ -65,10 +65,44 @@ android {
     }
 }
 
+//task packForXCode(type: Sync) {
+//    final File frameworkDir = new File(buildDir, "xcode-frameworks")
+//    final String mode = project.findProperty("XCODE_CONFIGURATION")?.toUpperCase() ?: 'DEBUG'
+//    final def framework = kotlin.targets.ios.binaries.getFramework("UserAgentSdk", mode)
+//
+//    inputs.property "mode", mode
+//    dependsOn framework.linkTask
+//
+//    from { framework.outputFile.parentFile }
+//    into frameworkDir
+//
+//    doLast {
+//        new File(frameworkDir, 'gradlew').with {
+//            text = "#!/bin/bash\nexport 'JAVA_HOME=${System.getProperty("java.home")}'\ncd '${rootProject.rootDir}'\n./gradlew \$@\n"
+//            setExecutable(true)
+//        }
+//    }
+//}
+//tasks.build.dependsOn packForXCode
+
 kotlin {
     android()
     jvm()
-    iosArm64("ios")
+
+//    KotlinNativeTarget iOSTarget(String name) {
+//        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
+//            return iosArm64(name)
+//        else
+//            return iosArm64(name)
+//    }
+//
+//    iOSTarget("ios") {
+//        binaries {
+//            framework {
+////                baseName = "commonMain"
+//            }
+//        }
+//    }
     js {
         browser {
         }
@@ -141,23 +175,3 @@ kotlin {
 configurations {
     compileClasspath
 }
-//
-//task packForXCode(type: Sync) {
-//    final File frameworkDir = new File(buildDir, "xcode-frameworks")
-//    final String mode = project.findProperty("XCODE_CONFIGURATION")?.toUpperCase() ?: 'DEBUG'
-//    final def framework = kotlin.targets.ios.binaries.getFramework("UserAgentSdk", mode)
-//
-//    inputs.property "mode", mode
-//    dependsOn framework.linkTask
-//
-//    from { framework.outputFile.parentFile }
-//    into frameworkDir
-//
-//    doLast {
-//        new File(frameworkDir, 'gradlew').with {
-//            text = "#!/bin/bash\nexport 'JAVA_HOME=${System.getProperty("java.home")}'\ncd '${rootProject.rootDir}'\n./gradlew \$@\n"
-//            setExecutable(true)
-//        }
-//    }
-//}
-//tasks.build.dependsOn packForXCode
