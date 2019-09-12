@@ -1,8 +1,10 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
 
 /** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
+//@Serializable
 data class RsaOtherPrimesInfo (val r: String, val d: String, val t: String)
 
+//@Serializable
 data class JsonWebKey(
     // The following fields are defined in Section 3.1 of JSON Web Key
     var kty: String = "",
@@ -75,9 +77,5 @@ data class JsonWebKey(
             }
             builder.append("]")
         }
-    }
-
-    constructor(json: String): this() {
-        TODO("JSON parse and assign values into this instance.")
     }
 }

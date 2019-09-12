@@ -1,13 +1,13 @@
 package com.microsoft.did.sdk.identifier
 
 import com.microsoft.did.sdk.crypto.keys.PublicKey
-import kotlinx.serialization.Serializable
+//import kotlinx.serialization.Serializable
 
 /**
  * Data Class for defining an Identifier Document
  * Public Key.
  */
-@Serializable
+//@Serializable
 data class IdentifierDocumentPublicKey (
     /**
      * The id of the public key in the format

@@ -3,6 +3,8 @@ package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 
+expect fun getDefaultSubtle(): SubtleCrypto
+
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
