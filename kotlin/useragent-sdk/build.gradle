@@ -51,8 +51,9 @@ android {
             resources.srcDir("src/androidMain/resources")
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-                implementation ("org.bitcoin:org.bitcoin")
+                fileTree(dir: 'libs', include: ['*.jar'])
             }
+            jniLibs.srcDir("src/androidMain/resources/jni")
         }
         debug {
             jniLibs.srcDir("src/androidMain/resources/jni")
@@ -84,7 +85,9 @@ android {
 //tasks.build.dependsOn packForXCode
 
 kotlin {
-    android()
+    android {
+
+    }
     jvm()
 
 //    KotlinNativeTarget iOSTarget(String name) {
