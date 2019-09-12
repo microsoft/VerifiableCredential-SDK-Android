@@ -46,6 +46,6 @@ class Identifier(cryptoOperations: CryptoOperations                             
      * Fetch Identifier Document from the Discovery Service.
      */
     fun getDocument(identifier: String): IdentifierDocument {
-        TODO()
+        TODO("Not implemented")
     }
 }

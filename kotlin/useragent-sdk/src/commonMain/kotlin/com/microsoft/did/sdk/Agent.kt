@@ -6,7 +6,6 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
@@ -40,7 +39,9 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
      * Creates and registers an Identifier.
      */
     fun createIdentifier() {
-
+        val seed = cryptoOperations.generateSeed()
+        val publicKey = cryptoOperations.generatePairwise(seed)
+        TODO("create Identifier Document and register to get new Identifier")
     }
 
     /**
@@ -50,14 +51,16 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
                           signingKeyReference: String?,
                           redirectUrl: String,
                           nonce: String?,
-                          state: String?) {}
+                          state: String?) {
+        TODO("Not implemented")
+    }
 
     /**
      * Verify the signature and
      * return OIDC Request object.
      */
     fun parseOidcRequest(request: String) {
-        throw Error("Not implemented")
+        TODO("Not implemented")
     }
 
     /**
@@ -66,7 +69,7 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
     fun createOidcResponse(signer: Identifier,
                            signingKeyReference: String?,
                            request: OidcRequest) {
-        throw Error("Not implemented")
+        TODO("Not implemented")
     }
 
     /**
@@ -74,7 +77,7 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
      * parse the OIDC Response object.
      */
     fun parseOidcResponse(response: String) {
-        throw Error("Not implemented")
+        TODO("Not implemented")
     }
 
 }

@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.registrars
 
 import com.microsoft.did.sdk.identifier.IdentifierDocument
+import io.ktor.client.engine.HttpClientEngine
 
 /**
  * @interface defining methods and properties
