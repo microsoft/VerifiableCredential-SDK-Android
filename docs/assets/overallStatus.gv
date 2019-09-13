@@ -1,0 +1,124 @@
+
+digraph architecture {
+  layers="public:private"
+  label="Kotlin SDK"
+  // layerselect=public
+  splines=ortho	
+  rankdir=LR
+  center=true
+  ranksep=0
+  layout=dot
+  ranksep=0
+
+  subgraph clusterLegend {
+    ranksep=1
+    label="Legend"
+
+    forcelabels=true
+    color=gray
+    fontcolor="gray"
+    style=rounded
+    node[height=0.25, layer=all]
+
+    complete[label="Complete", color="none", shape=none]
+    speced[label="Spec'd", color="#0078d4", shape=ellipse]
+    inProgress[label="In Progress", color="#107c10", shape=box]
+    Blocking[label="Blocking", color="#d83b01", shape="diamond"]
+
+  }
+
+  // Complete
+  node[color=none, layer=public]
+
+
+  SubtleCrypto
+
+  Subtle
+  Provider
+
+  libsecp256k1[label="libsecp256k1.so", layer=private]
+
+  KeyStore
+  
+  // In Progress
+  node[color="#107c10", shape=box, layer=public]
+  
+  Agent
+  Identifier
+  IdentifierDocument
+
+  IRegistrar
+  SidetreeRegistrar
+  
+  IResolver
+  HttpResolver
+
+  CryptoOperations
+
+  Secp256k1SubtleCrypto[color="#107c10"]
+  Secp256k1Provider[color="#107c10"]
+  
+  // Specified
+  node[color="#0078d4", shape=ellipse, layer=public]
+
+  OidcRequest
+  OidcResponse
+
+  JwsToken
+  JweToken
+
+  SecureStorageKeyStore[layer=private]
+  SecureEnclaveKeyStore[layer=private]
+  KeyVaultKeyStore[layer=private]
+  InMemoryKeyStore[layer=private]
+
+  // Blocking
+  node[color="#d83b01", shape="diamond", layer=public]
+
+
+  // Associations
+  edge[arrowhead="open"]
+  Agent -> Identifier
+  Agent -> IRegistrar
+  Agent -> IResolver
+  Agent -> JweToken
+  Agent -> JwsToken
+  Identifier -> OidcRequest
+  Identifier -> OidcResponse
+
+  // Inheritance
+  edge[arrowhead="empty"]
+  Secp256k1SubtleCrypto -> Subtle
+
+  // Implementation/Realization
+  edge[arrowhead="empty",style="dashed"]
+  SidetreeRegistrar -> IRegistrar
+  HttpResolver -> IResolver
+  Secp256k1Provider -> Provider
+  Subtle -> SubtleCrypto
+  SecureStorageKeyStore -> KeyStore
+  SecureEnclaveKeyStore -> KeyStore
+  KeyVaultKeyStore -> KeyStore
+  InMemoryKeyStore -> KeyStore
+
+  // Dependency
+  edge[arrowhead="open",style="dashed"]
+  JwsToken -> CryptoOperations
+  JweToken -> CryptoOperations
+  SidetreeRegistrar -> JwsToken
+
+  // Aggregations
+  edge[dir="back",arrowtail="odiamond"]
+  Subtle -> Provider
+  CryptoOperations -> SubtleCrypto
+  CryptoOperations -> KeyStore
+
+  // Compositions
+  edge[dir="back",arrowtail="diamond"]
+  Agent -> IRegistrar
+  Agent -> IResolver
+  Agent -> CryptoOperations
+  Identifier -> IdentifierDocument
+  Secp256k1Provider -> libsecp256k1
+  Secp256k1SubtleCrypto -> Secp256k1Provider
+}
