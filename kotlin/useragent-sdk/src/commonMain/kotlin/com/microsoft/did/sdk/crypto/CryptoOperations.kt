@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.crypto
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
 
 /**
@@ -10,7 +11,9 @@ import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), keyStore: IKeyStore? = null) {
+class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyStore: IKeyStore? = null) {
+
+    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto);
 
     /**
      * Sign payload with key stored in keyStore.
@@ -55,14 +58,6 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), keyStore
      * Generate a seed.
      */
     fun generateSeed(): String {
-        TODO("Not implemented")
-    }
-
-    /**
-     * Get underlying subtle crypto that implements
-     * particular algorithm.
-     */
-    fun getSubtleCrypto() {
         TODO("Not implemented")
     }
 }

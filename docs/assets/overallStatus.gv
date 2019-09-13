@@ -1,7 +1,7 @@
 
 digraph architecture {
   layers="public:private"
-  label="Kotlin SDK"
+  // label="Kotlin SDK"
   // layerselect=public
   splines=ortho	
   rankdir=LR
@@ -54,6 +54,7 @@ digraph architecture {
   HttpResolver
 
   CryptoOperations
+  SubtleCryptoFactory
 
   Secp256k1SubtleCrypto[color="#107c10"]
   Secp256k1Provider[color="#107c10"]
@@ -110,8 +111,7 @@ digraph architecture {
   // Aggregations
   edge[dir="back",arrowtail="odiamond"]
   Subtle -> Provider
-  CryptoOperations -> SubtleCrypto
-  CryptoOperations -> KeyStore
+  SubtleCryptoFactory -> SubtleCrypto
 
   // Compositions
   edge[dir="back",arrowtail="diamond"]
@@ -119,6 +119,8 @@ digraph architecture {
   Agent -> IResolver
   Agent -> CryptoOperations
   Identifier -> IdentifierDocument
+  CryptoOperations -> SubtleCryptoFactory
+  CryptoOperations -> KeyStore
   Secp256k1Provider -> libsecp256k1
   Secp256k1SubtleCrypto -> Secp256k1Provider
 }

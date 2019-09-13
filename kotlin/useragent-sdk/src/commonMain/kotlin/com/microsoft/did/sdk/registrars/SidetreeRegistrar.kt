@@ -19,7 +19,7 @@ class SidetreeRegistrar(url: String, cryptoOperations: CryptoOperations): IRegis
 
     // private val client = HttpClient(engine = HttpClientEngine) {
 
-    }
+    // }
 
     /**
      * Registers the identifier document on the ledger

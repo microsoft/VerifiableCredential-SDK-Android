@@ -4,19 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.did.sdk.crypto.keys
 
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.crypto.plugins.CryptoFactory
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 
 /**
  * Class to model pairwise keys
  */
-class PairwiseKey(cryptoFactory: CryptoFactory) {
-
-    /**
-     * Get or set the crypto factory to use, containing the crypto suite and the key store.
-     */
-    private var cryptoFactory: CryptoFactory = cryptoFactory
+class PairwiseKey(private val crypto: CryptoOperations) {
 
     // Set of master keys for the different persona's
     private var masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
@@ -53,10 +49,10 @@ class PairwiseKey(cryptoFactory: CryptoFactory) {
         }
 
         // Get the seed
-        val jwk = this.cryptoFactory.keyStore.getSecretKey(seedReference, false);
+        val jwk = this.crypto.keyStore!!.getSecretKey(seedReference, false);
 
         // Get the subtle crypto
-        val crypto: SubtleCrypto = this.cryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value);
+        val crypto: SubtleCrypto = this.crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value);
 
         // Generate the master key
         val alg: Algorithm =
