@@ -2,10 +2,15 @@ package com.microsoft.did.sdk.registrars
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.IdentifierDocument
+import com.microsoft.did.sdk.utilities.getHttpClientEngine
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.HttpClientEngine
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.*
+import io.ktor.http.URLBuilder
+import io.ktor.http.Url
+import io.ktor.http.contentType
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 /**
@@ -23,8 +28,23 @@ class SidetreeRegistrar(url: String, cryptoOperations: CryptoOperations): IRegis
      * @param identifierDocument to register.
      * @param signingKeyReference reference to the key to be used for signing request.
      */
-    override fun register(registrationRequest: String, signingKeyReference: String?) {
-        val client = HttpClient()
+    override fun register(identifierDocument: IdentifierDocument, signingKeyReference: String?) {
+
+        val jws = "jws"
+        GlobalScope.launch {
+            sendRequest(jws)
+        }
+    }
+
+    private suspend fun sendRequest(request: String) {
+        val httpClientEngine = getHttpClientEngine()
+        val client = HttpClient(httpClientEngine) {
+            install(JsonFeature)
+        }
+        val response = client.post<IdentifierDocument> {
+            url("")
+            body = request
+        }
     }
 
     /**

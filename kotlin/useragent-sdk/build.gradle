@@ -11,16 +11,17 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:3.2.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$serialization_version"
     }
 }
 plugins {
     id("org.jetbrains.kotlin.multiplatform") version '1.3.50'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.3.50'
+    id("org.jetbrains.kotlin.plugin.serialization") version '1.3.50'
 }
 apply plugin: "com.android.library"
-//apply plugin: 'kotlin-multiplatform'
-//apply plugin: 'kotlinx-serialization'
+apply plugin: 'kotlin-multiplatform'
+apply plugin: 'kotlinx-serialization'
+
 repositories {
     mavenCentral()
     google()
@@ -64,7 +65,9 @@ android {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
                 fileTree(dir: 'libs', include: ['*.jar'])
-                implementation("io.ktor:ktor-client-android:$ktor_version")
+                implementation "io.ktor:ktor-client-android:$ktor_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1"
             }
         }
         debug {
@@ -79,7 +82,7 @@ android {
 }
 kotlin {
     android("android")
-    jvm()
+//    jvm()
 
 //    KotlinNativeTarget iOSTarget(String name) {
 //        if (System.getenv("SDK_NAME")?.startsWith("iphoneos") == true)
@@ -106,14 +109,16 @@ kotlin {
     // For Linux, should be changed to e.g. linuxX64
     // For MacOS, should be changed to e.g. macosX64
     // For Windows, should be changed to e.g. mingwX64
-    macosX64("macos")
+    // macosX64("macos")
     sourceSets {
         androidMain {}
         commonMain {
             dependencies {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
-                implementation("io.ktor:ktor-client-core:$ktor_version")
+                implementation "io.ktor:ktor-client-core:$ktor_version"
+                implementation "io.ktor:ktor-client-json:$ktor_version"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.0.1"
             }
         }
         commonTest {
@@ -122,23 +127,24 @@ kotlin {
                 implementation kotlin('test-annotations-common')
             }
         }
-        jvmMain {
-            dependencies {
-                implementation kotlin('stdlib-jdk8')
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
-            }
-        }
-        jvmTest {
-            dependencies {
-                implementation kotlin('test')
-                implementation kotlin('test-junit')
-            }
-        }
+//        jvmMain {
+//            dependencies {
+//                implementation kotlin('stdlib-jdk8')
+//                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
+//                implementation("io.ktor:ktor-client-apache:$ktor_version")
+//            }
+//        }
+//        jvmTest {
+//            dependencies {
+//                implementation kotlin('test')
+//                implementation kotlin('test-junit')
+//            }
+//        }
         jsMain {
             dependencies {
                 implementation kotlin('stdlib-js')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$serialization_version"
-                implementation("io.ktor:ktor-client-js:$ktor_version")
+                implementation "io.ktor:ktor-client-js:$ktor_version"
             }
         }
         jsTest {
@@ -146,14 +152,14 @@ kotlin {
                 implementation kotlin('test-js')
             }
         }
-        macosMain {
-        }
-        macosTest {
-        }
-        iosMain {
-        }
-        iosTest {
-        }
+//        macosMain {
+//        }
+//        macosTest {
+//        }
+//        iosMain {
+//        }
+//        iosTest {
+//        }
     }
 }
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
