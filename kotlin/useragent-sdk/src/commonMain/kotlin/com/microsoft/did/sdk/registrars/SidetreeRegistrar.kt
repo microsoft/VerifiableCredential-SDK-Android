@@ -4,11 +4,8 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.IdentifierDocument
 import com.microsoft.did.sdk.utilities.getHttpClientEngine
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.request.*
-import io.ktor.http.URLBuilder
-import io.ktor.http.Url
-import io.ktor.http.contentType
+import io.ktor.client.request.post
+import io.ktor.client.request.url
 import kotlinx.coroutines.*
 
 
@@ -43,9 +40,7 @@ class SidetreeRegistrar(registrarUrl: String, cryptoOperations: CryptoOperations
      */
     private suspend fun sendRequest(request: String) {
         val httpClientEngine = getHttpClientEngine()
-        val client = HttpClient(httpClientEngine) {
-            install(JsonFeature)
-        }
+        val client = HttpClient()
         val response = client.post<IdentifierDocument> {
             url("")
             body = request

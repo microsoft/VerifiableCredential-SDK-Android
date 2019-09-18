@@ -55,7 +55,7 @@ android {
     compileSdkVersion 29
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 26
     }
     sourceSets {
         main {
@@ -102,7 +102,6 @@ kotlin {
         browser {
         }
         nodejs {
-//            moduleKind = "commonjs"
         }
     }
     // For ARM, should be changed to iosArm32 or iosArm64
@@ -117,7 +116,6 @@ kotlin {
                 implementation kotlin('stdlib-common')
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
                 implementation "io.ktor:ktor-client-core:$ktor_version"
-                implementation "io.ktor:ktor-client-json:$ktor_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.0.1"
             }
         }
