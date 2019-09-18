@@ -9,18 +9,18 @@ import io.ktor.client.request.*
 import io.ktor.http.URLBuilder
 import io.ktor.http.Url
 import io.ktor.http.contentType
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 
 /**
  * Registrar implementation for the Sidetree network
  * @class
  * @implements IRegistrar
- * @param url to the registration endpoint
+ * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar(url: String, cryptoOperations: CryptoOperations): IRegistrar {
+class SidetreeRegistrar(registrarUrl: String, cryptoOperations: CryptoOperations): IRegistrar {
+
 
     /**
      * Registers the identifier document on the ledger
@@ -36,6 +36,11 @@ class SidetreeRegistrar(url: String, cryptoOperations: CryptoOperations): IRegis
         }
     }
 
+    /**
+     * Send request to the registration service
+     * returning the fully discoverable Identifier Document.
+     * @param request request sent to the registration service.
+     */
     private suspend fun sendRequest(request: String) {
         val httpClientEngine = getHttpClientEngine()
         val client = HttpClient(httpClientEngine) {
