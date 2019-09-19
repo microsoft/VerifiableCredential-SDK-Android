@@ -63,7 +63,8 @@ android {
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
             resources.srcDir("src/androidMain/resources")
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
                 fileTree(dir: 'libs', include: ['*.jar'])
                 implementation "io.ktor:ktor-client-android:$ktor_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
@@ -98,12 +99,12 @@ kotlin {
 //            }
 //        }
 //    }
-    js {
-        browser {
-        }
-        nodejs {
-        }
-    }
+//    js {
+//        browser {
+//        }
+//        nodejs {
+//        }
+//    }
     // For ARM, should be changed to iosArm32 or iosArm64
     // For Linux, should be changed to e.g. linuxX64
     // For MacOS, should be changed to e.g. macosX64
