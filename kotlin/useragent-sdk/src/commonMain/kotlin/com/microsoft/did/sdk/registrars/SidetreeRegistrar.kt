@@ -10,7 +10,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
-import kotlin.math.sign
 
 @Serializable
 data class JwsToken(
@@ -62,13 +61,15 @@ class SidetreeRegistrar(registrarUrl: String, cryptoOperations: CryptoOperations
      * @param request request sent to the registration service.
      */
     private suspend fun sendRequest(request: JwsToken) {
-        // val httpClientEngine = getHttpClientEngine()
-        val client = HttpClient()
-        return client.post<Unit> {
+        val httpClientEngine = getHttpClientEngine()
+        val client = HttpClient(httpClientEngine)
+        val response = client.post<Unit> {
             url("https://beta.ion.microsoft.com")
             contentType(ContentType.Application.Json)
             body = request
         }
+        client.close()
+        return response
     }
 
     /**
