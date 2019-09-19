@@ -70,6 +70,7 @@ android {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1"
                 testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+                implementation "io.ktor:ktor-client-android:$ktor_version"
             }
         }
         debug {
@@ -119,7 +120,6 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
                 implementation "io.ktor:ktor-client-core:$ktor_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.0.1"
-                implementation "io.ktor:ktor-client-apache:$ktor_version"
             }
         }
         commonTest {

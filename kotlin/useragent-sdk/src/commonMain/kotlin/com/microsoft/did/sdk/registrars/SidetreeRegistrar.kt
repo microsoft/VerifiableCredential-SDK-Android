@@ -2,8 +2,7 @@ package com.microsoft.did.sdk.registrars
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.IdentifierDocument
-import com.microsoft.did.sdk.utilities.getHttpClientEngine
-import io.ktor.client.HttpClient
+import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
@@ -61,8 +60,7 @@ class SidetreeRegistrar(registrarUrl: String, cryptoOperations: CryptoOperations
      * @param request request sent to the registration service.
      */
     private suspend fun sendRequest(request: JwsToken) {
-        val httpClientEngine = getHttpClientEngine()
-        val client = HttpClient(httpClientEngine)
+        val client = getHttpClient()
         val response = client.post<Unit> {
             url("https://beta.ion.microsoft.com")
             contentType(ContentType.Application.Json)
