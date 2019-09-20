@@ -14,12 +14,12 @@ data class JwsFlatJson (
     /**
      * The protected (signed) header.
      */
-    val protected: MutableMap<String, String>?,
+    val protected: String,
 
     /**
      * The unprotected (unverified) header.
      */
-    val header: MutableMap<String, String>?,
+    val header: Map<String, String>?,
 
     /**
      * The JWS Signature

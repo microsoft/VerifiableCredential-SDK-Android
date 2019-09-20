@@ -55,6 +55,8 @@ enum class JoseConstants(val value: String) {
      */
     Es256K("ES256K"),
 
+    EdDsa("EDDSA"),
+
     /**
      * Define JOSE algorithm constants
      */

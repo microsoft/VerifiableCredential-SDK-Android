@@ -14,7 +14,7 @@ data class JwsCompact (
     /**
      * The protected (signed) header.
      */
-    val protected: MutableMap<String, String>?,
+    val protected: String,
 
     /**
      * The JWS Signature

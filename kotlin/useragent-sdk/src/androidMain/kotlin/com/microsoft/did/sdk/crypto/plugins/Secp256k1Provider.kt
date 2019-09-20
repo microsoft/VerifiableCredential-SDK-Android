@@ -92,7 +92,9 @@ class Secp256k1Provider(): Provider() {
         if (publicKey == null) {
             throw Error("No public key components could be found")
         }
-//        val xyData = publicToXY(publicKey)
+        println("Getting XY")
+        val xyData = publicToXY(publicKey)
+        println("XY got")
         return JsonWebKey(
             kty = com.microsoft.did.sdk.crypto.keys.KeyType.EllipticCurve.value,
             crv = W3cCryptoApiConstants.Secp256k1.value,
@@ -101,8 +103,8 @@ class Secp256k1Provider(): Provider() {
             alg = this.name,
             ext = key.extractable,
             d = d,
-            x = "todo",
-            y = "todo"
+            x = xyData.first,
+            y = xyData.second
         )
     }
 
@@ -122,26 +124,30 @@ class Secp256k1Provider(): Provider() {
     }
 
     // mapped from secp256k1_eckey_pubkey_parse
-    private fun publicToXY(keyData: ByteArray): Pair<ULongArray, ULongArray> {
+    private fun publicToXY(keyData: ByteArray): Pair<String, String> {
         if (keyData.size == 33 && (
                     keyData[0] == secp256k1Tag.even.byte ||
                     keyData[0] == secp256k1Tag.odd.byte)) {
             // compressed form
+            println("Compressed form")
             return Pair(
-                ulongArrayOf(0UL),
-                ulongArrayOf(0UL)
+                "",
+                ""
             )
-
         } else if (keyData.size == 65 && (
                     keyData[0] == secp256k1Tag.uncompressed.byte ||
                     keyData[0] == secp256k1Tag.hybridEven.byte ||
                     keyData[0] == secp256k1Tag.hybridOdd.byte
                     )) {
-            // uncompressed
+            println("Uncompressed form")
+            // uncompressed, bytes 1-32, and 33-end are x and y
+            val x = keyData.sliceArray(1..32)
+            val y = keyData.sliceArray(33..64)
+            println("X: $x, Y: $y")
             return Pair(
-                ulongArrayOf(0UL),
-                ulongArrayOf(0UL)
-            )
+                Base64.encodeToString(x, Base64.URL_SAFE),
+                Base64.encodeToString(y, Base64.URL_SAFE)
+                )
         } else {
             throw Error("Public key improperly formatted")
         }

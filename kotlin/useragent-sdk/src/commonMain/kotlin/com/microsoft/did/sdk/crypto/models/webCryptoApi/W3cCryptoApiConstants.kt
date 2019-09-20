@@ -38,6 +38,10 @@ enum class W3cCryptoApiConstants(val value: String) {
      */
     AesGcm("AES-GCM"),
 
+    EcDsa("ECDSA"),
+
+    EdDsa("EDDSA"),
+
     /**
      * Define W3C algorithm constants
      */
@@ -49,5 +53,6 @@ enum class W3cCryptoApiConstants(val value: String) {
     Secp256r1("P-256"),
     Secp384r1("P-384"),
     Secp521r1("P-521"),
-    Secp256k1("P-256K")
+    Secp256k1("P-256K"),
+    Ed25519("ed25519")
 }

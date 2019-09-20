@@ -1,7 +1,9 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.getDefaultKeyStore
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
@@ -11,7 +13,7 @@ import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyStore: IKeyStore? = null) {
+class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyStore: IKeyStore = getDefaultKeyStore()) {
 
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto);
 
@@ -20,14 +22,14 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyS
      * @param payload to sign.
      * @param signingKeyReference reference to key stored in keystore.
      */
-    fun sign(payload: String, signingKeyReference: String) {
+    fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
         TODO("Not implemented")
     }
 
     /**
      * Verify payload with key stored in keyStore.
      */
-    fun verify() {
+    fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String) {
         TODO("Not implemented")
     }
 

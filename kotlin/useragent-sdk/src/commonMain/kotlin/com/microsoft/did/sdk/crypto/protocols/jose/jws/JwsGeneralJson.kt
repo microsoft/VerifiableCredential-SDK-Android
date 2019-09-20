@@ -15,5 +15,5 @@ data class JwsGeneralJson (
     /**
      * The Signatures
      */
-    val signatures: ArrayList<JwsSignature>
+    val signatures: List<JwsSignature>
 )
