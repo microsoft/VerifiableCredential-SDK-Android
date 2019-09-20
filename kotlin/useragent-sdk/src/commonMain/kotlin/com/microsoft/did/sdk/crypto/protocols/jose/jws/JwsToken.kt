@@ -156,7 +156,8 @@ class JwsToken private constructor(private val payload: String, signatures: List
 
         val signatureInput = "$encodedProtected.${this.payload}"
 
-        val signature = cryptoOperations.sign(signatureInput, signingKeyReference,
+        val signature = cryptoOperations.sign(
+            stringToByteArray(signatureInput), signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName))
 
         val signatureBase64 = Base64Url.encode(signature)

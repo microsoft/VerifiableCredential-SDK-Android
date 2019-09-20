@@ -49,7 +49,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
         }
 
         // Get the seed
-        val jwk = this.crypto.keyStore!!.getSecretKey(seedReference, false);
+        val jwk = this.crypto.keyStore.getSecretKey(seedReference);
 
         // Get the subtle crypto
         val crypto: SubtleCrypto = this.crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value);
