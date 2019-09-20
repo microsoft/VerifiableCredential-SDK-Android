@@ -3,12 +3,13 @@ digraph architecture {
   layers="public:private"
   // label="Kotlin SDK"
   // layerselect=public
-  splines=ortho	
+  // splines=ortho	
+  splines=polyline
   rankdir=LR
   center=true
   ranksep=0
   layout=dot
-  ranksep=0
+  ranksep=0.3
 
   subgraph clusterLegend {
     ranksep=1
@@ -30,6 +31,7 @@ digraph architecture {
   // Complete
   node[color=none, layer=public]
 
+  JwsToken
 
   SubtleCrypto
 
@@ -39,6 +41,9 @@ digraph architecture {
   libsecp256k1[label="libsecp256k1.so", layer=private]
 
   KeyStore
+
+  Secp256k1SubtleCrypto
+  Secp256k1Provider
   
   // In Progress
   node[color="#107c10", shape=box, layer=public]
@@ -54,10 +59,8 @@ digraph architecture {
   HttpResolver
 
   CryptoOperations
-  SubtleCryptoFactory
 
-  Secp256k1SubtleCrypto[color="#107c10"]
-  Secp256k1Provider[color="#107c10"]
+  SubtleCryptoFactory
   
   // Specified
   node[color="#0078d4", shape=ellipse, layer=public]
@@ -65,7 +68,6 @@ digraph architecture {
   OidcRequest
   OidcResponse
 
-  JwsToken
   JweToken
 
   SecureStorageKeyStore[layer=private]
@@ -75,7 +77,6 @@ digraph architecture {
 
   // Blocking
   node[color="#d83b01", shape="diamond", layer=public]
-
 
   // Associations
   edge[arrowhead="open"]
