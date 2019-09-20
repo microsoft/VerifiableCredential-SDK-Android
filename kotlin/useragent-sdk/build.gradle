@@ -11,7 +11,7 @@ buildscript {
     dependencies {
         classpath "com.android.tools.build:gradle:3.2.1"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$serialization_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 plugins {
@@ -66,10 +66,8 @@ android {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
                 api 'com.google.guava:guava:28.1-android'
                 fileTree(dir: 'libs', include: ['*.jar'])
-                implementation "io.ktor:ktor-client-android:$ktor_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$serialization_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.1"
-                testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
                 implementation "io.ktor:ktor-client-android:$ktor_version"
             }
         }
@@ -120,6 +118,8 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
                 implementation "io.ktor:ktor-client-core:$ktor_version"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:1.0.1"
+                implementation "io.ktor:ktor-client-json:$ktor_version"
+
             }
         }
         commonTest {

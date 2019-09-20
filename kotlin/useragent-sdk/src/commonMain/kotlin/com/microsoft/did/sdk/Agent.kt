@@ -28,7 +28,7 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
     /**
      * Registrar to be used when registering Identifiers.
      */
-    private val registrar = SidetreeRegistrar(registrationUrl, cryptoOperations)
+    private val registrar = SidetreeRegistrar()
 
     /**
      * Resolver to be used when resolving Identifier Documents.

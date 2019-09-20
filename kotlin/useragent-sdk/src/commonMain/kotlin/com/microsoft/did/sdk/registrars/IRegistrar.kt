@@ -15,5 +15,5 @@ interface IRegistrar {
      * @param identifierDocument to be registered.
      * @param signingKeyReference reference to the key to be used for signing request.
      */
-    open fun register(identifierDocument: IdentifierDocument, signingKeyReference: String?)
+    open fun register()
 }
