@@ -189,7 +189,7 @@ abstract class Provider {
     protected fun checkKeyUsages(usages: Set<KeyUsage>, allowed: Set<KeyUsage>) {
         val forbiddenUsages = usages - allowed
         if (forbiddenUsages.isNotEmpty()) {
-            throw Error("Key Usages contains forbidden Key Usage: ${forbiddenUsages.joinToString()}")
+            throw Error("Key Usages contains forbidden Key Usage: ${forbiddenUsages.joinToString { use -> use.value }}")
         }
     }
 

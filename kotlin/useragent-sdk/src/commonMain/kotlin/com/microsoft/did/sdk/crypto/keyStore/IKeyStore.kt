@@ -20,11 +20,11 @@ interface IKeyStore {
      * @param keyIdentifier for which to return the key.
      * @param [publicKeyOnly] True if only the public key is needed.
      */
-    fun getSecretKey(keyReference: String, publicKeyOnly: Boolean?): SecretKey
+    fun getSecretKey(keyReference: String): SecretKey
 
-    fun getPrivateKey(keyReference: String, publicKeyOnly: Boolean?): PrivateKey
+    fun getPrivateKey(keyReference: String): PrivateKey
 
-    fun getPublicKey(keyReference: String, publicKeyOnly: Boolean?): PublicKey
+    fun getPublicKey(keyReference: String): PublicKey
 
     /**
      * Saves the specified key to the key store using
