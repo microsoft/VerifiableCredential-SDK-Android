@@ -5,5 +5,5 @@ import io.ktor.client.engine.android.Android
 
 actual fun getHttpClient(): HttpClient {
      println("IN Android Main")
-     return HttpClient(Android)
+     return HttpClient(Android) {}
 }

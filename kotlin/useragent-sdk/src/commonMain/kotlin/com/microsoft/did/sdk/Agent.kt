@@ -9,6 +9,8 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 const val defaultRegistrationUrl = "beta.discover.did.microsoft.com"
 const val defaultResolverUrl = "beta.ion.microsoft.com"
@@ -24,7 +26,7 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
     /**
      * CryptoOperations
      */
-    private val cryptoOperations =  CryptoOperations()
+    // private val cryptoOperations =  CryptoOperations()
     /**
      * Registrar to be used when registering Identifiers.
      */
@@ -39,9 +41,12 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
      * Creates and registers an Identifier.
      */
     fun createIdentifier() {
-        val seed = cryptoOperations.generateSeed()
-        val publicKey = cryptoOperations.generatePairwise(seed)
-        TODO("create Identifier Document and register to get new Identifier")
+        GlobalScope.launch {
+            val document = registrar.register()
+            println(document)
+        }
+        // val seed = cryptoOperations.generateSeed()
+        // val publicKey = cryptoOperations.generatePairwise(seed)
     }
 
     /**

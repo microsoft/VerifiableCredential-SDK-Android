@@ -1,13 +1,11 @@
 package com.microsoft.did.sdk.registrars
 
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.identifier.IdentifierDocument
 import com.microsoft.did.sdk.utilities.getHttpClient
+import com.microsoft.did.sdk.utilities.stringToByteArray
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import kotlinx.coroutines.*
+import io.ktor.http.content.ByteArrayContent
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -26,6 +24,14 @@ data class Header(
     val proofOfWork: String
 )
 
+@Serializable
+data class IdentifierDocument (
+    val created: String,
+    val context: String,
+    val publicKey: ArrayList<String>,
+    val id: String
+)
+
 /**
  * Registrar implementation for the Sidetree network
  * @class
@@ -42,7 +48,7 @@ class SidetreeRegistrar: IRegistrar {
      * @param identifierDocument to register.
      * @param signingKeyReference reference to the key to be used for signing request.
      */
-    override fun register() {
+    override suspend fun register(): String {
 
         // create JWS request
         val payload = "eyJjcmVhdGVkIjoiMjAxOS0wOS0xOVQxNzowMzoxNy44ODFaIiwiQGNvbnRleHQiOiJodHRwczovL3czaWQub3JnL2RpZC92MSIsInB1YmxpY0tleSI6W3siaWQiOiIjc2lnS2V5IiwidHlwZSI6IlNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTgiLCJwdWJsaWNLZXlKd2siOnsia2lkIjoiI3NpZ0tleSIsImt0eSI6IkVDIiwidXNlIjoic2lnIiwiYWxnIjoiRVMyNTZLIiwiY3J2IjoiUC0yNTZLIiwieCI6ImJFNmJKNml3QVlZN1lzUHBkemRHTWV5enJXc1VDN3g4Z2wwemNaOU1ueXciLCJ5IjoieDM5TExDSFhaQ3B2SElMOHozQUtTbVpkcDQ1bU54akc0aEM2V2pQbl9hMCJ9fSx7ImlkIjoiI2VuY0tleSIsInR5cGUiOiJSc2FWZXJpZmljYXRpb25LZXkyMDE4IiwicHVibGljS2V5SndrIjp7ImtpZCI6IiNlbmNLZXkiLCJrdHkiOiJSU0EiLCJ1c2UiOiJlbmMiLCJlIjoiQVFBQiIsIm4iOiJoYThrTFN6VkkwaXBaUEJ3MXV3LTZ3QXE0bTNDcWNZeDU5anc1UUx4czRVYl9DLUlraThucThROHp2OE9kYVg5bWZHRzdxUERSVG9wWmQ5WTYtaGlYX1ZpSE9aZEhGeDU5akliUTRCSWZzM0NQcHcxWlo2S1NqMnc5ZmxncFVXOUVuX1Mtd1hJMzJjd2tGWlRlVzBLUFpOVDBhOHNrSEZYV254VzZrN3pLU1RqZmwzWHlQbXFyOG5yeFhFQnMzcHRwMkY0aVZqbWIteDhyUzJ5Q3pKeGpiN1c1T2dZYks0dzFhdkptbU5lM01BeWs5WlRFUWZVRmJKc0x4aVlVWlVXYmJ1ODZxelJDMG00NUdRNHNTdFIxS3lNNmpwcEtXNTM5N0V6OE9ZVGJKLUdudDU2MFJNclRNUkZfbmVOSzVITU16ZGlnUVZ3OV9mczRucDJXN1YwV1EifX1dfQ"
@@ -50,11 +56,10 @@ class SidetreeRegistrar: IRegistrar {
         val header = Header(alg="ES256K", kid="#sigKey", operation="create", proofOfWork = "{}")
         val jws = JwsToken(payload, header, signature)
         println(jws)
-        GlobalScope.launch {
-            println("in coroutine")
-            val response = sendRequest(jws)
-            println(response)
-        }
+        val response = sendRequest(jws)
+        // val document = Json.parse(IdentifierDocument.serializer(), response)
+        // println(response)
+        return response
     }
 
     /**
@@ -65,9 +70,11 @@ class SidetreeRegistrar: IRegistrar {
     private suspend fun sendRequest(request: JwsToken): String {
         val client = getHttpClient()
         val response = client.post<String> {
-            url("https://beta.ion.microsoft.com")
-            contentType(ContentType.Application.Json)
-            body = Json.stringify(JwsToken.serializer(), request)
+            url("https://beta.ion.microsoft.com/api/1.0/register")
+            body = ByteArrayContent(
+                bytes = stringToByteArray(Json.stringify(JwsToken.serializer(), request)),
+                contentType = ContentType.Application.Json
+            )
         }
         client.close()
         return response
