@@ -1,10 +1,11 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
+import kotlinx.serialization.Serializable
 
 /** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
-//@Serializable
+@Serializable
 data class RsaOtherPrimesInfo (val r: String, val d: String, val t: String)
 
-//@Serializable
+@Serializable
 data class JsonWebKey(
     // The following fields are defined in Section 3.1 of JSON Web Key
     var kty: String = "",
