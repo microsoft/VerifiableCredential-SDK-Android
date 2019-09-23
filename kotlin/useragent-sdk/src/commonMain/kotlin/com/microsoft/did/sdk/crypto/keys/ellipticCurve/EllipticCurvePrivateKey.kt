@@ -6,9 +6,8 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 
 class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
-    override fun getThumbprint(): String {
-        val publicKey = getPublicKey() as EllipticCurvePublicKey
-        return publicKey.getThumbprint()
+    override fun minimumAlphabeticJwk(): String {
+        return this.getPublicKey().minimumAlphabeticJwk()
     }
 
     var crv = key.crv
