@@ -1,15 +1,17 @@
 package com.microsoft.did.sdk.crypto.keys
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.KeyUse
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.stringToByteArray
 
 /**
  * Represents a Public Key in JWK format.
  * @class
  * @abstract
  */
-abstract class PublicKey (key: JsonWebKey) {
+abstract class PublicKey (val key: JsonWebKey) {
     /**
      * Key type
      */
@@ -40,5 +42,19 @@ abstract class PublicKey (key: JsonWebKey) {
      * @param jwk JSON object representation of a JWK
      * @see https://tools.ietf.org/html/rfc7638
      */
-    abstract fun getThumbprint (): String;
+    fun getThumbprint (crypto: CryptoOperations): String {
+        // construct a JSON object with only required fields
+        val json = this.minimumAlphabeticJwk()
+        val jsonUtf8 = stringToByteArray(json)
+        val digest = crypto.subtleCryptoFactory.getMessageDigest(W3cCryptoApiConstants.Sha512.value)
+        val hash = digest.digest(Algorithm(W3cCryptoApiConstants.Sha512.value), jsonUtf8)
+        // undocumented, but assumed base64url of hash is returned
+        return Base64Url.encode(hash)
+    }
+
+    /**
+     * Gets the minimum JWK with parameters in alphabetical order as specified by JWK Thumbprint
+     * @see https://tools.ietf.org/html/rfc7638
+     */
+    abstract fun minimumAlphabeticJwk(): String;
 }

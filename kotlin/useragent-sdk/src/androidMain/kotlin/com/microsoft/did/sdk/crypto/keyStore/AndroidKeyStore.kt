@@ -3,8 +3,18 @@ package com.microsoft.did.sdk.crypto.keyStore
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
+import java.security.KeyStore
 
 class AndroidKeyStore: IKeyStore {
+
+    companion object {
+        val keyStore: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+            load(null)
+        }
+    }
+
     override fun getSecretKey(keyReference: String): SecretKey {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -30,6 +40,15 @@ class AndroidKeyStore: IKeyStore {
     }
 
     override fun list(): Map<String, String> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        val output = emptyMap<String, String>().toMutableMap()
+        val aliases = keyStore.aliases()
+        for (alias in aliases) {
+            val key = keyStore.getKey(alias, null)
+            key.
+            if (key?.kid != null) {
+                output[alias] = key.kid!!
+            }
+        }
+        return output
     }
 }

@@ -23,10 +23,16 @@ enum class W3cCryptoApiConstants(val value: String) {
      */
     RsaSsaPkcs1V15("RSASSA-PKCS1-v1_5"),
 
+    Sha1("SHA-1"),
+
+    Sha224("SHA-224"),
+
     /**
      * Define W3C algorithm constants
      */
     Sha256("SHA-256"),
+
+    Sha384("SHA-384"),
 
     /**
      * Define W3C algorithm constants

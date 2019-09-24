@@ -13,4 +13,8 @@ abstract class PrivateKey(key: JsonWebKey): PublicKey(key) {
      * @returns The corresponding {@link PublicKey}
      */
     abstract fun getPublicKey (): PublicKey;
+
+    override fun minimumAlphabeticJwk(): String {
+        this.getPublicKey().minimumAlphabeticJwk()
+    }
 }
