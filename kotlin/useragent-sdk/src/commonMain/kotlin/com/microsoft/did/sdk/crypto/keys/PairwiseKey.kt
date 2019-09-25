@@ -5,6 +5,7 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
@@ -58,9 +59,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
         val alg: Algorithm =
             EcdsaParams(
                 name = W3cCryptoApiConstants.Hmac.value,
-                hash = Algorithm(
-                    W3cCryptoApiConstants.Sha512.value
-                )
+                hash = Sha.Sha512
             )
         val masterJwk = JsonWebKey(
                 kty = KeyType.Octets.value,

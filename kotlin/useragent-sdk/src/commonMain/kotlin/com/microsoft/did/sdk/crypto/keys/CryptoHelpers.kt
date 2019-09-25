@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.did.sdk.crypto.keys
 
+import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 
@@ -53,7 +54,7 @@ object CryptoHelpers {
                 return Algorithm (
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
-                        "hash" to Algorithm( name = "SHA-${matches.first().value}")
+                        "hash" to Sha.get(matches.first().value.toInt())
                     )
                 )
             }
@@ -61,7 +62,7 @@ object CryptoHelpers {
             JoseConstants.RsaOaep256.value -> RsaOaepParams(
                 name = "RSA-OAEP",
                 additionalParams = mapOf(
-                    "hash" to Algorithm ( name = "SHA-256")
+                    "hash" to Sha.Sha256
                 )
             )
             JoseConstants.AesGcm128.value,
@@ -82,7 +83,7 @@ object CryptoHelpers {
                 )
             }
             JoseConstants.Es256K.value -> EcdsaParams( name = "ECDSA",
-                    hash =  Algorithm( name = "SHA-256" ),
+                    hash =  Sha.Sha256,
                 additionalParams = mapOf(
                     "namedCurve" to "P-256K",
                     "format" to "DER"

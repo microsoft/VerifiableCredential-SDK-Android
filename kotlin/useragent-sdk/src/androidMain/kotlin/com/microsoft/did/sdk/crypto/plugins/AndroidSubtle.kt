@@ -1,15 +1,16 @@
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.did.sdk.crypto.keys.AndroidInternalKeyHandle
+import com.microsoft.did.sdk.crypto.keys.AndroidPublicKeyHandle
+import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import java.math.BigInteger
-import java.security.KeyFactory
-import java.security.KeyStore
-import java.security.MessageDigest
-import java.security.Signature
-import java.security.interfaces.ECPrivateKey
+import java.security.*
+import java.security.interfaces.RSAPublicKey
 import java.security.spec.*
-import java.util.*
 
 class AndroidSubtle: SubtleCrypto {
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -26,24 +27,22 @@ class AndroidSubtle: SubtleCrypto {
             throw Error("Sign must use a private key")
         }
         // key's handle should be an Android keyStore key reference.
-        if (!AndroidKeyStore.keyStore.containsAlias(key.handle as? String ?:
-            throw Error("Non-Android cryptoKey passed"))) {
-            throw Error("No key found for cryptoKey ${key.handle}")
-        }
-        val privateKeyReference = AndroidKeyStore.keyStore.getEntry(key.handle, null)
-                as? KeyStore.PrivateKeyEntry ?: throw Error("Key ${key.handle} is not a private key")
-
-        return Signature.getInstance(convertSignAlgorithmToAndroid(algorithm, key)).run {
-            initSign(privateKeyReference.privateKey)
-            update(data)
-            sign()
+        val internalHandle = key.handle as? AndroidInternalKeyHandle
+        if (internalHandle != null) {
+            return Signature.getInstance(convertSignAlgorithmToAndroid(algorithm, key)).run {
+                initSign(internalHandle.key.privateKey)
+                update(data)
+                sign()
+            }
+        } else {
+            TODO("Support software private keys")
         }
     }
 
     override fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-
+        val handle = key.handle as? AndroidPublicKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
         val s = Signature.getInstance(convertSignAlgorithmToAndroid(algorithm, key)).apply {
-            initVerify()
+            initVerify(handle.key)
             update(data)
         }
         return s.verify(signature)
@@ -94,36 +93,30 @@ class AndroidSubtle: SubtleCrypto {
         keyUsages: List<KeyUsage>
     ): CryptoKey {
         when (keyData.kty) {
-            com.microsoft.did.sdk.crypto.keys.KeyType.RSA -> {
+            com.microsoft.did.sdk.crypto.keys.KeyType.RSA.value -> {
                 val keyFactory = KeyFactory.getInstance(AndroidConstants.Rsa.value)
                 if (keyData.d != null) { // Private RSA key being imported
-                    keyFactory.generatePrivate(RSAPrivateKeySpec(
-                        BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE)),
-                        BigInteger(1, Base64.decode(keyData.d, Base64.URL_SAFE))
-                    ))
+                    throw Error("Importing private RSA keys is not supported")
+//                    keyFactory.generatePrivate(RSAPrivateKeySpec(
+//                        BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE)),
+//                        BigInteger(1, Base64.decode(keyData.d, Base64.URL_SAFE))
+//                    ))
                 } else { // Public RSA key being imported
-                    keyFactory.generatePublic(RSAPublicKeySpec(
+                    val key = keyFactory.generatePublic(RSAPublicKeySpec(
                         BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE)),
                         BigInteger(1, Base64.decode(keyData.e, Base64.URL_SAFE))
                     ))
+                    return CryptoKey(
+                        KeyType.Public,
+                        extractable,
+                        convertJwkAlgorithmToCryptoKeyAlgorithm(keyData.alg , key),
+                        keyUsages,
+                        AndroidPublicKeyHandle(key)
+                    )
                 }
             }
-            com.microsoft.did.sdk.crypto.keys.KeyType.EllipticCurve -> {
-                val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
-                if (keyData.d != null) { // Private EC key
-                    keyFactory.generatePrivate(ECPrivateKeySpec(
-                        BigInteger(1, Base64.decode(keyData.d, Base64.URL_SAFE)),
-                        ECParameterSpec(
-                            // EllipticCurve parameters,
-                            ECPoint(
-                                BigInteger(1, Base64.decode(keyData.x, Base64.URL_SAFE)),
-                                BigInteger(1, Base64.decode(keyData.y, Base64.URL_SAFE))
-                            )
-                        )
-                    ))
-                } else { // Public EC key
-
-                }
+            com.microsoft.did.sdk.crypto.keys.KeyType.EllipticCurve.value -> {
+                TODO("Standard Elliptic Curves are not currently supported.")
             }
             else -> throw Error("Cannot import JWK key type ${keyData.kty}")
         }
@@ -134,7 +127,7 @@ class AndroidSubtle: SubtleCrypto {
     }
 
     override fun exportKeyJwk(key: CryptoKey): JsonWebKey {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun wrapKey(
@@ -186,6 +179,21 @@ class AndroidSubtle: SubtleCrypto {
             }
             else -> throw Error("Unsupported algorithm: ${algorithm.name}")
         }
+    }
 
+    private fun convertJwkAlgorithmToCryptoKeyAlgorithm(alg: String?, key: Key): Algorithm {
+        when (alg) {
+            null -> Algorithm("unknown")
+            JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
+                val length = Regex("RS(\\d+)").matchEntire(alg).groupValues.first()
+                val rsaKey = key as RSAPublicKey
+                return RsaHashedKeyAlgorithm(
+                    modulusLength = rsaKey.modulus.toLong().toULong(),
+                    publicExponent = rsaKey.publicExponent.toLong().toULong(),
+                    hash = Sha.get(length.toInt())
+                )
+            }
+            else -> throw Error("Unknown JWK algorithm: $alg")
+        }
     }
 }

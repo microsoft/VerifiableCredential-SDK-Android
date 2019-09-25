@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import java.security.KeyStore
+import java.security.interfaces.RSAPublicKey
 
 class AndroidKeyStore: IKeyStore {
 
@@ -43,10 +44,11 @@ class AndroidKeyStore: IKeyStore {
         val output = emptyMap<String, String>().toMutableMap()
         val aliases = keyStore.aliases()
         for (alias in aliases) {
-            val key = keyStore.getKey(alias, null)
-            key.
-            if (key?.kid != null) {
-                output[alias] = key.kid!!
+            if (keyStore.isKeyEntry(alias)) {
+                val key = keyStore.getEntry(alias, null)
+                if (key is KeyStore.PrivateKeyEntry) {
+                    key.certificate.type.
+                }
             }
         }
         return output
