@@ -1,12 +1,10 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
-import com.microsoft.did.sdk.crypto.keys.KeyContainer
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.keys.PublicKey
-import com.microsoft.did.sdk.crypto.keys.SecretKey
+import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import java.security.KeyStore
+import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 
 class AndroidKeyStore: IKeyStore {
@@ -42,22 +40,44 @@ class AndroidKeyStore: IKeyStore {
     }
 
     override fun list(): Map<String, KeyStoreListItem> {
-        val output = emptyMap<String, String>().toMutableMap()
+        val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
         val aliases = keyStore.aliases()
         // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
         val keyContainerPattern = Regex("(^.+).(\\d+$)")
         for (alias in aliases) {
             if (alias.matches(keyContainerPattern)) {
+                val entry = keyStore.getEntry(alias, null)
                 val matches = keyContainerPattern.matchEntire(alias)
                 val values = matches!!.groupValues
-                if (output.containsKey(values[0])) {
 
-                } else {
-                    output[values[0]] = KeyStoreListItem()
+                // Get the keyType associated with this key.
+                val kty: KeyType = if (entry is KeyStore.PrivateKeyEntry) {
+                    whatKeyTypeIs(entry.certificate.publicKey)
+                } else { // SecretKeyEntry
+                    KeyType.Octets
                 }
 
+                // Add the key to an ListItem or make a new one
+                if (output.containsKey(values[0])) {
+                    val listItem = output[values[0]]!!
+                    if (listItem.kty != kty) {
+                        throw Error("Key Container ${values[0]} contains keys of two different " +
+                                "types (${listItem.kty.value}, ${kty.value})")
+                    }
+                    listItem.kids.add(alias)
+                } else {
+                    output[values[0]] = KeyStoreListItem(kty, mutableListOf(alias))
+                }
             }
         }
         return output
+    }
+
+    private fun whatKeyTypeIs(publicKey: java.security.PublicKey): KeyType {
+        return when (publicKey) {
+            is RSAPublicKey -> KeyType.RSA
+            is ECPublicKey -> KeyType.EllipticCurve
+            else -> throw Error("Unknown Key Type")
+        }
     }
 }

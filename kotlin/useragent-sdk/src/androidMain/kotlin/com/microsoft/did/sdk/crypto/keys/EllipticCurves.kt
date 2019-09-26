@@ -6,6 +6,7 @@ import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.EllipticCurve
 
+// We'll come back to this later but this is for native curves. It may not be necessary.
 enum class EllipticCurves(spec: ECParameterSpec) {
     secp256k1(ECParameterSpec(
         EllipticCurve(

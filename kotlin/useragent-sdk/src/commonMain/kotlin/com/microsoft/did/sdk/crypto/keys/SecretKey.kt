@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.crypto.models.KeyUse
  * @class
  * @extends JsonWebKey
  */
-class SecretKey(key: JsonWebKey) {
+open class SecretKey(key: JsonWebKey) {
     /**
      * Set the Oct key type
      */
