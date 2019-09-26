@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
+import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
@@ -20,11 +21,11 @@ interface IKeyStore {
      * @param keyIdentifier for which to return the key.
      * @param [publicKeyOnly] True if only the public key is needed.
      */
-    fun getSecretKey(keyReference: String): SecretKey
+    fun getSecretKey(keyReference: String): KeyContainer<SecretKey>
 
-    fun getPrivateKey(keyReference: String): PrivateKey
+    fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey>
 
-    fun getPublicKey(keyReference: String): PublicKey
+    fun getPublicKey(keyReference: String): KeyContainer<PublicKey>
 
     /**
      * Saves the specified key to the key store using
@@ -39,5 +40,5 @@ interface IKeyStore {
     /**
      * Lists all key references with their corresponding key ids
      */
-    fun list(): Map<String, String>
+    fun list(): Map<String, KeyStoreListItem>
 }

@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
+import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
@@ -16,15 +17,15 @@ class AndroidKeyStore: IKeyStore {
         }
     }
 
-    override fun getSecretKey(keyReference: String): SecretKey {
+    override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getPrivateKey(keyReference: String): PrivateKey {
+    override fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun getPublicKey(keyReference: String): PublicKey {
+    override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -40,15 +41,21 @@ class AndroidKeyStore: IKeyStore {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun list(): Map<String, String> {
+    override fun list(): Map<String, KeyStoreListItem> {
         val output = emptyMap<String, String>().toMutableMap()
         val aliases = keyStore.aliases()
+        // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
+        val keyContainerPattern = Regex("(^.+).(\\d+$)")
         for (alias in aliases) {
-            if (keyStore.isKeyEntry(alias)) {
-                val key = keyStore.getEntry(alias, null)
-                if (key is KeyStore.PrivateKeyEntry) {
-                    key.certificate.type.
+            if (alias.matches(keyContainerPattern)) {
+                val matches = keyContainerPattern.matchEntire(alias)
+                val values = matches!!.groupValues
+                if (output.containsKey(values[0])) {
+
+                } else {
+                    output[values[0]] = KeyStoreListItem()
                 }
+
             }
         }
         return output

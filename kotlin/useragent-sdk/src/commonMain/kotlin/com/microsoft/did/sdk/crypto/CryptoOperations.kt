@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
  */
 class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyStore: IKeyStore = getDefaultKeyStore()) {
 
-    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto);
+    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
 
     /**
      * Sign payload with key stored in keyStore.
