@@ -81,7 +81,10 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyS
                 val keyPair = subtle.generateKeyPair(RsaHashedKeyAlgorithm(
                     modulusLength = 4096UL,
                     publicExponent = 65537UL,
-                    hash = Sha.Sha256
+                    hash = Sha.Sha256,
+                    additionalParams = mapOf(
+                        "KeyReference" to keyReference
+                    )
                 ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt))
                 keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
                 RsaPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
@@ -89,7 +92,10 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyS
             KeyType.EllipticCurve -> {
                 val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.Secp256k1.value, SubtleCryptoScope.Private)
                 val keyPair = subtle.generateKeyPair(EcdsaParams(
-                    hash = Sha.Sha256
+                    hash = Sha.Sha256,
+                    additionalParams = mapOf(
+                        "KeyReference" to keyReference
+                    )
                 ), false, listOf(KeyUsage.Sign, KeyUsage.Verify))
                 keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
                 EllipticCurvePublicKey(subtle.exportKeyJwk(keyPair.publicKey))

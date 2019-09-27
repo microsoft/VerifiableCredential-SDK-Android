@@ -54,12 +54,13 @@ class AndroidKeyStore: IKeyStore {
             val publicKey = whatKeyTypeIs(privateKey.certificate.publicKey)
             return when (publicKey) {
                 KeyType.RSA -> {
+                    val key = privateKey.certificate.publicKey
                     RsaPrivateKey (
                         JsonWebKey(
                             kty = KeyType.RSA.value,
                             kid = alias,
-                            n = Base64.encodeToString((publicKey as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE),
-                            e = Base64.encodeToString(publicKey.publicExponent.toByteArray(), Base64.URL_SAFE),
+                            n = Base64.encodeToString((key as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE),
+                            e = Base64.encodeToString(key.publicExponent.toByteArray(), Base64.URL_SAFE),
                             d = "0",
                             p = "0",
                             q = "0",
@@ -70,12 +71,13 @@ class AndroidKeyStore: IKeyStore {
                     )
                 }
                 KeyType.EllipticCurve -> {
+                    val key = privateKey.certificate.publicKey
                     EllipticCurvePrivateKey (
                         JsonWebKey(
                             kty = KeyType.EllipticCurve.value,
                             kid = alias,
-                            x = Base64.encodeToString((publicKey as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE),
-                            y = Base64.encodeToString(publicKey.w.affineY.toByteArray(), Base64.URL_SAFE),
+                            x = Base64.encodeToString((key as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE),
+                            y = Base64.encodeToString(key.w.affineY.toByteArray(), Base64.URL_SAFE),
                             d = "0"
                         )
                     )
