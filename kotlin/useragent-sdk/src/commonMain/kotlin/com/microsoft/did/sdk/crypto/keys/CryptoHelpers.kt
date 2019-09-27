@@ -60,7 +60,6 @@ object CryptoHelpers {
             }
             JoseConstants.RsaOaep.value, // According to the spec, this should point to SHA-1
             JoseConstants.RsaOaep256.value -> RsaOaepParams(
-                name = "RSA-OAEP",
                 additionalParams = mapOf(
                     "hash" to Sha.Sha256
                 )
@@ -73,7 +72,6 @@ object CryptoHelpers {
                 val matches = regex.findAll(jwa)
                 val length = matches.first().value.toUShort()
                 return AesGcmParams(
-                    name = W3cCryptoApiConstants.AesGcm.value,
                     iv = iv,
                     additionalData = aad,
                     tagLength = 128.toByte(),
@@ -82,7 +80,7 @@ object CryptoHelpers {
                     )
                 )
             }
-            JoseConstants.Es256K.value -> EcdsaParams( name = "ECDSA",
+            JoseConstants.Es256K.value -> EcdsaParams(
                     hash =  Sha.Sha256,
                 additionalParams = mapOf(
                     "namedCurve" to "P-256K",

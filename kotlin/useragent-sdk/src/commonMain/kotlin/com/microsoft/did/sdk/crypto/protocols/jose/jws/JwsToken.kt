@@ -176,13 +176,17 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun verify(cryptoOperations: CryptoOperations) {
         val keyStoreKeys = cryptoOperations.keyStore.list()
+        val aliasList = keyStoreKeys.values.map { listItem -> listItem.kids }.reduce {
+            acc, curr ->
+            acc.addAll(curr)
+        }
         this.signatures.forEach {
             val kid = it.getKid()
             val signatureInput = "${it.protected}.${this.payload}"
             val signature = Base64Url.decode(it.signature)
-            if (keyStoreKeys.containsValue(kid)) {
+            if (aliasList.containsValue(kid)) {
                 // we can perform this verification using our own keys
-                val key = (keyStoreKeys.entries.filter { key -> key.value == kid }).first()
+                val key = (keyStoreKeys.entries.filter { key -> key.value.kids.contains(kid) }).first()
                 cryptoOperations.verify(stringToByteArray(signatureInput), signature, key.key)
             } else {
                 // we must retrieve the associated DID

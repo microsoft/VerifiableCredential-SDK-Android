@@ -2,11 +2,19 @@ package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.getDefaultKeyStore
+import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.crypto.keys.PublicKey
+import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
+import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
+import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
+import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.did.sdk.crypto.models.Sha
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
+import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 
 /**
  * Class that encompasses all of Crypto
@@ -23,14 +31,24 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyS
      * @param signingKeyReference reference to key stored in keystore.
      */
     fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
-        TODO("Not implemented")
+        val privateKey = keyStore.getPrivateKey(signingKeyReference)
+        val alg = algorithm ?: privateKey.alg ?: throw Error("No Algorithm specified for key $signingKeyReference")
+        val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Private)
+        val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
+        return subtle.sign(alg, key, payload)
     }
 
     /**
      * Verify payload with key stored in keyStore.
      */
-    fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String) {
-        TODO("Not implemented")
+    fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
+        val publicKey = keyStore.getPublicKey(signingKeyReference)
+        val alg = algorithm ?: publicKey.alg ?: throw Error("No Algorithm specified for key $signingKeyReference")
+        val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Public)
+        val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
+        if (!subtle.verify(alg, key, signature, payload)) {
+            throw Error("Signature invalid")
+        }
     }
 
     /**
@@ -45,6 +63,38 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyS
      */
     fun decrypt() {
         TODO("Not implemented")
+    }
+
+    /**
+     * Generates a key pair.
+     * @param keyType the type of key to generate
+     * @returns the associated public key
+     */
+    fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
+        if (keyStore.list().keys.contains(keyReference)) {
+            throw Error("Key $keyReference already exists")
+        }
+        return when (keyType) {
+            KeyType.Octets -> throw Error("Cannot generate a symmetric key")
+            KeyType.RSA -> {
+                val subtle = subtleCryptoFactory.getSharedKeyEncrypter(W3cCryptoApiConstants.RsaSsaPkcs1V15.value, SubtleCryptoScope.Private)
+                val keyPair = subtle.generateKeyPair(RsaHashedKeyAlgorithm(
+                    modulusLength = 4096UL,
+                    publicExponent = 65537UL,
+                    hash = Sha.Sha256
+                ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt))
+                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
+                RsaPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
+            }
+            KeyType.EllipticCurve -> {
+                val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.Secp256k1.value, SubtleCryptoScope.Private)
+                val keyPair = subtle.generateKeyPair(EcdsaParams(
+                    hash = Sha.Sha256
+                ), false, listOf(KeyUsage.Sign, KeyUsage.Verify))
+                keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
+                EllipticCurvePublicKey(subtle.exportKeyJwk(keyPair.publicKey))
+            }
+        }
     }
 
     /**

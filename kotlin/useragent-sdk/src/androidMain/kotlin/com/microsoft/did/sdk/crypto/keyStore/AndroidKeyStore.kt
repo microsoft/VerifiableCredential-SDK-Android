@@ -93,7 +93,7 @@ class AndroidKeyStore: IKeyStore {
         }
 
         fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
-            if (!kid.isNullOrBlank() && !kid!!.startsWith(keyReference)) {
+            if (!kid.isNullOrBlank() && !kid.startsWith(keyReference)) {
                 throw Error("Key ID must begin with key reference")
                 // This could be relaxed later if we flush keys and use a format of
                 // KEYREFERENCE.KEYID and ensure KEYID does not contain the dot delimiter
@@ -133,6 +133,40 @@ class AndroidKeyStore: IKeyStore {
                 is ECPublicKey -> KeyType.EllipticCurve
                 else -> throw Error("Unknown Key Type")
             }
+        }
+
+        private fun list(): Map<String, KeyStoreListItem> {
+            val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
+            val aliases = keyStore.aliases()
+            // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
+            val keyContainerPattern = Regex("(^.+).(\\d+$)")
+            for (alias in aliases) {
+                if (alias.matches(keyContainerPattern)) {
+                    val entry = keyStore.getEntry(alias, null)
+                    val matches = keyContainerPattern.matchEntire(alias)
+                    val values = matches!!.groupValues
+
+                    // Get the keyType associated with this key.
+                    val kty: KeyType = if (entry is KeyStore.PrivateKeyEntry) {
+                        whatKeyTypeIs(entry.certificate.publicKey)
+                    } else { // SecretKeyEntry
+                        KeyType.Octets
+                    }
+
+                    // Add the key to an ListItem or make a new one
+                    if (output.containsKey(values[0])) {
+                        val listItem = output[values[0]]!!
+                        if (listItem.kty != kty) {
+                            throw Error("Key Container ${values[0]} contains keys of two different " +
+                                    "types (${listItem.kty.value}, ${kty.value})")
+                        }
+                        listItem.kids.add(alias)
+                    } else {
+                        output[values[0]] = KeyStoreListItem(kty, mutableListOf(alias))
+                    }
+                }
+            }
+            return output
         }
     }
 
@@ -200,37 +234,7 @@ class AndroidKeyStore: IKeyStore {
     }
 
     override fun list(): Map<String, KeyStoreListItem> {
-        val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
-        val aliases = keyStore.aliases()
-        // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
-        val keyContainerPattern = Regex("(^.+).(\\d+$)")
-        for (alias in aliases) {
-            if (alias.matches(keyContainerPattern)) {
-                val entry = keyStore.getEntry(alias, null)
-                val matches = keyContainerPattern.matchEntire(alias)
-                val values = matches!!.groupValues
-
-                // Get the keyType associated with this key.
-                val kty: KeyType = if (entry is KeyStore.PrivateKeyEntry) {
-                    whatKeyTypeIs(entry.certificate.publicKey)
-                } else { // SecretKeyEntry
-                    KeyType.Octets
-                }
-
-                // Add the key to an ListItem or make a new one
-                if (output.containsKey(values[0])) {
-                    val listItem = output[values[0]]!!
-                    if (listItem.kty != kty) {
-                        throw Error("Key Container ${values[0]} contains keys of two different " +
-                                "types (${listItem.kty.value}, ${kty.value})")
-                    }
-                    listItem.kids.add(alias)
-                } else {
-                    output[values[0]] = KeyStoreListItem(kty, mutableListOf(alias))
-                }
-            }
-        }
-        return output
+        return AndroidKeyStore.list()
     }
 
 }

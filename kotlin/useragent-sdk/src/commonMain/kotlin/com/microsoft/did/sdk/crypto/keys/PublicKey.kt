@@ -4,6 +4,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.utilities.Base64Url
 import com.microsoft.did.sdk.utilities.stringToByteArray
 
@@ -47,7 +48,7 @@ abstract class PublicKey (val key: JsonWebKey) {
         // construct a JSON object with only required fields
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)
-        val digest = crypto.subtleCryptoFactory.getMessageDigest(W3cCryptoApiConstants.Sha512.value)
+        val digest = crypto.subtleCryptoFactory.getMessageDigest(W3cCryptoApiConstants.Sha512.value, SubtleCryptoScope.Public)
         val hash = digest.digest(Sha.Sha512, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
         return Base64Url.encode(hash)

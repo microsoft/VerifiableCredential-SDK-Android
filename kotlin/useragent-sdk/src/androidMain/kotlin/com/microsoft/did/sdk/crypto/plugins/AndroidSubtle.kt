@@ -5,14 +5,11 @@ import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.AndroidKeyHandle
-import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.RsaHashedKeyGenParams
-import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import java.math.BigInteger
 import java.security.*
-import java.security.interfaces.RSAPublicKey
 import java.security.spec.*
 import javax.crypto.KeyGenerator
 
@@ -158,7 +155,7 @@ class AndroidSubtle: SubtleCrypto {
                     return CryptoKey(
                         KeyType.Private,
                         extractable,
-                        jwkAlgorithmToCryptoKeyAlgorithm(keyData.alg, entry.certificate.publicKey),
+                        JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!),
                         keyUsages,
                         entry
                     )
@@ -170,7 +167,7 @@ class AndroidSubtle: SubtleCrypto {
                     return CryptoKey(
                         KeyType.Public,
                         extractable,
-                        jwkAlgorithmToCryptoKeyAlgorithm(keyData.alg , key),
+                        JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!),
                         keyUsages,
                         key
                     )
@@ -285,21 +282,5 @@ class AndroidSubtle: SubtleCrypto {
             })
         }
         return flags
-    }
-
-    private fun jwkAlgorithmToCryptoKeyAlgorithm(alg: String?, key: PublicKey): Algorithm {
-        return when (alg) {
-            null -> Algorithm("unknown")
-            JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
-                val length = Regex("RS(\\d+)").matchEntire(alg)!!.groupValues.first()
-                val rsaKey = key as RSAPublicKey
-                return RsaHashedKeyAlgorithm(
-                    modulusLength = rsaKey.modulus.toLong().toULong(),
-                    publicExponent = rsaKey.publicExponent.toLong().toULong(),
-                    hash = Sha.get(length.toInt())
-                )
-            }
-            else -> throw Error("Unknown JWK algorithm: $alg")
-        }
     }
 }
