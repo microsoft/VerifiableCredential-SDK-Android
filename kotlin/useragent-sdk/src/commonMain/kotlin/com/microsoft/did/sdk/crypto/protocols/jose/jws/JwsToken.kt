@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.KeyStoreListItem
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.Base64Url
@@ -123,7 +124,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
-        val signingKey = cryptoOperations.keyStore.getPublicKey(signingKeyReference)
+        val signingKey = cryptoOperations.keyStore.getPublicKey(signingKeyReference).getKey()
 
         // 3. Compute headers
         val headers = header.toMutableMap()
@@ -176,15 +177,16 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun verify(cryptoOperations: CryptoOperations) {
         val keyStoreKeys = cryptoOperations.keyStore.list()
-        val aliasList = keyStoreKeys.values.map { listItem -> listItem.kids }.reduce {
+        val aliasList = keyStoreKeys.values.map { listItem: KeyStoreListItem -> listItem.kids }.reduce {
             acc, curr ->
             acc.addAll(curr)
+            acc
         }
         this.signatures.forEach {
             val kid = it.getKid()
             val signatureInput = "${it.protected}.${this.payload}"
             val signature = Base64Url.decode(it.signature)
-            if (aliasList.containsValue(kid)) {
+            if (aliasList.contains(kid)) {
                 // we can perform this verification using our own keys
                 val key = (keyStoreKeys.entries.filter { key -> key.value.kids.contains(kid) }).first()
                 cryptoOperations.verify(stringToByteArray(signatureInput), signature, key.key)
@@ -192,7 +194,6 @@ class JwsToken private constructor(private val payload: String, signatures: List
                 // we must retrieve the associated DID
                 TODO("Resolver must be implemented to get key $kid")
             }
-
         }
     }
 
