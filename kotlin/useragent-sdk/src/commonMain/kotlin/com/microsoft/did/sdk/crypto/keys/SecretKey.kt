@@ -16,7 +16,7 @@ open class SecretKey(key: JsonWebKey) {
     /**
      * Set the Oct key type
      */
-    var kty: KeyType = KeyType.Octets;
+    var kty: KeyType = KeyType.Octets
 
     /**
      * Key ID
@@ -42,5 +42,16 @@ open class SecretKey(key: JsonWebKey) {
      * secret
      */
     var k: String? = key.k
+
+    fun toJWK(): JsonWebKey {
+        return JsonWebKey(
+            kty = kty.value,
+            kid = kid,
+            use = use?.value,
+            alg = alg,
+            key_ops = key_ops?.map { use -> use.value },
+            k = k
+        )
+    }
 
 }

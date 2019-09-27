@@ -25,6 +25,7 @@ enum class W3cCryptoApiConstants(val value: String) {
 
     Sha1("SHA-1"),
 
+    // NONSTANDARD
     Sha224("SHA-224"),
 
     /**
@@ -60,5 +61,13 @@ enum class W3cCryptoApiConstants(val value: String) {
     Secp384r1("P-384"),
     Secp521r1("P-521"),
     Secp256k1("P-256K"),
-    Ed25519("ed25519")
+    Ed25519("ed25519"),
+
+    AesCtr("AES-CTR"),
+    AesCbc("AES-CBC"),
+    AesGcm("AES-GCM"),
+    AesKw("AES-KW"),
+
+    Hmac("HMAC"),
+
 }

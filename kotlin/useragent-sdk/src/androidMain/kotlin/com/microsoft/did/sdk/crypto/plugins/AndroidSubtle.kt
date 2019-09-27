@@ -1,16 +1,16 @@
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
-import com.microsoft.did.sdk.crypto.keys.AndroidInternalKeyHandle
-import com.microsoft.did.sdk.crypto.keys.AndroidPublicKeyHandle
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.did.sdk.crypto.keys.AndroidKeyHandle
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import java.math.BigInteger
 import java.security.*
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.*
+import javax.crypto.KeyGenerator
 
 class AndroidSubtle: SubtleCrypto {
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -27,22 +27,18 @@ class AndroidSubtle: SubtleCrypto {
             throw Error("Sign must use a private key")
         }
         // key's handle should be an Android keyStore key reference.
-        val internalHandle = key.handle as? AndroidInternalKeyHandle
-        if (internalHandle != null) {
-            return Signature.getInstance(convertSignAlgorithmToAndroid(algorithm, key)).run {
-                initSign(internalHandle.key.privateKey)
-                update(data)
-                sign()
-            }
-        } else {
-            TODO("Support software private keys")
+        val handle = cryptoKeyToPrivateKey(key)
+        return Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).run {
+            initSign(handle.privateKey)
+            update(data)
+            sign()
         }
     }
 
     override fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        val handle = key.handle as? AndroidPublicKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
-        val s = Signature.getInstance(convertSignAlgorithmToAndroid(algorithm, key)).apply {
-            initVerify(handle.key)
+        val handle = cryptoKeyToPublicKey(key)
+        val s = Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).apply {
+            initVerify(handle)
             update(data)
         }
         return s.verify(signature)
@@ -54,7 +50,22 @@ class AndroidSubtle: SubtleCrypto {
     }
 
     override fun generateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKey {
-
+        val secret = when(algorithm.name) {
+            W3cCryptoApiConstants.AesCbc.value, W3cCryptoApiConstants.AesCtr.value,
+            W3cCryptoApiConstants.AesGcm.value, W3cCryptoApiConstants.AesKw.value -> {
+                val generator = KeyGenerator.getInstance(AndroidConstants.Aes.value)
+                val alg = algorithm as AesKeyGenParams
+                generator.init(alg.length.toInt())
+                generator.generateKey()
+            }
+            else -> throw Error("Unsupported symmetric key algorithm: ${algorithm.name}")
+        }
+        return CryptoKey(
+            type = KeyType.Secret,
+            extractable = extractable,
+            usages = keyUsages,
+            handle = secret
+        )
     }
 
     override fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKeyPair {
@@ -96,11 +107,18 @@ class AndroidSubtle: SubtleCrypto {
             com.microsoft.did.sdk.crypto.keys.KeyType.RSA.value -> {
                 val keyFactory = KeyFactory.getInstance(AndroidConstants.Rsa.value)
                 if (keyData.d != null) { // Private RSA key being imported
-                    throw Error("Importing private RSA keys is not supported")
-//                    keyFactory.generatePrivate(RSAPrivateKeySpec(
-//                        BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE)),
-//                        BigInteger(1, Base64.decode(keyData.d, Base64.URL_SAFE))
-//                    ))
+                    if (!AndroidKeyStore.keyStore.isKeyEntry(keyData.kid ?: "")) {
+                        throw Error("Software private keys are not supported.")
+                    }
+                    val entry = AndroidKeyStore.keyStore.getEntry(keyData.kid!!, null) as?
+                            KeyStore.PrivateKeyEntry ?: throw Error("Key must be a private key")
+                    return CryptoKey(
+                        KeyType.Private,
+                        extractable,
+                        jwkAlgorithmToCryptoKeyAlgorithm(keyData.alg, entry.certificate.publicKey),
+                        keyUsages,
+                        entry
+                    )
                 } else { // Public RSA key being imported
                     val key = keyFactory.generatePublic(RSAPublicKeySpec(
                         BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE)),
@@ -109,9 +127,9 @@ class AndroidSubtle: SubtleCrypto {
                     return CryptoKey(
                         KeyType.Public,
                         extractable,
-                        convertJwkAlgorithmToCryptoKeyAlgorithm(keyData.alg , key),
+                        jwkAlgorithmToCryptoKeyAlgorithm(keyData.alg , key),
                         keyUsages,
-                        AndroidPublicKeyHandle(key)
+                        key
                     )
                 }
             }
@@ -127,7 +145,18 @@ class AndroidSubtle: SubtleCrypto {
     }
 
     override fun exportKeyJwk(key: CryptoKey): JsonWebKey {
+        val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
+        when (internalHandle.key) {
+            is PublicKey -> {
+                AndroidKeyStore.androidPublicKeyToJWK(internalHandle.alias, internalHandle.key)
+            }
+            is KeyStore.PrivateKeyEntry -> {
 
+            }
+            else -> {
+                throw Error("Unknown CryptoKey format")
+            }
+        }
     }
 
     override fun wrapKey(
@@ -151,8 +180,18 @@ class AndroidSubtle: SubtleCrypto {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
+    private fun cryptoKeyToPublicKey(key: CryptoKey): PublicKey {
+        val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
+        return internalHandle.key as? PublicKey ?: throw Error("Private key passed when a public key was expected")
+    }
 
-    private fun convertSignAlgorithmToAndroid(algorithm: Algorithm, cryptoKey: CryptoKey): String {
+    private fun cryptoKeyToPrivateKey(key: CryptoKey): KeyStore.PrivateKeyEntry {
+        val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
+        return internalHandle.key as? KeyStore.PrivateKeyEntry ?: throw Error("Software private keys are not supported.")
+    }
+
+
+    private fun signAlgorithmToAndroid(algorithm: Algorithm, cryptoKey: CryptoKey): String {
         return when (algorithm.name) {
             W3cCryptoApiConstants.EcDsa.value -> {
                 val ecDsaParams = algorithm as EcdsaParams
@@ -181,7 +220,7 @@ class AndroidSubtle: SubtleCrypto {
         }
     }
 
-    private fun convertJwkAlgorithmToCryptoKeyAlgorithm(alg: String?, key: Key): Algorithm {
+    private fun jwkAlgorithmToCryptoKeyAlgorithm(alg: String?, key: PublicKey): Algorithm {
         when (alg) {
             null -> Algorithm("unknown")
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
@@ -196,4 +235,5 @@ class AndroidSubtle: SubtleCrypto {
             else -> throw Error("Unknown JWK algorithm: $alg")
         }
     }
+
 }

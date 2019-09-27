@@ -4,6 +4,8 @@ enum class AndroidConstants(val value: String) {
     // key factory algorithm names from https://docs.oracle.com/javase/8/docs/technotes/guides/security/StandardNames.html#KeyFactory
     Rsa("RSA"),
     Ec("EC"),
+    Aes("AES"),
+    AesWrap("AESWRAP"),
     // Signature algorithm names from https://developer.android.com/training/articles/keystore.html#SupportedSignatures
     EcDsaSha1("SHA1withECDSA"),
     EcDsaSha224("SHA224withECDSA"),

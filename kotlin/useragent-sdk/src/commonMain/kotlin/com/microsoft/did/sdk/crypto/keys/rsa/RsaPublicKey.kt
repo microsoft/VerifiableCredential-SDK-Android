@@ -11,6 +11,18 @@ class RsaPublicKey(jwk: JsonWebKey): PublicKey(jwk) {
 
     override var kty = KeyType.RSA
 
-    val n = key.n ?: throw Error("Json Web key parameter \"n\" is required.")
-    val e = key.e ?: throw Error("Json Web key parameter \"e\" is required.")
+    val n = key.n
+    val e = key.e
+
+    override fun toJWK(): JsonWebKey {
+        return JsonWebKey(
+            kty = kty.value,
+            alg = alg,
+            use = use?.value,
+            key_ops = key_ops?.map { use -> use.value },
+            kid = kid,
+            e = e,
+            n = n
+        )
+    }
 }

@@ -17,4 +17,16 @@ class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
      var x = key.x
      var y = key.y
      override var kty = KeyType.EllipticCurve
+
+    override fun toJWK(): JsonWebKey {
+        return JsonWebKey(
+            kty = kty.value,
+            alg = alg,
+            kid = kid,
+            key_ops = key_ops?.map { use -> use.value },
+            crv = crv,
+            x = x,
+            y = y
+        )
+    }
  }

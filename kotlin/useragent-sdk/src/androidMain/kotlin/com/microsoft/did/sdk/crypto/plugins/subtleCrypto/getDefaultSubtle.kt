@@ -1,7 +1,8 @@
 package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
+import AndroidSubtle
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 
 actual fun getDefaultSubtle(): SubtleCrypto {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    return AndroidSubtle()
 }

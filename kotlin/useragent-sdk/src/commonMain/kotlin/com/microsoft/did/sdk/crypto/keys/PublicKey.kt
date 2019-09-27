@@ -57,5 +57,7 @@ abstract class PublicKey (val key: JsonWebKey) {
      * Gets the minimum JWK with parameters in alphabetical order as specified by JWK Thumbprint
      * @see https://tools.ietf.org/html/rfc7638
      */
-    abstract fun minimumAlphabeticJwk(): String;
+    abstract fun minimumAlphabeticJwk(): String
+
+    abstract fun toJWK(): JsonWebKey
 }
