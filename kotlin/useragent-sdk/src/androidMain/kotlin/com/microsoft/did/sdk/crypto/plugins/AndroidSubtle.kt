@@ -27,7 +27,7 @@ class AndroidSubtle: SubtleCrypto {
 
     override fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         // verify we're signing with a private key
-        if (!key.type != KeyType.Private) {
+        if (key.type != KeyType.Private) {
             throw Error("Sign must use a private key")
         }
         // key's handle should be an Android keyStore key reference.
@@ -88,11 +88,30 @@ class AndroidSubtle: SubtleCrypto {
                 .build()
         )
         val keyPair = keyPairGenerator.genKeyPair()
+        // get the private key reference
+        val entry = AndroidKeyStore.keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
         // convert keypair.
-        TODO("export a cryptokeypair")
         return CryptoKeyPair(
-            AndroidKeyStore.androidPrivateKeyToPrivateKey(alias, keyPair.private),
-            AndroidKeyStore.androidPublicKeyToPublicKey(alias, keyPair.public)
+            CryptoKey(
+                KeyType.Public,
+                extractable,
+                algorithm,
+                keyUsages,
+                AndroidKeyHandle(
+                    alias,
+                    keyPair.public
+                )
+            ),
+            CryptoKey(
+                KeyType.Private,
+                false,
+                algorithm,
+                keyUsages,
+                AndroidKeyHandle(
+                    alias,
+                    entry
+                )
+            )
         )
     }
 
@@ -245,7 +264,7 @@ class AndroidSubtle: SubtleCrypto {
     }
 
     private fun keyPairAlgorithmToAndroid(algorithm: Algorithm): String {
-        when (algorithm.name) {
+        return when (algorithm.name) {
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> AndroidConstants.Rsa.value
             W3cCryptoApiConstants.EcDsa.value -> AndroidConstants.Ec.value
             else -> throw Error("Unknown algorithm used: ${algorithm.name}")
@@ -269,10 +288,10 @@ class AndroidSubtle: SubtleCrypto {
     }
 
     private fun jwkAlgorithmToCryptoKeyAlgorithm(alg: String?, key: PublicKey): Algorithm {
-        when (alg) {
+        return when (alg) {
             null -> Algorithm("unknown")
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
-                val length = Regex("RS(\\d+)").matchEntire(alg).groupValues.first()
+                val length = Regex("RS(\\d+)").matchEntire(alg)!!.groupValues.first()
                 val rsaKey = key as RSAPublicKey
                 return RsaHashedKeyAlgorithm(
                     modulusLength = rsaKey.modulus.toLong().toULong(),
@@ -283,5 +302,4 @@ class AndroidSubtle: SubtleCrypto {
             else -> throw Error("Unknown JWK algorithm: $alg")
         }
     }
-
 }
