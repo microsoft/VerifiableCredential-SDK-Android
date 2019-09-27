@@ -18,7 +18,9 @@ import javax.crypto.spec.SecretKeySpec
 class AndroidKeyStore: IKeyStore {
 
     companion object {
-        val keyStore: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+        const val provider = "AndroidKeyStore"
+
+        val keyStore: KeyStore = KeyStore.getInstance(provider).apply {
             load(null)
         }
 
@@ -88,6 +90,41 @@ class AndroidKeyStore: IKeyStore {
                 kid = alias,
                 k = Base64.encodeToString(secretKey.secretKey.encoded, Base64.URL_SAFE)
             ))
+        }
+
+        fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
+            if (!kid.isNullOrBlank() && !kid!!.startsWith(keyReference)) {
+                throw Error("Key ID must begin with key reference")
+                // This could be relaxed later if we flush keys and use a format of
+                // KEYREFERENCE.KEYID and ensure KEYID does not contain the dot delimiter
+            }
+            val regexForIndex = Regex("^.*\\.([-.]+$)")
+            return if (kid != null) {
+                kid
+            } else {
+                // generate a key id
+                val listItem = list()[keyReference]
+                if (listItem == null) { // no previous keys
+                    "$keyReference.1"
+                } else {
+                    // heuristic, find the last digit and count up
+                    var latestVersion = listItem.kids.reduce {
+                            acc: String, current: String ->
+                        val currentValue = regexForIndex.matchEntire(current)?.groupValues?.firstOrNull()?.toInt()
+                        val accValue = acc.toIntOrNull()
+                        if (currentValue != null && accValue == null) {
+                            current
+                        } else if (currentValue != null && accValue != null && currentValue > accValue) {
+                            current
+                        } else {
+                            acc
+                        }
+                    }.toIntOrNull() ?: 1
+
+                    latestVersion++
+                    "$keyReference.$latestVersion"
+                }
+            }
         }
 
         private fun whatKeyTypeIs(publicKey: java.security.PublicKey): KeyType {
@@ -194,41 +231,6 @@ class AndroidKeyStore: IKeyStore {
             }
         }
         return output
-    }
-
-    private fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
-        if (!kid.isNullOrBlank() && !kid!!.startsWith(keyReference)) {
-            throw Error("Key ID must begin with key reference")
-            // This could be relaxed later if we flush keys and use a format of
-            // KEYREFERENCE.KEYID and ensure KEYID does not contain the dot delimiter
-        }
-        val regexForIndex = Regex("^.*\\.([-.]+$)")
-        return if (kid != null) {
-            kid
-        } else {
-            // generate a key id
-            val listItem = list()[keyReference]
-            if (listItem == null) { // no previous keys
-                "$keyReference.1"
-            } else {
-                // heuristic, find the last digit and count up
-                var latestVersion = listItem.kids.reduce {
-                    acc: String, current: String ->
-                    val currentValue = regexForIndex.matchEntire(current)?.groupValues?.firstOrNull()?.toInt()
-                    val accValue = acc.toIntOrNull()
-                    if (currentValue != null && accValue == null) {
-                        current
-                    } else if (currentValue != null && accValue != null && currentValue > accValue) {
-                        current
-                    } else {
-                        acc
-                    }
-                }.toIntOrNull() ?: 1
-
-                latestVersion++
-                "$keyReference.$latestVersion"
-            }
-        }
     }
 
 }

@@ -16,5 +16,13 @@ enum class AndroidConstants(val value: String) {
     RsSha224("SHA224withRSA"),
     RsSha256("SHA256withRSA"),
     RsSha384("SHA384withRSA"),
-    RsSha512("SHA512withRSA")
+    RsSha512("SHA512withRSA"),
+
+
+
+
+    //////////////////////
+    // Custom Constants //
+    //////////////////////
+    KeyReference("KeyReference")
 }

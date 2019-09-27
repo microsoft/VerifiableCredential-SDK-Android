@@ -1,3 +1,6 @@
+import android.annotation.TargetApi
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
@@ -5,6 +8,7 @@ import com.microsoft.did.sdk.crypto.keys.AndroidKeyHandle
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.RsaHashedKeyGenParams
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import java.math.BigInteger
 import java.security.*
@@ -64,12 +68,32 @@ class AndroidSubtle: SubtleCrypto {
             type = KeyType.Secret,
             extractable = extractable,
             usages = keyUsages,
-            handle = secret
+            handle = secret,
+            algorithm = algorithm
         )
     }
 
+    @TargetApi(23)
     override fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKeyPair {
-
+        if (!algorithm.additionalParams.containsKey(AndroidConstants.KeyReference.value)){
+            throw Error("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
+        }
+        val alias = AndroidKeyStore.checkOrCreateKeyId(algorithm.additionalParams[AndroidConstants.KeyReference.value] as String, null)
+        val keyPairGenerator = KeyPairGenerator.getInstance(keyPairAlgorithmToAndroid(algorithm), AndroidKeyStore.provider)
+        keyPairGenerator.initialize(
+            KeyGenParameterSpec.Builder(
+                alias,
+                keyPairUsageToAndroid(keyUsages)
+            ).setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA512)
+                .build()
+        )
+        val keyPair = keyPairGenerator.genKeyPair()
+        // convert keypair.
+        TODO("export a cryptokeypair")
+        return CryptoKeyPair(
+            AndroidKeyStore.androidPrivateKeyToPrivateKey(alias, keyPair.private),
+            AndroidKeyStore.androidPublicKeyToPublicKey(alias, keyPair.public)
+        )
     }
 
     override fun deriveKey(
@@ -105,7 +129,7 @@ class AndroidSubtle: SubtleCrypto {
     ): CryptoKey {
         when (keyData.kty) {
             com.microsoft.did.sdk.crypto.keys.KeyType.RSA.value -> {
-                val keyFactory = KeyFactory.getInstance(AndroidConstants.Rsa.value)
+                val keyFactory = KeyFactory.getInstance(KeyProperties.KEY_ALGORITHM_RSA)
                 if (keyData.d != null) { // Private RSA key being imported
                     if (!AndroidKeyStore.keyStore.isKeyEntry(keyData.kid ?: "")) {
                         throw Error("Software private keys are not supported.")
@@ -146,12 +170,12 @@ class AndroidSubtle: SubtleCrypto {
 
     override fun exportKeyJwk(key: CryptoKey): JsonWebKey {
         val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
-        when (internalHandle.key) {
+        return when (internalHandle.key) {
             is PublicKey -> {
-                AndroidKeyStore.androidPublicKeyToJWK(internalHandle.alias, internalHandle.key)
+                AndroidKeyStore.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key).toJWK()
             }
             is KeyStore.PrivateKeyEntry -> {
-
+                AndroidKeyStore.androidPrivateKeyToPrivateKey(internalHandle.alias, internalHandle.key).toJWK()
             }
             else -> {
                 throw Error("Unknown CryptoKey format")
@@ -218,6 +242,30 @@ class AndroidSubtle: SubtleCrypto {
             }
             else -> throw Error("Unsupported algorithm: ${algorithm.name}")
         }
+    }
+
+    private fun keyPairAlgorithmToAndroid(algorithm: Algorithm): String {
+        when (algorithm.name) {
+            W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> AndroidConstants.Rsa.value
+            W3cCryptoApiConstants.EcDsa.value -> AndroidConstants.Ec.value
+            else -> throw Error("Unknown algorithm used: ${algorithm.name}")
+        }
+    }
+
+    private fun keyPairUsageToAndroid(usages: List<KeyUsage>): Int {
+        var flags = 0
+        usages.forEach { usage ->
+            flags = flags.or(when (usage) {
+                KeyUsage.Decrypt -> KeyProperties.PURPOSE_DECRYPT
+                KeyUsage.Encrypt -> KeyProperties.PURPOSE_ENCRYPT
+                KeyUsage.Sign -> KeyProperties.PURPOSE_SIGN
+                KeyUsage.Verify -> KeyProperties.PURPOSE_VERIFY
+                KeyUsage.WrapKey -> KeyProperties.PURPOSE_WRAP_KEY
+                KeyUsage.UnwrapKey -> KeyProperties.PURPOSE_WRAP_KEY
+                else -> 0
+            })
+        }
+        return flags
     }
 
     private fun jwkAlgorithmToCryptoKeyAlgorithm(alg: String?, key: PublicKey): Algorithm {

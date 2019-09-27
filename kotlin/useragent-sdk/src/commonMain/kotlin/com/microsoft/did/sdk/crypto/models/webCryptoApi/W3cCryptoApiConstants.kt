@@ -40,19 +40,9 @@ enum class W3cCryptoApiConstants(val value: String) {
      */
     Sha512("SHA-512"),
 
-    /**
-     * Define W3C algorithm constants
-     */
-    AesGcm("AES-GCM"),
-
     EcDsa("ECDSA"),
 
     EdDsa("EDDSA"),
-
-    /**
-     * Define W3C algorithm constants
-     */
-    Hmac("HMAC"),
 
     /**
      * @see https://www.w3.org/TR/WebCryptoAPI/#dfn-NamedCurve
@@ -68,6 +58,6 @@ enum class W3cCryptoApiConstants(val value: String) {
     AesGcm("AES-GCM"),
     AesKw("AES-KW"),
 
-    Hmac("HMAC"),
+    Hmac("HMAC")
 
 }

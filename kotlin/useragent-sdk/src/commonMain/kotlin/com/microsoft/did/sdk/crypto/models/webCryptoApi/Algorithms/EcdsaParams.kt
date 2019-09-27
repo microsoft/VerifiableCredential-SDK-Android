@@ -1,4 +1,4 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
 
-class EcdsaParams(name: String, val hash: Algorithm, additionalParams: Map<String, Any> = emptyMap()): Algorithm(name, additionalParams) {
+class EcdsaParams(val hash: Algorithm, additionalParams: Map<String, Any> = emptyMap()): Algorithm(W3cCryptoApiConstants.EcDsa.value, additionalParams) {
 }
