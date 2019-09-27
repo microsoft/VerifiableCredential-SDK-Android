@@ -141,7 +141,7 @@ class AndroidKeyStore: IKeyStore {
             val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
             val aliases = keyStore.aliases()
             // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
-            val keyContainerPattern = Regex("(^.+).(\\d+$)")
+            val keyContainerPattern = Regex("(^.+).\\d+$")
             for (alias in aliases) {
                 if (alias.matches(keyContainerPattern)) {
                     val entry = keyStore.getEntry(alias, null)
@@ -156,15 +156,15 @@ class AndroidKeyStore: IKeyStore {
                     }
 
                     // Add the key to an ListItem or make a new one
-                    if (output.containsKey(values[0])) {
-                        val listItem = output[values[0]]!!
+                    if (output.containsKey(values[1])) {
+                        val listItem = output[values[1]]!!
                         if (listItem.kty != kty) {
-                            throw Error("Key Container ${values[0]} contains keys of two different " +
+                            throw Error("Key Container ${values[1]} contains keys of two different " +
                                     "types (${listItem.kty.value}, ${kty.value})")
                         }
                         listItem.kids.add(alias)
                     } else {
-                        output[values[0]] = KeyStoreListItem(kty, mutableListOf(alias))
+                        output[values[1]] = KeyStoreListItem(kty, mutableListOf(alias))
                     }
                 }
             }

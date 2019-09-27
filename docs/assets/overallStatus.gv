@@ -41,9 +41,16 @@ digraph architecture {
   libsecp256k1[label="libsecp256k1.so", layer=private]
 
   KeyStore
+  AndroidKeyStore[layer=private]
+
+  SubtleCryptoFactory
 
   Secp256k1SubtleCrypto
   Secp256k1Provider
+  AndroidSubtleCrypto[layer=private]
+
+  IRegistrar
+  SidetreeRegistrar
   
   // In Progress
   node[color="#107c10", shape=box, layer=public]
@@ -51,16 +58,11 @@ digraph architecture {
   Agent
   Identifier
   IdentifierDocument
-
-  IRegistrar
-  SidetreeRegistrar
   
   IResolver
   HttpResolver
 
   CryptoOperations
-
-  SubtleCryptoFactory
   
   // Specified
   node[color="#0078d4", shape=ellipse, layer=public]
@@ -70,7 +72,6 @@ digraph architecture {
 
   JweToken
 
-  SecureStorageKeyStore[layer=private]
   SecureEnclaveKeyStore[layer=private]
   KeyVaultKeyStore[layer=private]
   InMemoryKeyStore[layer=private]
@@ -98,7 +99,8 @@ digraph architecture {
   HttpResolver -> IResolver
   Secp256k1Provider -> Provider
   Subtle -> SubtleCrypto
-  SecureStorageKeyStore -> KeyStore
+  AndroidSubtleCrypto -> SubtleCrypto
+  AndroidKeyStore -> KeyStore
   SecureEnclaveKeyStore -> KeyStore
   KeyVaultKeyStore -> KeyStore
   InMemoryKeyStore -> KeyStore
