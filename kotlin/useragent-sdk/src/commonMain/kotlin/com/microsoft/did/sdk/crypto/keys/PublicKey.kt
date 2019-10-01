@@ -17,7 +17,7 @@ abstract class PublicKey (val key: JsonWebKey) {
     /**
      * Key type
      */
-    open var kty: KeyType = KeyType.valueOf(key.kty)
+    open var kty: KeyType = toKeyType(key.kty)
 
     /**
      * Key ID

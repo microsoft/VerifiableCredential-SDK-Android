@@ -1,13 +1,17 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
 import android.util.Base64
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.did.sdk.utilities.stringToByteArray
+import kotlinx.serialization.json.Json
 import java.security.KeyFactory
 import java.security.KeyStore
 import java.security.interfaces.ECPublicKey
@@ -15,7 +19,7 @@ import java.security.interfaces.RSAPublicKey
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.SecretKeySpec
 
-class AndroidKeyStore: IKeyStore {
+class AndroidKeyStore(val crypto: CryptoOperations): IKeyStore {
 
     companion object {
         const val provider = "AndroidKeyStore"
@@ -223,7 +227,10 @@ class AndroidKeyStore: IKeyStore {
             // do nothing, the key is already there.
             return
         }
-        throw Error("Software Keys are currently not supported.")
+        // This key is not natively supported
+        val jwk = key.toJWK()
+        val jwkString = Json.stringify(JsonWebKey.serializer(), jwk)
+        keyStore.setKeyEntry(alias, stringToByteArray(jwkString), emptyArray())
     }
 
     override fun save(keyReference: String, key: PublicKey) {

@@ -1,3 +1,5 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
-expect fun getDefaultKeyStore(): IKeyStore
+import com.microsoft.did.sdk.crypto.CryptoOperations
+
+expect fun getDefaultKeyStore(parent: CryptoOperations): IKeyStore

@@ -160,6 +160,31 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
         return getSubtleCryptoFrom(messageDigests, name, scope)
     }
 
+    fun getBestMatch (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        fun findMatch(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, scope: SubtleCryptoScope): SubtleCrypto? {
+            val list = map[name]
+            if (list != null) {
+                try {
+                    return findSubtleCryptoFor(list, scope)
+                } catch (error: Error) {
+                    // no match
+                }
+            }
+            return null
+        }
+        // look in the order of:
+        val searchSequence = listOf(keyEncrypters, messageSigners, symmetricEncrypter, messageDigests, sharedKeyEncrypters, messageAuthenticationCodeSigners)
+
+        searchSequence.forEach {
+            val match = findMatch(it, name, scope)
+            if (match != null) {
+                return match
+            }
+        }
+
+        return defaultSubtleCryptoMapItem.subtleCrypto;
+    }
+
     private fun addOrCreateListFor(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, subtleCrypto: SubtleCryptoMapItem) {
         val list = map[name]
         if (list != null) {

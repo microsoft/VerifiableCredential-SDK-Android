@@ -21,8 +21,8 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), val keyStore: IKeyStore = getDefaultKeyStore()) {
-
+class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), keyStore: IKeyStore?) {
+    val keyStore: IKeyStore = keyStore ?: getDefaultKeyStore(this)
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
 
     /**

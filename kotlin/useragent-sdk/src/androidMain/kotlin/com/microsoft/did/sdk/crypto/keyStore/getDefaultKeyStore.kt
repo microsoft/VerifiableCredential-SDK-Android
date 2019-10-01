@@ -1,5 +1,7 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
-actual fun getDefaultKeyStore(): IKeyStore {
-    return AndroidKeyStore()
+import com.microsoft.did.sdk.crypto.CryptoOperations
+
+actual fun getDefaultKeyStore(parent: CryptoOperations): IKeyStore {
+    return AndroidKeyStore(parent)
 }

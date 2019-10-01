@@ -124,7 +124,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
-        val signingKey = cryptoOperations.keyStore.getPublicKey(signingKeyReference).getKey()
+        val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
 
         // 3. Compute headers
         val headers = header.toMutableMap()
