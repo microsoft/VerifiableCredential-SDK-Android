@@ -13,3 +13,17 @@ enum class KeyUsage (val value: String) {
     WrapKey("wrapKey"),
     UnwrapKey("unwrapKey")
 }
+
+fun toKeyUsage(key_ops: String): KeyUsage {
+    return when (key_ops) {
+        KeyUsage.Encrypt.value -> KeyUsage.Encrypt
+        KeyUsage.Decrypt.value -> KeyUsage.Decrypt
+        KeyUsage.Sign.value -> KeyUsage.Sign
+        KeyUsage.Verify.value -> KeyUsage.Verify
+        KeyUsage.DeriveBits.value -> KeyUsage.DeriveBits
+        KeyUsage.DeriveKey.value -> KeyUsage.DeriveKey
+        KeyUsage.WrapKey.value -> KeyUsage.WrapKey
+        KeyUsage.UnwrapKey.value -> KeyUsage.UnwrapKey
+        else -> throw Error("Unknown key_op $key_ops")
+    }
+}

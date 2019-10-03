@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.crypto.plugins
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
+import com.microsoft.did.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
 import java.util.*
@@ -75,6 +76,42 @@ class Secp256k1Provider(): Provider() {
         }
 
         return NativeSecp256k1.verify(data, signature, keyData)
+    }
+
+    override fun onImportKey(
+        format: KeyFormat,
+        keyData: JsonWebKey,
+        algorithm: Algorithm,
+        extractable: Boolean,
+        keyUsages: Set<KeyUsage>
+    ): CryptoKey {
+        if (keyData.d != null) { // import d as the private key handle
+            return CryptoKey(
+                type = KeyType.Private,
+                extractable = extractable,
+                algorithm = algorithm,
+                usages = keyUsages.toList(),
+                handle = Base64.decode(stringToByteArray(keyData.d!!), Base64.URL_SAFE)
+            )
+        } else {// public key
+            val x = Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE)
+            val y = Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE)
+            val xyData = ByteArray(65)
+            xyData[0] = secp256k1Tag.uncompressed.byte
+            x.forEachIndexed { index, byte ->
+                xyData[index + 1] = byte
+            }
+            y.forEachIndexed { index, byte ->
+                xyData[index + 33] = byte
+            }
+            return CryptoKey(
+                type = KeyType.Public,
+                extractable = extractable,
+                algorithm = algorithm,
+                usages = keyUsages.toList(),
+                handle = xyData
+            )
+        }
     }
 
     override fun onExportKeyJwk(key: CryptoKey): JsonWebKey {

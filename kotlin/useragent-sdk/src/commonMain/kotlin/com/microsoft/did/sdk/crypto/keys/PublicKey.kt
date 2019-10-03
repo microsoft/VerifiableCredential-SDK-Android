@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.crypto.keys
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.Sha
+import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.utilities.Base64Url
@@ -27,12 +28,12 @@ abstract class PublicKey (val key: JsonWebKey) {
     /**
      * Intended use
      */
-    open var use: KeyUse? = key.use?.let { KeyUse.valueOf(it) }
+    open var use: KeyUse? = key.use?.let { toKeyUse(it) }
 
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map { KeyUsage.valueOf(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key

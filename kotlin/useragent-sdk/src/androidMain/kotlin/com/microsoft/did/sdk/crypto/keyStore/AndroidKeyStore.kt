@@ -1,25 +1,29 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
+import android.annotation.TargetApi
+import android.content.Context
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.security.keystore.KeyProtection
 import android.util.Base64
-import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import kotlinx.serialization.json.Json
-import java.security.KeyFactory
 import java.security.KeyStore
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
-import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.SecretKeySpec
+import 	androidx.security.crypto.EncryptedSharedPreferences
+import javax.crypto.KeyGenerator
 
-class AndroidKeyStore(val crypto: CryptoOperations): IKeyStore {
+class AndroidKeyStore(val context: Context): IKeyStore {
 
     companion object {
         const val provider = "AndroidKeyStore"
@@ -215,12 +219,16 @@ class AndroidKeyStore(val crypto: CryptoOperations): IKeyStore {
         )
     }
 
+    @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         val keyValue = Base64.decode(key.k, Base64.URL_SAFE)
-        keyStore.setKeyEntry(alias, keyValue, emptyArray())
+        val secret = SecretKeySpec(keyValue, "RAW")
+        val entry = KeyStore.SecretKeyEntry(secret)
+        keyStore.setEntry(alias, entry, secretKeyToKeyProtection(key))
     }
 
+    @TargetApi(23)
     override fun save(keyReference: String, key: PrivateKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         if (keyStore.containsAlias(alias)) {
@@ -230,7 +238,10 @@ class AndroidKeyStore(val crypto: CryptoOperations): IKeyStore {
         // This key is not natively supported
         val jwk = key.toJWK()
         val jwkString = Json.stringify(JsonWebKey.serializer(), jwk)
-        keyStore.setKeyEntry(alias, stringToByteArray(jwkString), emptyArray())
+        val keyValue = stringToByteArray(jwkString)
+        val secret = SecretKeySpec(keyValue, 0, keyValue.count(), "AES")
+        val entry = KeyStore.SecretKeyEntry(secret)
+        keyStore.setEntry(alias, entry, privateKeyToKeyProtection(key))
     }
 
     override fun save(keyReference: String, key: PublicKey) {
@@ -244,6 +255,81 @@ class AndroidKeyStore(val crypto: CryptoOperations): IKeyStore {
 
     override fun list(): Map<String, KeyStoreListItem> {
         return AndroidKeyStore.list()
+    }
+
+    private fun saveSecretKey(alias: String, data: ByteArray) {
+        val masterKeyAlias = getSecretVaultMasterKey()
+        val sharedPreferences = EncryptedSharedPreferences.create(
+            "secret_shared_prefs",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+        val editor = sharedPreferences.edit();
+        TODO("save keys to the editor")
+    }
+
+    @TargetApi(23)
+    private fun getSecretVaultMasterKey(): String {
+        val alias = "ms-useragent-secret-masterkey"
+
+        if (!keyStore.containsAlias(alias)) {
+            // Generate the master key
+            val generator = KeyGenerator.getInstance("AES", provider)
+            generator.init(KeyGenParameterSpec.Builder(
+                alias,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build())
+            generator.generateKey();
+        }
+
+        return alias
+    }
+
+    @TargetApi(23)
+    private fun secretKeyToKeyProtection(key: SecretKey): KeyProtection {
+        return keyToKeyProtection(key.key_ops, key.use)
+    }
+
+    @TargetApi(23)
+    private fun privateKeyToKeyProtection(key: PrivateKey): KeyProtection {
+        return keyToKeyProtection(key.key_ops, key.use)
+    }
+
+    @TargetApi(23)
+    private fun keyToKeyProtection(keyOps: List<KeyUsage>?, keyUse: KeyUse?): KeyProtection {
+        val keyUsage = keyOps ?: if (keyUse != null) {
+            when (keyUse) {
+                KeyUse.Encryption -> listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
+                KeyUse.Signature -> listOf(KeyUsage.Sign, KeyUsage.Verify)
+                else -> throw Error("Key use should be either 'sig' or 'enc'")
+            }
+        } else {
+            listOf(KeyUsage.Encrypt, KeyUsage.Decrypt, KeyUsage.Sign, KeyUsage.Verify)
+        }
+        return keyUsageToKeyProtection(keyUsage)
+    }
+
+    @TargetApi(23)
+    private fun keyUsageToKeyProtection(usage: List<KeyUsage>): KeyProtection {
+        var usageFlag = 0
+        if (usage.contains(KeyUsage.Decrypt)) {
+            usageFlag = usageFlag or KeyProperties.PURPOSE_DECRYPT
+        }
+        if (usage.contains(KeyUsage.Encrypt)) {
+            usageFlag = usageFlag or KeyProperties.PURPOSE_ENCRYPT
+        }
+        if (usage.contains(KeyUsage.Sign)) {
+            usageFlag = usageFlag or KeyProperties.PURPOSE_SIGN
+        }
+        if (usage.contains(KeyUsage.Verify)) {
+            usageFlag = usageFlag or KeyProperties.PURPOSE_VERIFY
+        }
+        return KeyProtection.Builder(usageFlag).build()
     }
 
 }

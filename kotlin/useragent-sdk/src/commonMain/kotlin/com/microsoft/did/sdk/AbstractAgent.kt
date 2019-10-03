@@ -6,25 +6,31 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
 
-const val defaultRegistrationUrl = "beta.discover.did.microsoft.com"
-const val defaultResolverUrl = "beta.ion.microsoft.com"
 
 /**
  * Class for creating identifiers and
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class Agent (registrationUrl: String = defaultRegistrationUrl,
-             resolverUrl: String = defaultResolverUrl) {
+abstract class AbstractAgent (registrationUrl: String,
+                              resolverUrl: String,
+                              keyStore: IKeyStore,
+                              subtleCrypto: SubtleCrypto) {
+    companion object {
+        const val defaultRegistrationUrl = "beta.discover.did.microsoft.com"
+        const val defaultResolverUrl = "beta.ion.microsoft.com"
+    }
 
     /**
      * CryptoOperations
      */
-    private val cryptoOperations =  CryptoOperations()
+    private val cryptoOperations =  CryptoOperations(subtleCrypto = subtleCrypto, keyStore = keyStore)
     /**
      * Registrar to be used when registering Identifiers.
      */

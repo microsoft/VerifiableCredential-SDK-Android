@@ -1,7 +1,6 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
-import com.microsoft.did.sdk.crypto.keyStore.getDefaultKeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
@@ -13,16 +12,13 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.getDefaultSubtle
-import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 
 /**
  * Class that encompasses all of Crypto
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), keyStore: IKeyStore?) {
-    val keyStore: IKeyStore = keyStore ?: getDefaultKeyStore(this)
+class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
 
     /**
@@ -90,10 +86,11 @@ class CryptoOperations(subtleCrypto: SubtleCrypto = getDefaultSubtle(), keyStore
                 RsaPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
             }
             KeyType.EllipticCurve -> {
-                val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.Secp256k1.value, SubtleCryptoScope.Private)
-                val keyPair = subtle.generateKeyPair(EcdsaParams(
-                    hash = Sha.Sha256,
+                val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
+                val keyPair = subtle.generateKeyPair(EcKeyGenParams(
+                    namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                     additionalParams = mapOf(
+                        "hash" to Sha.Sha256,
                         "KeyReference" to keyReference
                     )
                 ), false, listOf(KeyUsage.Sign, KeyUsage.Verify))

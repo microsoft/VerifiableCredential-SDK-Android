@@ -6,6 +6,8 @@ package com.microsoft.did.sdk.crypto.keys
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.KeyUse
+import com.microsoft.did.sdk.crypto.models.toKeyUse
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.toKeyUsage
 
 /**
  * Represents an OCT key
@@ -26,12 +28,12 @@ open class SecretKey(key: JsonWebKey) {
     /**
      * Intended use
      */
-    open var use: KeyUse? = key.use?.let { KeyUse.valueOf(it) }
+    open var use: KeyUse? = key.use?.let { toKeyUse(it) }
 
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map { KeyUsage.valueOf(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key
