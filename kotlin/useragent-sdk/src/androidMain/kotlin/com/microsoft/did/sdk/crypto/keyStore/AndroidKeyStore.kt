@@ -80,15 +80,29 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
     }
 
     override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
-        val allKeys = this.list()
-        val key = allKeys[keyReference] ?: throw Error("Key $keyReference not found")
-        return KeyContainer(
-            kty = key.kty,
-            keys = key.kids.map {
-                val entry = keyStore.getEntry(it, null) as? KeyStore.PrivateKeyEntry ?: throw Error("Key $it is not a private key.")
-                AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry.certificate.publicKey)
-            }
-        )
+        val nativeKeys = listNativeKeys()
+        var key = nativeKeys[keyReference]
+        if (key != null) {
+            return KeyContainer(
+                kty = key.kty,
+                keys = key.kids.map {
+                    val entry = keyStore.getEntry(it, null) as? KeyStore.PrivateKeyEntry
+                        ?: throw Error("Key $it is not a private key.")
+                    AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry.certificate.publicKey)
+                }
+            )
+        }
+        val softwareKeys = listSecureData()
+        key = softwareKeys[keyReference]
+        if (key != null) {
+            return KeyContainer(
+                kty = key.kty,
+                keys = key.kids.map{
+                    getSecurePublicKey(it)!!
+                }
+            )
+        }
+        throw Error("Key $keyReference not found")
     }
 
     @TargetApi(23)
@@ -108,7 +122,10 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             return
         }
         // This key is not natively supported
-        val jwk = key.toJWK()
+        var jwk = key.toJWK();
+        println(alias);
+        jwk.kid = alias;
+        println(jwk);
         val jwkString = Json.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
@@ -191,6 +208,10 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             }
         }
         return keyMap
+    }
+
+    private fun getSecurePublicKey(alias: String): PublicKey? {
+        return getSecurePrivateKey(alias)?.getPublicKey()
     }
 
     private fun getSecurePrivateKey(alias: String): PrivateKey? {
@@ -295,7 +316,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             // This could be relaxed later if we flush keys and use a format of
             // KEYREFERENCE.KEYID and ensure KEYID does not contain the dot delimiter
         }
-        return if (kid != null) {
+        return if (!kid.isNullOrBlank()) {
             kid
         } else {
             // generate a key id

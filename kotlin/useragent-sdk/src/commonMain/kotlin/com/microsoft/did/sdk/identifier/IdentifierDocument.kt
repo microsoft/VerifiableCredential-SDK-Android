@@ -1,9 +1,8 @@
 package com.microsoft.did.sdk.identifier
 
-//import kotlinx.serialization.json.*
-//import kotlinx.serialization.Serializable
+import kotlinx.serialization.Serializable
 
-//@Serializable
+@Serializable
 data class Document(val id: String, val publicKeys: ArrayList<IdentifierDocumentPublicKey>) {}
 
 /**

@@ -67,9 +67,6 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
      * @returns the associated public key
      */
     fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
-        if (keyStore.list().keys.contains(keyReference)) {
-            throw Error("Key $keyReference already exists")
-        }
         return when (keyType) {
             KeyType.Octets -> throw Error("Cannot generate a symmetric key")
             KeyType.RSA -> {

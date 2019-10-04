@@ -7,7 +7,7 @@ import io.ktor.client.engine.HttpClientEngine
  * @interface defining methods and properties
  * to be implemented by specific registration methods.
  */
-interface IRegistrar {
+abstract IRegistrar {
 
     /**
      * Registers the identifier document on the ledger
@@ -15,5 +15,9 @@ interface IRegistrar {
      * @param identifierDocument to be registered.
      * @param signingKeyReference reference to the key to be used for signing request.
      */
-    open fun register()
+    fun register() {
+
+    }
+
+    abstract fun onRegister()
 }
