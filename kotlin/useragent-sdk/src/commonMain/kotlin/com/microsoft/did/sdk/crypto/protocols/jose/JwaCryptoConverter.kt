@@ -26,7 +26,7 @@ class JwaCryptoConverter {
                         )
                     )
                 }
-                JoseConstants.Es256K.value -> {
+                JoseConstants.EcDsa.value, JoseConstants.Es256K.value -> {
                     EcdsaParams(
                         hash = Algorithm(
                             name = W3cCryptoApiConstants.Sha256.value

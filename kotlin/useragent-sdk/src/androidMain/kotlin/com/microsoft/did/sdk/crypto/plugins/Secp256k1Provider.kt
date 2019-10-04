@@ -35,13 +35,15 @@ class Secp256k1Provider(): Provider() {
 
         val publicKey = NativeSecp256k1.computePubkey(secret)
 
-        val keyPair = CryptoKeyPair(CryptoKey(
+        val keyPair = CryptoKeyPair(
+            privateKey = CryptoKey(
             KeyType.Private,
             extractable,
             algorithm,
             keyUsages.toList(),
             secret
-        ), CryptoKey(
+            ),
+            publicKey = CryptoKey(
             KeyType.Public,
             true,
             algorithm,
@@ -129,9 +131,7 @@ class Secp256k1Provider(): Provider() {
         if (publicKey == null) {
             throw Error("No public key components could be found")
         }
-        println("Getting XY")
         val xyData = publicToXY(publicKey)
-        println("XY got")
         return JsonWebKey(
             kty = com.microsoft.did.sdk.crypto.keys.KeyType.EllipticCurve.value,
             crv = W3cCryptoApiConstants.Secp256k1.value,
@@ -166,7 +166,6 @@ class Secp256k1Provider(): Provider() {
                     keyData[0] == secp256k1Tag.even.byte ||
                     keyData[0] == secp256k1Tag.odd.byte)) {
             // compressed form
-            println("Compressed form")
             return Pair(
                 "",
                 ""
@@ -176,11 +175,9 @@ class Secp256k1Provider(): Provider() {
                     keyData[0] == secp256k1Tag.hybridEven.byte ||
                     keyData[0] == secp256k1Tag.hybridOdd.byte
                     )) {
-            println("Uncompressed form")
             // uncompressed, bytes 1-32, and 33-end are x and y
             val x = keyData.sliceArray(1..32)
             val y = keyData.sliceArray(33..64)
-            println("X: $x, Y: $y")
             return Pair(
                 Base64.encodeToString(x, Base64.URL_SAFE),
                 Base64.encodeToString(y, Base64.URL_SAFE)

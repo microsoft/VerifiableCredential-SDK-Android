@@ -93,7 +93,7 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
                         "hash" to Sha.Sha256,
                         "KeyReference" to keyReference
                     )
-                ), false, listOf(KeyUsage.Sign, KeyUsage.Verify))
+                ), true, listOf(KeyUsage.Sign, KeyUsage.Verify))
                 keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
                 EllipticCurvePublicKey(subtle.exportKeyJwk(keyPair.publicKey))
             }

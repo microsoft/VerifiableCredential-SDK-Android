@@ -1,3 +1,5 @@
+package com.microsoft.did.sdk.crypto.plugins
+
 import android.annotation.TargetApi
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -8,12 +10,13 @@ import com.microsoft.did.sdk.crypto.keys.AndroidKeyHandle
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.utilities.AndroidKeyConverter
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.*
 import javax.crypto.KeyGenerator
 
-class AndroidSubtle: SubtleCrypto {
+class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -75,7 +78,7 @@ class AndroidSubtle: SubtleCrypto {
         if (!algorithm.additionalParams.containsKey(AndroidConstants.KeyReference.value)){
             throw Error("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
         }
-        val alias = AndroidKeyStore.checkOrCreateKeyId(algorithm.additionalParams[AndroidConstants.KeyReference.value] as String, null)
+        val alias = keyStore.checkOrCreateKeyId(algorithm.additionalParams[AndroidConstants.KeyReference.value] as String, null)
         val keyPairGenerator = KeyPairGenerator.getInstance(keyPairAlgorithmToAndroid(algorithm), AndroidKeyStore.provider)
         keyPairGenerator.initialize(
             KeyGenParameterSpec.Builder(
@@ -188,10 +191,10 @@ class AndroidSubtle: SubtleCrypto {
         val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
         return when (internalHandle.key) {
             is PublicKey -> {
-                AndroidKeyStore.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key).toJWK()
+                AndroidKeyConverter.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key).toJWK()
             }
             is KeyStore.PrivateKeyEntry -> {
-                AndroidKeyStore.androidPrivateKeyToPrivateKey(internalHandle.alias, internalHandle.key).toJWK()
+                AndroidKeyConverter.androidPrivateKeyToPrivateKey(internalHandle.alias, internalHandle.key).toJWK()
             }
             else -> {
                 throw Error("Unknown CryptoKey format")
