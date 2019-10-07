@@ -28,7 +28,7 @@ class HttpResolver(private val baseUrl : String): IResolver {
      * to resolver specified Identifier
      * @param identifier to resolve
      */
-    override suspend fun resolve(identifier: String): IdentifierDocument {
+    override suspend fun resolveDocument(identifier: String): IdentifierDocument {
         val client = getHttpClient()
         val response = client.get<String>() {
             url("$baseUrl${ if (endsInSlash) {""} else {"/"} }$identifier ")

@@ -19,7 +19,7 @@ import kotlinx.serialization.json.Json
  * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar: IRegistrar() {
+class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
 
     @ImplicitReflectionSerializer
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
@@ -42,7 +42,7 @@ class SidetreeRegistrar: IRegistrar() {
     private suspend fun sendRequest(request: String): String {
         val client = getHttpClient()
         val response = client.post<String> {
-            url("https://beta.ion.microsoft.com")
+            url(baseUrl)
             contentType(ContentType.Application.Json)
             body = request
         }
