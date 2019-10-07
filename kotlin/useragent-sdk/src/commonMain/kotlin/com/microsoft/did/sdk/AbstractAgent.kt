@@ -10,8 +10,13 @@ import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.identifier.Identifier
+import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
+import com.microsoft.did.sdk.identifier.document.service.IdentityHubUserService
+import com.microsoft.did.sdk.identifier.document.service.UserHubEndpoint
+import com.microsoft.did.sdk.registrars.RegistrationDocument
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
+import kotlinx.serialization.ImplicitReflectionSerializer
 
 
 /**
@@ -49,7 +54,8 @@ abstract class AbstractAgent (registrationUrl: String,
     /**
      * Creates and registers an Identifier.
      */
-    fun createIdentifier() {
+    @ImplicitReflectionSerializer
+    suspend fun createIdentifier(): Identifier {
         // TODO: Use software generated keys from the seed
 //        val seed = cryptoOperations.generateSeed()
 //        val publicKey = cryptoOperations.generatePairwise(seed)
@@ -58,8 +64,46 @@ abstract class AbstractAgent (registrationUrl: String,
         val personaSigKeyRef = "a.$signatureKeyReference"
         val encKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
         val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
+        var encJwk = encKey.toJWK()
+        var sigJwk = sigKey.toJWK()
+        encJwk.kid = "#${encJwk.kid}"
+        sigJwk.kid = "#${encJwk.kid}"
+        // RSA key
+        val encPubKey = IdentifierDocumentPublicKey(
+            id = encJwk.kid!!,
+            type = "RsaVerificationKey2018",
+            publicKeyJwk = encJwk
+        )
+        // Secp256k1 key
+        val sigPubKey = IdentifierDocumentPublicKey(
+            id = sigJwk.kid!!,
+            type = "EcdsaSecp256k1VerificationKey2019",
+            publicKeyJwk = sigJwk
+        )
+        // Microsoft Identity Hub
+        val identityHub = Identifier("did:test:hub.id",
+            cryptoOperations, resolver, registrar
+        )
+        val hubService = IdentityHubUserService.create(
+            id = "#hub",
+            keyStore = this.cryptoOperations.keyStore,
+            signatureKeyRef = personaSigKeyRef,
+            instances = listOf(identityHub)
+        )
 
-        TODO("create Identifier Document and register to get new Identifier")
+        val document = RegistrationDocument(
+            publicKeys = listOf(encPubKey, sigPubKey),
+            services = listOf(hubService)
+        )
+        val registered = this.registrar.register(document, personaSigKeyRef, cryptoOperations)
+        return Identifier(
+            document = registered,
+            signatureKeyReference = personaSigKeyRef,
+            encryptionKeyReference = personaEncKeyRef,
+            cryptoOperations = cryptoOperations,
+            resolver = resolver,
+            registrar = registrar
+        )
     }
 
     /**

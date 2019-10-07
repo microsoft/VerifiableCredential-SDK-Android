@@ -23,7 +23,7 @@ data class IdentifierDocumentPublicKey (
     /**
      * The owner of the key.
      */
-    val owner: String?,
+    val controller: String? = null,
 
     /**
      * The JWK public key.

@@ -14,5 +14,5 @@ interface IResolver {
      * identifier.
      * @param identifier for which to return the identifier document.
      */
-    open fun resolve(identifier: String): IdentifierDocument
+    open suspend fun resolve(identifier: String): IdentifierDocument
 }
