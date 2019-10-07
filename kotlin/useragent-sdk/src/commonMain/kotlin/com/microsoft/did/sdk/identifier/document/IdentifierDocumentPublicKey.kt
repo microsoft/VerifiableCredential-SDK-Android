@@ -1,6 +1,6 @@
-package com.microsoft.did.sdk.identifier
+package com.microsoft.did.sdk.identifier.document
 
-import com.microsoft.did.sdk.crypto.keys.PublicKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.Serializable
 
 /**
@@ -28,5 +28,5 @@ data class IdentifierDocumentPublicKey (
     /**
      * The JWK public key.
      */
-    val publicKeyJwk: PublicKey
+    val publicKeyJwk: JsonWebKey
     )

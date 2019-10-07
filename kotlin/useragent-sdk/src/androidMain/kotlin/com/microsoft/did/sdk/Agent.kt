@@ -10,7 +10,13 @@ class Agent private constructor (
             registrationUrl: String = defaultRegistrationUrl,
             resolverUrl: String = defaultResolverUrl,
             subtleCrypto: SubtleCrypto,
-            keyStore: IKeyStore): AbstractAgent(registrationUrl, resolverUrl, keyStore, subtleCrypto) {
+            keyStore: IKeyStore): AbstractAgent(
+    registrationUrl = registrationUrl,
+    resolverUrl = resolverUrl,
+    signatureKeyReference = defaultSignatureKeyReference,
+    encryptionKeyReference = defaultEncryptionKeyReference,
+    keyStore = keyStore,
+    subtleCrypto = subtleCrypto) {
 
     companion object {
         fun getInstance(context: Context): Agent {

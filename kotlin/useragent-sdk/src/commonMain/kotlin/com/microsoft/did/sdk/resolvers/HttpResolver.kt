@@ -1,8 +1,6 @@
 package com.microsoft.did.sdk.resolvers
 
-import com.microsoft.did.sdk.IResolver
-import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.identifier.IdentifierDocument
+import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 
 /**
  * Fetches Identifier Documents from remote resolvers over http.
