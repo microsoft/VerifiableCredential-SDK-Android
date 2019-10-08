@@ -4,6 +4,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
+import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -11,6 +12,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 
 /**
  * Registrar implementation for the Sidetree network
@@ -24,14 +26,14 @@ class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
     @ImplicitReflectionSerializer
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
-        val content = Json.stringify(RegistrationDocument.serializer(), document)
+        val content = MinimalJson.serializer.stringify(RegistrationDocument.serializer(), document)
         val jwsToken = JwsToken(content)
         val kid = crypto.keyStore.getPublicKey(signatureKeyRef).getKey().kid
         jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to "#$kid", "operation" to "create"))
         val jws = jwsToken.serialize(JwsFormat.FlatJson)
         println(jws)
         val response = sendRequest(jws)
-        return Json.parse(IdentifierDocument.serializer(), response)
+        return MinimalJson.serializer.parse(IdentifierDocument.serializer(), response)
     }
 
     /**

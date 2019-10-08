@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.resolvers
 
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
+import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.url
@@ -33,7 +34,7 @@ class HttpResolver(private val baseUrl : String): IResolver {
         }
         client.close()
         println("GOT $response")
-        val result = Json.parse(ResolverResult.serializer(), response)
+        val result = MinimalJson.serializer.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")
         return result.document
     }

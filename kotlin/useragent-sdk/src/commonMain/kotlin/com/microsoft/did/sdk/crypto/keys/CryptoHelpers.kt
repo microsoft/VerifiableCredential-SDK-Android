@@ -34,7 +34,7 @@ object CryptoHelpers {
 //            return cryptoFactory.getMessageDigest(jwa);
 //        }
 //
-//        throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+//        throw new Error(`Algorithm '${MinimalJson.serializer.stringify(algorithm)}' is not supported`);
 //    }
 
     /**
@@ -120,7 +120,7 @@ object CryptoHelpers {
 //            return `SHA${CryptoHelpers.getHash(hash)}`;
 //        }
 //
-//        throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+//        throw new Error(`Algorithm '${MinimalJson.serializer.stringify(algorithm)}' is not supported`);
 //    }
 //
 //    /**
@@ -147,7 +147,7 @@ object CryptoHelpers {
 //            case 'AES-GCM':
 //            return <RsaHashedImportParams>{ name };
 //        }
-//        throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+//        throw new Error(`Algorithm '${MinimalJson.serializer.stringify(algorithm)}' is not supported`);
 //    }
 //
 //    private static getHash(hash: any) {

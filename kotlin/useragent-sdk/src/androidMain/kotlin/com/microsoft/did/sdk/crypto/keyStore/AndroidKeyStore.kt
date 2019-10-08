@@ -23,6 +23,7 @@ import java.security.interfaces.RSAPublicKey
 import javax.crypto.spec.SecretKeySpec
 import 	androidx.security.crypto.EncryptedSharedPreferences
 import com.microsoft.did.sdk.utilities.AndroidKeyConverter
+import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.byteArrayToString
 import kotlinx.serialization.parse
 import javax.crypto.KeyGenerator
@@ -126,7 +127,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         println(alias);
         jwk.kid = alias;
         println(jwk);
-        val jwkString = Json.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = MinimalJson.serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -193,7 +194,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
                 val keyRef = keyReferenceMatch.groupValues[1];
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE)
-                val key = Json.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
+                val key = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
                 val keyType = toKeyType(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
@@ -216,7 +217,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
 
     private fun getSecurePrivateKey(alias: String): PrivateKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = Json.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty == KeyType.RSA.value) {
             return RsaPrivateKey(jwk)
         } else if (jwk.kty == KeyType.EllipticCurve.value) {

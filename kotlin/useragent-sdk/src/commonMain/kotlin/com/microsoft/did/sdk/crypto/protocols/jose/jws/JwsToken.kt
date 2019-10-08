@@ -5,6 +5,7 @@ import com.microsoft.did.sdk.crypto.keyStore.KeyStoreListItem
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.byteArrayToString
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -36,14 +37,14 @@ class JwsToken private constructor(private val payload: String, signatures: List
                 return JwsToken(payload, listOf(jwsSignatureObject))
             } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
-                val token = Json.parse(JwsGeneralJson.serializer(), jws)
+                val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = token.signatures
                 )
             } else if (jws.toLowerCase().contains("\"signature\"")) {
                 // Flat
-                val token = Json.parse(JwsFlatJson.serializer(), jws)
+                val token = MinimalJson.serializer.parse(JwsFlatJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = listOf(JwsSignature(
@@ -70,15 +71,15 @@ class JwsToken private constructor(private val payload: String, signatures: List
         return when(format) {
             JwsFormat.Compact -> {
                 val jws = intermediateCompactSerialize()
-                Json.stringify(JwsCompact.serializer(), jws)
+                MinimalJson.serializer.stringify(JwsCompact.serializer(), jws)
             }
             JwsFormat.FlatJson -> {
                 val jws = intermediateFlatJsonSerialize()
-                Json.stringify(JwsFlatJson.serializer(), jws)
+                MinimalJson.serializer.stringify(JwsFlatJson.serializer(), jws)
             }
             JwsFormat.GeneralJson -> {
                 val jws = intermediateGeneralJsonSerialize()
-            Json.stringify(JwsGeneralJson.serializer(), jws)
+            MinimalJson.serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
             else -> {
                 throw Error("Unknown JWS format: $format")
@@ -151,7 +152,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
 
         var encodedProtected = ""
         if (protected.count() > 0) {
-            val jsonProtected = Json.stringify(protected)
+            val jsonProtected = MinimalJson.serializer.stringify(protected)
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected))
         }
 

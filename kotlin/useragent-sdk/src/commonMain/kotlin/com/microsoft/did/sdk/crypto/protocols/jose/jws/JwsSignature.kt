@@ -2,6 +2,7 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.byteArrayToString
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.Serializable
@@ -32,7 +33,7 @@ data class JwsSignature (
     fun getKid(): String? {
         if (protected.isNotEmpty()) {
             val jsonProtected = Base64Url.decode(protected)
-            val mapObject = Json.parseMap<String, String>(byteArrayToString(jsonProtected))
+            val mapObject = MinimalJson.serializer.parseMap<String, String>(byteArrayToString(jsonProtected))
             if (mapObject.containsKey(JoseConstants.Kid.value)) {
                 return mapObject[JoseConstants.Kid.value]
             }
