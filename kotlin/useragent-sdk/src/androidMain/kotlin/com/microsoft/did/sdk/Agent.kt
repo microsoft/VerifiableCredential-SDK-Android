@@ -32,6 +32,7 @@ class Agent private constructor (
                 SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
             );
             return Agent(
+                registrationUrl = "https://beta.core.ion.msidentity.com/",
                 cryptoOperations = crypto
             )
         }

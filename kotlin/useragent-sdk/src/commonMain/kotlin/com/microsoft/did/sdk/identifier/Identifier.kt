@@ -113,6 +113,7 @@ class Identifier constructor (
             }
 
             val document = RegistrationDocument(
+                context = "https://w3id.org/did/v1",
                 publicKeys = listOf(encPubKey, sigPubKey),
                 services = if (hubService != null) {listOf(hubService)} else { null }
             )

@@ -4,9 +4,11 @@ import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.identifier.IdentifierDocumentService
 import kotlinx.serialization.Polymorphic
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@SerialName("IdentityHub") // serializer writes this value for "type"
 class IdentityHubService(override val id: String, val publicKey: String, @Polymorphic override val serviceEndpoint: Endpoint): IdentifierDocumentService {
     override val type: String = "IdentityHub"
     companion object {

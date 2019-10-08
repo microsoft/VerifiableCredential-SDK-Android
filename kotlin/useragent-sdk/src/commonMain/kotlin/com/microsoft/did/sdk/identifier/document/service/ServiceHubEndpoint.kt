@@ -1,9 +1,12 @@
 package com.microsoft.did.sdk.identifier.document.service
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 
 @Serializable
+@SerialName("HostServiceEndpoint")
 class ServiceHubEndpoint(val locations: List<String>,
-                         @SerialName("@type")
-                         val type: String? = "HostServiceEndpoint"): Endpoint()
+                         @Required @SerialName("@type")
+                         val type: String = "HostServiceEndpoint"): Endpoint() {
+    @Required
+    override val context: String = "https://schema.identity.foundation/hub"
+}

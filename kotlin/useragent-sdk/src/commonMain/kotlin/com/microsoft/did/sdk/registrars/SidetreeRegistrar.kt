@@ -8,11 +8,14 @@ import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import io.ktor.client.call.HttpClientCall
+import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import kotlinx.coroutines.io.readUTF8LineTo
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
@@ -25,17 +28,17 @@ import kotlinx.serialization.json.JsonConfiguration
  * @param cryptoOperations
  */
 class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
-
     @ImplicitReflectionSerializer
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
         val content = MinimalJson.serializer.stringify(RegistrationDocument.serializer(), document)
         val jwsToken = JwsToken(content)
         val kid = crypto.keyStore.getPublicKey(signatureKeyRef).getKey().kid
-        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to "#$kid", "operation" to "create"))
+        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to "#$kid", "operation" to "create", "alg" to "ES256K"))
         val jws = jwsToken.serialize(JwsFormat.FlatJson)
         println(jws)
         val response = sendRequest(jws)
+        println(response)
         return MinimalJson.serializer.parse(IdentifierDocument.serializer(), response)
     }
 
@@ -46,14 +49,25 @@ class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
      */
     private suspend fun sendRequest(request: String): String {
         val client = getHttpClient()
-        val response = client.post<String> {
-            url(baseUrl)
-            contentType(ContentType.Application.Json)
-            body = ByteArrayContent(
-                bytes = stringToByteArray(request)
-            )
+        try {
+            return client.post<String> {
+                url(baseUrl)
+                body = ByteArrayContent(
+                    bytes = stringToByteArray(request),
+                    contentType = ContentType.Application.Json
+                )
+            }
+        } catch (error: ResponseException) {
+            println("Registration failed (${error.response.status})")
+            while (!error.response.content.isClosedForRead) {
+                val data = error.response.content.readUTF8Line(error.response.content.availableForRead)
+                if (!data.isNullOrBlank()) {
+                    println(data)
+                }
+            }
+            throw error
+        } finally {
+            client.close()
         }
-        client.close()
-        return response
     }
 }
