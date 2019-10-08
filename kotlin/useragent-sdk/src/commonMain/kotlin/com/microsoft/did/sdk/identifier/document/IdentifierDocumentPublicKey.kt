@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.identifier.document
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -24,6 +25,9 @@ data class IdentifierDocumentPublicKey (
      * The owner of the key.
      */
     val controller: String? = null,
+
+    @Deprecated("against spec", ReplaceWith("this.controller"))
+    val owner: String? = null,
 
     /**
      * The JWK public key.

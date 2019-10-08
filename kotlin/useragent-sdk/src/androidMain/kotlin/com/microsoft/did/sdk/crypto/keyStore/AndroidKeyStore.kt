@@ -327,7 +327,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
                 // heuristic, find the last digit and count up
                 var latestVersion = listItem.kids.reduce {
                         acc: String, current: String ->
-                    val currentValue = regexForKeyIndex.matchEntire(current)?.groupValues?.firstOrNull()?.toInt()
+                    val currentValue = regexForKeyIndex.matchEntire(current)?.groupValues?.get(1)?.toInt()
                     val accValue = acc.toIntOrNull()
                     if (currentValue != null && accValue == null) {
                         current

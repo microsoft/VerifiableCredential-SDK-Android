@@ -6,14 +6,7 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
-import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
-import com.microsoft.did.sdk.identifier.document.service.IdentityHubUserService
-import com.microsoft.did.sdk.identifier.document.service.UserHubEndpoint
-import com.microsoft.did.sdk.registrars.RegistrationDocument
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -28,19 +21,14 @@ abstract class AbstractAgent (registrationUrl: String,
                               resolverUrl: String,
                               val signatureKeyReference: String,
                               val encryptionKeyReference: String,
-                              keyStore: IKeyStore,
-                              subtleCrypto: SubtleCrypto) {
+                              private val cryptoOperations: CryptoOperations) {
     companion object {
-        const val defaultRegistrationUrl = "beta.discover.did.microsoft.com/1.0/identifiers/"
-        const val defaultResolverUrl = "beta.ion.microsoft.com/api/1.0/register"
+        const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
+        const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"
         const val defaultSignatureKeyReference = "signature"
         const val defaultEncryptionKeyReference = "encryption"
     }
 
-    /**
-     * CryptoOperations
-     */
-    private val cryptoOperations =  CryptoOperations(subtleCrypto = subtleCrypto, keyStore = keyStore)
     /**
      * Registrar to be used when registering Identifiers.
      */

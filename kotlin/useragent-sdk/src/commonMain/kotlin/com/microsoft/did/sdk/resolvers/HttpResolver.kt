@@ -21,8 +21,6 @@ class HttpResolver(private val baseUrl : String): IResolver {
     @Serializable
     data class ResolverResult(val document: IdentifierDocument, val resolverMetadata: ResolverMetadata)
 
-    private val endsInSlash = Regex("/\\/$/").matches(baseUrl)
-
     /**
      * Sends a fetch request to the resolver URL
      * to resolver specified Identifier
@@ -31,9 +29,10 @@ class HttpResolver(private val baseUrl : String): IResolver {
     override suspend fun resolveDocument(identifier: String): IdentifierDocument {
         val client = getHttpClient()
         val response = client.get<String>() {
-            url("$baseUrl${ if (endsInSlash) {""} else {"/"} }$identifier ")
+            url("$baseUrl/$identifier ")
         }
         client.close()
+        println("GOT $response")
         val result = Json.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")
         return result.document

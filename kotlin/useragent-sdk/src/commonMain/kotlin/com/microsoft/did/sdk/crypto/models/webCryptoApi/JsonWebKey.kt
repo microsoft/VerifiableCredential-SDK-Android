@@ -1,10 +1,6 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
 import kotlinx.serialization.Serializable
 
-/** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
-@Serializable
-data class RsaOtherPrimesInfo (val r: String, val d: String, val t: String)
-
 @Serializable
 data class JsonWebKey(
     // The following fields are defined in Section 3.1 of JSON Web Key
@@ -30,5 +26,17 @@ data class JsonWebKey(
     var dq: String? = null,
     var qi: String? = null,
     var oth: List<RsaOtherPrimesInfo>? = null,
-    var k: String? = null
-)
+    var k: String? = null,
+
+    @Deprecated("Please use 'alg' parameter", ReplaceWith("this.alg"))
+    val defaultEncryptionAlgorithm: String? = null,
+    @Deprecated("Please use 'alg' parameter", ReplaceWith("this.alg"))
+    val defaultSignAlgorithm: String? = null,
+
+    @Deprecated("Please use 'key_ops' parameter", ReplaceWith("this.key_ops"))
+    val keyOps: List<String>? = null
+) {
+    /** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
+    @Serializable
+    data class RsaOtherPrimesInfo (val r: String, val d: String, val t: String)
+}

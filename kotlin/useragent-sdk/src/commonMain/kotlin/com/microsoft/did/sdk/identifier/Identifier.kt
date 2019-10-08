@@ -3,11 +3,9 @@ package com.microsoft.did.sdk.identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.models.KeyUse
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
-import com.microsoft.did.sdk.identifier.document.service.IdentityHubUserService
+import com.microsoft.did.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.registrars.RegistrationDocument
 
@@ -60,17 +58,17 @@ class Identifier constructor (
                 type = "EcdsaSecp256k1VerificationKey2019",
                 publicKeyJwk = sigJwk
             )
-            var hubService: IdentityHubUserService? = null
+            var hubService: IdentityHubService? = null
             if (!identityHubDid.isNullOrEmpty()) {
-                val hubs = identityHubDid.map {
-                    resolver.resolve(it,
-                    cryptoOperations
-                )}
-                val hubService = IdentityHubUserService.create(
-                    id = "#hub",
-                    keyStore = cryptoOperations.keyStore,
-                    signatureKeyRef = personaSigKeyRef,
-                    instances = hubs
+                        val hubs = identityHubDid.map {
+                            resolver.resolve(it,
+                                cryptoOperations
+                            )}
+                        val hubService = IdentityHubService.create(
+                            id = "#hub",
+                            keyStore = cryptoOperations.keyStore,
+                            signatureKeyRef = personaSigKeyRef,
+                            instances = hubs
                 )
             }
 
@@ -79,7 +77,13 @@ class Identifier constructor (
                 services = if (hubService != null) {listOf(hubService)} else {
                     emptyList()}
             )
+
+            println(document)
+
             val registered = registrar.register(document, personaSigKeyRef, cryptoOperations)
+
+            println(registered)
+
             return Identifier(
                 document = registered,
                 signatureKeyReference = personaSigKeyRef,
