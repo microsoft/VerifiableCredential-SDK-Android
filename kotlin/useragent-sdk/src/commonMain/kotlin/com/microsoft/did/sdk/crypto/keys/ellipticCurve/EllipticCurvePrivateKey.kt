@@ -19,6 +19,7 @@ class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
             alg = alg,
             kid = kid,
             key_ops = key_ops?.map { use -> use.value },
+            use = use?.value,
             crv = crv,
             x = x,
             y = y,

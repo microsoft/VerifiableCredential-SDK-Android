@@ -26,15 +26,7 @@ data class JsonWebKey(
     var dq: String? = null,
     var qi: String? = null,
     var oth: List<RsaOtherPrimesInfo>? = null,
-    var k: String? = null,
-
-    @Deprecated("Please use 'alg' parameter", ReplaceWith("this.alg"))
-    val defaultEncryptionAlgorithm: String? = null,
-    @Deprecated("Please use 'alg' parameter", ReplaceWith("this.alg"))
-    val defaultSignAlgorithm: String? = null,
-
-    @Deprecated("Please use 'key_ops' parameter", ReplaceWith("this.key_ops"))
-    val keyOps: List<String>? = null
+    var k: String? = null
 ) {
     /** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
     @Serializable

@@ -25,6 +25,7 @@ class RsaPrivateKey(jwk: JsonWebKey): PrivateKey(jwk) {
             alg = alg,
             kid = kid,
             key_ops = key_ops?.map { use -> use.value },
+            use = use?.value,
 
             n = this.n,
             e = this.e,

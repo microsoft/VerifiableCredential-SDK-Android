@@ -157,9 +157,9 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
             key_ops = keyOps,
             alg = JwaCryptoConverter.webCryptoToJwa(key.algorithm),
             ext = key.extractable,
-            d = d,
-            x = xyData.first,
-            y = xyData.second
+            d = d?.trim(),
+            x = xyData.first.trim(),
+            y = xyData.second.trim()
         )
     }
 

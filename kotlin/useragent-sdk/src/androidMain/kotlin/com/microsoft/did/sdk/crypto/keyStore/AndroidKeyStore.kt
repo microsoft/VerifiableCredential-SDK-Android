@@ -124,9 +124,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         }
         // This key is not natively supported
         var jwk = key.toJWK();
-        println(alias);
         jwk.kid = alias;
-        println(jwk);
         val jwkString = MinimalJson.serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)

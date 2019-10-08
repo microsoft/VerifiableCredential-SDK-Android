@@ -67,7 +67,7 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
      * @returns the associated public key
      */
     fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
-        return when (keyType) {
+        when (keyType) {
             KeyType.Octets -> throw Error("Cannot generate a symmetric key")
             KeyType.RSA -> {
                 val subtle = subtleCryptoFactory.getSharedKeyEncrypter(W3cCryptoApiConstants.RsaSsaPkcs1V15.value, SubtleCryptoScope.Private)
@@ -80,7 +80,6 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
                     )
                 ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt))
                 keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
-                RsaPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
             }
             KeyType.EllipticCurve -> {
                 val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
@@ -92,9 +91,9 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
                     )
                 ), true, listOf(KeyUsage.Sign, KeyUsage.Verify))
                 keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
-                EllipticCurvePublicKey(subtle.exportKeyJwk(keyPair.publicKey))
             }
         }
+        return keyStore.getPublicKey(keyReference).getKey()
     }
 
     /**

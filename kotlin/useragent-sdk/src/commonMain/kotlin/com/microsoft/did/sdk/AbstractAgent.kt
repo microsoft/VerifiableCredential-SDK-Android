@@ -21,7 +21,7 @@ abstract class AbstractAgent (registrationUrl: String,
                               resolverUrl: String,
                               val signatureKeyReference: String,
                               val encryptionKeyReference: String,
-                              private val cryptoOperations: CryptoOperations) {
+                              /* private */ val cryptoOperations: CryptoOperations) {
     companion object {
         const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
         const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"

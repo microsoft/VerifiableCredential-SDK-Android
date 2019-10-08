@@ -40,7 +40,7 @@ val microsoftIdentityHubDocument = IdentifierDocument(
     services = listOf(IdentityHubService(
         id = "#hubEndpoint",
         publicKey = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
-        endpoint = ServiceHubEndpoint(listOf("https://beta.hub.microsoft.com/"))
+        serviceEndpoint = ServiceHubEndpoint(listOf("https://beta.hub.microsoft.com/"))
     ))
 )
 
@@ -77,10 +77,14 @@ class Identifier constructor (
             val personaSigKeyRef = "$alias.$signatureKeyReference"
             val encKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
             val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
-            var encJwk = encKey.toJWK()
-            var sigJwk = sigKey.toJWK()
+            val encJwk = encKey.toJWK()
+            val sigJwk = sigKey.toJWK()
+            println("BEFORE KID MODIFICATION")
+            println(sigJwk)
             encJwk.kid = "#${encJwk.kid}"
-            sigJwk.kid = "#${sigKey.kid}"
+            sigJwk.kid = "#${sigJwk.kid}"
+            println("AFTER KID MODIFICATION")
+            println(sigJwk)
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
@@ -93,14 +97,14 @@ class Identifier constructor (
                 type = "EcdsaSecp256k1VerificationKey2019",
                 publicKeyJwk = sigJwk
             )
-            var hubService: IdentityHubService? = null
+            var hubService: IdentifierDocumentService? = null
             if (!identityHubDid.isNullOrEmpty()) {
 //                        val hubs = identityHubDid.map {
 //                            resolver.resolve(it,
 //                                cryptoOperations
 //                            )}
                         val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", cryptoOperations, resolver, registrar)
-                        val hubService = IdentityHubService.create(
+                        hubService = IdentityHubService.create(
                             id = "#hub",
                             keyStore = cryptoOperations.keyStore,
                             signatureKeyRef = personaSigKeyRef,
@@ -110,8 +114,7 @@ class Identifier constructor (
 
             val document = RegistrationDocument(
                 publicKeys = listOf(encPubKey, sigPubKey),
-                services = if (hubService != null) {listOf(hubService)} else {
-                    emptyList()}
+                services = if (hubService != null) {listOf(hubService)} else { null }
             )
 
             println(document)

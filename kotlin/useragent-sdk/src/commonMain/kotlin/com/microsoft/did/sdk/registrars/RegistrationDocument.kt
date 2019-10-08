@@ -5,4 +5,4 @@ import com.microsoft.did.sdk.identifier.IdentifierDocumentService
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RegistrationDocument(val id: String? = null, val publicKeys: List<IdentifierDocumentPublicKey>, val services: List<IdentifierDocumentService>)
+data class RegistrationDocument(val id: String? = null, val publicKeys: List<IdentifierDocumentPublicKey>, val services: List<IdentifierDocumentService>? = null)

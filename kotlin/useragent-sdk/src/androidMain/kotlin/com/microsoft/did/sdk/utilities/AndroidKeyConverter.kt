@@ -9,7 +9,9 @@ import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import java.security.KeyStore
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
@@ -22,8 +24,10 @@ object AndroidKeyConverter {
                     JsonWebKey(
                         kty = KeyType.RSA.value,
                         kid = alias,
-                        n = Base64.encodeToString((publicKey as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE),
-                        e = Base64.encodeToString(publicKey.publicExponent.toByteArray(), Base64.URL_SAFE)
+                        key_ops = listOf(KeyUsage.Encrypt.value),
+                        use = KeyUse.Encryption.value,
+                        n = Base64.encodeToString((publicKey as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE).trim(),
+                        e = Base64.encodeToString(publicKey.publicExponent.toByteArray(), Base64.URL_SAFE).trim()
                     )
                 )
             }
@@ -32,8 +36,10 @@ object AndroidKeyConverter {
                     JsonWebKey(
                         kty = KeyType.EllipticCurve.value,
                         kid = alias,
-                        x = Base64.encodeToString((publicKey as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE),
-                        y = Base64.encodeToString(publicKey.w.affineY.toByteArray(), Base64.URL_SAFE)
+                        key_ops = listOf(KeyUsage.Verify.value),
+                        use = KeyUse.Signature.value,
+                        x = Base64.encodeToString((publicKey as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE).trim(),
+                        y = Base64.encodeToString(publicKey.w.affineY.toByteArray(), Base64.URL_SAFE).trim()
                     )
                 )
             }
@@ -49,6 +55,8 @@ object AndroidKeyConverter {
                     JsonWebKey(
                         kty = KeyType.RSA.value,
                         kid = alias,
+                        key_ops = listOf(KeyUsage.Decrypt.value),
+                        use = KeyUse.Encryption.value,
                         n = Base64.encodeToString((key as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE),
                         e = Base64.encodeToString(key.publicExponent.toByteArray(), Base64.URL_SAFE),
                         d = "0",
@@ -66,6 +74,8 @@ object AndroidKeyConverter {
                     JsonWebKey(
                         kty = KeyType.EllipticCurve.value,
                         kid = alias,
+                        key_ops = listOf(KeyUsage.Sign.value),
+                        use = KeyUse.Signature.value,
                         x = Base64.encodeToString((key as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE),
                         y = Base64.encodeToString(key.w.affineY.toByteArray(), Base64.URL_SAFE),
                         d = "0"

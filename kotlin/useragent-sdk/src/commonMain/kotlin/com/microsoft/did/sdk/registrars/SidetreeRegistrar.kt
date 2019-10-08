@@ -6,8 +6,11 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
+import com.microsoft.did.sdk.utilities.stringToByteArray
+import io.ktor.client.call.HttpClientCall
 import io.ktor.client.request.post
 import io.ktor.client.request.url
+import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -46,7 +49,9 @@ class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
         val response = client.post<String> {
             url(baseUrl)
             contentType(ContentType.Application.Json)
-            body = request
+            body = ByteArrayContent(
+                bytes = stringToByteArray(request)
+            )
         }
         client.close()
         return response
