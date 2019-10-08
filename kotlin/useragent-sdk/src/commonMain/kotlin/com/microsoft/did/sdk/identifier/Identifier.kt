@@ -80,7 +80,7 @@ class Identifier constructor (
             var encJwk = encKey.toJWK()
             var sigJwk = sigKey.toJWK()
             encJwk.kid = "#${encJwk.kid}"
-            sigJwk.kid = "#${encJwk.kid}"
+            sigJwk.kid = "#${sigKey.kid}"
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
