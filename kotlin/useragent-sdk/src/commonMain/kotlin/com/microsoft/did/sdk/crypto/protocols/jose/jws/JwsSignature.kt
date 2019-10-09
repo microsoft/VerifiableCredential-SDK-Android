@@ -31,15 +31,25 @@ data class JwsSignature (
 ) {
     @ImplicitReflectionSerializer
     fun getKid(): String? {
+        return getMember(JoseConstants.Kid.value)
+    }
+
+    @ImplicitReflectionSerializer
+    fun getAlg(): String? {
+        return getMember(JoseConstants.Alg.value)
+    }
+
+    @ImplicitReflectionSerializer
+    private fun getMember(member: String): String? {
         if (protected.isNotEmpty()) {
             val jsonProtected = Base64Url.decode(protected)
             val mapObject = MinimalJson.serializer.parseMap<String, String>(byteArrayToString(jsonProtected))
-            if (mapObject.containsKey(JoseConstants.Kid.value)) {
-                return mapObject[JoseConstants.Kid.value]
+            if (mapObject.containsKey(member)) {
+                return mapObject[member]
             }
         }
-        if (header.isNullOrEmpty() && header!!.containsKey(JoseConstants.Kid.value)) {
-            return header!![JoseConstants.Kid.value]
+        if (header.isNullOrEmpty() && header!!.containsKey(member)) {
+            return header!![member]
         }
         return null
     }

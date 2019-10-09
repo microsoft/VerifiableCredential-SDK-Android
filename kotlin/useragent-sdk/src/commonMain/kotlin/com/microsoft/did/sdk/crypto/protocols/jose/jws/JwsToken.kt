@@ -2,8 +2,13 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStoreListItem
+import com.microsoft.did.sdk.crypto.keys.PublicKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
 import com.microsoft.did.sdk.utilities.Base64Url
 import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.byteArrayToString
@@ -176,26 +181,59 @@ class JwsToken private constructor(private val payload: String, signatures: List
      *Verify the JWS signatures
      */
     @ImplicitReflectionSerializer
-    fun verify(cryptoOperations: CryptoOperations) {
+    fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false) {
         val keyStoreKeys = cryptoOperations.keyStore.list()
         val aliasList = keyStoreKeys.values.map { listItem: KeyStoreListItem -> listItem.kids }.reduce {
             acc, curr ->
             acc.addAll(curr)
             acc
         }
-        this.signatures.forEach {
+        val results = this.signatures.map {
             val kid = it.getKid()
             val signatureInput = "${it.protected}.${this.payload}"
             val signature = Base64Url.decode(it.signature)
             if (aliasList.contains(kid)) {
                 // we can perform this verification using our own keys
                 val key = (keyStoreKeys.entries.filter { key -> key.value.kids.contains(kid) }).first()
-                cryptoOperations.verify(stringToByteArray(signatureInput), signature, key.key)
+                val publicKey = cryptoOperations.keyStore.getPublicKey(key.key);
+                verifyWithKey(cryptoOperations, signatureInput, it, publicKey.getKey())
             } else {
-                // we must retrieve the associated DID
-                TODO("Resolver must be implemented to get key $kid")
+                // use one of the provided public Keys
+                val key = publicKeys.firstOrNull {
+                    it.kid != null && kid?.endsWith(it.kid!!) ?: false
+                }
+                if (key != null) {
+                    verifyWithKey(cryptoOperations, signatureInput, it, key!!)
+                } else if (publicKeys.isNotEmpty()) {
+                    verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
+                } else {
+                    false
+                }
             }
         }
+        if (!if (all) {
+            results.reduce{
+                    result, valid -> result && valid
+            }
+        } else {
+            results.reduce {
+                result, valid -> result || valid
+            }
+        }) {
+            throw Error("Invalid Signature")
+        }
+    }
+
+    @ImplicitReflectionSerializer
+    private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
+        val alg = signature.getAlg() ?: throw Error("This signature contains no algorithm.")
+        val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg)
+        val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.Public)
+        val cryptoKey = subtle.importKey(KeyFormat.Jwk, key.toJWK(), subtleAlg,
+            true, key.key_ops ?: listOf(KeyUsage.Verify))
+        val rawSignature = Base64Url.decode(signature.signature)
+        val rawData = stringToByteArray(data)
+        return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 
     /**
