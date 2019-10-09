@@ -37,8 +37,8 @@ class OidcRequest(
         const val scope = "openid did_authn"
 
         suspend fun parseAndVerify(signedRequest: String, crypto: CryptoOperations, resolver: IResolver): OidcRequest {
-            if (!Regex("^oidc\\:\\/\\/").matches(signedRequest)) {
-                throw Error("Must be passed a string beginning in \"oidc://\"")
+            if (!Regex("^openid\\:\\/\\/").matches(signedRequest)) {
+                throw Error("Must be passed a string beginning in \"openid://\"")
             }
             // do we have a direct or indirect request object?
             val scope = Regex("scope=([^&]+)").find(signedRequest)
