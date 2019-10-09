@@ -7,27 +7,12 @@ import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import com.microsoft.did.sdk.utilities.stringToByteArray
-import io.ktor.client.call.HttpClientCall
-import io.ktor.client.features.ClientRequestException
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import kotlinx.coroutines.io.readUTF8LineTo
 import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-
-@Serializable
-data class IdentifierDocument (
-    val created: String,
-    val context: String,
-    val publicKey: ArrayList<String>,
-    val id: String
-)
-
 /**
  * Registrar implementation for the Sidetree network
  * @class
