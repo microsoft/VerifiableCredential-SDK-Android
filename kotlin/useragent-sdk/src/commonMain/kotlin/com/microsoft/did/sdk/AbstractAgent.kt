@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk
 
+import com.microsoft.did.sdk.auth.OidcRequest
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
@@ -52,10 +53,9 @@ abstract class AbstractAgent (registrationUrl: String,
      * Creates an OIDC Request.
      */
     fun createOidcRequest(signer: Identifier,
-                          signingKeyReference: String?,
                           redirectUrl: String,
                           nonce: String?,
-                          state: String?) {
+                          state: String?): OidcRequest {
         TODO("Not implemented")
     }
 
@@ -63,7 +63,7 @@ abstract class AbstractAgent (registrationUrl: String,
      * Verify the signature and
      * return OIDC Request object.
      */
-    fun parseOidcRequest(request: String) {
+    fun parseOidcRequest(request: String): OidcRequest {
         TODO("Not implemented")
     }
 
@@ -71,8 +71,8 @@ abstract class AbstractAgent (registrationUrl: String,
      * Create an OIDC Response.
      */
     fun createOidcResponse(signer: Identifier,
-                           signingKeyReference: String?,
-                           request: OidcRequest) {
+                           request: OidcRequest
+    ): OidcResponse {
         TODO("Not implemented")
     }
 
@@ -80,7 +80,7 @@ abstract class AbstractAgent (registrationUrl: String,
      * Verify the signature and
      * parse the OIDC Response object.
      */
-    fun parseOidcResponse(response: String) {
+    fun parseOidcResponse(response: String): OidcResponse {
         TODO("Not implemented")
     }
 
