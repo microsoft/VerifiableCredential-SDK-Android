@@ -8,10 +8,10 @@ object Base64 {
     )
     private const val padding = "="
     fun encode(data: ByteArray): String {
-        return com.microsoft.did.sdk.utilities.encode(data, dictionary, padding)
+        return encode(data, dictionary, padding)
     }
     fun decode(base64: String): ByteArray {
-        return com.microsoft.did.sdk.utilities.decode(base64, dictionary, padding)
+        return decode(base64, dictionary, padding)
     }
 }
 
@@ -22,10 +22,10 @@ object Base64Url {
     "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "_"
     )
     fun encode(data: ByteArray): String {
-        return com.microsoft.did.sdk.utilities.encode(data, dictionary, "")
+        return encode(data, dictionary, "")
     }
     fun decode(base64url: String): ByteArray {
-        return com.microsoft.did.sdk.utilities.decode(base64url, dictionary, "")
+        return decode(base64url, dictionary, "")
     }
 }
 

@@ -1,13 +1,13 @@
 package com.microsoft.did.sdk.registrars
 
-import com.microsoft.did.sdk.identifier.IdentifierDocument
-import io.ktor.client.engine.HttpClientEngine
+import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 
 /**
  * @interface defining methods and properties
  * to be implemented by specific registration methods.
  */
-interface IRegistrar {
+abstract class IRegistrar {
 
     /**
      * Registers the identifier document on the ledger
@@ -17,5 +17,5 @@ interface IRegistrar {
      * @return IdentifierDocument that was registered.
      * @throws Error if unable to register Identifier Document.
      */
-    open suspend fun register(): Any
+    abstract suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument
 }

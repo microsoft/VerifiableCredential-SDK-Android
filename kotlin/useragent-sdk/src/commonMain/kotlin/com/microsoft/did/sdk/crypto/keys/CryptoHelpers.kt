@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.did.sdk.crypto.keys
 
+import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 
@@ -33,7 +34,7 @@ object CryptoHelpers {
 //            return cryptoFactory.getMessageDigest(jwa);
 //        }
 //
-//        throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+//        throw new Error(`Algorithm '${MinimalJson.serializer.stringify(algorithm)}' is not supported`);
 //    }
 
     /**
@@ -53,15 +54,14 @@ object CryptoHelpers {
                 return Algorithm (
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
-                        "hash" to Algorithm( name = "SHA-${matches.first().value}")
+                        "hash" to Sha.get(matches.first().value.toInt())
                     )
                 )
             }
             JoseConstants.RsaOaep.value, // According to the spec, this should point to SHA-1
             JoseConstants.RsaOaep256.value -> RsaOaepParams(
-                name = "RSA-OAEP",
                 additionalParams = mapOf(
-                    "hash" to Algorithm ( name = "SHA-256")
+                    "hash" to Sha.Sha256
                 )
             )
             JoseConstants.AesGcm128.value,
@@ -72,7 +72,6 @@ object CryptoHelpers {
                 val matches = regex.findAll(jwa)
                 val length = matches.first().value.toUShort()
                 return AesGcmParams(
-                    name = W3cCryptoApiConstants.AesGcm.value,
                     iv = iv,
                     additionalData = aad,
                     tagLength = 128.toByte(),
@@ -81,8 +80,8 @@ object CryptoHelpers {
                     )
                 )
             }
-            JoseConstants.Es256K.value -> EcdsaParams( name = "ECDSA",
-                    hash =  Algorithm( name = "SHA-256" ),
+            JoseConstants.Es256K.value -> EcdsaParams(
+                    hash =  Sha.Sha256,
                 additionalParams = mapOf(
                     "namedCurve" to "P-256K",
                     "format" to "DER"
@@ -121,7 +120,7 @@ object CryptoHelpers {
 //            return `SHA${CryptoHelpers.getHash(hash)}`;
 //        }
 //
-//        throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+//        throw new Error(`Algorithm '${MinimalJson.serializer.stringify(algorithm)}' is not supported`);
 //    }
 //
 //    /**
@@ -148,7 +147,7 @@ object CryptoHelpers {
 //            case 'AES-GCM':
 //            return <RsaHashedImportParams>{ name };
 //        }
-//        throw new Error(`Algorithm '${JSON.stringify(algorithm)}' is not supported`);
+//        throw new Error(`Algorithm '${MinimalJson.serializer.stringify(algorithm)}' is not supported`);
 //    }
 //
 //    private static getHash(hash: any) {

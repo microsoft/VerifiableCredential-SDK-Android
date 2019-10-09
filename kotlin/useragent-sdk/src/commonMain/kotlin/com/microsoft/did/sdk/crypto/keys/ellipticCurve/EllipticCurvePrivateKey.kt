@@ -6,10 +6,6 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 
 class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
-    override fun minimumAlphabeticJwk(): String {
-        return this.getPublicKey().minimumAlphabeticJwk()
-    }
-
     var crv = key.crv
     var x = key.x
     var y = key.y
@@ -17,15 +13,21 @@ class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     override var alg: String? = if (key.alg != null) key.alg!! else "ES256K"
     var d = key.d
 
-    override fun getPublicKey(): PublicKey {
-        return EllipticCurvePublicKey(
-            JsonWebKey(
-                kty = this.kty.value,
-                alg = this.alg,
-                crv = this.crv,
-                x = this.x,
-                y = this.y
-            )
+    override fun toJWK(): JsonWebKey {
+        return JsonWebKey(
+            kty = kty.value,
+            alg = alg,
+            kid = kid,
+            key_ops = key_ops?.map { use -> use.value },
+            use = use?.value,
+            crv = crv,
+            x = x,
+            y = y,
+            d = d
         )
+    }
+
+    override fun getPublicKey(): PublicKey {
+        return EllipticCurvePublicKey(this.toJWK())
     }
 }

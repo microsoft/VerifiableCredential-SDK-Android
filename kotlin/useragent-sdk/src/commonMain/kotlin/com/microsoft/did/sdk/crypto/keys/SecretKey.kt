@@ -6,17 +6,19 @@ package com.microsoft.did.sdk.crypto.keys
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.KeyUse
+import com.microsoft.did.sdk.crypto.models.toKeyUse
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.toKeyUsage
 
 /**
  * Represents an OCT key
  * @class
  * @extends JsonWebKey
  */
-class SecretKey(key: JsonWebKey) {
+open class SecretKey(key: JsonWebKey) {
     /**
      * Set the Oct key type
      */
-    var kty: KeyType = KeyType.Octets;
+    var kty: KeyType = KeyType.Octets
 
     /**
      * Key ID
@@ -26,12 +28,12 @@ class SecretKey(key: JsonWebKey) {
     /**
      * Intended use
      */
-    open var use: KeyUse? = key.use?.let { KeyUse.valueOf(it) }
+    open var use: KeyUse? = key.use?.let { toKeyUse(it) }
 
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map { KeyUsage.valueOf(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key
@@ -42,5 +44,16 @@ class SecretKey(key: JsonWebKey) {
      * secret
      */
     var k: String? = key.k
+
+    fun toJWK(): JsonWebKey {
+        return JsonWebKey(
+            kty = kty.value,
+            kid = kid,
+            use = use?.value,
+            alg = alg,
+            key_ops = key_ops?.map { use -> use.value },
+            k = k
+        )
+    }
 
 }

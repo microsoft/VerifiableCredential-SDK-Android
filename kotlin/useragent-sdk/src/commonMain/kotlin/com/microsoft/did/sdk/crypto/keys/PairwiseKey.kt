@@ -5,8 +5,10 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 
 /**
@@ -49,23 +51,20 @@ class PairwiseKey(private val crypto: CryptoOperations) {
         }
 
         // Get the seed
-        val jwk = this.crypto.keyStore.getSecretKey(seedReference);
+        val jwk = this.crypto.keyStore.getSecretKey(seedReference)
 
         // Get the subtle crypto
-        val crypto: SubtleCrypto = this.crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value);
+        val crypto: SubtleCrypto = this.crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);
 
         // Generate the master key
         val alg: Algorithm =
             EcdsaParams(
-                name = W3cCryptoApiConstants.Hmac.value,
-                hash = Algorithm(
-                    W3cCryptoApiConstants.Sha512.value
-                )
+                hash = Sha.Sha512
             )
         val masterJwk = JsonWebKey(
                 kty = KeyType.Octets.value,
                 alg = JoseConstants.Hs512.value,
-                k = jwk.k
+                k = jwk.getKey().k
             )
         val key = crypto.importKey(
             KeyFormat.Jwk, masterJwk, alg, false, listOf(

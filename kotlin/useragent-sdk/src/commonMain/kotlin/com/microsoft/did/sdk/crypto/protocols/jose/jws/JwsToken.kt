@@ -1,9 +1,11 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.KeyStoreListItem
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.byteArrayToString
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -35,14 +37,14 @@ class JwsToken private constructor(private val payload: String, signatures: List
                 return JwsToken(payload, listOf(jwsSignatureObject))
             } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
-                val token = Json.parse(JwsGeneralJson.serializer(), jws)
+                val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = token.signatures
                 )
             } else if (jws.toLowerCase().contains("\"signature\"")) {
                 // Flat
-                val token = Json.parse(JwsFlatJson.serializer(), jws)
+                val token = MinimalJson.serializer.parse(JwsFlatJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = listOf(JwsSignature(
@@ -69,15 +71,15 @@ class JwsToken private constructor(private val payload: String, signatures: List
         return when(format) {
             JwsFormat.Compact -> {
                 val jws = intermediateCompactSerialize()
-                Json.stringify(JwsCompact.serializer(), jws)
+                MinimalJson.serializer.stringify(JwsCompact.serializer(), jws)
             }
             JwsFormat.FlatJson -> {
                 val jws = intermediateFlatJsonSerialize()
-                Json.stringify(JwsFlatJson.serializer(), jws)
+                MinimalJson.serializer.stringify(JwsFlatJson.serializer(), jws)
             }
             JwsFormat.GeneralJson -> {
                 val jws = intermediateGeneralJsonSerialize()
-            Json.stringify(JwsGeneralJson.serializer(), jws)
+            MinimalJson.serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
             else -> {
                 throw Error("Unknown JWS format: $format")
@@ -123,7 +125,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
-        val signingKey = cryptoOperations.keyStore.getPublicKey(signingKeyReference)
+        val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
 
         // 3. Compute headers
         val headers = header.toMutableMap()
@@ -150,7 +152,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
 
         var encodedProtected = ""
         if (protected.count() > 0) {
-            val jsonProtected = Json.stringify(protected)
+            val jsonProtected = MinimalJson.serializer.stringify(protected)
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected))
         }
 
@@ -176,19 +178,23 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun verify(cryptoOperations: CryptoOperations) {
         val keyStoreKeys = cryptoOperations.keyStore.list()
+        val aliasList = keyStoreKeys.values.map { listItem: KeyStoreListItem -> listItem.kids }.reduce {
+            acc, curr ->
+            acc.addAll(curr)
+            acc
+        }
         this.signatures.forEach {
             val kid = it.getKid()
             val signatureInput = "${it.protected}.${this.payload}"
             val signature = Base64Url.decode(it.signature)
-            if (keyStoreKeys.containsValue(kid)) {
+            if (aliasList.contains(kid)) {
                 // we can perform this verification using our own keys
-                val key = (keyStoreKeys.entries.filter { key -> key.value == kid }).first()
+                val key = (keyStoreKeys.entries.filter { key -> key.value.kids.contains(kid) }).first()
                 cryptoOperations.verify(stringToByteArray(signatureInput), signature, key.key)
             } else {
                 // we must retrieve the associated DID
                 TODO("Resolver must be implemented to get key $kid")
             }
-
         }
     }
 

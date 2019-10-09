@@ -2,9 +2,8 @@ package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.utilities.MinimalJson
 import kotlinx.serialization.json.Json
-
-expect fun getDefaultSubtle(): SubtleCrypto
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
@@ -119,7 +118,7 @@ open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
         var keyData: ByteArray
         if (format == KeyFormat.Jwk) {
             val keyJwk = this.exportKeyJwk(key)
-            val jwkSequence = Json.stringify(JsonWebKey.serializer(), keyJwk).asSequence()
+            val jwkSequence = MinimalJson.serializer.stringify(JsonWebKey.serializer(), keyJwk).asSequence()
             keyData = ByteArray(jwkSequence.count())
             jwkSequence.forEachIndexed { index, character ->
                 keyData[index] = character.toByte()

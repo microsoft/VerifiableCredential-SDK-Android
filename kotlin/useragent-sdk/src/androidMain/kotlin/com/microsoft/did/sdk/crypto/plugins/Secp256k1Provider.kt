@@ -1,18 +1,23 @@
 package com.microsoft.did.sdk.crypto.plugins
 
 import android.util.Base64
+import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
+import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
 import java.util.*
 
-class Secp256k1Provider(): Provider() {
+class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
     companion object {
         init {
             System.loadLibrary("secp256k1")
         }
     }
+
+    data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
     override val name: String = "ECDSA"
     override val privateKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Sign)
@@ -34,18 +39,27 @@ class Secp256k1Provider(): Provider() {
 
         val publicKey = NativeSecp256k1.computePubkey(secret)
 
-        val keyPair = CryptoKeyPair(CryptoKey(
+        val signAlgorithm = EcdsaParams(
+            hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.Sha256,
+            additionalParams = mapOf(
+                "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
+            )
+        )
+
+        val keyPair = CryptoKeyPair(
+            privateKey = CryptoKey(
             KeyType.Private,
             extractable,
-            algorithm,
+            signAlgorithm,
             keyUsages.toList(),
-            secret
-        ), CryptoKey(
+            Secp256k1Handle("", secret)
+            ),
+            publicKey = CryptoKey(
             KeyType.Public,
             true,
-            algorithm,
+            signAlgorithm,
             publicKeyUsage.toList(),
-            publicKey
+                Secp256k1Handle("", publicKey)
         ))
 
         return return keyPair
@@ -60,21 +74,61 @@ class Secp256k1Provider(): Provider() {
     }
 
     override fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        val keyData = getKeyData(key)
-        if (data.size !== 32) {
+        val keyData = (key.handle as Secp256k1Handle).data
+        val ecAlgorithm = algorithm as EcdsaParams
+        val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
+        if (hashedData.size !== 32) {
             throw Error("Data must be 32 bytes")
         }
-
-        return NativeSecp256k1.sign(data, keyData)
+        return NativeSecp256k1.sign(hashedData, keyData)
     }
 
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        val keyData = getKeyData(key)
-        if (data.size !== 32) {
+        val keyData = (key.handle as Secp256k1Handle).data
+        val ecAlgorithm = algorithm as EcdsaParams
+        val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
+        if (hashedData.size !== 32) {
             throw Error("Data must be 32 bytes")
         }
 
-        return NativeSecp256k1.verify(data, signature, keyData)
+        return NativeSecp256k1.verify(hashedData, signature, keyData)
+    }
+
+    override fun onImportKey(
+        format: KeyFormat,
+        keyData: JsonWebKey,
+        algorithm: Algorithm,
+        extractable: Boolean,
+        keyUsages: Set<KeyUsage>
+    ): CryptoKey {
+        val alias = keyData.kid ?: ""
+        if (keyData.d != null) { // import d as the private key handle
+            return CryptoKey(
+                type = KeyType.Private,
+                extractable = extractable,
+                algorithm = algorithm,
+                usages = keyUsages.toList(),
+                handle = Secp256k1Handle(alias, Base64.decode(stringToByteArray(keyData.d!!), Base64.URL_SAFE))
+            )
+        } else {// public key
+            val x = Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE)
+            val y = Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE)
+            val xyData = ByteArray(65)
+            xyData[0] = secp256k1Tag.uncompressed.byte
+            x.forEachIndexed { index, byte ->
+                xyData[index + 1] = byte
+            }
+            y.forEachIndexed { index, byte ->
+                xyData[index + 33] = byte
+            }
+            return CryptoKey(
+                type = KeyType.Public,
+                extractable = extractable,
+                algorithm = algorithm,
+                usages = keyUsages.toList(),
+                handle = Secp256k1Handle(alias, xyData)
+            )
+        }
     }
 
     override fun onExportKeyJwk(key: CryptoKey): JsonWebKey {
@@ -82,45 +136,41 @@ class Secp256k1Provider(): Provider() {
         for (usage in key.usages) {
             keyOps.add(usage.value)
         }
-        var publicKey = key.handle as? ByteArray
+        var publicKey: ByteArray
+        val handle = key.handle as Secp256k1Handle
         val d: String? = if (key.type == KeyType.Private) {
-            publicKey = NativeSecp256k1.computePubkey(key.handle as? ByteArray)
-            Base64.encodeToString(key.handle as? ByteArray, Base64.URL_SAFE)
+            publicKey = NativeSecp256k1.computePubkey(handle.data)
+            Base64.encodeToString(handle.data, Base64.URL_SAFE)
         } else {
+            publicKey = handle.data
             null
         }
         if (publicKey == null) {
             throw Error("No public key components could be found")
         }
-        println("Getting XY")
         val xyData = publicToXY(publicKey)
-        println("XY got")
         return JsonWebKey(
             kty = com.microsoft.did.sdk.crypto.keys.KeyType.EllipticCurve.value,
+            kid = handle.alias,
             crv = W3cCryptoApiConstants.Secp256k1.value,
             use = "sig",
             key_ops = keyOps,
-            alg = this.name,
+            alg = JwaCryptoConverter.webCryptoToJwa(key.algorithm),
             ext = key.extractable,
-            d = d,
-            x = xyData.first,
-            y = xyData.second
+            d = d?.trim(),
+            x = xyData.first.trim(),
+            y = xyData.second.trim()
         )
     }
 
     override fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
         super.checkCryptoKey(key, keyUsage)
         if (key.type == KeyType.Private) {
-            val keyData = getKeyData(key)
+            val keyData = (key.handle as Secp256k1Handle).data
             if (!NativeSecp256k1.secKeyVerify(keyData)) {
                 throw Error("Private key invalid")
             }
         }
-    }
-
-    private fun getKeyData(key: CryptoKey): ByteArray {
-        checkAlgorithmName(key.algorithm)
-        return key.handle as? ByteArray ?: throw Error("Invalid key")
     }
 
     // mapped from secp256k1_eckey_pubkey_parse
@@ -129,7 +179,6 @@ class Secp256k1Provider(): Provider() {
                     keyData[0] == secp256k1Tag.even.byte ||
                     keyData[0] == secp256k1Tag.odd.byte)) {
             // compressed form
-            println("Compressed form")
             return Pair(
                 "",
                 ""
@@ -139,11 +188,9 @@ class Secp256k1Provider(): Provider() {
                     keyData[0] == secp256k1Tag.hybridEven.byte ||
                     keyData[0] == secp256k1Tag.hybridOdd.byte
                     )) {
-            println("Uncompressed form")
             // uncompressed, bytes 1-32, and 33-end are x and y
             val x = keyData.sliceArray(1..32)
             val y = keyData.sliceArray(33..64)
-            println("X: $x, Y: $y")
             return Pair(
                 Base64.encodeToString(x, Base64.URL_SAFE),
                 Base64.encodeToString(y, Base64.URL_SAFE)

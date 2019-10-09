@@ -13,35 +13,37 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
  */
 class SubtleCryptoFactory(default: SubtleCrypto) {
 
+    private val defaultSubtleCryptoMapItem = SubtleCryptoMapItem(default, SubtleCryptoScope.All)
+
     /**
      * The key encryptors
      */
-    var keyEncrypters: Map<String, SubtleCrypto> = mapOf("*" to default)
+    var keyEncrypters: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The shared key encryptors
      */
-    var sharedKeyEncrypters: Map<String, SubtleCrypto> = mapOf("*" to default)
+    var sharedKeyEncrypters: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The symmetric content encryptors
      */
-    var symmetricEncrypter: Map<String, SubtleCrypto> = mapOf("*" to default)
+    var symmetricEncrypter: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The message signer
      */
-    var messageSigners: Map<String, SubtleCrypto> = mapOf("*" to default)
+    var messageSigners: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The hmac operations
      */
-    var messageAuthenticationCodeSigners: Map<String, SubtleCrypto> = mapOf("*" to default)
+    var messageAuthenticationCodeSigners: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The digest operations
      */
-    var messageDigests: Map<String, SubtleCrypto> = mapOf("*" to default)
+    var messageDigests: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * Label for default algorithm
@@ -49,12 +51,31 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
     private val defaultAlgorithm: String = "*"
 
     /**
+     * Sets the key encrypter plugin given the encryption algorithm's name
+     * @param name The name of the algorithm
+     * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
+     */
+    fun addKeyEncrypter (name: String, subtleCrypto: SubtleCryptoMapItem ) {
+        addOrCreateListFor(keyEncrypters, name, subtleCrypto)
+    }
+
+    /**
      * Gets the key encrypter object given the encryption algorithm's name
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getKeyEncrypter (name: String): SubtleCrypto {
-        return this.keyEncrypters.getOrElse(name, { this.keyEncrypters[defaultAlgorithm] ?: error("Default algorithm not implemented") });
+    fun getKeyEncrypter (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        return getSubtleCryptoFrom(keyEncrypters, name, scope)
+    }
+
+
+    /**
+     * Sets the shared key encrypter plugin given the encryption algorithm's name
+     * @param name The name of the algorithm
+     * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
+     */
+    fun addSharedKeyEncrypter (name: String, subtleCrypto: SubtleCryptoMapItem) {
+        addOrCreateListFor(sharedKeyEncrypters, name, subtleCrypto)
     }
 
     /**
@@ -63,8 +84,17 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getSharedKeyEncrypter (name: String): SubtleCrypto {
-        return this.sharedKeyEncrypters.getOrElse(name, { this.sharedKeyEncrypters[defaultAlgorithm] ?: error("Default algorithm not implemented") });
+    fun getSharedKeyEncrypter (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        return getSubtleCryptoFrom(sharedKeyEncrypters, name, scope)
+    }
+
+    /**
+     * Sets the SymmetricEncrypter object plugin given the encryption algorithm's name
+     * @param name The name of the algorithm
+     * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
+     */
+    fun addSymmetricEncrypter (name: String, subtleCrypto: SubtleCryptoMapItem) {
+        addOrCreateListFor(symmetricEncrypter, name, subtleCrypto)
     }
 
     /**
@@ -72,17 +102,36 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getSymmetricEncrypter (name: String): SubtleCrypto {
-        return this.symmetricEncrypter.getOrElse(name, { this.symmetricEncrypter[defaultAlgorithm] ?: error("Default algorithm not implemented") });
+    fun getSymmetricEncrypter (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        return getSubtleCryptoFrom(symmetricEncrypter, name, scope)
     }
+
+    /**
+     * Sets the message signer object plugin given the encryption algorithm's name
+     * @param name The name of the algorithm
+     * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
+     */
+    fun addMessageSigner (name: String, subtleCrypto: SubtleCryptoMapItem) {
+        addOrCreateListFor(messageSigners, name, subtleCrypto)
+    }
+
 
     /**
      * Gets the message signer object given the signing algorithm's name
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getMessageSigner (name: String): SubtleCrypto {
-        return this.messageSigners.getOrElse(name, { this.messageSigners[defaultAlgorithm] ?: error("Default algorithm not implemented") });
+    fun getMessageSigner (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        return getSubtleCryptoFrom(messageSigners, name, scope)
+    }
+
+    /**
+     * Sets the mmac signer object plugin given the encryption algorithm's name
+     * @param name The name of the algorithm
+     * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
+     */
+    fun addMessageAuthenticationCodeSigner (name: String, subtleCrypto: SubtleCryptoMapItem) {
+        addOrCreateListFor(messageAuthenticationCodeSigners, name, subtleCrypto)
     }
 
     /**
@@ -90,16 +139,85 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getMessageAuthenticationCodeSigners (name: String): SubtleCrypto {
-        return this.messageAuthenticationCodeSigners.getOrElse(name, { this.messageAuthenticationCodeSigners[defaultAlgorithm] ?: error("Default algorithm not implemented") });
+    fun getMessageAuthenticationCodeSigners (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        return getSubtleCryptoFrom(messageAuthenticationCodeSigners, name, scope)
     }
 
+    /**
+     * Sets the message digest object plugin given the encryption algorithm's name
+     * @param name The name of the algorithm
+     * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
+     */
+    fun addMessageDigest (name: String, subtleCrypto: SubtleCryptoMapItem) {
+        addOrCreateListFor(messageDigests, name, subtleCrypto)
+    }
     /**
      * Gets the message digest object given the digest algorithm's name
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getMessageDigest (name: String): SubtleCrypto {
-        return this.messageDigests.getOrElse(name, { this.messageDigests[defaultAlgorithm] ?: error("Default algorithm not implemented") });
+    fun getMessageDigest (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        return getSubtleCryptoFrom(messageDigests, name, scope)
+    }
+
+    fun getBestMatch (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        fun findMatch(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, scope: SubtleCryptoScope): SubtleCrypto? {
+            val list = map[name]
+            if (list != null) {
+                try {
+                    return findSubtleCryptoFor(list, scope)
+                } catch (error: Error) {
+                    // no match
+                }
+            }
+            return null
+        }
+        // look in the order of:
+        val searchSequence = listOf(keyEncrypters, messageSigners, symmetricEncrypter, messageDigests, sharedKeyEncrypters, messageAuthenticationCodeSigners)
+
+        searchSequence.forEach {
+            val match = findMatch(it, name, scope)
+            if (match != null) {
+                return match
+            }
+        }
+
+        return defaultSubtleCryptoMapItem.subtleCrypto;
+    }
+
+    private fun addOrCreateListFor(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, subtleCrypto: SubtleCryptoMapItem) {
+        val list = map[name]
+        if (list != null) {
+            list.add(subtleCrypto)
+            map[name] = list
+        } else {
+            map[name] = mutableListOf(subtleCrypto)
+        }
+    }
+
+    private fun getSubtleCryptoFrom(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, scope: SubtleCryptoScope): SubtleCrypto {
+        val list = map[name]
+        // check for the specified scope
+        if (list != null) {
+            try {
+                return findSubtleCryptoFor(list, scope)
+            } catch (error: Error) {
+                // oh darn we didn't find one in the specified algorithm :'(
+            }
+        }
+        return findSubtleCryptoFor(map[defaultAlgorithm]!!, scope)
+    }
+
+    private fun findSubtleCryptoFor(list: List<SubtleCryptoMapItem>, scope: SubtleCryptoScope): SubtleCrypto {
+        val exactScope = list.filter { it.scope == scope }
+        if (exactScope.isNotEmpty()) {
+            return exactScope.first().subtleCrypto
+        } else if (scope != SubtleCryptoScope.All) {
+            val closeEnoughScope = list.filter { it.scope == SubtleCryptoScope.All }
+            if (closeEnoughScope.isNotEmpty()) {
+                return closeEnoughScope.first().subtleCrypto
+            }
+        }
+        throw Error("Could not find SubtleCrypto of appropriate scope")
     }
 }

@@ -5,32 +5,35 @@
 
 package com.microsoft.did.sdk
 
+import com.microsoft.did.sdk.auth.OidcRequest
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.serialization.ImplicitReflectionSerializer
 
-const val defaultRegistrationUrl = "beta.discover.did.microsoft.com"
-const val defaultResolverUrl = "beta.ion.microsoft.com"
 
 /**
  * Class for creating identifiers and
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class Agent (registrationUrl: String = defaultRegistrationUrl,
-             resolverUrl: String = defaultResolverUrl) {
+abstract class AbstractAgent (registrationUrl: String,
+                              resolverUrl: String,
+                              val signatureKeyReference: String,
+                              val encryptionKeyReference: String,
+                              /* private */ val cryptoOperations: CryptoOperations) {
+    companion object {
+        const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
+        const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"
+        const val defaultSignatureKeyReference = "signature"
+        const val defaultEncryptionKeyReference = "encryption"
+    }
 
-    /**
-     * CryptoOperations
-     */
-    // private val cryptoOperations =  CryptoOperations()
     /**
      * Registrar to be used when registering Identifiers.
      */
-    private val registrar = SidetreeRegistrar()
+    private val registrar = SidetreeRegistrar(registrationUrl)
 
     /**
      * Resolver to be used when resolving Identifier Documents.
@@ -40,23 +43,19 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
     /**
      * Creates and registers an Identifier.
      */
-    fun createIdentifier() {
-        GlobalScope.launch {
-            val document = registrar.register()
-            println(document)
-        }
-        // val seed = cryptoOperations.generateSeed()
-        // val publicKey = cryptoOperations.generatePairwise(seed)
+    @ImplicitReflectionSerializer
+    suspend fun createIdentifier(): Identifier {
+        return Identifier.createAndRegister("a", cryptoOperations, signatureKeyReference,
+            encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id"))
     }
 
     /**
      * Creates an OIDC Request.
      */
     fun createOidcRequest(signer: Identifier,
-                          signingKeyReference: String?,
                           redirectUrl: String,
                           nonce: String?,
-                          state: String?) {
+                          state: String?): OidcRequest {
         TODO("Not implemented")
     }
 
@@ -64,7 +63,7 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
      * Verify the signature and
      * return OIDC Request object.
      */
-    fun parseOidcRequest(request: String) {
+    fun parseOidcRequest(request: String): OidcRequest {
         TODO("Not implemented")
     }
 
@@ -72,8 +71,8 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
      * Create an OIDC Response.
      */
     fun createOidcResponse(signer: Identifier,
-                           signingKeyReference: String?,
-                           request: OidcRequest) {
+                           request: OidcRequest
+    ): OidcResponse {
         TODO("Not implemented")
     }
 
@@ -81,7 +80,7 @@ class Agent (registrationUrl: String = defaultRegistrationUrl,
      * Verify the signature and
      * parse the OIDC Response object.
      */
-    fun parseOidcResponse(response: String) {
+    fun parseOidcResponse(response: String): OidcResponse {
         TODO("Not implemented")
     }
 
