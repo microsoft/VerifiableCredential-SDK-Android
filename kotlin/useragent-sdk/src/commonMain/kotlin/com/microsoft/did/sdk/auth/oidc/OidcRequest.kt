@@ -18,12 +18,12 @@ import kotlinx.serialization.*
  */
 class OidcRequest private constructor(
     val sender: Identifier,
-    private val scope: String = OidcRequest.scope,
-    private val redirectUrl: String,
-    private val nonce: String,
-    private val state: String? = null,
-    private val responseType: String = OidcRequest.responseType,
-    private val responseMode: String = OidcRequest.responseMode,
+    val scope: String = OidcRequest.defaultScope,
+    val redirectUrl: String,
+    val nonce: String,
+    val state: String? = null,
+    val responseType: String = OidcRequest.defaultResponseType,
+    val responseMode: String = OidcRequest.defaultResponseMode,
     val registration: Registration? = null,
     val claimsRequested: RequestClaimParameter? = null,
     val claimsOffered: ClaimObject? = null
@@ -56,17 +56,17 @@ class OidcRequest private constructor(
         /**
          * Standard response type for SIOP.
          */
-        private const val responseType = "id_token"
+        const val defaultResponseType = "id_token"
 
         /**
          * Standard response mode for SIOP.
          */
-        private const val responseMode = "form_post"
+        const val defaultResponseMode = "form_post"
 
         /**
          * Standard scope for SIOP.
          */
-        private const val scope = "openid did_authn"
+        const val defaultScope = "openid did_authn"
 
         @ImplicitReflectionSerializer
         suspend fun parseAndVerify(signedRequest: String,
@@ -117,7 +117,7 @@ class OidcRequest private constructor(
             val state = contents.state ?: getQueryStringParameter(OAuthRequestParameter.State, signedRequest)
             val responseMode =
                 contents.responseMode ?: getQueryStringParameter(OAuthRequestParameter.ResponseMode, signedRequest) ?:
-                        OidcRequest.responseMode
+                        OidcRequest.defaultResponseMode
             val nonce = contents.nonce ?: getQueryStringParameter(OAuthRequestParameter.Nonce, signedRequest) ?:
                     throw Error("No nonce was included in this OIDC request.")
             val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer())
@@ -140,7 +140,7 @@ class OidcRequest private constructor(
             )
         }
 
-        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy): T? {
+        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>): T? {
             val data = getQueryStringParameter(name, url)
             return if (!data.isNullOrBlank()) {
                 MinimalJson.serializer.parse(serializer, data)

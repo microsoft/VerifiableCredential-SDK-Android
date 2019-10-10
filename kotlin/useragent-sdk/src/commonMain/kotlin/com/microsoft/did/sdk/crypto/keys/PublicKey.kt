@@ -45,12 +45,12 @@ abstract class PublicKey (val key: JsonWebKey) {
      * @param jwk JSON object representation of a JWK
      * @see https://tools.ietf.org/html/rfc7638
      */
-    fun getThumbprint (crypto: CryptoOperations): String {
+    fun getThumbprint (crypto: CryptoOperations, sha: Algorithm = Sha.Sha512): String {
         // construct a JSON object with only required fields
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)
-        val digest = crypto.subtleCryptoFactory.getMessageDigest(W3cCryptoApiConstants.Sha512.value, SubtleCryptoScope.Public)
-        val hash = digest.digest(Sha.Sha512, jsonUtf8)
+        val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.Public)
+        val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
         return Base64Url.encode(hash)
     }

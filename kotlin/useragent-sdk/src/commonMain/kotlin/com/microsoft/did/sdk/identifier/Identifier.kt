@@ -54,8 +54,8 @@ val microsoftIdentityHubDocument = IdentifierDocument(
  */
 class Identifier constructor (
                  val document: IdentifierDocument,
-                 private val signatureKeyReference: String,
-                 private val encryptionKeyReference: String,
+                 val signatureKeyReference: String,
+                 val encryptionKeyReference: String,
                  private val cryptoOperations: CryptoOperations,
                  private val resolver: IResolver,
                  private val registrar: IRegistrar) {

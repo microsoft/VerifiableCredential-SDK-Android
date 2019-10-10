@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.auth.OidcRequest
+import com.microsoft.did.sdk.auth.oidc.OidcRequest
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
