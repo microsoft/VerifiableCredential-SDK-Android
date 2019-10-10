@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
+import io.ktor.http.ContentType
 import kotlinx.serialization.ImplicitReflectionSerializer
 
 
@@ -50,38 +51,21 @@ abstract class AbstractAgent (registrationUrl: String,
     }
 
     /**
-     * Creates an OIDC Request.
-     */
-    fun createOidcRequest(signer: Identifier,
-                          redirectUrl: String,
-                          nonce: String?,
-                          state: String?): OidcRequest {
-        TODO("Not implemented")
-    }
-
-    /**
      * Verify the signature and
      * return OIDC Request object.
      */
-    fun parseOidcRequest(request: String): OidcRequest {
-        TODO("Not implemented")
-    }
-
-    /**
-     * Create an OIDC Response.
-     */
-    fun createOidcResponse(signer: Identifier,
-                           request: OidcRequest
-    ): OidcResponse {
-        TODO("Not implemented")
+    @ImplicitReflectionSerializer
+    suspend fun parseOidcRequest(request: String): OidcRequest {
+        return OidcRequest.parseAndVerify(request, cryptoOperations, resolver)
     }
 
     /**
      * Verify the signature and
      * parse the OIDC Response object.
      */
-    fun parseOidcResponse(response: String): OidcResponse {
-        TODO("Not implemented")
+    @ImplicitReflectionSerializer
+    suspend fun parseOidcResponse(response: String, contentType: ContentType = ContentType.Application.FormUrlEncoded): OidcResponse {
+        return OidcResponse.parseAndVerify(response, cryptoOperations, resolver, contentType)
     }
 
 }

@@ -107,18 +107,7 @@ class OidcResponse (
                                     if (claimObject.claimClass != claimClass.key) {
                                         throw Error("Claim Object class does not match expected class.")
                                     }
-                                    claimObject.claimDetails.forEach {
-                                        claimDetailData ->
-                                        when (claimDetailData.type) {
-                                            ClaimDetail.UNSIGNED -> {
-                                                // do nothing
-                                            }
-                                            ClaimDetail.JWS -> {
-                                                val claimDetail = JwsToken(claimDetailData.data)
-                                                DidKeyResolver.verifyJws(claimDetail, crypto, resolver)
-                                            }
-                                        }
-                                    }
+                                    claimObject.verify(crypto, resolver)
                                     claimObjects.add(claimObject)
                                 }
                             }
@@ -212,7 +201,7 @@ class OidcResponse (
         return send(responseSerialized)
     }
 
-    suspend fun send(idToken: String): ClaimObject? {
+    private suspend fun send(idToken: String): ClaimObject? {
         return when (responseMode) {
             OidcRequest.defaultResponseMode -> {
                 val responseBody = "id_token=${PercentEncoding.encode(idToken)}" + if (!state.isNullOrBlank()) {

@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.auth.oidc
 
+import com.microsoft.did.sdk.OidcResponse
 import com.microsoft.did.sdk.auth.OAuthRequestParameter
 import com.microsoft.did.sdk.credentials.ClaimObject
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -17,7 +18,7 @@ import kotlinx.serialization.*
  * Class to represent Open ID Connect Self-Issued Tokens
  * @class
  */
-class OidcRequest private constructor(
+class OidcRequest constructor(
     val sender: Identifier,
     val scope: String = OidcRequest.defaultScope,
     val redirectUrl: String,
@@ -152,7 +153,12 @@ class OidcRequest private constructor(
      * Respond to OIDC Request using identifier.
      * @param identifier the identifier used to sign response
      */
-    suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null) {
-        TODO("Not implemented")
+    @ImplicitReflectionSerializer
+    suspend fun respondWith(identifier: Identifier, cryptoOperations: CryptoOperations, claimObjects: List<ClaimObject>? = null) {
+        val oidcResponse = OidcResponse.create(this, identifier)
+        claimObjects?.forEach {
+            oidcResponse.addClaim(it)
+        }
+        oidcResponse.signAndSend(cryptoOperations)
     }
 }
