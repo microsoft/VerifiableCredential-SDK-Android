@@ -21,5 +21,8 @@ enum class OAuthRequestParameter(val value: String) {
     Registration("registration"),
     Request("request"),
     RequestUri("request_uri"),
-    Claims("claims")
+    Claims("claims"),
+
+    // custom parameters
+    Offer("vc_offer")
 }

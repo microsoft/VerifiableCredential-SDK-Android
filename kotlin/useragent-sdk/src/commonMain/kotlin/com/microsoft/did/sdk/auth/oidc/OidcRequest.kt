@@ -1,6 +1,6 @@
-package com.microsoft.did.sdk.auth
+package com.microsoft.did.sdk.auth.oidc
 
-import com.microsoft.did.sdk.auth.oidc.Registration
+import com.microsoft.did.sdk.auth.OAuthRequestParameter
 import com.microsoft.did.sdk.credentials.ClaimObject
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
@@ -10,11 +10,7 @@ import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.PercentEncoding
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.parseMap
-import kotlin.math.sign
+import kotlinx.serialization.*
 
 /**
  * Class to represent Open ID Connect Self-Issued Tokens
@@ -22,105 +18,55 @@ import kotlin.math.sign
  */
 class OidcRequest private constructor(
     val sender: Identifier,
-    val redirectUrl: String,
-    val nonce: String?,
-    val claimObjects: List<ClaimObject>?,
-    val state: String?,
-    val claimsRequested: List<String>?,
-    val scope: String = OidcRequest.scope,
-    val responseType: String = OidcRequest.responseType,
-    val responseMode: String = OidcRequest.responseMode
+    private val scope: String = OidcRequest.scope,
+    private val redirectUrl: String,
+    private val nonce: String,
+    private val state: String? = null,
+    private val responseType: String = OidcRequest.responseType,
+    private val responseMode: String = OidcRequest.responseMode,
+    val registration: Registration? = null,
+    val claimsRequested: RequestClaimParameter? = null,
+    val claimsOffered: ClaimObject? = null
 ) {
-
-
     @Serializable
     private data class OidcRequestObject(
-        val iss: String?,
-        val aud: String?,
+        val iss: String? = null,
+        val aud: String? = null,
         @SerialName("response_type")
-        val responseType: String?,
+        val responseType: String? = null,
         @SerialName("response_mode")
-        val responseMode: String?,
+        val responseMode: String? = null,
         @SerialName("client_id")
-        val clientId: String?,
+        val clientId: String? = null,
         @SerialName("redirect_uri")
-        val redirectUri: String?,
-        val scope: String?,
-        val state: String?,
-        val nonce: String?,
+        val redirectUri: String? = null,
+        val scope: String? = null,
+        val state: String? = null,
+        val nonce: String? = null,
         @SerialName("max_age")
         val maxAge: Int?,
-        val claims: OidcRequestClaim?,
-        val registration: Registration?
-        // custom extension values
-
-    ) {
-        @Serializable
-        private data class OidcRequestClaim(
-            val userInfo: UserInfo?,
-            @SerialName("id_token")
-            val idToken: IdToken?
-        ) {
-            @Serializable
-            private data class UserInfo(
-                val name: String?,
-                @SerialName("given_name")
-                val givenName: String?,
-                @SerialName("family_name")
-                val familyName: String?,
-                @SerialName("middle_name")
-                val middleName: String?,
-                val nickname: String?,
-                @SerialName("preferred_username")
-                val preferredUsername: String?,
-                val profile: String?,
-                val picture: String?,
-                val website: String?,
-                val email: String?,
-                @SerialName("email_verified")
-                val emailVerified: Boolean?,
-                val gender: String?,
-                val birthdate: String?,
-                val zoneinfo: String?,
-                val locale: String?,
-                @SerialName("phone_number")
-                val phoneNumber: String?,
-                @SerialName("phone_number_verified")
-                val phoneNumberVerified: Boolean?,
-                val address: Address?,
-                @SerialName("updated_at")
-                val updatedAt: Int?
-            ) {
-                @Serializable
-                private data class Address(
-                    val formatted: String?,
-                    @SerialName("street_address")
-                    val streetAddress: String?,
-                    val locality: String?,
-                    val region: String?,
-                    @SerialName("postal_code")
-                    val postalCode: String?,
-                    val country: String?
-                )
-            }
-        }
-    }
+        val claims: RequestClaimParameter? = null,
+        val registration: Registration? = null,
+        // custom parameters
+        @SerialName("vc_offer")
+        val claimsOffered: ClaimObject? = null
+    )
 
     companion object {
         /**
          * Standard response type for SIOP.
          */
-        const val responseType = "id_token"
+        private const val responseType = "id_token"
 
         /**
          * Standard response mode for SIOP.
          */
-        const val responseMode = "form_post"
+        private const val responseMode = "form_post"
 
         /**
          * Standard scope for SIOP.
          */
-        const val scope = "openid did_authn"
+        private const val scope = "openid did_authn"
 
         @ImplicitReflectionSerializer
         suspend fun parseAndVerify(signedRequest: String,
@@ -145,11 +91,11 @@ class OidcRequest private constructor(
             }
             val token = JwsToken(request)
             // get the DID associated
-            val contents = MinimalJson.serializer.parse(OidcRequestObject.serializer(), token.content());
+            val contents = MinimalJson.serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {
                 throw Error("Could not find the issuer's DID")
             }
-            val sender = resolver.resolve(contents.iss, crypto)
+            val sender = resolver.resolve(contents.iss!!, crypto)
             // verify the request
             val keys = sender.document.publicKeys.map {
                 it.toPublicKey()
@@ -157,37 +103,50 @@ class OidcRequest private constructor(
             token.verify(crypto, keys)
             // retrieve the rest of the parameters
             val scope = contents.scope ?: getQueryStringParameter(OAuthRequestParameter.Scope, signedRequest, true)!!
-            var responseType = contents.responseType ?: (OAuthRequestParameter.ResponseType, signedRequest, true)!!
-            var redirectUrl = contents.clientId ?: contents.redirectUri ?:
-                getQueryStringParameter(OAuthRequestParameter.ClientId, signedRequest true)!!
+            val responseType = contents.responseType ?: getQueryStringParameter(
+                OAuthRequestParameter.ResponseType,
+                signedRequest,
+                true
+            )!!
+            val redirectUrl = contents.clientId ?: contents.redirectUri ?: getQueryStringParameter(
+                OAuthRequestParameter.ClientId,
+                signedRequest,
+                true
+            )!!
             // optionals
             val state = contents.state ?: getQueryStringParameter(OAuthRequestParameter.State, signedRequest)
-            val responseMode = contents.responseMode ?: getQueryStringParameter(OAuthRequestParameter.ResponseMode, signedRequest)
-            val nonce = contents.nonce ?: getQueryStringParameter(OAuthRequestParameter.Nonce, signedRequest)
-            var claims = contents.claims ?: getQueryStringParameter(OAuthRequestParameter.Claims, signedRequest)
-            var registration = if (contents.registration != null) {
-                contents.registration
-            } else {
-                val registrationValue = getQueryStringParameter(OAuthRequestParameter.Registration, signedRequest)
-                if (!registrationValue.isNullOrBlank()) {
-                    MinimalJson.serializer.parse(Registration.serializer(), registrationValue)
-                } else {
-                    null
-                }
-            }
+            val responseMode =
+                contents.responseMode ?: getQueryStringParameter(OAuthRequestParameter.ResponseMode, signedRequest) ?:
+                        OidcRequest.responseMode
+            val nonce = contents.nonce ?: getQueryStringParameter(OAuthRequestParameter.Nonce, signedRequest) ?:
+                    throw Error("No nonce was included in this OIDC request.")
+            val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer())
+            val registration = contents.registration ?: getQueryStringJsonParameter(OAuthRequestParameter.Registration,
+                signedRequest, Registration.serializer())
 
+            val offers = contents.claimsOffered ?: getQueryStringJsonParameter(OAuthRequestParameter.Offer, signedRequest, ClaimObject.serializer())
             // form an OidcRequest object
             return OidcRequest(
                 sender,
+                scope,
                 redirectUrl,
                 nonce,
-                ,
                 state,
-                ,
-                scope,
                 responseType,
-                responseMode
+                responseMode,
+                registration,
+                claims,
+                offers
             )
+        }
+
+        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy): T? {
+            val data = getQueryStringParameter(name, url)
+            return if (!data.isNullOrBlank()) {
+                MinimalJson.serializer.parse(serializer, data)
+            } else {
+                null
+            }
         }
 
         private fun getQueryStringParameter(name: OAuthRequestParameter, url: String, required: Boolean = false): String? {

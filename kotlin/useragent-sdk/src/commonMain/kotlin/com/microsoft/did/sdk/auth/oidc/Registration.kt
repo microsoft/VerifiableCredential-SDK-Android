@@ -30,5 +30,4 @@ data class Registration(
 //    val JsonWebKeySet: TODO: Implement JsonWebKeySet,
     @SerialName("request_uris")
     val requestUris: List<String>?
-) {
-}
+)
