@@ -65,4 +65,28 @@ data class RequestClaimParameter (
             }
         }
     }
+
+    fun getRequestedClaimClasses(): Map<String, Boolean> {
+        return if (idToken == null) {
+            emptyMap()
+        } else {
+            val idTokenClaims = listOf("iss",
+                "sub",
+                "aud",
+                "exp",
+                "iat",
+                "auth_time",
+                "nonce",
+                "acr",
+                "amr",
+                "azp")
+            val requestedClasses = mutableMapOf<String, Boolean>()
+            idToken.filter {
+                !(it.key in idTokenClaims)
+            }.forEach {
+                requestedClasses[it.key] = it.value.essential ?: false
+            }
+            requestedClasses
+        }
+    }
 }
