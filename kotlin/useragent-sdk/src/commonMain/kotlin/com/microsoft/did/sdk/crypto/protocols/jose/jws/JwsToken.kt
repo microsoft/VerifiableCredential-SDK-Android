@@ -23,7 +23,7 @@ import kotlinx.serialization.stringify
  */
 class JwsToken private constructor(private val payload: String, signatures: List<JwsSignature> = emptyList()) {
 
-    private val signatures: MutableList<JwsSignature> = signatures.toMutableList()
+    val signatures: MutableList<JwsSignature> = signatures.toMutableList()
 
     companion object {
         fun deserialize(jws: String): JwsToken {

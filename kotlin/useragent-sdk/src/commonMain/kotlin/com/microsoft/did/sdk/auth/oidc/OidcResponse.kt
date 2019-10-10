@@ -2,19 +2,18 @@ package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.auth.OAuthRequestParameter
 import com.microsoft.did.sdk.auth.oidc.OidcRequest
+import com.microsoft.did.sdk.auth.oidc.getQueryStringParameter
 import com.microsoft.did.sdk.credentials.ClaimDetail
 import com.microsoft.did.sdk.credentials.ClaimObject
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
-import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.getCurrentTime
-import com.microsoft.did.sdk.utilities.getHttpClient
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.utilities.*
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -25,6 +24,7 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlin.collections.Map
 import kotlin.math.floor
 
 class OidcResponse (
@@ -32,9 +32,7 @@ class OidcResponse (
     val nonce: String,
     val state: String? = null,
     val claims: MutableList<ClaimObject> = mutableListOf(),
-    private val scope: String,
     private val redirectUrl: String,
-    private val responseType: String,
     private val responseMode: String
     ) {
     @Serializable
@@ -69,17 +67,77 @@ class OidcResponse (
                 responder = respondWithIdentifier,
                 nonce = oidcRequest.nonce,
                 state = oidcRequest.state,
-                scope = oidcRequest.scope,
                 redirectUrl = oidcRequest.redirectUrl,
-                responseType = oidcRequest.responseType,
                 responseMode = oidcRequest.responseMode
             )
         }
 
-        fun parseAndVerify(token: String,
-                           crypto: CryptoOperations,
-                           resolver: IResolver): OidcResponse {
-            TODO("Not yet implemented")
+        @ImplicitReflectionSerializer
+        suspend fun parseAndVerify(data: String,
+                                   crypto: CryptoOperations,
+                                   resolver: IResolver,
+                                   contentType: ContentType): OidcResponse {
+            return when(contentType) {
+                ContentType.Application.FormUrlEncoded -> {
+                    val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data) ?: throw Error("No id_token given.")
+                    val state = getQueryStringParameter(OAuthRequestParameter.State, data)
+                    val token = JwsToken(idToken)
+                    val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
+
+                    val responder = if (response.didComm != null) {
+                        resolver.resolve(response.didComm.did, crypto)
+                    } else {
+                        DidKeyResolver.resolveIdentiferFromKid(token.signatures.first {
+                            !it.getKid().isNullOrBlank()
+                        }.getKid()!!, crypto, resolver)
+                    }
+
+                    DidKeyResolver.verifyJws(token, crypto, responder)
+                    val claimObjects = mutableListOf<ClaimObject>()
+                    if (response.claimNames != null) {
+                        // for each claim class
+                        response.claimNames.forEach {
+                            claimClass ->
+                            val claims = response.claimSources?.get(claimClass.value) ?: throw Error("Could not find claims for ${claimClass.key}")
+                            claims.forEach { claim ->
+                                if (claim.containsKey("JWT")) {
+                                    val claimObjectData = JwsToken(claim["JWT"]!!)
+                                    DidKeyResolver.verifyJws(claimObjectData, crypto, responder)
+                                    val claimObject = MinimalJson.serializer.parse(ClaimObject.serializer(), claimObjectData.content())
+                                    if (claimObject.claimClass != claimClass.key) {
+                                        throw Error("Claim Object class does not match expected class.")
+                                    }
+                                    claimObject.claimDetails.forEach {
+                                        claimDetailData ->
+                                        when (claimDetailData.type) {
+                                            ClaimDetail.UNSIGNED -> {
+                                                // do nothing
+                                            }
+                                            ClaimDetail.JWS -> {
+                                                val claimDetail = JwsToken(claimDetailData.data)
+                                                DidKeyResolver.verifyJws(claimDetail, crypto, resolver)
+                                            }
+                                        }
+                                    }
+                                    claimObjects.add(claimObject)
+                                }
+                            }
+                        }
+                    }
+
+                    OidcResponse(
+                        responder,
+                        response.nonce,
+                        state,
+                        claimObjects,
+                        response.aud,
+                        "form_post"
+                    )
+                }
+                else -> {
+                    throw Error("Unable to parse content of type $contentType")
+                }
+            }
         }
     }
 
@@ -157,8 +215,8 @@ class OidcResponse (
     suspend fun send(idToken: String): ClaimObject? {
         return when (responseMode) {
             OidcRequest.defaultResponseMode -> {
-                val responseBody = "id_token=$idToken" + if (!state.isNullOrBlank()) {
-                    "&state=$state"
+                val responseBody = "id_token=${PercentEncoding.encode(idToken)}" + if (!state.isNullOrBlank()) {
+                    "&state=${PercentEncoding.encode(state)}"
                 } else {
                     ""
                 }

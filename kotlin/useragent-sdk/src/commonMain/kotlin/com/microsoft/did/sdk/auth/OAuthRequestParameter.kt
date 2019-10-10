@@ -23,6 +23,8 @@ enum class OAuthRequestParameter(val value: String) {
     RequestUri("request_uri"),
     Claims("claims"),
 
+    IdToken("id_token"),
+
     // custom parameters
     Offer("vc_offer")
 }

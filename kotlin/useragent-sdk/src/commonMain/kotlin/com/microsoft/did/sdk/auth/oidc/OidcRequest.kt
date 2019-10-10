@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.auth.oidc
 import com.microsoft.did.sdk.auth.OAuthRequestParameter
 import com.microsoft.did.sdk.credentials.ClaimObject
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
@@ -95,12 +96,9 @@ class OidcRequest private constructor(
             if (contents.iss.isNullOrBlank()) {
                 throw Error("Could not find the issuer's DID")
             }
-            val sender = resolver.resolve(contents.iss!!, crypto)
-            // verify the request
-            val keys = sender.document.publicKeys.map {
-                it.toPublicKey()
-            }
-            token.verify(crypto, keys)
+            val sender = resolver.resolve(contents.iss, crypto)
+            DidKeyResolver.verifyJws(token, crypto, sender)
+
             // retrieve the rest of the parameters
             val scope = contents.scope ?: getQueryStringParameter(OAuthRequestParameter.Scope, signedRequest, true)!!
             val responseType = contents.responseType ?: getQueryStringParameter(
@@ -147,16 +145,6 @@ class OidcRequest private constructor(
             } else {
                 null
             }
-        }
-
-        private fun getQueryStringParameter(name: OAuthRequestParameter, url: String, required: Boolean = false): String? {
-            val findResults = Regex("${name.value}=([^&]+)").find(url)
-            if (findResults != null) {
-                return PercentEncoding.decode(findResults.groupValues[1])
-            } else if (required) {
-                throw Error("Openid requires a \"${name.value}\" parameter")
-            }
-            return null
         }
 
     }
