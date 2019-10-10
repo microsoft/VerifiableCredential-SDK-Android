@@ -53,7 +53,7 @@ class OidcResponse (
         @SerialName("_claim_names")
         val claimNames: Map<String, String>? = null,
         @SerialName("_claim_sources")
-        val claimSources: Map<String, Map<String, String>>? = null
+        val claimSources: Map<String, List<Map<String, String>>>? = null
     )
 
     @Serializable
@@ -110,25 +110,27 @@ class OidcResponse (
         )
 
         var claimNames: MutableMap<String, String>? = null
-        var claimSources: MutableMap<String, Map<String, String>>? = null
+        var claimSources: MutableMap<String, MutableList<Map<String, String>>>? = null
         if (!claims.isNullOrEmpty()) {
             claimNames = mutableMapOf()
             claimSources = mutableMapOf()
             claims.forEachIndexed { index, it ->
-                val presentation = PresentationDetails(
-                    it.claimIssuer,
-                    redirectUrl,
-                    it.claimDetails
-                )
-                val presentationData = MinimalJson.serializer.stringify(PresentationDetails.serializer(), presentation)
-                val token = JwsToken(presentationData)
+                val claimData = MinimalJson.serializer.stringify(ClaimObject.serializer(), it)
+                val token = JwsToken(claimData)
                 token.sign(useKey, crypto)
                 val serialized = token.serialize(JwsFormat.Compact)
-                val name = "src$index"
-                claimNames[it.claimClass] = name
-                claimSources[name] = mapOf(
-                    "VP_JWT" to serialized
-                )
+                val name = if (claimNames.containsKey(it.claimClass)) {
+                    claimNames[it.claimClass]!!
+                } else {
+                    claimNames[it.claimClass] = "src$index"
+                    "src$index"
+                }
+                if (claimSources.containsKey(name)) {
+                    claimSources[name] = mutableListOf()
+                }
+                claimSources[name]?.add(mapOf(
+                    "JWT" to serialized
+                ))
             }
         }
 
