@@ -52,23 +52,26 @@ digraph architecture {
   IRegistrar
   SidetreeRegistrar
   
-  // In Progress
-  node[color="#107c10", shape=box, layer=public]
-  
-  Agent
   Identifier
   IdentifierDocument
   
   IResolver
   HttpResolver
 
+  OidcRequest
+  OidcResponse
+
+  ClaimObject
+
+  // In Progress
+  node[color="#107c10", shape=box, layer=public]
+  
+  Agent
+
   CryptoOperations
   
   // Specified
   node[color="#0078d4", shape=ellipse, layer=public]
-
-  OidcRequest
-  OidcResponse
 
   JweToken
 
@@ -115,6 +118,8 @@ digraph architecture {
   edge[dir="back",arrowtail="odiamond"]
   Subtle -> Provider
   SubtleCryptoFactory -> SubtleCrypto
+  OidcRequest -> ClaimObject
+  OidcResponse -> ClaimObject
 
   // Compositions
   edge[dir="back",arrowtail="diamond"]
