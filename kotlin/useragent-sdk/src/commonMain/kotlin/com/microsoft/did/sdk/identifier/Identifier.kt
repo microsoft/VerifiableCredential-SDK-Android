@@ -108,7 +108,7 @@ class Identifier constructor (
                         hubService = IdentityHubService.create(
                             id = "#hub",
                             keyStore = cryptoOperations.keyStore,
-                            signatureKeyRef = personaSigKeyRef,
+                            signatureKeyRef = personaEncKeyRef,
                             instances = listOf(microsoftHub)
                 )
             }
