@@ -64,8 +64,12 @@ abstract class AbstractAgent (registrationUrl: String,
      * parse the OIDC Response object.
      */
     @ImplicitReflectionSerializer
-    suspend fun parseOidcResponse(response: String, contentType: ContentType = ContentType.Application.FormUrlEncoded): OidcResponse {
-        return OidcResponse.parseAndVerify(response, cryptoOperations, resolver, contentType)
+    suspend fun parseOidcResponse(response: String,
+                                  clockSkewInMinutes: Int = 5,
+                                  issuedWithinLastMinutes: Int? = null,
+                                  contentType: ContentType = ContentType.Application.FormUrlEncoded): OidcResponse {
+        return OidcResponse.parseAndVerify(response, clockSkewInMinutes, issuedWithinLastMinutes,
+            cryptoOperations, resolver, contentType)
     }
 
 }

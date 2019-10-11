@@ -9,7 +9,6 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.PercentEncoding
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
 import kotlinx.serialization.*
@@ -20,6 +19,7 @@ import kotlinx.serialization.*
  */
 class OidcRequest constructor(
     val sender: Identifier,
+    val crypto: CryptoOperations,
     val scope: String = OidcRequest.defaultScope,
     val redirectUrl: String,
     val nonce: String,
@@ -97,6 +97,7 @@ class OidcRequest constructor(
             if (contents.iss.isNullOrBlank()) {
                 throw Error("Could not find the issuer's DID")
             }
+
             val sender = resolver.resolve(contents.iss, crypto)
             DidKeyResolver.verifyJws(token, crypto, sender)
 
@@ -127,6 +128,7 @@ class OidcRequest constructor(
             // form an OidcRequest object
             return OidcRequest(
                 sender,
+                crypto,
                 scope,
                 redirectUrl,
                 nonce,
@@ -154,11 +156,11 @@ class OidcRequest constructor(
      * @param identifier the identifier used to sign response
      */
     @ImplicitReflectionSerializer
-    suspend fun respondWith(identifier: Identifier, cryptoOperations: CryptoOperations, claimObjects: List<ClaimObject>? = null) {
+    suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null) {
         val oidcResponse = OidcResponse.create(this, identifier)
         claimObjects?.forEach {
             oidcResponse.addClaim(it)
         }
-        oidcResponse.signAndSend(cryptoOperations)
+        oidcResponse.signAndSend()
     }
 }

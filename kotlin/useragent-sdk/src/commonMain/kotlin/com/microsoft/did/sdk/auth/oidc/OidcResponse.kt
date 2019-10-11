@@ -29,6 +29,7 @@ import kotlin.math.floor
 
 class OidcResponse (
     val responder: Identifier,
+    val crypto: CryptoOperations,
     val nonce: String,
     val state: String? = null,
     val claims: MutableList<ClaimObject> = mutableListOf(),
@@ -65,6 +66,7 @@ class OidcResponse (
         fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier): OidcResponse {
             return OidcResponse(
                 responder = respondWithIdentifier,
+                crypto = oidcRequest.crypto,
                 nonce = oidcRequest.nonce,
                 state = oidcRequest.state,
                 redirectUrl = oidcRequest.redirectUrl,
@@ -74,6 +76,8 @@ class OidcResponse (
 
         @ImplicitReflectionSerializer
         suspend fun parseAndVerify(data: String,
+                                   clockSkewInMinutes: Int = 5,
+                                   issuedWithinLastMinutes: Int? = null,
                                    crypto: CryptoOperations,
                                    resolver: IResolver,
                                    contentType: ContentType): OidcResponse {
@@ -83,6 +87,16 @@ class OidcResponse (
                     val state = getQueryStringParameter(OAuthRequestParameter.State, data)
                     val token = JwsToken(idToken)
                     val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
+
+                    val clockSkew = clockSkewInMinutes * 60
+                    val currentTime = getCurrentTime() / 1000;
+                    if (currentTime - clockSkew < response.exp) {
+                        throw Error("Id token has expired.")
+                    }
+                    if (issuedWithinLastMinutes != null &&
+                        (response.iat < (currentTime - clockSkew - (issuedWithinLastMinutes * 60)))) {
+                        throw Error("Id token issued before time frame set by issuedWithinLastMinutes ($issuedWithinLastMinutes)")
+                    }
 
                     val responder = if (response.didComm != null) {
                         resolver.resolve(response.didComm.did, crypto)
@@ -116,6 +130,7 @@ class OidcResponse (
 
                     OidcResponse(
                         responder,
+                        crypto,
                         response.nonce,
                         state,
                         claimObjects,
@@ -139,7 +154,6 @@ class OidcResponse (
      */
     @ImplicitReflectionSerializer
     suspend fun signAndSend(
-        crypto: CryptoOperations,
         expiresIn: Int = 5,
         useKey: String = responder.signatureKeyReference
     ): ClaimObject? {

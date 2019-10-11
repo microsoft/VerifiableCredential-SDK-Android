@@ -13,6 +13,7 @@ import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
 import kotlinx.serialization.ImplicitReflectionSerializer
+
 /**
  * Registrar implementation for the Sidetree network
  * @class
