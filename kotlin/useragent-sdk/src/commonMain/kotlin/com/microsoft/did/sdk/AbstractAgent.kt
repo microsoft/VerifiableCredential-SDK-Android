@@ -8,10 +8,13 @@ package com.microsoft.did.sdk
 import com.microsoft.did.sdk.auth.oidc.OidcRequest
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.Identifier
+import com.microsoft.did.sdk.identifier.IdentifierToken
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
+import com.microsoft.did.sdk.utilities.Base64Url
 import io.ktor.http.ContentType
 import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlin.random.Random
 
 
 /**
@@ -46,8 +49,16 @@ abstract class AbstractAgent (registrationUrl: String,
      */
     @ImplicitReflectionSerializer
     suspend fun createIdentifier(): Identifier {
-        return Identifier.createAndRegister("a", cryptoOperations, signatureKeyReference,
+        val alias = Base64Url.encode(Random.nextBytes(16))
+        return Identifier.createAndRegister(alias, cryptoOperations, signatureKeyReference,
             encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id"))
+    }
+
+    fun deserializeIdentifier(identifierToken: String): Identifier {
+        return IdentifierToken.deserialize(
+            identifierToken,
+            cryptoOperations, resolver, registrar
+        )
     }
 
     /**

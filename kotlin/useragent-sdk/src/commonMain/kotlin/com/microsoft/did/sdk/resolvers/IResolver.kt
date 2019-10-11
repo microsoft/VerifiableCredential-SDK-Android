@@ -38,6 +38,7 @@ interface IResolver {
             document,
             "",
             encKey,
+            "",
             cryptoOperations,
             this,
             NullRegistrar()

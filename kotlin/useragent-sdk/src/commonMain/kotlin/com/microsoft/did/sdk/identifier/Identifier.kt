@@ -56,6 +56,7 @@ class Identifier constructor (
                  val document: IdentifierDocument,
                  val signatureKeyReference: String,
                  val encryptionKeyReference: String,
+                 val alias: String,
                  private val cryptoOperations: CryptoOperations,
                  private val resolver: IResolver,
                  private val registrar: IRegistrar) {
@@ -103,7 +104,7 @@ class Identifier constructor (
 //                            resolver.resolve(it,
 //                                cryptoOperations
 //                            )}
-                        val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", cryptoOperations, resolver, registrar)
+                        val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, resolver, registrar)
                         hubService = IdentityHubService.create(
                             id = "#hub",
                             keyStore = cryptoOperations.keyStore,
@@ -125,6 +126,7 @@ class Identifier constructor (
             println(registered)
 
             return Identifier(
+                alias = alias,
                 document = registered,
                 signatureKeyReference = personaSigKeyRef,
                 encryptionKeyReference = personaEncKeyRef,
@@ -133,5 +135,9 @@ class Identifier constructor (
                 registrar = registrar
             )
         }
+    }
+
+    fun serialize(): String {
+        return IdentifierToken.serialize(this)
     }
 }
