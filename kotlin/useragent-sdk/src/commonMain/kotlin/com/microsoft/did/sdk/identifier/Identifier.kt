@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
+import com.microsoft.did.sdk.identifier.document.LinkedDataKeySpecification
 import com.microsoft.did.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.did.sdk.identifier.document.service.ServiceHubEndpoint
 import com.microsoft.did.sdk.registrars.IRegistrar
@@ -89,13 +90,13 @@ class Identifier constructor (
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
-                type = "RsaVerificationKey2018",
+                type =  LinkedDataKeySpecification.RsaSignature2018.values.first(),
                 publicKeyJwk = encJwk
             )
             // Secp256k1 key
             val sigPubKey = IdentifierDocumentPublicKey(
                 id = sigJwk.kid!!,
-                type = "EcdsaSecp256k1VerificationKey2019",
+                type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                 publicKeyJwk = sigJwk
             )
             var hubService: IdentifierDocumentService? = null
