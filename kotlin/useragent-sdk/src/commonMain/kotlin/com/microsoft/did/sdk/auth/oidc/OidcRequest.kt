@@ -156,11 +156,11 @@ class OidcRequest constructor(
      * @param identifier the identifier used to sign response
      */
     @ImplicitReflectionSerializer
-    suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null) {
+    suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null): ClaimObject? {
         val oidcResponse = OidcResponse.create(this, identifier)
         claimObjects?.forEach {
             oidcResponse.addClaim(it)
         }
-        oidcResponse.signAndSend()
+        return oidcResponse.signAndSend()
     }
 }
