@@ -89,8 +89,9 @@ digraph architecture {
   Agent -> IResolver
   Agent -> JweToken
   Agent -> JwsToken
-  Identifier -> OidcRequest
-  Identifier -> OidcResponse
+  Agent -> OidcRequest
+  OidcRequest -> OidcResponse
+  Agent -> OidcResponse
 
   // Inheritance
   edge[arrowhead="empty"]
