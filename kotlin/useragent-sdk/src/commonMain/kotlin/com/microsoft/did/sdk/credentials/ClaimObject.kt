@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 data class ClaimObject(val claimClass: String,
                        val claimDescriptions: List<ClaimDescription>,
                        val claimIssuer: String,
-                       val claimDetails: List<ClaimDetail>) {
+                       val claimDetails: ClaimDetail) {
     companion object {
         fun deserialize(claimObject: String): ClaimObject {
             return MinimalJson.serializer.parse(ClaimObject.serializer(), claimObject)
@@ -29,17 +29,6 @@ data class ClaimObject(val claimClass: String,
 
     @ImplicitReflectionSerializer
     suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver) {
-        claimDetails.forEach {
-                claimDetailData ->
-            when (claimDetailData.type) {
-                ClaimDetail.UNSIGNED -> {
-                    // do nothing
-                }
-                ClaimDetail.JWS -> {
-                    val claimDetail = JwsToken(claimDetailData.data)
-                    DidKeyResolver.verifyJws(claimDetail, cryptoOperations, resolver)
-                }
-            }
-        }
+        claimDetails.verify(cryptoOperations, resolver)
     }
 }

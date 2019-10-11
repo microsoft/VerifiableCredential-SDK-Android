@@ -20,7 +20,7 @@ class ClaimBuilder(forClass: ClaimClass? = null) {
     var readPermissionDescription: PermissionDescription? = forClass?.readPermissionDescription
 
     private val claimDescriptions: MutableList<ClaimDescription> = mutableListOf()
-    private val claimDetails: MutableList<String> = mutableListOf()
+    private val claimDetails: MutableList<Map<String, String>> = mutableListOf()
 
 
     fun addClassDescription(header: String, body: String) {
@@ -33,7 +33,7 @@ class ClaimBuilder(forClass: ClaimClass? = null) {
 
     @ImplicitReflectionSerializer
     fun addClaimDetail(claim: Map<String, String>) {
-        claimDetails.add(MinimalJson.serializer.stringify(claim))
+        claimDetails.add(claim)
     }
 
     fun buildClass(): ClaimClass {
@@ -53,21 +53,16 @@ class ClaimBuilder(forClass: ClaimClass? = null) {
     @ImplicitReflectionSerializer
     fun buildObject(classUri: String, identifier: Identifier, cryptoOperations: CryptoOperations? = null): ClaimObject {
         val claims = if (cryptoOperations != null) {
-            claimDetails.map{
-                val token = JwsToken(it)
-                token.sign(identifier.signatureKeyReference, cryptoOperations)
-                ClaimDetail(
-                    type = ClaimDetail.JWS,
-                    data = token.serialize(JwsFormat.Compact)
-                )
-            }
+            val serializedData = MinimalJson.serializer.stringify(claimDetails)
+            val token = JwsToken(serializedData)
+            token.sign(identifier.signatureKeyReference, cryptoOperations)
+            SignedClaimDetail(
+                data = token.serialize(JwsFormat.Compact)
+            )
         } else {
-            claimDetails.map{
-                ClaimDetail(
-                    type = ClaimDetail.UNSIGNED,
-                    data = it
-                )
-            }
+            UnsignedClaimDetail(
+                data = claimDetails.toList()
+            )
         }
         return ClaimObject(
             classUri,

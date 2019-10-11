@@ -119,11 +119,7 @@ class Identifier constructor (
                 services = if (hubService != null) {listOf(hubService)} else { null }
             )
 
-            println(document)
-
             val registered = registrar.register(document, personaSigKeyRef, cryptoOperations)
-
-            println(registered)
 
             return Identifier(
                 alias = alias,

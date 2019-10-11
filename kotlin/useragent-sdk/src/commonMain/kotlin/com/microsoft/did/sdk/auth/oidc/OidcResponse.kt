@@ -5,6 +5,7 @@ import com.microsoft.did.sdk.auth.oidc.OidcRequest
 import com.microsoft.did.sdk.auth.oidc.getQueryStringParameter
 import com.microsoft.did.sdk.credentials.ClaimDetail
 import com.microsoft.did.sdk.credentials.ClaimObject
+import com.microsoft.did.sdk.credentials.ClaimResponse
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -212,10 +213,10 @@ class OidcResponse (
         token.sign(useKey, crypto)
         val responseSerialized = token.serialize(JwsFormat.Compact)
 
-        return send(responseSerialized)
+        return send(responseSerialized)?.claimObject
     }
 
-    private suspend fun send(idToken: String): ClaimObject? {
+    private suspend fun send(idToken: String): ClaimResponse? {
         return when (responseMode) {
             OidcRequest.defaultResponseMode -> {
                 val responseBody = "id_token=${PercentEncoding.encode(idToken)}" + if (!state.isNullOrBlank()) {
@@ -230,7 +231,7 @@ class OidcResponse (
                         contentType = ContentType.Application.FormUrlEncoded)
                 }
                 if (response.isNotBlank()) {
-                    MinimalJson.serializer.parse(ClaimObject.serializer(), response)
+                    MinimalJson.serializer.parse(ClaimResponse.serializer(), response)
                 } else {
                     null
                 }

@@ -1,14 +1,10 @@
 package com.microsoft.did.sdk.credentials
 
-import kotlinx.serialization.Serializable
+import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.resolvers.IResolver
 
-@Serializable
-data class ClaimDetail (
-    val type: String = JWS,
-    val data: String
-) {
-    companion object {
-        const val UNSIGNED = "unsigned"
-        const val JWS = "jws"
-    }
+interface ClaimDetail {
+    val type: String
+
+    suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver)
 }
