@@ -15,7 +15,7 @@ class IdentityHubService(override val id: String, val publicKey: String, @Polymo
         fun create(id: String, signatureKeyRef: String, instances: List<Identifier>, keyStore: IKeyStore): IdentifierDocumentService {
             val keyId = keyStore.list()[signatureKeyRef] ?: throw Error("Could not find key $signatureKeyRef")
             val didList = instances.map { it.document.id }
-            return IdentityHubService(id, keyId.getLatestKeyId(), UserHubEndpoint(didList))
+            return IdentityHubService(id, keyId.getLatestKeyId(), UserHubEndpoint(instance = didList))
         }
     }
 }

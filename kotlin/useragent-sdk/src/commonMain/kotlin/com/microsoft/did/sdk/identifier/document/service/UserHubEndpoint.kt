@@ -6,9 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class UserHubEndpoint(
-    val instances: List<String>,
+    val instance: List<String>,
     @Required @SerialName("@type")
-    val type: String = "UserServiceEndpoint"): Endpoint() {
-    @Required
-    override val context: String = "https://schema.identity.foundation/hub"
+    val type: String = "UserServiceEndpoint"): Endpoint("schema.identity.foundation/hub") {
 }

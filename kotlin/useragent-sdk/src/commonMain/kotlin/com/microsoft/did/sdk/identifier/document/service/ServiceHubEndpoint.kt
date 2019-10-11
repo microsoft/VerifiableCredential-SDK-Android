@@ -4,9 +4,7 @@ import kotlinx.serialization.*
 
 @Serializable
 @SerialName("HostServiceEndpoint")
-class ServiceHubEndpoint(val locations: List<String>,
+class ServiceHubEndpoint(val location: List<String>,
                          @Required @SerialName("@type")
-                         val type: String = "HostServiceEndpoint"): Endpoint() {
-    @Required
-    override val context: String = "https://schema.identity.foundation/hub"
+                         val type: String = "HostServiceEndpoint"): Endpoint("schema.identity.foundation/hub") {
 }

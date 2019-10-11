@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 open class Endpoint(
     @Required @SerialName("@context")
-    open val context: String = "schema.identity.foundation/hub")
+    val context: String)
