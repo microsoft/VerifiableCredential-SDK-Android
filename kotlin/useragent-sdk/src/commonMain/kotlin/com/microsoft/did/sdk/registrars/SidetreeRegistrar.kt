@@ -1,9 +1,12 @@
 package com.microsoft.did.sdk.registrars
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
+import com.microsoft.did.sdk.utilities.Base64Url
 import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import com.microsoft.did.sdk.utilities.stringToByteArray
@@ -27,10 +30,16 @@ class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
         // create JWS request
         val content = MinimalJson.serializer.stringify(RegistrationDocument.serializer(), document)
         val jwsToken = JwsToken(content)
-        val kid = crypto.keyStore.getPublicKey(signatureKeyRef).getKey().kid
+        val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
+        println(MinimalJson.serializer.stringify( JsonWebKey.serializer(), key.toJWK()))
+        println(Base64Url.decode(key.x!!).joinToString { byte -> byte.toInt().toString() })
+        println(Base64Url.decode(key.y!!).joinToString { byte -> byte.toInt().toString() })
+        val kid = key.kid
         jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to "#$kid", "operation" to "create", "alg" to "ES256K"))
         val jws = jwsToken.serialize(JwsFormat.FlatJson)
-        println(jws)
+        println("." + jwsToken.intermediateFlatJsonSerialize().payload)
+        println(jwsToken.intermediateFlatJsonSerialize().signature)
+        throw Error("Do not flood ION");
         val response = sendRequest(jws)
         println(response)
         return MinimalJson.serializer.parse(IdentifierDocument.serializer(), response)

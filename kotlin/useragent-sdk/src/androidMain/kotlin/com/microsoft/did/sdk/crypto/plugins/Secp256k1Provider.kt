@@ -108,11 +108,11 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
                 extractable = extractable,
                 algorithm = algorithm,
                 usages = keyUsages.toList(),
-                handle = Secp256k1Handle(alias, Base64.decode(stringToByteArray(keyData.d!!), Base64.URL_SAFE))
+                handle = Secp256k1Handle(alias, Base64.decode(stringToByteArray(keyData.d!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
             )
         } else {// public key
-            val x = Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE)
-            val y = Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE)
+            val x = Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            val y = Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
             val xyData = ByteArray(65)
             xyData[0] = secp256k1Tag.uncompressed.byte
             x.forEachIndexed { index, byte ->
@@ -140,7 +140,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
         val handle = key.handle as Secp256k1Handle
         val d: String? = if (key.type == KeyType.Private) {
             publicKey = NativeSecp256k1.computePubkey(handle.data)
-            Base64.encodeToString(handle.data, Base64.URL_SAFE)
+            Base64.encodeToString(handle.data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
         } else {
             publicKey = handle.data
             null
@@ -192,8 +192,8 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
             val x = keyData.sliceArray(1..32)
             val y = keyData.sliceArray(33..64)
             return Pair(
-                Base64.encodeToString(x, Base64.URL_SAFE),
-                Base64.encodeToString(y, Base64.URL_SAFE)
+                Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 )
         } else {
             throw Error("Public key improperly formatted")

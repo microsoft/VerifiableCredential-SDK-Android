@@ -109,7 +109,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
     @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
-        val keyValue = Base64.decode(key.k, Base64.URL_SAFE)
+        val keyValue = Base64.decode(key.k, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
         val secret = SecretKeySpec(keyValue, "AES")
         val entry = KeyStore.SecretKeyEntry(secret)
         keyStore.setEntry(alias, entry, secretKeyToKeyProtection(key))
@@ -191,7 +191,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             if (keyReferenceMatch != null) {
                 val keyRef = keyReferenceMatch.groupValues[1];
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
-                val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE)
+                val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val key = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
                 val keyType = toKeyType(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
@@ -229,7 +229,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         val sharedPreferences = getSharedPreferences();
         val base64UrlEncodedData = sharedPreferences.getString(alias, null)
         if (base64UrlEncodedData != null) {
-            return Base64.decode(base64UrlEncodedData, Base64.URL_SAFE)
+            return Base64.decode(base64UrlEncodedData, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
         }
         return null
     }
@@ -237,7 +237,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
     private fun saveSecureData(alias: String, data: ByteArray) {
         val sharedPreferences = getSharedPreferences();
         val editor = sharedPreferences.edit();
-        editor.putString(alias, Base64.encodeToString(data, Base64.URL_SAFE));
+        editor.putString(alias, Base64.encodeToString(data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP));
         editor.apply()
     }
 

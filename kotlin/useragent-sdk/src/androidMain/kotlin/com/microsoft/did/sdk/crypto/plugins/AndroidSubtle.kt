@@ -164,8 +164,8 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
                     )
                 } else { // Public RSA key being imported
                     val key = keyFactory.generatePublic(RSAPublicKeySpec(
-                        BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE)),
-                        BigInteger(1, Base64.decode(keyData.e, Base64.URL_SAFE))
+                        BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)),
+                        BigInteger(1, Base64.decode(keyData.e, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
                     ))
                     return CryptoKey(
                         KeyType.Public,
