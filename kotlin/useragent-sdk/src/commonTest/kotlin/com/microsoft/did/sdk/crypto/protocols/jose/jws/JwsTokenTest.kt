@@ -40,8 +40,12 @@ class JwsTokenTest {
 
         val token = JwsToken(testData)
         token.sign(keyRef, crypto)
+        val serialized = token.serialize(JwsFormat.Compact)
 
-        token.verify(crypto)
+        println(serialized)
+
+        val verifyToken = JwsToken.deserialize(serialized)
+        verifyToken.verify(crypto)
     }
 
 

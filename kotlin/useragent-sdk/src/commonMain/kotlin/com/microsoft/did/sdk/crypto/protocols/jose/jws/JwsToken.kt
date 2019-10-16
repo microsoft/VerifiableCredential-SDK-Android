@@ -27,13 +27,13 @@ class JwsToken private constructor(private val payload: String, signatures: List
 
     companion object {
         fun deserialize(jws: String): JwsToken {
-            val compactRegex = Regex("([A-Za-z_\\-]*)\\.([A-Za-z_\\-]*)\\.([A-Za-z_\\-]*)")
+            val compactRegex = Regex("([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)")
             val compactMatches = compactRegex.matchEntire(jws.trim())
             if (compactMatches != null) {
                 // compact JWS format
-                val protected = compactMatches.groupValues[0]
-                val payload = compactMatches.groupValues[1]
-                val signature = compactMatches.groupValues[2]
+                val protected = compactMatches.groupValues[1]
+                val payload = compactMatches.groupValues[2]
+                val signature = compactMatches.groupValues[3]
                 val jwsSignatureObject = JwsSignature(
                     protected = protected,
                     header =  null,
@@ -76,7 +76,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
         return when(format) {
             JwsFormat.Compact -> {
                 val jws = intermediateCompactSerialize()
-                MinimalJson.serializer.stringify(JwsCompact.serializer(), jws)
+                "${jws.protected}.${jws.payload}.${jws.signature}"
             }
             JwsFormat.FlatJson -> {
                 val jws = intermediateFlatJsonSerialize()
