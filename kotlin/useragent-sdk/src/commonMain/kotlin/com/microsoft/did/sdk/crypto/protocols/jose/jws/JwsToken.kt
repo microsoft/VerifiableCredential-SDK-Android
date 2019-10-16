@@ -162,6 +162,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
         }
 
         val signatureInput = "$encodedProtected.${this.payload}"
+        println("SIGN: $signatureInput")
 
         val signature = cryptoOperations.sign(
             stringToByteArray(signatureInput), signingKeyReference,
@@ -233,6 +234,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
             true, key.key_ops ?: listOf(KeyUsage.Verify))
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
+        println("VERIFY: $data")
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 

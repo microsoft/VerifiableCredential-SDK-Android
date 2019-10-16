@@ -64,6 +64,7 @@ android {
             java.srcDir("src/androidMain/kotlin")
             manifest.srcFile("src/androidMain/AndroidManifest.xml")
             resources.srcDir("src/androidMain/resources")
+            jniLibs.srcDir("src/androidMain/resources/jni")
             dependencies {
                 implementation "androidx.security:security-crypto:$security_version"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"

@@ -46,7 +46,10 @@ object JwaCryptoConverter {
                 )
             }
             else -> {
-                throw Error("Unknown JOSE algorithm: $algorithm")
+                println("Unknown JOSE algorithm: $algorithm")
+                Algorithm(
+                    name = algorithm
+                )
             }
         }
     }

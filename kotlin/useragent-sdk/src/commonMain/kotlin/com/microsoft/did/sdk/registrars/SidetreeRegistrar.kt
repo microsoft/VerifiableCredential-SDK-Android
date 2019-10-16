@@ -32,11 +32,12 @@ class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
         val jwsToken = JwsToken(content)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         println(MinimalJson.serializer.stringify( JsonWebKey.serializer(), key.toJWK()))
-        println(Base64Url.decode(key.x!!).joinToString { byte -> byte.toInt().toString() })
-        println(Base64Url.decode(key.y!!).joinToString { byte -> byte.toInt().toString() })
+        println(Base64Url.decode(key.x!!).joinToString { byte -> byte.toString(10) })
+        println(Base64Url.decode(key.y!!).joinToString { byte -> byte.toString(10) })
         val kid = key.kid
         jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to "#$kid", "operation" to "create", "alg" to "ES256K"))
         val jws = jwsToken.serialize(JwsFormat.FlatJson)
+        jwsToken.verify(crypto);
         println("." + jwsToken.intermediateFlatJsonSerialize().payload)
         println(jwsToken.intermediateFlatJsonSerialize().signature)
         throw Error("Do not flood ION");
