@@ -35,6 +35,15 @@ object Base64Url {
 private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) {
 
     companion object {
+        fun uInt(byte: Byte): Int {
+            val value = byte.toInt()
+            return if (value < 0) {
+                value + 256
+            } else {
+                value
+            }
+        }
+
         fun fromString(data: String, dictionary: List<String>, padding: Char? = null): ByteGroup {
             if (data.length > 4) {
                 throw Error("Invalid base64 byte group length")
@@ -68,9 +77,9 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
 //        |5 4 3 2 1 0|5 4 3 2 1 0|5 4 3 2 1 0|5 4 3 2 1 0|
 //        +--1.index--+--2.index--+--3.index--+--4.index--+
             // bit shifting is only available in Int and Long. Int is 32, capable of holding all bytes.
-            var inputGroupInt = data[0].toInt().shl(16)
-            inputGroupInt = inputGroupInt or if (data.size > 1) { data[1].toInt().shl(8) } else { 0 }
-            inputGroupInt = inputGroupInt or if (data.size > 2) { data[2].toInt() } else { 0 }
+            var inputGroupInt = uInt(data[0]).shl(16)
+            inputGroupInt = inputGroupInt or if (data.size > 1) { uInt(data[1]).shl(8) } else { 0 }
+            inputGroupInt = inputGroupInt or if (data.size > 2) { uInt(data[2]) } else { 0 }
             val index1 = inputGroupInt.and(0x00fc0000).shr(18)
             val index2 = inputGroupInt.and(0x0003f000).shr(12)
             val index3 = inputGroupInt.and(0x00000fc0).shr(6)

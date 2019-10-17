@@ -68,6 +68,32 @@ class Base64TestSuite() {
         }
     }
 
+    @Test
+    fun twosComplimentUrlTest() {
+        val data = ByteArray(3)
+        // CAFE41
+        // 1100 1010 1111 1110 0100 0001
+        // ^      ^       ^      ^
+        // 50     47      57     1
+        // y      v       5      B
+        data[0] = 0xCA.toByte()
+        data[1] = 0xFE.toByte()
+        data[2] = 0x41.toByte()
+
+        assertEquals("yv5B", Base64Url.encode(data))
+
+        val stringData = "1234"
+        // 1(53) 2(54)  3(55)  4(56)
+        // v     v      v      v
+        // 11010111 01101101 11111000
+        // 215      109      248
+        val expectedData = ByteArray(3)
+        expectedData[0] = 0xD7.toByte()
+        expectedData[1] = 0x6D.toByte()
+        expectedData[2] = 0xF8.toByte()
+        assertEqualsByteArray(expectedData, Base64Url.decode(stringData))
+    }
+
     fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {
         assertEquals(expected.size, actual.size, "ByteArrays are of different length.")
         expected.forEachIndexed{

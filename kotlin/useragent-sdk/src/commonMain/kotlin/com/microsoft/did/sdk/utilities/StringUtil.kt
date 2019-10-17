@@ -7,3 +7,19 @@ fun stringToByteArray(str: String): ByteArray {
 fun byteArrayToString(array: ByteArray): String {
     return String((array.map { b -> b.toChar() }).toCharArray())
 }
+
+fun printBytes(array: ByteArray) {
+    print("[")
+    array.forEachIndexed{
+        index, it ->
+        if (it < 0) {
+            print(it + 256)
+        } else {
+            print(it)
+        }
+        if (index < array.size) {
+            print(", ")
+        }
+    }
+    println("]")
+}

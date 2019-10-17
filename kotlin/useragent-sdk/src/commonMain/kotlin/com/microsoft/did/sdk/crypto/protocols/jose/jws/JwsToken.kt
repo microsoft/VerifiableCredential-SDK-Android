@@ -9,13 +9,11 @@ import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.byteArrayToString
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.utilities.*
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.stringify
+import kotlin.collections.Map
 
 /**
  * Class for containing JWS token operations.
@@ -156,19 +154,25 @@ class JwsToken private constructor(private val payload: String, signatures: List
         }
 
         var encodedProtected = ""
-        if (protected.count() > 0) {
+        if (protected.isNotEmpty()) {
             val jsonProtected = MinimalJson.serializer.stringify(protected)
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected))
         }
 
-        val signatureInput = "$encodedProtected.${this.payload}"
-        println("SIGN: $signatureInput")
+        val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
+        print("SIGN: ")
+        printBytes(signatureInput)
 
         val signature = cryptoOperations.sign(
-            stringToByteArray(signatureInput), signingKeyReference,
+            signatureInput, signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName))
 
+        print("SIGNATURE: ")
+        printBytes(signature)
+
         val signatureBase64 = Base64Url.encode(signature)
+
+        println(signatureBase64)
 
         this.signatures.add(
             JwsSignature(
