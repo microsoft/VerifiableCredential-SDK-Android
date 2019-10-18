@@ -15,7 +15,6 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.*
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
@@ -24,7 +23,6 @@ import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import kotlin.collections.Map
 import kotlin.math.floor
 
@@ -44,8 +42,7 @@ class OidcResponse (
         val sub: String, // thumbprint (sha-256)
         val aud: String,
         val nonce: String,
-        @SerialName("did_comm")
-        val didComm: DidComm ? = null,
+        val did: String?,
         @SerialName("sub_jwk")
         val subJwk: JsonWebKey,
         val iat: Int,
@@ -54,11 +51,6 @@ class OidcResponse (
         val claimNames: Map<String, String>? = null,
         @SerialName("_claim_sources")
         val claimSources: Map<String, List<Map<String, String>>>? = null
-    )
-
-    @Serializable
-    data class DidComm(
-        val did: String
     )
 
     companion object {
@@ -99,8 +91,8 @@ class OidcResponse (
                         throw Error("Id token issued before time frame set by issuedWithinLastMinutes ($issuedWithinLastMinutes)")
                     }
 
-                    val responder = if (response.didComm != null) {
-                        resolver.resolve(response.didComm.did, crypto)
+                    val responder = if (response.did != null) {
+                        resolver.resolve(response.did, crypto)
                     } else {
                         DidKeyResolver.resolveIdentiferFromKid(token.signatures.first {
                             !it.getKid().isNullOrBlank()
@@ -200,7 +192,7 @@ class OidcResponse (
             sub = key.getThumbprint(crypto, Sha.Sha256),
             aud = redirectUrl,
             nonce = nonce,
-            didComm = DidComm(responder.document.id),
+            did = responder.document.id,
             subJwk = key.toJWK(),
             iat = iat,
             exp = exp,
