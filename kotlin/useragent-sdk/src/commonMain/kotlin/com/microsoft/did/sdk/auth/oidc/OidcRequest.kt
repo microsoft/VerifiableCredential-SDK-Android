@@ -46,7 +46,7 @@ class OidcRequest constructor(
         val state: String? = null,
         val nonce: String? = null,
         @SerialName("max_age")
-        val maxAge: Int?,
+        val maxAge: Int? = null,
         val claims: RequestClaimParameter? = null,
         val registration: Registration? = null,
         // custom parameters
