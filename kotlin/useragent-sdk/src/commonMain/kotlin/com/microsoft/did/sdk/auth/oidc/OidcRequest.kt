@@ -74,7 +74,7 @@ class OidcRequest constructor(
         suspend fun parseAndVerify(signedRequest: String,
                                    crypto: CryptoOperations,
                                    resolver: IResolver): OidcRequest {
-            if (!Regex("^openid\\:\\/\\/").matches(signedRequest)) {
+            if (!signedRequest.startsWith("openid://")) {
                 throw Error("Must be passed a string beginning in \"openid://\"")
             }
 
