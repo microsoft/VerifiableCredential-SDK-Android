@@ -150,6 +150,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
         if (!headers.containsKey(JoseConstants.Kid.value)) {
             if (signingKey.kid != null) {
                 protected[JoseConstants.Kid.value] = signingKey.kid!!
+                println("Using key ${protected[JoseConstants.Kid.value]}")
             }
         }
 
@@ -193,27 +194,57 @@ class JwsToken private constructor(private val payload: String, signatures: List
             acc.addAll(curr)
             acc
         }
+        println("Available keys: ${aliasList.joinToString()}")
         val results = this.signatures.map {
+            println("PROTECTED: ${it.protected}")
+            println("HEADERS: ${it.header}")
             val kid = it.getKid()
-            val signatureInput = "${it.protected}.${this.payload}"
-            val signature = Base64Url.decode(it.signature)
-            if (aliasList.contains(kid)) {
-                // we can perform this verification using our own keys
-                val key = (keyStoreKeys.entries.filter { key -> key.value.kids.contains(kid) }).first()
-                val publicKey = cryptoOperations.keyStore.getPublicKey(key.key);
-                verifyWithKey(cryptoOperations, signatureInput, it, publicKey.getKey())
-            } else {
-                // use one of the provided public Keys
-                val key = publicKeys.firstOrNull {
-                    it.kid != null && kid?.endsWith(it.kid!!) ?: false
-                }
-                if (key != null) {
-                    verifyWithKey(cryptoOperations, signatureInput, it, key!!)
-                } else if (publicKeys.isNotEmpty()) {
-                    verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
+            if (kid != null) {
+                println("Resolving key: $kid")
+                val applicableKeys = aliasList.filter { kid.endsWith(it) }
+                println("Applicable keys: ${applicableKeys.joinToString()}")
+                val signatureInput = "${it.protected}.${this.payload}"
+                if (applicableKeys.isNotEmpty()) {
+                    // we can perform this verification using our own keys
+                    val keyRef = keyStoreKeys.entries.first { key ->
+                        println("Checking Reference ${key.key}")
+                        key.value.kids.any {
+                            applicableKeys.contains(it)
+                        }
+                    }.key
+                    println("Key reference $keyRef")
+                    val publicKey = cryptoOperations.keyStore.getPublicKey(keyRef).keys.first {
+                        if (it.kid != null) {
+                            println("Checking ${it.kid}")
+                            applicableKeys.contains(it.kid!!)
+                        } else {
+                            false
+                        }
+                    }
+                    println("Internal key ${publicKey.kid ?: "<unknown>"} attempted")
+                    verifyWithKey(cryptoOperations, signatureInput, it, publicKey)
                 } else {
-                    false
+                    // use one of the provided public Keys
+                    val key = publicKeys.firstOrNull {
+                        it.kid != null && kid.endsWith(it.kid!!)
+                    }
+                    when {
+                        key != null -> {
+                            println("key ${key.kid?: "<unknown>"} attempted")
+                            verifyWithKey(cryptoOperations, signatureInput, it, key)
+                        }
+                        publicKeys.isNotEmpty() -> {
+                            println("first publickey attempted")
+                            verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
+                        }
+                        else -> {
+                            println("No keys attempted")
+                            false
+                        }
+                    }
                 }
+            } else {
+                false
             }
         }
         if (!if (all) {
@@ -238,7 +269,10 @@ class JwsToken private constructor(private val payload: String, signatures: List
             true, key.key_ops ?: listOf(KeyUsage.Verify))
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
-        println("VERIFY: $data")
+        print("VERIFY: ")
+        printBytes(rawData)
+        print("SIGNATURE: ")
+        printBytes(rawSignature)
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 

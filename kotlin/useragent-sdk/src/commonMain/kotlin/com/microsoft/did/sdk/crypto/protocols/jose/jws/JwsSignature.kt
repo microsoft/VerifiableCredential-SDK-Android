@@ -48,8 +48,8 @@ data class JwsSignature (
                 return mapObject[member]
             }
         }
-        if (header.isNullOrEmpty() && header!!.containsKey(member)) {
-            return header!![member]
+        if (!header.isNullOrEmpty() && header.containsKey(member)) {
+            return header[member]
         }
         return null
     }
