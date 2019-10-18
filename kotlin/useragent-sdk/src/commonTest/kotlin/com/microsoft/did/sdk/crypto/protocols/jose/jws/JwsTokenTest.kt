@@ -23,9 +23,7 @@ class JwsTokenTest {
     fun setup() {
         keyRef = Base64Url.encode(Random.nextBytes(8))
         var keyPair =  subtle.generateKeyPair(
-            Algorithm(
-                "MOCK"
-            ),
+            RsaOaepParams(),
             true,
             listOf(KeyUsage.Sign, KeyUsage.Verify)
         )

@@ -12,7 +12,7 @@ class MockPrivateKey(key: JsonWebKey): PrivateKey(key) {
     override fun toJWK(): JsonWebKey {
         return JsonWebKey(
             kty = "RSA",
-            alg = "MOCK",
+            alg = this.alg,
             kid = kid
         )
     }

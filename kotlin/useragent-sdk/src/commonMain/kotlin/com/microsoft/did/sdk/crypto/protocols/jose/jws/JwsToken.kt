@@ -181,35 +181,31 @@ class JwsToken private constructor(private val payload: String, signatures: List
     fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false) {
         val results = this.signatures.map {
             val fullyQuantifiedKid = it.getKid() ?: ""
-            val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid)?.second
-            if (kid != null) {
-                val signatureInput = "${it.protected}.${this.payload}"
-                val publicKey = cryptoOperations.keyStore.getPublicKeyById(kid)
-                if (publicKey != null) {
-                    println("Internal key ${publicKey.kid} attempted")
-                    verifyWithKey(cryptoOperations, signatureInput, it, publicKey)
-                } else {
-                    // use one of the provided public Keys
-                    val key = publicKeys.firstOrNull {
-                        kid.endsWith(it.kid!!)
+            val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid).second
+            val signatureInput = "${it.protected}.${this.payload}"
+            val publicKey = cryptoOperations.keyStore.getPublicKeyById(kid)
+            if (publicKey != null) {
+                println("Internal key ${publicKey.kid} attempted")
+                verifyWithKey(cryptoOperations, signatureInput, it, publicKey)
+            } else {
+                // use one of the provided public Keys
+                val key = publicKeys.firstOrNull {
+                    kid.endsWith(it.kid!!)
+                }
+                when {
+                    key != null -> {
+                        println("key ${key.kid} attempted")
+                        verifyWithKey(cryptoOperations, signatureInput, it, key)
                     }
-                    when {
-                        key != null -> {
-                            println("key ${key.kid} attempted")
-                            verifyWithKey(cryptoOperations, signatureInput, it, key)
-                        }
-                        publicKeys.isNotEmpty() -> {
-                            println("first publickey attempted")
-                            verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
-                        }
-                        else -> {
-                            println("No keys attempted")
-                            false
-                        }
+                    publicKeys.isNotEmpty() -> {
+                        println("first publickey attempted")
+                        verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
+                    }
+                    else -> {
+                        println("No keys attempted")
+                        false
                     }
                 }
-            } else {
-                false
             }
         }
         if (!if (all) {

@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 
 object JwaCryptoConverter {
-    fun extractDidAndKeyId(keyId: String): Pair<String?, String>? {
+    fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
         val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
         return if (matches != null) {
             Pair( if (matches.groupValues[1].isNotBlank()) {
@@ -13,7 +13,7 @@ object JwaCryptoConverter {
                 null
             }, matches.groupValues[2])
         } else {
-            null
+            Pair(null, keyId)
         }
     }
 

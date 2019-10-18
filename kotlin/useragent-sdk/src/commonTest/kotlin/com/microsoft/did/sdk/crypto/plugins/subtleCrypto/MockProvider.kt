@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
 class MockProvider() : Provider() {
-    override val name: String = "MOCK"
+    override val name: String = W3cCryptoApiConstants.RsaOaep.value
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,
         KeyUsage.Decrypt
@@ -107,7 +107,7 @@ class MockProvider() : Provider() {
     override fun onExportKeyJwk(key: CryptoKey): JsonWebKey {
         return JsonWebKey(
             kty = "RSA",
-            alg = "MOCK",
+            alg = W3cCryptoApiConstants.RsaOaep.value,
             kid = key.handle as String
         )
     }
