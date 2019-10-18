@@ -7,13 +7,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("UNSIGNED")
+@SerialName("unsigned")
 data class UnsignedClaimDetail(
     val data: List<Map<String, String>>
 ): ClaimDetail {
     @Required
     override val type: String
-        get() = "UNSIGNED"
+        get() = "unsigned"
 
     override suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver) {
         // nothing to do

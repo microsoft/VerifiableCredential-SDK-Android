@@ -201,6 +201,7 @@ class OidcResponse (
         )
 
         val responseData = MinimalJson.serializer.stringify(OidcResponseObject.serializer(), response)
+        println("Responding with data: $responseData")
         val token = JwsToken(responseData)
         token.sign(useKey, crypto)
         val responseSerialized = token.serialize(JwsFormat.Compact)

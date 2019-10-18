@@ -29,6 +29,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
             val compactMatches = compactRegex.matchEntire(jws.trim())
             if (compactMatches != null) {
                 // compact JWS format
+                println("Compact format detected")
                 val protected = compactMatches.groupValues[1]
                 val payload = compactMatches.groupValues[2]
                 val signature = compactMatches.groupValues[3]
@@ -40,6 +41,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
                 return JwsToken(payload, listOf(jwsSignatureObject))
             } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
+                println("General format detected")
                 val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
@@ -47,6 +49,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
                 )
             } else if (jws.toLowerCase().contains("\"signature\"")) {
                 // Flat
+                println("Flat format detected")
                 val token = MinimalJson.serializer.parse(JwsFlatJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
@@ -190,7 +193,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
             } else {
                 // use one of the provided public Keys
                 val key = publicKeys.firstOrNull {
-                    kid.endsWith(it.kid!!)
+                    kid.endsWith(it.kid)
                 }
                 when {
                     key != null -> {

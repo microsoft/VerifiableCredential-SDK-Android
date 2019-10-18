@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RequestClaimParameter (
-    val userInfo: UserInfoRequest?,
+    val userInfo: UserInfoRequest? = null,
     @SerialName("id_token")
-    val idToken: Map<String, MemberScope<String>>?
+    val idToken: Map<String, MemberScope<String>>? = null
 ) {
     @Serializable
     data class UserInfoRequest(

@@ -35,7 +35,7 @@ object MinimalJson {
     }
 
     val serializer = Json(
-        context = identifierDocumentServiceSerializer + serviceEndpointSerializer,
+        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

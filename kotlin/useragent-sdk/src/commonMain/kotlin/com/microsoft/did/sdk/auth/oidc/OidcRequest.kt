@@ -50,7 +50,7 @@ class OidcRequest constructor(
         val claims: RequestClaimParameter? = null,
         val registration: Registration? = null,
         // custom parameters
-        @SerialName("vc_offer")
+        @SerialName("offer")
         val claimsOffered: ClaimObject? = null
     )
 
@@ -91,7 +91,7 @@ class OidcRequest constructor(
             if (request == null) {
                 throw Error("Request contains no signed material")
             }
-            val token = JwsToken(request)
+            val token = JwsToken.deserialize(request)
             // get the DID associated
             val contents = MinimalJson.serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {

@@ -10,13 +10,13 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-@SerialName("JWS")
+@SerialName("jws")
 data class SignedClaimDetail(
     val data: String
 ): ClaimDetail {
     @Required
     override val type: String
-        get() = "JWS"
+        get() = "jws"
 
     @ImplicitReflectionSerializer
     override suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver) {
