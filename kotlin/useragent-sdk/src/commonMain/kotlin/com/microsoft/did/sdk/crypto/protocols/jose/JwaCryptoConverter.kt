@@ -4,6 +4,19 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 
 object JwaCryptoConverter {
+    fun extractDidAndKeyId(keyId: String): Pair<String?, String>? {
+        val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
+        return if (matches != null) {
+            Pair( if (matches.groupValues[1].isNotBlank()) {
+                matches.groupValues[1]
+            } else {
+                null
+            }, matches.groupValues[2])
+        } else {
+            null
+        }
+    }
+
     fun jwaAlgToWebCrypto(algorithm: String): Algorithm {
         return when (algorithm.toUpperCase()) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {

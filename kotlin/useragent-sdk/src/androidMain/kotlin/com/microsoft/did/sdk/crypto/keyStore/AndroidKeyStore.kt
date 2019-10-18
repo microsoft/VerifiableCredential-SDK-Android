@@ -106,6 +106,52 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         throw Error("Key $keyReference not found")
     }
 
+    override fun getSecretKeyById(keyId: String): SecretKey? {
+        val keyRef = findReferenceInList(this.list(), keyId)
+        return if (!keyRef.isNullOrBlank()) {
+            getSecretKey(keyRef).keys.firstOrNull { it.kid == keyId }
+        } else {
+            null
+        }
+    }
+
+    override fun getPrivateKeyById(keyId: String): PrivateKey? {
+        val nativeKeys = listNativeKeys()
+        var keyRef = findReferenceInList(nativeKeys, keyId)
+        if (!keyRef.isNullOrBlank()) { // This keyID exists within the android keystore
+            return AndroidKeyConverter.androidPrivateKeyToPrivateKey(keyId,
+                keyStore.getEntry(keyId, null) as? KeyStore.PrivateKeyEntry ?: throw Error("Key $keyId is not a private key."))
+        }
+        val softwareKeys = listSecureData()
+        keyRef = findReferenceInList(softwareKeys, keyId)
+        if (!keyRef.isNullOrBlank()) {
+            return getSecurePrivateKey(keyId)
+        }
+        return null
+    }
+
+    override fun getPublicKeyById(keyId: String): PublicKey? {
+        val nativeKeys = listNativeKeys()
+        var keyRef = findReferenceInList(nativeKeys, keyId)
+        if (!keyRef.isNullOrBlank()) { // This keyID exists within the android keystore
+            val entry = keyStore.getEntry(keyId, null) as? KeyStore.PrivateKeyEntry
+                ?: throw Error("Key $keyId is not a private key.")
+            return AndroidKeyConverter.androidPublicKeyToPublicKey(keyId, entry.certificate.publicKey)
+        }
+        val softwareKeys = listSecureData()
+        keyRef = findReferenceInList(softwareKeys, keyId)
+        if (!keyRef.isNullOrBlank()) {
+            return getSecurePublicKey(keyId)
+        }
+        return null
+    }
+
+    private fun findReferenceInList(list: Map<String, KeyStoreListItem>, keyId: String): String? {
+        return list.filter  {
+            it.value.kids.contains(keyId)
+        }.entries.firstOrNull()?.key
+    }
+
     @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)

@@ -148,10 +148,8 @@ class JwsToken private constructor(private val payload: String, signatures: List
         }
 
         if (!headers.containsKey(JoseConstants.Kid.value)) {
-            if (signingKey.kid != null) {
-                protected[JoseConstants.Kid.value] = signingKey.kid!!
-                println("Using key ${protected[JoseConstants.Kid.value]}")
-            }
+            protected[JoseConstants.Kid.value] = signingKey.kid
+            println("Using key ${protected[JoseConstants.Kid.value]}")
         }
 
         var encodedProtected = ""
@@ -161,19 +159,12 @@ class JwsToken private constructor(private val payload: String, signatures: List
         }
 
         val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
-        print("SIGN: ")
-        printBytes(signatureInput)
 
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName))
 
-        print("SIGNATURE: ")
-        printBytes(signature)
-
         val signatureBase64 = Base64Url.encode(signature)
-
-        println(signatureBase64)
 
         this.signatures.add(
             JwsSignature(
@@ -188,49 +179,23 @@ class JwsToken private constructor(private val payload: String, signatures: List
      */
     @ImplicitReflectionSerializer
     fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false) {
-        val keyStoreKeys = cryptoOperations.keyStore.list()
-        val aliasList = keyStoreKeys.values.map { listItem: KeyStoreListItem -> listItem.kids }.reduce {
-            acc, curr ->
-            acc.addAll(curr)
-            acc
-        }
-        println("Available keys: ${aliasList.joinToString()}")
         val results = this.signatures.map {
-            println("PROTECTED: ${it.protected}")
-            println("HEADERS: ${it.header}")
-            val kid = it.getKid()
+            val fullyQuantifiedKid = it.getKid() ?: ""
+            val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid)?.second
             if (kid != null) {
-                println("Resolving key: $kid")
-                val applicableKeys = aliasList.filter { kid.endsWith(it) }
-                println("Applicable keys: ${applicableKeys.joinToString()}")
                 val signatureInput = "${it.protected}.${this.payload}"
-                if (applicableKeys.isNotEmpty()) {
-                    // we can perform this verification using our own keys
-                    val keyRef = keyStoreKeys.entries.first { key ->
-                        println("Checking Reference ${key.key}")
-                        key.value.kids.any {
-                            applicableKeys.contains(it)
-                        }
-                    }.key
-                    println("Key reference $keyRef")
-                    val publicKey = cryptoOperations.keyStore.getPublicKey(keyRef).keys.first {
-                        if (it.kid != null) {
-                            println("Checking ${it.kid}")
-                            applicableKeys.contains(it.kid!!)
-                        } else {
-                            false
-                        }
-                    }
-                    println("Internal key ${publicKey.kid ?: "<unknown>"} attempted")
+                val publicKey = cryptoOperations.keyStore.getPublicKeyById(kid)
+                if (publicKey != null) {
+                    println("Internal key ${publicKey.kid} attempted")
                     verifyWithKey(cryptoOperations, signatureInput, it, publicKey)
                 } else {
                     // use one of the provided public Keys
                     val key = publicKeys.firstOrNull {
-                        it.kid != null && kid.endsWith(it.kid!!)
+                        kid.endsWith(it.kid!!)
                     }
                     when {
                         key != null -> {
-                            println("key ${key.kid?: "<unknown>"} attempted")
+                            println("key ${key.kid} attempted")
                             verifyWithKey(cryptoOperations, signatureInput, it, key)
                         }
                         publicKeys.isNotEmpty() -> {
@@ -269,10 +234,6 @@ class JwsToken private constructor(private val payload: String, signatures: List
             true, key.key_ops ?: listOf(KeyUsage.Verify))
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
-        print("VERIFY: ")
-        printBytes(rawData)
-        print("SIGNATURE: ")
-        printBytes(rawSignature)
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 

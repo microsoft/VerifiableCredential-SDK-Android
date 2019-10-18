@@ -14,7 +14,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.toKeyUsage
  * @class
  * @extends JsonWebKey
  */
-open class SecretKey(key: JsonWebKey) {
+open class SecretKey(key: JsonWebKey): IKeyStoreItem {
     /**
      * Set the Oct key type
      */
@@ -23,7 +23,7 @@ open class SecretKey(key: JsonWebKey) {
     /**
      * Key ID
      */
-    open var kid: String? = key.kid
+    override var kid: String = key.kid ?: ""
 
     /**
      * Intended use

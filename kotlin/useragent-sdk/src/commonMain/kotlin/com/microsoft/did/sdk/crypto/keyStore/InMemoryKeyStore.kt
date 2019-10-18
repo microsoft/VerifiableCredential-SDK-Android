@@ -30,6 +30,34 @@ class InMemoryKeyStore(): IKeyStore {
         }
     }
 
+    override fun getSecretKeyById(keyId: String): SecretKey? {
+        return findKeyMatchingIdIn(secretKeys, keyId)
+    }
+
+    override fun getPrivateKeyById(keyId: String): PrivateKey? {
+        return findKeyMatchingIdIn(privateKeys, keyId)
+    }
+
+    override fun getPublicKeyById(keyId: String): PublicKey? {
+        return findKeyMatchingIdIn(publicKeys, keyId) ?:
+                findKeyMatchingIdIn(privateKeys, keyId)?.getPublicKey()
+    }
+
+    private fun <T: IKeyStoreItem> findKeyMatchingIdIn(map: Map<String, KeyContainer<T>>, keyId: String): T? {
+        return map.map {
+            val key = it.value.keys.firstOrNull {
+                it.kid == keyId
+            }
+            if (key != null) {
+                key
+            } else {
+                null
+            }
+        }.firstOrNull {
+            it != null
+        }
+    }
+
     override fun save(keyReference: String, key: SecretKey) {
         if (secretKeys.containsKey(keyReference)) {
             val keyContainer = secretKeys[keyReference]!!

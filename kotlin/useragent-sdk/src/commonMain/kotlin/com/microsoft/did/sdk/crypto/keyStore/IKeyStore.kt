@@ -18,14 +18,21 @@ interface IKeyStore {
     /**
      * Returns the key associated with the specified
      * key reference.
-     * @param keyIdentifier for which to return the key.
-     * @param [publicKeyOnly] True if only the public key is needed.
+     * @param keyReference for which to return the key.
      */
     fun getSecretKey(keyReference: String): KeyContainer<SecretKey>
 
     fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey>
 
     fun getPublicKey(keyReference: String): KeyContainer<PublicKey>
+
+    /**
+     * Returns the key associated with the specified key id
+     * @param keyIdentifier the key identifier to search for
+     */
+    fun getSecretKeyById(keyId: String): SecretKey?
+    fun getPrivateKeyById(keyId: String): PrivateKey?
+    fun getPublicKeyById(keyId: String): PublicKey?
 
     /**
      * Saves the specified key to the key store using

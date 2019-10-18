@@ -14,7 +14,7 @@ import com.microsoft.did.sdk.utilities.stringToByteArray
  * @class
  * @abstract
  */
-abstract class PublicKey (val key: JsonWebKey) {
+abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
     /**
      * Key type
      */
@@ -23,7 +23,7 @@ abstract class PublicKey (val key: JsonWebKey) {
     /**
      * Key ID
      */
-    open var kid: String? = key.kid
+    override var kid: String = key.kid ?: ""
 
     /**
      * Intended use
