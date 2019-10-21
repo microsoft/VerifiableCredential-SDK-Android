@@ -41,16 +41,16 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
     }
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
-        val allKeys = this.list()
-        val key = allKeys[keyReference] ?: throw Error("Key $keyReference not found")
+        val softwareKeys = listSecureData()
+        val key = softwareKeys[keyReference] ?: throw Error("Key $keyReference not found")
         if (key.kty != KeyType.Octets) {
             throw Error("Key $keyReference (type ${key.kty.value}) is not a secret.")
         }
+
         return KeyContainer(
             kty = key.kty,
-            keys = key.kids.map {
-                AndroidKeyConverter.androidSecretKeyToSecretKey(it,
-                    keyStore.getEntry(it, null) as? KeyStore.SecretKeyEntry ?: throw Error("Key $it is not a secret key."))
+            keys = key.kids.map{
+                getSecureSecretkey(it)!!
             }
         )
     }
@@ -155,10 +155,11 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
     @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
-        val keyValue = Base64.decode(key.k, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-        val secret = SecretKeySpec(keyValue, "AES")
-        val entry = KeyStore.SecretKeyEntry(secret)
-        keyStore.setEntry(alias, entry, secretKeyToKeyProtection(key))
+        var jwk = key.toJWK();
+        jwk.kid = alias;
+        val jwkString = MinimalJson.serializer.stringify(JsonWebKey.serializer(), jwk)
+        val keyValue = stringToByteArray(jwkString)
+        saveSecureData(alias, keyValue)
     }
 
     @TargetApi(23)
@@ -269,6 +270,15 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         } else {
             throw Error("Unknown key type ${jwk.kty}")
         }
+    }
+
+    private fun getSecureSecretkey(alias: String): SecretKey? {
+        val data = getSecureData(alias) ?: return null
+        val jwk = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        if (jwk.kty != KeyType.Octets.value) {
+            throw Error("$alias is not a secret key.")
+        }
+        return SecretKey(jwk)
     }
 
     private fun getSecureData(alias: String): ByteArray? {
