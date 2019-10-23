@@ -185,7 +185,9 @@ class JwsToken private constructor(private val payload: String, signatures: List
         val results = this.signatures.map {
             val fullyQuantifiedKid = it.getKid() ?: ""
             val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid).second
+            println("Finding matching key for \"$kid\"")
             val signatureInput = "${it.protected}.${this.payload}"
+            println("SDATA: $signatureInput")
             val publicKey = cryptoOperations.keyStore.getPublicKeyById(kid)
             if (publicKey != null) {
                 println("Internal key ${publicKey.kid} attempted")
@@ -193,7 +195,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
             } else {
                 // use one of the provided public Keys
                 val key = publicKeys.firstOrNull {
-                    kid.endsWith(it.kid)
+                    it.kid.endsWith(kid)
                 }
                 when {
                     key != null -> {
@@ -233,6 +235,8 @@ class JwsToken private constructor(private val payload: String, signatures: List
             true, key.key_ops ?: listOf(KeyUsage.Verify))
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
+        print("DATA ")
+        printBytes(rawData)
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 
