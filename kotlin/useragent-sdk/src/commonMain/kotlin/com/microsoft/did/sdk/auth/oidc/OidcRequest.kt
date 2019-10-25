@@ -161,6 +161,6 @@ class OidcRequest constructor(
         claimObjects?.forEach {
             oidcResponse.addClaim(it)
         }
-        return oidcResponse.signAndSend()
+        return oidcResponse.signAndSend(15)
     }
 }

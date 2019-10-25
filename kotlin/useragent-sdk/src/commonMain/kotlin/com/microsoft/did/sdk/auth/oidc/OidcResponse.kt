@@ -19,10 +19,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.Required
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
 import kotlin.collections.Map
 import kotlin.math.floor
 
@@ -47,6 +44,9 @@ class OidcResponse (
         val subJwk: JsonWebKey,
         val iat: Int,
         val exp: Int,
+
+        // NON COMPLIANT STATE
+        val state: String? = null,
         @SerialName("_claim_names")
         val claimNames: Map<String, String>? = null,
         @SerialName("_claim_sources")
@@ -156,13 +156,6 @@ class OidcResponse (
         val iat = floor( currentTime / 1000f).toInt()
         val key = crypto.keyStore.getPublicKey(useKey).getKey()
 
-        @Serializable
-        data class PresentationDetails(
-            val iss: String,
-            val aud: String,
-            val vc: List<ClaimDetail>
-        )
-
         var claimNames: MutableMap<String, String>? = null
         var claimSources: MutableMap<String, MutableList<Map<String, String>>>? = null
         if (!claims.isNullOrEmpty()) {
@@ -179,7 +172,7 @@ class OidcResponse (
                     claimNames[it.claimClass] = "src$index"
                     "src$index"
                 }
-                if (claimSources.containsKey(name)) {
+                if (!claimSources.containsKey(name)) {
                     claimSources[name] = mutableListOf()
                 }
                 claimSources[name]?.add(mapOf(
@@ -196,6 +189,7 @@ class OidcResponse (
             subJwk = key.toJWK(),
             iat = iat,
             exp = exp,
+            state = state,
             claimNames = claimNames,
             claimSources = claimSources
         )
@@ -212,11 +206,15 @@ class OidcResponse (
     private suspend fun send(idToken: String): ClaimResponse? {
         return when (responseMode) {
             OidcRequest.defaultResponseMode -> {
+//                val responseBody = "id_token=${idToken}" + if (!state.isNullOrBlank()) {
+//                    "&state=${state}"
+                    // DISABLED WHILE EnterpiseAgent is not percent decoding
                 val responseBody = "id_token=${PercentEncoding.encode(idToken)}" + if (!state.isNullOrBlank()) {
                     "&state=${PercentEncoding.encode(state)}"
                 } else {
                     ""
                 }
+                println("Encoded as: $responseBody")
                 val response = getHttpClient().post<String> {
                     url(redirectUrl)
                     body = ByteArrayContent(
@@ -224,7 +222,12 @@ class OidcResponse (
                         contentType = ContentType.Application.FormUrlEncoded)
                 }
                 if (response.isNotBlank()) {
-                    MinimalJson.serializer.parse(ClaimResponse.serializer(), response)
+                    try {
+                        MinimalJson.serializer.parse(ClaimResponse.serializer(), response)
+                    } catch (error: SerializationException) {
+                        // this was not the right format but we did not get a 400 error
+                        null
+                    }
                 } else {
                     null
                 }

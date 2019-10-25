@@ -9,6 +9,8 @@ import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.stringify
 
 class ClaimBuilder(forClass: ClaimClass? = null) {
+    var context: String? = null
+    var type: String? = null
     var issuerName: String? = forClass?.issuerName
     var claimLogo: ClaimClass.ClaimLogo? = forClass?.claimLogo
     var claimName: String? = forClass?.claimName
@@ -52,6 +54,9 @@ class ClaimBuilder(forClass: ClaimClass? = null) {
 
     @ImplicitReflectionSerializer
     fun buildObject(classUri: String, identifier: Identifier, cryptoOperations: CryptoOperations? = null): ClaimObject {
+        if (context.isNullOrBlank() || type.isNullOrBlank()) {
+            throw Error("Context and Type must be set.")
+        }
         val claims = if (cryptoOperations != null) {
             val serializedData = MinimalJson.serializer.stringify(claimDetails)
             val token = JwsToken(serializedData)
@@ -66,6 +71,8 @@ class ClaimBuilder(forClass: ClaimClass? = null) {
         }
         return ClaimObject(
             classUri,
+            context!!,
+            type!!,
             claimDescriptions,
             identifier.document.id,
             claims

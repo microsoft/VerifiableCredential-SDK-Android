@@ -6,10 +6,15 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.MinimalJson
 import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ClaimObject(val claimClass: String,
+                       @SerialName("@context")
+                       val context: String,
+                       @SerialName("@type")
+                       val type: String,
                        val claimDescriptions: List<ClaimDescription>,
                        val claimIssuer: String,
                        val claimDetails: ClaimDetail) {

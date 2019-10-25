@@ -42,7 +42,7 @@ object PercentEncoding {
 
     fun encode(data: String): String {
         return data.map {
-            return if (restrictedCharacters.containsKey("$it")) {
+            if (restrictedCharacters.containsKey("$it")) {
                 restrictedCharacters["$it"] ?: error("Map contains $it but does not contain $it ¯\\_(ツ)_/¯")
             } else {
                 "$it"
@@ -74,16 +74,13 @@ object PercentEncoding {
                 mapping.value.toUpperCase() == hex.toUpperCase()
             }
         }.reduce {
-            acc, mapping ->
+                acc, mapping ->
             if (mapping != null && acc == null) {
                 mapping
             } else {
                 acc
             }
-        }
-        if (mapping == null) {
-            throw Error("Illegal Percent encoding $hex")
-        }
+        } ?: throw Error("Illegal Percent encoding $hex")
         return mapping.key[0]
     }
 

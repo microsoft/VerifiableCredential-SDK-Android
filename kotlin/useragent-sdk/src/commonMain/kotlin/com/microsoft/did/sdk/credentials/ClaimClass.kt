@@ -24,7 +24,7 @@ data class ClaimClass(
         @Serializable
         data class SourceUri(
             val uri: String,
-            val description: String
+            val description: String? = null
         )
     }
 

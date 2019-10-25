@@ -8,8 +8,6 @@ class ClaimResponse(
     @SerialName("credential-id")
     val id: String,
     val state: String,
-    @SerialName("issuance-date")
-    val iat: Int,
     @SerialName("credential")
     val claimObject: ClaimObject
 )

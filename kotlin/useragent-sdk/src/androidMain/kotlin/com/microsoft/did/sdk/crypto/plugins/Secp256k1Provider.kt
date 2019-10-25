@@ -5,6 +5,7 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.utilities.printBytes
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
@@ -77,7 +78,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
         val keyData = (key.handle as Secp256k1Handle).data
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
-        if (hashedData.size !== 32) {
+        if (hashedData.size != 32) {
             throw Error("Data must be 32 bytes")
         }
         return NativeSecp256k1.sign(hashedData, keyData)
@@ -87,9 +88,12 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
         val keyData = (key.handle as Secp256k1Handle).data
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
-        if (hashedData.size !== 32) {
+        if (hashedData.size != 32) {
             throw Error("Data must be 32 bytes")
         }
+
+        print("KEY DATA: ")
+        printBytes(keyData)
 
         return NativeSecp256k1.verify(hashedData, signature, keyData)
     }
@@ -102,8 +106,8 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
         keyUsages: Set<KeyUsage>
     ): CryptoKey {
         val alias = keyData.kid ?: ""
-        if (keyData.d != null) { // import d as the private key handle
-            return CryptoKey(
+        return if (keyData.d != null) { // import d as the private key handle
+            CryptoKey(
                 type = KeyType.Private,
                 extractable = extractable,
                 algorithm = algorithm,
@@ -121,7 +125,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
             y.forEachIndexed { index, byte ->
                 xyData[index + 33] = byte
             }
-            return CryptoKey(
+            CryptoKey(
                 type = KeyType.Public,
                 extractable = extractable,
                 algorithm = algorithm,
@@ -136,7 +140,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
         for (usage in key.usages) {
             keyOps.add(usage.value)
         }
-        var publicKey: ByteArray
+        val publicKey: ByteArray
         val handle = key.handle as Secp256k1Handle
         val d: String? = if (key.type == KeyType.Private) {
             publicKey = NativeSecp256k1.computePubkey(handle.data)
@@ -144,9 +148,6 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
         } else {
             publicKey = handle.data
             null
-        }
-        if (publicKey == null) {
-            throw Error("No public key components could be found")
         }
         val xyData = publicToXY(publicKey)
         return JsonWebKey(
