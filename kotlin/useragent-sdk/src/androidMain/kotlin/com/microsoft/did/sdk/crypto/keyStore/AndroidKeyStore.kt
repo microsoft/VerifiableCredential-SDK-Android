@@ -29,8 +29,8 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
 
     companion object {
         const val provider = "AndroidKeyStore"
-        private val regexForKeyReference = Regex("#(^.*)\\.[^.]+$")
-        private val regexForKeyIndex = Regex("^.*\\.([^.]+$)")
+        private val regexForKeyReference = Regex("^#(.*)\\.[^.]+$")
+        private val regexForKeyIndex = Regex("^#.*\\.([^.]+$)")
 
         val keyStore: KeyStore = KeyStore.getInstance(provider).apply {
             load(null)
@@ -138,6 +138,20 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
             return getSecurePublicKey(keyId)
         }
         return null
+    }
+
+    public fun deletePrivateKey(keyId: String) {
+        val nativeKeys = listNativeKeys()
+        var keyRef = findReferenceInList(nativeKeys, keyId)
+        if (!keyRef.isNullOrBlank()) {
+            AndroidKeyStore.keyStore.deleteEntry(keyId)
+            return
+        }
+        val softwareKeys = listSecureData()
+        keyRef = findReferenceInList(softwareKeys, keyId)
+        if (!keyRef.isNullOrBlank()) {
+            deleteSecureData(keyId)
+        }
     }
 
     private fun findReferenceInList(list: Map<String, KeyStoreListItem>, keyId: String): String? {
@@ -277,6 +291,13 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
             return Base64.decode(base64UrlEncodedData, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
         }
         return null
+    }
+
+    private fun deleteSecureData(alias: String) {
+        val sharedPreferences = getSharedPreferences()
+        val editor = sharedPreferences.edit()
+        editor.remove(alias)
+        editor.apply()
     }
 
     private fun saveSecureData(alias: String, data: ByteArray) {

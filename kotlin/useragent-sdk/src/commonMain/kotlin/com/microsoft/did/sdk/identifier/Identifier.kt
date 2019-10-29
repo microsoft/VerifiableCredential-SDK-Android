@@ -77,15 +77,14 @@ class Identifier constructor (
             // TODO: Use software generated keys from the seed
 //        val seed = cryptoOperations.generateSeed()
 //        val publicKey = cryptoOperations.generatePairwise(seed)
-            // prepending "a." for forward compatability with multi-persona sdk support
+            logger.debug("Creating identifier ($alias)")
             val personaEncKeyRef = "$alias.$encryptionKeyReference"
             val personaSigKeyRef = "$alias.$signatureKeyReference"
             val encKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
             val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
             val encJwk = encKey.toJWK()
             val sigJwk = sigKey.toJWK()
-            encJwk.kid = "#${encJwk.kid}"
-            sigJwk.kid = "#${sigJwk.kid}"
+            logger.debug("Created keys ${encJwk.kid} and ${sigJwk.kid}")
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
@@ -104,13 +103,14 @@ class Identifier constructor (
 //                            resolver.resolve(it,
 //                                cryptoOperations
 //                            )}
-                        val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, logger, resolver, registrar)
-                        hubService = IdentityHubService.create(
-                            id = "#hub",
-                            keyStore = cryptoOperations.keyStore,
-                            signatureKeyRef = personaEncKeyRef,
-                            instances = listOf(microsoftHub),
-                            logger = logger
+                logger.debug("Adding Microsoft Identity Hub")
+                val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, logger, resolver, registrar)
+                hubService = IdentityHubService.create(
+                    id = "#hub",
+                    keyStore = cryptoOperations.keyStore,
+                    signatureKeyRef = personaEncKeyRef,
+                    instances = listOf(microsoftHub),
+                    logger = logger
                 )
             }
 
@@ -122,6 +122,7 @@ class Identifier constructor (
 
             val registered = registrar.register(document, personaSigKeyRef, cryptoOperations)
 
+            logger.debug("Registered new decentralized identity")
             return Identifier(
                 alias = alias,
                 document = registered,

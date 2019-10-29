@@ -80,6 +80,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
             throw logger.error("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
         }
         val alias = keyStore.checkOrCreateKeyId(algorithm.additionalParams[AndroidConstants.KeyReference.value] as String, null)
+        logger.debug("Generating ${algorithm.name} key with alias $alias")
         val keyPairGenerator = KeyPairGenerator.getInstance(keyPairAlgorithmToAndroid(algorithm), AndroidKeyStore.provider)
         keyPairGenerator.initialize(
             KeyGenParameterSpec.Builder(
@@ -89,6 +90,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                 .build()
         )
         val keyPair = keyPairGenerator.genKeyPair()
+//        AndroidKeyStore.keyStore.
         logger.debug("Key pair generated ($alias)")
         // convert keypair.
         return CryptoKeyPair(

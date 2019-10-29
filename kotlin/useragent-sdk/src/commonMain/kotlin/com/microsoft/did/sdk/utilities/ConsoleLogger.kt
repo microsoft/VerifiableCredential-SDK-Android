@@ -12,7 +12,7 @@ class ConsoleLogger(var debug: Boolean = false): ILogger {
 
     override fun debug(message: String) {
         if (debug) {
-            println("[WARN]: $message")
+            println("[DEBUG]: $message")
         }
     }
 
