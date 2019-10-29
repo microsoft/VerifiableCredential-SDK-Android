@@ -4,8 +4,9 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.utilities.ILogger
 
-class RsaPrivateKey(jwk: JsonWebKey): PrivateKey(jwk) {
+class RsaPrivateKey(jwk: JsonWebKey, logger: ILogger): PrivateKey(jwk, logger) {
     override var kty = KeyType.RSA
     override var alg: String? = if (key.alg != null) key.alg!! else "RS256"
 
@@ -40,6 +41,6 @@ class RsaPrivateKey(jwk: JsonWebKey): PrivateKey(jwk) {
     }
 
     override fun getPublicKey(): PublicKey {
-        return RsaPublicKey(this.toJWK())
+        return RsaPublicKey(this.toJWK(), logger = logger)
     }
 }

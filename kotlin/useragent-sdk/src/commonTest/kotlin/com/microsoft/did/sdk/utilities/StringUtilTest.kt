@@ -6,11 +6,12 @@ import kotlin.test.assertEquals
 import kotlin.test.expect
 
 class StringUtilTest {
+    val logger = ConsoleLogger()
 
     @Test
     fun gauntletByBase64() {
         for (unused in 0..100) {
-            val stringData = Base64.encode(Random.Default.nextBytes(24))
+            val stringData = Base64.encode(Random.Default.nextBytes(24), logger)
 
             val data = stringToByteArray(stringData)
             assertEquals(stringData, byteArrayToString(data))

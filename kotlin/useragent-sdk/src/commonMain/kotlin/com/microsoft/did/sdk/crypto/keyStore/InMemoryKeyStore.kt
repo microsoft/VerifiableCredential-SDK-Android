@@ -10,18 +10,18 @@ class InMemoryKeyStore(logger: ILogger): IKeyStore(logger) {
     private val publicKeys: MutableMap<String, KeyContainer<PublicKey>> = mutableMapOf()
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
-        return secretKeys[keyReference]?: throw Error("key $keyReference does not exist.")
+        return secretKeys[keyReference]?: throw logger.error("key $keyReference does not exist.")
     }
 
     override fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey> {
-        return privateKeys[keyReference]?: throw Error("key $keyReference does not exist.")
+        return privateKeys[keyReference]?: throw logger.error("key $keyReference does not exist.")
     }
 
     override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
         return if (publicKeys.containsKey(keyReference)) {
             publicKeys[keyReference]!!
         } else {
-            val keyContainer = privateKeys[keyReference] ?: throw Error("key $keyReference does not exist.")
+            val keyContainer = privateKeys[keyReference] ?: throw logger.error("key $keyReference does not exist.")
             KeyContainer(
                 keyContainer.kty,
                 keyContainer.keys.map { it.getPublicKey() },
@@ -75,7 +75,7 @@ class InMemoryKeyStore(logger: ILogger): IKeyStore(logger) {
                 key.kty,
                 listOf(key),
                 key.use,
-                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it) }
+                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it, logger = logger) }
             )
         }
     }
@@ -96,7 +96,7 @@ class InMemoryKeyStore(logger: ILogger): IKeyStore(logger) {
                 key.kty,
                 listOf(key),
                 key.use,
-                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it) }
+                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it, logger = logger) }
             )
         }
     }
@@ -117,7 +117,7 @@ class InMemoryKeyStore(logger: ILogger): IKeyStore(logger) {
                 key.kty,
                 listOf(key),
                 key.use,
-                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it) }
+                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it, logger = logger) }
             )
         }
     }

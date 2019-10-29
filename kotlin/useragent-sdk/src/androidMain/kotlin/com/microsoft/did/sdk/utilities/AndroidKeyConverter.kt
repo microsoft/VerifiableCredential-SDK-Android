@@ -17,8 +17,8 @@ import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 
 object AndroidKeyConverter {
-    fun androidPublicKeyToPublicKey(alias: String, publicKey: java.security.PublicKey): PublicKey {
-        return when (whatKeyTypeIs(publicKey)) {
+    fun androidPublicKeyToPublicKey(alias: String, publicKey: java.security.PublicKey, logger: ILogger): PublicKey {
+        return when (whatKeyTypeIs(publicKey, logger)) {
             KeyType.RSA -> {
                 RsaPublicKey(
                     JsonWebKey(
@@ -28,7 +28,8 @@ object AndroidKeyConverter {
                         use = KeyUse.Encryption.value,
                         n = Base64.encodeToString((publicKey as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim(),
                         e = Base64.encodeToString(publicKey.publicExponent.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim()
-                    )
+                    ),
+                    logger = logger
                 )
             }
             KeyType.EllipticCurve -> {
@@ -40,16 +41,17 @@ object AndroidKeyConverter {
                         use = KeyUse.Signature.value,
                         x = Base64.encodeToString((publicKey as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim(),
                         y = Base64.encodeToString(publicKey.w.affineY.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim()
-                    )
+                    ),
+                    logger = logger
                 )
             }
-            else -> throw Error("Cannot convert key type.")
+            else -> throw logger.error("Cannot convert key type.")
         }
     }
 
-    fun androidPrivateKeyToPrivateKey(alias: String, keyStore: KeyStore): PrivateKey {
+    fun androidPrivateKeyToPrivateKey(alias: String, keyStore: KeyStore, logger: ILogger): PrivateKey {
         val key = keyStore.getCertificate(alias).publicKey
-        return when (whatKeyTypeIs(key)) {
+        return when (whatKeyTypeIs(key, logger)) {
             KeyType.RSA -> {
                 RsaPrivateKey (
                     JsonWebKey(
@@ -65,7 +67,8 @@ object AndroidKeyConverter {
                         dp = "0",
                         dq = "0",
                         qi = "0"
-                    )
+                    ),
+                    logger = logger
                 )
             }
             KeyType.EllipticCurve -> {
@@ -78,18 +81,19 @@ object AndroidKeyConverter {
                         x = Base64.encodeToString((key as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                         y = Base64.encodeToString(key.w.affineY.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                         d = "0"
-                    )
+                    ),
+                    logger = logger
                 )
             }
-            else -> throw Error("Cannot convert key type.")
+            else -> throw logger.error("Cannot convert key type.")
         }
     }
 
-    fun whatKeyTypeIs(publicKey: java.security.PublicKey): KeyType {
+    fun whatKeyTypeIs(publicKey: java.security.PublicKey, logger: ILogger): KeyType {
         return when (publicKey) {
             is RSAPublicKey -> KeyType.RSA
             is ECPublicKey -> KeyType.EllipticCurve
-            else -> throw Error("Unknown Key Type")
+            else -> throw logger.error("Unknown Key Type")
         }
     }
 }

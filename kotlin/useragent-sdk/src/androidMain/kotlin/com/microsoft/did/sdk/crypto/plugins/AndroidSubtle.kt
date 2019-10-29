@@ -29,7 +29,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
     override fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         // verify we're signing with a private key
         if (key.type != KeyType.Private) {
-            throw Error("Sign must use a private key")
+            throw logger.error("Sign must use a private key")
         }
         // key's handle should be an Android keyStore key reference.
         val handle = cryptoKeyToPrivateKey(key)
@@ -63,7 +63,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                 generator.init(alg.length.toInt())
                 generator.generateKey()
             }
-            else -> throw Error("Unsupported symmetric key algorithm: ${algorithm.name}")
+            else -> throw logger.error("Unsupported symmetric key algorithm: ${algorithm.name}")
         }
         return CryptoKey(
             type = KeyType.Secret,
@@ -77,7 +77,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
     @TargetApi(23)
     override fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKeyPair {
         if (!algorithm.additionalParams.containsKey(AndroidConstants.KeyReference.value)){
-            throw Error("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
+            throw logger.error("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
         }
         val alias = keyStore.checkOrCreateKeyId(algorithm.additionalParams[AndroidConstants.KeyReference.value] as String, null)
         val keyPairGenerator = KeyPairGenerator.getInstance(keyPairAlgorithmToAndroid(algorithm), AndroidKeyStore.provider)
@@ -89,6 +89,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                 .build()
         )
         val keyPair = keyPairGenerator.genKeyPair()
+        logger.debug("Key pair generated ($alias)")
         // convert keypair.
         return CryptoKeyPair(
             CryptoKey(
@@ -150,13 +151,13 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                 val keyFactory = KeyFactory.getInstance(KeyProperties.KEY_ALGORITHM_RSA)
                 if (keyData.d != null) { // Private RSA key being imported
                     if (!AndroidKeyStore.keyStore.isKeyEntry(keyData.kid ?: "")) {
-                        throw Error("Software private keys are not supported.")
+                        throw logger.error("Software private keys are not supported.")
                     }
                     val entry = AndroidKeyHandle(keyData.kid!!, null)
                     return CryptoKey(
                         KeyType.Private,
                         extractable,
-                        JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!),
+                        JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!, logger = logger),
                         keyUsages,
                         entry
                     )
@@ -169,7 +170,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                     return CryptoKey(
                         KeyType.Public,
                         extractable,
-                        JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!),
+                        JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!, logger = logger),
                         keyUsages,
                         entry
                     )
@@ -178,7 +179,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
             com.microsoft.did.sdk.crypto.keys.KeyType.EllipticCurve.value -> {
                 TODO("Standard Elliptic Curves are not currently supported.")
             }
-            else -> throw Error("Cannot import JWK key type ${keyData.kty}")
+            else -> throw logger.error("Cannot import JWK key type ${keyData.kty}")
         }
     }
 
@@ -187,16 +188,16 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
     }
 
     override fun exportKeyJwk(key: CryptoKey): JsonWebKey {
-        val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
+        val internalHandle = key.handle as? AndroidKeyHandle ?: throw logger.error("Unknown format for CryptoKey passed")
         return when (internalHandle.key) {
             is PublicKey -> {
-                AndroidKeyConverter.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key).toJWK()
+                AndroidKeyConverter.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key, logger).toJWK()
             }
             null -> {
-                AndroidKeyConverter.androidPrivateKeyToPrivateKey(internalHandle.alias, AndroidKeyStore.keyStore).toJWK()
+                AndroidKeyConverter.androidPrivateKeyToPrivateKey(internalHandle.alias, AndroidKeyStore.keyStore, logger).toJWK()
             }
             else -> {
-                throw Error("Unknown CryptoKey format")
+                throw logger.error("Unknown CryptoKey format")
             }
         }
     }
@@ -224,16 +225,16 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
 
     private fun cryptoKeyToPublicKey(key: CryptoKey): PublicKey {
         val internalHandle = key.handle as? AndroidKeyHandle
-            ?: throw Error("Unknown format for CryptoKey passed")
+            ?: throw logger.error("Unknown format for CryptoKey passed")
         return internalHandle.key as? PublicKey
-            ?: throw Error("Private key passed when a public key was expected")
+            ?: throw logger.error("Private key passed when a public key was expected")
     }
 
     private fun cryptoKeyToPrivateKey(key: CryptoKey): PrivateKey {
         val internalHandle = key.handle as? AndroidKeyHandle
-            ?: throw Error("Unknown format for CryptoKey passed")
+            ?: throw logger.error("Unknown format for CryptoKey passed")
         return AndroidKeyStore.keyStore.getKey(internalHandle.alias, null) as? PrivateKey
-            ?: throw Error("Software private keys are not supported by the native Subtle.")
+            ?: throw logger.error("Software private keys are not supported by the native Subtle.")
     }
 
 
@@ -247,22 +248,22 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                     W3cCryptoApiConstants.Sha256.value -> AndroidConstants.EcDsaSha256.value
                     W3cCryptoApiConstants.Sha384.value -> AndroidConstants.EcDsaSha384.value
                     W3cCryptoApiConstants.Sha512.value -> AndroidConstants.EcDsaSha512.value
-                    else -> throw Error("Unsupported ECDSA hash algorithm: ${ecDsaParams.hash.name}")
+                    else -> throw logger.error("Unsupported ECDSA hash algorithm: ${ecDsaParams.hash.name}")
                 }
             }
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> {
                 // The hash is indicated by the key's "algorithm" slot.
-                val keyAlgorithm = cryptoKey.algorithm as? RsaHashedKeyAlgorithm ?: throw Error("Unsupported RSA key algorithm: ${cryptoKey.algorithm.name}")
+                val keyAlgorithm = cryptoKey.algorithm as? RsaHashedKeyAlgorithm ?: throw logger.error("Unsupported RSA key algorithm: ${cryptoKey.algorithm.name}")
                 when (keyAlgorithm.hash.name) {
                     W3cCryptoApiConstants.Sha1.value -> AndroidConstants.RsSha1.value
                     W3cCryptoApiConstants.Sha224.value -> AndroidConstants.RsSha224.value
                     W3cCryptoApiConstants.Sha256.value -> AndroidConstants.RsSha256.value
                     W3cCryptoApiConstants.Sha384.value -> AndroidConstants.RsSha384.value
                     W3cCryptoApiConstants.Sha512.value -> AndroidConstants.RsSha512.value
-                    else -> throw Error("Unsupported RSA hash algorithm: ${keyAlgorithm.hash.name}")
+                    else -> throw logger.error("Unsupported RSA hash algorithm: ${keyAlgorithm.hash.name}")
                 }
             }
-            else -> throw Error("Unsupported algorithm: ${algorithm.name}")
+            else -> throw logger.error("Unsupported algorithm: ${algorithm.name}")
         }
     }
 
@@ -270,7 +271,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
         return when (algorithm.name) {
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> AndroidConstants.Rsa.value
             W3cCryptoApiConstants.EcDsa.value -> AndroidConstants.Ec.value
-            else -> throw Error("Unknown algorithm used: ${algorithm.name}")
+            else -> throw logger.error("Unknown algorithm used: ${algorithm.name}")
         }
     }
 

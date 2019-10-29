@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.utilities.ILogger
 
 abstract class Provider(
-    private val logger: ILogger
+    internal val logger: ILogger
 ) {
     public abstract val name: String
     public abstract val privateKeyUsage: Set<KeyUsage>?
@@ -12,48 +12,48 @@ abstract class Provider(
     public abstract val symmetricKeyUsage: Set<KeyUsage>?
 
     protected open fun onDigest(algorithm: Algorithm, data: ByteArray): ByteArray {
-        throw Error("Digest not supported.")
+        throw logger.error("Digest not supported.")
     }
     protected open fun onGenerateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        throw Error("GenerateKey not supported.")
+        throw logger.error("GenerateKey not supported.")
     }
     protected open fun onGenerateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
-        throw Error("GenerateKeyPair not supported.")
+        throw logger.error("GenerateKeyPair not supported.")
     }
     protected open fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        throw Error("Sign not supported.")
+        throw logger.error("Sign not supported.")
     }
     protected open fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        throw Error("Verify not supported.")
+        throw logger.error("Verify not supported.")
     }
     protected open fun onEncrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        throw Error("Encrypt not supported.")
+        throw logger.error("Encrypt not supported.")
     }
     protected open fun onDecrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        throw Error("Decrypt not supported.")
+        throw logger.error("Decrypt not supported.")
     }
     protected open fun onDeriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
-        throw Error("DeriveBits not supported.")
+        throw logger.error("DeriveBits not supported.")
     }
     protected open fun onExportKey(format: KeyFormat, key: CryptoKey): ByteArray {
-        throw Error("ExportKey not supported.")
+        throw logger.error("ExportKey not supported.")
     }
     protected open fun onExportKeyJwk(key: CryptoKey): JsonWebKey {
-        throw Error("ExportKeyJwk not supported.")
+        throw logger.error("ExportKeyJwk not supported.")
     }
     protected open fun onImportKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm,
                               extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        throw Error("ImportKey not supported.")
+        throw logger.error("ImportKey not supported.")
     }
     protected open fun onImportKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm,
                                    extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        throw Error("ImportKey not supported.")
+        throw logger.error("ImportKey not supported.")
     }
     protected open fun checkGenerateKeyParams(algorithm: Algorithm) {
-        throw Error("GenerateKey params check not implemented")
+        throw logger.error("GenerateKey params check not implemented")
     }
     public open fun checkDerivedKeyParams(algorithm: Algorithm) {
-        throw Error("DerivedKey params check not implemented")
+        throw logger.error("DerivedKey params check not implemented")
     }
 
     public fun digest(algorithm: Algorithm, data: ByteArray): ByteArray {
@@ -99,7 +99,7 @@ abstract class Provider(
     public fun importKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
         if (format == KeyFormat.Jwk) {
-            throw Error("KeyData does not match format")
+            throw logger.error("KeyData does not match format")
         }
         checkImportKey(format, algorithm, extractable, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
@@ -107,7 +107,7 @@ abstract class Provider(
     public fun importKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
         if (format != KeyFormat.Jwk) {
-            throw Error("KeyData does not match format")
+            throw logger.error("KeyData does not match format")
         }
         checkImportKey(format, algorithm, extractable, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
@@ -120,7 +120,7 @@ abstract class Provider(
         checkAlgorithmName(algorithm)
         checkGenerateKeyParams(algorithm)
         if (keyUsages.count() == 0) {
-            throw Error("Usages cannot be empty when creating a key.")
+            throw logger.error("Usages cannot be empty when creating a key.")
         }
         var allowedUsages: Set<KeyUsage> = if (this.symmetricKeyUsage != null) {
             this.symmetricKeyUsage!!
@@ -154,12 +154,12 @@ abstract class Provider(
         checkAlgorithmParams(algorithm)
         checkCryptoKey(baseKey, KeyUsage.DeriveBits)
         if (length.rem(8u).compareTo(0u) != 0) {
-            throw Error("Length is not a multiple of 8")
+            throw logger.error("Length is not a multiple of 8")
         }
     }
     private fun checkExportKey(format: KeyFormat, key: CryptoKey) {
         if (!key.extractable) {
-            throw Error("Key is not extractable")
+            throw logger.error("Key is not extractable")
         }
     }
     private fun checkImportKey(format: KeyFormat, algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
@@ -181,7 +181,7 @@ abstract class Provider(
 
     protected open fun checkAlgorithmName(algorithm: Algorithm) {
         if (algorithm.name.toLowerCase() != this.name.toLowerCase()) {
-            throw Error("Unrecognized Algorithm ${algorithm.name}")
+            throw logger.error("Unrecognized Algorithm ${algorithm.name}")
         }
     }
 
@@ -192,14 +192,14 @@ abstract class Provider(
     protected fun checkKeyUsages(usages: Set<KeyUsage>, allowed: Set<KeyUsage>) {
         val forbiddenUsages = usages - allowed
         if (forbiddenUsages.isNotEmpty()) {
-            throw Error("Key Usages contains forbidden Key Usage: ${forbiddenUsages.joinToString { use -> use.value }}")
+            throw logger.error("Key Usages contains forbidden Key Usage: ${forbiddenUsages.joinToString { use -> use.value }}")
         }
     }
 
     public open fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
         checkAlgorithmName(key.algorithm)
         if (!key.usages.contains(keyUsage)) {
-            throw Error("Key does not allow ${keyUsage.name}")
+            throw logger.error("Key does not allow ${keyUsage.name}")
         }
     }
 

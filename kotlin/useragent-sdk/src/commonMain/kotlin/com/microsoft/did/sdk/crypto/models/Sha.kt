@@ -2,6 +2,7 @@ package com.microsoft.did.sdk.crypto.models
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.did.sdk.utilities.ILogger
 
 
 // convenience class for SHA algorithms
@@ -22,14 +23,14 @@ class Sha(algorithm: Algorithm) {
         val Sha512 = Algorithm(
             name = W3cCryptoApiConstants.Sha512.value
         )
-        fun get(length: Int): Algorithm {
+        fun get(length: Int, logger: ILogger): Algorithm {
             return when (length) {
                 1 -> Sha1
                 224 -> Sha224
                 256 -> Sha256
                 384 -> Sha384
                 512 -> Sha512
-                else -> throw Error("No SHA at this length.")
+                else -> throw logger.error("No SHA at this length.")
             }
         }
     }

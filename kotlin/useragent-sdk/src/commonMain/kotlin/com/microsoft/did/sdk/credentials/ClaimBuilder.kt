@@ -4,11 +4,12 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.MinimalJson
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.stringify
 
-class ClaimBuilder(forClass: ClaimClass? = null) {
+class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
     var context: String? = null
     var type: String? = null
     var issuerName: String? = forClass?.issuerName
@@ -55,11 +56,11 @@ class ClaimBuilder(forClass: ClaimClass? = null) {
     @ImplicitReflectionSerializer
     fun buildObject(classUri: String, identifier: Identifier, cryptoOperations: CryptoOperations? = null): ClaimObject {
         if (context.isNullOrBlank() || type.isNullOrBlank()) {
-            throw Error("Context and Type must be set.")
+            throw logger.error("Context and Type must be set.")
         }
         val claims = if (cryptoOperations != null) {
             val serializedData = MinimalJson.serializer.stringify(claimDetails)
-            val token = JwsToken(serializedData)
+            val token = JwsToken(serializedData, logger = logger)
             token.sign(identifier.signatureKeyReference, cryptoOperations)
             SignedClaimDetail(
                 data = token.serialize(JwsFormat.Compact)

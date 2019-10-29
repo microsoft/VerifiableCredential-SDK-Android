@@ -10,11 +10,11 @@ object Base64 {
         "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "+", "/"
     )
     private const val padding = '='
-    fun encode(data: ByteArray): String {
-        return encode(data, dictionary, padding)
+    fun encode(data: ByteArray, logger: ILogger): String {
+        return encode(data, dictionary, padding, logger)
     }
-    fun decode(base64: String): ByteArray {
-        return decode(base64, dictionary, padding)
+    fun decode(base64: String, logger: ILogger): ByteArray {
+        return decode(base64, dictionary, padding, logger)
     }
 }
 
@@ -24,15 +24,15 @@ object Base64Url {
     "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
     "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "_"
     )
-    fun encode(data: ByteArray): String {
-        return encode(data, dictionary, null)
+    fun encode(data: ByteArray, logger: ILogger): String {
+        return encode(data, dictionary, null, logger)
     }
-    fun decode(base64url: String): ByteArray {
-        return decode(base64url, dictionary, null)
+    fun decode(base64url: String, logger: ILogger): ByteArray {
+        return decode(base64url, dictionary, null, logger)
     }
 }
 
-private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) {
+private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int, val logger: ILogger) {
 
     companion object {
         fun uInt(byte: Byte): Int {
@@ -44,9 +44,9 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
             }
         }
 
-        fun fromString(data: String, dictionary: List<String>, padding: Char? = null): ByteGroup {
+        fun fromString(data: String, dictionary: List<String>, padding: Char? = null, logger: ILogger): ByteGroup {
             if (data.length > 4) {
-                throw Error("Invalid base64 byte group length")
+                throw logger.error("Invalid base64 byte group length")
             }
             val minimalIr = data.filter {
                 padding == null || it != padding
@@ -55,22 +55,22 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
             }
             return when (minimalIr.size) {
                 2 -> {
-                    ByteGroup(listOf(minimalIr[0], minimalIr[1], 0, 0), 1)
+                    ByteGroup(listOf(minimalIr[0], minimalIr[1], 0, 0), 1, logger)
                 }
                 3 -> {
-                    ByteGroup(listOf(minimalIr[0], minimalIr[1], minimalIr[2], 0), 2)
+                    ByteGroup(listOf(minimalIr[0], minimalIr[1], minimalIr[2], 0), 2, logger)
                 }
                 4 -> {
-                    ByteGroup(minimalIr, 3)
+                    ByteGroup(minimalIr, 3, logger)
                 }
                 0, 1 -> {
-                    throw Error("Invalid base64 encoding")
+                    throw logger.error("Invalid base64 encoding")
                 }
-                else -> throw Error("Invalid base64 encoding")
+                else -> throw logger.error("Invalid base64 encoding")
             }
         }
 
-        fun fromByteArray(data: ByteArray): ByteGroup {
+        fun fromByteArray(data: ByteArray, logger: ILogger): ByteGroup {
 //        +--first octet--+-second octet--+--third octet--+
 //        |7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|7 6 5 4 3 2 1 0|
 //        +-----------+---+-------+-------+---+-----------+
@@ -84,7 +84,7 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
             val index2 = inputGroupInt.and(0x0003f000).shr(12)
             val index3 = inputGroupInt.and(0x00000fc0).shr(6)
             val index4 = inputGroupInt.and(0x0000003f)
-            return ByteGroup(listOf(index1, index2, index3, index4), min(data.size, 3))
+            return ByteGroup(listOf(index1, index2, index3, index4), min(data.size, 3), logger)
         }
     }
 
@@ -127,11 +127,11 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
 }
 
 
-private fun decode(data: String, dictionary: List<String>, padding: Char?): ByteArray {
+private fun decode(data: String, dictionary: List<String>, padding: Char?, logger: ILogger): ByteArray {
     val outputs = mutableListOf<ByteArray>()
     for (index in data.indices step 4) {
         val slice = data.slice(index..min(index+3, data.length-1))
-        outputs.add(ByteGroup.fromString(slice, dictionary, padding).toBytes())
+        outputs.add(ByteGroup.fromString(slice, dictionary, padding, logger).toBytes())
     }
     var outputSize = max(0, outputs.size - 1) * 3 + (outputs.lastOrNull()?.size ?: 0)
     val output = ByteArray(outputSize)
@@ -142,11 +142,11 @@ private fun decode(data: String, dictionary: List<String>, padding: Char?): Byte
     return output
 }
 
-private fun encode(data: ByteArray, dictionary: List<String>, padding: Char?): String {
+private fun encode(data: ByteArray, dictionary: List<String>, padding: Char?, logger: ILogger): String {
     var output = ""
     for (index in data.indices step 3) {
         val slice = data.sliceArray(index..min(index+2, data.size-1))
-        output += ByteGroup.fromByteArray(slice).toString(dictionary, padding)
+        output += ByteGroup.fromByteArray(slice, logger).toString(dictionary, padding)
     }
     return output
 }

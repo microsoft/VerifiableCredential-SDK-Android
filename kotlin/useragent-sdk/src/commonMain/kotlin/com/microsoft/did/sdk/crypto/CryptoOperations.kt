@@ -29,8 +29,9 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
      * @param signingKeyReference reference to key stored in keystore.
      */
     fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
+        logger.debug("Signing with $signingKeyReference")
         val privateKey = keyStore.getPrivateKey(signingKeyReference)
-        val alg = algorithm ?: privateKey.alg ?: throw Error("No Algorithm specified for key $signingKeyReference")
+        val alg = algorithm ?: privateKey.alg ?: throw logger.error("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Private)
         val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
         return subtle.sign(alg, key, payload)
@@ -40,12 +41,13 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
      * Verify payload with key stored in keyStore.
      */
     fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
+        logger.debug("Verifying with $signingKeyReference")
         val publicKey = keyStore.getPublicKey(signingKeyReference)
-        val alg = algorithm ?: publicKey.alg ?: throw Error("No Algorithm specified for key $signingKeyReference")
+        val alg = algorithm ?: publicKey.alg ?: throw logger.error("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Public)
         val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
         if (!subtle.verify(alg, key, signature, payload)) {
-            throw Error("Signature invalid")
+            throw logger.error("Signature invalid")
         }
     }
 
@@ -69,8 +71,9 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
      * @returns the associated public key
      */
     fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
+        logger.debug("Generating new key pair $keyReference of type ${keyType.value}")
         when (keyType) {
-            KeyType.Octets -> throw Error("Cannot generate a symmetric key")
+            KeyType.Octets -> throw logger.error("Cannot generate a symmetric key")
             KeyType.RSA -> {
                 val subtle = subtleCryptoFactory.getSharedKeyEncrypter(W3cCryptoApiConstants.RsaSsaPkcs1V15.value, SubtleCryptoScope.Private)
                 val keyPair = subtle.generateKeyPair(RsaHashedKeyAlgorithm(
@@ -81,7 +84,8 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
                         "KeyReference" to keyReference
                     )
                 ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt))
-                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
+                logger.debug("Saving key pair to keystore.")
+                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger))
             }
             KeyType.EllipticCurve -> {
                 val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
@@ -92,7 +96,8 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
                         "KeyReference" to keyReference
                     )
                 ), true, listOf(KeyUsage.Sign, KeyUsage.Verify))
-                keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
+                logger.debug("Saving key pair to keystore.")
+                keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger))
             }
         }
         return keyStore.getPublicKey(keyReference).getKey()

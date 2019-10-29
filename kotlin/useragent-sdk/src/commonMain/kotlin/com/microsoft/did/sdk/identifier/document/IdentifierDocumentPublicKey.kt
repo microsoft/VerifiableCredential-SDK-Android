@@ -4,6 +4,7 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.utilities.ILogger
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -38,22 +39,22 @@ data class IdentifierDocumentPublicKey (
     val publicKeyJwk: JsonWebKey
     ) {
 
-    fun toPublicKey(): PublicKey {
+    fun toPublicKey(logger: ILogger): PublicKey {
         return when (type) {
             in LinkedDataKeySpecification.RsaSignature2018.values -> {
-                return RsaPublicKey(this.publicKeyJwk)
+                return RsaPublicKey(this.publicKeyJwk, logger = logger)
             }
             in LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values -> {
-                return EllipticCurvePublicKey(this.publicKeyJwk)
+                return EllipticCurvePublicKey(this.publicKeyJwk, logger = logger)
             }
             in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
-                throw Error("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
+                throw logger.error("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
             }
             in LinkedDataKeySpecification.Ed25519Signature2018.values -> {
-                throw Error("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
+                throw logger.error("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
             }
             else -> {
-                throw Error("Unknown key type: $type")
+                throw logger.error("Unknown key type: $type")
             }
         }
     }

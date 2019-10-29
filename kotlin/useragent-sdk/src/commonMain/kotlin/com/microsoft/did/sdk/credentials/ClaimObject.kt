@@ -4,6 +4,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.resolvers.IResolver
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.MinimalJson
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.SerialName
@@ -33,7 +34,7 @@ data class ClaimObject(val claimClass: String,
     }
 
     @ImplicitReflectionSerializer
-    suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver) {
-        claimDetails.verify(cryptoOperations, resolver)
+    suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver, logger: ILogger) {
+        claimDetails.verify(cryptoOperations, resolver, logger = logger)
     }
 }

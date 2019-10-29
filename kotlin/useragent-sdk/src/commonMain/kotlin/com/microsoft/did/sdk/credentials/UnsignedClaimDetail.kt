@@ -2,6 +2,7 @@ package com.microsoft.did.sdk.credentials
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.resolvers.IResolver
+import com.microsoft.did.sdk.utilities.ILogger
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,7 +16,7 @@ data class UnsignedClaimDetail(
     override val type: String
         get() = "unsigned"
 
-    override suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver) {
+    override suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver, logger: ILogger) {
         // nothing to do
     }
 }

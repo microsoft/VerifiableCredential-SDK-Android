@@ -109,7 +109,8 @@ class Identifier constructor (
                             id = "#hub",
                             keyStore = cryptoOperations.keyStore,
                             signatureKeyRef = personaEncKeyRef,
-                            instances = listOf(microsoftHub)
+                            instances = listOf(microsoftHub),
+                            logger = logger
                 )
             }
 

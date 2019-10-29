@@ -219,6 +219,6 @@ class SubtleCryptoFactory(default: SubtleCrypto, val logger: ILogger) {
                 return closeEnoughScope.first().subtleCrypto
             }
         }
-        throw Error("Could not find SubtleCrypto of appropriate scope")
+        throw logger.error("Could not find SubtleCrypto of appropriate scope")
     }
 }

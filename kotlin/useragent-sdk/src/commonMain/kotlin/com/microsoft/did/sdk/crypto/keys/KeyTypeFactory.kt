@@ -5,6 +5,7 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.did.sdk.utilities.ILogger
 
 /**
  * Factory class to create @enum KeyType objects
@@ -27,8 +28,8 @@ object KeyTypeFactory {
      * Create the key use according to the selected algorithm.
      * @param algorithm JWA algorithm constant
      */
-    fun createViaJwa (algorithm: String): KeyType {
-        val alg = CryptoHelpers.jwaToWebCrypto(algorithm);
+    fun createViaJwa (algorithm: String, logger: ILogger): KeyType {
+        val alg = CryptoHelpers.jwaToWebCrypto(algorithm, logger = logger);
         return KeyTypeFactory.createViaWebCrypto(alg);
     }
 }

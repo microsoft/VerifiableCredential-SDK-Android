@@ -19,12 +19,14 @@ import kotlin.collections.Map
  * Class for containing JWS token operations.
  * @class
  */
-class JwsToken private constructor(private val payload: String, signatures: List<JwsSignature> = emptyList()) {
+class JwsToken private constructor(private val payload: String,
+                                   signatures: List<JwsSignature> = emptyList(),
+                                   private val logger: ILogger) {
 
     val signatures: MutableList<JwsSignature> = signatures.toMutableList()
 
     companion object {
-        fun deserialize(jws: String): JwsToken {
+        fun deserialize(jws: String, logger: ILogger): JwsToken {
             val compactRegex = Regex("([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)")
             val compactMatches = compactRegex.matchEntire(jws.trim())
             if (compactMatches != null) {
@@ -38,14 +40,15 @@ class JwsToken private constructor(private val payload: String, signatures: List
                     header =  null,
                     signature = signature
                 )
-                return JwsToken(payload, listOf(jwsSignatureObject))
+                return JwsToken(payload, listOf(jwsSignatureObject), logger = logger)
             } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
                 println("General format detected")
                 val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
-                    signatures = token.signatures
+                    signatures = token.signatures,
+                    logger = logger
                 )
             } else if (jws.toLowerCase().contains("\"signature\"")) {
                 // Flat
@@ -57,18 +60,19 @@ class JwsToken private constructor(private val payload: String, signatures: List
                         protected = token.protected,
                         header = token.header,
                         signature = token.signature
-                    ))
+                    )),
+                    logger = logger
                 )
             } else {
                 // Unidentifiable garbage
-                throw Error("Unable to parse JWS token.")
+                throw logger.error("Unable to parse JWS token.")
             }
         }
     }
 
-    constructor(content: ByteArray): this(Base64Url.encode(content), emptyList()) {}
+    constructor(content: ByteArray, logger: ILogger): this(Base64Url.encode(content, logger = logger), emptyList(), logger) {}
 
-    constructor(content: String): this(Base64Url.encode(stringToByteArray(content)), emptyList()) {}
+    constructor(content: String, logger: ILogger): this(Base64Url.encode(stringToByteArray(content), logger = logger), emptyList(), logger) {}
 
     /**
      * Serialize a JWS token object from token.
@@ -88,13 +92,13 @@ class JwsToken private constructor(private val payload: String, signatures: List
             MinimalJson.serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
             else -> {
-                throw Error("Unknown JWS format: $format")
+                throw logger.error("Unknown JWS format: $format")
             }
         }
     }
 
     fun intermediateCompactSerialize(): JwsCompact {
-        val signature = this.signatures.firstOrNull() ?: throw Error("This JWS token contains no signatures")
+        val signature = this.signatures.firstOrNull() ?: throw logger.error("This JWS token contains no signatures")
         return JwsCompact(
             protected = signature.protected,
             payload = this.payload,
@@ -103,7 +107,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
     }
 
     fun intermediateFlatJsonSerialize(): JwsFlatJson {
-        val signature = this.signatures.firstOrNull() ?: throw Error("This JWS token contains no signatures")
+        val signature = this.signatures.firstOrNull() ?: throw logger.error("This JWS token contains no signatures")
         return JwsFlatJson(
             protected = signature.protected,
             header = signature.header,
@@ -114,7 +118,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
 
     fun intermediateGeneralJsonSerialize(): JwsGeneralJson {
         if (this.signatures.count() == 0) {
-            throw Error("This JWS token contains no signatures")
+            throw logger.error("This JWS token contains no signatures")
         }
         return JwsGeneralJson(
             payload = this.payload,
@@ -144,7 +148,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
                 algorithmName = signingKey.alg!!
                 protected[JoseConstants.Alg.value] = algorithmName
             } else {
-                throw Error("No algorithm defined for key $signingKeyReference")
+                throw logger.error("No algorithm defined for key $signingKeyReference")
             }
         } else {
             algorithmName = headers[JoseConstants.Alg.value]!!
@@ -158,16 +162,16 @@ class JwsToken private constructor(private val payload: String, signatures: List
         var encodedProtected = ""
         if (protected.isNotEmpty()) {
             val jsonProtected = MinimalJson.serializer.stringify(protected)
-            encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected))
+            encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected), logger = logger)
         }
 
         val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
 
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
-            JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName))
+            JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName, logger = logger))
 
-        val signatureBase64 = Base64Url.encode(signature)
+        val signatureBase64 = Base64Url.encode(signature, logger = logger)
 
         this.signatures.add(
             JwsSignature(
@@ -183,7 +187,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
     @ImplicitReflectionSerializer
     fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false) {
         val results = this.signatures.map {
-            val fullyQuantifiedKid = it.getKid() ?: ""
+            val fullyQuantifiedKid = it.getKid(logger = logger) ?: ""
             val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid).second
             println("Finding matching key for \"$kid\"")
             val signatureInput = "${it.protected}.${this.payload}"
@@ -223,18 +227,18 @@ class JwsToken private constructor(private val payload: String, signatures: List
             }
         }) {
             // TODO: fix signature verification on the enterprise agent?
-            // throw Error("Invalid Signature")
+            // throw logger.error("Invalid Signature")
         }
     }
 
     @ImplicitReflectionSerializer
     private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
-        val alg = signature.getAlg() ?: throw Error("This signature contains no algorithm.")
-        val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg)
+        val alg = signature.getAlg(logger = logger) ?: throw logger.error("This signature contains no algorithm.")
+        val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg, logger = logger)
         val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.Public)
         val cryptoKey = subtle.importKey(KeyFormat.Jwk, key.toJWK(), subtleAlg,
             true, key.key_ops ?: listOf(KeyUsage.Verify))
-        val rawSignature = Base64Url.decode(signature.signature)
+        val rawSignature = Base64Url.decode(signature.signature, logger = logger)
         val rawData = stringToByteArray(data)
         print("DATA ")
         printBytes(rawData)
@@ -245,7 +249,7 @@ class JwsToken private constructor(private val payload: String, signatures: List
      * Plaintext payload content
      */
     fun content(): String {
-        return byteArrayToString(Base64Url.decode(this.payload))
+        return byteArrayToString(Base64Url.decode(this.payload, logger = logger))
     }
 
 }

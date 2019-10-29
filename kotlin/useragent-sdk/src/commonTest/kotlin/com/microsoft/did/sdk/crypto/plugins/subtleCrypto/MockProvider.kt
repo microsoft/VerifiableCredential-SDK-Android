@@ -46,12 +46,12 @@ class MockProvider() : Provider(ConsoleLogger()) {
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         val datagram = Datagram.deserialize(signature)
         if (key.handle != datagram.keyId) {
-            throw Error("Incorrect key used")
+            throw logger.error("Incorrect key used")
         }
         datagram.getData().forEachIndexed {
                 index, byte ->
             if (data[index] != byte) {
-                throw Error("Signed data differs at byte $index")
+                throw logger.error("Signed data differs at byte $index")
             }
         }
         return true
@@ -66,7 +66,7 @@ class MockProvider() : Provider(ConsoleLogger()) {
         extractable: Boolean,
         keyUsages: Set<KeyUsage>
     ): CryptoKeyPair {
-        val kid = Base64Url.encode(Random.Default.nextBytes(8))
+        val kid = Base64Url.encode(Random.Default.nextBytes(8), logger)
         return CryptoKeyPair(
             publicKey = CryptoKey(
                 KeyType.Public,
@@ -95,7 +95,7 @@ class MockProvider() : Provider(ConsoleLogger()) {
         return CryptoKey(
             KeyType.Secret,
             extractable = extractable,
-            handle = keyData.kid ?: Base64Url.encode(Random.Default.nextBytes(8)),
+            handle = keyData.kid ?: Base64Url.encode(Random.Default.nextBytes(8), logger),
             usages = keyUsages.toList(),
             algorithm = algorithm
         )

@@ -4,8 +4,9 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.utilities.ILogger
 
-class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
+class EllipticCurvePrivateKey (key: JsonWebKey, logger: ILogger): PrivateKey(key, logger) {
     var crv = key.crv
     var x = key.x
     var y = key.y
@@ -28,6 +29,6 @@ class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     }
 
     override fun getPublicKey(): PublicKey {
-        return EllipticCurvePublicKey(this.toJWK())
+        return EllipticCurvePublicKey(this.toJWK(), logger)
     }
 }

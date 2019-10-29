@@ -2,12 +2,13 @@ package com.microsoft.did.sdk.registrars
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
+import com.microsoft.did.sdk.utilities.ILogger
 
 /**
  * @interface defining methods and properties
  * to be implemented by specific registration methods.
  */
-abstract class IRegistrar {
+abstract class IRegistrar(internal val logger: ILogger) {
 
     /**
      * Registers the identifier document on the ledger

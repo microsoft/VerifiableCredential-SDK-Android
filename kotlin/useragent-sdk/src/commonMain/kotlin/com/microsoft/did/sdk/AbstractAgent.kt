@@ -52,7 +52,7 @@ abstract class AbstractAgent (registrationUrl: String,
      */
     @ImplicitReflectionSerializer
     suspend fun createIdentifier(): Identifier {
-        val alias = Base64Url.encode(Random.nextBytes(16))
+        val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
         return Identifier.createAndRegister(alias, cryptoOperations, logger, signatureKeyReference,
             encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id"))
     }

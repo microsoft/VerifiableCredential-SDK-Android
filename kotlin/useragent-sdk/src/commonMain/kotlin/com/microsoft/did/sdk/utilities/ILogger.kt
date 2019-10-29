@@ -19,10 +19,10 @@ interface ILogger {
     /**
      * Always logged with error annotation
      */
-    fun error(message: String)
+    fun error(message: String): Error
 
     /**
-     * ALways logged with fatal error annotation
+     * Always logged with fatal error annotation
      */
-    fun fatal(message: String)
+    fun fatal(message: String): Error
 }

@@ -3,8 +3,9 @@ package com.microsoft.did.sdk.crypto.keys.rsa
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.utilities.ILogger
 
-class RsaPublicKey(jwk: JsonWebKey): PublicKey(jwk) {
+class RsaPublicKey(jwk: JsonWebKey, logger: ILogger): PublicKey(jwk, logger = logger) {
     override fun minimumAlphabeticJwk(): String {
         return "{\"e\":\"${e}\",\"kty\":\"${kty.value}\",\"n\":\"${n}\"}"
     }

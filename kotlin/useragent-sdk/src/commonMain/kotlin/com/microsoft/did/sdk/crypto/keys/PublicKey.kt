@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.stringToByteArray
 
 /**
@@ -14,11 +15,11 @@ import com.microsoft.did.sdk.utilities.stringToByteArray
  * @class
  * @abstract
  */
-abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
+abstract class PublicKey (val key: JsonWebKey, internal var logger: ILogger): IKeyStoreItem {
     /**
      * Key type
      */
-    open var kty: KeyType = toKeyType(key.kty)
+    open var kty: KeyType = toKeyType(key.kty, logger = logger)
 
     /**
      * Key ID
@@ -33,7 +34,7 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it, logger = logger) }
 
     /**
      * Algorithm intended for use with this key
@@ -52,7 +53,7 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
         val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.Public)
         val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
-        return Base64Url.encode(hash)
+        return Base64Url.encode(hash, logger = logger)
     }
 
     /**

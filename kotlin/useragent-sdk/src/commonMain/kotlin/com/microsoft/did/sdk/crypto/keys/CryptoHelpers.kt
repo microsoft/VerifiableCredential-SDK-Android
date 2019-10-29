@@ -7,6 +7,7 @@ package com.microsoft.did.sdk.crypto.keys
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.did.sdk.utilities.ILogger
 
 object CryptoHelpers {
 //    /**
@@ -44,7 +45,7 @@ object CryptoHelpers {
      * @param jwaAlgorithmName Requested algorithm
      * @see https://www.w3.org/TR/WebCryptoAPI/#jwk-mapping
      */
-    fun jwaToWebCrypto(jwa: String, vararg args: List<Any>): Algorithm {
+    fun jwaToWebCrypto(jwa: String, vararg args: List<Any>, logger: ILogger): Algorithm {
         val regex = Regex("\\d+")
         return when (jwa.toUpperCase()) {
             JoseConstants.Rs256.value,
@@ -54,7 +55,7 @@ object CryptoHelpers {
                 return Algorithm (
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
-                        "hash" to Sha.get(matches.first().value.toInt())
+                        "hash" to Sha.get(matches.first().value.toInt(), logger = logger)
                     )
                 )
             }

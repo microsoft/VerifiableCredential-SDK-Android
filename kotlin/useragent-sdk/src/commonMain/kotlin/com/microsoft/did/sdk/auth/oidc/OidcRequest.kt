@@ -78,13 +78,13 @@ class OidcRequest constructor(
                                    logger: ILogger,
                                    resolver: IResolver): OidcRequest {
             if (!signedRequest.startsWith("openid://")) {
-                throw Error("Must be passed a string beginning in \"openid://\"")
+                throw logger.error("Must be passed a string beginning in \"openid://\"")
             }
 
             // Verify and parse the request object
-            var request = getQueryStringParameter(OAuthRequestParameter.Request, signedRequest)
+            var request = getQueryStringParameter(OAuthRequestParameter.Request, signedRequest, logger = logger)
             // check for a request object
-            val indirectRequestUrl = getQueryStringParameter(OAuthRequestParameter.RequestUri, signedRequest)
+            val indirectRequestUrl = getQueryStringParameter(OAuthRequestParameter.RequestUri, signedRequest, logger = logger)
             if (indirectRequestUrl != null) {
                 val client = getHttpClient()
                 request = client.get<String>(indirectRequestUrl);
@@ -92,42 +92,43 @@ class OidcRequest constructor(
 
             // verify the signature and whatnot from the request object if we have one
             if (request == null) {
-                throw Error("Request contains no signed material")
+                throw logger.error("Request contains no signed material")
             }
-            val token = JwsToken.deserialize(request)
+            val token = JwsToken.deserialize(request, logger = logger)
             // get the DID associated
             val contents = MinimalJson.serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {
-                throw Error("Could not find the issuer's DID")
+                throw logger.error("Could not find the issuer's DID")
             }
 
             val sender = resolver.resolve(contents.iss, crypto)
-            DidKeyResolver.verifyJws(token, crypto, sender)
+            DidKeyResolver.verifyJws(token, crypto, sender, logger = logger)
 
             // retrieve the rest of the parameters
-            val scope = contents.scope ?: getQueryStringParameter(OAuthRequestParameter.Scope, signedRequest, true)!!
+            val scope = contents.scope ?: getQueryStringParameter(OAuthRequestParameter.Scope, signedRequest, true, logger = logger)!!
             val responseType = contents.responseType ?: getQueryStringParameter(
                 OAuthRequestParameter.ResponseType,
                 signedRequest,
-                true
-            )!!
+                true,
+                logger = logger)!!
             val redirectUrl = contents.clientId ?: contents.redirectUri ?: getQueryStringParameter(
                 OAuthRequestParameter.ClientId,
                 signedRequest,
-                true
+                true,
+                logger = logger
             )!!
             // optionals
-            val state = contents.state ?: getQueryStringParameter(OAuthRequestParameter.State, signedRequest)
+            val state = contents.state ?: getQueryStringParameter(OAuthRequestParameter.State, signedRequest, logger = logger)
             val responseMode =
-                contents.responseMode ?: getQueryStringParameter(OAuthRequestParameter.ResponseMode, signedRequest) ?:
+                contents.responseMode ?: getQueryStringParameter(OAuthRequestParameter.ResponseMode, signedRequest, logger = logger) ?:
                         OidcRequest.defaultResponseMode
-            val nonce = contents.nonce ?: getQueryStringParameter(OAuthRequestParameter.Nonce, signedRequest) ?:
-                    throw Error("No nonce was included in this OIDC request.")
-            val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer())
+            val nonce = contents.nonce ?: getQueryStringParameter(OAuthRequestParameter.Nonce, signedRequest, logger = logger) ?:
+                    throw logger.error("No nonce was included in this OIDC request.")
+            val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer(), logger = logger)
             val registration = contents.registration ?: getQueryStringJsonParameter(OAuthRequestParameter.Registration,
-                signedRequest, Registration.serializer())
+                signedRequest, Registration.serializer(), logger = logger)
 
-            val offers = contents.claimsOffered ?: getQueryStringJsonParameter(OAuthRequestParameter.Offer, signedRequest, ClaimObject.serializer())
+            val offers = contents.claimsOffered ?: getQueryStringJsonParameter(OAuthRequestParameter.Offer, signedRequest, ClaimObject.serializer(), logger = logger)
             // form an OidcRequest object
             return OidcRequest(
                 sender,
@@ -145,8 +146,8 @@ class OidcRequest constructor(
             )
         }
 
-        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>): T? {
-            val data = getQueryStringParameter(name, url)
+        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: ILogger): T? {
+            val data = getQueryStringParameter(name, url, logger = logger)
             return if (!data.isNullOrBlank()) {
                 MinimalJson.serializer.parse(serializer, data)
             } else {

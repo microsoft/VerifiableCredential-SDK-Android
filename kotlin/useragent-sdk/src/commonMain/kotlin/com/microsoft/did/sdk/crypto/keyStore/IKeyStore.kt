@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.utilities.ILogger
  * Interface defining methods and properties to
  * be implemented by specific key stores.
  */
-abstract class IKeyStore(private val logger: ILogger) {
+abstract class IKeyStore(internal val logger: ILogger) {
     /**
      * Returns the key associated with the specified
      * key reference.

@@ -2,6 +2,7 @@ package com.microsoft.did.sdk.crypto.protocols.jose
 
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.utilities.ILogger
 
 object JwaCryptoConverter {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
@@ -17,7 +18,7 @@ object JwaCryptoConverter {
         }
     }
 
-    fun jwaAlgToWebCrypto(algorithm: String): Algorithm {
+    fun jwaAlgToWebCrypto(algorithm: String, logger: ILogger): Algorithm {
         return when (algorithm.toUpperCase()) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
                 // get hash size
@@ -25,7 +26,7 @@ object JwaCryptoConverter {
                 Algorithm(
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
-                        "hash" to Sha.get(hashSize.toInt())
+                        "hash" to Sha.get(hashSize.toInt(), logger = logger)
                     )
                 )
             }
@@ -67,7 +68,7 @@ object JwaCryptoConverter {
         }
     }
 
-    fun webCryptoToJwa(algorithm: Algorithm): String {
+    fun webCryptoToJwa(algorithm: Algorithm, logger: ILogger): String {
         return when (algorithm) {
             is EcdsaParams -> {
                 when (algorithm.additionalParams["namedCurve"]) {
@@ -90,18 +91,18 @@ object JwaCryptoConverter {
                 }
             }
             else -> {
-                throw Error("Unknown algorithm: ${algorithm.name}");
+                throw logger.error("Unknown algorithm: ${algorithm.name}");
             }
         }
     }
 
-    fun jwkAlgToKeyGenWebCrypto(algorithm: String): Algorithm {
+    fun jwkAlgToKeyGenWebCrypto(algorithm: String, logger: ILogger): Algorithm {
         return when (algorithm.toUpperCase()) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
                 // get hash size
                 val hashSize = Regex("[Rr][Ss](\\d+)").matchEntire(algorithm)!!.groupValues[0]
                 RsaHashedKeyAlgorithm(
-                    hash = Sha.get(hashSize.toInt()),
+                    hash = Sha.get(hashSize.toInt(), logger = logger),
                     publicExponent = 65537UL,
                     modulusLength = 4096UL// KEY SIZE
                 )
@@ -137,7 +138,7 @@ object JwaCryptoConverter {
                 )
             }
             else -> {
-                throw Error("Unknown JOSE algorithm: $algorithm")
+                throw logger.error("Unknown JOSE algorithm: $algorithm")
             }
         }
     }

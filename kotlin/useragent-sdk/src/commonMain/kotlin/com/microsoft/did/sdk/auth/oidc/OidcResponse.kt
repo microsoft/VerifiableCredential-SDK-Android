@@ -79,45 +79,45 @@ class OidcResponse (
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
                 ContentType.Application.FormUrlEncoded -> {
-                    val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data) ?: throw Error("No id_token given.")
-                    val state = getQueryStringParameter(OAuthRequestParameter.State, data)
-                    val token = JwsToken(idToken)
+                    val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data, logger = logger) ?: throw logger.error("No id_token given.")
+                    val state = getQueryStringParameter(OAuthRequestParameter.State, data, logger = logger)
+                    val token = JwsToken(idToken, logger = logger)
                     val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
 
                     val clockSkew = clockSkewInMinutes * 60
                     val currentTime = getCurrentTime() / 1000;
                     if (currentTime - clockSkew < response.exp) {
-                        throw Error("Id token has expired.")
+                        throw logger.error("Id token has expired.")
                     }
                     if (issuedWithinLastMinutes != null &&
                         (response.iat < (currentTime - clockSkew - (issuedWithinLastMinutes * 60)))) {
-                        throw Error("Id token issued before time frame set by issuedWithinLastMinutes ($issuedWithinLastMinutes)")
+                        throw logger.error("Id token issued before time frame set by issuedWithinLastMinutes ($issuedWithinLastMinutes)")
                     }
 
                     val responder = if (response.did != null) {
                         resolver.resolve(response.did, crypto)
                     } else {
                         DidKeyResolver.resolveIdentiferFromKid(token.signatures.first {
-                            !it.getKid().isNullOrBlank()
-                        }.getKid()!!, crypto, resolver)
+                            !it.getKid(logger = logger).isNullOrBlank()
+                        }.getKid(logger = logger)!!, crypto, resolver, logger = logger)
                     }
 
-                    DidKeyResolver.verifyJws(token, crypto, responder)
+                    DidKeyResolver.verifyJws(token, crypto, responder, logger = logger)
                     val claimObjects = mutableListOf<ClaimObject>()
                     if (response.claimNames != null) {
                         // for each claim class
                         response.claimNames.forEach {
                             claimClass ->
-                            val claims = response.claimSources?.get(claimClass.value) ?: throw Error("Could not find claims for ${claimClass.key}")
+                            val claims = response.claimSources?.get(claimClass.value) ?: throw logger.error("Could not find claims for ${claimClass.key}")
                             claims.forEach { claim ->
                                 if (claim.containsKey("JWT")) {
-                                    val claimObjectData = JwsToken(claim["JWT"]!!)
-                                    DidKeyResolver.verifyJws(claimObjectData, crypto, responder)
+                                    val claimObjectData = JwsToken(claim["JWT"]!!, logger = logger)
+                                    DidKeyResolver.verifyJws(claimObjectData, crypto, responder, logger = logger)
                                     val claimObject = MinimalJson.serializer.parse(ClaimObject.serializer(), claimObjectData.content())
                                     if (claimObject.claimClass != claimClass.key) {
-                                        throw Error("Claim Object class does not match expected class.")
+                                        throw logger.error("Claim Object class does not match expected class.")
                                     }
-                                    claimObject.verify(crypto, resolver)
+                                    claimObject.verify(crypto, resolver, logger = logger)
                                     claimObjects.add(claimObject)
                                 }
                             }
@@ -136,7 +136,7 @@ class OidcResponse (
                     )
                 }
                 else -> {
-                    throw Error("Unable to parse content of type $contentType")
+                    throw logger.error("Unable to parse content of type $contentType")
                 }
             }
         }
@@ -167,7 +167,7 @@ class OidcResponse (
             claimSources = mutableMapOf()
             claims.forEachIndexed { index, it ->
                 val claimData = MinimalJson.serializer.stringify(ClaimObject.serializer(), it)
-                val token = JwsToken(claimData)
+                val token = JwsToken(claimData, logger = logger)
                 token.sign(useKey, crypto)
                 val serialized = token.serialize(JwsFormat.Compact)
                 val name = if (claimNames.containsKey(it.claimClass)) {
@@ -200,7 +200,7 @@ class OidcResponse (
 
         val responseData = MinimalJson.serializer.stringify(OidcResponseObject.serializer(), response)
         println("Responding with data: $responseData")
-        val token = JwsToken(responseData)
+        val token = JwsToken(responseData, logger = logger)
         token.sign(useKey, crypto)
         val responseSerialized = token.serialize(JwsFormat.Compact)
 
@@ -213,8 +213,8 @@ class OidcResponse (
 //                val responseBody = "id_token=${idToken}" + if (!state.isNullOrBlank()) {
 //                    "&state=${state}"
                     // DISABLED WHILE EnterpiseAgent is not percent decoding
-                val responseBody = "id_token=${PercentEncoding.encode(idToken)}" + if (!state.isNullOrBlank()) {
-                    "&state=${PercentEncoding.encode(state)}"
+                val responseBody = "id_token=${PercentEncoding.encode(idToken, logger = logger)}" + if (!state.isNullOrBlank()) {
+                    "&state=${PercentEncoding.encode(state, logger = logger)}"
                 } else {
                     ""
                 }
@@ -237,7 +237,7 @@ class OidcResponse (
                 }
             }
             else -> {
-                throw Error("Unknown Response Mode $responseMode")
+                throw logger.error("Unknown Response Mode $responseMode")
             }
         }
     }

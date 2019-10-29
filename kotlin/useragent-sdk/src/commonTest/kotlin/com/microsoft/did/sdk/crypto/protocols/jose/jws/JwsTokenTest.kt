@@ -23,7 +23,7 @@ class JwsTokenTest {
 
     @BeforeTest
     fun setup() {
-        keyRef = Base64Url.encode(Random.nextBytes(8))
+        keyRef = Base64Url.encode(Random.nextBytes(8), logger)
         var keyPair =  subtle.generateKeyPair(
             RsaOaepParams(),
             true,
@@ -38,13 +38,13 @@ class JwsTokenTest {
     fun signAndVerify() {
         val testData = Random.Default.nextBytes(32)
 
-        val token = JwsToken(testData)
+        val token = JwsToken(testData, logger)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(JwsFormat.Compact)
 
         println(serialized)
 
-        val verifyToken = JwsToken.deserialize(serialized)
+        val verifyToken = JwsToken.deserialize(serialized, logger)
         verifyToken.verify(crypto)
     }
 

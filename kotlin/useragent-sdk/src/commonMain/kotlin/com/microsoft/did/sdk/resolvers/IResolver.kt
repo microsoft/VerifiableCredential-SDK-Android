@@ -14,7 +14,7 @@ import com.microsoft.did.sdk.utilities.ILogger
  * be implemented by specific resolver methods.
  * @interface
  */
-abstract class IResolver(private val logger: ILogger) {
+abstract class IResolver(internal val logger: ILogger) {
 
     /**
      * Returns the identifier document for the specified
@@ -43,7 +43,7 @@ abstract class IResolver(private val logger: ILogger) {
             cryptoOperations,
             logger,
             this,
-            NullRegistrar()
+            NullRegistrar(logger)
         )
     }
 }

@@ -1,5 +1,7 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
 
+import com.microsoft.did.sdk.utilities.ILogger
+
 /**
  * A type of operation that may be performed using a key.
  */
@@ -14,7 +16,7 @@ enum class KeyUsage (val value: String) {
     UnwrapKey("unwrapKey")
 }
 
-fun toKeyUsage(key_ops: String): KeyUsage {
+fun toKeyUsage(key_ops: String, logger: ILogger): KeyUsage {
     return when (key_ops) {
         KeyUsage.Encrypt.value -> KeyUsage.Encrypt
         KeyUsage.Decrypt.value -> KeyUsage.Decrypt
@@ -24,6 +26,6 @@ fun toKeyUsage(key_ops: String): KeyUsage {
         KeyUsage.DeriveKey.value -> KeyUsage.DeriveKey
         KeyUsage.WrapKey.value -> KeyUsage.WrapKey
         KeyUsage.UnwrapKey.value -> KeyUsage.UnwrapKey
-        else -> throw Error("Unknown key_op $key_ops")
+        else -> throw logger.error("Unknown key_op $key_ops")
     }
 }

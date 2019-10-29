@@ -5,6 +5,7 @@ import kotlin.test.assertEquals
 
 
 class Base64TestSuite() {
+    val logger = ConsoleLogger()
     /**
      * @see https://tools.ietf.org/html/rfc4648#section-10
      */
@@ -34,7 +35,7 @@ class Base64TestSuite() {
             val inputDataList = it.first.map { character -> character.toByte() }
             val inputData = ByteArray(inputDataList.size)
             inputDataList.forEachIndexed {index, byte -> inputData[index] = byte }
-            val output = Base64.encode(inputData)
+            val output = Base64.encode(inputData, logger)
             assertEquals(it.second, output, "Failed to encode \"${it.first}\" correctly.")
         }
     }
@@ -43,7 +44,7 @@ class Base64TestSuite() {
     fun rfcDecodeVectorsTest() {
         base64TestPairs.forEach {
             val outputData = it.first.map { character -> character.toByte() }.toByteArray()
-            val output = Base64.decode(it.second)
+            val output = Base64.decode(it.second, logger)
             assertEqualsByteArray(outputData, output, "Failed to decode \"${it.first}\" correctly.")
         }
     }
@@ -54,7 +55,7 @@ class Base64TestSuite() {
             val inputDataList = it.first.map { character -> character.toByte() }
             val inputData = ByteArray(inputDataList.size)
             inputDataList.forEachIndexed {index, byte -> inputData[index] = byte }
-            val output = Base64Url.encode(inputData)
+            val output = Base64Url.encode(inputData, logger)
             assertEquals(it.second, output, "Failed to encode \"${it.first}\" correctly.")
         }
     }
@@ -63,7 +64,7 @@ class Base64TestSuite() {
     fun rfcUrlDecodeVectorsTest() {
         base64UrlTestPairs.forEach {
             val outputData = it.first.map { character -> character.toByte() }.toByteArray()
-            val output = Base64Url.decode(it.second)
+            val output = Base64Url.decode(it.second, logger)
             assertEqualsByteArray(outputData, output, "Failed to decode \"${it.first}\" correctly.")
         }
     }
@@ -80,7 +81,7 @@ class Base64TestSuite() {
         data[1] = 0xFE.toByte()
         data[2] = 0x41.toByte()
 
-        assertEquals("yv5B", Base64Url.encode(data))
+        assertEquals("yv5B", Base64Url.encode(data, logger))
 
         val stringData = "1234"
         // 1(53) 2(54)  3(55)  4(56)
@@ -91,7 +92,7 @@ class Base64TestSuite() {
         expectedData[0] = 0xD7.toByte()
         expectedData[1] = 0x6D.toByte()
         expectedData[2] = 0xF8.toByte()
-        assertEqualsByteArray(expectedData, Base64Url.decode(stringData))
+        assertEqualsByteArray(expectedData, Base64Url.decode(stringData, logger))
     }
 
     fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {

@@ -71,10 +71,10 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
-        val keyGenParams = algorithm as? EcKeyGenParams ?: throw Error("EcKeyGenParams expected as algorithm")
+        val keyGenParams = algorithm as? EcKeyGenParams ?: throw logger.error("EcKeyGenParams expected as algorithm")
         if (keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.value.toUpperCase(Locale.ROOT) &&
             keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.name.toUpperCase(Locale.ROOT)) {
-            throw Error("The curve ${keyGenParams.namedCurve} is not supported by Secp256k1Provider")
+            throw logger.error("The curve ${keyGenParams.namedCurve} is not supported by Secp256k1Provider")
         }
     }
 
@@ -83,7 +83,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
-            throw Error("Data must be 32 bytes")
+            throw logger.error("Data must be 32 bytes")
         }
         return NativeSecp256k1.sign(hashedData, keyData)
     }
@@ -93,7 +93,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
-            throw Error("Data must be 32 bytes")
+            throw logger.error("Data must be 32 bytes")
         }
 
         print("KEY DATA: ")
@@ -160,7 +160,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
             crv = W3cCryptoApiConstants.Secp256k1.value,
             use = "sig",
             key_ops = keyOps,
-            alg = JwaCryptoConverter.webCryptoToJwa(key.algorithm),
+            alg = JwaCryptoConverter.webCryptoToJwa(key.algorithm, logger),
             ext = key.extractable,
             d = d?.trim(),
             x = xyData.first.trim(),
@@ -173,7 +173,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
         if (key.type == KeyType.Private) {
             val keyData = (key.handle as Secp256k1Handle).data
             if (!NativeSecp256k1.secKeyVerify(keyData)) {
-                throw Error("Private key invalid")
+                throw logger.error("Private key invalid")
             }
         }
     }
@@ -201,7 +201,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
                 Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 )
         } else {
-            throw Error("Public key improperly formatted")
+            throw logger.error("Public key improperly formatted")
         }
     }
 

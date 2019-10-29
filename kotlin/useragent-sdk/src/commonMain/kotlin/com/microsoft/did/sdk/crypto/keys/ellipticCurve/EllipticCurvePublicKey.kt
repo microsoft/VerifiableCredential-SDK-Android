@@ -4,8 +4,9 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.ILogger
 
-class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
+class EllipticCurvePublicKey(key: JsonWebKey, logger: ILogger): PublicKey(key, logger = logger) {
     override fun minimumAlphabeticJwk(): String {
         return "{\"crv\":\"$crv\",\"kty\":\"${kty.value}\",\"x\":\"$x\",\"y\":\"$y\"}"
     }

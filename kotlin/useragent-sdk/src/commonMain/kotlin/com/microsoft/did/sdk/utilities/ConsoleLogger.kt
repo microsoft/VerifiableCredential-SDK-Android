@@ -16,11 +16,13 @@ class ConsoleLogger(var debug: Boolean = false): ILogger {
         }
     }
 
-    override fun error(message: String) {
+    override fun error(message: String): Error {
         println("[ERROR]: $message")
+        throw Error(message)
     }
 
-    override fun fatal(message: String) {
+    override fun fatal(message: String): Error {
         println("[FATAL]: $message")
+        throw Error(message)
     }
 }

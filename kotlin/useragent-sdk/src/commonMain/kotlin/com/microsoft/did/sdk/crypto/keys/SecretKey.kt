@@ -8,13 +8,14 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.toKeyUsage
+import com.microsoft.did.sdk.utilities.ILogger
 
 /**
  * Represents an OCT key
  * @class
  * @extends JsonWebKey
  */
-open class SecretKey(key: JsonWebKey): IKeyStoreItem {
+open class SecretKey(key: JsonWebKey, logger: ILogger): IKeyStoreItem {
     /**
      * Set the Oct key type
      */
@@ -33,7 +34,7 @@ open class SecretKey(key: JsonWebKey): IKeyStoreItem {
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it, logger = logger) }
 
     /**
      * Algorithm intended for use with this key
