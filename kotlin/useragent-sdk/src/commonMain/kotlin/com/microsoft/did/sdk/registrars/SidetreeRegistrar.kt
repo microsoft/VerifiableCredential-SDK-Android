@@ -6,10 +6,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.getHttpClient
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.utilities.*
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -24,7 +21,7 @@ import kotlinx.serialization.ImplicitReflectionSerializer
  * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar(private val baseUrl: String): IRegistrar() {
+class SidetreeRegistrar(private val baseUrl: String, private val logger: ILogger): IRegistrar() {
     @ImplicitReflectionSerializer
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request

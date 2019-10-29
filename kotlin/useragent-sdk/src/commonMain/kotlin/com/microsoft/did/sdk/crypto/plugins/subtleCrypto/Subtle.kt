@@ -2,13 +2,14 @@ package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.MinimalJson
 import kotlinx.serialization.json.Json
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
-open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
+open class Subtle(providers: Set<Provider> = emptySet(), private val logger: ILogger): SubtleCrypto {
     val provider = providers.map({
         Pair<String, Provider>(it.name.toLowerCase(), it)
     }).toMap()

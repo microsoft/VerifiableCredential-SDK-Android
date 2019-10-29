@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.resolvers
 
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
@@ -14,7 +15,7 @@ import kotlinx.serialization.json.Json
  * @implements IResolver
  * @param url of the remote resolver.
  */
-class HttpResolver(private val baseUrl : String): IResolver {
+class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(logger) {
 
     @Serializable
     data class ResolverMetadata(val driverId: String?, val driver: String?, val retrieved: String?, val duration: String?)

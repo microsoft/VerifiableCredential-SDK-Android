@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.did.sdk.identifier.document.service.ServiceHubEndpoint
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.registrars.RegistrationDocument
+import com.microsoft.did.sdk.utilities.ILogger
 
 val microsoftIdentityHubDocument = IdentifierDocument(
     context = "https://w3id.org/did/v1",
@@ -59,12 +60,14 @@ class Identifier constructor (
                  val encryptionKeyReference: String,
                  val alias: String,
                  private val cryptoOperations: CryptoOperations,
+                 private val logger: ILogger,
                  private val resolver: IResolver,
                  private val registrar: IRegistrar) {
     companion object {
         suspend fun createAndRegister(
             alias: String,
             cryptoOperations: CryptoOperations,
+            logger: ILogger,
             signatureKeyReference: String,
             encryptionKeyReference: String,
             resolver: IResolver,
@@ -101,7 +104,7 @@ class Identifier constructor (
 //                            resolver.resolve(it,
 //                                cryptoOperations
 //                            )}
-                        val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, resolver, registrar)
+                        val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, logger, resolver, registrar)
                         hubService = IdentityHubService.create(
                             id = "#hub",
                             keyStore = cryptoOperations.keyStore,
@@ -124,6 +127,7 @@ class Identifier constructor (
                 signatureKeyReference = personaSigKeyRef,
                 encryptionKeyReference = personaEncKeyRef,
                 cryptoOperations = cryptoOperations,
+                logger = logger,
                 resolver = resolver,
                 registrar = registrar
             )

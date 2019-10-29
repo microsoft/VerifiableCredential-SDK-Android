@@ -47,10 +47,10 @@ object AndroidKeyConverter {
         }
     }
 
-    fun androidPrivateKeyToPrivateKey(alias: String, privateKey: KeyStore.PrivateKeyEntry): PrivateKey {
-        return when (whatKeyTypeIs(privateKey.certificate.publicKey)) {
+    fun androidPrivateKeyToPrivateKey(alias: String, keyStore: KeyStore): PrivateKey {
+        val key = keyStore.getCertificate(alias).publicKey
+        return when (whatKeyTypeIs(key)) {
             KeyType.RSA -> {
-                val key = privateKey.certificate.publicKey
                 RsaPrivateKey (
                     JsonWebKey(
                         kty = KeyType.RSA.value,
@@ -69,7 +69,6 @@ object AndroidKeyConverter {
                 )
             }
             KeyType.EllipticCurve -> {
-                val key = privateKey.certificate.publicKey
                 EllipticCurvePrivateKey (
                     JsonWebKey(
                         kty = KeyType.EllipticCurve.value,
@@ -84,16 +83,6 @@ object AndroidKeyConverter {
             }
             else -> throw Error("Cannot convert key type.")
         }
-    }
-
-    fun androidSecretKeyToSecretKey(alias: String, secretKey: KeyStore.SecretKeyEntry): SecretKey {
-        return SecretKey(
-            JsonWebKey(
-                kty = KeyType.Octets.value,
-                kid = alias,
-                k = Base64.encodeToString(secretKey.secretKey.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-            )
-        )
     }
 
     fun whatKeyTypeIs(publicKey: java.security.PublicKey): KeyType {

@@ -1,14 +1,11 @@
 package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.byteArrayToString
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.utilities.*
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
-class MockProvider() : Provider() {
+class MockProvider() : Provider(ConsoleLogger()) {
     override val name: String = W3cCryptoApiConstants.RsaOaep.value
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,

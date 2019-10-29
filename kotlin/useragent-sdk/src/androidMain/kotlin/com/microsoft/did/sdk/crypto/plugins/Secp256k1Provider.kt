@@ -5,16 +5,20 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.printBytes
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
+import org.bitcoin.Secp256k1Context
 import java.security.SecureRandom
 import java.util.*
 
-class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto): Provider() {
+class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Provider(logger) {
     companion object {
         init {
-            System.loadLibrary("secp256k1")
+            if (!Secp256k1Context.isEnabled()) {
+                System.loadLibrary("secp256k1")
+            }
         }
     }
 

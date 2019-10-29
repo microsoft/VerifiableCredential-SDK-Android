@@ -2,8 +2,9 @@ package com.microsoft.did.sdk.crypto.keyStore
 
 import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.utilities.ILogger
 
-class InMemoryKeyStore(): IKeyStore {
+class InMemoryKeyStore(logger: ILogger): IKeyStore(logger) {
     private val secretKeys: MutableMap<String, KeyContainer<SecretKey>> = mutableMapOf()
     private val privateKeys: MutableMap<String, KeyContainer<PrivateKey>> = mutableMapOf()
     private val publicKeys: MutableMap<String, KeyContainer<PublicKey>> = mutableMapOf()

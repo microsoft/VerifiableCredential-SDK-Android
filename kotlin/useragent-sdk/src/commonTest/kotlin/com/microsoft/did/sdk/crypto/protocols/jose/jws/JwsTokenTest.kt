@@ -8,15 +8,17 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.ConsoleLogger
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class JwsTokenTest {
-    val keyStore = InMemoryKeyStore()
-    val subtle = Subtle(setOf(MockProvider()))
-    val crypto = CryptoOperations(keyStore = keyStore, subtleCrypto = subtle)
+    val logger = ConsoleLogger()
+    val keyStore = InMemoryKeyStore(logger)
+    val subtle = Subtle(setOf(MockProvider()), logger)
+    val crypto = CryptoOperations(keyStore = keyStore, subtleCrypto = subtle, logger = logger)
     var keyRef = ""
 
     @BeforeTest

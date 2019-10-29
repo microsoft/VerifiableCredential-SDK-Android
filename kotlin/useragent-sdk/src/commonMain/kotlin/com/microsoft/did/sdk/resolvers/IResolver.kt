@@ -7,20 +7,21 @@ import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.registrars.NullRegistrar
+import com.microsoft.did.sdk.utilities.ILogger
 
 /**
  * Interface defining methods and properties to
  * be implemented by specific resolver methods.
  * @interface
  */
-interface IResolver {
+abstract class IResolver(private val logger: ILogger) {
 
     /**
      * Returns the identifier document for the specified
      * identifier.
      * @param identifier for which to return the identifier document.
      */
-    open suspend fun resolveDocument(identifier: String): IdentifierDocument
+    abstract suspend fun resolveDocument(identifier: String): IdentifierDocument
 
     suspend fun resolve(identifier: String,
                 cryptoOperations: CryptoOperations): Identifier {
@@ -40,6 +41,7 @@ interface IResolver {
             encKey,
             "",
             cryptoOperations,
+            logger,
             this,
             NullRegistrar()
         )

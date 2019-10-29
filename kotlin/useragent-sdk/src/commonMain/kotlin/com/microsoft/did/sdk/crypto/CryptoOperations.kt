@@ -12,14 +12,16 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.utilities.ConsoleLogger
+import com.microsoft.did.sdk.utilities.ILogger
 
 /**
  * Class that encompasses all of Crypto
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore) {
-    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
+class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, private val logger: ILogger = ConsoleLogger()) {
+    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto, logger)
 
     /**
      * Sign payload with key stored in keyStore.

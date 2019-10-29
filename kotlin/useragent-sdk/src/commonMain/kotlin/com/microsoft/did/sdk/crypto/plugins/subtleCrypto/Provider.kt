@@ -1,8 +1,11 @@
 package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.utilities.ILogger
 
-abstract class Provider {
+abstract class Provider(
+    private val logger: ILogger
+) {
     public abstract val name: String
     public abstract val privateKeyUsage: Set<KeyUsage>?
     public abstract val publicKeyUsage: Set<KeyUsage>?

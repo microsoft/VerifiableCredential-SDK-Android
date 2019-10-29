@@ -4,6 +4,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.resolvers.IResolver
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.MinimalJson
 import kotlinx.serialization.Serializable
 
@@ -32,6 +33,7 @@ data class IdentifierToken (
         fun deserialize(
             identifierToken: String,
             cryptoOperations: CryptoOperations,
+            logger: ILogger,
             resolver: IResolver,
             registrar: IRegistrar
         ): Identifier {
@@ -42,6 +44,7 @@ data class IdentifierToken (
                 signatureKeyReference = token.signatureKeyReference,
                 encryptionKeyReference = token.encryptionKeyReference,
                 cryptoOperations = cryptoOperations,
+                logger = logger,
                 resolver = resolver,
                 registrar = registrar
             )

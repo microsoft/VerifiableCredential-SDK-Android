@@ -8,6 +8,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
+import com.microsoft.did.sdk.utilities.ILogger
 import com.microsoft.did.sdk.utilities.MinimalJson
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
@@ -20,6 +21,7 @@ import kotlinx.serialization.*
 class OidcRequest constructor(
     val sender: Identifier,
     val crypto: CryptoOperations,
+    private val logger: ILogger,
     val scope: String = OidcRequest.defaultScope,
     val redirectUrl: String,
     val nonce: String,
@@ -73,6 +75,7 @@ class OidcRequest constructor(
         @ImplicitReflectionSerializer
         suspend fun parseAndVerify(signedRequest: String,
                                    crypto: CryptoOperations,
+                                   logger: ILogger,
                                    resolver: IResolver): OidcRequest {
             if (!signedRequest.startsWith("openid://")) {
                 throw Error("Must be passed a string beginning in \"openid://\"")
@@ -129,6 +132,7 @@ class OidcRequest constructor(
             return OidcRequest(
                 sender,
                 crypto,
+                logger,
                 scope,
                 redirectUrl,
                 nonce,
@@ -157,7 +161,7 @@ class OidcRequest constructor(
      */
     @ImplicitReflectionSerializer
     suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null): ClaimObject? {
-        val oidcResponse = OidcResponse.create(this, identifier)
+        val oidcResponse = OidcResponse.create(this, identifier, logger)
         claimObjects?.forEach {
             oidcResponse.addClaim(it)
         }

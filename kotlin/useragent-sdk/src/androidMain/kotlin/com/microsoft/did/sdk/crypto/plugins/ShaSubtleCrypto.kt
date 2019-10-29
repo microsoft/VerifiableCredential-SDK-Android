@@ -5,10 +5,11 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
+import com.microsoft.did.sdk.utilities.ILogger
 import java.security.MessageDigest
 
-class ShaSubtleCrypto: Subtle(setOf(ShaProvider())), SubtleCrypto {
-    class ShaProvider() : Provider() {
+class ShaSubtleCrypto(logger: ILogger): Subtle(setOf(ShaProvider(logger)), logger), SubtleCrypto {
+    class ShaProvider(logger: ILogger) : Provider(logger) {
         override val name: String = "SHA-256"
         override val privateKeyUsage: Set<KeyUsage>? = null
         override val publicKeyUsage: Set<KeyUsage>? = null

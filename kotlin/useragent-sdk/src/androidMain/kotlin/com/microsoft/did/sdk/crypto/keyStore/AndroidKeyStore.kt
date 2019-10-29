@@ -15,24 +15,21 @@ import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.utilities.stringToByteArray
 import kotlinx.serialization.json.Json
 import java.security.KeyStore
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
 import javax.crypto.spec.SecretKeySpec
 import 	androidx.security.crypto.EncryptedSharedPreferences
-import com.microsoft.did.sdk.utilities.AndroidKeyConverter
-import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.byteArrayToString
+import com.microsoft.did.sdk.utilities.*
 import kotlinx.serialization.parse
 import javax.crypto.KeyGenerator
 
-class AndroidKeyStore(private val context: Context): IKeyStore {
+class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(logger) {
 
     companion object {
         const val provider = "AndroidKeyStore"
-        private val regexForKeyReference = Regex("(^.*)\\.[^.]+$")
+        private val regexForKeyReference = Regex("#(^.*)\\.[^.]+$")
         private val regexForKeyIndex = Regex("^.*\\.([^.]+$)")
 
         val keyStore: KeyStore = KeyStore.getInstance(provider).apply {
@@ -62,8 +59,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             return KeyContainer(
                 kty = key.kty,
                 keys = key.kids.map{
-                    AndroidKeyConverter.androidPrivateKeyToPrivateKey(it,
-                        keyStore.getEntry(it, null) as? KeyStore.PrivateKeyEntry ?: throw Error("Key $it is not a private key."))
+                    AndroidKeyConverter.androidPrivateKeyToPrivateKey(it, keyStore)
                 }
             )
         }
@@ -87,9 +83,9 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             return KeyContainer(
                 kty = key.kty,
                 keys = key.kids.map {
-                    val entry = keyStore.getEntry(it, null) as? KeyStore.PrivateKeyEntry
+                    val entry = keyStore.getCertificate(it).publicKey
                         ?: throw Error("Key $it is not a private key.")
-                    AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry.certificate.publicKey)
+                    AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry)
                 }
             )
         }
@@ -119,8 +115,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         val nativeKeys = listNativeKeys()
         var keyRef = findReferenceInList(nativeKeys, keyId)
         if (!keyRef.isNullOrBlank()) { // This keyID exists within the android keystore
-            return AndroidKeyConverter.androidPrivateKeyToPrivateKey(keyId,
-                keyStore.getEntry(keyId, null) as? KeyStore.PrivateKeyEntry ?: throw Error("Key $keyId is not a private key."))
+            return AndroidKeyConverter.androidPrivateKeyToPrivateKey(keyId, keyStore)
         }
         val softwareKeys = listSecureData()
         keyRef = findReferenceInList(softwareKeys, keyId)
@@ -134,9 +129,8 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         val nativeKeys = listNativeKeys()
         var keyRef = findReferenceInList(nativeKeys, keyId)
         if (!keyRef.isNullOrBlank()) { // This keyID exists within the android keystore
-            val entry = keyStore.getEntry(keyId, null) as? KeyStore.PrivateKeyEntry
-                ?: throw Error("Key $keyId is not a private key.")
-            return AndroidKeyConverter.androidPublicKeyToPublicKey(keyId, entry.certificate.publicKey)
+            val entry = keyStore.getCertificate(keyId).publicKey ?: throw Error("Key $keyId is not a private key.")
+            return AndroidKeyConverter.androidPublicKeyToPublicKey(keyId, entry)
         }
         val softwareKeys = listSecureData()
         keyRef = findReferenceInList(softwareKeys, keyId)
@@ -197,19 +191,15 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
         val aliases = keyStore.aliases()
         // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
-        val keyContainerPattern = Regex("(^.+).\\d+$")
+        val keyContainerPattern = Regex("#(^.+).\\d+$")
         for (alias in aliases) {
             if (alias.matches(keyContainerPattern)) {
-                val entry = keyStore.getEntry(alias, null)
+                val entry = keyStore.getCertificate(alias)
                 val matches = keyContainerPattern.matchEntire(alias)
                 val values = matches!!.groupValues
 
                 // Get the keyType associated with this key.
-                val kty: KeyType = if (entry is KeyStore.PrivateKeyEntry) {
-                    AndroidKeyConverter.whatKeyTypeIs(entry.certificate.publicKey)
-                } else { // SecretKeyEntry
-                    KeyType.Octets
-                }
+                val kty: KeyType = AndroidKeyConverter.whatKeyTypeIs(entry.publicKey)
 
                 // Add the key to an ListItem or make a new one
                 if (output.containsKey(values[1])) {
@@ -328,45 +318,8 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
         return alias
     }
 
-    @TargetApi(23)
-    private fun secretKeyToKeyProtection(key: SecretKey): KeyProtection {
-        return keyToKeyProtection(key.key_ops, key.use)
-    }
-
-    @TargetApi(23)
-    private fun keyToKeyProtection(keyOps: List<KeyUsage>?, keyUse: KeyUse?): KeyProtection {
-        val keyUsage = keyOps ?: if (keyUse != null) {
-            when (keyUse) {
-                KeyUse.Encryption -> listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
-                KeyUse.Signature -> listOf(KeyUsage.Sign, KeyUsage.Verify)
-                else -> throw Error("Key use should be either 'sig' or 'enc'")
-            }
-        } else {
-            listOf(KeyUsage.Encrypt, KeyUsage.Decrypt, KeyUsage.Sign, KeyUsage.Verify)
-        }
-        return keyUsageToKeyProtection(keyUsage)
-    }
-
-    @TargetApi(23)
-    private fun keyUsageToKeyProtection(usage: List<KeyUsage>): KeyProtection {
-        var usageFlag = 0
-        if (usage.contains(KeyUsage.Decrypt)) {
-            usageFlag = usageFlag or KeyProperties.PURPOSE_DECRYPT
-        }
-        if (usage.contains(KeyUsage.Encrypt)) {
-            usageFlag = usageFlag or KeyProperties.PURPOSE_ENCRYPT
-        }
-        if (usage.contains(KeyUsage.Sign)) {
-            usageFlag = usageFlag or KeyProperties.PURPOSE_SIGN
-        }
-        if (usage.contains(KeyUsage.Verify)) {
-            usageFlag = usageFlag or KeyProperties.PURPOSE_VERIFY
-        }
-        return KeyProtection.Builder(usageFlag).build()
-    }
-
     fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
-        if (!kid.isNullOrBlank() && !kid.startsWith(keyReference)) {
+        if (!kid.isNullOrBlank() && !kid.startsWith(keyReference) && !kid.startsWith("#$keyReference")) {
             throw Error("Key ID must begin with key reference")
             // This could be relaxed later if we flush keys and use a format of
             // KEYREFERENCE.KEYID and ensure KEYID does not contain the dot delimiter
@@ -377,7 +330,7 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
             // generate a key id
             val listItem = this.list()[keyReference]
             if (listItem == null) { // no previous keys
-                "$keyReference.1"
+                "#$keyReference.1"
             } else {
                 // heuristic, find the last digit and count up
                 var latestVersion = listItem.kids.reduce {
@@ -394,10 +347,9 @@ class AndroidKeyStore(private val context: Context): IKeyStore {
                 }.toIntOrNull() ?: 1
 
                 latestVersion++
-                "$keyReference.$latestVersion"
+                "#$keyReference.$latestVersion"
             }
         }
     }
-
 
 }

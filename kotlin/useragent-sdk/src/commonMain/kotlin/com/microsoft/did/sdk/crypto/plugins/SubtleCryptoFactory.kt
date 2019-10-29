@@ -2,6 +2,7 @@ package com.microsoft.did.sdk.crypto.plugins
 
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.utilities.ILogger
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -11,7 +12,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 /**
  * Utility class to handle all CryptoSuite dependency injection
  */
-class SubtleCryptoFactory(default: SubtleCrypto) {
+class SubtleCryptoFactory(default: SubtleCrypto, val logger: ILogger) {
 
     private val defaultSubtleCryptoMapItem = SubtleCryptoMapItem(default, SubtleCryptoScope.All)
 

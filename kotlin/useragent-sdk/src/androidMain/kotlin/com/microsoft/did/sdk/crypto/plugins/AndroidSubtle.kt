@@ -11,12 +11,13 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.AndroidKeyConverter
+import com.microsoft.did.sdk.utilities.ILogger
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.*
 import javax.crypto.KeyGenerator
 
-class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
+class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: ILogger): SubtleCrypto {
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -33,7 +34,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
         // key's handle should be an Android keyStore key reference.
         val handle = cryptoKeyToPrivateKey(key)
         return Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).run {
-            initSign(handle.privateKey)
+            initSign(handle)
             update(data)
             sign()
         }
@@ -88,8 +89,6 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
                 .build()
         )
         val keyPair = keyPairGenerator.genKeyPair()
-        // get the private key reference
-        val entry = AndroidKeyStore.keyStore.getEntry(alias, null) as KeyStore.PrivateKeyEntry
         // convert keypair.
         return CryptoKeyPair(
             CryptoKey(
@@ -109,7 +108,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
                 keyUsages,
                 AndroidKeyHandle(
                     alias,
-                    entry
+                    null
                 )
             )
         )
@@ -153,8 +152,7 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
                     if (!AndroidKeyStore.keyStore.isKeyEntry(keyData.kid ?: "")) {
                         throw Error("Software private keys are not supported.")
                     }
-                    val entry = AndroidKeyStore.keyStore.getEntry(keyData.kid!!, null) as?
-                            KeyStore.PrivateKeyEntry ?: throw Error("Key must be a private key")
+                    val entry = AndroidKeyHandle(keyData.kid!!, null)
                     return CryptoKey(
                         KeyType.Private,
                         extractable,
@@ -167,12 +165,13 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
                         BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)),
                         BigInteger(1, Base64.decode(keyData.e, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
                     ))
+                    val entry = AndroidKeyHandle(keyData.kid ?: "", key)
                     return CryptoKey(
                         KeyType.Public,
                         extractable,
                         JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!),
                         keyUsages,
-                        key
+                        entry
                     )
                 }
             }
@@ -193,8 +192,8 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
             is PublicKey -> {
                 AndroidKeyConverter.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key).toJWK()
             }
-            is KeyStore.PrivateKeyEntry -> {
-                AndroidKeyConverter.androidPrivateKeyToPrivateKey(internalHandle.alias, internalHandle.key).toJWK()
+            null -> {
+                AndroidKeyConverter.androidPrivateKeyToPrivateKey(internalHandle.alias, AndroidKeyStore.keyStore).toJWK()
             }
             else -> {
                 throw Error("Unknown CryptoKey format")
@@ -224,13 +223,17 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore): SubtleCrypto {
     }
 
     private fun cryptoKeyToPublicKey(key: CryptoKey): PublicKey {
-        val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
-        return internalHandle.key as? PublicKey ?: throw Error("Private key passed when a public key was expected")
+        val internalHandle = key.handle as? AndroidKeyHandle
+            ?: throw Error("Unknown format for CryptoKey passed")
+        return internalHandle.key as? PublicKey
+            ?: throw Error("Private key passed when a public key was expected")
     }
 
-    private fun cryptoKeyToPrivateKey(key: CryptoKey): KeyStore.PrivateKeyEntry {
-        val internalHandle = key.handle as? AndroidKeyHandle ?: throw Error("Unknown format for CryptoKey passed")
-        return internalHandle.key as? KeyStore.PrivateKeyEntry ?: throw Error("Software private keys are not supported.")
+    private fun cryptoKeyToPrivateKey(key: CryptoKey): PrivateKey {
+        val internalHandle = key.handle as? AndroidKeyHandle
+            ?: throw Error("Unknown format for CryptoKey passed")
+        return AndroidKeyStore.keyStore.getKey(internalHandle.alias, null) as? PrivateKey
+            ?: throw Error("Software private keys are not supported by the native Subtle.")
     }
 
 

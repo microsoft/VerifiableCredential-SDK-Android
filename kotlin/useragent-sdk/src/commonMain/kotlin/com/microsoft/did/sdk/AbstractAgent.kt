@@ -12,6 +12,8 @@ import com.microsoft.did.sdk.identifier.IdentifierToken
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.resolvers.HttpResolver
 import com.microsoft.did.sdk.utilities.Base64Url
+import com.microsoft.did.sdk.utilities.ConsoleLogger
+import com.microsoft.did.sdk.utilities.ILogger
 import io.ktor.http.ContentType
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlin.random.Random
@@ -26,7 +28,8 @@ abstract class AbstractAgent (registrationUrl: String,
                               resolverUrl: String,
                               val signatureKeyReference: String,
                               val encryptionKeyReference: String,
-                              /* private */ val cryptoOperations: CryptoOperations) {
+                              /* private */ val cryptoOperations: CryptoOperations,
+                              private val logger: ILogger = ConsoleLogger()) {
     companion object {
         const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
         const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"
@@ -37,12 +40,12 @@ abstract class AbstractAgent (registrationUrl: String,
     /**
      * Registrar to be used when registering Identifiers.
      */
-    private val registrar = SidetreeRegistrar(registrationUrl)
+    private val registrar = SidetreeRegistrar(registrationUrl, logger)
 
     /**
      * Resolver to be used when resolving Identifier Documents.
      */
-    private val resolver = HttpResolver(resolverUrl)
+    private val resolver = HttpResolver(resolverUrl, logger)
 
     /**
      * Creates and registers an Identifier.
@@ -50,14 +53,14 @@ abstract class AbstractAgent (registrationUrl: String,
     @ImplicitReflectionSerializer
     suspend fun createIdentifier(): Identifier {
         val alias = Base64Url.encode(Random.nextBytes(16))
-        return Identifier.createAndRegister(alias, cryptoOperations, signatureKeyReference,
+        return Identifier.createAndRegister(alias, cryptoOperations, logger, signatureKeyReference,
             encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id"))
     }
 
     fun deserializeIdentifier(identifierToken: String): Identifier {
         return IdentifierToken.deserialize(
             identifierToken,
-            cryptoOperations, resolver, registrar
+            cryptoOperations, logger, resolver, registrar
         )
     }
 
@@ -67,7 +70,7 @@ abstract class AbstractAgent (registrationUrl: String,
      */
     @ImplicitReflectionSerializer
     suspend fun parseOidcRequest(request: String): OidcRequest {
-        return OidcRequest.parseAndVerify(request, cryptoOperations, resolver)
+        return OidcRequest.parseAndVerify(request, cryptoOperations, logger, resolver)
     }
 
     /**
@@ -80,7 +83,7 @@ abstract class AbstractAgent (registrationUrl: String,
                                   issuedWithinLastMinutes: Int? = null,
                                   contentType: ContentType = ContentType.Application.FormUrlEncoded): OidcResponse {
         return OidcResponse.parseAndVerify(response, clockSkewInMinutes, issuedWithinLastMinutes,
-            cryptoOperations, resolver, contentType)
+            cryptoOperations, logger, resolver, contentType)
     }
 
 }

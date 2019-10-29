@@ -26,6 +26,7 @@ import kotlin.math.floor
 class OidcResponse (
     val responder: Identifier,
     val crypto: CryptoOperations,
+    private val logger: ILogger,
     val nonce: String,
     val state: String? = null,
     val claims: MutableList<ClaimObject> = mutableListOf(),
@@ -56,10 +57,11 @@ class OidcResponse (
     companion object {
         const val SELFISSUED = "https://self-issued.me"
 
-        fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier): OidcResponse {
+        fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier, logger: ILogger): OidcResponse {
             return OidcResponse(
                 responder = respondWithIdentifier,
                 crypto = oidcRequest.crypto,
+                logger = logger,
                 nonce = oidcRequest.nonce,
                 state = oidcRequest.state,
                 redirectUrl = oidcRequest.redirectUrl,
@@ -72,6 +74,7 @@ class OidcResponse (
                                    clockSkewInMinutes: Int = 5,
                                    issuedWithinLastMinutes: Int? = null,
                                    crypto: CryptoOperations,
+                                   logger: ILogger,
                                    resolver: IResolver,
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
@@ -124,6 +127,7 @@ class OidcResponse (
                     OidcResponse(
                         responder,
                         crypto,
+                        logger,
                         response.nonce,
                         state,
                         claimObjects,
