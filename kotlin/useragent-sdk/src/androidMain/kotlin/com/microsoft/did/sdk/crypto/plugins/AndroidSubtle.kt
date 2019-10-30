@@ -285,8 +285,8 @@ class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: I
                 KeyUsage.Encrypt -> KeyProperties.PURPOSE_ENCRYPT
                 KeyUsage.Sign -> KeyProperties.PURPOSE_SIGN
                 KeyUsage.Verify -> KeyProperties.PURPOSE_VERIFY
-                KeyUsage.WrapKey -> KeyProperties.PURPOSE_WRAP_KEY
-                KeyUsage.UnwrapKey -> KeyProperties.PURPOSE_WRAP_KEY
+                KeyUsage.WrapKey -> KeyProperties.PURPOSE_ENCRYPT
+                KeyUsage.UnwrapKey -> KeyProperties.PURPOSE_DECRYPT
                 else -> 0
             })
         }
