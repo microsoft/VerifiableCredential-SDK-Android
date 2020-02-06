@@ -23,6 +23,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude("META-INF/*.kotlin_module")
+    }
 }
 
 buildscript {
@@ -71,5 +74,5 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
-
+    implementation files('libs/org.bitcoin.jar')
 }
