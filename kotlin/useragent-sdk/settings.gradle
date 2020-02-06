@@ -1,4 +1,0 @@
-rootProject.name = 'useragent-sdk'
-
-
-enableFeaturePreview('GRADLE_METADATA')

@@ -1,4 +1,0 @@
-headers = /Users/sydneymorton/Documents/repos/UserAgent/kotlin/useragent-sdk/src/iosMain/resources/libsecp256k1.h
-headerFilter = /Users/sydneymorton/Documents/repos/UserAgent/kotlin/useragent-sdk/src/iosMain/resources/*
-
-linkerOpts.osx = -L/Users/sydneymorton/Documents/repos/UserAgent/kotlin/useragent-sdk/src/iosMain/resources/libsecp256k1.dylib
