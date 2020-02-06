@@ -1,0 +1,2 @@
+include ':PortableIdentityCard-ClientSDK'
+rootProject.name='PortableIdentityCard-ClientSDK-Android'
