@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 apply plugin: 'kotlin-android'
 
@@ -10,7 +10,6 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
     defaultConfig {
-        applicationId "com.microsoft.did.sdk"
         minSdkVersion 23 // TODO: needs to be 19 for authenticator app
         targetSdkVersion 29
         versionCode 1
