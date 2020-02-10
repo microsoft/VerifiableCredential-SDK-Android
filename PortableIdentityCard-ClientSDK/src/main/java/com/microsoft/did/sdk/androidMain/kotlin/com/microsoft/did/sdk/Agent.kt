@@ -4,8 +4,6 @@ import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import android.content.Context
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
-import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
@@ -14,10 +12,11 @@ import com.microsoft.did.sdk.utilities.ConsoleLogger
 import com.microsoft.did.sdk.utilities.ILogger
 
 class Agent private constructor (
+    
             registrationUrl: String = defaultRegistrationUrl,
             resolverUrl: String = defaultResolverUrl,
             cryptoOperations: CryptoOperations,
-            logger: ILogger): AbstractAgent(
+            logger: ILogger): DidManager(
     registrationUrl = registrationUrl,
     resolverUrl = resolverUrl,
     signatureKeyReference = defaultSignatureKeyReference,
