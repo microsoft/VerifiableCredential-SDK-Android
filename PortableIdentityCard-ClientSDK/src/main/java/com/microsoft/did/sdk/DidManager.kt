@@ -30,7 +30,7 @@ import kotlin.random.Random
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class DidManager(
+class DidManager @JvmOverloads constructor(
     context: Context,
     registrationUrl: String = defaultRegistrationUrl,
     resolverUrl: String = defaultResolverUrl,
