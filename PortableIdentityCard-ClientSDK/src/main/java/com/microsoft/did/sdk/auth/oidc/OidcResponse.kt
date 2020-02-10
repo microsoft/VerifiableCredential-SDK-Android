@@ -20,6 +20,7 @@ import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
 import kotlinx.serialization.*
+import java.util.*
 import kotlin.collections.Map
 import kotlin.math.floor
 
@@ -85,7 +86,7 @@ class OidcResponse (
                     val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
 
                     val clockSkew = clockSkewInMinutes * 60
-                    val currentTime = getCurrentTime() / 1000;
+                    val currentTime = Date().time / 1000
                     if (currentTime - clockSkew < response.exp) {
                         throw logger.error("Id token has expired.")
                     }
@@ -154,7 +155,7 @@ class OidcResponse (
         expiresIn: Int = 5,
         useKey: String = responder.signatureKeyReference
     ): ClaimObject? {
-        val currentTime = getCurrentTime()
+        val currentTime = Date().time
         val expiration = currentTime + 1000 * 60 * expiresIn
         val exp = floor(expiration / 1000f).toInt()
         val iat = floor( currentTime / 1000f).toInt()

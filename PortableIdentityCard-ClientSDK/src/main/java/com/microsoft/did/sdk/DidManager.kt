@@ -36,7 +36,6 @@ class DidManager(
     resolverUrl: String = defaultResolverUrl,
     private val signatureKeyReference: String = defaultSignatureKeyReference,
     private val encryptionKeyReference: String = defaultEncryptionKeyReference,
-    private val cryptoOperations: CryptoOperations,
     private val logger: ILogger = ConsoleLogger()
 ) {
 
@@ -47,26 +46,22 @@ class DidManager(
         const val defaultEncryptionKeyReference = "encryption"
     }
 
+    private val cryptoOperations: CryptoOperations
+
+    private val registrar = SidetreeRegistrar(registrationUrl, logger)
+
+    private val resolver = HttpResolver(resolverUrl, logger)
+
     init {
         val keyStore = AndroidKeyStore(context, logger)
         val subtleCrypto = AndroidSubtle(keyStore, logger)
-        val crypto = CryptoOperations(subtleCrypto, keyStore, logger)
         val ecSubtle = EllipticCurveSubtleCrypto(subtleCrypto, logger)
-        crypto.subtleCryptoFactory.addMessageSigner(
+        cryptoOperations = CryptoOperations(subtleCrypto, keyStore, logger)
+        cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
     }
-
-    /**
-     * Registrar to be used when registering Identifiers.
-     */
-    private val registrar = SidetreeRegistrar(registrationUrl, logger)
-
-    /**
-     * Resolver to be used when resolving Identifier Documents.
-     */
-    private val resolver = HttpResolver(resolverUrl, logger)
 
     /**
      * Creates and registers an Identifier.
