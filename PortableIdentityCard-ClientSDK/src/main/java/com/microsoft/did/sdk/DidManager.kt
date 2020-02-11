@@ -5,8 +5,15 @@
 
 package com.microsoft.did.sdk
 
+import android.content.Context
 import com.microsoft.did.sdk.auth.oidc.OidcRequest
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
+import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.identifier.IdentifierToken
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
@@ -18,18 +25,20 @@ import io.ktor.http.ContentType
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlin.random.Random
 
-
 /**
  * Class for creating identifiers and
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-abstract class AbstractAgent (registrationUrl: String,
-                              resolverUrl: String,
-                              val signatureKeyReference: String,
-                              val encryptionKeyReference: String,
-                              /* private */ val cryptoOperations: CryptoOperations,
-                              private val logger: ILogger = ConsoleLogger()) {
+class DidManager @JvmOverloads constructor(
+    context: Context,
+    registrationUrl: String = defaultRegistrationUrl,
+    resolverUrl: String = defaultResolverUrl,
+    private val signatureKeyReference: String = defaultSignatureKeyReference,
+    private val encryptionKeyReference: String = defaultEncryptionKeyReference,
+    private val logger: ILogger = ConsoleLogger()
+) {
+
     companion object {
         const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
         const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"
@@ -37,15 +46,22 @@ abstract class AbstractAgent (registrationUrl: String,
         const val defaultEncryptionKeyReference = "encryption"
     }
 
-    /**
-     * Registrar to be used when registering Identifiers.
-     */
+    private val cryptoOperations: CryptoOperations
+
     private val registrar = SidetreeRegistrar(registrationUrl, logger)
 
-    /**
-     * Resolver to be used when resolving Identifier Documents.
-     */
     private val resolver = HttpResolver(resolverUrl, logger)
+
+    init {
+        val keyStore = AndroidKeyStore(context, logger)
+        val subtleCrypto = AndroidSubtle(keyStore, logger)
+        val ecSubtle = EllipticCurveSubtleCrypto(subtleCrypto, logger)
+        cryptoOperations = CryptoOperations(subtleCrypto, keyStore, logger)
+        cryptoOperations.subtleCryptoFactory.addMessageSigner(
+            name = W3cCryptoApiConstants.EcDsa.value,
+            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
+        )
+    }
 
     /**
      * Creates and registers an Identifier.
@@ -53,15 +69,14 @@ abstract class AbstractAgent (registrationUrl: String,
     @ImplicitReflectionSerializer
     suspend fun createIdentifier(): Identifier {
         val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
-        return Identifier.createAndRegister(alias, cryptoOperations, logger, signatureKeyReference,
-            encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id"))
+        return Identifier.createAndRegister(
+            alias, cryptoOperations, logger, signatureKeyReference,
+            encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
+        )
     }
 
     fun deserializeIdentifier(identifierToken: String): Identifier {
-        return IdentifierToken.deserialize(
-            identifierToken,
-            cryptoOperations, logger, resolver, registrar
-        )
+        return IdentifierToken.deserialize(identifierToken, cryptoOperations, logger, resolver, registrar)
     }
 
     /**
@@ -78,12 +93,15 @@ abstract class AbstractAgent (registrationUrl: String,
      * parse the OIDC Response object.
      */
     @ImplicitReflectionSerializer
-    suspend fun parseOidcResponse(response: String,
-                                  clockSkewInMinutes: Int = 5,
-                                  issuedWithinLastMinutes: Int? = null,
-                                  contentType: ContentType = ContentType.Application.FormUrlEncoded): OidcResponse {
-        return OidcResponse.parseAndVerify(response, clockSkewInMinutes, issuedWithinLastMinutes,
-            cryptoOperations, logger, resolver, contentType)
+    suspend fun parseOidcResponse(
+        response: String,
+        clockSkewInMinutes: Int = 5,
+        issuedWithinLastMinutes: Int? = null,
+        contentType: ContentType = ContentType.Application.FormUrlEncoded
+    ): OidcResponse {
+        return OidcResponse.parseAndVerify(
+            response, clockSkewInMinutes, issuedWithinLastMinutes,
+            cryptoOperations, logger, resolver, contentType
+        )
     }
-
 }

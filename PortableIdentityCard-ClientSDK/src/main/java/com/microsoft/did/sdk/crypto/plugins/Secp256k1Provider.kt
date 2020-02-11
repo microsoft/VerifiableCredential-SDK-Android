@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved
+
 package com.microsoft.did.sdk.crypto.plugins
 
 import android.util.Base64
@@ -13,7 +15,7 @@ import org.bitcoin.Secp256k1Context
 import java.security.SecureRandom
 import java.util.*
 
-class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Provider(logger) {
+class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger) : Provider(logger) {
     companion object {
         init {
             if (!Secp256k1Context.isEnabled()) {
@@ -53,19 +55,20 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
 
         val keyPair = CryptoKeyPair(
             privateKey = CryptoKey(
-            KeyType.Private,
-            extractable,
-            signAlgorithm,
-            keyUsages.toList(),
-            Secp256k1Handle("", secret)
+                KeyType.Private,
+                extractable,
+                signAlgorithm,
+                keyUsages.toList(),
+                Secp256k1Handle("", secret)
             ),
             publicKey = CryptoKey(
-            KeyType.Public,
-            true,
-            signAlgorithm,
-            publicKeyUsage.toList(),
+                KeyType.Public,
+                true,
+                signAlgorithm,
+                publicKeyUsage.toList(),
                 Secp256k1Handle("", publicKey)
-        ))
+            )
+        )
 
         return return keyPair
     }
@@ -73,7 +76,8 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
         val keyGenParams = algorithm as? EcKeyGenParams ?: throw logger.error("EcKeyGenParams expected as algorithm")
         if (keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.value.toUpperCase(Locale.ROOT) &&
-            keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.name.toUpperCase(Locale.ROOT)) {
+            keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.name.toUpperCase(Locale.ROOT)
+        ) {
             throw logger.error("The curve ${keyGenParams.namedCurve} is not supported by Secp256k1Provider")
         }
     }
@@ -116,11 +120,19 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
                 extractable = extractable,
                 algorithm = algorithm,
                 usages = keyUsages.toList(),
-                handle = Secp256k1Handle(alias, Base64.decode(stringToByteArray(keyData.d!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
+                handle = Secp256k1Handle(
+                    alias,
+                    Base64.decode(
+                        stringToByteArray(keyData.d!!),
+                        Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                    )
+                )
             )
         } else {// public key
-            val x = Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-            val y = Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            val x =
+                Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            val y =
+                Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
             val xyData = ByteArray(65)
             xyData[0] = secp256k1Tag.uncompressed.byte
             x.forEachIndexed { index, byte ->
@@ -182,7 +194,8 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
     private fun publicToXY(keyData: ByteArray): Pair<String, String> {
         if (keyData.size == 33 && (
                     keyData[0] == secp256k1Tag.even.byte ||
-                    keyData[0] == secp256k1Tag.odd.byte)) {
+                            keyData[0] == secp256k1Tag.odd.byte)
+        ) {
             // compressed form
             return Pair(
                 "",
@@ -190,16 +203,17 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto, logger: ILogger): Pro
             )
         } else if (keyData.size == 65 && (
                     keyData[0] == secp256k1Tag.uncompressed.byte ||
-                    keyData[0] == secp256k1Tag.hybridEven.byte ||
-                    keyData[0] == secp256k1Tag.hybridOdd.byte
-                    )) {
+                            keyData[0] == secp256k1Tag.hybridEven.byte ||
+                            keyData[0] == secp256k1Tag.hybridOdd.byte
+                    )
+        ) {
             // uncompressed, bytes 1-32, and 33-end are x and y
             val x = keyData.sliceArray(1..32)
             val y = keyData.sliceArray(33..64)
             return Pair(
                 Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                 Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-                )
+            )
         } else {
             throw logger.error("Public key improperly formatted")
         }
