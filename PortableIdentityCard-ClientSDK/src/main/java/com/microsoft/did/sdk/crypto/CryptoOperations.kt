@@ -1,13 +1,12 @@
+// Copyright (c) Microsoft Corporation. All rights reserved
+
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.IKeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
@@ -20,7 +19,11 @@ import com.microsoft.did.sdk.utilities.ILogger
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, private val logger: ILogger = ConsoleLogger()) {
+class CryptoOperations(
+    subtleCrypto: SubtleCrypto,
+    val keyStore: IKeyStore,
+    private val logger: ILogger = ConsoleLogger()
+) {
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto, logger)
 
     /**
@@ -43,7 +46,8 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
     fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
         logger.debug("Verifying with $signingKeyReference")
         val publicKey = keyStore.getPublicKey(signingKeyReference)
-        val alg = algorithm ?: publicKey.alg ?: throw logger.error("No Algorithm specified for key $signingKeyReference")
+        val alg =
+            algorithm ?: publicKey.alg ?: throw logger.error("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Public)
         val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
         if (!subtle.verify(alg, key, signature, payload)) {
@@ -75,29 +79,38 @@ class CryptoOperations(subtleCrypto: SubtleCrypto, val keyStore: IKeyStore, priv
         when (keyType) {
             KeyType.Octets -> throw logger.error("Cannot generate a symmetric key")
             KeyType.RSA -> {
-                val subtle = subtleCryptoFactory.getSharedKeyEncrypter(W3cCryptoApiConstants.RsaSsaPkcs1V15.value, SubtleCryptoScope.Private)
-                val keyPair = subtle.generateKeyPair(RsaHashedKeyAlgorithm(
-                    modulusLength = 4096UL,
-                    publicExponent = 65537UL,
-                    hash = Sha.Sha256,
-                    additionalParams = mapOf(
-                        "KeyReference" to keyReference
-                    )
-                ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt))
+                val subtle = subtleCryptoFactory.getSharedKeyEncrypter(
+                    W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
+                    SubtleCryptoScope.Private
+                )
+                val keyPair = subtle.generateKeyPair(
+                    RsaHashedKeyAlgorithm(
+                        modulusLength = 4096UL,
+                        publicExponent = 65537UL,
+                        hash = Sha.Sha256,
+                        additionalParams = mapOf("KeyReference" to keyReference)
+                    ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
+                )
                 logger.debug("Saving key pair to keystore.")
                 keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger))
             }
             KeyType.EllipticCurve -> {
-                val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
-                val keyPair = subtle.generateKeyPair(EcKeyGenParams(
-                    namedCurve = W3cCryptoApiConstants.Secp256k1.value,
-                    additionalParams = mapOf(
-                        "hash" to Sha.Sha256,
-                        "KeyReference" to keyReference
-                    )
-                ), true, listOf(KeyUsage.Sign, KeyUsage.Verify))
+                val subtle =
+                    subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
+                val keyPair = subtle.generateKeyPair(
+                    EcKeyGenParams(
+                        namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+                        additionalParams = mapOf(
+                            "hash" to Sha.Sha256,
+                            "KeyReference" to keyReference
+                        )
+                    ), true, listOf(KeyUsage.Sign, KeyUsage.Verify)
+                )
                 logger.debug("Saving key pair to keystore.")
-                keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger))
+                keyStore.save(
+                    keyReference,
+                    EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger)
+                )
             }
         }
         return keyStore.getPublicKey(keyReference).getKey()

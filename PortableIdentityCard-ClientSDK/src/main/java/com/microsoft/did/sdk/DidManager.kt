@@ -66,7 +66,6 @@ class DidManager @JvmOverloads constructor(
     /**
      * Creates and registers an Identifier.
      */
-    @ImplicitReflectionSerializer
     suspend fun createIdentifier(): Identifier {
         val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
         return Identifier.createAndRegister(
@@ -76,7 +75,13 @@ class DidManager @JvmOverloads constructor(
     }
 
     fun deserializeIdentifier(identifierToken: String): Identifier {
-        return IdentifierToken.deserialize(identifierToken, cryptoOperations, logger, resolver, registrar)
+        return IdentifierToken.deserialize(
+            identifierToken,
+            cryptoOperations,
+            logger,
+            resolver,
+            registrar
+        )
     }
 
     /**
