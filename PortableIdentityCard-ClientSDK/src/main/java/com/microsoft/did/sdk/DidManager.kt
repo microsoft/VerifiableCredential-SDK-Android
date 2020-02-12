@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.auth.oidc.OidcRequest
+import com.microsoft.did.sdk.auth.oidc.OidcResponse
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
