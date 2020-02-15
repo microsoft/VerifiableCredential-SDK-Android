@@ -17,31 +17,52 @@ import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ConsoleLogger
 import com.microsoft.did.sdk.utilities.ILogger
 
-object DidSdkConfig {
+class DidSdkConfig(
+    context: Context,
+    internal val logger: ILogger,
+    internal val signatureKeyReference: String,
+    internal val encryptionKeyReference: String,
+    registrationUrl: String,
+    resolverUrl: String
+) {
 
-    var registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register"
+    /**
+     * This is a helper for static access to the SDK. This should not be needed for projects with proper dependency
+     * injection as this obfuscates dependencies and harms testability
+     */
+    companion object {
+        @JvmStatic
+        lateinit var didManager: DidManager
+            private set
 
-    var resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
+        @JvmStatic
+        lateinit var picManager: PicManager
+            private set
 
-    var signatureKeyReference: String = "signature"
-
-    var encryptionKeyReference: String = "encryption"
-
-    var logger: ILogger = ConsoleLogger()
-
-    internal lateinit var registrar: IRegistrar
-
-    internal lateinit var resolver: IResolver
-
-    internal lateinit var cryptoOperations: CryptoOperations
-
-    @JvmStatic
-    fun init(context: Context) {
-        init(AndroidKeyStore(context, logger))
+        @JvmStatic
+        @JvmOverloads
+        fun init(
+            context: Context,
+            logger: ILogger = ConsoleLogger(),
+            registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
+            resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
+            signatureKeyReference: String = "signature",
+            encryptionKeyReference: String = "encryption"
+        ) {
+            val config = DidSdkConfig(context, logger, signatureKeyReference, encryptionKeyReference, registrationUrl, resolverUrl)
+            didManager = DidManager(config)
+            picManager = PicManager(config)
+        }
     }
 
-    @JvmStatic
-    fun init(keyStore: AndroidKeyStore) {
+    internal var registrar: IRegistrar
+
+    internal var resolver: IResolver
+
+    internal var cryptoOperations: CryptoOperations
+
+    init {
+        val keyStore = AndroidKeyStore(context, logger)
         val subtleCrypto = AndroidSubtle(keyStore, logger)
         val ecSubtle = EllipticCurveSubtleCrypto(subtleCrypto, logger)
         registrar = SidetreeRegistrar(registrationUrl, logger)

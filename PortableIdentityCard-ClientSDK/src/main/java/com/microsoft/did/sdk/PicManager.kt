@@ -11,10 +11,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ImplicitReflectionSerializer
 
-object PicManager {
+class PicManager(private val config: DidSdkConfig) {
 
     @ImplicitReflectionSerializer
-    @JvmStatic
     fun parseOidcRequest(request: String, callback: (OidcRequest) -> Unit) {
         GlobalScope.launch {
             callback.invoke(parseOidcRequest(request))
@@ -22,7 +21,6 @@ object PicManager {
     }
 
     @ImplicitReflectionSerializer
-    @JvmStatic
     fun parseOidcResponse(request: String, callback: (OidcResponse) -> Unit) {
         GlobalScope.launch {
             callback.invoke(parseOidcResponse(request))
@@ -36,7 +34,7 @@ object PicManager {
     @ImplicitReflectionSerializer
     suspend fun parseOidcRequest(request: String): OidcRequest {
         return withContext(Dispatchers.Default) {
-            OidcRequest.parseAndVerify(request, DidSdkConfig.cryptoOperations, DidSdkConfig.logger, DidSdkConfig.resolver)
+            OidcRequest.parseAndVerify(request, config.cryptoOperations, config.logger, config.resolver)
         }
     }
 
@@ -54,7 +52,7 @@ object PicManager {
         return withContext(Dispatchers.Default) {
             OidcResponse.parseAndVerify(
                 response, clockSkewInMinutes, issuedWithinLastMinutes,
-                DidSdkConfig.cryptoOperations, DidSdkConfig.logger, DidSdkConfig.resolver, contentType
+                config.cryptoOperations, config.logger, config.resolver, contentType
             )
         }
     }
