@@ -5,24 +5,20 @@
 
 package com.microsoft.did.sdk
 
-import android.content.Context
-import com.microsoft.did.sdk.auth.oidc.OidcRequest
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.DidSdkConfig.cryptoOperations
+import com.microsoft.did.sdk.DidSdkConfig.encryptionKeyReference
+import com.microsoft.did.sdk.DidSdkConfig.logger
+import com.microsoft.did.sdk.DidSdkConfig.registrar
+import com.microsoft.did.sdk.DidSdkConfig.resolver
+import com.microsoft.did.sdk.DidSdkConfig.signatureKeyReference
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.identifier.IdentifierToken
-import com.microsoft.did.sdk.registrars.SidetreeRegistrar
-import com.microsoft.did.sdk.resolvers.HttpResolver
 import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.ConsoleLogger
-import com.microsoft.did.sdk.utilities.ILogger
-import io.ktor.http.ContentType
-import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.security.auth.callback.Callback
 import kotlin.random.Random
 
 /**
@@ -30,48 +26,26 @@ import kotlin.random.Random
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class DidManager @JvmOverloads constructor(
-    context: Context,
-    registrationUrl: String = defaultRegistrationUrl,
-    resolverUrl: String = defaultResolverUrl,
-    private val signatureKeyReference: String = defaultSignatureKeyReference,
-    private val encryptionKeyReference: String = defaultEncryptionKeyReference,
-    private val logger: ILogger = ConsoleLogger()
-) {
+object DidManager {
 
-    companion object {
-        const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
-        const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"
-        const val defaultSignatureKeyReference = "signature"
-        const val defaultEncryptionKeyReference = "encryption"
-    }
-
-    private val cryptoOperations: CryptoOperations
-
-    private val registrar = SidetreeRegistrar(registrationUrl, logger)
-
-    private val resolver = HttpResolver(resolverUrl, logger)
-
-    init {
-        val keyStore = AndroidKeyStore(context, logger)
-        val subtleCrypto = AndroidSubtle(keyStore, logger)
-        val ecSubtle = EllipticCurveSubtleCrypto(subtleCrypto, logger)
-        cryptoOperations = CryptoOperations(subtleCrypto, keyStore, logger)
-        cryptoOperations.subtleCryptoFactory.addMessageSigner(
-            name = W3cCryptoApiConstants.EcDsa.value,
-            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
-        )
+    @JvmStatic
+    fun createIdentifier(callback: (Identifier) -> Unit) {
+        GlobalScope.launch {
+            callback.invoke(createIdentifier())
+        }
     }
 
     /**
      * Creates and registers an Identifier.
      */
     suspend fun createIdentifier(): Identifier {
-        val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
-        return Identifier.createAndRegister(
-            alias, cryptoOperations, logger, signatureKeyReference,
-            encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
-        )
+        return withContext(Dispatchers.Default) {
+            val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
+            Identifier.createAndRegister(
+                alias, cryptoOperations, logger, signatureKeyReference,
+                encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
+            )
+        }
     }
 
     fun deserializeIdentifier(identifierToken: String): Identifier {
@@ -81,32 +55,6 @@ class DidManager @JvmOverloads constructor(
             logger,
             resolver,
             registrar
-        )
-    }
-
-    /**
-     * Verify the signature and
-     * return OIDC Request object.
-     */
-    @ImplicitReflectionSerializer
-    suspend fun parseOidcRequest(request: String): OidcRequest {
-        return OidcRequest.parseAndVerify(request, cryptoOperations, logger, resolver)
-    }
-
-    /**
-     * Verify the signature and
-     * parse the OIDC Response object.
-     */
-    @ImplicitReflectionSerializer
-    suspend fun parseOidcResponse(
-        response: String,
-        clockSkewInMinutes: Int = 5,
-        issuedWithinLastMinutes: Int? = null,
-        contentType: ContentType = ContentType.Application.FormUrlEncoded
-    ): OidcResponse {
-        return OidcResponse.parseAndVerify(
-            response, clockSkewInMinutes, issuedWithinLastMinutes,
-            cryptoOperations, logger, resolver, contentType
         )
     }
 }
