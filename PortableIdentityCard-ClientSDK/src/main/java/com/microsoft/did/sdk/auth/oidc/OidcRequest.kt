@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.auth.oidc
 
-import com.microsoft.did.sdk.OidcResponse
 import com.microsoft.did.sdk.auth.OAuthRequestParameter
 import com.microsoft.did.sdk.credentials.ClaimObject
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -10,7 +9,10 @@ import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.*
 import io.ktor.client.request.get
-import kotlinx.serialization.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
  * Class to represent Open ID Connect Self-Issued Tokens

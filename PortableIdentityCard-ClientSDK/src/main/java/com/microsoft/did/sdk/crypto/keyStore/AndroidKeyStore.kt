@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved
+
 package com.microsoft.did.sdk.crypto.keyStore
 
 import android.annotation.TargetApi
@@ -5,24 +7,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.security.keystore.KeyProtection
 import android.util.Base64
+import androidx.security.crypto.EncryptedSharedPreferences
 import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
-import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import kotlinx.serialization.json.Json
-import java.security.KeyStore
-import java.security.interfaces.ECPublicKey
-import java.security.interfaces.RSAPublicKey
-import javax.crypto.spec.SecretKeySpec
-import 	androidx.security.crypto.EncryptedSharedPreferences
 import com.microsoft.did.sdk.utilities.*
-import kotlinx.serialization.parse
+import java.security.KeyStore
 import javax.crypto.KeyGenerator
 
 class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(logger) {

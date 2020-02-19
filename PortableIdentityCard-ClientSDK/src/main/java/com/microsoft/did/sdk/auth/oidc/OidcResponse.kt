@@ -1,9 +1,8 @@
-package com.microsoft.did.sdk
+// Copyright (c) Microsoft Corporation. All rights reserved
+
+package com.microsoft.did.sdk.auth.oidc
 
 import com.microsoft.did.sdk.auth.OAuthRequestParameter
-import com.microsoft.did.sdk.auth.oidc.OidcRequest
-import com.microsoft.did.sdk.auth.oidc.getQueryStringParameter
-import com.microsoft.did.sdk.credentials.ClaimDetail
 import com.microsoft.did.sdk.credentials.ClaimObject
 import com.microsoft.did.sdk.credentials.ClaimResponse
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -21,7 +20,6 @@ import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
 import kotlinx.serialization.*
 import java.util.*
-import kotlin.collections.Map
 import kotlin.math.floor
 
 class OidcResponse (

@@ -5,23 +5,13 @@
 
 package com.microsoft.did.sdk
 
-import android.content.Context
-import com.microsoft.did.sdk.auth.oidc.OidcRequest
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.crypto.keys.KeyType
+import com.microsoft.did.sdk.crypto.keys.SecretKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.identifier.IdentifierToken
-import com.microsoft.did.sdk.registrars.SidetreeRegistrar
-import com.microsoft.did.sdk.resolvers.HttpResolver
 import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.ConsoleLogger
-import com.microsoft.did.sdk.utilities.ILogger
-import io.ktor.http.ContentType
+import kotlinx.coroutines.*
 import kotlin.random.Random
 
 /**
@@ -29,81 +19,74 @@ import kotlin.random.Random
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class DidManager @JvmOverloads constructor(
-    context: Context,
-    registrationUrl: String = defaultRegistrationUrl,
-    resolverUrl: String = defaultResolverUrl,
-    private val signatureKeyReference: String = defaultSignatureKeyReference,
-    private val encryptionKeyReference: String = defaultEncryptionKeyReference,
-    private val logger: ILogger = ConsoleLogger()
-) {
+class DidManager(private val config: DidSdkConfig) {
 
-    companion object {
-        const val defaultResolverUrl = "https://beta.discover.did.microsoft.com/1.0/identifiers"
-        const val defaultRegistrationUrl = "https://beta.ion.microsoft.com/api/1.0/register"
-        const val defaultSignatureKeyReference = "signature"
-        const val defaultEncryptionKeyReference = "encryption"
+    private val didSecretName = "did.identifier"
+
+    val did: Identifier by lazy { initDid() }
+
+    // TODO: Cleanup method
+    private fun initDid(): Identifier {
+        val did = if (config.cryptoOperations.keyStore.list().containsKey(didSecretName)) {
+            println("Identifier found, deserializing")
+            val keySerialized = config.cryptoOperations.keyStore.getSecretKey(didSecretName).getKey()
+            deserializeIdentifier(keySerialized.k!!)
+        } else {
+            println("No identifier found, registering new DID")
+            val identifier = registerNewDid()
+            val key = SecretKey(
+                JsonWebKey(
+                    kty = KeyType.Octets.value,
+                    kid = "#$didSecretName.1",
+                    k = did.serialize()
+                ),
+                logger = config.logger
+            )
+            config.cryptoOperations.keyStore.save(didSecretName, key)
+            identifier
+        }
+        println("Using identifier ${did.document.id}")
+        return did
     }
 
-    private val cryptoOperations: CryptoOperations
+    // TODO: properly name APIs
+    fun registerNewDid(): Identifier {
+        var did: Identifier? = null
+        // TODO: Verify runBlocking is proper here
+        runBlocking {
+            did = createIdentifier()
+        }
+        println("Registered ${did!!.document.id}")
+        return did!!
+    }
 
-    private val registrar = SidetreeRegistrar(registrationUrl, logger)
-
-    private val resolver = HttpResolver(resolverUrl, logger)
-
-    init {
-        val keyStore = AndroidKeyStore(context, logger)
-        val subtleCrypto = AndroidSubtle(keyStore, logger)
-        val ecSubtle = EllipticCurveSubtleCrypto(subtleCrypto, logger)
-        cryptoOperations = CryptoOperations(subtleCrypto, keyStore, logger)
-        cryptoOperations.subtleCryptoFactory.addMessageSigner(
-            name = W3cCryptoApiConstants.EcDsa.value,
-            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
-        )
+    fun createIdentifier(callback: (Identifier) -> Unit) {
+        GlobalScope.launch {
+            callback.invoke(createIdentifier())
+        }
     }
 
     /**
      * Creates and registers an Identifier.
      */
     suspend fun createIdentifier(): Identifier {
-        val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
-        return Identifier.createAndRegister(
-            alias, cryptoOperations, logger, signatureKeyReference,
-            encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
-        )
+        return withContext(Dispatchers.Default) {
+            val alias = Base64Url.encode(Random.nextBytes(16), logger = config.logger)
+            Identifier.createAndRegister(
+                alias, config.cryptoOperations, config.logger, config.signatureKeyReference,
+                config.encryptionKeyReference, config.resolver, config.registrar, listOf("did:test:hub.id")
+            )
+        }
     }
 
     fun deserializeIdentifier(identifierToken: String): Identifier {
         return IdentifierToken.deserialize(
             identifierToken,
-            cryptoOperations,
-            logger,
-            resolver,
-            registrar
+            config.cryptoOperations,
+            config.logger,
+            config.resolver,
+            config.registrar
         )
     }
 
-    /**
-     * Verify the signature and
-     * return OIDC Request object.
-     */
-    suspend fun parseOidcRequest(request: String): OidcRequest {
-        return OidcRequest.parseAndVerify(request, cryptoOperations, logger, resolver)
-    }
-
-    /**
-     * Verify the signature and
-     * parse the OIDC Response object.
-     */
-    suspend fun parseOidcResponse(
-        response: String,
-        clockSkewInMinutes: Int = 5,
-        issuedWithinLastMinutes: Int? = null,
-        contentType: ContentType = ContentType.Application.FormUrlEncoded
-    ): OidcResponse {
-        return OidcResponse.parseAndVerify(
-            response, clockSkewInMinutes, issuedWithinLastMinutes,
-            cryptoOperations, logger, resolver, contentType
-        )
-    }
 }
