@@ -1,19 +1,13 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.KeyStoreListItem
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
 import com.microsoft.did.sdk.utilities.*
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
-import kotlinx.serialization.stringify
 import kotlin.collections.Map
 
 /**
@@ -45,9 +39,7 @@ class JwsToken private constructor(private val payload: String,
             } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
                 println("General format detected")
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                val token = polymorphicSerialization.parse(JwsGeneralJson.serializer(), jws)
-//                val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
+                val token = Serializer.parse(JwsGeneralJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = token.signatures,
@@ -56,9 +48,7 @@ class JwsToken private constructor(private val payload: String,
             } else if (jws.toLowerCase().contains("\"signature\"")) {
                 // Flat
                 println("Flat format detected")
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                val token = polymorphicSerialization.parse(JwsFlatJson.serializer(), jws)
-//                val token = MinimalJson.serializer.parse(JwsFlatJson.serializer(), jws)
+                val token = Serializer.parse(JwsFlatJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = listOf(JwsSignature(
@@ -90,15 +80,11 @@ class JwsToken private constructor(private val payload: String,
             }
             JwsFormat.FlatJson -> {
                 val jws = intermediateFlatJsonSerialize()
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                polymorphicSerialization.stringify(JwsFlatJson.serializer(), jws)
-//                MinimalJson.serializer.stringify(JwsFlatJson.serializer(), jws)
+                Serializer.stringify(JwsFlatJson.serializer(), jws)
             }
             JwsFormat.GeneralJson -> {
                 val jws = intermediateGeneralJsonSerialize()
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                polymorphicSerialization.stringify(JwsGeneralJson.serializer(), jws)
-//            MinimalJson.serializer.stringify(JwsGeneralJson.serializer(), jws)
+                Serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
             else -> {
                 throw logger.error("Unknown JWS format: $format")
@@ -169,8 +155,7 @@ class JwsToken private constructor(private val payload: String,
 
         var encodedProtected = ""
         if (protected.isNotEmpty()) {
-            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-            val jsonProtected = polymorphicSerialization.stringify(protected, String::class, String::class)
+            val jsonProtected = Serializer.stringify(protected, String::class, String::class)
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected), logger = logger)
         }
 

@@ -5,8 +5,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.utilities.ILogger
-import com.microsoft.did.sdk.utilities.IPolymorphicSerialization
-import com.microsoft.did.sdk.utilities.PolymorphicSerialization
+import com.microsoft.did.sdk.utilities.Serializer
 
 class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
     var context: String? = null
@@ -56,9 +55,7 @@ class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
             throw logger.error("Context and Type must be set.")
         }
         val claims = if (cryptoOperations != null) {
-            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-            val serializedData = polymorphicSerialization.stringify(claimDetails, Map::class)
-//            val serializedData = MinimalJson.serializer.stringify(claimDetails)
+            val serializedData = Serializer.stringify(claimDetails, Map::class)
             val token = JwsToken(serializedData, logger = logger)
             token.sign(identifier.signatureKeyReference, cryptoOperations)
             SignedClaimDetail(

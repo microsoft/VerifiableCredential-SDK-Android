@@ -5,7 +5,6 @@ import com.microsoft.did.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 /**
  * Fetches Identifier Documents from remote resolvers over http.
@@ -33,9 +32,7 @@ class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(log
         }
         client.close()
         println("GOT $response")
-        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-        val result = polymorphicSerialization.parse(ResolverResult.serializer(), response)
-//        val result = MinimalJson.serializer.parse(ResolverResult.serializer(), response)
+        val result = Serializer.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")
         return result.document
     }

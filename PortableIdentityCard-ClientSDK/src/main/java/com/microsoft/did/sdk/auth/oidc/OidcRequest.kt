@@ -8,8 +8,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ILogger
-import com.microsoft.did.sdk.utilities.IPolymorphicSerialization
-import com.microsoft.did.sdk.utilities.PolymorphicSerialization
+import com.microsoft.did.sdk.utilities.Serializer
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
 import kotlinx.serialization.DeserializationStrategy
@@ -97,8 +96,7 @@ class OidcRequest constructor(
             }
             val token = JwsToken.deserialize(request, logger = logger)
             // get the DID associated
-            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-            val contents = polymorphicSerialization.parse(OidcRequestObject.serializer(), token.content())
+            val contents = Serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {
                 throw logger.error("Could not find the issuer's DID")
             }
@@ -151,8 +149,7 @@ class OidcRequest constructor(
         private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: ILogger): T? {
             val data = getQueryStringParameter(name, url, logger = logger)
             return if (!data.isNullOrBlank()) {
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                polymorphicSerialization.parse(serializer, data)
+                Serializer.parse(serializer, data)
             } else {
                 null
             }

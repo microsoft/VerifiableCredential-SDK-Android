@@ -14,6 +14,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.*
+import com.microsoft.did.sdk.utilities.Serializer
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
@@ -80,8 +81,7 @@ class OidcResponse (
                     val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data, logger = logger) ?: throw logger.error("No id_token given.")
                     val state = getQueryStringParameter(OAuthRequestParameter.State, data, logger = logger)
                     val token = JwsToken(idToken, logger = logger)
-                    val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                    val response = polymorphicSerialization.parse(OidcResponseObject.serializer(), token.content())
+                    val response = Serializer.parse(OidcResponseObject.serializer(), token.content())
 
                     val clockSkew = clockSkewInMinutes * 60
                     val currentTime = Date().time / 1000
@@ -112,8 +112,7 @@ class OidcResponse (
                                 if (claim.containsKey("JWT")) {
                                     val claimObjectData = JwsToken(claim["JWT"]!!, logger = logger)
                                     DidKeyResolver.verifyJws(claimObjectData, crypto, responder, logger = logger)
-                                    val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                                    val claimObject = polymorphicSerialization.parse(ClaimObject.serializer(), claimObjectData.content())
+                                    val claimObject = Serializer.parse(ClaimObject.serializer(), claimObjectData.content())
                                     if (claimObject.claimClass != claimClass.key) {
                                         throw logger.error("Claim Object class does not match expected class.")
                                     }
@@ -165,8 +164,7 @@ class OidcResponse (
             claimNames = mutableMapOf()
             claimSources = mutableMapOf()
             claims.forEachIndexed { index, it ->
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                val claimData = polymorphicSerialization.stringify(ClaimObject.serializer(), it)
+                val claimData = Serializer.stringify(ClaimObject.serializer(), it)
                 val token = JwsToken(claimData, logger = logger)
                 token.sign(useKey, crypto)
                 val serialized = token.serialize(JwsFormat.Compact)
@@ -197,8 +195,7 @@ class OidcResponse (
             claimNames = claimNames,
             claimSources = claimSources
         )
-        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-        val responseData = polymorphicSerialization.stringify(OidcResponseObject.serializer(), response)
+        val responseData = Serializer.stringify(OidcResponseObject.serializer(), response)
         println("Responding with data: $responseData")
         val token = JwsToken(responseData, logger = logger)
         token.sign(useKey, crypto)
@@ -227,8 +224,7 @@ class OidcResponse (
                 }
                 if (response.isNotBlank()) {
                     try {
-                        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                        polymorphicSerialization.parse(ClaimResponse.serializer(), response)
+                        Serializer.parse(ClaimResponse.serializer(), response)
                     } catch (error: SerializationException) {
                         // this was not the right format but we did not get a 400 error
                         null

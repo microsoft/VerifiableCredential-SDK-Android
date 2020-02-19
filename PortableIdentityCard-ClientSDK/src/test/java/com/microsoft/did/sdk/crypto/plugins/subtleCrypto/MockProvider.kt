@@ -29,16 +29,12 @@ class MockProvider() : Provider(ConsoleLogger()) {
         companion object {
             fun serialize(key: CryptoKey, data: ByteArray): ByteArray {
                 val datagram = Datagram(key.handle as String, byteArrayToString(data))
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                val json = polymorphicSerialization.stringify(serializer(), datagram)
-//                val json = MinimalJson.serializer.stringify(serializer(), datagram)
+                val json = Serializer.stringify(serializer(), datagram)
                 return stringToByteArray(json)
             }
 
             fun deserialize(datagram: ByteArray): Datagram {
-                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-                return polymorphicSerialization.parse(serializer(), byteArrayToString(datagram))
-//                return MinimalJson.serializer.parse(serializer(), byteArrayToString(datagram))
+                return Serializer.parse(serializer(), byteArrayToString(datagram))
             }
         }
     }

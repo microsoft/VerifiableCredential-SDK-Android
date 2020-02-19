@@ -1,5 +1,7 @@
 package com.microsoft.did.sdk.utilities
 
+import assertk.assertThat
+import assertk.assertions.isEqualToWithGivenProperties
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
@@ -53,10 +55,9 @@ class SerializationTest {
 
     @Test
     fun serializationTest() {
-        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
-        val serializedJson = polymorphicSerialization.stringify(IdentifierDocument.serializer(), document)
+        val serializedJson = Serializer.stringify(IdentifierDocument.serializer(), document)
         println("serialized data: $serializedJson")
-        val deserialized = polymorphicSerialization.parse(IdentifierDocument.serializer(), serializedJson)
-        println(deserialized)
+        val deserialize = Serializer.parse(IdentifierDocument.serializer(), serializedJson)
+        assertThat(document).isEqualToWithGivenProperties(deserialize)
     }
 }
