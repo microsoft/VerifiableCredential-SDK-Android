@@ -70,7 +70,6 @@ class OidcResponse (
             )
         }
 
-        @ImplicitReflectionSerializer
         suspend fun parseAndVerify(data: String,
                                    clockSkewInMinutes: Int = 5,
                                    issuedWithinLastMinutes: Int? = null,
@@ -83,7 +82,9 @@ class OidcResponse (
                     val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data, logger = logger) ?: throw logger.error("No id_token given.")
                     val state = getQueryStringParameter(OAuthRequestParameter.State, data, logger = logger)
                     val token = JwsToken(idToken, logger = logger)
-                    val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
+                    val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                    val response = polymorphicSerialization.parse(OidcResponseObject.serializer(), token.content())
+//                    val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
 
                     val clockSkew = clockSkewInMinutes * 60
                     val currentTime = Date().time / 1000
@@ -114,7 +115,9 @@ class OidcResponse (
                                 if (claim.containsKey("JWT")) {
                                     val claimObjectData = JwsToken(claim["JWT"]!!, logger = logger)
                                     DidKeyResolver.verifyJws(claimObjectData, crypto, responder, logger = logger)
-                                    val claimObject = MinimalJson.serializer.parse(ClaimObject.serializer(), claimObjectData.content())
+                                    val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                                    val claimObject = polymorphicSerialization.parse(ClaimObject.serializer(), claimObjectData.content())
+//                                    val claimObject = MinimalJson.serializer.parse(ClaimObject.serializer(), claimObjectData.content())
                                     if (claimObject.claimClass != claimClass.key) {
                                         throw logger.error("Claim Object class does not match expected class.")
                                     }
@@ -150,7 +153,6 @@ class OidcResponse (
     /**
      * @param expiresIn Minutes until the OIDC response requires
      */
-    @ImplicitReflectionSerializer
     suspend fun signAndSend(
         expiresIn: Int = 5,
         useKey: String = responder.signatureKeyReference
@@ -167,7 +169,9 @@ class OidcResponse (
             claimNames = mutableMapOf()
             claimSources = mutableMapOf()
             claims.forEachIndexed { index, it ->
-                val claimData = MinimalJson.serializer.stringify(ClaimObject.serializer(), it)
+                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                val claimData = polymorphicSerialization.stringify(ClaimObject.serializer(), it)
+//                val claimData = MinimalJson.serializer.stringify(ClaimObject.serializer(), it)
                 val token = JwsToken(claimData, logger = logger)
                 token.sign(useKey, crypto)
                 val serialized = token.serialize(JwsFormat.Compact)
@@ -198,8 +202,9 @@ class OidcResponse (
             claimNames = claimNames,
             claimSources = claimSources
         )
-
-        val responseData = MinimalJson.serializer.stringify(OidcResponseObject.serializer(), response)
+        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+        val responseData = polymorphicSerialization.stringify(OidcResponseObject.serializer(), response)
+//        val responseData = MinimalJson.serializer.stringify(OidcResponseObject.serializer(), response)
         println("Responding with data: $responseData")
         val token = JwsToken(responseData, logger = logger)
         token.sign(useKey, crypto)
@@ -228,7 +233,9 @@ class OidcResponse (
                 }
                 if (response.isNotBlank()) {
                     try {
-                        MinimalJson.serializer.parse(ClaimResponse.serializer(), response)
+                        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                        polymorphicSerialization.parse(ClaimResponse.serializer(), response)
+//                        MinimalJson.serializer.parse(ClaimResponse.serializer(), response)
                     } catch (error: SerializationException) {
                         // this was not the right format but we did not get a 400 error
                         null

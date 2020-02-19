@@ -22,7 +22,6 @@ import com.microsoft.did.sdk.utilities.Base64Url
 import com.microsoft.did.sdk.utilities.ConsoleLogger
 import com.microsoft.did.sdk.utilities.ILogger
 import io.ktor.http.ContentType
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlin.random.Random
 
 /**
@@ -88,7 +87,6 @@ class DidManager @JvmOverloads constructor(
      * Verify the signature and
      * return OIDC Request object.
      */
-    @ImplicitReflectionSerializer
     suspend fun parseOidcRequest(request: String): OidcRequest {
         return OidcRequest.parseAndVerify(request, cryptoOperations, logger, resolver)
     }
@@ -97,7 +95,6 @@ class DidManager @JvmOverloads constructor(
      * Verify the signature and
      * parse the OIDC Response object.
      */
-    @ImplicitReflectionSerializer
     suspend fun parseOidcResponse(
         response: String,
         clockSkewInMinutes: Int = 5,

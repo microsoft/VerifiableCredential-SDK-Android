@@ -1,6 +1,8 @@
 package com.microsoft.did.sdk.credentials
 
+import com.microsoft.did.sdk.utilities.IPolymorphicSerialization
 import com.microsoft.did.sdk.utilities.MinimalJson
+import com.microsoft.did.sdk.utilities.PolymorphicSerialization
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
 import kotlinx.serialization.Serializable
@@ -35,11 +37,15 @@ data class ClaimClass(
         }
 
         fun deserialize(claimClass: String): ClaimClass {
-            return MinimalJson.serializer.parse(ClaimClass.serializer(), claimClass)
+            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+            return polymorphicSerialization.parse(ClaimClass.serializer(), claimClass)
+//            return MinimalJson.serializer.parse(ClaimClass.serializer(), claimClass)
         }
     }
 
     fun serialize(): String {
-        return MinimalJson.serializer.stringify(ClaimClass.serializer(), this)
+        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+        return polymorphicSerialization.stringify(ClaimClass.serializer(), this)
+//        return MinimalJson.serializer.stringify(ClaimClass.serializer(), this)
     }
 }

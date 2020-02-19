@@ -5,7 +5,9 @@ import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ILogger
+import com.microsoft.did.sdk.utilities.IPolymorphicSerialization
 import com.microsoft.did.sdk.utilities.MinimalJson
+import com.microsoft.did.sdk.utilities.PolymorphicSerialization
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -27,7 +29,9 @@ data class IdentifierToken (
 
         fun serialize(identifier: Identifier): String {
             val token = tokenize(identifier)
-            return MinimalJson.serializer.stringify(IdentifierToken.serializer(), token)
+            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+            return polymorphicSerialization.stringify(IdentifierToken.serializer(), token)
+//            return MinimalJson.serializer.stringify(IdentifierToken.serializer(), token)
         }
 
         fun deserialize(
@@ -37,7 +41,9 @@ data class IdentifierToken (
             resolver: IResolver,
             registrar: IRegistrar
         ): Identifier {
-            val token = MinimalJson.serializer.parse(IdentifierToken.serializer(), identifierToken)
+            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+            val token = polymorphicSerialization.parse(IdentifierToken.serializer(), identifierToken)
+//            val token = MinimalJson.serializer.parse(IdentifierToken.serializer(), identifierToken)
             return Identifier(
                 alias = token.alias,
                 document = token.document,

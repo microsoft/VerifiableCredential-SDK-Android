@@ -12,7 +12,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
-import kotlinx.serialization.ImplicitReflectionSerializer
 
 /**
  * Registrar implementation for the Sidetree network
@@ -22,10 +21,11 @@ import kotlinx.serialization.ImplicitReflectionSerializer
  * @param cryptoOperations
  */
 class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistrar(logger) {
-    @ImplicitReflectionSerializer
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
-        val content = MinimalJson.serializer.stringify(RegistrationDocument.serializer(), document)
+        val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+        val content = polymorphicSerialization.stringify(RegistrationDocument.serializer(), document)
+//        val content = MinimalJson.serializer.stringify(RegistrationDocument.serializer(), document)
         val jwsToken = JwsToken(content, logger = logger)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         val kid = key.kid
@@ -34,7 +34,8 @@ class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistra
         jwsToken.verify(crypto);
         val response = sendRequest(jws)
         println(response)
-        return MinimalJson.serializer.parse(IdentifierDocument.serializer(), response)
+        return polymorphicSerialization.parse(IdentifierDocument.serializer(), response)
+//        return MinimalJson.serializer.parse(IdentifierDocument.serializer(), response)
     }
 
     /**

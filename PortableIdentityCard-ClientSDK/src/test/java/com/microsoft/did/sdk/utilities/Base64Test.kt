@@ -4,12 +4,12 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 
-class Base64TestSuite() {
-    val logger = ConsoleLogger()
+class Base64TestSuite {
+    private val logger = ConsoleLogger()
     /**
      * @see https://tools.ietf.org/html/rfc4648#section-10
      */
-    val base64TestPairs = listOf(
+    private val base64TestPairs = listOf(
         Pair("", ""),
         Pair("f", "Zg=="),
         Pair("fo", "Zm8="),
@@ -19,7 +19,7 @@ class Base64TestSuite() {
         Pair("foobar", "Zm9vYmFy")
     )
 
-    val base64UrlTestPairs = listOf(
+    private val base64UrlTestPairs = listOf(
         Pair("", ""),
         Pair("f", "Zg"),
         Pair("fo", "Zm8"),
@@ -95,7 +95,7 @@ class Base64TestSuite() {
         assertEqualsByteArray(expectedData, Base64Url.decode(stringData, logger))
     }
 
-    fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {
+    private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {
         assertEquals(expected.size, actual.size, "ByteArrays are of different length.")
         expected.forEachIndexed { index, byte ->
             assertEquals(byte, actual[index], message)

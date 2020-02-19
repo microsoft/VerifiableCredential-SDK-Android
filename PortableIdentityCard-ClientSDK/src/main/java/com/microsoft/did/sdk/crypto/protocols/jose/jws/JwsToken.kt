@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
 import com.microsoft.did.sdk.utilities.*
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import kotlinx.serialization.stringify
 import kotlin.collections.Map
 
@@ -44,7 +45,9 @@ class JwsToken private constructor(private val payload: String,
             } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
                 println("General format detected")
-                val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
+                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                val token = polymorphicSerialization.parse(JwsGeneralJson.serializer(), jws)
+//                val token = MinimalJson.serializer.parse(JwsGeneralJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = token.signatures,
@@ -53,7 +56,9 @@ class JwsToken private constructor(private val payload: String,
             } else if (jws.toLowerCase().contains("\"signature\"")) {
                 // Flat
                 println("Flat format detected")
-                val token = MinimalJson.serializer.parse(JwsFlatJson.serializer(), jws)
+                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                val token = polymorphicSerialization.parse(JwsFlatJson.serializer(), jws)
+//                val token = MinimalJson.serializer.parse(JwsFlatJson.serializer(), jws)
                 return JwsToken(
                     payload = token.payload,
                     signatures = listOf(JwsSignature(
@@ -85,11 +90,15 @@ class JwsToken private constructor(private val payload: String,
             }
             JwsFormat.FlatJson -> {
                 val jws = intermediateFlatJsonSerialize()
-                MinimalJson.serializer.stringify(JwsFlatJson.serializer(), jws)
+                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                polymorphicSerialization.stringify(JwsFlatJson.serializer(), jws)
+//                MinimalJson.serializer.stringify(JwsFlatJson.serializer(), jws)
             }
             JwsFormat.GeneralJson -> {
                 val jws = intermediateGeneralJsonSerialize()
-            MinimalJson.serializer.stringify(JwsGeneralJson.serializer(), jws)
+                val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+                polymorphicSerialization.stringify(JwsGeneralJson.serializer(), jws)
+//            MinimalJson.serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
             else -> {
                 throw logger.error("Unknown JWS format: $format")
@@ -132,7 +141,6 @@ class JwsToken private constructor(private val payload: String,
      * @param cryptoOperations CryptoOperations used to form the signatures
      * @param header optional headers added to the signature
      */
-    @ImplicitReflectionSerializer
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
         val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
@@ -161,7 +169,8 @@ class JwsToken private constructor(private val payload: String,
 
         var encodedProtected = ""
         if (protected.isNotEmpty()) {
-            val jsonProtected = MinimalJson.serializer.stringify(protected)
+            val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
+            val jsonProtected = polymorphicSerialization.stringify(protected, String::class, String::class)
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected), logger = logger)
         }
 
@@ -184,7 +193,6 @@ class JwsToken private constructor(private val payload: String,
     /**
      *Verify the JWS signatures
      */
-    @ImplicitReflectionSerializer
     fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false) {
         val results = this.signatures.map {
             val fullyQuantifiedKid = it.getKid(logger = logger) ?: ""
@@ -231,7 +239,6 @@ class JwsToken private constructor(private val payload: String,
         }
     }
 
-    @ImplicitReflectionSerializer
     private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
         val alg = signature.getAlg(logger = logger) ?: throw logger.error("This signature contains no algorithm.")
         val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg, logger = logger)
