@@ -7,10 +7,12 @@ import com.microsoft.did.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
-import com.microsoft.did.sdk.utilities.*
+import com.microsoft.did.sdk.utilities.ILogger
+import com.microsoft.did.sdk.utilities.IPolymorphicSerialization
+import com.microsoft.did.sdk.utilities.PolymorphicSerialization
+import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -97,7 +99,6 @@ class OidcRequest constructor(
             // get the DID associated
             val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
             val contents = polymorphicSerialization.parse(OidcRequestObject.serializer(), token.content())
-//            val contents = MinimalJson.serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {
                 throw logger.error("Could not find the issuer's DID")
             }
@@ -152,7 +153,6 @@ class OidcRequest constructor(
             return if (!data.isNullOrBlank()) {
                 val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
                 polymorphicSerialization.parse(serializer, data)
-//                MinimalJson.serializer.parse(serializer, data)
             } else {
                 null
             }

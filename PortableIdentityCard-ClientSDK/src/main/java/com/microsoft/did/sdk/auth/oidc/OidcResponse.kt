@@ -82,7 +82,6 @@ class OidcResponse (
                     val token = JwsToken(idToken, logger = logger)
                     val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
                     val response = polymorphicSerialization.parse(OidcResponseObject.serializer(), token.content())
-//                    val response = MinimalJson.serializer.parse(OidcResponseObject.serializer(), token.content())
 
                     val clockSkew = clockSkewInMinutes * 60
                     val currentTime = Date().time / 1000
@@ -115,7 +114,6 @@ class OidcResponse (
                                     DidKeyResolver.verifyJws(claimObjectData, crypto, responder, logger = logger)
                                     val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
                                     val claimObject = polymorphicSerialization.parse(ClaimObject.serializer(), claimObjectData.content())
-//                                    val claimObject = MinimalJson.serializer.parse(ClaimObject.serializer(), claimObjectData.content())
                                     if (claimObject.claimClass != claimClass.key) {
                                         throw logger.error("Claim Object class does not match expected class.")
                                     }
@@ -169,7 +167,6 @@ class OidcResponse (
             claims.forEachIndexed { index, it ->
                 val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
                 val claimData = polymorphicSerialization.stringify(ClaimObject.serializer(), it)
-//                val claimData = MinimalJson.serializer.stringify(ClaimObject.serializer(), it)
                 val token = JwsToken(claimData, logger = logger)
                 token.sign(useKey, crypto)
                 val serialized = token.serialize(JwsFormat.Compact)
@@ -202,7 +199,6 @@ class OidcResponse (
         )
         val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
         val responseData = polymorphicSerialization.stringify(OidcResponseObject.serializer(), response)
-//        val responseData = MinimalJson.serializer.stringify(OidcResponseObject.serializer(), response)
         println("Responding with data: $responseData")
         val token = JwsToken(responseData, logger = logger)
         token.sign(useKey, crypto)
@@ -233,7 +229,6 @@ class OidcResponse (
                     try {
                         val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
                         polymorphicSerialization.parse(ClaimResponse.serializer(), response)
-//                        MinimalJson.serializer.parse(ClaimResponse.serializer(), response)
                     } catch (error: SerializationException) {
                         // this was not the right format but we did not get a 400 error
                         null

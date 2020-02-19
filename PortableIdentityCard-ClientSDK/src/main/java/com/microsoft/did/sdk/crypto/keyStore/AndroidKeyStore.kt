@@ -159,7 +159,6 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
         jwk.kid = alias;
         val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
         val jwkString = polymorphicSerialization.stringify(JsonWebKey.serializer(), jwk)
-//        val jwkString = MinimalJson.serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -176,7 +175,6 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
         jwk.kid = alias;
         val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
         val jwkString = polymorphicSerialization.stringify(JsonWebKey.serializer(), jwk)
-//        val jwkString = MinimalJson.serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -240,7 +238,6 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
                 val key = polymorphicSerialization.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
-//                val key = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
                 val keyType = toKeyType(key.kty, logger)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
@@ -265,7 +262,6 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
         val data = getSecureData(alias) ?: return null
         val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
         val jwk = polymorphicSerialization.parse(JsonWebKey.serializer(), byteArrayToString(data))
-//        val jwk = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty == KeyType.RSA.value) {
             return RsaPrivateKey(jwk, logger = logger)
         } else if (jwk.kty == KeyType.EllipticCurve.value) {
@@ -279,7 +275,6 @@ class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(
         val data = getSecureData(alias) ?: return null
         val polymorphicSerialization: IPolymorphicSerialization = PolymorphicSerialization
         val jwk = polymorphicSerialization.parse(JsonWebKey.serializer(), byteArrayToString(data))
-//        val jwk = MinimalJson.serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty != KeyType.Octets.value) {
             throw logger.error("$alias is not a secret key.")
         }
