@@ -1,7 +1,5 @@
 package com.microsoft.did.sdk.utilities
 
-import assertk.assertThat
-import assertk.assertions.isEqualToWithGivenProperties
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
@@ -9,6 +7,7 @@ import com.microsoft.did.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.did.sdk.identifier.document.service.ServiceHubEndpoint
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import org.assertj.core.api.Assertions.assertThat
 
 class SerializationTest {
     private var actualDocument : IdentifierDocument = IdentifierDocument(
@@ -57,6 +56,6 @@ class SerializationTest {
     fun serializationTest() {
         val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
         val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedDocument)
-        assertThat(actualDocument).isEqualToWithGivenProperties(expectedDocument)
+        assertThat(actualDocument).isEqualToComparingFieldByFieldRecursively(expectedDocument)
     }
 }
