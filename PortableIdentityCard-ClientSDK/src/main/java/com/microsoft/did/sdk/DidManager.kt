@@ -12,7 +12,6 @@ import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.identifier.IdentifierToken
 import com.microsoft.did.sdk.utilities.Base64Url
 import kotlinx.coroutines.*
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlin.random.Random
 
 /**
@@ -24,11 +23,9 @@ class DidManager(private val config: DidSdkConfig) {
 
     private val didSecretName = "did.identifier"
 
-    @ImplicitReflectionSerializer
     val did: Identifier by lazy { initDid() }
 
     // TODO: Cleanup method
-    @ImplicitReflectionSerializer
     private fun initDid(): Identifier {
         val did = if (config.cryptoOperations.keyStore.list().containsKey(didSecretName)) {
             println("Identifier found, deserializing")
@@ -53,7 +50,6 @@ class DidManager(private val config: DidSdkConfig) {
     }
 
     // TODO: properly name APIs
-    @ImplicitReflectionSerializer
     fun registerNewDid(): Identifier {
         var did: Identifier? = null
         // TODO: Verify runBlocking is proper here

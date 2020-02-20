@@ -8,11 +8,10 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ILogger
-import com.microsoft.did.sdk.utilities.MinimalJson
+import com.microsoft.did.sdk.utilities.Serializer
 import com.microsoft.did.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
 import kotlinx.serialization.DeserializationStrategy
-import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -73,8 +72,7 @@ class OidcRequest constructor(
          * Standard scope for SIOP.
          */
         const val defaultScope = "openid did_authn"
-
-        @ImplicitReflectionSerializer
+        
         suspend fun parseAndVerify(signedRequest: String,
                                    crypto: CryptoOperations,
                                    logger: ILogger,
@@ -98,7 +96,7 @@ class OidcRequest constructor(
             }
             val token = JwsToken.deserialize(request, logger = logger)
             // get the DID associated
-            val contents = MinimalJson.serializer.parse(OidcRequestObject.serializer(), token.content())
+            val contents = Serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {
                 throw logger.error("Could not find the issuer's DID")
             }
@@ -151,7 +149,7 @@ class OidcRequest constructor(
         private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: ILogger): T? {
             val data = getQueryStringParameter(name, url, logger = logger)
             return if (!data.isNullOrBlank()) {
-                MinimalJson.serializer.parse(serializer, data)
+                Serializer.parse(serializer, data)
             } else {
                 null
             }
@@ -162,7 +160,6 @@ class OidcRequest constructor(
      * Respond to OIDC Request using identifier.
      * @param identifier the identifier used to sign response
      */
-    @ImplicitReflectionSerializer
     suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null): ClaimObject? {
         val oidcResponse = OidcResponse.create(this, identifier, logger)
         claimObjects?.forEach {

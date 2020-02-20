@@ -6,7 +6,6 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ILogger
-import kotlinx.serialization.ImplicitReflectionSerializer
 
 object DidKeyResolver {
     suspend fun resolveIdentiferFromKid(kid: String, crypto: CryptoOperations, resolver: IResolver, logger: ILogger): Identifier {
@@ -22,8 +21,7 @@ object DidKeyResolver {
                     it.id.endsWith(did.groupValues[1])
         }.firstOrNull()?.toPublicKey(logger = logger) ?: throw logger.error("Could not find key $kid")
     }
-
-    @ImplicitReflectionSerializer
+    
     suspend fun verifyJws(jws: JwsToken, crypto: CryptoOperations, forDid: Identifier, logger: ILogger) {
         val keys = forDid.document.publicKeys.map {
             it.toPublicKey(logger = logger)
@@ -31,7 +29,6 @@ object DidKeyResolver {
         jws.verify(crypto, keys)
     }
 
-    @ImplicitReflectionSerializer
     suspend fun verifyJws(jws: JwsToken, crypto: CryptoOperations, resolver: IResolver, forDid: String? = null, logger: ILogger) {
         if (forDid.isNullOrBlank()) {
             val sender = resolver.resolve(forDid!!, crypto)
