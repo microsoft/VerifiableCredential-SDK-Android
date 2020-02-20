@@ -15,7 +15,6 @@ import kotlinx.serialization.modules.plus
 import kotlin.reflect.KClass
 import kotlin.collections.Map
 
-@UnstableDefault
 object Serializer : ISerializer {
     private val identifierDocumentServiceSerializer = SerializersModule {
         polymorphic(IdentifierDocumentService::class) {
@@ -37,12 +36,13 @@ object Serializer : ISerializer {
         }
     }
 
-    val json : Json = Json(
+    val json: Json = Json(
         context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false
-        ))
+        )
+    )
 
     override fun <T> parse(deserializer: DeserializationStrategy<T>, string: String): T =
         json.parse(deserializer, string)
@@ -50,23 +50,23 @@ object Serializer : ISerializer {
     override fun <T> stringify(serializer: SerializationStrategy<T>, obj: T): String =
         json.stringify(serializer, obj)
 
-    fun <K : Any, V: Any> stringify(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String {
+    fun <K : Any, V : Any> stringify(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String {
         val serializer: ISerializer = this
         return serializer.stringifyImpl(obj, keyClass, valClass)
     }
-    
+
     @ImplicitReflectionSerializer
-    override fun <K : Any, V: Any> stringifyImpl(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String {
+    override fun <K : Any, V : Any> stringifyImpl(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String {
         return json.stringify((keyClass.serializer() to valClass.serializer()).map, obj)
     }
 
-    fun <K : Any, V: Any> parseMap(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V> {
+    fun <K : Any, V : Any> parseMap(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V> {
         val serializer: ISerializer = this
         return serializer.parseMapImpl(map, keyClass, valClass)
     }
 
     @ImplicitReflectionSerializer
-    override fun <K : Any, V: Any> parseMapImpl(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V> {
+    override fun <K : Any, V : Any> parseMapImpl(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V> {
         return parse((keyClass.serializer() to valClass.serializer()).map, map)
     }
 
@@ -74,7 +74,7 @@ object Serializer : ISerializer {
         val serializer: ISerializer = this
         return serializer.stringifyImpl(objects, keyClass)
     }
-    
+
     @ImplicitReflectionSerializer
     override fun <T : Any> stringifyImpl(objects: List<T>, keyClass: KClass<T>): String {
         return stringify((keyClass.serializer()).list, objects)

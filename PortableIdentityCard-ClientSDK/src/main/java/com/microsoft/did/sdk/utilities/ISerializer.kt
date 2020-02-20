@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 interface ISerializer {
     fun <T> parse(deserializer: DeserializationStrategy<T>, string: String): T
     fun <T> stringify(serializer: SerializationStrategy<T>, obj: T): String
-    fun <K : Any, V: Any> stringifyImpl(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String
-    fun <K : Any, V: Any> parseMapImpl(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V>
+    fun <K : Any, V : Any> stringifyImpl(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String
+    fun <K : Any, V : Any> parseMapImpl(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V>
     fun <T : Any> stringifyImpl(objects: List<T>, keyClass: KClass<T>): String
 }

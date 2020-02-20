@@ -11,7 +11,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SerializationTest {
-    private var document : IdentifierDocument = IdentifierDocument(
+    private var actualDocument : IdentifierDocument = IdentifierDocument(
         context = "https://w3id.org/did/v1",
         id = "did:test:hub.id",
         created = "2019-07-15T22:36:00.881Z",
@@ -55,9 +55,9 @@ class SerializationTest {
 
     @Test
     fun serializationTest() {
-        val serializedJson = Serializer.stringify(IdentifierDocument.serializer(), document)
+        val serializedJson = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
         println("serialized data: $serializedJson")
-        val deserialize = Serializer.parse(IdentifierDocument.serializer(), serializedJson)
-        assertThat(document).isEqualToWithGivenProperties(deserialize)
+        val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedJson)
+        assertThat(actualDocument).isEqualToWithGivenProperties(expectedDocument)
     }
 }
