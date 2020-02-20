@@ -1,13 +1,10 @@
 package com.microsoft.did.sdk.resolvers
 
 import com.microsoft.did.sdk.identifier.document.IdentifierDocument
-import com.microsoft.did.sdk.utilities.ILogger
-import com.microsoft.did.sdk.utilities.MinimalJson
-import com.microsoft.did.sdk.utilities.getHttpClient
+import com.microsoft.did.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 /**
  * Fetches Identifier Documents from remote resolvers over http.
@@ -35,7 +32,7 @@ class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(log
         }
         client.close()
         println("GOT $response")
-        val result = MinimalJson.serializer.parse(ResolverResult.serializer(), response)
+        val result = Serializer.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")
         return result.document
     }
