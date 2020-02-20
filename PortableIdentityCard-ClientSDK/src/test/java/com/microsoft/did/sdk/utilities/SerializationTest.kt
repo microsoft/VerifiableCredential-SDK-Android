@@ -55,9 +55,9 @@ class SerializationTest {
 
     @Test
     fun serializationTest() {
-        val serializedJson = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
-        println("serialized data: $serializedJson")
-        val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedJson)
+        val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
+        assertThat(actualDocument, serializedDocument)
+        val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedDocument)
         assertThat(actualDocument).isEqualToWithGivenProperties(expectedDocument)
     }
 }
