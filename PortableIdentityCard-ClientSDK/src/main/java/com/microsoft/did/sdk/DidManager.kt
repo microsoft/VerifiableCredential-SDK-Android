@@ -41,7 +41,7 @@ class DidManager(private val config: DidSdkConfig) {
                 JsonWebKey(
                     kty = KeyType.Octets.value,
                     kid = "#$didSecretName.1",
-                    k = did.serialize()
+                    k = identifier.serialize()
                 ),
                 logger = config.logger
             )

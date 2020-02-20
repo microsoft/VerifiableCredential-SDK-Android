@@ -31,7 +31,7 @@ class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistra
         val jwsToken = JwsToken(content, logger = logger)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         val kid = key.kid
-        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to "#$kid", "operation" to "create", "alg" to "ES256K"))
+        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))
         val jws = jwsToken.serialize(JwsFormat.FlatJson)
         jwsToken.verify(crypto);
         val response = sendRequest(jws)
