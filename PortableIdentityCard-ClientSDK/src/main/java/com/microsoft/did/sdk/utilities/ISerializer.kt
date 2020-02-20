@@ -1,8 +1,10 @@
 /*
 Kotlin serialization supports polymorphic serialization but it is in experimental stage currently which requires usage
 of @ImplicitReflectionSerializer annotation. Any method which uses serializer() as a parameter to determine the class
-type requires this annotation. Adding this interface to abstract the serialization methods so that all the nested
-method calls need not have to annotate but make the method calls via this interface
+type requires this annotation. Tried moving to gson library instead of kotlin serialization but the same problem there
+as well, polymorphic serialization methods are not exposed but only experimental. Adding this interface to abstract the
+serialization methods so that all the nested method calls need not have to annotate but make the method calls via this
+interface until another option is explored.
  */
 package com.microsoft.did.sdk.utilities
 
