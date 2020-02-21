@@ -3,6 +3,7 @@
 package com.microsoft.did.sdk
 
 import android.content.Context
+import androidx.room.Room
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
@@ -12,8 +13,8 @@ import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
-import com.microsoft.did.sdk.repository.InMemoryStore
-import com.microsoft.did.sdk.repository.Repository
+import com.microsoft.did.sdk.persistance.SdkDatabase
+import com.microsoft.did.sdk.persistance.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.resolvers.HttpResolver
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ConsoleLogger
@@ -63,7 +64,7 @@ class DidSdkConfig(
 
     internal var cryptoOperations: CryptoOperations
 
-    internal var repository: Repository
+    internal var vcRepository: VerifiableCredentialRepository
 
     init {
         val keyStore = AndroidKeyStore(context, logger)
@@ -76,6 +77,8 @@ class DidSdkConfig(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
-        repository = Repository(InMemoryStore())
+        val db = Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db").build()
+        vcRepository = VerifiableCredentialRepository(db)
+
     }
 }

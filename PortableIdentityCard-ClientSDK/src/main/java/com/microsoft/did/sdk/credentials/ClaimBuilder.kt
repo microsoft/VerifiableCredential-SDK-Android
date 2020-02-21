@@ -70,8 +70,8 @@ class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
             classUri,
             context!!,
             type!!,
-            claimDescriptions,
             identifier.document.id,
+            claimDescriptions,
             claims
         )
     }

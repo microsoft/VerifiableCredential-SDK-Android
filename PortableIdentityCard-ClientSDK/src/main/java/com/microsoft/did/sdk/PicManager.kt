@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk
 
+import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.auth.oidc.OidcRequest
 import com.microsoft.did.sdk.auth.oidc.OidcResponse
 import com.microsoft.did.sdk.credentials.ClaimObject
@@ -54,10 +55,10 @@ class PicManager(private val config: DidSdkConfig) {
     }
 
     suspend fun saveClaim(claim: ClaimObject) {
-        config.repository.saveClaim(claim)
+        config.vcRepository.insert(claim)
     }
 
-    suspend fun getClaims(): List<ClaimObject> {
-        return config.repository.getClaims()
+    fun getClaims(): LiveData<List<ClaimObject>> {
+        return config.vcRepository.getAllClaimObjects()
     }
 }

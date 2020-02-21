@@ -1,5 +1,8 @@
 package com.microsoft.did.sdk.credentials
 
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ILogger
@@ -8,22 +11,28 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ClaimObject(val claimClass: String,
+@Entity
+data class ClaimObject(var claimClass: String,
                        @SerialName("@context")
-                       val context: String,
+                       var context: String,
                        @SerialName("@type")
-                       val type: String,
-                       val claimDescriptions: List<ClaimDescription>,
-                       val claimIssuer: String,
-                       val claimDetails: ClaimDetail) {
+                       var type: String,
+                       var claimIssuer: String,
+                       @Ignore val claimDescriptions: List<ClaimDescription>,
+                       @Ignore val claimDetails: ClaimDetail) {
     companion object {
         fun deserialize(claimObject: String): ClaimObject {
-            return Serializer.parse(ClaimObject.serializer(), claimObject)
+            return Serializer.parse(serializer(), claimObject)
         }
     }
 
+    // Room band aid because @Ignore doesn't work in the constructor
+    constructor(claimClass: String, context: String, type: String, claimIssuer: String) : this(claimClass, context, type, claimIssuer, emptyList(), SignedClaimDetail(""))
+
+    @PrimaryKey var uid:Int = 0
+
     fun serialize(): String {
-        return Serializer.stringify(ClaimObject.serializer(), this)
+        return Serializer.stringify(serializer(), this)
     }
 
     suspend fun getClaimClass(): ClaimClass {

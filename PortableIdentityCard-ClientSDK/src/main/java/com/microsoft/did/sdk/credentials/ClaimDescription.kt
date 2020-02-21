@@ -1,6 +1,11 @@
 package com.microsoft.did.sdk.credentials
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ClaimDescription (val header: String, val body: String)
+@Entity
+data class ClaimDescription (val header: String, val body: String) {
+    @PrimaryKey(autoGenerate = true) var uid: Int? = null
+}
