@@ -4,6 +4,7 @@ package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.auth.oidc.OidcRequest
 import com.microsoft.did.sdk.auth.oidc.OidcResponse
+import com.microsoft.did.sdk.credentials.ClaimObject
 import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -29,7 +30,7 @@ class PicManager(private val config: DidSdkConfig) {
      * return OIDC Request object.
      */
     suspend fun parseOidcRequest(request: String): OidcRequest {
-        return withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             OidcRequest.parseAndVerify(request, config.cryptoOperations, config.logger, config.resolver)
         }
     }
@@ -44,11 +45,19 @@ class PicManager(private val config: DidSdkConfig) {
         issuedWithinLastMinutes: Int? = null,
         contentType: ContentType = ContentType.Application.FormUrlEncoded
     ): OidcResponse {
-        return withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             OidcResponse.parseAndVerify(
                 response, clockSkewInMinutes, issuedWithinLastMinutes,
                 config.cryptoOperations, config.logger, config.resolver, contentType
             )
         }
+    }
+
+    suspend fun saveClaim(claim: ClaimObject) {
+        config.repository.saveClaim(claim)
+    }
+
+    suspend fun getClaims(): List<ClaimObject> {
+        return config.repository.getClaims()
     }
 }

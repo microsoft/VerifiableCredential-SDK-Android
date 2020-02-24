@@ -23,7 +23,11 @@ android {
         }
     }
     packagingOptions {
-        exclude("META-INF/*.kotlin_module")
+        pickFirst("META-INF/*.kotlin_module")
+    }
+
+    sourceSets {
+        main.jniLibs.srcDirs = ['libs']
     }
 }
 
