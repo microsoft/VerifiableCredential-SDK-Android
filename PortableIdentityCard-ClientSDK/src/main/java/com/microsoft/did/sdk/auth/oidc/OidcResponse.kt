@@ -216,11 +216,17 @@ class OidcResponse (
                     ""
                 }
                 println("Encoded as: $responseBody")
-                val response = getHttpClient().post<String> {
-                    url(redirectUrl)
-                    body = ByteArrayContent(
-                        bytes = stringToByteArray(responseBody),
-                        contentType = ContentType.Application.FormUrlEncoded)
+                val response = try {
+                     getHttpClient().post<String> {
+                        url(redirectUrl)
+                        body = ByteArrayContent(
+                            bytes = stringToByteArray(responseBody),
+                            contentType = ContentType.Application.FormUrlEncoded
+                        )
+                    }
+                } catch (exception: Exception) {
+                    println("Exception sending response: ${exception.message}")
+                    throw exception
                 }
                 if (response.isNotBlank()) {
                     try {

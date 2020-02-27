@@ -77,7 +77,7 @@ class DidSdkConfig(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
-        val db = Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db").build()
+        val db = Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db").fallbackToDestructiveMigration().build()
         vcRepository = VerifiableCredentialRepository(db)
 
     }

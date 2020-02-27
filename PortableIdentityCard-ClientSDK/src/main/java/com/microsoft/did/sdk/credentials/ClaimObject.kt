@@ -29,7 +29,7 @@ data class ClaimObject(var claimClass: String,
     // Room band aid because @Ignore doesn't work in the constructor
     constructor(claimClass: String, context: String, type: String, claimIssuer: String) : this(claimClass, context, type, claimIssuer, emptyList(), SignedClaimDetail(""))
 
-    @PrimaryKey var uid:Int = 0
+    @PrimaryKey(autoGenerate = true) var uid:Int = 0
 
     fun serialize(): String {
         return Serializer.stringify(serializer(), this)
