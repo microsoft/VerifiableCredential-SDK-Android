@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity
-data class ClaimDescription(val header: String, val body: String, val claimObjectUid: String) {
+data class ClaimDescription(val header: String, val body: String) {
     @PrimaryKey(autoGenerate = true)
     var uid: Int? = null
 }
