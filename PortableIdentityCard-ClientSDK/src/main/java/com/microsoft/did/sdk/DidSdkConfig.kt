@@ -12,6 +12,8 @@ import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.registrars.IRegistrar
 import com.microsoft.did.sdk.registrars.SidetreeRegistrar
+import com.microsoft.did.sdk.repository.InMemoryStore
+import com.microsoft.did.sdk.repository.Repository
 import com.microsoft.did.sdk.resolvers.HttpResolver
 import com.microsoft.did.sdk.resolvers.IResolver
 import com.microsoft.did.sdk.utilities.ConsoleLogger
@@ -61,6 +63,8 @@ class DidSdkConfig(
 
     internal var cryptoOperations: CryptoOperations
 
+    internal var repository: Repository
+
     init {
         val keyStore = AndroidKeyStore(context, logger)
         val subtleCrypto = AndroidSubtle(keyStore, logger)
@@ -72,5 +76,6 @@ class DidSdkConfig(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
+        repository = Repository(InMemoryStore())
     }
 }
