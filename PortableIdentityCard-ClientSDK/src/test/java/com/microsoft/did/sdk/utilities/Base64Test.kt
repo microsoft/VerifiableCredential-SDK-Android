@@ -1,8 +1,7 @@
 package com.microsoft.did.sdk.utilities
 
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
-
 
 class Base64TestSuite {
     private val logger = ConsoleLogger()

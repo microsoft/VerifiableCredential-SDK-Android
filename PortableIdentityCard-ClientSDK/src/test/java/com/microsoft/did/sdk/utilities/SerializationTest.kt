@@ -5,8 +5,7 @@ import com.microsoft.did.sdk.identifier.document.IdentifierDocument
 import com.microsoft.did.sdk.identifier.document.IdentifierDocumentPublicKey
 import com.microsoft.did.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.did.sdk.identifier.document.service.ServiceHubEndpoint
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
 class SerializationTest {
@@ -46,12 +45,7 @@ class SerializationTest {
             )
         )
     )
-
-    @BeforeTest
-    fun setup() {
-
-    }
-
+    
     @Test
     fun serializationTest() {
         val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
