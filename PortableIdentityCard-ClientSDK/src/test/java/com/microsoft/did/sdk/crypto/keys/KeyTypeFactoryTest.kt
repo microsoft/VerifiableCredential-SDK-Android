@@ -1,9 +1,8 @@
 package com.microsoft.did.sdk.crypto.keys
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.did.sdk.utilities.ConsoleLogger
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
@@ -11,46 +10,50 @@ class KeyTypeFactoryTest {
     private val logger = ConsoleLogger()
 
     @Test
-    fun rsaoaepKeyTypeTest() {
-        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm("rsa-oaep"))
+    fun `finding key type for rsa-oaep algorithm`() {
+        val algorithmName = "rsa-oaep"
+        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.RSA)
     }
 
     @Test
-    fun rsaoaep256KeyTypeTest() {
-        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm("rsa-oaep-256"))
+    fun `finding key type for rsa-oaep-256 algorithm`() {
+        val algorithmName = "rsa-oaep-256"
+        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.RSA)
     }
 
     @Test
-    fun hmacKeyTypeTest() {
-        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm("hmac"))
+    fun `finding key type for hmac algorithm`() {
+        val algorithmName = "hmac"
+        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.Octets)
     }
 
     @Test
-    fun ecdsaKeyTypeTest() {
-        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm("ecdsa"))
+    fun `finding key type for ecdsa algorithm`() {
+        val algorithmName = "ecdsa"
+        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.EllipticCurve)
     }
 
     @Test
-    fun ecdhKeyTypeTest() {
-        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm("ecdh"))
+    fun `finding key type for ecdh algorithm`() {
+        val algorithmName = "ecdh"
+        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.EllipticCurve)
     }
 
     @Test
-    fun rsaKeyTypeTest() {
-        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm("rsassa-pkcs1-v1_5"))
+    fun `finding key type for rsa algorithm`() {
+        val algorithmName = "rsassa-pkcs1-v1_5"
+        val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.RSA)
     }
 
     @Test
-    fun keyTypeFailureTest() {
-        val actualAlgorithmName = "Test"
-        assertThatThrownBy { KeyTypeFactory.createViaJwa(actualAlgorithmName, logger) }.isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("Algorithm $actualAlgorithmName is not supported")
-
+    fun `failing with invalid algorithm while finding key type`() {
+        val nonExistingAlgorithmName = "Test"
+        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName, logger) }.isInstanceOf(IllegalStateException::class.java)
     }
 }

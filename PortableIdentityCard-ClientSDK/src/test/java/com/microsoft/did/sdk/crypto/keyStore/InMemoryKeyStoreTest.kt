@@ -1,8 +1,5 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotNull
 import com.microsoft.did.sdk.crypto.keys.MockPrivateKey
 import com.microsoft.did.sdk.crypto.keys.MockPublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
@@ -10,104 +7,117 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.RsaOaepParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
-import com.microsoft.did.sdk.utilities.Base64Url
 import com.microsoft.did.sdk.utilities.ConsoleLogger
+import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
-import kotlin.random.Random
+import org.junit.jupiter.api.*
 
 class InMemoryKeyStoreTest {
     private val logger = ConsoleLogger()
     private val inMemoryKeyStore = InMemoryKeyStore(logger)
     private val subtle = Subtle(setOf(MockProvider()), logger)
-    private lateinit var privateKeyRef: String
-    private lateinit var publicKeyRef: String
-    private lateinit var keyPair: CryptoKeyPair
-    private lateinit var actualPublicKey: MockPublicKey
-    private lateinit var actualPrivateKey: MockPrivateKey
-    private lateinit var secondKeyPair: CryptoKeyPair
-    private lateinit var secondPublicKey: MockPublicKey
-    private lateinit var secondPrivateKey: MockPrivateKey
+    private val keyRef: String = "TestKeys"
+    private var keyPair: CryptoKeyPair
+    private var actualPublicKey: MockPublicKey
+    private var actualPrivateKey: MockPrivateKey
 
-    @BeforeAll
-    fun setUp() {
+    init {
         keyPair = subtle.generateKeyPair(
-                RsaOaepParams(),
-        true,
-        listOf(KeyUsage.Sign, KeyUsage.Verify)
-        )
-        actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
-        actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
-        secondKeyPair = subtle.generateKeyPair(
             RsaOaepParams(),
             true,
             listOf(KeyUsage.Sign, KeyUsage.Verify)
         )
-        secondPrivateKey = MockPrivateKey(subtle.exportKeyJwk(secondKeyPair.privateKey))
-        secondPublicKey = MockPublicKey(subtle.exportKeyJwk(secondKeyPair.publicKey))
+        actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
+        actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
     }
 
     @Test
-    fun savePrivateKeyTest() {
-        privateKeyRef = Base64Url.encode(Random.nextBytes(8), logger)
-        inMemoryKeyStore.save(privateKeyRef, actualPrivateKey)
+    fun `save and retrieve public-private keys`() {
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
         val expectedPrivateKeyById = inMemoryKeyStore.getPrivateKeyById(actualPrivateKey.kid)
         assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyById)
-        val expectedPrivateKeyByRef = inMemoryKeyStore.getPrivateKey(privateKeyRef)
-        assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyByRef.getKey(expectedPrivateKeyById?.kid))
-    }
+        val expectedPrivateKeyByRef = inMemoryKeyStore.getPrivateKey(keyRef)
+        assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyByRef.keys[0])
 
-    @Test
-    fun savePublicKeyTest() {
-        publicKeyRef = Base64Url.encode(Random.nextBytes(8), logger)
-        inMemoryKeyStore.save(publicKeyRef, actualPublicKey)
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
         val expectedPublicKeyById = inMemoryKeyStore.getPublicKeyById(actualPublicKey.kid)
         assertThat(actualPublicKey).isEqualTo(expectedPublicKeyById)
-        val expectedPublicByKeyRef = inMemoryKeyStore.getPublicKey(publicKeyRef)
-        assertThat(actualPublicKey).isEqualTo(expectedPublicByKeyRef.getKey(expectedPublicKeyById?.kid))
+        val expectedPublicByKeyRef = inMemoryKeyStore.getPublicKey(keyRef)
+        assertThat(actualPublicKey).isEqualTo(expectedPublicByKeyRef.keys[0])
     }
 
     @Test
-    fun listKeysTest() {
+    fun `list keys`() {
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
         val keysInKeyStore = inMemoryKeyStore.list()
-        val expectedPrivateKey = keysInKeyStore[privateKeyRef]
+        val expectedPrivateKey = keysInKeyStore[keyRef]
         assertThat(expectedPrivateKey!!.getLatestKeyId()).isNotNull()
         assertThat(actualPrivateKey.kid).isEqualTo(expectedPrivateKey.kids.firstOrNull())
-        val expectedPublicKey = keysInKeyStore[publicKeyRef]
+        val expectedPublicKey = keysInKeyStore[keyRef]
         assertThat(actualPublicKey.kid).isEqualTo(expectedPublicKey!!.kids.firstOrNull())
     }
 
     @Test
-    fun saveSecondPublicKeyTest() {
-        inMemoryKeyStore.save(publicKeyRef, secondPublicKey)
-        val expectedPublicKeyById = inMemoryKeyStore.getPublicKeyById(secondPublicKey.kid)
-        assertThat(secondPublicKey).isEqualTo(expectedPublicKeyById)
-        val expectedPublicByKeyRef = inMemoryKeyStore.getPublicKey(publicKeyRef)
-        assertThat(secondPublicKey).isEqualTo(expectedPublicByKeyRef.getKey(expectedPublicKeyById?.kid))
+    fun `save two sets of public-private keys with same key reference and retrieve them`() {
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
+
+        keyPair = subtle.generateKeyPair(
+            RsaOaepParams(),
+            true,
+            listOf(KeyUsage.Sign, KeyUsage.Verify)
+        )
+        actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
+        actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
+
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
+
+        val expectedPublicKeyById = inMemoryKeyStore.getPublicKeyById(actualPublicKey.kid)
+        assertThat(actualPublicKey).isEqualTo(expectedPublicKeyById)
+        val expectedPublicKeyByRef = inMemoryKeyStore.getPublicKey(keyRef)
+        assertThat(expectedPublicKeyByRef.keys).contains(actualPublicKey)
+
+        val expectedPrivateKeyById = inMemoryKeyStore.getPrivateKeyById(actualPrivateKey.kid)
+        assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyById)
+        val expectedPrivateKeyByRef = inMemoryKeyStore.getPrivateKey(keyRef)
+        assertThat(expectedPrivateKeyByRef.keys).contains(actualPrivateKey)
     }
 
     @Test
-    fun saveSecondPrivateKeyTest() {
-        inMemoryKeyStore.save(privateKeyRef, secondPrivateKey)
-        val expectedPrivateKeyById = inMemoryKeyStore.getPrivateKeyById(secondPrivateKey.kid)
-        assertThat(secondPrivateKey).isEqualTo(expectedPrivateKeyById)
-        val expectedPrivateKeyByRef = inMemoryKeyStore.getPrivateKey(privateKeyRef)
-        assertThat(secondPrivateKey).isEqualTo(expectedPrivateKeyByRef.getKey(expectedPrivateKeyById?.kid))
+    fun `fail retrieve public key`() {
+        val nonExistingPublicKeyRef = "kid1"
+        assertThatThrownBy { inMemoryKeyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(Error::class.java)
     }
 
     @Test
-    fun getPublicKeyFailureTest() {
-        val expectedPublicKeyRef = "kid1"
-        assertThatThrownBy {inMemoryKeyStore.getPublicKey(expectedPublicKeyRef)}.isInstanceOf(Error::class.java)
-            .hasMessageContaining("key $expectedPublicKeyRef does not exist.")
+    fun `retrieve public key using key reference`() {
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
+        val expectedPublicKey = inMemoryKeyStore.getPublicKey(keyRef)
+        assertThat(actualPublicKey.key).isEqualTo(expectedPublicKey.keys[0].key)
     }
 
     @Test
-    fun getPublicKeyWithPrivateKeyReferenceTest() {
-        val expectedPublicKey = inMemoryKeyStore.getPublicKey(privateKeyRef)
-        assertThat(actualPrivateKey.key).isEqualTo(expectedPublicKey.keys[0].key)
+    fun `retrieve public key using key id`() {
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
+        val expectedPublicKey = inMemoryKeyStore.getPublicKeyById(actualPublicKey.kid)
+        assertThat(actualPublicKey).isEqualTo(expectedPublicKey)
     }
 
-    //TO DO: Add tests for secret key
+    @Test
+    fun `retrieve private key using key reference`() {
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
+        val expectedPrivateKey = inMemoryKeyStore.getPrivateKey(keyRef)
+        assertThat(actualPrivateKey.key).isEqualTo(expectedPrivateKey.keys[0].key)
+    }
+
+    @Test
+    fun `retrieve private key using key id`() {
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
+        val expectedPrivateKey = inMemoryKeyStore.getPrivateKeyById(actualPrivateKey.kid)
+        assertThat(actualPrivateKey).isEqualTo(expectedPrivateKey)
+    }
+
+    //TODO: Add tests for secret key
 }

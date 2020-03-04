@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.utilities
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
+import org.assertj.core.api.Assertions.assertThat
 
 class Base64TestSuite {
     private val logger = ConsoleLogger()
@@ -29,18 +29,18 @@ class Base64TestSuite {
     )
 
     @Test
-    fun rfcEncodeVectorsTest() {
+    fun `rfc encode vectors`() {
         base64TestPairs.forEach {
             val inputDataList = it.first.map { character -> character.toByte() }
             val inputData = ByteArray(inputDataList.size)
             inputDataList.forEachIndexed { index, byte -> inputData[index] = byte }
-            val output = Base64.encode(inputData, logger)
-            assertEquals(it.second, output, "Failed to encode \"${it.first}\" correctly.")
+            val expectedOutput = Base64.encode(inputData, logger)
+            assertThat(it.second).isEqualTo(expectedOutput)
         }
     }
 
     @Test
-    fun rfcDecodeVectorsTest() {
+    fun `rfc decode vectors`() {
         base64TestPairs.forEach {
             val outputData = it.first.map { character -> character.toByte() }.toByteArray()
             val output = Base64.decode(it.second, logger)
@@ -49,18 +49,18 @@ class Base64TestSuite {
     }
 
     @Test
-    fun rfcUrlEncodeVectorsTest() {
+    fun `rfc url encode vectors`() {
         base64UrlTestPairs.forEach {
             val inputDataList = it.first.map { character -> character.toByte() }
             val inputData = ByteArray(inputDataList.size)
             inputDataList.forEachIndexed { index, byte -> inputData[index] = byte }
-            val output = Base64Url.encode(inputData, logger)
-            assertEquals(it.second, output, "Failed to encode \"${it.first}\" correctly.")
+            val expectedOutput = Base64Url.encode(inputData, logger)
+            assertThat(it.second).isEqualTo(expectedOutput)
         }
     }
 
     @Test
-    fun rfcUrlDecodeVectorsTest() {
+    fun `rfc url decode vectors`() {
         base64UrlTestPairs.forEach {
             val outputData = it.first.map { character -> character.toByte() }.toByteArray()
             val output = Base64Url.decode(it.second, logger)
@@ -69,7 +69,7 @@ class Base64TestSuite {
     }
 
     @Test
-    fun twosComplimentUrlTest() {
+    fun `twos compliment url`() {
         val data = ByteArray(3)
         // CAFE41
         // 1100 1010 1111 1110 0100 0001
@@ -80,7 +80,7 @@ class Base64TestSuite {
         data[1] = 0xFE.toByte()
         data[2] = 0x41.toByte()
 
-        assertEquals("yv5B", Base64Url.encode(data, logger))
+        assertThat("yv5B").isEqualTo(Base64Url.encode(data, logger))
 
         val stringData = "1234"
         // 1(53) 2(54)  3(55)  4(56)
@@ -95,9 +95,9 @@ class Base64TestSuite {
     }
 
     private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {
-        assertEquals(expected.size, actual.size, "ByteArrays are of different length.")
+        assertThat(expected.size).isEqualTo(actual.size)
         expected.forEachIndexed { index, byte ->
-            assertEquals(byte, actual[index], message)
+            assertThat(byte).isEqualTo(actual[index])
         }
     }
 }
