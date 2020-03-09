@@ -22,9 +22,9 @@ class JwsTokenTest {
     private val subtle: SubtleCrypto
     private val crypto: CryptoOperations
     private val keyRef: String
-    private val payload: String = "{\"iss\":\"joe\",\r\n"+
-    " \"exp\":1300819380,\r\n"+
-            " \"http://example.com/is_root\":true}"
+    private val payload = """{"iss":"joe",${'\r'}
+ "exp":1300819380,${'\r'}
+ "http://example.com/is_root":true}"""
 
     init {
         /* This is the payload used for all the operations below */
@@ -33,7 +33,7 @@ class JwsTokenTest {
         subtle = Subtle(setOf(MockProvider()), logger)
         crypto = CryptoOperations(subtle, keyStore, logger)
         keyRef = Base64Url.encode(Random.nextBytes(8), logger)
-        val keyPair =  subtle.generateKeyPair(
+        val keyPair = subtle.generateKeyPair(
             RsaOaepParams(),
             true,
             listOf(KeyUsage.Sign, KeyUsage.Verify)
@@ -53,7 +53,7 @@ class JwsTokenTest {
         assertThat(serialized).isNotNull()
         assertThat(serialized).doesNotContain("signatures")
         val verifyToken = JwsToken.deserialize(serialized, logger)
-        assertThat(verifyToken).isNotNull
+        assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isEqualTo(1)
     }
 
@@ -66,7 +66,7 @@ class JwsTokenTest {
         assertThat(serialized).isNotNull()
         assertThat(serialized).contains("signatures")
         val verifyToken = JwsToken.deserialize(serialized, logger)
-        assertThat(verifyToken).isNotNull
+        assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isGreaterThanOrEqualTo(1)
     }
 

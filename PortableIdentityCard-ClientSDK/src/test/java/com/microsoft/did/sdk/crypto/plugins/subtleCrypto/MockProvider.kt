@@ -5,8 +5,7 @@ import com.microsoft.did.sdk.utilities.*
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
-class MockProvider : Provider(ConsoleLogger()) {
-    override var name: String = W3cCryptoApiConstants.RsaOaep.value
+class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.value) : Provider(ConsoleLogger()) {
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,
         KeyUsage.Decrypt

@@ -14,50 +14,40 @@ class SubtleCryptoFactoryTest {
 
     @Test
     fun `get message authentication code signers object for a given algorithm name`() {
-        val mockProviderForHmac = MockProvider()
-        mockProviderForHmac.name = W3cCryptoApiConstants.Hmac.value
+        val mockProviderForHmac = MockProvider(W3cCryptoApiConstants.Hmac.value)
         val ecSubtle = Subtle(setOf(mockProviderForHmac), logger)
         subtleCryptoFactory.addMessageAuthenticationCodeSigner(
             W3cCryptoApiConstants.Hmac.value,
             SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.Private)
         )
         var macSigner = subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private)
-        if (macSigner is Subtle) {
-            macSigner = macSigner as Subtle
+        if (macSigner is Subtle)
             assertThat(macSigner.provider.containsKey(W3cCryptoApiConstants.Hmac.value.toLowerCase())).isTrue()
-        }
     }
 
     @Test
     fun `get message digest for a given algorithm name`() {
-        val mockProviderForSha = MockProvider()
-        mockProviderForSha.name = W3cCryptoApiConstants.Sha512.value
+        val mockProviderForSha = MockProvider(W3cCryptoApiConstants.Sha512.value)
         val ecSubtle = Subtle(setOf(mockProviderForSha), logger)
         subtleCryptoFactory.addMessageDigest(W3cCryptoApiConstants.Sha512.value, SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.Public))
         var msgDigest = subtleCryptoFactory.getMessageDigest(W3cCryptoApiConstants.Sha512.value, SubtleCryptoScope.Public)
-        if (msgDigest is Subtle) {
-            msgDigest = msgDigest as Subtle
+        if (msgDigest is Subtle)
             assertThat(msgDigest.provider.containsKey(W3cCryptoApiConstants.Sha512.value.toLowerCase())).isTrue()
-        }
     }
 
     @Test
     fun `get message signer for a given algorithm name`() {
-        val mockProviderForEc = MockProvider()
-        mockProviderForEc.name = W3cCryptoApiConstants.EcDsa.value
+        val mockProviderForEc = MockProvider(W3cCryptoApiConstants.EcDsa.value)
         val ecSubtle = Subtle(setOf(mockProviderForEc), logger)
         subtleCryptoFactory.addMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.Private))
         var msgSigner = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
-        if (msgSigner is Subtle) {
-            msgSigner = msgSigner as Subtle
+        if (msgSigner is Subtle)
             assertThat(msgSigner.provider.containsKey(W3cCryptoApiConstants.EcDsa.value.toLowerCase())).isTrue()
-        }
     }
 
     @Test
     fun `get shared key encrypter for a given algorithm`() {
-        val mockProviderForRsa = MockProvider()
-        mockProviderForRsa.name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value
+        val mockProviderForRsa = MockProvider(W3cCryptoApiConstants.RsaSsaPkcs1V15.value)
         val rsaSubtle = Subtle(setOf(mockProviderForRsa), logger)
         subtleCryptoFactory.addSharedKeyEncrypter(
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
@@ -65,16 +55,13 @@ class SubtleCryptoFactoryTest {
         )
         var sharedKeyEncrypter =
             subtleCryptoFactory.getSharedKeyEncrypter(W3cCryptoApiConstants.RsaSsaPkcs1V15.value, SubtleCryptoScope.Private)
-        if (sharedKeyEncrypter is Subtle) {
-            sharedKeyEncrypter = sharedKeyEncrypter as Subtle
+        if (sharedKeyEncrypter is Subtle)
             assertThat(sharedKeyEncrypter.provider.containsKey(W3cCryptoApiConstants.RsaSsaPkcs1V15.value.toLowerCase())).isTrue()
-        }
     }
 
     @Test
     fun `get symmetric key encrypter for a given algorithm`() {
-        val mockProviderForRsa = MockProvider()
-        mockProviderForRsa.name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value
+        val mockProviderForRsa = MockProvider(W3cCryptoApiConstants.RsaSsaPkcs1V15.value)
         val rsaSubtle = Subtle(setOf(mockProviderForRsa), logger)
         subtleCryptoFactory.addSymmetricEncrypter(
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
@@ -82,9 +69,7 @@ class SubtleCryptoFactoryTest {
         )
         var symmetricEncrypter =
             subtleCryptoFactory.getSymmetricEncrypter(W3cCryptoApiConstants.RsaSsaPkcs1V15.value, SubtleCryptoScope.Private)
-        if (symmetricEncrypter is Subtle) {
-            symmetricEncrypter = symmetricEncrypter as Subtle
+        if (symmetricEncrypter is Subtle)
             assertThat(symmetricEncrypter.provider.containsKey(W3cCryptoApiConstants.RsaSsaPkcs1V15.value.toLowerCase())).isTrue()
-        }
     }
 }
