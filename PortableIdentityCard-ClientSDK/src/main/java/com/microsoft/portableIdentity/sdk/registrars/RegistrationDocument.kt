@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RegistrationDocument(
         @SerialName("@context")
-        val context: String = "https://www.w3.org/2019/portableIdentity/v1",
+        val context: String = "https://www.w3.org/2019/did/v1",
         val id: String? = null,
         @SerialName("publicKey")
         val publicKeys: List<IdentifierDocumentPublicKey>,

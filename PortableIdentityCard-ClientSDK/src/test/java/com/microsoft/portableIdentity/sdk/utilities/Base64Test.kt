@@ -95,7 +95,7 @@ class Base64TestSuite {
         assertEqualsByteArray(expectedData, Base64Url.decode(stringData, logger))
     }
 
-    private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays portableIdentity not match") {
+    private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {
         assertEquals(expected.size, actual.size, "ByteArrays are of different length.")
         expected.forEachIndexed { index, byte ->
             assertEquals(byte, actual[index], message)

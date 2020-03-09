@@ -226,7 +226,7 @@ class OidcResponse (
                     try {
                         Serializer.parse(ClaimResponse.serializer(), response)
                     } catch (error: SerializationException) {
-                        // this was not the right format but we portableIdentity not get a 400 error
+                        // this was not the right format but we did not get a 400 error
                         null
                     }
                 } else {

@@ -11,17 +11,17 @@ import org.assertj.core.api.Assertions.assertThat
 
 class SerializationTest {
     private var actualDocument : IdentifierDocument = IdentifierDocument(
-        context = "https://w3id.org/portableIdentity/v1",
-        id = "portableIdentity:test:hub.id",
+        context = "https://w3id.org/did/v1",
+        id = "did:test:hub.id",
         created = "2019-07-15T22:36:00.881Z",
         publicKeys = listOf(
             IdentifierDocumentPublicKey(
-                id = "portableIdentity:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
+                id = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
                 type = "RsaVerificationKey2018",
-                controller = "portableIdentity:test:hub.id",
+                controller = "did:test:hub.id",
                 publicKeyJwk = JsonWebKey(
                     kty = "RSA",
-                    kid = "portableIdentity:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
+                    kid = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
                     alg = "RSA-OAEP",
                     key_ops = listOf("sign", "verify", "wrapKey", "unwrapKey", "encrypt", "decrypt"),
                     n = "uG76CgQGPSTx0ZuJBvof4ceNj4Taci3xaFpt_2hQeLhbjvE_N7SHFU86rFWxZMv_DP7h9cfDImp" +
@@ -41,7 +41,7 @@ class SerializationTest {
         services = listOf(
             IdentityHubService(
                 id = "#hubEndpoint",
-                publicKey = "portableIdentity:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
+                publicKey = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
                 serviceEndpoint = ServiceHubEndpoint(listOf("https://beta.hub.microsoft.com/"))
             )
         )
