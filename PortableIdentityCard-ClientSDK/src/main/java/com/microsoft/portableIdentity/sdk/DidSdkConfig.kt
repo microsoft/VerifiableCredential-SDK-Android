@@ -47,7 +47,7 @@ class DidSdkConfig(
             context: Context,
             logger: ILogger = ConsoleLogger(),
             registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
-            resolverUrl: String = "https://beta.discover.portableIdentity.microsoft.com/1.0/identifiers",
+            resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
             signatureKeyReference: String = "signature",
             encryptionKeyReference: String = "encryption"
         ) {

@@ -21,7 +21,7 @@ import kotlin.random.Random
  */
 class DidManager(private val config: DidSdkConfig) {
 
-    private val didSecretName = "portableIdentity.identifier"
+    private val didSecretName = "did.identifier"
 
     val did: Identifier by lazy { initDid() }
 
@@ -74,7 +74,7 @@ class DidManager(private val config: DidSdkConfig) {
             val alias = Base64Url.encode(Random.nextBytes(16), logger = config.logger)
             Identifier.createAndRegister(
                 alias, config.cryptoOperations, config.logger, config.signatureKeyReference,
-                config.encryptionKeyReference, config.resolver, config.registrar, listOf("portableIdentity:test:hub.id")
+                config.encryptionKeyReference, config.resolver, config.registrar, listOf("did:test:hub.id")
             )
         }
     }
