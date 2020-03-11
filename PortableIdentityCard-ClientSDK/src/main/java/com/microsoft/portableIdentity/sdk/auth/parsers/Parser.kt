@@ -5,12 +5,25 @@
 
 package com.microsoft.portableIdentity.sdk.auth.parsers
 
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
+import com.microsoft.portableIdentity.sdk.auth.ProtocolType
+import com.microsoft.portableIdentity.sdk.auth.models.OIDCRequestContent
+import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
- * Interface for defining methods on a Parser Object that parses raw requests.
+ * Singleton Object that Parses contents of JwsTokens into correct object.
  */
-interface Parser {
+class Parser() : IParser {
 
-    fun getCredentialRequests(): CredentialRequests
+    override fun parse(token: JwsToken): Pair<RequestContent, ProtocolType> {
+        try {
+            val contents = Serializer.parse(OIDCRequestContent.serializer(), token.content())
+            return Pair(contents, ProtocolType.OIDC)
+        } catch (exception: Exception) {
+            BaseLogger.log("token is not an OIDC Request.")
+        }
+        throw Exception("Protocol Not Supported")
+    }
 }

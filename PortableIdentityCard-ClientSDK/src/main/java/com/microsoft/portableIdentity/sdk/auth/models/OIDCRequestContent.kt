@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.models
 
+import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
 import com.microsoft.portableIdentity.sdk.auth.oidc.Registration
 import com.microsoft.portableIdentity.sdk.auth.oidc.RequestClaimParameter
 import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
@@ -7,7 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OIDCRequestObject(
+data class OIDCRequestContent(
     val iss: String? = null,
     val aud: String? = null,
     @SerialName("response_type")
@@ -28,4 +29,12 @@ data class OIDCRequestObject(
     // custom parameters
     @SerialName("offer")
     val claimsOffered: ClaimObject? = null
-)
+): RequestContent {
+    override fun getCredentialRequests(): CredentialRequests {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun isValid(): Boolean {
+        TODO("need to check exp and such") //To change body of created functions use File | Settings | File Templates.
+    }
+}
