@@ -1,6 +1,9 @@
 package com.microsoft.portableIdentity.sdk.auth.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.OAuthRequestParameter
+import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
+import com.microsoft.portableIdentity.sdk.auth.models.getQueryStringParameter
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.Registration
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.RequestClaimParameter
 import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
@@ -82,9 +85,17 @@ class OidcRequest constructor(
             }
 
             // Verify and parse the request object
-            var request = getQueryStringParameter(OAuthRequestParameter.Request, signedRequest, logger = logger)
+            var request = getQueryStringParameter(
+                OAuthRequestParameter.Request,
+                signedRequest,
+                logger = logger
+            )
             // check for a request object
-            val indirectRequestUrl = getQueryStringParameter(OAuthRequestParameter.RequestUri, signedRequest, logger = logger)
+            val indirectRequestUrl = getQueryStringParameter(
+                OAuthRequestParameter.RequestUri,
+                signedRequest,
+                logger = logger
+            )
             if (indirectRequestUrl != null) {
                 val client = getHttpClient()
                 request = client.get<String>(indirectRequestUrl);
@@ -105,12 +116,18 @@ class OidcRequest constructor(
             DidKeyResolver.verifyJws(token, crypto, sender, logger = logger)
 
             // retrieve the rest of the parameters
-            val scope = contents.scope ?: getQueryStringParameter(OAuthRequestParameter.Scope, signedRequest, true, logger = logger)!!
+            val scope = contents.scope ?: getQueryStringParameter(
+                OAuthRequestParameter.Scope,
+                signedRequest,
+                true,
+                logger = logger
+            )!!
             val responseType = contents.responseType ?: getQueryStringParameter(
                 OAuthRequestParameter.ResponseType,
                 signedRequest,
                 true,
-                logger = logger)!!
+                logger = logger
+            )!!
             val redirectUrl = contents.clientId ?: contents.redirectUri ?: getQueryStringParameter(
                 OAuthRequestParameter.ClientId,
                 signedRequest,
@@ -118,14 +135,27 @@ class OidcRequest constructor(
                 logger = logger
             )!!
             // optionals
-            val state = contents.state ?: getQueryStringParameter(OAuthRequestParameter.State, signedRequest, logger = logger)
+            val state = contents.state ?: getQueryStringParameter(
+                OAuthRequestParameter.State,
+                signedRequest,
+                logger = logger
+            )
             val responseMode =
-                contents.responseMode ?: getQueryStringParameter(OAuthRequestParameter.ResponseMode, signedRequest, logger = logger) ?:
+                contents.responseMode ?: getQueryStringParameter(
+                    OAuthRequestParameter.ResponseMode,
+                    signedRequest,
+                    logger = logger
+                ) ?:
                         OidcRequest.defaultResponseMode
-            val nonce = contents.nonce ?: getQueryStringParameter(OAuthRequestParameter.Nonce, signedRequest, logger = logger) ?:
+            val nonce = contents.nonce ?: getQueryStringParameter(
+                OAuthRequestParameter.Nonce,
+                signedRequest,
+                logger = logger
+            ) ?:
                     throw logger.error("No nonce was included in this OIDC request.")
             val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer(), logger = logger)
-            val registration = contents.registration ?: getQueryStringJsonParameter(OAuthRequestParameter.Registration,
+            val registration = contents.registration ?: getQueryStringJsonParameter(
+                OAuthRequestParameter.Registration,
                 signedRequest, Registration.serializer(), logger = logger)
 
             val offers = contents.claimsOffered ?: getQueryStringJsonParameter(OAuthRequestParameter.Offer, signedRequest, ClaimObject.serializer(), logger = logger)

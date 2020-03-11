@@ -2,7 +2,8 @@
 
 package com.microsoft.portableIdentity.sdk.auth.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.OAuthRequestParameter
+import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
+import com.microsoft.portableIdentity.sdk.auth.models.getQueryStringParameter
 import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
 import com.microsoft.portableIdentity.sdk.credentials.ClaimResponse
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
@@ -78,8 +79,16 @@ class OidcResponse (
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
                 ContentType.Application.FormUrlEncoded -> {
-                    val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data, logger = logger) ?: throw logger.error("No id_token given.")
-                    val state = getQueryStringParameter(OAuthRequestParameter.State, data, logger = logger)
+                    val idToken = getQueryStringParameter(
+                        OAuthRequestParameter.IdToken,
+                        data,
+                        logger = logger
+                    ) ?: throw logger.error("No id_token given.")
+                    val state = getQueryStringParameter(
+                        OAuthRequestParameter.State,
+                        data,
+                        logger = logger
+                    )
                     val token = JwsToken(idToken, logger = logger)
                     val response = Serializer.parse(OidcResponseObject.serializer(), token.content())
 

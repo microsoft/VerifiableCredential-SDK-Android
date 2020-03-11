@@ -1,6 +1,6 @@
-package com.microsoft.portableIdentity.sdk.auth.oidc
+package com.microsoft.portableIdentity.sdk.auth.models
 
-import com.microsoft.portableIdentity.sdk.auth.OAuthRequestParameter
+import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import com.microsoft.portableIdentity.sdk.utilities.PercentEncoding
 

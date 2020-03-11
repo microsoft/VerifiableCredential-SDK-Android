@@ -1,8 +1,7 @@
-package com.microsoft.portableIdentity.sdk.auth.models
+package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
-import com.microsoft.portableIdentity.sdk.auth.oidc.Registration
-import com.microsoft.portableIdentity.sdk.auth.oidc.RequestClaimParameter
+import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

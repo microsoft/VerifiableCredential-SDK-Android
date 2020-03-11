@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.auth
+package com.microsoft.portableIdentity.sdk.auth.models
 
 enum class OAuthRequestParameter(val value: String) {
     // Required
