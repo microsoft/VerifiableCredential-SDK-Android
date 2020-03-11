@@ -9,7 +9,6 @@ package com.microsoft.portableIdentity.sdk.auth.credentialRequests
  * Object that bundles types of credential requests together if exists.
  */
 data class CredentialRequests(
-    val selfIssuedCredentialRequests: Set<SelfIssuedCredentialRequest>?,
+    val selfIssuedCredentialRequests: Set<SelfIssuedClaimRequest>?,
     val verifiableCredentialRequests: Set<VerifiableCredentialRequest>?,
-    val idTokenRequests: Set<IdTokenRequest>?) {
-}
+    val idTokenRequests: Set<IdTokenRequest>?)

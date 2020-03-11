@@ -10,5 +10,22 @@ package com.microsoft.portableIdentity.sdk.auth.credentialRequests
  */
 interface CredentialRequest {
 
-    // TODO: add properties.
+    /**
+     * id of the credentialRequest.
+     */
+    val id: String
+
+    /**
+     * Type of Credential Request.
+     */
+    val type: CredentialRequestType
+}
+
+/**
+ * Enum Class that represents all Credential Request Types we support.
+ */
+enum class CredentialRequestType(val type: String) {
+    VC("VerifiableCredential"),
+    IdToken("IdToken"),
+    SelfIssued("SelfIssued")
 }

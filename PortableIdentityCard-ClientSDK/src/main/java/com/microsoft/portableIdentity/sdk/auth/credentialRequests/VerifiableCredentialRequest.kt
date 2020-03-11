@@ -8,6 +8,20 @@ package com.microsoft.portableIdentity.sdk.auth.credentialRequests
 /**
  * Object that represents a Verifiable Credential Request.
  */
-data class VerifiableCredentialRequest(val schema: String) {
-    // TODO: add properties.
-}
+data class VerifiableCredentialRequest(
+
+    override val id: String,
+
+    override  val type: CredentialRequestType = CredentialRequestType.VC,
+
+    /**
+     * A set of names of required claims from idToken.
+     */
+    val requiredRequestedClaims: Set<String>?,
+
+
+    /**
+     * A set of names of optional claims from idToken.
+     */
+    val optionalRequestedClaims: Set<String>?
+) : CredentialRequest
