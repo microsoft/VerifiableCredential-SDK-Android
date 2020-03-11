@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth
+package com.microsoft.portableIdentity.sdk.auth.formatters
 
-class Response(val response: Request) {
+interface Formatter {
+
+    // TODO(add method signatures.)
 }

@@ -3,7 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth
+package com.microsoft.portableIdentity.sdk.auth.formatters
 
-class Response(val response: Request) {
+import com.microsoft.portableIdentity.sdk.auth.ProtocolType
+
+object FormatterFactory {
+
+    fun makeFormatter(protocolType: ProtocolType): Formatter? {
+        // TODO: implement factory method.
+        return null
+    }
 }

@@ -3,7 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth
+package com.microsoft.portableIdentity.sdk.auth.credentialRequests
 
-class Response(val response: Request) {
+/**
+ * Interface that defines a generic CredentialRequest.
+ */
+interface CredentialRequest {
+
+    // TODO: add properties.
 }

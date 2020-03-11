@@ -6,6 +6,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.*
 import kotlin.collections.Map

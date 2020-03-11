@@ -5,5 +5,16 @@
 
 package com.microsoft.portableIdentity.sdk.auth
 
-class Response(val response: Request) {
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
+
+enum class ProtocolType {
+    OIDC,
+    SIOP;
+
+    companion object {
+        fun getProtocolType(rawRequest: JoseToken): ProtocolType? {
+            // TODO: implement this switch statement correctly
+            return SIOP
+        }
+    }
 }

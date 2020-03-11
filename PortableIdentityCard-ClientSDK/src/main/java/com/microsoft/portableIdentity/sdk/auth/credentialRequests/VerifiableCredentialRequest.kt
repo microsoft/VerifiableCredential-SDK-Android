@@ -3,7 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth
+package com.microsoft.portableIdentity.sdk.auth.credentialRequests
 
-class Response(val response: Request) {
+/**
+ * Object that represents a Verifiable Credential Request.
+ */
+data class VerifiableCredentialRequest(val schema: String) {
+    // TODO: add properties.
 }
