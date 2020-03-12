@@ -13,7 +13,7 @@ import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
- * Singleton Object that Parses contents of JwsTokens into correct object.
+ * Object that Parses contents of JwsTokens into correct object.
  */
 class Parser() : IParser {
 
@@ -26,6 +26,4 @@ class Parser() : IParser {
         }
         throw Exception("Protocol Not Supported")
     }
-
-
 }

@@ -179,7 +179,7 @@ class JwsToken private constructor(private val payload: String,
     /**
      *Verify the JWS signatures
      */
-    fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false) {
+    fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false): Boolean {
         val results = this.signatures.map {
             val fullyQuantifiedKid = it.getKid(logger = logger) ?: ""
             val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid).second
@@ -211,15 +211,15 @@ class JwsToken private constructor(private val payload: String,
                 }
             }
         }
-        if (!if (all) {
-            results.reduce{
-                    result, valid -> result && valid
-            }
-        } else {
-            results.reduce {
-                result, valid -> result || valid
-            }
-        }) {
+        if ((return !if (all) {
+                results.reduce{ result, valid -> result && valid
+                }
+            } else {
+                results.reduce {
+                    result, valid -> result || valid
+                }
+            })
+        ) {
             // TODO: fix signature verification on the enterprise agent?
             // throw logger.error("Invalid Signature")
         }

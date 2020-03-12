@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.validators
 
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 
@@ -13,5 +14,5 @@ interface IValidator {
     /**
      * Checks signature on JwsToken.
      */
-    fun verify(token: JwsToken): Boolean
+    fun verify(token: JwsToken, publicKeys: List<PublicKey>): Boolean
 }

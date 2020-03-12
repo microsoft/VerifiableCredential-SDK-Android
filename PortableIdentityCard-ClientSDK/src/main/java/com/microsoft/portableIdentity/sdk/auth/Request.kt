@@ -13,63 +13,61 @@ import com.microsoft.portableIdentity.sdk.auth.validators.IValidator
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import kotlinx.serialization.internal.VALUE_INDEX
 
 /**
  * Class that represents a generic Request.
  * As of now, only support rawRequests of JoseToken.
  */
-class Request(val rawRequest: JoseToken,
-              val parser: IParser = Parser(),
-              val validator: IValidator = Validator()) {
+class Request private constructor(val rawRequest: JwsToken,
+                                  val contents: RequestContent,
+                                  val protocolType: ProtocolType,
+                                  val parser: IParser,
+                                  val validator: IValidator) {
 
-    /**
-     * The contents of the RawRequest
-     */
-    var contents: RequestContent? = null
+    companion object {
+        /**
+         * Create Method to create a Request object from a JoseToken.
+         *
+         * @param rawRequest JoseToken object that is the request.
+         * @param validator optional validator param for dependency injection.
+         * @param parser optional parser param for dependency injection.
+         *
+         * @return a Request object.
+         */
+        fun create(rawRequest: JoseToken,
+                   validator: IValidator = Validator(),
+                   parser: IParser = Parser()): Request {
 
-    /**
-     * The type of protocol that the contents conform to.
-     */
-    var protocolType: ProtocolType? = null
+            return if (rawRequest is JwsToken) {
+                val (contents, protocolType) = parser.parse(rawRequest)
+                Request(rawRequest, contents, protocolType, parser, validator)
+            } else {
+                TODO(
+                    reason="unwrap JWE into a JWS to construct Request."
+                )
+                throw Exception("JWEs not supported yet.")
+            }
+        }
+    }
 
     /**
      * Validate this request using the Validator.
      * This includes:
-     * 1. TODO: decrypting if JWEToken
-     * 2. verifying the signature if contains JWSToken
-     * 3. TODO: checking the claims of content protocol.
+     * 1. verifying the signature if contains JWSToken
+     * 2. check the claims of content protocol.
      *
      * Return: true if successfully validate.
      */
     fun validate(): Boolean {
-        if (rawRequest is JwsToken) {
-            return validator.verify(rawRequest)
-        }
-        return false
+        val publicKeys = contents.getPublicKeys()
+        return validator.verify(rawRequest, publicKeys) && contents.isValid()
     }
 
     /**
-     * Parses contents of the JoseToken and sets the contents and protocolType properties.
-     * TODO: add decrypting token if needed via validator.
-     */
-    fun parseContents() {
-        if (rawRequest is JwsToken) {
-            val (contents, protocolType) = parser.parse(rawRequest)
-            this.contents = contents
-            this.protocolType = protocolType
-        }
-        else {
-            throw Exception("JoseToken type not supported")
-        }
-    }
-
-    /**
-     * Get Credential Requests.
+     * Get Credential Requests if there are any in Request.
      */
     fun getCredentialRequests(): CredentialRequests? {
-        if (contents == null) {
-            parseContents()
-        }
-        return contents?.getCredentialRequests()
+        return contents.getCredentialRequests()
     }
 }

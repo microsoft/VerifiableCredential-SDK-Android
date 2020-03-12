@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -87,6 +88,10 @@ class DidManager(private val config: DidSdkConfig) {
             config.resolver,
             config.registrar
         )
+    }
+
+    fun getCryptoOperation(): CryptoOperations {
+        return config.cryptoOperations
     }
 
 }

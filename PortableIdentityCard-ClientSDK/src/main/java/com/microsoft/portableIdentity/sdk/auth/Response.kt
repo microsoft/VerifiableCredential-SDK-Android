@@ -5,5 +5,35 @@
 
 package com.microsoft.portableIdentity.sdk.auth
 
-class Response(val response: Request) {
+import com.microsoft.did.sdk.credentials.Credential
+import com.microsoft.portableIdentity.sdk.auth.protectors.IProtector
+import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
+import java.lang.Exception
+
+class Response(val request: Request?) {
+
+    val collectedCredentials: MutableSet<Credential> = mutableSetOf()
+
+    var signer: Signer? = null
+
+    fun addCredential(credential: Credential) {
+        collectedCredentials.add(credential)
+    }
+
+    fun addProtector(protector: IProtector) {
+        if (protector is Signer) {
+            signer = protector
+        } else {
+            throw Exception("We do not support Encryption at the moment.")
+        }
+    }
+
+    /**
+     * 1. Composes ResponseContents from RequestContents and collected credentials.
+     * 2. Protects contents with protectors if exist.
+     * 3. Sends Response to url.
+     */
+    fun send(url: String) {
+
+    }
 }
