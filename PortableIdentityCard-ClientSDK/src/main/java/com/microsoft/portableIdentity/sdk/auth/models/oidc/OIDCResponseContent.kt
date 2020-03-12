@@ -1,9 +1,12 @@
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
+import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
 import com.microsoft.portableIdentity.sdk.auth.oidc.OidcResponse
+import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -29,7 +32,21 @@ data class OIDCResponseContent(
     val claimSources: Map<String, List<Map<String, String>>>? = null
 ) : ResponseContent {
 
-    override fun populateFromRequest(requestContent: RequestContent) {
+    override fun addSignerParams(signer: Signer) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun addCredentials(credentials: List<Credential>) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun stringify(): String {
+        return Serializer.stringify(OIDCResponseContent.serializer(), this)
+    }
+
+    companion object {
+        fun populateFromRequest(requestContent: RequestContent) : OIDCResponseContent {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
     }
 }

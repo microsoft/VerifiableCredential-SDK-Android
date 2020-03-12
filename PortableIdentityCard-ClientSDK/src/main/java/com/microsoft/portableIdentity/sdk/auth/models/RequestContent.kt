@@ -6,6 +6,11 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 interface RequestContent {
 
     /**
+     * the Uri to send the response to.
+     */
+    val responseUri: String
+
+    /**
      * Get credential requests from content.
      */
     fun getCredentialRequests(): CredentialRequests

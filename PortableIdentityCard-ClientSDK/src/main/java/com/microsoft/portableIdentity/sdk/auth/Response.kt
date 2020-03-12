@@ -6,15 +6,22 @@
 package com.microsoft.portableIdentity.sdk.auth
 
 import com.microsoft.did.sdk.credentials.Credential
+import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OIDCResponseContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.IProtector
 import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
+import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
 import java.lang.Exception
 
-class Response(val request: Request?) {
+class Response(private val request: Request) {
 
-    val collectedCredentials: MutableSet<Credential> = mutableSetOf()
+    private val collectedCredentials: MutableList<Credential> = mutableListOf()
 
-    var signer: Signer? = null
+    private var signer: Signer? = null
 
     fun addCredential(credential: Credential) {
         collectedCredentials.add(credential)
@@ -32,8 +39,57 @@ class Response(val request: Request?) {
      * 1. Composes ResponseContents from RequestContents and collected credentials.
      * 2. Protects contents with protectors if exist.
      * 3. Sends Response to url.
+     *
+     * @returns response to Response.
      */
-    fun send(url: String) {
+    suspend fun send(): String? {
+        var responseBody: String
+        when (request.protocolType) {
+            ProtocolType.OIDC -> {
+                val responseContent = OIDCResponseContent.populateFromRequest(request.contents)
+                val token = wrapAsJwsToken(responseContent)
+                // serialize into compact form. TODO(unsure about this)
+                val responseSerialized = token.serialize(JwsFormat.Compact)
+                responseBody = "id_token=${token}"
+                if (!responseContent.state.isNullOrBlank()) {
+                   responseBody += "&state=${responseContent.state}"
+                }
+            }
+            else -> {
+                throw Exception("Protocol Not Supported")
+            }
+        }
+        return HttpWrapper.post(responseBody, request.contents.responseUri)
+    }
 
+    /**
+     * Create JwsToken from ResponseContent and sign if signer exists.
+     *
+     * @param responseContent content to sign.
+     *
+     * @return JwsToken signed if signer exists.
+     */
+    private fun wrapAsJwsToken(responseContent: ResponseContent): JwsToken {
+        responseContent.addCredentials(collectedCredentials)
+
+        // create JWSToken and sign if signer is not null.
+        return if (signer != null) {
+            // use signer to sign payload.
+            responseContent.addSignerParams(signer!!)
+            signer!!.protect(responseContent)
+            // TODO(get rid of bangs)
+        } else {
+            // do not sign token.
+            JwsToken(responseContent.stringify(), BaseLogger)
+        }
+    }
+
+    /**
+     * Create JoseToken from ResponseContent and encrypt if encryptor exists.
+     *
+     * @return JweToken
+     */
+    private fun wrapAsJweToken(): JoseToken {
+        TODO("Encrypting not supported.")
     }
 }
