@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.portableIdentity.sdk.auth.oidc
+package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
 import com.microsoft.portableIdentity.sdk.auth.models.getQueryStringParameter
-import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
-import com.microsoft.portableIdentity.sdk.credentials.ClaimResponse
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimResponse
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey

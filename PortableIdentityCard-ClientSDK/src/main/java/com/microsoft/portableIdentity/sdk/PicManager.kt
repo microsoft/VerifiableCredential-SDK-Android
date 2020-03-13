@@ -2,9 +2,9 @@
 
 package com.microsoft.portableIdentity.sdk
 
-import com.microsoft.portableIdentity.sdk.auth.oidc.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.oidc.OidcResponse
-import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
+import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest
+import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcResponse
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import io.ktor.http.ContentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

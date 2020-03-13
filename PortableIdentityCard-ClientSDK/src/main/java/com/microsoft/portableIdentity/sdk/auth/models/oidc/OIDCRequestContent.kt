@@ -2,7 +2,7 @@ package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
-import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

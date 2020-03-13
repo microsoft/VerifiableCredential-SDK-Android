@@ -3,7 +3,7 @@ package com.microsoft.portableIdentity.sdk.auth.models.oidc
 import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
-import com.microsoft.portableIdentity.sdk.auth.oidc.OidcResponse
+import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.utilities.Serializer

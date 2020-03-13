@@ -1,10 +1,10 @@
-package com.microsoft.portableIdentity.sdk.auth.oidc
+package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
 import com.microsoft.portableIdentity.sdk.auth.models.getQueryStringParameter
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.Registration
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.RequestClaimParameter
-import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken

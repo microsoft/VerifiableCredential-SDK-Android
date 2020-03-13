@@ -13,6 +13,7 @@ import com.microsoft.portableIdentity.sdk.auth.validators.IValidator
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import kotlinx.serialization.internal.VALUE_INDEX
 
 /**
@@ -27,27 +28,26 @@ class Request private constructor(val rawRequest: JwsToken,
 
     companion object {
         /**
-         * Create Method to create a Request object from a JoseToken.
+         * Create Method to create a Request object from a raw request string.
          *
-         * @param rawRequest JoseToken object that is the request.
+         * @param rawRequest String contains a request.
          * @param validator optional validator param for dependency injection.
          * @param parser optional parser param for dependency injection.
          *
          * @return a Request object.
          */
-        fun create(rawRequest: JoseToken,
+        fun create(rawRequest: String,
                    validator: IValidator = Validator(),
                    parser: IParser = Parser()): Request {
 
-            return if (rawRequest is JwsToken) {
-                val (contents, protocolType) = parser.parse(rawRequest)
-                Request(rawRequest, contents, protocolType, parser, validator)
-            } else {
-                TODO(
-                    reason="unwrap JWE into a JWS to construct Request."
-                )
-                throw Exception("JWEs not supported yet.")
+            try {
+                val token = JwsToken.deserialize(rawRequest, BaseLogger)
+                val (contents, protocolType) = parser.parse(token)
+                return Request(token, contents, protocolType, parser, validator)
+            } catch (exception: Exception) {
+                BaseLogger.log("raw request is not a JwsToken.")
             }
+                throw BaseLogger.error("Other raw request types such as JweToken not supported.")
         }
     }
 
