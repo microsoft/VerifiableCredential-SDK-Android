@@ -7,7 +7,7 @@ package com.microsoft.portableIdentity.sdk.auth
 
 import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.OIDCResponseContent
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.SIOPResponseContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.IProtector
 import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
@@ -46,7 +46,7 @@ class Response(private val request: Request) {
         var responseBody: String
         when (request.protocolType) {
             ProtocolType.OIDC -> {
-                val responseContent = OIDCResponseContent.populateFromRequest(request.contents)
+                val responseContent = SIOPResponseContent.populateFromRequest(request.contents)
                 val token = wrapAsJwsToken(responseContent)
                 // serialize into compact form. TODO(unsure about this)
                 val responseSerialized = token.serialize(JwsFormat.Compact)

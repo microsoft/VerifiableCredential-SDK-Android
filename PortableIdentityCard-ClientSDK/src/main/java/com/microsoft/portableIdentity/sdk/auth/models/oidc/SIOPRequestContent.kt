@@ -8,7 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OIDCRequestContent(
+data class SIOPRequestContent(
     val iss: String? = null,
     val aud: String? = null,
     @SerialName("response_type")

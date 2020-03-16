@@ -6,7 +6,7 @@
 package com.microsoft.portableIdentity.sdk.auth.parsers
 
 import com.microsoft.portableIdentity.sdk.auth.ProtocolType
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.OIDCRequestContent
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.SIOPRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
@@ -19,7 +19,7 @@ class Parser() : IParser {
 
     override fun parse(token: JwsToken): Pair<RequestContent, ProtocolType> {
         try {
-            val contents = Serializer.parse(OIDCRequestContent.serializer(), token.content())
+            val contents = Serializer.parse(SIOPRequestContent.serializer(), token.content())
             return Pair(contents, ProtocolType.OIDC)
         } catch (exception: Exception) {
             BaseLogger.log("token is not an OIDC Request.")

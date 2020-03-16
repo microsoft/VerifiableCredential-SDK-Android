@@ -12,7 +12,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OIDCResponseContent(
+data class SIOPResponseContent(
     @Required
     val iss: String = OidcResponse.SELFISSUED,
     val sub: String, // thumbprint (sha-256)
@@ -41,11 +41,11 @@ data class OIDCResponseContent(
     }
 
     override fun stringify(): String {
-        return Serializer.stringify(OIDCResponseContent.serializer(), this)
+        return Serializer.stringify(SIOPResponseContent.serializer(), this)
     }
 
     companion object {
-        fun populateFromRequest(requestContent: RequestContent) : OIDCResponseContent {
+        fun populateFromRequest(requestContent: RequestContent) : SIOPResponseContent {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
