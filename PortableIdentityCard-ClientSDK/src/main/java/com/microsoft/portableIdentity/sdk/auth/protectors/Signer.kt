@@ -9,10 +9,10 @@ import java.security.KeyStore
 
 /**
  * Protector Class that can protect responseContent by signing.
- *
+ * TODO(make default signing key)
  * @param keyReference to sign token with.
  */
-class Signer(private val keyReference: String): IProtector {
+class Signer(private val keyReference: String = "sigKey"): IProtector {
 
     override fun protect(responseContent: ResponseContent) : JwsToken {
         val content = responseContent.stringify()

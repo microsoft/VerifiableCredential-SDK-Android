@@ -29,14 +29,13 @@ data class SIOPResponseContent(
     @SerialName("_claim_names")
     val claimNames: Map<String, String>? = null,
     @SerialName("_claim_sources")
-    val claimSources: Map<String, List<Map<String, String>>>? = null
+    val claimSources: Map<String, List<Map<String, String>>>? = null,
+
+    // optional parameters
+    val schema: String? = null
 ) : ResponseContent {
 
     override fun addSignerParams(signer: Signer) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun addCredentials(credentials: List<Credential>) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -45,7 +44,7 @@ data class SIOPResponseContent(
     }
 
     companion object {
-        fun populateFromRequest(requestContent: RequestContent) : SIOPResponseContent {
+        fun create(requestContent: RequestContent, credentials: List<Credential>) : SIOPResponseContent {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }

@@ -17,27 +17,17 @@ import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
 import java.lang.Exception
 
-class Response(private val request: Request) {
+class Response(private val request: Request, private val signer: Signer = Signer()) {
 
     private val collectedCredentials: MutableList<Credential> = mutableListOf()
-
-    private var signer: Signer? = null
 
     fun addCredential(credential: Credential) {
         collectedCredentials.add(credential)
     }
 
-    fun addProtector(protector: IProtector) {
-        if (protector is Signer) {
-            signer = protector
-        } else {
-            throw Exception("We do not support Encryption at the moment.")
-        }
-    }
-
     /**
      * 1. Composes ResponseContents from RequestContents and collected credentials.
-     * 2. Protects contents with protectors if exist.
+     * 2. Protects contents with protectors.
      * 3. Sends Response to url.
      *
      * @returns response to Response.
@@ -46,11 +36,10 @@ class Response(private val request: Request) {
         var responseBody: String
         when (request.protocolType) {
             ProtocolType.OIDC -> {
-                val responseContent = SIOPResponseContent.populateFromRequest(request.contents)
+                val responseContent = SIOPResponseContent.create(request.contents, collectedCredentials)
                 val token = wrapAsJwsToken(responseContent)
-                // serialize into compact form. TODO(unsure about this)
-                val responseSerialized = token.serialize(JwsFormat.Compact)
-                responseBody = "id_token=${token}"
+                val serializedToken = token.serialize(JwsFormat.Compact)
+                responseBody = "id_token=${serializedToken}"
                 if (!responseContent.state.isNullOrBlank()) {
                    responseBody += "&state=${responseContent.state}"
                 }
@@ -70,7 +59,6 @@ class Response(private val request: Request) {
      * @return JwsToken signed if signer exists.
      */
     private fun wrapAsJwsToken(responseContent: ResponseContent): JwsToken {
-        responseContent.addCredentials(collectedCredentials)
 
         // create JWSToken and sign if signer is not null.
         return if (signer != null) {

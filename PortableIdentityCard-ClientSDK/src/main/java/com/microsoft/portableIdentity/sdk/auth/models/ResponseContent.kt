@@ -13,13 +13,6 @@ interface ResponseContent {
     fun addSignerParams(signer: Signer)
 
     /**
-     * Add Credentials to Response Content.
-     *
-     * @param credentials a list of requested credentials.
-     */
-    fun addCredentials(credentials: List<Credential>)
-
-    /**
      * Wrapper over serializer stringify function.
      */
     fun stringify() : String
