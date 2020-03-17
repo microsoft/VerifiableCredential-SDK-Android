@@ -20,7 +20,7 @@ class Parser() : IParser {
     override fun parse(token: JwsToken): Pair<RequestContent, ProtocolType> {
         try {
             val contents = Serializer.parse(SIOPRequestContent.serializer(), token.content())
-            return Pair(contents, ProtocolType.OIDC)
+            return Pair(contents, ProtocolType.SIOP)
         } catch (exception: Exception) {
             BaseLogger.log("token is not an OIDC Request.")
         }

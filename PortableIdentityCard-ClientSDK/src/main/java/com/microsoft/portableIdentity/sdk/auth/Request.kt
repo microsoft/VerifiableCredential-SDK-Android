@@ -54,7 +54,7 @@ class Request private constructor(val rawRequest: JwsToken,
     /**
      * Validate this request using the Validator.
      * This includes:
-     * 1. verifying the signature if contains JWSToken
+     * 1. verifying the signature of the JWSToken
      * 2. check the claims of content protocol.
      *
      * Return: true if successfully validate.

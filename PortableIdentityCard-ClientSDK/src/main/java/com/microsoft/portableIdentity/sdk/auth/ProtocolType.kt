@@ -7,14 +7,11 @@ package com.microsoft.portableIdentity.sdk.auth
 
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 
+/**
+ * Type of Protocol of a Request/Response.
+ * We could support some other protocol for interop in the future.
+ * However, we only support SIOP for now.
+ */
 enum class ProtocolType {
-    OIDC,
-    SIOP;
-
-    companion object {
-        fun getProtocolType(rawRequest: JoseToken): ProtocolType? {
-            // TODO: implement this switch statement correctly
-            return SIOP
-        }
-    }
+    SIOP
 }
