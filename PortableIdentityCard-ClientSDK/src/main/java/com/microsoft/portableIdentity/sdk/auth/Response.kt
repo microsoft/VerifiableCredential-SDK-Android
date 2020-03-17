@@ -35,7 +35,7 @@ class Response(private val request: Request, private val signer: Signer = Signer
     suspend fun send(): String? {
         var responseBody: String
         when (request.protocolType) {
-            ProtocolType.OIDC -> {
+            ProtocolType.SIOP -> {
                 val responseContent = SIOPResponseContent.create(request.contents, collectedCredentials)
                 val token = wrapAsJwsToken(responseContent)
                 val serializedToken = token.serialize(JwsFormat.Compact)

@@ -211,18 +211,14 @@ class JwsToken private constructor(private val payload: String,
                 }
             }
         }
-        if ((return !if (all) {
+        return if (all) {
                 results.reduce{ result, valid -> result && valid
                 }
             } else {
                 results.reduce {
                     result, valid -> result || valid
                 }
-            })
-        ) {
-            // TODO: fix signature verification on the enterprise agent?
-            // throw logger.error("Invalid Signature")
-        }
+            }
     }
 
     private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
