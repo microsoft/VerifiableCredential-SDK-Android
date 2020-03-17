@@ -56,6 +56,7 @@ object AndroidKeyConverter {
                     JsonWebKey(
                         kty = KeyType.RSA.value,
                         kid = alias,
+                        alg = key.algorithm,
                         key_ops = listOf(KeyUsage.Decrypt.value),
                         use = KeyUse.Encryption.value,
                         n = Base64.encodeToString((key as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
