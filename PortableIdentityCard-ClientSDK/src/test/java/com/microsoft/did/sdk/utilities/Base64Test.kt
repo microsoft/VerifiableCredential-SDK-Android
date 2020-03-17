@@ -3,7 +3,7 @@ package com.microsoft.did.sdk.utilities
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
-class Base64TestSuite {
+class Base64Test {
     private val logger = ConsoleLogger()
     /**
      * @see https://tools.ietf.org/html/rfc4648#section-10
