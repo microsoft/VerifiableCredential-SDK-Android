@@ -7,12 +7,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 interface IValidator {
 
     /**
-     * TODO: encrypting not supported.
-     */
-    fun decrypt(token: JoseToken)
-
-    /**
      * Checks signature on JwsToken.
      */
-    fun verify(token: JwsToken, publicKeys: List<PublicKey>): Boolean
+    suspend fun verify(token: JwsToken, requester: String): Boolean
 }

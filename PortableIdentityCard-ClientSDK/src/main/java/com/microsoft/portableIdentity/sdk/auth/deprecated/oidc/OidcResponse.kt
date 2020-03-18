@@ -3,7 +3,7 @@
 package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.getQueryStringParameter
+import com.microsoft.portableIdentity.sdk.auth.models.siop.getQueryStringParameter
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimResponse
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations

@@ -5,21 +5,13 @@
 
 package com.microsoft.portableIdentity.sdk.auth.credentialRequests
 
+import kotlinx.serialization.Serializable
+
 /**
  * Interface that defines a generic CredentialRequest.
  */
-interface CredentialRequest {
 
-    /**
-     * id of the credentialRequest.
-     */
-    val id: String
-
-    /**
-     * Type of Credential Request.
-     */
-    val type: CredentialRequestType
-}
+data class CredentialRequest<T>(val claims: Map<String, T>)
 
 /**
  * Enum Class that represents all Credential Request Types we support.

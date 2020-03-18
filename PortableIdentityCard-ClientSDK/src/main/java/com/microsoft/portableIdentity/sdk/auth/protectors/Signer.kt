@@ -29,7 +29,7 @@ class Signer(private val keyReference: String = "sigKey"): IProtector {
      */
     fun sign(content: String, headers: Map<String, String> = emptyMap()) : JwsToken {
         val token = JwsToken(content, logger = BaseLogger)
-        token.sign(keyReference, DidSdkConfig.didManager.getCryptoOperation(), headers)
+        token.sign(keyReference, DidSdkConfig.didManager.cryptoOperations, headers)
         return token
     }
 }

@@ -6,7 +6,7 @@
 package com.microsoft.portableIdentity.sdk.auth.parsers
 
 import com.microsoft.portableIdentity.sdk.auth.ProtocolType
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.SIOPRequestContent
+import com.microsoft.portableIdentity.sdk.auth.models.siop.SIOPRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger

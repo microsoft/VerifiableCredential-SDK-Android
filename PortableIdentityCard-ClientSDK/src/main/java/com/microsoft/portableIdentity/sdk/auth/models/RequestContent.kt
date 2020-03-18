@@ -11,6 +11,11 @@ interface RequestContent {
     val responseUri: String
 
     /**
+     * The identifier who send the request.
+     */
+    val requester: String
+
+    /**
      * Get credential requests from content.
      */
     fun getCredentialRequests(): CredentialRequests
@@ -19,9 +24,4 @@ interface RequestContent {
      * Check claim requirements
      */
     fun isValid(): Boolean
-
-    /**
-     * Get List of all public keys that can be used to verify Request.
-     */
-    fun getPublicKeys(): List<PublicKey>
 }

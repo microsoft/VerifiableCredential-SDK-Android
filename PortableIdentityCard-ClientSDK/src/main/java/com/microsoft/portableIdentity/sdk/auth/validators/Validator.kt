@@ -8,8 +8,10 @@ package com.microsoft.portableIdentity.sdk.auth.validators
 import com.microsoft.portableIdentity.sdk.DidSdkConfig
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import javax.xml.transform.Templates
 
 /**
@@ -17,12 +19,12 @@ import javax.xml.transform.Templates
  */
 class Validator: IValidator {
 
-    override fun decrypt(token: JoseToken) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun verify(token: JwsToken, publicKeys: List<PublicKey>): Boolean {
-        val cryptoOperations = DidSdkConfig.didManager.getCryptoOperation()
-        return token.verify(cryptoOperations, publicKeys, false)
+    override suspend fun verify(token: JwsToken, requester: String): Boolean {
+        val cryptoOperations = DidSdkConfig.didManager.cryptoOperations
+        val requesterDidDocument = DidSdkConfig.didManager.resolver.resolve(requester, cryptoOperations)
+        val keys = requesterDidDocument.document.publicKeys.map {
+            it.toPublicKey(BaseLogger)
+        }
+        return token.verify(cryptoOperations, keys)
     }
 }

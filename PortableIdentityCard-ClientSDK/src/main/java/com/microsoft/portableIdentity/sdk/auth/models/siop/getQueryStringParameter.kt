@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.auth.models.oidc
+package com.microsoft.portableIdentity.sdk.auth.models.siop
 
 import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
 import com.microsoft.portableIdentity.sdk.utilities.ILogger

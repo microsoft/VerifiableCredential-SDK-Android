@@ -11,20 +11,17 @@ import com.microsoft.portableIdentity.sdk.auth.parsers.Parser
 import com.microsoft.portableIdentity.sdk.auth.parsers.IParser
 import com.microsoft.portableIdentity.sdk.auth.validators.IValidator
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
-import kotlinx.serialization.internal.VALUE_INDEX
 
 /**
  * Class that represents a generic Request.
  * As of now, only support rawRequests of JoseToken.
  */
-class Request private constructor(val rawRequest: JwsToken,
+class Request private constructor(val token: JwsToken,
                                   val contents: RequestContent,
                                   val protocolType: ProtocolType,
-                                  val parser: IParser,
-                                  val validator: IValidator) {
+                                  private val validator: IValidator) {
 
     companion object {
         /**
@@ -43,7 +40,7 @@ class Request private constructor(val rawRequest: JwsToken,
             try {
                 val token = JwsToken.deserialize(rawRequest, BaseLogger)
                 val (contents, protocolType) = parser.parse(token)
-                return Request(token, contents, protocolType, parser, validator)
+                return Request(token, contents, protocolType, validator)
             } catch (exception: Exception) {
                 BaseLogger.log("raw request is not a JwsToken.")
             }
@@ -59,9 +56,8 @@ class Request private constructor(val rawRequest: JwsToken,
      *
      * Return: true if successfully validate.
      */
-    fun validate(): Boolean {
-        val publicKeys = contents.getPublicKeys()
-        return validator.verify(rawRequest, publicKeys) && contents.isValid()
+    suspend fun validate(): Boolean {
+        return validator.verify(token, contents.requester) && contents.isValid()
     }
 
     /**

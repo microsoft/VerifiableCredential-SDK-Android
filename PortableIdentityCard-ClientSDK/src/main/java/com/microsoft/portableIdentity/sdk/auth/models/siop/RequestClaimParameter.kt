@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.auth.models.oidc
+package com.microsoft.portableIdentity.sdk.auth.models.siop
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

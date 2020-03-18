@@ -7,8 +7,7 @@ package com.microsoft.portableIdentity.sdk.auth
 
 import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.SIOPResponseContent
-import com.microsoft.portableIdentity.sdk.auth.protectors.IProtector
+import com.microsoft.portableIdentity.sdk.auth.models.siop.SIOPResponseContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
