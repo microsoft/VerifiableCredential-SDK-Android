@@ -1,6 +1,6 @@
-package com.microsoft.portableIdentity.sdk.auth.models.siop
+package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
+import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OAuthRequestParameter
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import com.microsoft.portableIdentity.sdk.utilities.PercentEncoding
 

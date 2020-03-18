@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.auth.models.siop
+package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -61,7 +61,9 @@ data class RequestClaimParameter (
     ) {
         companion object {
             fun <T>default(): MemberScope<T> {
-                return MemberScope(undefined = true)
+                return MemberScope(
+                    undefined = true
+                )
             }
         }
     }

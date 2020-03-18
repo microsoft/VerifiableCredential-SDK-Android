@@ -1,11 +1,9 @@
 package com.microsoft.portableIdentity.sdk.auth.models.siop
 
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequest
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.InputClaim
+import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import kotlinx.serialization.ContextualSerialization
 import kotlinx.serialization.SerialName

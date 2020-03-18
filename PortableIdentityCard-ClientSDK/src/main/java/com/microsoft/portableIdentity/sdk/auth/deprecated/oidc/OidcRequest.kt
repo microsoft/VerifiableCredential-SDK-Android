@@ -1,9 +1,5 @@
 package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.models.OAuthRequestParameter
-import com.microsoft.portableIdentity.sdk.auth.models.siop.getQueryStringParameter
-import com.microsoft.portableIdentity.sdk.auth.models.siop.Registration
-import com.microsoft.portableIdentity.sdk.auth.models.siop.RequestClaimParameter
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
@@ -178,7 +174,11 @@ class OidcRequest constructor(
 
         private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: ILogger): T? {
             val data =
-                getQueryStringParameter(name, url, logger = logger)
+                getQueryStringParameter(
+                    name,
+                    url,
+                    logger = logger
+                )
             return if (!data.isNullOrBlank()) {
                 Serializer.parse(serializer, data)
             } else {

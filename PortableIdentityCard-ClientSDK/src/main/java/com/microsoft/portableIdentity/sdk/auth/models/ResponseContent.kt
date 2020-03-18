@@ -14,6 +14,7 @@ interface ResponseContent {
 
     /**
      * Wrapper over serializer stringify function.
+     * TODO(use polymorphism instead)
      */
     fun stringify() : String
 }
