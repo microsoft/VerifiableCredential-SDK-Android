@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.auth.models.siop
+package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
@@ -12,7 +12,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SIOPResponseContent(
+data class OIDCResponseContent(
     @Required
     val iss: String = OidcResponse.SELFISSUED,
     val sub: String, // thumbprint (sha-256)
@@ -40,11 +40,11 @@ data class SIOPResponseContent(
     }
 
     override fun stringify(): String {
-        return Serializer.stringify(SIOPResponseContent.serializer(), this)
+        return Serializer.stringify(OIDCResponseContent.serializer(), this)
     }
 
     companion object {
-        fun create(requestContent: RequestContent, credentials: List<Credential>) : SIOPResponseContent {
+        fun create(requestContent: RequestContent, credentials: List<Credential>) : OIDCResponseContent {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }

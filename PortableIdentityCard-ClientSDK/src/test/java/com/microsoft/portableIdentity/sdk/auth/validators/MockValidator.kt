@@ -2,7 +2,7 @@ package com.microsoft.portableIdentity.sdk.auth.validators
 
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 
-class MockValidator: IValidator {
+class MockValidator: Validator {
 
     /**
      * always return true

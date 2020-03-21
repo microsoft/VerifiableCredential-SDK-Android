@@ -6,47 +6,25 @@
 package com.microsoft.portableIdentity.sdk.auth
 
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
-import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
-import com.microsoft.portableIdentity.sdk.auth.parsers.Parser
-import com.microsoft.portableIdentity.sdk.auth.parsers.IParser
-import com.microsoft.portableIdentity.sdk.auth.validators.IValidator
+import com.microsoft.portableIdentity.sdk.auth.protocolManagers.OIDCProtocolManager
+import com.microsoft.portableIdentity.sdk.auth.protocolManagers.ProtocolManager
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
+import com.microsoft.portableIdentity.sdk.auth.validators.JoseValidator
 
 /**
  * Class that represents a generic Request.
  * As of now, only support rawRequests of JoseToken.
  */
-class Request private constructor(val token: JwsToken,
-                                  val contents: RequestContent,
-                                  val protocolType: ProtocolType,
-                                  private val validator: IValidator) {
+class Request(val rawRequest: String, private val validator: Validator = JoseValidator()) {
 
-    companion object {
-        /**
-         * Create Method to create a Request object from a raw request string.
-         *
-         * @param rawRequest String contains a request.
-         * @param validator optional validator param for dependency injection.
-         * @param parser optional parser param for dependency injection.
-         *
-         * @return a Request object.
-         */
-        fun create(rawRequest: String,
-                   validator: IValidator = Validator(),
-                   parser: IParser = Parser()): Request {
+    val protocolManager: ProtocolManager
 
-            try {
-                val token = JwsToken.deserialize(rawRequest, BaseLogger)
-                val (contents, protocolType) = parser.parse(token)
-                return Request(token, contents, protocolType, validator)
-            } catch (exception: Exception) {
-                BaseLogger.log("raw request is not a JwsToken.")
-            }
-                throw BaseLogger.error("Other raw request types such as JweToken not supported.")
-        }
+    init {
+        // only support OIDC protocol for now.
+        // which protocol manager to create will be decided in this constructor in the future.
+        protocolManager = OIDCProtocolManager(rawRequest)
     }
+
 
     /**
      * Validate this request using the Validator.
@@ -56,14 +34,14 @@ class Request private constructor(val token: JwsToken,
      *
      * Return: true if successfully validate.
      */
-    suspend fun validate(): Boolean {
-        return validator.verify(token, contents.requester) && contents.isValid()
+    suspend fun isValid(): Boolean {
+        return protocolManager.isValid(validator)
     }
 
     /**
      * Get Credential Requests if there are any in Request.
      */
     fun getCredentialRequests(): CredentialRequests? {
-        return contents.getCredentialRequests()
+        return protocolManager.getCredentialRequests()
     }
 }

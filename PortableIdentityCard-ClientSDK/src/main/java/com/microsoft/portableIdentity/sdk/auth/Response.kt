@@ -6,9 +6,11 @@
 package com.microsoft.portableIdentity.sdk.auth
 
 import com.microsoft.did.sdk.credentials.Credential
+import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
-import com.microsoft.portableIdentity.sdk.auth.models.siop.SIOPResponseContent
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OIDCResponseContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
+import com.microsoft.portableIdentity.sdk.auth.protocolManagers.OIDCProtocolManager
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
@@ -33,9 +35,14 @@ class Response(private val request: Request, private val signer: Signer = Signer
      */
     suspend fun send(): String? {
         var responseBody: String
-        when (request.protocolType) {
-            ProtocolType.SIOP -> {
-                val responseContent = SIOPResponseContent.create(request.contents, collectedCredentials)
+        when (request.protocolManager) {
+            OIDCProtocolManager::class -> {
+
+                if (request.protocolManager.requestContent == null) {
+                    return null
+                }
+
+                val responseContent = OIDCResponseContent.create(request.protocolManager.requestContent!!, collectedCredentials)
                 val token = wrapAsJwsToken(responseContent)
                 val serializedToken = token.serialize(JwsFormat.Compact)
                 responseBody = "id_token=${serializedToken}"
@@ -47,7 +54,7 @@ class Response(private val request: Request, private val signer: Signer = Signer
                 throw Exception("Protocol Not Supported")
             }
         }
-        return HttpWrapper.post(responseBody, request.contents.responseUri)
+        return HttpWrapper.post(responseBody, request.protocolManager.requestContent!!.responseUri)
     }
 
     /**

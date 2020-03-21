@@ -80,4 +80,8 @@ class IdTokenRequests(override val entries: Set<Map.Entry<String, InputClaim>>,
 @Serializable
 data class InputClaim(
     val essential: Boolean?,
-    val purpose: String?)
+    override val purpose: String?): RequestInfo
+
+interface RequestInfo {
+    val purpose: String?
+}

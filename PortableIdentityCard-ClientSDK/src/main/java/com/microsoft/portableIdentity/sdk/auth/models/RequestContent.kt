@@ -14,14 +14,4 @@ interface RequestContent {
      * The identifier who send the request.
      */
     val requester: String
-
-    /**
-     * Get credential requests from content.
-     */
-    fun getCredentialRequests(): CredentialRequests
-
-    /**
-     * Check claim requirements
-     */
-    fun isValid(): Boolean
 }

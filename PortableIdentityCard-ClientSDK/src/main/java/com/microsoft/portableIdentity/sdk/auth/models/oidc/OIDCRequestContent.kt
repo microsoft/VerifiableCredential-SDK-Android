@@ -1,11 +1,10 @@
-package com.microsoft.portableIdentity.sdk.auth.models.siop
+package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.InputClaim
+import com.microsoft.portableIdentity.sdk.auth.credentialRequests.RequestInfo
 import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
 import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
-import kotlinx.serialization.ContextualSerialization
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.*
@@ -14,7 +13,7 @@ import java.util.*
  * Contents of a OpenID Self-Issued Token Request.
  */
 @Serializable
-data class SIOPRequestContent(
+data class OIDCRequestContent(
 
     // what type of object the response should be (should be idtoken).
     @SerialName("response_type")
@@ -40,7 +39,7 @@ data class SIOPRequestContent(
     val nonce: String? = null,
 
     // claims that are being requested.
-    val claims: Map<String, Map<String, @ContextualSerialization InputClaim?>?>? = null,
+    val claims: Map<String, Map<String, RequestInfo?>?>? = null,
 
     // iat and exp that need to be checked to see if token has expired
     val exp: String? = null,
@@ -54,36 +53,20 @@ data class SIOPRequestContent(
     val maxAge: Int? = null,
     val nbf: String? = null
 ): RequestContent {
-    override fun getCredentialRequests(): CredentialRequests {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     /**
-     * Checks the expiration.
-     * TODO(check to see if all parameters are there?
+     * Get OIDC Specific Params.
      */
-    override fun isValid(): Boolean {
-        val currentTime = Date().time
-        // check exp
-        val milliseconds = 1000
-        // set a leeway of 5 minutes.
-        val expirationCheckTimeOffsetInMinutes = 5
-        val expirationCheck = currentTime + milliseconds * 60 * expirationCheckTimeOffsetInMinutes
-        if (exp is String) {
-            try {
-                val expLong = exp.toLong()
-                if (expLong <= expirationCheck) {
-                    BaseLogger.log("Token is not expired")
-                    return true
-                }
-                BaseLogger.log("Token is expired.")
-                return false
-            } catch (exception: NumberFormatException) {
-                BaseLogger.error("exp claim is not a number")
-                return false
-            }
-        }
-        BaseLogger.log("exp is not present in SIOP Request.")
-        return false
+    fun getOIDCParams(): Map<String, String?> {
+        return mapOf(
+            "response_type" to responseType,
+            "response_mode" to responseMode,
+            "client_id" to requester,
+            "redirect_url" to responseUri,
+            "scope" to scope,
+            "state" to state,
+            "nonce" to nonce
+        )
     }
+
 }
