@@ -33,19 +33,4 @@ data class OIDCResponseContent(
 
     // optional parameters
     val schema: String? = null
-) : ResponseContent {
-
-    override fun addSignerParams(signer: Signer) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun stringify(): String {
-        return Serializer.stringify(OIDCResponseContent.serializer(), this)
-    }
-
-    companion object {
-        fun create(requestContent: RequestContent, credentials: List<Credential>) : OIDCResponseContent {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-    }
-}
+) : ResponseContent

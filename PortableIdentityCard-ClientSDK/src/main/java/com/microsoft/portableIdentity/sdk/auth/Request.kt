@@ -13,10 +13,15 @@ import com.microsoft.portableIdentity.sdk.auth.validators.JoseValidator
 
 /**
  * Class that represents a generic Request.
- * As of now, only support rawRequests of JoseToken.
+ *
+ * @param rawRequest to be parsed.
+ * @param validator optional parameter used to validate request.
  */
-class Request(val rawRequest: String, private val validator: Validator = JoseValidator()) {
+class Request(private val rawRequest: String, private val validator: Validator = JoseValidator()) {
 
+    /**
+     * manages protocol specific logic.
+     */
     val protocolManager: ProtocolManager
 
     init {
@@ -32,14 +37,16 @@ class Request(val rawRequest: String, private val validator: Validator = JoseVal
      * 1. verifying the signature of the JWSToken
      * 2. check the claims of content protocol.
      *
-     * Return: true if successfully validate.
+     * @return true if successfully validate.
      */
     suspend fun isValid(): Boolean {
-        return protocolManager.isValid(validator)
+        return protocolManager.isRequestValid(validator)
     }
 
     /**
      * Get Credential Requests if there are any in Request.
+     *
+     * @return credentials requests if exist, null if no credentials requested.
      */
     fun getCredentialRequests(): CredentialRequests? {
         return protocolManager.getCredentialRequests()

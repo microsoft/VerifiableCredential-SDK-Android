@@ -1,8 +1,14 @@
 package com.microsoft.portableIdentity.sdk.auth.protocolManagers
 
+import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
+import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OIDCRequestContent
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OIDCResponseContent
+import com.microsoft.portableIdentity.sdk.auth.protectors.Protector
+import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -13,11 +19,13 @@ import java.util.*
 
 class OIDCProtocolManager(rawRequest: String): ProtocolManager {
 
+    override val responseUri: String
+
     private val requestParameters: Map<String, List<String>>
 
     private val requestToken: JwsToken?
 
-    override val requestContent: OIDCRequestContent?
+    private val requestContent: OIDCRequestContent?
 
     init {
         val openIdUrl = Url(rawRequest)
@@ -29,6 +37,7 @@ class OIDCProtocolManager(rawRequest: String): ProtocolManager {
             try {
                 requestToken = JwsToken.deserialize(serializedToken, BaseLogger)
                 requestContent = Serializer.parse(OIDCRequestContent.serializer(), requestToken.content())
+                responseUri = requestContent.responseUri
 
             } catch (exception: Exception) {
                 TODO("check to see if request can be a different type of token.")
@@ -36,6 +45,12 @@ class OIDCProtocolManager(rawRequest: String): ProtocolManager {
         } else {
             requestToken = null
             requestContent = null
+            val responseUri = requestParameters["redirect_uri"]?.first()
+            if (responseUri is String) {
+                this.responseUri = responseUri
+            } else {
+                throw Exception("No Response Uri in the Request.")
+            }
         }
     }
 
@@ -46,7 +61,7 @@ class OIDCProtocolManager(rawRequest: String): ProtocolManager {
     /**
      * TODO(check to see if all parameters are there?
      */
-    override suspend fun isValid(validator: Validator): Boolean {
+    override suspend fun isRequestValid(validator: Validator): Boolean {
 
         if (requestToken == null || requestContent == null) {
             // TODO(should we be throwing here or just returning true?)
@@ -94,4 +109,25 @@ class OIDCProtocolManager(rawRequest: String): ProtocolManager {
         // All checks have passed so request is valid.
         return true
     }
+
+    override fun formResponse(protector: Protector, collectedCredentials: List<Credential>): String {
+        var responseBody: String
+        val responseContent = createResponseContent(collectedCredentials)
+        val serializedResponseContent = Serializer.stringify(OIDCResponseContent.serializer(), responseContent)
+        val protectedToken: JwsToken = protector.protect(serializedResponseContent) as JwsToken
+        val serializedToken = protectedToken.serialize(JwsFormat.Compact)
+        responseBody = "id_token=${serializedToken}"
+        if (!responseContent.state.isNullOrBlank()) {
+            responseBody += "&state=${responseContent.state}"
+        }
+        return responseBody
+    }
+
+    /**
+     * Create Response Content object from collectedCredentials and Request Contents.
+     */
+    private fun createResponseContent(collectedCredentials: List<Credential>): OIDCResponseContent {
+        TODO("implement when protocol is finalized")
+    }
+
 }

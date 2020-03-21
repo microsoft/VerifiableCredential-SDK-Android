@@ -2,21 +2,21 @@ package com.microsoft.portableIdentity.sdk.auth.protectors
 
 import com.microsoft.portableIdentity.sdk.DidSdkConfig
 import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
+import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import java.security.KeyStore
 
 /**
  * Protector Class that can protect responseContent by signing.
  * TODO(make default signing key)
  * @param keyReference to sign token with.
  */
-class Signer(private val keyReference: String = "sigKey"): IProtector {
+class Signer(private val keyReference: String = "sigKey",
+             private val cryptoOperations: CryptoOperations = DidSdkConfig.didManager.cryptoOperations,
+             private val additionalHeaders: Map<String, String> = emptyMap()): Protector {
 
-    override fun protect(responseContent: ResponseContent) : JwsToken {
-        val content = responseContent.stringify()
-        return sign(content)
+    override fun protect(contents: String) : JwsToken {
+        return sign(contents)
     }
 
     /**
@@ -27,9 +27,9 @@ class Signer(private val keyReference: String = "sigKey"): IProtector {
      *
      * @return JwsToken
      */
-    fun sign(content: String, headers: Map<String, String> = emptyMap()) : JwsToken {
+    fun sign(content: String) : JwsToken {
         val token = JwsToken(content, logger = BaseLogger)
-        token.sign(keyReference, DidSdkConfig.didManager.cryptoOperations, headers)
+        token.sign(keyReference, cryptoOperations, additionalHeaders)
         return token
     }
 }
