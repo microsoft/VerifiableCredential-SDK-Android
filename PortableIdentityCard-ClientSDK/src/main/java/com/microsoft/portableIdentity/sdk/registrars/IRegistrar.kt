@@ -1,6 +1,7 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDoc
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
@@ -19,4 +20,6 @@ abstract class IRegistrar(internal val logger: ILogger) {
      * @throws Error if unable to register Identifier Document.
      */
     abstract suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument
+
+    abstract suspend fun register(document: RegDoc, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDoc
 }
