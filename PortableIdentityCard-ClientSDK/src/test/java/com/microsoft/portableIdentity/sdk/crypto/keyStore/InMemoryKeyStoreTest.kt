@@ -32,13 +32,16 @@ class InMemoryKeyStoreTest {
     }
 
     @Test
-    fun `save and retrieve public-private keys`() {
+    fun `save and retrieve private key`() {
         inMemoryKeyStore.save(keyRef, actualPrivateKey)
         val expectedPrivateKeyById = inMemoryKeyStore.getPrivateKeyById(actualPrivateKey.kid)
         assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyById)
         val expectedPrivateKeyByRef = inMemoryKeyStore.getPrivateKey(keyRef)
         assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyByRef.keys[0])
+    }
 
+    @Test
+    fun `save and retrieve public key`() {
         inMemoryKeyStore.save(keyRef, actualPublicKey)
         val expectedPublicKeyById = inMemoryKeyStore.getPublicKeyById(actualPublicKey.kid)
         assertThat(actualPublicKey).isEqualTo(expectedPublicKeyById)
@@ -50,17 +53,41 @@ class InMemoryKeyStoreTest {
     fun `list keys`() {
         inMemoryKeyStore.save(keyRef, actualPrivateKey)
         inMemoryKeyStore.save(keyRef, actualPublicKey)
+        keyPair = subtle.generateKeyPair(
+            RsaOaepParams(),
+            true,
+            listOf(KeyUsage.Sign, KeyUsage.Verify)
+        )
+        actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
+        actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
+        inMemoryKeyStore.save(keyRef, actualPrivateKey)
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
         val keysInKeyStore = inMemoryKeyStore.list()
         val expectedPrivateKey = keysInKeyStore[keyRef]
-        assertThat(expectedPrivateKey!!.getLatestKeyId()).isNotNull()
-        assertThat(actualPrivateKey.kid).isEqualTo(expectedPrivateKey.kids.firstOrNull())
-        val expectedPublicKey = keysInKeyStore[keyRef]
-        assertThat(actualPublicKey.kid).isEqualTo(expectedPublicKey!!.kids.firstOrNull())
+        assertThat(expectedPrivateKey?.kids?.size).isEqualTo(2)
     }
 
     @Test
-    fun `save two sets of public-private keys with same key reference and retrieve them`() {
+    fun `save two sets of public keys with same key reference and retrieve them`() {
         inMemoryKeyStore.save(keyRef, actualPublicKey)
+
+        keyPair = subtle.generateKeyPair(
+            RsaOaepParams(),
+            true,
+            listOf(KeyUsage.Sign, KeyUsage.Verify)
+        )
+        actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
+
+        inMemoryKeyStore.save(keyRef, actualPublicKey)
+
+        val expectedPublicKeyById = inMemoryKeyStore.getPublicKeyById(actualPublicKey.kid)
+        assertThat(actualPublicKey).isEqualTo(expectedPublicKeyById)
+        val expectedPublicKeyByRef = inMemoryKeyStore.getPublicKey(keyRef)
+        assertThat(expectedPublicKeyByRef.keys).contains(actualPublicKey)
+    }
+
+    @Test
+    fun `save two sets of private keys with same key reference and retrieve them`() {
         inMemoryKeyStore.save(keyRef, actualPrivateKey)
 
         keyPair = subtle.generateKeyPair(
@@ -69,15 +96,8 @@ class InMemoryKeyStoreTest {
             listOf(KeyUsage.Sign, KeyUsage.Verify)
         )
         actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
-        actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
 
-        inMemoryKeyStore.save(keyRef, actualPublicKey)
         inMemoryKeyStore.save(keyRef, actualPrivateKey)
-
-        val expectedPublicKeyById = inMemoryKeyStore.getPublicKeyById(actualPublicKey.kid)
-        assertThat(actualPublicKey).isEqualTo(expectedPublicKeyById)
-        val expectedPublicKeyByRef = inMemoryKeyStore.getPublicKey(keyRef)
-        assertThat(expectedPublicKeyByRef.keys).contains(actualPublicKey)
 
         val expectedPrivateKeyById = inMemoryKeyStore.getPrivateKeyById(actualPrivateKey.kid)
         assertThat(actualPrivateKey).isEqualTo(expectedPrivateKeyById)

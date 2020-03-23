@@ -44,7 +44,7 @@ class Base64Test {
         base64TestPairs.forEach {
             val outputData = it.first.map { character -> character.toByte() }.toByteArray()
             val output = Base64.decode(it.second, logger)
-            assertEqualsByteArray(outputData, output, "Failed to decode \"${it.first}\" correctly.")
+            assertEqualsByteArray(outputData, output)
         }
     }
 
@@ -64,7 +64,7 @@ class Base64Test {
         base64UrlTestPairs.forEach {
             val outputData = it.first.map { character -> character.toByte() }.toByteArray()
             val output = Base64Url.decode(it.second, logger)
-            assertEqualsByteArray(outputData, output, "Failed to decode \"${it.first}\" correctly.")
+            assertEqualsByteArray(outputData, output)
         }
     }
 
@@ -94,7 +94,7 @@ class Base64Test {
         assertEqualsByteArray(expectedData, Base64Url.decode(stringData, logger))
     }
 
-    private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray, message: String = "ByteArrays did not match") {
+    private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray) {
         assertThat(expected.size).isEqualTo(actual.size)
         expected.forEachIndexed { index, byte ->
             assertThat(byte).isEqualTo(actual[index])

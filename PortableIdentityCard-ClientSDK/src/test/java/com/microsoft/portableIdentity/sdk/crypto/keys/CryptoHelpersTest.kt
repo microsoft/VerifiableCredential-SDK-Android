@@ -11,23 +11,26 @@ class CryptoHelpersTest {
 
     @Test
     fun `converting json web algorithm to web crypto algorithm for es256k`() {
-        val actualAlgorithmName = "ES256K"
+        val suppliedAlgorithmName = "ES256K"
         val expectedAlgorithmName = "ECDSA"
-        assertThat(CryptoHelpers.jwaToWebCrypto(actualAlgorithmName, logger = logger).name).isEqualTo(expectedAlgorithmName)
+        val actualAlgorithmName = CryptoHelpers.jwaToWebCrypto(suppliedAlgorithmName, logger = logger).name
+        assertThat(actualAlgorithmName).isEqualTo(expectedAlgorithmName)
     }
 
     @Test
     fun `converting json web algorithm to web crypto algorithm for rs256`() {
-        val actualAlgorithmName = "RS256"
+        val suppliedAlgorithmName = "RS256"
         val expectedAlgorithmName = "RSASSA-PKCS1-v1_5"
-        assertThat(CryptoHelpers.jwaToWebCrypto(actualAlgorithmName, logger = logger).name).isEqualTo(expectedAlgorithmName)
+        val actualAlgorithmName = CryptoHelpers.jwaToWebCrypto(suppliedAlgorithmName, logger = logger).name
+        assertThat(actualAlgorithmName).isEqualTo(expectedAlgorithmName)
     }
 
     @Test
     fun `converting json web algorithm to web crypto algorithm for rsaoaep`() {
-        val actualAlgorithmName = "RSA-OAEP"
+        val suppliedAlgorithmName = "RSA-OAEP"
         val expectedAlgorithmName = "RSA-OAEP-256"
-        assertThat(CryptoHelpers.jwaToWebCrypto(actualAlgorithmName, logger = logger).name).isEqualTo(expectedAlgorithmName)
+        val actualAlgorithmName = CryptoHelpers.jwaToWebCrypto(suppliedAlgorithmName, logger = logger).name
+        assertThat(actualAlgorithmName).isEqualTo(expectedAlgorithmName)
     }
 
     @Test
@@ -37,4 +40,6 @@ class CryptoHelpersTest {
             CryptoHelpers.jwaToWebCrypto(actualAlgorithmName, logger = logger).name
         }.isInstanceOf(IllegalStateException::class.java)
     }
+
+    //TODO: Check for AesGcm128 or AesGcm192 or AesGcm256
 }
