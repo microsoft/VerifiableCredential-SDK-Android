@@ -11,7 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PicManager(private val config: DidSdkConfig) {
+class CardManager(private val config: DidSdkConfig) {
 
     fun parseOidcRequest(request: String, callback: (OidcRequest) -> Unit) {
         GlobalScope.launch {

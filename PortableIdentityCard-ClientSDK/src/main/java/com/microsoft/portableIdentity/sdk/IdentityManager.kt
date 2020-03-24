@@ -21,7 +21,7 @@ import kotlin.random.Random
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class DidManager(private val config: DidSdkConfig) {
+class IdentityManager(private val config: DidSdkConfig) {
 
     private val didSecretName = "did.identifier"
 
