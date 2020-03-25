@@ -1,4 +1,4 @@
 package com.microsoft.portableIdentity.sdk.auth
 
-enum class AuthenticatorException {
+class AuthenticatorException(message: String): Exception(message) {
 }

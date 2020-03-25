@@ -5,8 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth
 
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
-
 /**
  * Type of Protocol of a Request/Response.
  * We could support some other protocol for interop in the future.

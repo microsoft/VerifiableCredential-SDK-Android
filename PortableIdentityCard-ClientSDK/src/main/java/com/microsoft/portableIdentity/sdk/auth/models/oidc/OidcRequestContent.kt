@@ -13,7 +13,7 @@ import java.util.*
  * Contents of a OpenID Self-Issued Token Request.
  */
 @Serializable
-data class OIDCRequestContent(
+data class OidcRequestContent(
 
     // what type of object the response should be (should be idtoken).
     @SerialName("response_type")
@@ -25,7 +25,7 @@ data class OIDCRequestContent(
 
     // did of the entity who sent the request.
     @SerialName("client_id")
-    override val requester: String,
+    val clientId: String,
 
     // where the SIOP provider should send response to.
     @SerialName("redirect_uri")
@@ -42,8 +42,8 @@ data class OIDCRequestContent(
     val claims: Map<String, Map<String, RequestInfo?>?>? = null,
 
     // iat and exp that need to be checked to see if token has expired
-    val exp: String? = null,
-    val iat: String? = null,
+    val exp: Long? = null,
+    val iat: Long? = null,
 
     // optional parameters
     val registration: Registration? = null,
@@ -52,21 +52,4 @@ data class OIDCRequestContent(
     @SerialName("max_age")
     val maxAge: Int? = null,
     val nbf: String? = null
-): RequestContent {
-
-    /**
-     * Get OIDC Specific Params.
-     */
-    fun getOIDCParams(): Map<String, String?> {
-        return mapOf(
-            "response_type" to responseType,
-            "response_mode" to responseMode,
-            "client_id" to requester,
-            "redirect_url" to responseUri,
-            "scope" to scope,
-            "state" to state,
-            "nonce" to nonce
-        )
-    }
-
-}
+): RequestContent

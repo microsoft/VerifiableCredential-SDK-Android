@@ -1,7 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.protectors
 
 import com.microsoft.portableIdentity.sdk.DidSdkConfig
-import com.microsoft.portableIdentity.sdk.auth.models.ResponseContent
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
@@ -12,7 +11,7 @@ import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
  * @param keyReference to sign token with.
  */
 class Signer(private val keyReference: String = "sigKey",
-             private val cryptoOperations: CryptoOperations = DidSdkConfig.didManager.cryptoOperations,
+             private val cryptoOperations: CryptoOperations = DidSdkConfig.identityManager.cryptoOperations,
              private val additionalHeaders: Map<String, String> = emptyMap()): Protector {
 
     override fun protect(contents: String) : JwsToken {

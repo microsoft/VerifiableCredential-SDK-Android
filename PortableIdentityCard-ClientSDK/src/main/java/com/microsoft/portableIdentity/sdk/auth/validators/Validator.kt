@@ -1,7 +1,5 @@
 package com.microsoft.portableIdentity.sdk.auth.validators
 
-import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseToken
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 
 interface Validator {

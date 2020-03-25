@@ -12,7 +12,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OIDCResponseContent(
+data class OidcResponseContent(
     @Required
     val iss: String = OidcResponse.SELFISSUED,
     val sub: String, // thumbprint (sha-256)

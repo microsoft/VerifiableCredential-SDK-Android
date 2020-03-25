@@ -10,8 +10,4 @@ interface RequestContent {
      */
     val responseUri: String
 
-    /**
-     * The identifier who send the request.
-     */
-    val requester: String
 }
