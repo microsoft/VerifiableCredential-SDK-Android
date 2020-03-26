@@ -12,13 +12,18 @@ import io.ktor.util.toMap
 
 class CardManager(private val config: DidSdkConfig) {
 
-    suspend fun parseRequest(rawRequest: String): OidcRequest {
-        if (!rawRequest.startsWith("openid://")) {
+    suspend fun getRequest(uri: String): OidcRequest {
+        val url: Url
+        try {
+            url = Url(uri)
+        } catch (exception: Exception) {
+           throw Exception("uri parameter, $uri, is not a properly formed URL.")
+        }
+        if (url.protocol.name != "openid") {
             throw Exception("request format not supported")
         }
 
-        val openIdUrl = Url(rawRequest)
-        val requestParameters = openIdUrl.parameters.toMap()
+        val requestParameters = url.parameters.toMap()
         val serializedToken = requestParameters["request"]?.first()
         if (serializedToken != null) {
             return OidcRequest(requestParameters, serializedToken)

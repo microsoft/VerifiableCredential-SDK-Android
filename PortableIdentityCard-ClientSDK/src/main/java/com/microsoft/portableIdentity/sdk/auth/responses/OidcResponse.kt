@@ -24,7 +24,7 @@ class OidcResponse(request: OidcRequest): Response {
     /**
      * list of collected credentials to be sent in response.
      */
-    override val collectedCredentials: MutableList<Credential> = mutableListOf()
+    private val collectedCredentials: MutableList<Credential> = mutableListOf()
 
     /**
      * Add Credential to be put into response.
@@ -39,7 +39,7 @@ class OidcResponse(request: OidcRequest): Response {
         var responseBody: String
         val responseContent = createResponseContent(collectedCredentials)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
-        val protectedToken: JwsToken = Signer.sign(serializedResponseContent)
+        val protectedToken = Signer.sign(serializedResponseContent)
         val serializedToken = protectedToken.serialize(JwsFormat.Compact)
         responseBody = "id_token=${serializedToken}"
         if (!responseContent.state.isNullOrBlank()) {

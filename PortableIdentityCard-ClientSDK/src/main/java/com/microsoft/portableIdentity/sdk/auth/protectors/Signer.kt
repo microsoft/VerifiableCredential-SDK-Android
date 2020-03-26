@@ -18,7 +18,7 @@ object Signer {
      *
      * @return JwsToken
      */
-    fun sign(payload: String, keyReference: String = "sigKey", additionalHeaders: Map<String, String> = emptyMap()) : JwsToken {
+    fun sign(payload: String, keyReference: String = "defaultSigningKey", additionalHeaders: Map<String, String> = emptyMap()) : JwsToken {
         val token = JwsToken(payload, logger = BaseLogger)
         token.sign(keyReference, DidSdkConfig.identityManager.cryptoOperations, additionalHeaders)
         return token
