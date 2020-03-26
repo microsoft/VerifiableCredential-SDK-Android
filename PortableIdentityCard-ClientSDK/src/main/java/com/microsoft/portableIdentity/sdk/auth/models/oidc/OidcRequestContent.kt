@@ -5,7 +5,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Contents of a OpenID Self-Issued Token Request.
+ * Contents of an OpenID Self-Issued Token Request.
+ *
+ * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
  */
 @Serializable
 data class OidcRequestContent(
@@ -26,6 +28,8 @@ data class OidcRequestContent(
     @SerialName("redirect_uri")
     val redirectUrl: String = "",
 
+    val iss: String? = null,
+
     // should contain "openid did_authN"
     val scope: String? = null,
 
@@ -33,18 +37,17 @@ data class OidcRequestContent(
     val state: String? = null,
     val nonce: String? = null,
 
-    // claims that are being requested.
-    val claims: Map<String, Map<String, String?>?>? = null,
+    // Claims that are being requested.
+    val attestations: Attestation? = null,
 
-    // iat and exp that need to be checked to see if token has expired
+    // iat, nbf, and exp that need to be checked to see if token has expired
     val exp: Long? = null,
     val iat: Long? = null,
+    val nbf: Long? = null,
 
     // optional parameters
     val registration: Registration? = null,
-    val iss: String? = null,
     val aud: String? = null,
     @SerialName("max_age")
-    val maxAge: Int? = null,
-    val nbf: String? = null
+    val maxAge: Int? = null
 )

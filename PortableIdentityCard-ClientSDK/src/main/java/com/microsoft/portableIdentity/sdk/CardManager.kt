@@ -3,6 +3,7 @@
 package com.microsoft.portableIdentity.sdk
 
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
@@ -12,13 +13,11 @@ import io.ktor.util.toMap
 
 class CardManager(private val config: DidSdkConfig) {
 
-    suspend fun getRequest(uri: String): OidcRequest {
-        val url: Url
-        try {
-            url = Url(uri)
-        } catch (exception: Exception) {
-           throw Exception("uri parameter, $uri, is not a properly formed URL.")
-        }
+    /**
+     * Create a Request Object from a uri.
+     */
+    suspend fun getRequest(uri: String): Request {
+        val url = Url(uri)
         if (url.protocol.name != "openid") {
             throw Exception("request format not supported")
         }
