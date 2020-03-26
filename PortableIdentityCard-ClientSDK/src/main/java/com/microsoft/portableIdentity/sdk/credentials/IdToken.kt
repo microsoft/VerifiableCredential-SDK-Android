@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.portableIdentity.sdk.auth.oidc
+package com.microsoft.portableIdentity.sdk.credentials
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

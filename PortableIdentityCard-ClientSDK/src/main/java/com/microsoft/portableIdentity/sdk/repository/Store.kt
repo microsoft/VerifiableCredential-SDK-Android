@@ -2,7 +2,7 @@
 
 package com.microsoft.portableIdentity.sdk.repository
 
-import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 
 interface Store {
     suspend fun saveClaim(claim: ClaimObject): Boolean
