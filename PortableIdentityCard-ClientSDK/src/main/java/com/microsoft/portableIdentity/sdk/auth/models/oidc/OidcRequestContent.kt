@@ -1,6 +1,5 @@
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.RequestInfo
 import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -35,7 +34,7 @@ data class OidcRequestContent(
     val nonce: String? = null,
 
     // claims that are being requested.
-    val claims: Map<String, Map<String, RequestInfo?>?>? = null,
+    val claims: Map<String, Map<String, String?>?>? = null,
 
     // iat and exp that need to be checked to see if token has expired
     val exp: Long? = null,

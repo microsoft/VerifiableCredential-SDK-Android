@@ -1,9 +1,5 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.IdTokenRequests
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.InputClaim
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.RequestInfo
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimDetail
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.SignedClaimDetail
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.UnsignedClaimDetail
@@ -33,13 +29,6 @@ object Serializer : ISerializer {
         }
     }
 
-    private val requestInfoSerializer = SerializersModule {
-        polymorphic(RequestInfo::class) {
-            String::class with String.serializer()
-            InputClaim::class with InputClaim.serializer()
-        }
-    }
-
     private val claimDetailSerializer = SerializersModule {
         polymorphic(ClaimDetail::class) {
             UnsignedClaimDetail::class with UnsignedClaimDetail.serializer()
@@ -48,10 +37,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = identifierDocumentServiceSerializer
-                + serviceEndpointSerializer
-                + claimDetailSerializer
-                + requestInfoSerializer,
+        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false
