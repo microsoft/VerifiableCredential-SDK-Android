@@ -4,15 +4,22 @@ import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import java.util.*
 
+/**
+ * Static class that Validates an OIDC Request.
+ */
 object OidcRequestValidator {
 
-    suspend fun verifyRequest(request: OidcRequest): Boolean {
-        val jwsToken = request.getJwsToken()
-        val contents = request.getContents()
-        return jwsToken != null && contents?.exp != null
-                && JwsValidator.verifySignature(jwsToken)
-                && hasTokenExpired(contents.exp)
-                && hasMatchingParams(contents, request.requestParameters)
+    /**
+     * Verifies that Oidc request.
+     *
+     * @param request to be validated.
+     * @return true, if valid.
+     */
+    suspend fun validate(request: OidcRequest): Boolean {
+        return request.content.exp != null
+                && JwsValidator.verifySignature(request.token)
+                && hasTokenExpired(request.content.exp)
+                && hasMatchingParams(request.content, request.oidcParameters)
     }
 
     private fun hasTokenExpired(expiration: Long): Boolean {

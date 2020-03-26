@@ -10,52 +10,24 @@ import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import io.ktor.http.Url
-import io.ktor.util.toMap
 
 /**
  * Class that represents a generic Request.
  *
- * @param rawRequest to be parsed.
- * @param validator optional parameter used to validate request.
+ * @param oidcParameters OpenId Connect specific parameters.
+ * @param serializedToken Serialized JwsToken that contains additional request params.
  */
-class OidcRequest(private val rawRequest: String): Request {
+class OidcRequest(val oidcParameters: Map<String, List<String>>, serializedToken: String): Request {
 
-    val requestParameters: Map<String, List<String>>
+    val content: OidcRequestContent
 
-    private var requestToken: JwsToken? = null
-
-    private var requestContent: OidcRequestContent? = null
-
-    private var requestUri: String? = null
+    val token: JwsToken = JwsToken.deserialize(serializedToken, BaseLogger)
 
     init {
-        val openIdUrl = Url(rawRequest)
-        requestParameters = openIdUrl.parameters.toMap()
-
-        val serializedToken = requestParameters["request"]?.first()
-
-        if (serializedToken != null) {
-            requestToken = JwsToken.deserialize(serializedToken, BaseLogger)
-            requestContent = Serializer.parse(OidcRequestContent.serializer(), requestToken!!.content())
-        } else {
-            requestUri = requestParameters["request_uri"]?.first()
-        }
+        content = Serializer.parse(OidcRequestContent.serializer(), token.content())
     }
 
     override fun getCredentialRequests(): CredentialRequests {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    fun getRequestUri(): String? {
-        return requestUri
-    }
-
-    fun getJwsToken(): JwsToken? {
-        return requestToken
-    }
-
-    fun getContents(): OidcRequestContent? {
-        return requestContent
     }
 }

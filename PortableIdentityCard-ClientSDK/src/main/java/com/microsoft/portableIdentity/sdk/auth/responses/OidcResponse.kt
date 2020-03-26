@@ -8,7 +8,6 @@ package com.microsoft.portableIdentity.sdk.auth.responses
 import com.microsoft.did.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.protectors.Protector
 import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
@@ -18,9 +17,9 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
  * OIDC Response formed from a Request.
  *
  * @param request that response is responding to.
- * @param protector optional parameter used to protect the response.
+ * @param signer optional parameter used to protect the response.
  */
-class OidcResponse(request: OidcRequest, private val protector: Protector = Signer()): Response {
+class OidcResponse(request: OidcRequest): Response {
 
     /**
      * list of collected credentials to be sent in response.
@@ -36,11 +35,11 @@ class OidcResponse(request: OidcRequest, private val protector: Protector = Sign
         collectedCredentials.add(credential)
     }
 
-    fun formResponse(protector: Protector, collectedCredentials: List<Credential>): String {
+    fun formResponse(collectedCredentials: List<Credential>): String {
         var responseBody: String
         val responseContent = createResponseContent(collectedCredentials)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
-        val protectedToken: JwsToken = protector.protect(serializedResponseContent) as JwsToken
+        val protectedToken: JwsToken = Signer.sign(serializedResponseContent)
         val serializedToken = protectedToken.serialize(JwsFormat.Compact)
         responseBody = "id_token=${serializedToken}"
         if (!responseContent.state.isNullOrBlank()) {

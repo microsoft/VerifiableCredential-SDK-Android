@@ -1,13 +1,9 @@
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
 import com.microsoft.portableIdentity.sdk.auth.credentialRequests.RequestInfo
 import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
-import com.microsoft.portableIdentity.sdk.auth.models.RequestContent
-import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.util.*
 
 /**
  * Contents of a OpenID Self-Issued Token Request.
@@ -29,7 +25,7 @@ data class OidcRequestContent(
 
     // where the SIOP provider should send response to.
     @SerialName("redirect_uri")
-    override val responseUri: String = "",
+    val redirectUrl: String = "",
 
     // should contain "openid did_authN"
     val scope: String? = null,
@@ -52,4 +48,4 @@ data class OidcRequestContent(
     @SerialName("max_age")
     val maxAge: Int? = null,
     val nbf: String? = null
-): RequestContent
+)
