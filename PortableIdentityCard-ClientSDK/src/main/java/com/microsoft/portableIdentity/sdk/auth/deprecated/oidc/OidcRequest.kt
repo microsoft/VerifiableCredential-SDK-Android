@@ -18,6 +18,7 @@ import kotlinx.serialization.Serializable
  * Class to represent Open ID Connect Self-Issued Tokens
  * @class
  */
+@Deprecated("New PICS model coming")
 class OidcRequest constructor(
     val sender: Identifier,
     val crypto: CryptoOperations,
