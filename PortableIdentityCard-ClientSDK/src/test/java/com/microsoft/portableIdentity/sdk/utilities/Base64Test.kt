@@ -29,69 +29,71 @@ class Base64Test {
     )
 
     @Test
-    fun `rfc encode vectors`() {
+    fun `rfc base64 encode vectors`() {
         base64TestPairs.forEach {
-            val inputDataList = it.first.map { character -> character.toByte() }
-            val inputData = ByteArray(inputDataList.size)
-            inputDataList.forEachIndexed { index, byte -> inputData[index] = byte }
-            val expectedOutput = Base64.encode(inputData, logger)
-            assertThat(it.second).isEqualTo(expectedOutput)
+            val suppliedInput = it.first.map { character -> character.toByte() }.toByteArray()
+            val actualEncodedOutput = Base64.encode(suppliedInput, logger)
+            val expectedEncodedOutput = it.second
+            assertThat(actualEncodedOutput).isEqualTo(expectedEncodedOutput)
         }
     }
 
     @Test
-    fun `rfc decode vectors`() {
+    fun `rfc base64 decode vectors`() {
         base64TestPairs.forEach {
-            val outputData = it.first.map { character -> character.toByte() }.toByteArray()
-            val output = Base64.decode(it.second, logger)
-            assertEqualsByteArray(outputData, output)
+            val expectedDecodedOutput = it.first.map { character -> character.toByte() }.toByteArray()
+            val suppliedInput = it.second
+            val actualDecodedOutput = Base64.decode(suppliedInput, logger)
+            assertEqualsByteArray(expectedDecodedOutput, actualDecodedOutput)
         }
     }
 
     @Test
-    fun `rfc url encode vectors`() {
+    fun `rfc base64url encode vectors`() {
         base64UrlTestPairs.forEach {
-            val inputDataList = it.first.map { character -> character.toByte() }
-            val inputData = ByteArray(inputDataList.size)
-            inputDataList.forEachIndexed { index, byte -> inputData[index] = byte }
-            val expectedOutput = Base64Url.encode(inputData, logger)
-            assertThat(it.second).isEqualTo(expectedOutput)
+            val suppliedInput = it.first.map { character -> character.toByte() }.toByteArray()
+            val actualEncodedOutput = Base64Url.encode(suppliedInput, logger)
+            val expectedEncodedOutput = it.second
+            assertThat(actualEncodedOutput).isEqualTo(expectedEncodedOutput)
         }
     }
 
     @Test
-    fun `rfc url decode vectors`() {
+    fun `rfc base64url decode vectors`() {
         base64UrlTestPairs.forEach {
-            val outputData = it.first.map { character -> character.toByte() }.toByteArray()
-            val output = Base64Url.decode(it.second, logger)
-            assertEqualsByteArray(outputData, output)
+            val expectedDecodedOutput = it.first.map { character -> character.toByte() }.toByteArray()
+            val suppliedInput = it.second
+            val actualDecodedOutput = Base64Url.decode(suppliedInput, logger)
+            assertEqualsByteArray(expectedDecodedOutput, actualDecodedOutput)
         }
     }
 
     @Test
     fun `twos compliment url`() {
-        val data = ByteArray(3)
+        val suppliedInput = ByteArray(3)
         // CAFE41
         // 1100 1010 1111 1110 0100 0001
         // ^      ^       ^      ^
         // 50     47      57     1
         // y      v       5      B
-        data[0] = 0xCA.toByte()
-        data[1] = 0xFE.toByte()
-        data[2] = 0x41.toByte()
+        suppliedInput[0] = 0xCA.toByte()
+        suppliedInput[1] = 0xFE.toByte()
+        suppliedInput[2] = 0x41.toByte()
+        val expectedOutput = "yv5B"
+        val actualOutput = Base64Url.encode(suppliedInput, logger)
+        assertThat(actualOutput).isEqualTo(expectedOutput)
 
-        assertThat("yv5B").isEqualTo(Base64Url.encode(data, logger))
-
-        val stringData = "1234"
+        val suppliedInputString = "1234"
         // 1(53) 2(54)  3(55)  4(56)
         // v     v      v      v
         // 11010111 01101101 11111000
         // 215      109      248
-        val expectedData = ByteArray(3)
-        expectedData[0] = 0xD7.toByte()
-        expectedData[1] = 0x6D.toByte()
-        expectedData[2] = 0xF8.toByte()
-        assertEqualsByteArray(expectedData, Base64Url.decode(stringData, logger))
+        val expectedOutputByteArray = ByteArray(3)
+        expectedOutputByteArray[0] = 0xD7.toByte()
+        expectedOutputByteArray[1] = 0x6D.toByte()
+        expectedOutputByteArray[2] = 0xF8.toByte()
+        val actualOutputByteArray = Base64Url.decode(suppliedInputString, logger)
+        assertEqualsByteArray(expectedOutputByteArray, actualOutputByteArray)
     }
 
     private fun assertEqualsByteArray(expected: ByteArray, actual: ByteArray) {
