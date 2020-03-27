@@ -5,7 +5,7 @@ import java.util.regex.Pattern
 
 object SdkLog {
     interface Consumer {
-        fun log(logLevel: Level, message: String, tag: String)
+        fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String)
     }
 
     enum class Level {
@@ -25,32 +25,32 @@ object SdkLog {
 
     fun addConsumer(consumer: Consumer) = consumers.add(consumer)
 
-    fun v(message: String, tag: String = implicitTag()) {
-        log(Level.VERBOSE, message, tag)
+    fun v(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
+        log(Level.VERBOSE, message, throwable, tag)
     }
 
-    fun d(message: String, tag: String = implicitTag()) {
-        log(Level.DEBUG, message, tag)
+    fun d(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
+        log(Level.DEBUG, message, throwable, tag)
     }
 
-    fun i(message: String, tag: String = implicitTag()) {
-        log(Level.INFO, message, tag)
+    fun i(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
+        log(Level.INFO, message, throwable, tag)
     }
 
-    fun w(message: String, tag: String = implicitTag()) {
-        log(Level.WARN, message, tag)
+    fun w(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
+        log(Level.WARN, message, throwable, tag)
     }
 
-    fun e(message: String, tag: String = implicitTag()) {
-        log(Level.ERROR, message, tag)
+    fun e(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
+        log(Level.ERROR, message, throwable, tag)
     }
 
-    fun f(message: String, tag: String = implicitTag()) {
-        log(Level.FAILURE, message, tag)
+    fun f(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
+        log(Level.FAILURE, message, throwable, tag)
     }
 
-    private fun log(logLevel: Level, message: String, tag: String) {
-        consumers.forEach { it.log(logLevel, message, tag) }
+    private fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String) {
+        consumers.forEach { it.log(logLevel, message, throwable, tag) }
     }
 
     @Deprecated("Use short form.", ReplaceWith("this.d(message, tag)"))

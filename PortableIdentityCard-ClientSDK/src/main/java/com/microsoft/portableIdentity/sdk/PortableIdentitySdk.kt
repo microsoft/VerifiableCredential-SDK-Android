@@ -16,6 +16,7 @@ object PortableIdentitySdk {
     lateinit var identityManager: IdentityManager
 
     @JvmOverloads
+    @JvmStatic
     fun init(
         context: Context,
         logConsumer: SdkLog.Consumer = AndroidLogCatConsumer(),

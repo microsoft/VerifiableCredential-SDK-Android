@@ -4,8 +4,12 @@ import android.util.Log
 
 class AndroidLogCatConsumer: SdkLog.Consumer {
 
-    override fun log(logLevel: SdkLog.Level, message: String, tag: String) {
-        Log.println(getAndroidLogLevel(logLevel), tag, message)
+    override fun log(logLevel: SdkLog.Level, message: String, throwable: Throwable?, tag: String) {
+        if (throwable == null) {
+            Log.println(getAndroidLogLevel(logLevel), tag, message)
+        } else {
+            Log.println(getAndroidLogLevel(logLevel), tag, message + "\n" + Log.getStackTraceString(throwable))
+        }
     }
 
     private fun getAndroidLogLevel(logLevel: SdkLog.Level): Int {
