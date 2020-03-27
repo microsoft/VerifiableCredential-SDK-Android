@@ -22,6 +22,18 @@ import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
+/**
+ * This Module is used by Dagger to provide additional types to the internal dependency graph. Usually types can be
+ * provided just by annotating a class constructor with @Inject. However, this is not always possible. It's not when
+ * a) Classes need special initialization outside of their constructor
+ * b) Multiple instances of the same type are needed (annotate with @Named)
+ * c) Interface types don't have a constructor, as such a @Provides annotation has to tell Dagger how to initialize
+ *    a type that implements this interface.
+ *
+ * More information:
+ * https://dagger.dev/users-guide
+ * https://developer.android.com/training/dependency-injection
+ */
 @Module
 internal class SdkModule {
 

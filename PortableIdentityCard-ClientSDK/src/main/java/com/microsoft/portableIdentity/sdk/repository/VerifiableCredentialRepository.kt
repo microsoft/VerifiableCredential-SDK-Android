@@ -8,6 +8,12 @@ import com.microsoft.portableIdentity.sdk.credentials.deprecated.SerialClaimObje
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
 
+/**
+ * Repository is an abstraction layer that is consumed by business logic and abstracts away the various data sources
+ * that an app can have. In the common case there are two data sources: network and database. The repository decides
+ * where to get this data, how and when to cache it, how to handle issues etc. so that the business logic will only
+ * ever care to get the object it wants.
+ */
 class VerifiableCredentialRepository @Inject constructor(database: SdkDatabase) {
 
     private val claimObjectDao = database.claimObjectDao()
