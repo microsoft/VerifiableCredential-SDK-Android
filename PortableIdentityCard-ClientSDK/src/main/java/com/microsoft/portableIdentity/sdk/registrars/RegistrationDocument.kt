@@ -1,16 +1,16 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPublicKey
-import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocumentPublicKey
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentifierDocumentService
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegistrationDocument(
-        @SerialName("@context")
+    @SerialName("@context")
         val context: String = "https://www.w3.org/2019/did/v1",
-        val id: String? = null,
-        @SerialName("publicKey")
+    val id: String? = null,
+    @SerialName("publicKey")
         val publicKeys: List<IdentifierDocumentPublicKey>,
-        @SerialName("service")
+    @SerialName("service")
         val services: List<IdentifierDocumentService>? = null)

@@ -3,8 +3,10 @@ package com.microsoft.portableIdentity.sdk.resolvers
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.IdResponse
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.document.IdDoc
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
@@ -22,10 +24,14 @@ abstract class IResolver(internal val logger: ILogger) {
      */
     abstract suspend fun resolveDocument(identifier: String): IdentifierDocument
 
-    suspend fun resolve(identifier: String,
-                cryptoOperations: CryptoOperations): Identifier {
+    abstract suspend fun resolveDocument(identifier: String, initialValues: String): IdDoc
+
+    suspend fun resolve(
+        identifier: String,
+        cryptoOperations: CryptoOperations
+    ): Identifier {
         val document = this.resolveDocument(identifier)
-        val encKey = document.publicKeys.filter{
+        val encKey = document.publicKeys.filter {
             if (it.publicKeyJwk.use != null) {
                 it.publicKeyJwk.use == KeyUse.Encryption.value
             } else if (it.publicKeyJwk.key_ops != null) {
@@ -43,6 +49,16 @@ abstract class IResolver(internal val logger: ILogger) {
             logger,
             this,
             NullRegistrar(logger)
+        )
+    }
+
+    suspend fun resolve(
+        identifier: String, initialValues: String,
+        cryptoOperations: CryptoOperations
+    ): IdResponse {
+        val document = this.resolveDocument(identifier, initialValues)
+        return IdResponse(
+            document
         )
     }
 }

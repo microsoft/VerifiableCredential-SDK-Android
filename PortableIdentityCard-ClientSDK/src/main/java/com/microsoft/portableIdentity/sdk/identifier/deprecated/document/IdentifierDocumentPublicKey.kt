@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.identifier.document
+package com.microsoft.portableIdentity.sdk.identifier.deprecated.document
 
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey

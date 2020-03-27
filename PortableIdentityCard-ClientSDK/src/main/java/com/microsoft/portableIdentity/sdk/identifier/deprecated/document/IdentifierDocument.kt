@@ -1,6 +1,6 @@
-package com.microsoft.portableIdentity.sdk.identifier.document
+package com.microsoft.portableIdentity.sdk.identifier.deprecated.document
 
-import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentifierDocumentService
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

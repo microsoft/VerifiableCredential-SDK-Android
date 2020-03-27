@@ -3,11 +3,13 @@ package com.microsoft.portableIdentity.sdk.utilities
 import com.microsoft.portableIdentity.sdk.credentials.ClaimDetail
 import com.microsoft.portableIdentity.sdk.credentials.SignedClaimDetail
 import com.microsoft.portableIdentity.sdk.credentials.UnsignedClaimDetail
-import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
-import com.microsoft.portableIdentity.sdk.identifier.document.service.Endpoint
-import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
-import com.microsoft.portableIdentity.sdk.identifier.document.service.ServiceHubEndpoint
-import com.microsoft.portableIdentity.sdk.identifier.document.service.UserHubEndpoint
+import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentifierDocService
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentifierDocumentService
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.Endpoint
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.UserHubEndpoint
+import com.microsoft.portableIdentity.sdk.identifier.document.service.*
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
@@ -19,6 +21,12 @@ object Serializer : ISerializer {
     private val identifierDocumentServiceSerializer = SerializersModule {
         polymorphic(IdentifierDocumentService::class) {
             IdentityHubService::class with IdentityHubService.serializer()
+        }
+    }
+
+    private val identifierDocServiceSerializer = SerializersModule {
+        polymorphic(IdentifierDocService::class) {
+            IdHubService::class with IdHubService.serializer()
         }
     }
 
@@ -37,7 +45,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
+        context = identifierDocServiceSerializer + identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

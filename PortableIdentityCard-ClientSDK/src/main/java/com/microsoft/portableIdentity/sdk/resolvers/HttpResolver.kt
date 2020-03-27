@@ -1,6 +1,8 @@
 package com.microsoft.portableIdentity.sdk.resolvers
 
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.IdResponse
+import com.microsoft.portableIdentity.sdk.identifier.document.IdDoc
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
@@ -35,5 +37,16 @@ class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(log
         val result = Serializer.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")
         return result.document
+    }
+
+    override suspend fun resolveDocument(identifier: String, initialValues: String): IdDoc {
+        val client = getHttpClient()
+        val response = client.get<String>() {
+            url("$baseUrl/$identifier?-ion-initial-state=$initialValues ")
+        }
+        client.close()
+        println("GOT $response")
+        val result = Serializer.parse(IdDoc.serializer(), response)
+        return result
     }
 }

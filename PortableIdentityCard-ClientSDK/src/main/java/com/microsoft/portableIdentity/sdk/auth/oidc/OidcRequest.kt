@@ -5,7 +5,7 @@ import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer

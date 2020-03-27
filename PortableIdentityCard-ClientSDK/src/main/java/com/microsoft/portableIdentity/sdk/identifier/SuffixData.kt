@@ -11,5 +11,5 @@ data class SuffixData(
     @SerialName("recoveryKey")
     val recoveryKey: RecoveryKey,
     @SerialName("nextRecoveryOtpHash")
-    val nextRecoveryOtpHash: String
+    val nextRecoveryCommitmentHash: String
 ) {}

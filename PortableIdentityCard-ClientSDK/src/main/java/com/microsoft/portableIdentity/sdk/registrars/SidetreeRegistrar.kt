@@ -6,7 +6,8 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDoc
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.post
@@ -34,6 +35,20 @@ class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistra
         val response = sendRequest(jws)
         println(response)
         return Serializer.parse(IdentifierDocument.serializer(), response)
+    }
+
+    override suspend fun register(document: RegDoc, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDoc {
+        // create JWS request
+        val content = Serializer.stringify(RegDoc.serializer(), document)
+        val jwsToken = JwsToken(content, logger = logger)
+        val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
+        val kid = key.kid
+        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))
+        val jws = jwsToken.serialize(JwsFormat.FlatJson)
+        jwsToken.verify(crypto);
+        val response = sendRequest(jws)
+        println(response)
+        return Serializer.parse(IdentifierDoc.serializer(), response)
     }
 
     /**

@@ -1,8 +1,7 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocPublicKey
-import com.microsoft.portableIdentity.sdk.identifier.document.RecoveryKey
-import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocService
+import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentifierDocService
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,6 +15,4 @@ data class RegistrationDoc(
     val publicKeys: List<IdentifierDocPublicKey>,
     @SerialName("service")
     val services: List<IdentifierDocService>? = null
-/*    @SerialName("recoveryKey")
-    val recoveryKey: RecoveryKey*/
 )

@@ -24,8 +24,6 @@ data class IdentifierDocPublicKey (
      */
     val controller: String? = null,
 
-    val usage: String,
-
     @Deprecated("against spec", ReplaceWith("this.controller"))
     val owner: String? = null,
 

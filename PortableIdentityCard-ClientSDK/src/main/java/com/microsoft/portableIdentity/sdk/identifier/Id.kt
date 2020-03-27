@@ -1,17 +1,21 @@
 package com.microsoft.portableIdentity.sdk.identifier
 
+import com.google.crypto.tink.subtle.Hex
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
+import com.microsoft.portableIdentity.sdk.crypto.plugins.Secp256k1Provider
+import com.microsoft.portableIdentity.sdk.identifier.IdResponse.Companion.microsoftIdentityHubDocument
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
+import com.microsoft.portableIdentity.sdk.identifier.document.IdToken
 import com.microsoft.portableIdentity.sdk.identifier.document.*
-import com.microsoft.portableIdentity.sdk.identifier.document.service.IdHubService
-import com.microsoft.portableIdentity.sdk.identifier.document.service.ServiceHubEndpoint
-import com.microsoft.portableIdentity.sdk.identifier.document.service.UserHubEndpoint
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.RegDoc
-import com.microsoft.portableIdentity.sdk.registrars.RegistrationDoc
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.*
 import java.security.MessageDigest
+import kotlin.experimental.and
+import kotlin.random.Random
 
 /**
  * Class for creating and managing identifiers,
@@ -32,133 +36,104 @@ class Id constructor(
     private val registrar: IRegistrar
 ) {
     companion object {
-
-        var microsoftIdentityHubDocument: IdentifierDoc = IdentifierDoc(
-//            context = "https://w3id.org/did/v1",
-//            id = "did:ion:test:EiD0fhJIYZwBNn2akeiVC5hT1K9ncP0HJCN0LkhnFrHyTg",
+/*        private var microsoftIdentityHubDocument: IdentifierDoc = IdentifierDoc(
             publicKeys = listOf(
                 IdentifierDocPublicKey(
                     id = "#key1",
                     type = "Secp256k1VerificationKey2018",
-                    usage = "Signing",
                     publicKeyHex = "02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1"
                 )
-            ),
-            services = listOf(
-                IdHubService(
-                    id = "IdentityHub",
-                    publicKey = "#key1",
-                    serviceEndpoint = UserHubEndpoint(listOf("did:bar:456", "did:zaz:789"))
-                )
             )
-        )
+        )*/
 
-        suspend fun createAndRegister(
+        suspend fun createLongFormIdentifier(
             alias: String,
             cryptoOperations: CryptoOperations,
             logger: ILogger,
             signatureKeyReference: String,
             encryptionKeyReference: String,
             resolver: IResolver,
-            registrar: IRegistrar,
-            identityHubDid: List<String>? = null
-        ): Id {
+            registrar: IRegistrar
+        ): IdResponse {
             // TODO: Use software generated keys from the seed
 //        val seed = cryptoOperations.generateSeed()
 //        val publicKey = cryptoOperations.generatePairwise(seed)
             logger.debug("Creating identifier ($alias)")
             val personaEncKeyRef = "$alias.$encryptionKeyReference"
             val personaSigKeyRef = "$alias.$signatureKeyReference"
-            val encKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
             val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
-            val encJwk = encKey.toJWK()
             val sigJwk = sigKey.toJWK()
-            logger.debug("Created keys ${encJwk.kid} and ${sigJwk.kid}")
-            // RSA key
-            val encPubKey = IdentifierDocPublicKey(
-                id = encJwk.kid!!,
-                type = LinkedDataKeySpecification.RsaSignature2018.values.first(),
-                usage = "Signing",
-                publicKeyHex = ""
-            )
-            // Secp256k1 key
-            val sigPubKey = IdentifierDocPublicKey(
-                id = sigJwk.kid!!,
-                type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
-                usage = "Signing",
-                publicKeyHex = ""
-            )
-            var hubService: IdentifierDocService? = null
-            if (!identityHubDid.isNullOrEmpty()) {
-//                        val hubs = identityHubDid.map {
-//                            resolver.resolve(it,
-//                                cryptoOperations
-//                            )}
-                logger.debug("Adding Microsoft Identity Hub")
-                val microsoftHub = Id(microsoftIdentityHubDocument, "", "", "", cryptoOperations, logger, resolver, registrar)
-                hubService = IdHubService.create(
-                    id = "#hub",
-                    keyStore = cryptoOperations.keyStore,
-                    signatureKeyRef = personaEncKeyRef,
-                    instances = listOf(microsoftHub),
-                    logger = logger
+
+            val microsoftIdentityHubDocument: IdentifierDoc = IdentifierDoc(
+                publicKeys = listOf(
+                    IdentifierDocPublicKey(
+                        id = sigJwk.kid!!,
+                        type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
+                        publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(sigJwk.x!!, logger), Base64.decode(sigJwk.y!!, logger))
+                    )
                 )
-            }
-
-            val document = RegistrationDoc(
-                context = "https://w3id.org/did/v1",
-                publicKeys = listOf(encPubKey, sigPubKey),
-                services = if (hubService != null) {
-                    listOf(hubService)
-                } else {
-                    null
-                }
             )
-            val nextUpdateOtp = otpGenerator()
-            val operationData = OperationData(hash(nextUpdateOtp), microsoftIdentityHubDocument)
-            val nextRecoveryOtp = otpGenerator()
+
+            val idDocPatches = IdentifierDocPatch("replace", microsoftIdentityHubDocument)
+            val updateCommitmentHashEncoded = generateCommitmentHash(logger)
+
+            val operationData = OperationData(updateCommitmentHashEncoded, listOf(idDocPatches))
+            val opDataJson = Serializer.stringify(OperationData.serializer(), operationData)
+            val opDataByteArray = stringToByteArray(opDataJson)
+            val opDataHashed = byteArrayOf(18, 32)+hash(opDataByteArray)
+            val opDataHashEncoded = Base64Url.encode(opDataHashed, logger)
+            val opDataEncoded = Base64Url.encode(opDataByteArray, logger)
+
+            val recoveryCommitmentHashEncoded = generateCommitmentHash(logger)
+
             val suffixData = SuffixData(
-                hash(operationData.toString()),
+                opDataHashEncoded,
                 RecoveryKey("03f513461b26cfeb508c79ae884f1090e8e431d06bbc6ae52eea31fd381bc52fa5"),
-                hash(nextRecoveryOtp)
+                recoveryCommitmentHashEncoded
             )
+            val uniqueSuffix = computeUniqueSuffix(suffixData, logger)
+            val did = "did:ion:test:$uniqueSuffix"
 
-            val regDoc = RegDoc("create", "", "")
-            val registered = registrar.register(
-                regDoc, personaSigKeyRef, cryptoOperations)
+            val suffixDataEncodedString = encodeSuffixData(suffixData, logger)
+            val regDoc = RegDoc("create", suffixDataEncodedString, opDataEncoded)
+            val regDocEncodedString = encodeRegDoc(regDoc, logger)
 
+            val identifierDocument = resolver.resolve(did, regDocEncodedString, cryptoOperations)
             logger.debug("Registered new decentralized identity")
-            return Id(
-                alias = alias,
-                document = registered,
-                signatureKeyReference = personaSigKeyRef,
-                encryptionKeyReference = personaEncKeyRef,
-                cryptoOperations = cryptoOperations,
-                logger = logger,
-                resolver = resolver,
-                registrar = registrar
-            )
+            return identifierDocument
         }
 
-        fun otpGenerator(): String {
-            return randomAlphanumericString()
-        }
-
-        fun randomAlphanumericString(): String {
-            val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
-            val outputStrLength = (1..28).shuffled().first()
-
-            return (1..outputStrLength)
-                .map { kotlin.random.Random.nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
-        }
-
-        fun hash(string: String): String {
-            val bytes = string.toString().toByteArray()
+        private fun hash(bytes: ByteArray): ByteArray {
             val md = MessageDigest.getInstance("SHA-256")
-            val digest = md.digest(bytes)
-            return digest.fold("", { str, it -> str + "%02x".format(it) })
+            return md.digest(bytes)
+        }
+
+        private fun generateCommitmentHash(logger: ILogger): String {
+            val commitmentValue = Base64Url.encode(Random.Default.nextBytes(32), logger)
+            val commitmentValueHash = byteArrayOf(18, 32)+hash(stringToByteArray(commitmentValue))
+            return Base64Url.encode(commitmentValueHash, logger)
+        }
+
+        private fun computeUniqueSuffix(suffixData: SuffixData, logger: ILogger): String {
+            val suffixDataJson = Serializer.stringify(SuffixData.serializer(), suffixData)
+            val suffixDataHash = byteArrayOf(18, 32)+hash(stringToByteArray(suffixDataJson))
+            return Base64Url.encode(suffixDataHash, logger)
+        }
+
+        private fun encodeRegDoc(regDoc: RegDoc, logger: ILogger): String{
+            val regDocJson = Serializer.stringify(RegDoc.serializer(), regDoc)
+            return Base64Url.encode(stringToByteArray(regDocJson), logger)
+        }
+
+        private fun encodeSuffixData(suffixData: SuffixData, logger: ILogger):String {
+            val suffixDataJson = Serializer.stringify(SuffixData.serializer(), suffixData)
+            return Base64Url.encode(stringToByteArray(suffixDataJson), logger)
+        }
+
+        private fun convertCryptoKeyToCompressedHex(ecKeyX: ByteArray, ecKeyY: ByteArray): String {
+            var yForCompressedHex = "0"+(2 + (ecKeyY[ecKeyY.size - 1] and 1)).toString()
+            val xForCompressedHex = Hex.encode(ecKeyX)
+            return """$yForCompressedHex$xForCompressedHex"""
         }
     }
 

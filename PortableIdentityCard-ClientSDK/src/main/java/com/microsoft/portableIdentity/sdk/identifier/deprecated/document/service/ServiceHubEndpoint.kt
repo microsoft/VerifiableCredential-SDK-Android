@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.identifier.document.service
+package com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service
 
 import kotlinx.serialization.*
 

@@ -1,13 +1,13 @@
 package com.microsoft.portableIdentity.sdk.identifier
 
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDoc
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocPatch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class OperationData (
     @SerialName("nextUpdateOtpHash")
-    val nextUpdateOtpHash: String,
-    @SerialName("document")
-    val regDocument: IdentifierDoc
+    val nextUpdateCommitmentHash: String,
+    @SerialName("patches")
+    val patches: List<IdentifierDocPatch>
 ) {}
