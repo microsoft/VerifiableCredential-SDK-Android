@@ -34,11 +34,11 @@ class DidSdkConfig(
      */
     companion object {
         @JvmStatic
-        lateinit var didManager: DidManager
+        lateinit var identityManager: IdentityManager
             private set
 
         @JvmStatic
-        lateinit var picManager: PicManager
+        lateinit var cardManager: CardManager
             private set
 
         @JvmStatic
@@ -52,8 +52,8 @@ class DidSdkConfig(
             encryptionKeyReference: String = "encryption"
         ) {
             val config = DidSdkConfig(context, logger, signatureKeyReference, encryptionKeyReference, registrationUrl, resolverUrl)
-            didManager = DidManager(config)
-            picManager = PicManager(config)
+            identityManager = IdentityManager(config)
+            cardManager = CardManager(config)
         }
     }
 

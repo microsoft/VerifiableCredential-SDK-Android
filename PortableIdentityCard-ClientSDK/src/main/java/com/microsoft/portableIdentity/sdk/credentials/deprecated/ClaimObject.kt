@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.credentials
+package com.microsoft.portableIdentity.sdk.credentials.deprecated
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
@@ -15,7 +15,8 @@ data class ClaimObject(val claimClass: String,
                        val type: String,
                        val claimDescriptions: List<ClaimDescription>,
                        val claimIssuer: String,
-                       val claimDetails: ClaimDetail) {
+                       val claimDetails: ClaimDetail
+) {
     companion object {
         fun deserialize(claimObject: String): ClaimObject {
             return Serializer.parse(ClaimObject.serializer(), claimObject)

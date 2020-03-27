@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.credentials
+package com.microsoft.portableIdentity.sdk.credentials.deprecated
 
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.getHttpClient
