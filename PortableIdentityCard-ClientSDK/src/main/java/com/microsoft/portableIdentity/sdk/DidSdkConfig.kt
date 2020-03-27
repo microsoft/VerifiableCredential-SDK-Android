@@ -24,6 +24,7 @@ class DidSdkConfig(
     internal val logger: ILogger,
     internal val signatureKeyReference: String,
     internal val encryptionKeyReference: String,
+    internal val recoveryKeyReference: String,
     registrationUrl: String,
     resolverUrl: String
 ) {
@@ -49,9 +50,10 @@ class DidSdkConfig(
             registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
             resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
             signatureKeyReference: String = "signature",
-            encryptionKeyReference: String = "encryption"
+            encryptionKeyReference: String = "encryption",
+            recoveryKeyReference: String = "recovery"
         ) {
-            val config = DidSdkConfig(context, logger, signatureKeyReference, encryptionKeyReference, registrationUrl, resolverUrl)
+            val config = DidSdkConfig(context, logger, signatureKeyReference, encryptionKeyReference, recoveryKeyReference, registrationUrl, resolverUrl)
             identityManager = IdentityManager(config)
             cardManager = CardManager(config)
         }

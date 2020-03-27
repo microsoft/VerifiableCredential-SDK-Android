@@ -33,22 +33,13 @@ class Identifier constructor(
     private val registrar: IRegistrar
 ) {
     companion object {
-/*        private var microsoftIdentityHubDocument: IdentifierDoc = IdentifierDoc(
-            publicKeys = listOf(
-                IdentifierDocPublicKey(
-                    id = "#key1",
-                    type = "Secp256k1VerificationKey2018",
-                    publicKeyHex = "02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1"
-                )
-            )
-        )*/
-
         suspend fun createLongFormIdentifier(
             alias: String,
             cryptoOperations: CryptoOperations,
             logger: ILogger,
             signatureKeyReference: String,
             encryptionKeyReference: String,
+            recoveryKeyReference: String,
             resolver: IResolver,
             registrar: IRegistrar
         ): IdentifierResponse {
@@ -58,15 +49,18 @@ class Identifier constructor(
             logger.debug("Creating identifier ($alias)")
             val personaEncKeyRef = "$alias.$encryptionKeyReference"
             val personaSigKeyRef = "$alias.$signatureKeyReference"
-            val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
-            val sigJwk = sigKey.toJWK()
+            val personaRecKeyRef = "$alias.$recoveryKeyReference"
+            val signingKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
+            val signingKeyJWK = signingKey.toJWK()
+            val recoveryKey = cryptoOperations.generateKeyPair(personaRecKeyRef, KeyType.EllipticCurve)
+            val recoveryKeyJWK = recoveryKey.toJWK()
 
             val microsoftIdentityHubDocument: IdentifierDocumentPayload = IdentifierDocumentPayload(
                 publicKeys = listOf(
                     IdentifierDocumentPublicKey(
-                        id = sigJwk.kid!!,
+                        id = signingKeyJWK.kid!!,
                         type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
-                        publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(sigJwk.x!!, logger), Base64.decode(sigJwk.y!!, logger))
+                        publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(signingKeyJWK.x!!, logger), Base64.decode(signingKeyJWK.y!!, logger))
                     )
                 )
             )
@@ -79,13 +73,14 @@ class Identifier constructor(
             val opDataByteArray = stringToByteArray(opDataJson)
             val opDataHashed = byteArrayOf(18, 32)+hash(opDataByteArray)
             val opDataHashEncoded = Base64Url.encode(opDataHashed, logger)
-            val opDataEncoded = Base64Url.encode(opDataByteArray, logger)
+
+            val opDataEncoded = encodeOperationData(operationData, logger)
 
             val recoveryCommitmentHashEncoded = generateCommitmentHash(logger)
 
             val suffixData = SuffixData(
                 opDataHashEncoded,
-                RecoveryKey("03f513461b26cfeb508c79ae884f1090e8e431d06bbc6ae52eea31fd381bc52fa5"),
+                RecoveryKey(convertCryptoKeyToCompressedHex(Base64.decode(recoveryKeyJWK.x!!, logger), Base64.decode(recoveryKeyJWK.y!!, logger))),
                 recoveryCommitmentHashEncoded
             )
             val uniqueSuffix = computeUniqueSuffix(suffixData, logger)
@@ -122,9 +117,15 @@ class Identifier constructor(
             return Base64Url.encode(stringToByteArray(regDocJson), logger)
         }
 
-        private fun encodeSuffixData(suffixData: SuffixData, logger: ILogger):String {
+        private fun encodeSuffixData(suffixData: SuffixData, logger: ILogger): String {
             val suffixDataJson = Serializer.stringify(SuffixData.serializer(), suffixData)
             return Base64Url.encode(stringToByteArray(suffixDataJson), logger)
+        }
+
+        private fun encodeOperationData(operationData: OperationData, logger: ILogger): String {
+            val opDataJson = Serializer.stringify(OperationData.serializer(), operationData)
+            val opDataByteArray = stringToByteArray(opDataJson)
+            return Base64Url.encode(opDataByteArray, logger)
         }
 
         private fun convertCryptoKeyToCompressedHex(ecKeyX: ByteArray, ecKeyY: ByteArray): String {

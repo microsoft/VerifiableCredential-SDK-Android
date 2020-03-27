@@ -125,12 +125,12 @@ class IdentityManager(private val config: DidSdkConfig) {
         }
     }*/
 
-    private suspend fun createLongFormIdentifier(): IdentifierResponse {
+    suspend fun createLongFormIdentifier(): IdentifierResponse {
         return withContext(Dispatchers.Default) {
             val alias = Base64Url.encode(Random.nextBytes(16), logger = config.logger)
             Identifier.createLongFormIdentifier(
                 alias, config.cryptoOperations, config.logger, config.signatureKeyReference,
-                config.encryptionKeyReference, config.resolver, config.registrar
+                config.encryptionKeyReference, config.recoveryKeyReference, config.resolver, config.registrar
             )
         }
     }

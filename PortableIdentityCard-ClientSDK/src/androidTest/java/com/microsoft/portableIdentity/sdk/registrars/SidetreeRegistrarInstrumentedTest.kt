@@ -233,7 +233,7 @@ class SidetreeRegistrarInstrumentedTest {
     fun idCreationTest() {
         val alias = Base64Url.encode(Random.nextBytes(16), logger)
         runBlocking {
-            val id = Identifier.createLongFormIdentifier(alias, cryptoOperations, logger, "", "", resolver, registrar)
+            val id = Identifier.createLongFormIdentifier(alias, cryptoOperations, logger, "", "", "", resolver, registrar)
             assertThat(id).isNotNull
         }
     }
