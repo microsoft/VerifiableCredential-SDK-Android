@@ -6,11 +6,17 @@ import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.repository.Repository
 import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
 import io.ktor.http.Url
 import io.ktor.util.toMap
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class CardManager(private val config: DidSdkConfig) {
+@Singleton
+class CardManager @Inject constructor(
+    private val repository: Repository
+) {
 
     suspend fun getRequest(uri: String): OidcRequest {
         val url: Url
@@ -52,10 +58,10 @@ class CardManager(private val config: DidSdkConfig) {
      *
      */
     suspend fun saveCard(claim: ClaimObject) {
-        config.repository.saveClaim(claim)
+        repository.saveClaim(claim)
     }
 
     suspend fun getCards(): List<ClaimObject> {
-        return config.repository.getClaims()
+        return repository.getClaims()
     }
 }

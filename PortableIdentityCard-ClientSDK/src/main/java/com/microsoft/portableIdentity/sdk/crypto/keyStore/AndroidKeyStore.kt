@@ -16,8 +16,11 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.utilities.*
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AndroidKeyStore(private val context: Context, logger: ILogger): IKeyStore(logger) {
+@Singleton
+class AndroidKeyStore @Inject constructor(private val context: Context, logger: Logger): com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore(logger) {
 
     companion object {
         const val provider = "AndroidKeyStore"

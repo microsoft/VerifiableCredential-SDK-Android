@@ -5,6 +5,9 @@ import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 import kotlinx.serialization.Serializable
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * Fetches Identifier Documents from remote resolvers over http.
@@ -12,7 +15,10 @@ import kotlinx.serialization.Serializable
  * @implements IResolver
  * @param url of the remote resolver.
  */
-class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(logger) {
+@Singleton
+class HttpResolver @Inject constructor(
+    @Named("resolverUrl") private val baseUrl: String, logger: Logger
+) : IResolver(logger) {
 
     @Serializable
     data class ResolverMetadata(val driverId: String?, val driver: String?, val retrieved: String?, val duration: String?)

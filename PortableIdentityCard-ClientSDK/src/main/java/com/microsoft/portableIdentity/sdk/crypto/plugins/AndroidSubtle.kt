@@ -11,13 +11,16 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.AndroidKeyConverter
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.*
 import javax.crypto.KeyGenerator
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AndroidSubtle(private var keyStore: AndroidKeyStore, private val logger: ILogger): SubtleCrypto {
+@Singleton
+class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore, private val logger: Logger): SubtleCrypto {
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

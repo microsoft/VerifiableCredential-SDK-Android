@@ -13,7 +13,7 @@ import com.microsoft.portableIdentity.sdk.identifier.document.service.ServiceHub
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 
 /**
  * Class for creating and managing identifiers,
@@ -29,7 +29,7 @@ class Identifier constructor (
                  val encryptionKeyReference: String,
                  val alias: String,
                  private val cryptoOperations: CryptoOperations,
-                 private val logger: ILogger,
+                 private val logger: Logger,
                  private val resolver: IResolver,
                  private val registrar: IRegistrar) {
     companion object {
@@ -67,10 +67,12 @@ class Identifier constructor (
             ))
         )
 
+
+        // TODO: needs refactoring! Dependency inject this object instead of having this companion etc.
         suspend fun createAndRegister(
             alias: String,
             cryptoOperations: CryptoOperations,
-            logger: ILogger,
+            logger: Logger,
             signatureKeyReference: String,
             encryptionKeyReference: String,
             resolver: IResolver,

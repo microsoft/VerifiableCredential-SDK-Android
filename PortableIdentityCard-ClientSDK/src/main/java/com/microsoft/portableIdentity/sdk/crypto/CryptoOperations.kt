@@ -2,7 +2,7 @@
 
 package com.microsoft.portableIdentity.sdk.crypto
 
-import com.microsoft.portableIdentity.sdk.crypto.keyStore.IKeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
@@ -12,17 +12,17 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 
 /**
  * Class that encompasses all of Crypto
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(
+class CryptoOperations (
     subtleCrypto: SubtleCrypto,
-    val keyStore: IKeyStore,
-    private val logger: ILogger = ConsoleLogger()
+    val keyStore: KeyStore,
+    private val logger: Logger = ConsoleLogger()
 ) {
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto, logger)
 

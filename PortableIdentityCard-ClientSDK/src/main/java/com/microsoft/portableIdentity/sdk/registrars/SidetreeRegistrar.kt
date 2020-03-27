@@ -13,6 +13,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
+import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Registrar implementation for the Sidetree network
@@ -21,7 +23,7 @@ import io.ktor.http.ContentType
  * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistrar(logger) {
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, logger: Logger): IRegistrar(logger) {
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
         val content = Serializer.stringify(RegistrationDocument.serializer(), document)

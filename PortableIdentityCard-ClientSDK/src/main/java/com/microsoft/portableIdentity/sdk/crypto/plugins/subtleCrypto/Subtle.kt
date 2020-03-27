@@ -2,13 +2,13 @@ package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
-open class Subtle(providers: Set<Provider> = emptySet(), private val logger: ILogger): SubtleCrypto {
+open class Subtle(providers: Set<Provider> = emptySet(), private val logger: Logger): SubtleCrypto {
     val provider = providers.map({
         Pair<String, Provider>(it.name.toLowerCase(), it)
     }).toMap()
