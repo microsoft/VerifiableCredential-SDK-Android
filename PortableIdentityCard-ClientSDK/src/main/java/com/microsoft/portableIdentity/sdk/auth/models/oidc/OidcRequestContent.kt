@@ -1,6 +1,12 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
+import com.microsoft.portableIdentity.sdk.auth.models.claimRequests.CredentialRequests
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -38,7 +44,7 @@ data class OidcRequestContent(
     val nonce: String? = null,
 
     // Claims that are being requested.
-    val attestations: Attestation? = null,
+    val attestations: CredentialRequests? = null,
 
     // iat, nbf, and exp that need to be checked to see if token has expired
     val exp: Long? = null,

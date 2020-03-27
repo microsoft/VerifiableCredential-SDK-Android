@@ -17,7 +17,7 @@ class OidcRequestTest {
         val request = OidcRequest(testParameters, serializedTestToken)
         print(request.content)
         runBlocking {
-            OidcRequestValidator.validate(request)
+            print(OidcRequestValidator.validate(request))
         }
 
     }

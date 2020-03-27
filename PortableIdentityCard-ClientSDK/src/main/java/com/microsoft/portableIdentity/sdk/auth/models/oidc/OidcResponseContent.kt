@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -48,7 +53,6 @@ data class OidcResponseContent(
     val claimSources: Map<String, List<Map<String, String>>>? = null,
 
     // PICS specific
-
     // response contains claims that fulfills this contract.
     val contract: String? = null,
     // claims that were being requested.

@@ -23,15 +23,14 @@ object OidcRequestValidator {
     }
 
     private fun hasTokenExpired(expiration: Long): Boolean {
-        val expirationOffset = getExpirationOffset()
-        return expiration > expirationOffset
+        return expiration > getExpirationDeadlineInSeconds()
     }
 
-    private fun getExpirationOffset(): Long {
+    private fun getExpirationDeadlineInSeconds(): Long {
         val currentTime = Date().time
         val milliseconds = 1000
         val expirationCheckTimeOffsetInMinutes = 5
-        return currentTime + milliseconds * 60 * expirationCheckTimeOffsetInMinutes
+        return (currentTime + milliseconds * 60 * expirationCheckTimeOffsetInMinutes) / milliseconds
     }
 
     private fun hasMatchingParams(requestContents: OidcRequestContent, params: Map<String, List<String>>): Boolean {
