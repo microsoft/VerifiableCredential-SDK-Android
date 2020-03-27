@@ -2,7 +2,7 @@ package com.microsoft.portableIdentity.sdk.utilities
 
 import android.util.Log
 
-class AndroidLogCatConsumer: SdkLog.Consumer {
+class DefaultLogConsumerBridge: SdkLog.ConsumerBridge {
 
     override fun log(logLevel: SdkLog.Level, message: String, throwable: Throwable?, tag: String) {
         if (throwable == null) {

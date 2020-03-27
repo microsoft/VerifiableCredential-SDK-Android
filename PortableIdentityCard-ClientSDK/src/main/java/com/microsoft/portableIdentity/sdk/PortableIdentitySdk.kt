@@ -4,7 +4,7 @@ package com.microsoft.portableIdentity.sdk
 
 import android.content.Context
 import com.microsoft.portableIdentity.sdk.di.DaggerSdkComponent
-import com.microsoft.portableIdentity.sdk.utilities.AndroidLogCatConsumer
+import com.microsoft.portableIdentity.sdk.utilities.DefaultLogConsumerBridge
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 object PortableIdentitySdk {
@@ -19,7 +19,7 @@ object PortableIdentitySdk {
     @JvmStatic
     fun init(
         context: Context,
-        logConsumer: SdkLog.Consumer = AndroidLogCatConsumer(),
+        logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(),
         registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
         signatureKeyReference: String = "signature",
@@ -36,6 +36,6 @@ object PortableIdentitySdk {
         identityManager = sdkComponent.identityManager()
         cardManager = sdkComponent.cardManager()
 
-        SdkLog.addConsumer(logConsumer)
+        SdkLog.addConsumer(logConsumerBridge)
     }
 }

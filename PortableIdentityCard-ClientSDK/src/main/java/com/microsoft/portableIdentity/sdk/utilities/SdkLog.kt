@@ -4,7 +4,7 @@ import java.lang.RuntimeException
 import java.util.regex.Pattern
 
 object SdkLog {
-    interface Consumer {
+    interface ConsumerBridge {
         fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String)
     }
 
@@ -21,9 +21,9 @@ object SdkLog {
 
     private const val ORIGINAL_CALLER_STACK_INDEX = 2
     private val ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$")
-    private val consumers: MutableList<Consumer> = ArrayList()
+    private val CONSUMERS: MutableList<ConsumerBridge> = ArrayList()
 
-    fun addConsumer(consumer: Consumer) = consumers.add(consumer)
+    fun addConsumer(consumerBridge: ConsumerBridge) = CONSUMERS.add(consumerBridge)
 
     fun v(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
         log(Level.VERBOSE, message, throwable, tag)
@@ -50,18 +50,18 @@ object SdkLog {
     }
 
     private fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String) {
-        consumers.forEach { it.log(logLevel, message, throwable, tag) }
+        CONSUMERS.forEach { it.log(logLevel, message, throwable, tag) }
     }
 
     @Deprecated("Use short form.", ReplaceWith("this.d(message, tag)"))
-    fun debug(message: String, tag: String = implicitTag()) = d(message, tag)
+    fun debug(message: String, tag: String = implicitTag()) = d(message, null, tag)
 
     @Deprecated(
         "Legacy error log function that returns an Exception. Remove all references, then delete this method.",
         ReplaceWith("this.e(message, tag)")
     )
     fun error(message: String, tag: String = implicitTag()): RuntimeException {
-        log(Level.ERROR, message, tag)
+        log(Level.ERROR, message,null, tag)
         return RuntimeException(message)
     }
 
@@ -73,7 +73,7 @@ object SdkLog {
     @Suppress("SameParameterValue")
     private fun getCallerElement(stackTrace: Array<StackTraceElement>, index: Int): StackTraceElement? {
         if (stackTrace.size <= index) {
-            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", "SdkLog.implicitTag")
+            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", null,"SdkLog.implicitTag")
             return null
         }
         // Calls from Java into Kotlin's @JvmStatic methods have an extra anonymous method. We have to skip it.
