@@ -5,18 +5,19 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.claimRequests
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ClaimInfo (
-    // name of the claim.
-    val claim: String,
+data class IdTokenRequest (
 
-    // if claim is required
-    val required: Boolean? = null,
+    val claims: List<ClaimInfo>,
 
-    // type of object the claim should be.
-    val type: String? = null,
+    val configuration: String,
 
-    val forDisplay: Boolean? = null
+    @SerialName("client_id")
+    val clientId: String,
+
+    @SerialName("redirect_uri")
+    val redirectUri: String
 )

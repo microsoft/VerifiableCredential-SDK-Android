@@ -2,7 +2,10 @@ package com.microsoft.portableIdentity.sdk.auth.requests
 
 import com.microsoft.portableIdentity.sdk.CardManager
 import com.microsoft.portableIdentity.sdk.DidSdkConfig
+import com.microsoft.portableIdentity.sdk.auth.models.contracts.Contract
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
+import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
@@ -14,11 +17,11 @@ class OidcRequestTest {
     @Test
     fun testRequest() {
 
-        val request = OidcRequest(testParameters, serializedTestToken)
-        print(request.content)
-        runBlocking {
-            print(OidcRequestValidator.validate(request))
-        }
-
+//        runBlocking {
+//            val httpResponse = HttpWrapper.get("https://portableidentitycards.azure-api.net/42b39d9d-0cdd-4ae0-b251-b7b39a561f91/api/portable/v1.0/contracts/xbl")
+//            print(httpResponse)
+//            val contract = Serializer.parse(Contract.serializer(), httpResponse)
+//            print(contract)
+//        }
     }
 }

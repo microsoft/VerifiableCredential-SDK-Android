@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CredentialRequests(
     // IdToken Requests.
-    val idTokens: Map<String, String>? = null,
+    val idTokens: List<IdTokenRequest>? = null,
 
     // Verifiable Presentation Requests.
     val presentations: List<VerifiablePresentationRequest>? = null,
