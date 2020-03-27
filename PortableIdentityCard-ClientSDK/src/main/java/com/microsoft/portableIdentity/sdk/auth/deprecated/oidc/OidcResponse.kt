@@ -25,7 +25,7 @@ import kotlin.math.floor
 class OidcResponse (
     val responder: Identifier,
     val crypto: CryptoOperations,
-    private val logger: ILogger,
+    private val logger: Logger,
     val nonce: String,
     val state: String? = null,
     val claims: MutableList<ClaimObject> = mutableListOf(),
@@ -56,7 +56,7 @@ class OidcResponse (
     companion object {
         const val SELFISSUED = "https://self-issued.me"
 
-        fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier, logger: ILogger): OidcResponse {
+        fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier, logger: Logger): OidcResponse {
             return OidcResponse(
                 responder = respondWithIdentifier,
                 crypto = oidcRequest.crypto,
@@ -72,7 +72,7 @@ class OidcResponse (
                                    clockSkewInMinutes: Int = 5,
                                    issuedWithinLastMinutes: Int? = null,
                                    crypto: CryptoOperations,
-                                   logger: ILogger,
+                                   logger: Logger,
                                    resolver: IResolver,
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
@@ -223,11 +223,17 @@ class OidcResponse (
                     ""
                 }
                 println("Encoded as: $responseBody")
-                val response = getHttpClient().post<String> {
-                    url(redirectUrl)
-                    body = ByteArrayContent(
-                        bytes = stringToByteArray(responseBody),
-                        contentType = ContentType.Application.FormUrlEncoded)
+                val response = try {
+                    getHttpClient().post<String> {
+                        url(redirectUrl)
+                        body = ByteArrayContent(
+                            bytes = stringToByteArray(responseBody),
+                            contentType = ContentType.Application.FormUrlEncoded
+                        )
+                    }
+                } catch (exception: Exception) {
+                    println("Exception sending response: ${exception.message}")
+                    throw exception
                 }
                 if (response.isNotBlank()) {
                     try {

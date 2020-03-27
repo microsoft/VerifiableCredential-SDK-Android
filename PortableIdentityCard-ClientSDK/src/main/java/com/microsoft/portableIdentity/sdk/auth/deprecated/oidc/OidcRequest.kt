@@ -6,7 +6,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
@@ -21,7 +21,7 @@ import kotlinx.serialization.Serializable
 class OidcRequest constructor(
     val sender: Identifier,
     val crypto: CryptoOperations,
-    private val logger: ILogger,
+    private val logger: Logger,
     val scope: String = OidcRequest.defaultScope,
     val redirectUrl: String,
     val nonce: String,
@@ -74,7 +74,7 @@ class OidcRequest constructor(
         
         suspend fun parseAndVerify(signedRequest: String,
                                    crypto: CryptoOperations,
-                                   logger: ILogger,
+                                   logger: Logger,
                                    resolver: IResolver): OidcRequest {
             if (!signedRequest.startsWith("openid://")) {
                 throw logger.error("Must be passed a string beginning in \"openid://\"")
@@ -172,7 +172,7 @@ class OidcRequest constructor(
             )
         }
 
-        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: ILogger): T? {
+        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: Logger): T? {
             val data =
                 getQueryStringParameter(
                     name,

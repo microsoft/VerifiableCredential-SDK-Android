@@ -2,6 +2,8 @@
 
 package com.microsoft.portableIdentity.sdk.di
 
+import android.content.Context
+import androidx.room.Room
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
@@ -13,6 +15,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
+import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Logger
@@ -61,5 +64,13 @@ internal class SdkModule {
     @Singleton
     fun defaultKeyStore(keyStore: AndroidKeyStore): KeyStore {
         return keyStore
+    }
+
+    @Provides
+    @Singleton
+    fun sdkDatabase(context: Context): SdkDatabase {
+        return Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db")
+            .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
+            .build()
     }
 }

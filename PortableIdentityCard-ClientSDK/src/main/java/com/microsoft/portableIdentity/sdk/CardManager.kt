@@ -2,11 +2,12 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.repository.Repository
+import com.microsoft.portableIdentity.sdk.repository.VerifiableCredentialRepository
 import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
 import io.ktor.http.Url
 import io.ktor.util.toMap
@@ -15,7 +16,7 @@ import javax.inject.Singleton
 
 @Singleton
 class CardManager @Inject constructor(
-    private val repository: Repository
+    private val vcRepository: VerifiableCredentialRepository
 ) {
 
     suspend fun getRequest(uri: String): OidcRequest {
@@ -57,11 +58,11 @@ class CardManager @Inject constructor(
     /**
      *
      */
-    suspend fun saveCard(claim: ClaimObject) {
-        repository.saveClaim(claim)
+    suspend fun saveClaim(claim: ClaimObject) {
+        vcRepository.insert(claim)
     }
 
-    suspend fun getCards(): List<ClaimObject> {
-        return repository.getClaims()
+    fun getClaims(): LiveData<List<ClaimObject>> {
+        return vcRepository.getAllClaimObjects()
     }
 }

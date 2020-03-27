@@ -4,10 +4,10 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
-class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
+class ClaimBuilder(forClass: ClaimClass? = null, private val logger: Logger) {
     var context: String? = null
     var type: String? = null
     var issuerName: String? = forClass?.issuerName
@@ -75,8 +75,8 @@ class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
             classUri,
             context!!,
             type!!,
-            claimDescriptions,
             identifier.document.id,
+            claimDescriptions,
             claims
         )
     }

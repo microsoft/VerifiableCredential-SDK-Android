@@ -2,9 +2,9 @@ package com.microsoft.portableIdentity.sdk.crypto.keyStore
 
 import com.microsoft.portableIdentity.sdk.crypto.keys.*
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.Logger
 
-class InMemoryKeyStore(logger: ILogger): KeyStore(logger) {
+class InMemoryKeyStore(logger: Logger): KeyStore(logger) {
     private val secretKeys: MutableMap<String, KeyContainer<SecretKey>> = mutableMapOf()
     private val privateKeys: MutableMap<String, KeyContainer<PrivateKey>> = mutableMapOf()
     private val publicKeys: MutableMap<String, KeyContainer<PublicKey>> = mutableMapOf()
