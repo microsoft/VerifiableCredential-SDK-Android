@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * Public Key.
  */
 @Serializable
-data class IdentifierDocPublicKey (
+data class IdentifierDocumentPublicKey (
     /**
      * The id of the public key in the format
      * #{keyIdentifier}.

@@ -8,13 +8,16 @@ import kotlinx.serialization.Serializable
  * @class
  */
 @Serializable
-class IdDoc(
+class IdentifierDocumentPayload(
     @SerialName("@context")
     val context: String = "https://www.w3.org/2019/did/v1",
     val created: String? = null,
     val updated: String? = null,
-    val publicKey: List<IdentifierDocPublicKey>,
-    val recoveryKey: RecoveryKey
+    @SerialName("publicKeys")
+    val publicKeys: List<IdentifierDocumentPublicKey>/*,
+    @SerialName("serviceEndpoints")
+    val services: List<IdentifierDocService>*/
+
 ) {
     val id: String = ""
 }

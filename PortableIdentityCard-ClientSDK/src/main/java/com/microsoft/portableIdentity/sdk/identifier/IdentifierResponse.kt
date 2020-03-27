@@ -10,13 +10,13 @@ import com.microsoft.portableIdentity.sdk.identifier.document.*
  * @param resolver to resolve the Identifier Document for Identifier.
  * @param registrar to register Identifiers.
  */
-class IdResponse constructor(
-    val document: IdDoc
+class IdentifierResponse constructor(
+    val document: IdentifierDocument
 ) {
     companion object {
-        var microsoftIdentityHubDocument: IdentifierDoc = IdentifierDoc(
+        var microsoftIdentityHubDocument: IdentifierDocumentPayload = IdentifierDocumentPayload(
             publicKeys = listOf(
-                IdentifierDocPublicKey(
+                IdentifierDocumentPublicKey(
                     id = "#key1",
                     type = "Secp256k1VerificationKey2018",
                     publicKeyHex = "02f49802fb3e09c6dd43f19aa41293d1e0dad044b68cf81cf7079499edfd0aa9f1"
@@ -33,6 +33,6 @@ class IdResponse constructor(
     }
 
     fun serialize(): String {
-        return IdResponseToken.serialize(this)
+        return IdentifierResponseToken.serialize(this)
     }
 }

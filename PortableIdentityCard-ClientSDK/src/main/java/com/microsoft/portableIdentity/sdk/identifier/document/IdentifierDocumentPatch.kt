@@ -4,10 +4,10 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class IdentifierDocPatch (
+class IdentifierDocumentPatch (
     val action: String,
 /*    @SerialName("publicKeys")
     val publicKeys: List<IdentifierDocPublicKey>*/
     @SerialName("document")
-    val document: IdentifierDoc
+    val document: IdentifierDocumentPayload
 ){}

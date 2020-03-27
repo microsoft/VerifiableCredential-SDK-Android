@@ -6,8 +6,9 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDoc
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPayload
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.features.ResponseException
 import io.ktor.client.request.post
@@ -37,9 +38,9 @@ class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistra
         return Serializer.parse(IdentifierDocument.serializer(), response)
     }
 
-    override suspend fun register(document: RegDoc, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDoc {
+    override suspend fun register(document: com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocumentPayload {
         // create JWS request
-        val content = Serializer.stringify(RegDoc.serializer(), document)
+        val content = Serializer.stringify(com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument.serializer(), document)
         val jwsToken = JwsToken(content, logger = logger)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         val kid = key.kid
@@ -48,7 +49,7 @@ class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistra
         jwsToken.verify(crypto);
         val response = sendRequest(jws)
         println(response)
-        return Serializer.parse(IdentifierDoc.serializer(), response)
+        return Serializer.parse(IdentifierDocumentPayload.serializer(), response)
     }
 
     /**

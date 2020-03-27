@@ -9,10 +9,9 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.identifier.Id
-import com.microsoft.portableIdentity.sdk.identifier.IdResponse
-import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.document.IdResponseToken
+import com.microsoft.portableIdentity.sdk.identifier.IdentifierResponse
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierResponseToken
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import kotlinx.coroutines.*
@@ -27,7 +26,7 @@ class IdentityManager(private val config: DidSdkConfig) {
 
     private val didSecretName = "did.identifier"
 
-    val did: IdResponse by lazy { initLongFormDid() }
+    val did: IdentifierResponse by lazy { initLongFormDid() }
 
     internal val cryptoOperations: CryptoOperations = config.cryptoOperations
 
@@ -57,7 +56,7 @@ class IdentityManager(private val config: DidSdkConfig) {
         return did
     }*/
 
-    private fun initLongFormDid(): IdResponse {
+    private fun initLongFormDid(): IdentifierResponse {
         val did = if (config.cryptoOperations.keyStore.list().containsKey(didSecretName)) {
             println("Identifier found, deserializing")
             val keySerialized = config.cryptoOperations.keyStore.getSecretKey(didSecretName).getKey()
@@ -81,18 +80,18 @@ class IdentityManager(private val config: DidSdkConfig) {
     }
 
     // TODO: properly name APIs
-    fun registerNewDid(): Identifier {
-        var did: Identifier? = null
+/*    fun registerNewDid(): com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier {
+        var did: com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier? = null
         // TODO: Verify runBlocking is proper here
         runBlocking {
             did = createIdentifier()
         }
         println("Registered ${did!!.document.id}")
         return did!!
-    }
+    }*/
 
-    fun registerNewLongFormDid(): IdResponse {
-        var did: IdResponse? = null
+    private fun registerNewLongFormDid(): IdentifierResponse {
+        var did: IdentifierResponse? = null
         // TODO: Verify runBlocking is proper here
         runBlocking {
             did = createLongFormIdentifier()
@@ -101,13 +100,13 @@ class IdentityManager(private val config: DidSdkConfig) {
         return did!!
     }
 
-    fun createIdentifier(callback: (Identifier) -> Unit) {
+/*    fun createIdentifier(callback: (com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier) -> Unit) {
         GlobalScope.launch {
             callback.invoke(createIdentifier())
         }
-    }
+    }*/
 
-    fun createLongFormIdentifier(callback: (IdResponse) -> Unit) {
+    fun createLongFormIdentifier(callback: (IdentifierResponse) -> Unit) {
         GlobalScope.launch {
             callback.invoke(createLongFormIdentifier())
         }
@@ -116,28 +115,28 @@ class IdentityManager(private val config: DidSdkConfig) {
     /**
      * Creates and registers an Identifier.
      */
-    suspend fun createIdentifier(): Identifier {
+/*    private suspend fun createIdentifier(): com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier {
         return withContext(Dispatchers.Default) {
             val alias = Base64Url.encode(Random.nextBytes(16), logger = config.logger)
-            Identifier.createAndRegister(
+            com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier.createAndRegister(
                 alias, config.cryptoOperations, config.logger, config.signatureKeyReference,
                 config.encryptionKeyReference, config.resolver, config.registrar, listOf("did:test:hub.id")
             )
         }
-    }
+    }*/
 
-    suspend fun createLongFormIdentifier(): IdResponse {
+    private suspend fun createLongFormIdentifier(): IdentifierResponse {
         return withContext(Dispatchers.Default) {
             val alias = Base64Url.encode(Random.nextBytes(16), logger = config.logger)
-            Id.createLongFormIdentifier(
+            Identifier.createLongFormIdentifier(
                 alias, config.cryptoOperations, config.logger, config.signatureKeyReference,
                 config.encryptionKeyReference, config.resolver, config.registrar
             )
         }
     }
 
-    fun deserializeIdentifier(identifierToken: String): IdResponse {
-        return IdResponseToken.deserialize(
+    private fun deserializeIdentifier(identifierToken: String): IdentifierResponse {
+        return IdentifierResponseToken.deserialize(
             identifierToken,
             config.cryptoOperations,
             config.logger,

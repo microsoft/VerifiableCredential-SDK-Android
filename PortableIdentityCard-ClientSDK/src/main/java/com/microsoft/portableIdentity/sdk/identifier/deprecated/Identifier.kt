@@ -12,7 +12,7 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedD
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
-import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
+import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
@@ -139,7 +139,11 @@ class Identifier constructor (
             val document = RegistrationDocument(
                 context = "https://w3id.org/did/v1",
                 publicKeys = listOf(encPubKey, sigPubKey),
-                services = if (hubService != null) {listOf(hubService)} else { null }
+                services = if (hubService != null) {
+                    listOf(hubService)
+                } else {
+                    null
+                }
             )
 
             val registered = registrar.register(document, personaSigKeyRef, cryptoOperations)

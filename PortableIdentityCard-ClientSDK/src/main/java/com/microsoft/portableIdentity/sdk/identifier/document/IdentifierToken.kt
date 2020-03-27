@@ -1,8 +1,7 @@
 package com.microsoft.portableIdentity.sdk.identifier.document
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.identifier.Id
-import com.microsoft.portableIdentity.sdk.identifier.deprecated.IdentifierToken
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
@@ -10,15 +9,15 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IdToken (
-    val document: IdentifierDoc,
+data class IdentifierToken (
+    val document: IdentifierDocumentPayload,
     val alias: String,
     val signatureKeyReference: String,
     val encryptionKeyReference: String
 ) {
     companion object {
-        private fun tokenize(identifier: Id): IdToken {
-            return IdToken(
+        private fun tokenize(identifier: Identifier): IdentifierToken {
+            return IdentifierToken(
                 identifier.document,
                 identifier.alias,
                 identifier.signatureKeyReference,
@@ -26,10 +25,10 @@ data class IdToken (
             )
         }
 
-        fun serialize(identifier: Id): String {
+        fun serialize(identifier: Identifier): String {
             val token =
                 tokenize(identifier)
-            return Serializer.stringify(IdToken.serializer(), token)
+            return Serializer.stringify(IdentifierToken.serializer(), token)
         }
 
         fun deserialize(
@@ -38,9 +37,9 @@ data class IdToken (
             logger: ILogger,
             resolver: IResolver,
             registrar: IRegistrar
-        ): Id {
-            val token = Serializer.parse(IdToken.serializer(), identifierToken)
-            return Id(
+        ): Identifier {
+            val token = Serializer.parse(IdentifierToken.serializer(), identifierToken)
+            return Identifier(
                 alias = token.alias,
                 document = token.document,
                 signatureKeyReference = token.signatureKeyReference,

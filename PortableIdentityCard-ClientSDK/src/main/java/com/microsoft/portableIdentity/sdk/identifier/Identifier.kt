@@ -3,14 +3,11 @@ package com.microsoft.portableIdentity.sdk.identifier
 import com.google.crypto.tink.subtle.Hex
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
-import com.microsoft.portableIdentity.sdk.crypto.plugins.Secp256k1Provider
-import com.microsoft.portableIdentity.sdk.identifier.IdResponse.Companion.microsoftIdentityHubDocument
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
-import com.microsoft.portableIdentity.sdk.identifier.document.IdToken
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierToken
 import com.microsoft.portableIdentity.sdk.identifier.document.*
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
-import com.microsoft.portableIdentity.sdk.registrars.RegDoc
+import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.*
 import java.security.MessageDigest
@@ -25,8 +22,8 @@ import kotlin.random.Random
  * @param resolver to resolve the Identifier Document for Identifier.
  * @param registrar to register Identifiers.
  */
-class Id constructor(
-    val document: IdentifierDoc,
+class Identifier constructor(
+    val document: IdentifierDocumentPayload,
     val signatureKeyReference: String,
     val encryptionKeyReference: String,
     val alias: String,
@@ -54,7 +51,7 @@ class Id constructor(
             encryptionKeyReference: String,
             resolver: IResolver,
             registrar: IRegistrar
-        ): IdResponse {
+        ): IdentifierResponse {
             // TODO: Use software generated keys from the seed
 //        val seed = cryptoOperations.generateSeed()
 //        val publicKey = cryptoOperations.generatePairwise(seed)
@@ -64,9 +61,9 @@ class Id constructor(
             val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
             val sigJwk = sigKey.toJWK()
 
-            val microsoftIdentityHubDocument: IdentifierDoc = IdentifierDoc(
+            val microsoftIdentityHubDocument: IdentifierDocumentPayload = IdentifierDocumentPayload(
                 publicKeys = listOf(
-                    IdentifierDocPublicKey(
+                    IdentifierDocumentPublicKey(
                         id = sigJwk.kid!!,
                         type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                         publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(sigJwk.x!!, logger), Base64.decode(sigJwk.y!!, logger))
@@ -74,7 +71,7 @@ class Id constructor(
                 )
             )
 
-            val idDocPatches = IdentifierDocPatch("replace", microsoftIdentityHubDocument)
+            val idDocPatches = IdentifierDocumentPatch("replace", microsoftIdentityHubDocument)
             val updateCommitmentHashEncoded = generateCommitmentHash(logger)
 
             val operationData = OperationData(updateCommitmentHashEncoded, listOf(idDocPatches))
@@ -95,7 +92,7 @@ class Id constructor(
             val did = "did:ion:test:$uniqueSuffix"
 
             val suffixDataEncodedString = encodeSuffixData(suffixData, logger)
-            val regDoc = RegDoc("create", suffixDataEncodedString, opDataEncoded)
+            val regDoc = RegistrationDocument("create", suffixDataEncodedString, opDataEncoded)
             val regDocEncodedString = encodeRegDoc(regDoc, logger)
 
             val identifierDocument = resolver.resolve(did, regDocEncodedString, cryptoOperations)
@@ -120,8 +117,8 @@ class Id constructor(
             return Base64Url.encode(suffixDataHash, logger)
         }
 
-        private fun encodeRegDoc(regDoc: RegDoc, logger: ILogger): String{
-            val regDocJson = Serializer.stringify(RegDoc.serializer(), regDoc)
+        private fun encodeRegDoc(registrationDocument: RegistrationDocument, logger: ILogger): String{
+            val regDocJson = Serializer.stringify(RegistrationDocument.serializer(), registrationDocument)
             return Base64Url.encode(stringToByteArray(regDocJson), logger)
         }
 
@@ -138,7 +135,7 @@ class Id constructor(
     }
 
     fun serialize(): String {
-        return IdToken.serialize(this)
+        return IdentifierToken.serialize(this)
     }
 
 }

@@ -1,8 +1,7 @@
 package com.microsoft.portableIdentity.sdk.identifier.document
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.identifier.Id
-import com.microsoft.portableIdentity.sdk.identifier.IdResponse
+import com.microsoft.portableIdentity.sdk.identifier.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
@@ -10,19 +9,19 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IdResponseToken (
-    val document: IdDoc
+data class IdentifierResponseToken (
+    val document: IdentifierDocument
 ) {
     companion object {
-        private fun tokenize(identifier: IdResponse): IdResponseToken {
-            return IdResponseToken(
+        private fun tokenize(identifier: IdentifierResponse): IdentifierResponseToken {
+            return IdentifierResponseToken(
                 identifier.document
             )
         }
 
-        fun serialize(identifier: IdResponse): String {
+        fun serialize(identifier: IdentifierResponse): String {
             val token = tokenize(identifier)
-            return Serializer.stringify(IdResponseToken.serializer(), token)
+            return Serializer.stringify(IdentifierResponseToken.serializer(), token)
         }
 
         fun deserialize(
@@ -31,9 +30,9 @@ data class IdResponseToken (
             logger: ILogger,
             resolver: IResolver,
             registrar: IRegistrar
-        ): IdResponse {
-            val token = Serializer.parse(IdResponseToken.serializer(), identifierToken)
-            return IdResponse(
+        ): IdentifierResponse {
+            val token = Serializer.parse(IdentifierResponseToken.serializer(), identifierToken)
+            return IdentifierResponse(
                 document = token.document
             )
         }

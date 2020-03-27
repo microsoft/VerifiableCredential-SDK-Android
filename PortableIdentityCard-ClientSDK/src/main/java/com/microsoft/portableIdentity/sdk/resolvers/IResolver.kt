@@ -3,9 +3,8 @@ package com.microsoft.portableIdentity.sdk.resolvers
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.portableIdentity.sdk.identifier.IdResponse
+import com.microsoft.portableIdentity.sdk.identifier.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.document.IdDoc
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
@@ -24,7 +23,7 @@ abstract class IResolver(internal val logger: ILogger) {
      */
     abstract suspend fun resolveDocument(identifier: String): IdentifierDocument
 
-    abstract suspend fun resolveDocument(identifier: String, initialValues: String): IdDoc
+    abstract suspend fun resolveDocument(identifier: String, initialValues: String): com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 
     suspend fun resolve(
         identifier: String,
@@ -55,9 +54,9 @@ abstract class IResolver(internal val logger: ILogger) {
     suspend fun resolve(
         identifier: String, initialValues: String,
         cryptoOperations: CryptoOperations
-    ): IdResponse {
+    ): IdentifierResponse {
         val document = this.resolveDocument(identifier, initialValues)
-        return IdResponse(
+        return IdentifierResponse(
             document
         )
     }

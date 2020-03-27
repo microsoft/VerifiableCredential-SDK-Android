@@ -1,8 +1,9 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDoc
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPayload
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
 /**
@@ -21,5 +22,5 @@ abstract class IRegistrar(internal val logger: ILogger) {
      */
     abstract suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument
 
-    abstract suspend fun register(document: RegDoc, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDoc
+    abstract suspend fun register(document: com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocumentPayload
 }
