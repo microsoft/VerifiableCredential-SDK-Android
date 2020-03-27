@@ -14,7 +14,6 @@ import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.Logger
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -32,8 +31,7 @@ class IdentityManager @Inject constructor(
     private val resolver: IResolver,
     private val registrar: IRegistrar,
     @Named("signatureKeyReference") private val signatureKeyReference: String,
-    @Named("encryptionKeyReference") private val encryptionKeyReference: String,
-    private val logger: Logger
+    @Named("encryptionKeyReference") private val encryptionKeyReference: String
 ) {
 
     private val didSecretName = "did.identifier"
@@ -54,8 +52,7 @@ class IdentityManager @Inject constructor(
                     kty = KeyType.Octets.value,
                     kid = "#$didSecretName.1",
                     k = identifier.serialize()
-                ),
-                logger = logger
+                )
             )
             cryptoOperations.keyStore.save(didSecretName, key)
             identifier
@@ -86,9 +83,9 @@ class IdentityManager @Inject constructor(
      */
     suspend fun createIdentifier(): Identifier {
         return withContext(Dispatchers.Default) {
-            val alias = Base64Url.encode(Random.nextBytes(16), logger = logger)
+            val alias = Base64Url.encode(Random.nextBytes(16))
             Identifier.createAndRegister(
-                alias, cryptoOperations, logger, signatureKeyReference,
+                alias, cryptoOperations, signatureKeyReference,
                 encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
             )
         }
@@ -98,7 +95,6 @@ class IdentityManager @Inject constructor(
         return IdentifierToken.deserialize(
             identifierToken,
             cryptoOperations,
-            logger,
             resolver,
             registrar
         )

@@ -4,8 +4,8 @@ package com.microsoft.portableIdentity.sdk
 
 import android.content.Context
 import com.microsoft.portableIdentity.sdk.di.DaggerSdkComponent
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
-import com.microsoft.portableIdentity.sdk.utilities.Logger
+import com.microsoft.portableIdentity.sdk.utilities.AndroidLogCatConsumer
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 object PortableIdentitySdk {
 
@@ -18,7 +18,7 @@ object PortableIdentitySdk {
     @JvmOverloads
     fun init(
         context: Context,
-        logger: Logger = ConsoleLogger(),
+        logConsumer: SdkLog.Consumer = AndroidLogCatConsumer(),
         registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
         signatureKeyReference: String = "signature",
@@ -26,7 +26,6 @@ object PortableIdentitySdk {
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
-            .logger(logger)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .signatureKeyReference(signatureKeyReference)
@@ -35,5 +34,7 @@ object PortableIdentitySdk {
 
         identityManager = sdkComponent.identityManager()
         cardManager = sdkComponent.cardManager()
+
+        SdkLog.addConsumer(logConsumer)
     }
 }

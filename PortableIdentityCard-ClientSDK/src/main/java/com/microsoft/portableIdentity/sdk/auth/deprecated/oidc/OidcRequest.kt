@@ -6,7 +6,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.Logger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.getHttpClient
 import io.ktor.client.request.get
@@ -21,7 +21,6 @@ import kotlinx.serialization.Serializable
 class OidcRequest constructor(
     val sender: Identifier,
     val crypto: CryptoOperations,
-    private val logger: Logger,
     val scope: String = OidcRequest.defaultScope,
     val redirectUrl: String,
     val nonce: String,
@@ -74,23 +73,20 @@ class OidcRequest constructor(
         
         suspend fun parseAndVerify(signedRequest: String,
                                    crypto: CryptoOperations,
-                                   logger: Logger,
                                    resolver: IResolver): OidcRequest {
             if (!signedRequest.startsWith("openid://")) {
-                throw logger.error("Must be passed a string beginning in \"openid://\"")
+                throw SdkLog.error("Must be passed a string beginning in \"openid://\"")
             }
 
             // Verify and parse the request object
             var request = getQueryStringParameter(
                 OAuthRequestParameter.Request,
-                signedRequest,
-                logger = logger
+                signedRequest
             )
             // check for a request object
             val indirectRequestUrl = getQueryStringParameter(
                 OAuthRequestParameter.RequestUri,
-                signedRequest,
-                logger = logger
+                signedRequest
             )
             if (indirectRequestUrl != null) {
                 val client = getHttpClient()
@@ -99,67 +95,60 @@ class OidcRequest constructor(
 
             // verify the signature and whatnot from the request object if we have one
             if (request == null) {
-                throw logger.error("Request contains no signed material")
+                throw SdkLog.error("Request contains no signed material")
             }
-            val token = JwsToken.deserialize(request, logger = logger)
+            val token = JwsToken.deserialize(request)
             // get the DID associated
             val contents = Serializer.parse(OidcRequestObject.serializer(), token.content())
             if (contents.iss.isNullOrBlank()) {
-                throw logger.error("Could not find the issuer's DID")
+                throw SdkLog.error("Could not find the issuer's DID")
             }
 
             val sender = resolver.resolve(contents.iss, crypto)
-            DidKeyResolver.verifyJws(token, crypto, sender, logger = logger)
+            DidKeyResolver.verifyJws(token, crypto, sender)
 
             // retrieve the rest of the parameters
             val scope = contents.scope ?: getQueryStringParameter(
                 OAuthRequestParameter.Scope,
                 signedRequest,
-                true,
-                logger = logger
+                true
             )!!
             val responseType = contents.responseType ?: getQueryStringParameter(
                 OAuthRequestParameter.ResponseType,
                 signedRequest,
-                true,
-                logger = logger
+                true
             )!!
             val redirectUrl = contents.clientId ?: contents.redirectUri ?: getQueryStringParameter(
                 OAuthRequestParameter.ClientId,
                 signedRequest,
-                true,
-                logger = logger
+                true
             )!!
             // optionals
             val state = contents.state ?: getQueryStringParameter(
                 OAuthRequestParameter.State,
-                signedRequest,
-                logger = logger
+                signedRequest
             )
             val responseMode =
                 contents.responseMode ?: getQueryStringParameter(
                     OAuthRequestParameter.ResponseMode,
-                    signedRequest,
-                    logger = logger
+                    signedRequest
                 ) ?:
                         OidcRequest.defaultResponseMode
             val nonce = contents.nonce ?: getQueryStringParameter(
                 OAuthRequestParameter.Nonce,
-                signedRequest,
-                logger = logger
+                signedRequest
             ) ?:
-                    throw logger.error("No nonce was included in this OIDC request.")
-            val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer(), logger = logger)
+                    throw SdkLog.error("No nonce was included in this OIDC request.")
+            val claims = contents.claims ?: getQueryStringJsonParameter(OAuthRequestParameter.Claims, signedRequest, RequestClaimParameter.serializer())
             val registration = contents.registration ?: getQueryStringJsonParameter(
                 OAuthRequestParameter.Registration,
-                signedRequest, Registration.serializer(), logger = logger)
+                signedRequest, Registration.serializer())
 
-            val offers = contents.claimsOffered ?: getQueryStringJsonParameter(OAuthRequestParameter.Offer, signedRequest, ClaimObject.serializer(), logger = logger)
+            val offers = contents.claimsOffered ?: getQueryStringJsonParameter(OAuthRequestParameter.Offer, signedRequest, ClaimObject.serializer())
             // form an OidcRequest object
             return OidcRequest(
                 sender,
                 crypto,
-                logger,
                 scope,
                 redirectUrl,
                 nonce,
@@ -172,12 +161,11 @@ class OidcRequest constructor(
             )
         }
 
-        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>, logger: Logger): T? {
+        private fun <T>getQueryStringJsonParameter(name: OAuthRequestParameter, url: String, serializer: DeserializationStrategy<T>): T? {
             val data =
                 getQueryStringParameter(
                     name,
-                    url,
-                    logger = logger
+                    url
                 )
             return if (!data.isNullOrBlank()) {
                 Serializer.parse(serializer, data)
@@ -192,7 +180,7 @@ class OidcRequest constructor(
      * @param identifier the identifier used to sign response
      */
     suspend fun respondWith(identifier: Identifier, claimObjects: List<ClaimObject>? = null): ClaimObject? {
-        val oidcResponse = OidcResponse.create(this, identifier, logger)
+        val oidcResponse = OidcResponse.create(this, identifier)
         claimObjects?.forEach {
             oidcResponse.addClaim(it)
         }

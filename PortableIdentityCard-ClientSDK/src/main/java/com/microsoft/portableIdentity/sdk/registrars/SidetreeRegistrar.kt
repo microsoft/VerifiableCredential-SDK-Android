@@ -23,11 +23,11 @@ import javax.inject.Named
  * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, logger: Logger): IRegistrar(logger) {
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String): IRegistrar() {
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
         val content = Serializer.stringify(RegistrationDocument.serializer(), document)
-        val jwsToken = JwsToken(content, logger = logger)
+        val jwsToken = JwsToken(content)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         val kid = key.kid
         jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))

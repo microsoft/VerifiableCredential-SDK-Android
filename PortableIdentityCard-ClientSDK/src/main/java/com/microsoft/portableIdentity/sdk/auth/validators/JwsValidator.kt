@@ -5,32 +5,37 @@
 
 package com.microsoft.portableIdentity.sdk.auth.validators
 
-import com.microsoft.portableIdentity.sdk.DidSdkConfig
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
+import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Class that can be used to validate JwsTokens.
  */
-object JwsValidator {
+@Singleton
+class JwsValidator @Inject constructor(
+    private val cryptoOperations: CryptoOperations,
+    private val resolver: IResolver
+    ) {
 
     /**
      * Verify the signature on the JwsToken.
      */
     suspend fun verifySignature(token: JwsToken): Boolean {
         val headers = token.signatures.first().header ?: throw Exception("JwsToken is not signed")
-        val cryptoOperations = DidSdkConfig.identityManager.cryptoOperations
+        val cryptoOperations = cryptoOperations
         val publicKeys = resolvePublicKeys(headers, cryptoOperations)
         return token.verify(cryptoOperations, publicKeys)
     }
 
     private suspend fun resolvePublicKeys(tokenHeaders: Map<String, String>, cryptoOperations: CryptoOperations): List<PublicKey> {
         val requesterDid = tokenHeaders["kid"] ?: throw Exception("No kid specified in header")
-        val requesterDidDocument = DidSdkConfig.identityManager.resolver.resolve(requesterDid, cryptoOperations)
+        val requesterDidDocument = resolver.resolve(requesterDid, cryptoOperations)
         return requesterDidDocument.document.publicKeys.map {
-            it.toPublicKey(BaseLogger)
+            it.toPublicKey()
         }
     }
 }

@@ -18,7 +18,6 @@ import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.Logger
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
@@ -31,10 +30,9 @@ internal class SdkModule {
     fun defaultCryptoOperations(
         subtleCrypto: SubtleCrypto,
         ecSubtle: EllipticCurveSubtleCrypto,
-        keyStore: KeyStore,
-        logger: Logger
+        keyStore: KeyStore
     ): CryptoOperations {
-        val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore, logger)
+        val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore)
         defaultCryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)

@@ -1,14 +1,12 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
-
 package com.microsoft.portableIdentity.sdk.utilities
 
 import java.lang.RuntimeException
 import java.util.regex.Pattern
 
-abstract class Logger {
-
-    private val ORIGINAL_CALLER_STACK_INDEX = 2
-    private val ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$")
+object SdkLog {
+    interface Consumer {
+        fun log(logLevel: Level, message: String, tag: String)
+    }
 
     enum class Level {
         VERBOSE,
@@ -21,7 +19,11 @@ abstract class Logger {
         fun severity() = ordinal
     }
 
-    abstract fun log(logLevel: Level, message: String, tag: String)
+    private const val ORIGINAL_CALLER_STACK_INDEX = 2
+    private val ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$")
+    private val consumers: MutableList<Consumer> = ArrayList()
+
+    fun addConsumer(consumer: Consumer) = consumers.add(consumer)
 
     fun v(message: String, tag: String = implicitTag()) {
         log(Level.VERBOSE, message, tag)
@@ -47,10 +49,17 @@ abstract class Logger {
         log(Level.FAILURE, message, tag)
     }
 
+    private fun log(logLevel: Level, message: String, tag: String) {
+        consumers.forEach { it.log(logLevel, message, tag) }
+    }
+
     @Deprecated("Use short form.", ReplaceWith("this.d(message, tag)"))
     fun debug(message: String, tag: String = implicitTag()) = d(message, tag)
 
-    @Deprecated("Legacy error log function that returns an Exception. Remove all references, then delete this method.", ReplaceWith("this.e(message, tag)"))
+    @Deprecated(
+        "Legacy error log function that returns an Exception. Remove all references, then delete this method.",
+        ReplaceWith("this.e(message, tag)")
+    )
     fun error(message: String, tag: String = implicitTag()): RuntimeException {
         log(Level.ERROR, message, tag)
         return RuntimeException(message)
@@ -64,13 +73,14 @@ abstract class Logger {
     @Suppress("SameParameterValue")
     private fun getCallerElement(stackTrace: Array<StackTraceElement>, index: Int): StackTraceElement? {
         if (stackTrace.size <= index) {
-            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", "Logger.implicitTag")
+            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", "SdkLog.implicitTag")
             return null
         }
         // Calls from Java into Kotlin's @JvmStatic methods have an extra anonymous method. We have to skip it.
         if (stackTrace[index].className == this.javaClass.name
             && stackTrace[index].methodName.length == 1
-            && stackTrace.size > index + 1) {
+            && stackTrace.size > index + 1
+        ) {
             return stackTrace[index + 1]
         }
         return stackTrace[index]

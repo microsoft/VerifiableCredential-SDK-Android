@@ -13,7 +13,7 @@ import com.microsoft.portableIdentity.sdk.identifier.document.service.ServiceHub
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.Logger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /**
  * Class for creating and managing identifiers,
@@ -29,7 +29,6 @@ class Identifier constructor (
                  val encryptionKeyReference: String,
                  val alias: String,
                  private val cryptoOperations: CryptoOperations,
-                 private val logger: Logger,
                  private val resolver: IResolver,
                  private val registrar: IRegistrar) {
     companion object {
@@ -72,7 +71,6 @@ class Identifier constructor (
         suspend fun createAndRegister(
             alias: String,
             cryptoOperations: CryptoOperations,
-            logger: Logger,
             signatureKeyReference: String,
             encryptionKeyReference: String,
             resolver: IResolver,
@@ -82,14 +80,14 @@ class Identifier constructor (
             // TODO: Use software generated keys from the seed
 //        val seed = cryptoOperations.generateSeed()
 //        val publicKey = cryptoOperations.generatePairwise(seed)
-            logger.debug("Creating identifier ($alias)")
+            SdkLog.d("Creating identifier ($alias)")
             val personaEncKeyRef = "$alias.$encryptionKeyReference"
             val personaSigKeyRef = "$alias.$signatureKeyReference"
             val encKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
             val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
             val encJwk = encKey.toJWK()
             val sigJwk = sigKey.toJWK()
-            logger.debug("Created keys ${encJwk.kid} and ${sigJwk.kid}")
+            SdkLog.d("Created keys ${encJwk.kid} and ${sigJwk.kid}")
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
@@ -108,14 +106,13 @@ class Identifier constructor (
 //                            resolver.resolve(it,
 //                                cryptoOperations
 //                            )}
-                logger.debug("Adding Microsoft Identity Hub")
-                val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, logger, resolver, registrar)
+                SdkLog.d("Adding Microsoft Identity Hub")
+                val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, resolver, registrar)
                 hubService = IdentityHubService.create(
                     id = "#hub",
                     keyStore = cryptoOperations.keyStore,
                     signatureKeyRef = personaEncKeyRef,
-                    instances = listOf(microsoftHub),
-                    logger = logger
+                    instances = listOf(microsoftHub)
                 )
             }
 
@@ -127,14 +124,13 @@ class Identifier constructor (
 
             val registered = registrar.register(document, personaSigKeyRef, cryptoOperations)
 
-            logger.debug("Registered new decentralized identity")
+            SdkLog.d("Registered new decentralized identity")
             return Identifier(
                 alias = alias,
                 document = registered,
                 signatureKeyReference = personaSigKeyRef,
                 encryptionKeyReference = personaEncKeyRef,
                 cryptoOperations = cryptoOperations,
-                logger = logger,
                 resolver = resolver,
                 registrar = registrar
             )

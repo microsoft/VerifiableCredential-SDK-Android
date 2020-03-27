@@ -4,9 +4,9 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
-class RsaPrivateKey(jwk: JsonWebKey, logger: ILogger): PrivateKey(jwk, logger) {
+class RsaPrivateKey(jwk: JsonWebKey): PrivateKey(jwk) {
     override var kty = KeyType.RSA
     override var alg: String? = if (key.alg != null) key.alg!! else "RS256"
 
@@ -41,6 +41,6 @@ class RsaPrivateKey(jwk: JsonWebKey, logger: ILogger): PrivateKey(jwk, logger) {
     }
 
     override fun getPublicKey(): PublicKey {
-        return RsaPublicKey(this.toJWK(), logger = logger)
+        return RsaPublicKey(this.toJWK())
     }
 }

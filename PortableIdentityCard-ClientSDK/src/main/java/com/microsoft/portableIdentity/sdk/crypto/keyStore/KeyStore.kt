@@ -4,8 +4,6 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.KeyContainer
 import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
-import com.microsoft.portableIdentity.sdk.utilities.Logger
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -16,7 +14,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Logger
  * Interface defining methods and properties to
  * be implemented by specific key stores.
  */
-abstract class KeyStore(internal val logger: Logger) {
+abstract class KeyStore() {
     /**
      * Returns the key associated with the specified
      * key reference.

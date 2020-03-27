@@ -40,17 +40,17 @@ object PercentEncoding {
 
     private val findPercentEncode = Regex("\\%([0-9A-Fa-f]{2})")
 
-    fun encode(data: String, logger: ILogger): String {
+    fun encode(data: String): String {
         return data.map {
             if (restrictedCharacters.containsKey("$it")) {
-                restrictedCharacters["$it"] ?: logger.error("Map contains $it but does not contain $it ¯\\_(ツ)_/¯")
+                restrictedCharacters["$it"] ?: SdkLog.error("Map contains $it but does not contain $it ¯\\_(ツ)_/¯")
             } else {
                 "$it"
             }
         }.joinToString(separator = "")
     }
 
-    fun decode(data: String, logger: ILogger): String {
+    fun decode(data: String): String {
         val finds = findPercentEncode.findAll(data)
         val iterator = finds.iterator()
         var previousIndex = 0
@@ -59,7 +59,7 @@ object PercentEncoding {
             val find = iterator.next()
             val index = find.range.first
             builder.append(data.slice((previousIndex) until index))
-            builder.append(decodePercent(find.groupValues[1], logger))
+            builder.append(decodePercent(find.groupValues[1]))
             previousIndex = find.range.last + 1
         }
         if (previousIndex != data.length) {
@@ -68,7 +68,7 @@ object PercentEncoding {
         return builder.toString()
     }
 
-    private fun decodePercent(hex: String, logger: ILogger): Char {
+    private fun decodePercent(hex: String): Char {
         val mapping = decodeCharacters.map {
             it.entries.firstOrNull { mapping ->
                 mapping.value.toUpperCase() == hex.toUpperCase()
@@ -80,7 +80,7 @@ object PercentEncoding {
             } else {
                 acc
             }
-        } ?: throw logger.error("Illegal Percent encoding $hex")
+        } ?: throw SdkLog.error("Illegal Percent encoding $hex")
         return mapping.key[0]
     }
 

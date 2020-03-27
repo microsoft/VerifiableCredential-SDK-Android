@@ -16,7 +16,8 @@ import javax.inject.Singleton
 
 @Singleton
 class CardManager @Inject constructor(
-    private val vcRepository: VerifiableCredentialRepository
+    private val vcRepository: VerifiableCredentialRepository,
+    private val validator: OidcRequestValidator // TODO: should this be a generic Validator?
 ) {
 
     suspend fun getRequest(uri: String): OidcRequest {
@@ -45,7 +46,7 @@ class CardManager @Inject constructor(
      * Validate an OpenID Connect Request.
      */
     suspend fun validate(request: OidcRequest) {
-        OidcRequestValidator.validate(request)
+        validator.validate(request)
     }
 
     /**

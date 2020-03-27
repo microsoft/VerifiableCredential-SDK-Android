@@ -5,7 +5,6 @@ package com.microsoft.portableIdentity.sdk.di
 import android.content.Context
 import com.microsoft.portableIdentity.sdk.CardManager
 import com.microsoft.portableIdentity.sdk.IdentityManager
-import com.microsoft.portableIdentity.sdk.utilities.Logger
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -25,9 +24,6 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
-
-        @BindsInstance
-        fun logger(logger: Logger): Builder
 
         @BindsInstance
         fun signatureKeyReference(@Named("signatureKeyReference") signatureKeyReference: String): Builder

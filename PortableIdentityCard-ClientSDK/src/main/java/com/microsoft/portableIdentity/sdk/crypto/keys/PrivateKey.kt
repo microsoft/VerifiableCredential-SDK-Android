@@ -1,9 +1,9 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
-abstract class PrivateKey(key: JsonWebKey, logger: ILogger): PublicKey(key, logger = logger) {
+abstract class PrivateKey(key: JsonWebKey): PublicKey(key) {
     /**
      * Default Sign Algorithm for JWK 'alg' field
      */
