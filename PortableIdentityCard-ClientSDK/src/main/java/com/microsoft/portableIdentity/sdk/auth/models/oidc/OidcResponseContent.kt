@@ -5,8 +5,6 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-val SELFISSUED = "https://self-issued.me"
-
 /**
  * Contents of an OpenID Self-Issued Token Response.
  *
@@ -16,7 +14,7 @@ val SELFISSUED = "https://self-issued.me"
 data class OidcResponseContent(
     // iss property always needs to be set to https://self-issued.me
     @Required
-    val iss: String = SELFISSUED,
+    val iss: String = "https://self-issued.me",
 
     // thumbprint (sha-256) of the public key
     val sub: String,

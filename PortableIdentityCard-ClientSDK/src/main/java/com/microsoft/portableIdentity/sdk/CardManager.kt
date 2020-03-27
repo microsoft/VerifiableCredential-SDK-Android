@@ -36,8 +36,8 @@ class CardManager(private val config: DidSdkConfig) {
     /**
      * Validate an OpenID Connect Request.
      */
-    suspend fun validate(request: OidcRequest) {
-        OidcRequestValidator.validate(request)
+    suspend fun validate(request: OidcRequest): Boolean {
+        return OidcRequestValidator.validate(request)
     }
 
     /**
