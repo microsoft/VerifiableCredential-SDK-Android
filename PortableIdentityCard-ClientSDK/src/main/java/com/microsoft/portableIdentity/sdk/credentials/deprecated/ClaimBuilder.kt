@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.credentials
+package com.microsoft.portableIdentity.sdk.credentials.deprecated
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
@@ -25,7 +25,12 @@ class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
 
 
     fun addClassDescription(header: String, body: String) {
-        claimClassDescriptions.add(ClaimDescription(header, body))
+        claimClassDescriptions.add(
+            ClaimDescription(
+                header,
+                body
+            )
+        )
     }
 
     fun addClaimDescription(header: String, body: String) {

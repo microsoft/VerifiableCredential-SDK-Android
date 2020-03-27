@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.credentials
+package com.microsoft.portableIdentity.sdk.credentials.deprecated
 
 import kotlinx.serialization.Serializable
 

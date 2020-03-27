@@ -5,14 +5,15 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.identifier.Id
 import com.microsoft.portableIdentity.sdk.identifier.IdResponse
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.deprecated.IdentifierToken
 import com.microsoft.portableIdentity.sdk.identifier.document.IdResponseToken
+import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import kotlinx.coroutines.*
 import kotlin.random.Random
@@ -22,11 +23,15 @@ import kotlin.random.Random
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class DidManager(private val config: DidSdkConfig) {
+class IdentityManager(private val config: DidSdkConfig) {
 
     private val didSecretName = "did.identifier"
 
     val did: IdResponse by lazy { initLongFormDid() }
+
+    internal val cryptoOperations: CryptoOperations = config.cryptoOperations
+
+    internal val resolver: IResolver = config.resolver
 
     // TODO: Cleanup method
 /*    private fun initDid(): Identifier {
@@ -140,5 +145,4 @@ class DidManager(private val config: DidSdkConfig) {
             config.registrar
         )
     }
-
 }

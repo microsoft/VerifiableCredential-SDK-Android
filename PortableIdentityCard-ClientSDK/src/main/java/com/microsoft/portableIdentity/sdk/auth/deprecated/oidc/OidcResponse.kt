@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.portableIdentity.sdk.auth.oidc
+package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.OAuthRequestParameter
-import com.microsoft.portableIdentity.sdk.credentials.ClaimObject
-import com.microsoft.portableIdentity.sdk.credentials.ClaimResponse
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimResponse
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -78,8 +77,16 @@ class OidcResponse (
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
                 ContentType.Application.FormUrlEncoded -> {
-                    val idToken = getQueryStringParameter(OAuthRequestParameter.IdToken, data, logger = logger) ?: throw logger.error("No id_token given.")
-                    val state = getQueryStringParameter(OAuthRequestParameter.State, data, logger = logger)
+                    val idToken = getQueryStringParameter(
+                        OAuthRequestParameter.IdToken,
+                        data,
+                        logger = logger
+                    ) ?: throw logger.error("No id_token given.")
+                    val state = getQueryStringParameter(
+                        OAuthRequestParameter.State,
+                        data,
+                        logger = logger
+                    )
                     val token = JwsToken(idToken, logger = logger)
                     val response = Serializer.parse(OidcResponseObject.serializer(), token.content())
 
