@@ -4,10 +4,12 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * Class that can protect some content by signing.
  */
+@Singleton
 class Signer @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     @Named("signatureKeyReference") private val signatureKeyReference: String
