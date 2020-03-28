@@ -2,7 +2,7 @@
 
 package com.microsoft.portableIdentity.sdk.crypto
 
-import com.microsoft.portableIdentity.sdk.crypto.keyStore.IKeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
@@ -11,20 +11,18 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /**
  * Class that encompasses all of Crypto
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations(
+class CryptoOperations (
     subtleCrypto: SubtleCrypto,
-    val keyStore: IKeyStore,
-    private val logger: ILogger = ConsoleLogger()
+    val keyStore: KeyStore
 ) {
-    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto, logger)
+    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
 
     /**
      * Sign payload with key stored in keyStore.
@@ -32,9 +30,9 @@ class CryptoOperations(
      * @param signingKeyReference reference to key stored in keystore.
      */
     fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
-        logger.debug("Signing with $signingKeyReference")
+        SdkLog.d("Signing with $signingKeyReference")
         val privateKey = keyStore.getPrivateKey(signingKeyReference)
-        val alg = algorithm ?: privateKey.alg ?: throw logger.error("No Algorithm specified for key $signingKeyReference")
+        val alg = algorithm ?: privateKey.alg ?: throw SdkLog.error("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Private)
         val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
         return subtle.sign(alg, key, payload)
@@ -44,14 +42,14 @@ class CryptoOperations(
      * Verify payload with key stored in keyStore.
      */
     fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
-        logger.debug("Verifying with $signingKeyReference")
+        SdkLog.d("Verifying with $signingKeyReference")
         val publicKey = keyStore.getPublicKey(signingKeyReference)
         val alg =
-            algorithm ?: publicKey.alg ?: throw logger.error("No Algorithm specified for key $signingKeyReference")
+            algorithm ?: publicKey.alg ?: throw SdkLog.error("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Public)
         val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
         if (!subtle.verify(alg, key, signature, payload)) {
-            throw logger.error("Signature invalid")
+            throw SdkLog.error("Signature invalid")
         }
     }
 
@@ -75,9 +73,9 @@ class CryptoOperations(
      * @returns the associated public key
      */
     fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
-        logger.debug("Generating new key pair $keyReference of type ${keyType.value}")
+        SdkLog.d("Generating new key pair $keyReference of type ${keyType.value}")
         when (keyType) {
-            KeyType.Octets -> throw logger.error("Cannot generate a symmetric key")
+            KeyType.Octets -> throw SdkLog.error("Cannot generate a symmetric key")
             KeyType.RSA -> {
                 val subtle = subtleCryptoFactory.getSharedKeyEncrypter(
                     W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
@@ -91,8 +89,8 @@ class CryptoOperations(
                         additionalParams = mapOf("KeyReference" to keyReference)
                     ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
                 )
-                logger.debug("Saving key pair to keystore.")
-                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger))
+                SdkLog.d("Saving key pair to keystore.")
+                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
             }
             KeyType.EllipticCurve -> {
                 val subtle =
@@ -106,10 +104,10 @@ class CryptoOperations(
                         )
                     ), true, listOf(KeyUsage.Sign, KeyUsage.Verify)
                 )
-                logger.debug("Saving key pair to keystore.")
+                SdkLog.d("Saving key pair to keystore.")
                 keyStore.save(
                     keyReference,
-                    EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey), logger = logger)
+                    EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
                 )
             }
         }

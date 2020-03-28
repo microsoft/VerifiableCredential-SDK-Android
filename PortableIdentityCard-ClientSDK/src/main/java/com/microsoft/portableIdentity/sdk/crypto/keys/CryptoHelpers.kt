@@ -7,7 +7,6 @@ package com.microsoft.portableIdentity.sdk.crypto.keys
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
 object CryptoHelpers {
 //    /**
@@ -45,7 +44,7 @@ object CryptoHelpers {
      * @param jwaAlgorithmName Requested algorithm
      * @see https://www.w3.org/TR/WebCryptoAPI/#jwk-mapping
      */
-    fun jwaToWebCrypto(jwa: String, vararg args: List<Any>, logger: ILogger): Algorithm {
+    fun jwaToWebCrypto(jwa: String, vararg args: List<Any>): Algorithm {
         val regex = Regex("\\d+")
         return when (jwa.toUpperCase()) {
             JoseConstants.Rs256.value,
@@ -55,7 +54,7 @@ object CryptoHelpers {
                 return Algorithm (
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
-                        "hash" to Sha.get(matches.first().value.toInt(), logger = logger)
+                        "hash" to Sha.get(matches.first().value.toInt())
                     )
                 )
             }

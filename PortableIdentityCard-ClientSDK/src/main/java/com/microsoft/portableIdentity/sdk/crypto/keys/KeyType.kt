@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 enum class KeyType(val value: String) {
     EllipticCurve("EC"),
@@ -8,11 +8,11 @@ enum class KeyType(val value: String) {
     RSA("RSA")
 }
 
-fun toKeyType(kty: String, logger: ILogger): KeyType {
+fun toKeyType(kty: String): KeyType {
     return when (kty) {
         KeyType.EllipticCurve.value -> KeyType.EllipticCurve
         KeyType.RSA.value -> KeyType.RSA
         KeyType.Octets.value -> KeyType.Octets
-        else -> throw logger.error("Unknown Key Type value: $kty")
+        else -> throw SdkLog.error("Unknown Key Type value: $kty")
     }
 }

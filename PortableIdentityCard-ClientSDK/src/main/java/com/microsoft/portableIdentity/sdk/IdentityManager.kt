@@ -11,9 +11,13 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
+import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import kotlinx.coroutines.*
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 import kotlin.random.Random
 
 /**
@@ -21,21 +25,24 @@ import kotlin.random.Random
  * sending and parsing OIDC Requests and Responses.
  * @class
  */
-class IdentityManager(private val config: DidSdkConfig) {
+@Singleton
+class IdentityManager @Inject constructor(
+    private val cryptoOperations: CryptoOperations,
+    private val resolver: IResolver,
+    private val registrar: IRegistrar,
+    @Named("signatureKeyReference") private val signatureKeyReference: String,
+    @Named("encryptionKeyReference") private val encryptionKeyReference: String
+) {
 
     private val didSecretName = "did.identifier"
 
     val did: Identifier by lazy { initDid() }
 
-    internal val cryptoOperations: CryptoOperations = config.cryptoOperations
-
-    internal val resolver: IResolver = config.resolver
-
     // TODO: Cleanup method
     private fun initDid(): Identifier {
-        val did = if (config.cryptoOperations.keyStore.list().containsKey(didSecretName)) {
+        val did = if (cryptoOperations.keyStore.list().containsKey(didSecretName)) {
             println("Identifier found, deserializing")
-            val keySerialized = config.cryptoOperations.keyStore.getSecretKey(didSecretName).getKey()
+            val keySerialized = cryptoOperations.keyStore.getSecretKey(didSecretName).getKey()
             deserializeIdentifier(keySerialized.k!!)
         } else {
             println("No identifier found, registering new DID")
@@ -45,10 +52,9 @@ class IdentityManager(private val config: DidSdkConfig) {
                     kty = KeyType.Octets.value,
                     kid = "#$didSecretName.1",
                     k = identifier.serialize()
-                ),
-                logger = config.logger
+                )
             )
-            config.cryptoOperations.keyStore.save(didSecretName, key)
+            cryptoOperations.keyStore.save(didSecretName, key)
             identifier
         }
         println("Using identifier ${did.document.id}")
@@ -77,10 +83,10 @@ class IdentityManager(private val config: DidSdkConfig) {
      */
     suspend fun createIdentifier(): Identifier {
         return withContext(Dispatchers.Default) {
-            val alias = Base64Url.encode(Random.nextBytes(16), logger = config.logger)
+            val alias = Base64Url.encode(Random.nextBytes(16))
             Identifier.createAndRegister(
-                alias, config.cryptoOperations, config.logger, config.signatureKeyReference,
-                config.encryptionKeyReference, config.resolver, config.registrar, listOf("did:test:hub.id")
+                alias, cryptoOperations, signatureKeyReference,
+                encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
             )
         }
     }
@@ -88,10 +94,9 @@ class IdentityManager(private val config: DidSdkConfig) {
     fun deserializeIdentifier(identifierToken: String): Identifier {
         return IdentifierToken.deserialize(
             identifierToken,
-            config.cryptoOperations,
-            config.logger,
-            config.resolver,
-            config.registrar
+            cryptoOperations,
+            resolver,
+            registrar
         )
     }
 }

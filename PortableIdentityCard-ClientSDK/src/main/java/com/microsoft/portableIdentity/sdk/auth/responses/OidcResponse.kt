@@ -35,18 +35,19 @@ class OidcResponse(request: OidcRequest): Response {
         collectedCredentials.add(credential)
     }
 
-    fun formResponse(collectedCredentials: List<Credential>): String {
-        var responseBody: String
-        val responseContent = createResponseContent(collectedCredentials)
-        val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
-        val protectedToken = Signer.sign(serializedResponseContent)
-        val serializedToken = protectedToken.serialize(JwsFormat.Compact)
-        responseBody = "id_token=${serializedToken}"
-        if (!responseContent.state.isNullOrBlank()) {
-            responseBody += "&state=${responseContent.state}"
-        }
-        return responseBody
-    }
+    // TODO: This has to be moved somewhere else. Currently it contains business logic while being an entity. You can't reference `Signer` here
+//    fun formResponse(collectedCredentials: List<Credential>): String {
+//        var responseBody: String
+//        val responseContent = createResponseContent(collectedCredentials)
+//        val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
+//        val protectedToken = Signer.sign(serializedResponseContent)
+//        val serializedToken = protectedToken.serialize(JwsFormat.Compact)
+//        responseBody = "id_token=${serializedToken}"
+//        if (!responseContent.state.isNullOrBlank()) {
+//            responseBody += "&state=${responseContent.state}"
+//        }
+//        return responseBody
+//    }
 
     /**
      * Create Response Content object from collectedCredentials and Request Contents.

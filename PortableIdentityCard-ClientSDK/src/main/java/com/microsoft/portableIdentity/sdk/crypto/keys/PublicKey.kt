@@ -7,7 +7,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.toKeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 
 /**
@@ -15,11 +15,11 @@ import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
  * @class
  * @abstract
  */
-abstract class PublicKey (val key: JsonWebKey, internal var logger: ILogger): IKeyStoreItem {
+abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
     /**
      * Key type
      */
-    open var kty: KeyType = toKeyType(key.kty, logger = logger)
+    open var kty: KeyType = toKeyType(key.kty)
 
     /**
      * Key ID
@@ -34,7 +34,7 @@ abstract class PublicKey (val key: JsonWebKey, internal var logger: ILogger): IK
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it, logger = logger) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key
@@ -53,7 +53,7 @@ abstract class PublicKey (val key: JsonWebKey, internal var logger: ILogger): IK
         val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.Public)
         val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
-        return Base64Url.encode(hash, logger = logger)
+        return Base64Url.encode(hash)
     }
 
     /**
