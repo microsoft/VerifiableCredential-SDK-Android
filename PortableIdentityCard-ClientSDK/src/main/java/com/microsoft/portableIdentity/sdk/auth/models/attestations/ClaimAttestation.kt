@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.contracts.display
+package com.microsoft.portableIdentity.sdk.auth.models.attestations
 
 import kotlinx.serialization.Serializable
 
-/**
- * Properties to be used in the user consent prompt
- */
 @Serializable
-data class ConsentDisplayProperties (
-    // Title that will be display on prompt page.
-    val title: String,
+data class ClaimAttestation (
+    // name of the claim.
+    val claim: String,
 
-    // Instructions for what the user will have to do to get Card.
-    val instructions: String
+    // if claim is required
+    val required: Boolean = false,
+
+    // type of object the claim should be.
+    val type: String = ""
 )

@@ -8,14 +8,17 @@ package com.microsoft.portableIdentity.sdk.auth.models.contracts.display
 import kotlinx.serialization.Serializable
 
 /**
- * Properties to render a user-specific claim.
+ * Properties used to render a Logo.
  */
 @Serializable
-data class ClaimDisplayProperties (
+data class Logo (
 
-    // What data type the claim is (ex. "Date")
-    val type: String,
+    // If image needs to be fetched, service will use this property.
+    val uri: String = "",
 
-    // A label used to describe the claim (ex. "Birthday").
-    val label: String
+    // Else if image is in svg or base64 format, service will use this property.
+    val image: String = "",
+
+    // Description used for alt text or voice over.
+    val description: String = ""
 )

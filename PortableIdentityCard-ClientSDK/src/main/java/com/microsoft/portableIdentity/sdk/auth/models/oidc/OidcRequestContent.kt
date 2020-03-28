@@ -6,9 +6,15 @@
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
 import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
-import com.microsoft.portableIdentity.sdk.auth.models.claimRequests.CredentialRequests
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+const val RESPONSE_TYPE = "response_type"
+const val RESPONSE_MODE = "response_mode"
+const val CLIENT_ID = "client_id"
+const val REDIRECT_URL = "redirect_uri"
+const val MAX_AGE = "max_age"
 
 /**
  * Contents of an OpenID Self-Issued Token Request.
@@ -19,41 +25,41 @@ import kotlinx.serialization.Serializable
 data class OidcRequestContent(
 
     // what type of object the response should be (should be idtoken).
-    @SerialName("response_type")
-    val responseType: String? = null,
+    @SerialName(RESPONSE_TYPE)
+    val responseType: String = "",
 
     // what mode the response should be sent in (should always be form post).
-    @SerialName("response_mode")
-    val responseMode: String? = null,
+    @SerialName(RESPONSE_MODE)
+    val responseMode: String = "",
 
     // did of the entity who sent the request.
-    @SerialName("client_id")
-    val clientId: String,
+    @SerialName(CLIENT_ID)
+    val clientId: String = "",
 
     // where the SIOP provider should send response to.
-    @SerialName("redirect_uri")
+    @SerialName(REDIRECT_URL)
     val redirectUrl: String = "",
 
-    val iss: String? = null,
+    val iss: String = "",
 
-    // should contain "openid did_authN"
-    val scope: String? = null,
+    // should contain "openid did_authn"
+    val scope: String = "",
 
     // opaque values that should be passed back to the requester.
-    val state: String? = null,
-    val nonce: String? = null,
+    val state: String = "",
+    val nonce: String = "",
 
     // Claims that are being requested.
-    val attestations: CredentialRequests? = null,
+    val attestations: CredentialAttestations? = null,
 
     // iat, nbf, and exp that need to be checked to see if token has expired
-    val exp: Long? = null,
-    val iat: Long? = null,
-    val nbf: Long? = null,
+    val exp: Long = 0,
+    val iat: Long = 0,
+    val nbf: Long = 0,
 
     // optional parameters
     val registration: Registration? = null,
-    val aud: String? = null,
-    @SerialName("max_age")
-    val maxAge: Int? = null
+    val aud: String = "",
+    @SerialName(MAX_AGE)
+    val maxAge: Int = 0
 )

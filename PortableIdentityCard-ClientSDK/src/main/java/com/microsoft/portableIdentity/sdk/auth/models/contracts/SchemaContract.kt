@@ -3,20 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.claimRequests
+package com.microsoft.portableIdentity.sdk.auth.models.contracts
 
 import kotlinx.serialization.Serializable
 
+const val SCHEMA = "schema"
+/**
+ * A structured data model used to describe the set of claims in a Verifiable Credential.
+ */
 @Serializable
-data class ClaimInfo (
-    // name of the claim.
-    val claim: String,
+data class SchemaContract (
 
-    // if claim is required
-    val required: Boolean? = null,
-
-    // type of object the claim should be.
-    val type: String? = null,
-
-    val forDisplay: Boolean? = null
+    // Should be set to "schema".
+    val id: String = SCHEMA
 )

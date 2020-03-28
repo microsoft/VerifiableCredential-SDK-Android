@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * A user experience data file that describes how information in a Verifiable Credential may be displayed.
  */
 @Serializable
-data class Display (
+data class DisplayContract (
 
     // Must be set to "display"
     val id: String = "display",
@@ -23,11 +23,11 @@ data class Display (
     val contract: String,
 
     // Properties used to render the card
-    val card: CardDisplayProperties,
+    val card: CardDescriptor,
 
     // Properties used to render the prompt in order to get the card.
-    val consent: ConsentDisplayProperties,
+    val consent: ConsentDescriptor,
 
     // Mapping of claims in the Verifiable Credential to how to display them.
-    val claims: Map<String, ClaimDisplayProperties>
+    val claims: Map<String, ClaimDescriptor>
 )

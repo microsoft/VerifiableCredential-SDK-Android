@@ -5,7 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.contracts
 
-import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.Display
+import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,17 +14,17 @@ import kotlinx.serialization.Serializable
  * schema, display, and input.
  */
 @Serializable
-data class Contract (
+data class PicContract (
     // unique identifier of the contract
     val id: String,
 
     // A subset of the model in the Rules file for client consumption. The input file must describe the set of inputs,
     // where to obtain the inputs and the endpoint to call to obtain a Verifiable Credential.
-    val input: Input,
+    val input: InputContract,
 
     // A user experience data file that describes how information in a Verifiable Credential may be displayed.
-    val display: Display,
+    val display: DisplayContract,
 
     // An optional structured data model used to describe the set of claims in a Verifiable Credential.
-    val schema: Schema?
+    val schema: SchemaContract? = null
 )

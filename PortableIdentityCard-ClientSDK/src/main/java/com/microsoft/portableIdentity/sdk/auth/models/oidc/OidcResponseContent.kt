@@ -10,6 +10,12 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+const val SELF_ISSUED = "https://self-issued.me"
+const val SUB_JWK = "sub_jwk"
+const val CLAIM_NAMES = "_claim_names"
+const val CLAIM_SOURCES = "_claim_sources"
+
+
 /**
  * Contents of an OpenID Self-Issued Token Response.
  *
@@ -19,7 +25,7 @@ import kotlinx.serialization.Serializable
 data class OidcResponseContent(
     // iss property always needs to be set to https://self-issued.me
     @Required
-    val iss: String = "https://self-issued.me",
+    val iss: String = SELF_ISSUED,
 
     // thumbprint (sha-256) of the public key
     val sub: String,
@@ -31,13 +37,13 @@ data class OidcResponseContent(
     val nonce: String,
 
     // state from the request.
-    val state: String? = null,
+    val state: String?,
 
     // did tied to the private key that signed response.
     val did: String?,
 
     // the public key that can be used to verify signature.
-    @SerialName("sub_jwk")
+    @SerialName(SUB_JWK)
     val subJwk: JsonWebKey,
 
     // time the token was issued.
@@ -47,9 +53,9 @@ data class OidcResponseContent(
     val exp: Long,
 
     // aggregated claims
-    @SerialName("_claim_names")
+    @SerialName(CLAIM_NAMES)
     val claimNames: Map<String, String>? = null,
-    @SerialName("_claim_sources")
+    @SerialName(CLAIM_SOURCES)
     val claimSources: Map<String, List<Map<String, String>>>? = null,
 
     // PICS specific

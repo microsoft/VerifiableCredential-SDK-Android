@@ -4,7 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.claimRequests
+package com.microsoft.portableIdentity.sdk.auth.models.attestations
 
 import kotlinx.serialization.Serializable
 
@@ -14,16 +14,16 @@ import kotlinx.serialization.Serializable
  * Must have either issuers property or contracts property
  */
 @Serializable
-data class VerifiablePresentationRequest(
+data class PresentationAttestation(
     // True, if presentation is required.
-    val required: Boolean? = null,
+    val required: Boolean = false,
 
     // The type of the verifiable credential that is being requested.
     val credentialType: String,
 
     // A list of issuers that requester will accept.
-    val issuers: List<AcceptedIssuer>? = null,
+    val issuers: List<AcceptedIssuer> = emptyList(),
 
     // A list of contracts if user does not have requested credential.
-    val contracts: List<String>? = null
+    val contracts: List<String> = emptyList()
 )

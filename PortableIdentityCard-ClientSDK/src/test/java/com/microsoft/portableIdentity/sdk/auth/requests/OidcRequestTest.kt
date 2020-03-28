@@ -1,12 +1,5 @@
 package com.microsoft.portableIdentity.sdk.auth.requests
 
-import com.microsoft.portableIdentity.sdk.CardManager
-import com.microsoft.portableIdentity.sdk.DidSdkConfig
-import com.microsoft.portableIdentity.sdk.auth.models.contracts.Contract
-import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
-import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 class OidcRequestTest {
@@ -25,3 +18,4 @@ class OidcRequestTest {
 //        }
     }
 }
+

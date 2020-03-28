@@ -3,21 +3,23 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.claimRequests
+package com.microsoft.portableIdentity.sdk.auth.models.attestations
 
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.CLIENT_ID
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.REDIRECT_URL
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IdTokenRequest (
+data class IdTokenAttestation (
 
-    val claims: List<ClaimInfo>,
+    val claims: List<ClaimAttestation>,
 
     val configuration: String,
 
-    @SerialName("client_id")
+    @SerialName(CLIENT_ID)
     val clientId: String,
 
-    @SerialName("redirect_uri")
+    @SerialName(REDIRECT_URL)
     val redirectUri: String
 )

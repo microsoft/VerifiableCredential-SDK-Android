@@ -3,15 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.claimRequests
+package com.microsoft.portableIdentity.sdk.auth.models.contracts.display
 
 import kotlinx.serialization.Serializable
 
 /**
- * Data Model for Accepted Issuer in OidcRequestContent.
+ * Properties to render a user-specific claim.
  */
 @Serializable
-data class AcceptedIssuer(
-    // did of the issuer.
-    val iss: String
+data class ClaimDescriptor (
+
+    // What data type the claim is (ex. "Date")
+    val type: String,
+
+    // A label used to describe the claim (ex. "Birthday").
+    val label: String
 )

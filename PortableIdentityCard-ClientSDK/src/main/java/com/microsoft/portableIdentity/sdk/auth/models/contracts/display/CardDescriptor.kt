@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  * These properties are not user-specific, but used to render a generic representation of the card.
  */
 @Serializable
-data class CardDisplayProperties (
+data class CardDescriptor (
 
     // Title of the Card.
     val title: String,
@@ -27,7 +27,7 @@ data class CardDisplayProperties (
     val textColor: String,
 
     // Logo that should be displayed on the card.
-    val logo: LogoDisplayProperties,
+    val logo: Logo,
 
     // Description of the card that should be displayed below the card.
     val description: String

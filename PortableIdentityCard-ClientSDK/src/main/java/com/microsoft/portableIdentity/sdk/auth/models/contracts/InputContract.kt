@@ -5,8 +5,10 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.contracts
 
-import com.microsoft.portableIdentity.sdk.auth.models.claimRequests.CredentialRequests
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import kotlinx.serialization.Serializable
+
+const val INPUT = "input"
 
 /**
  * a subset of the model in the Rules file for client consumption.
@@ -14,10 +16,10 @@ import kotlinx.serialization.Serializable
  * where to obtain the inputs and the endpoint to call to obtain a Verifiable Credential.
  */
 @Serializable
-data class Input (
+data class InputContract (
 
     // Value should be set to "input".
-    val id: String = "input",
+    val id: String = INPUT,
 
     // The issuance endpoint where the request should be sent to.
     val credentialIssuer: String,
@@ -26,5 +28,5 @@ data class Input (
     val issuer: String,
 
     // Claims that are being requested.
-    val attestations: CredentialRequests
+    val attestations: CredentialAttestations
 )

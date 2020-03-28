@@ -3,16 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.contracts
+package com.microsoft.portableIdentity.sdk.auth.models.contracts.display
 
 import kotlinx.serialization.Serializable
 
 /**
- * A structured data model used to describe the set of claims in a Verifiable Credential.
+ * Properties to be used in the user consent prompt
  */
 @Serializable
-data class Schema (
+data class ConsentDescriptor (
+    // Title that will be display on prompt page.
+    val title: String,
 
-    // Should be set to "schema".
-    val id: String = "schema"
+    // Instructions for what the user will have to do to get Card.
+    val instructions: String
 )

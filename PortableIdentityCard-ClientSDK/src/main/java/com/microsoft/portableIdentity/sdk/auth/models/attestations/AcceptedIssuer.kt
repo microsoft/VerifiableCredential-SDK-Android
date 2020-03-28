@@ -3,21 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.models.claimRequests
+package com.microsoft.portableIdentity.sdk.auth.models.attestations
 
 import kotlinx.serialization.Serializable
 
 /**
- * Class to bucket together credential requests.
+ * Data Model for Accepted Issuer in OidcRequestContent.
  */
 @Serializable
-data class CredentialRequests(
-    // IdToken Requests.
-    val idTokens: List<IdTokenRequest>? = null,
-
-    // Verifiable Presentation Requests.
-    val presentations: List<VerifiablePresentationRequest>? = null,
-
-    // SelfIssued Claim Requests.
-    val selfIssued: SelfIssuedClaimRequest? = null
+data class AcceptedIssuer(
+    // did of the issuer.
+    val iss: String
 )
