@@ -8,14 +8,14 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.toKeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.toKeyUsage
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /**
  * Represents an OCT key
  * @class
  * @extends JsonWebKey
  */
-open class SecretKey(key: JsonWebKey, logger: ILogger): IKeyStoreItem {
+open class SecretKey(key: JsonWebKey): IKeyStoreItem {
     /**
      * Set the Oct key type
      */
@@ -34,7 +34,7 @@ open class SecretKey(key: JsonWebKey, logger: ILogger): IKeyStoreItem {
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it, logger = logger) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key

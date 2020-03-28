@@ -5,7 +5,7 @@ import com.microsoft.portableIdentity.sdk.utilities.*
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
-class MockProvider() : Provider(ConsoleLogger()) {
+class MockProvider : Provider() {
     override val name: String = W3cCryptoApiConstants.RsaOaep.value
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,
@@ -46,12 +46,12 @@ class MockProvider() : Provider(ConsoleLogger()) {
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         val datagram = Datagram.deserialize(signature)
         if (key.handle != datagram.keyId) {
-            throw logger.error("Incorrect key used")
+            throw SdkLog.error("Incorrect key used")
         }
         datagram.getData().forEachIndexed {
                 index, byte ->
             if (data[index] != byte) {
-                throw logger.error("Signed data differs at byte $index")
+                throw SdkLog.error("Signed data differs at byte $index")
             }
         }
         return true
@@ -66,7 +66,7 @@ class MockProvider() : Provider(ConsoleLogger()) {
         extractable: Boolean,
         keyUsages: Set<KeyUsage>
     ): CryptoKeyPair {
-        val kid = Base64Url.encode(Random.Default.nextBytes(8), logger)
+        val kid = Base64Url.encode(Random.Default.nextBytes(8))
         return CryptoKeyPair(
             publicKey = CryptoKey(
                 KeyType.Public,
@@ -95,7 +95,7 @@ class MockProvider() : Provider(ConsoleLogger()) {
         return CryptoKey(
             KeyType.Secret,
             extractable = extractable,
-            handle = keyData.kid ?: Base64Url.encode(Random.Default.nextBytes(8), logger),
+            handle = keyData.kid ?: Base64Url.encode(Random.Default.nextBytes(8)),
             usages = keyUsages.toList(),
             algorithm = algorithm
         )

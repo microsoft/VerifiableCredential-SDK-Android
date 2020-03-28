@@ -3,9 +3,8 @@ package com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
-class EllipticCurvePublicKey(key: JsonWebKey, logger: ILogger): PublicKey(key, logger = logger) {
+class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
     override fun minimumAlphabeticJwk(): String {
         return "{\"crv\":\"$crv\",\"kty\":\"${kty.value}\",\"x\":\"$x\",\"y\":\"$y\"}"
     }

@@ -2,10 +2,10 @@ package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
-class NullRegistrar(logger: ILogger): IRegistrar(logger) {
+class NullRegistrar(): IRegistrar() {
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
-        throw logger.error("Attempted to register from the null registrar.")
+        throw SdkLog.error("Attempted to register from the null registrar.")
     }
 }

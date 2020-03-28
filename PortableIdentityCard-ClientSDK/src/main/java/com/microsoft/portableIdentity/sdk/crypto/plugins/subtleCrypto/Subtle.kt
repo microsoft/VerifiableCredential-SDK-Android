@@ -2,19 +2,19 @@ package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
-open class Subtle(providers: Set<Provider> = emptySet(), private val logger: ILogger): SubtleCrypto {
+open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
     val provider = providers.map({
         Pair<String, Provider>(it.name.toLowerCase(), it)
     }).toMap()
 
     private fun getProvider(algorithm: String): Provider {
-        return provider[algorithm.toLowerCase()] ?: throw logger.error("Unknown algorithm $algorithm")
+        return provider[algorithm.toLowerCase()] ?: throw SdkLog.error("Unknown algorithm $algorithm")
     }
 
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -61,7 +61,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val logger: ILo
         // check derivedKeyType
         val importProvider = this.getProvider(derivedKeyType.name);
         importProvider.checkDerivedKeyParams(derivedKeyType)
-        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw logger.error("DerivedKeyType must include a length parameter"))
+        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw SdkLog.error("DerivedKeyType must include a length parameter"))
 
         // derive bits
         val provider = this.getProvider(algorithm.name);
@@ -150,7 +150,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val logger: ILo
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
             } catch (error: Error) {
-                throw logger.error("wrappedKey is not a JSON web key")
+                throw SdkLog.error("wrappedKey is not a JSON web key")
             }
         }
 

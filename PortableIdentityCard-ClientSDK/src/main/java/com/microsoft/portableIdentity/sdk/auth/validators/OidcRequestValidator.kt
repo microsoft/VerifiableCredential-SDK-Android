@@ -3,11 +3,14 @@ package com.microsoft.portableIdentity.sdk.auth.validators
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Static class that Validates an OIDC Request.
  */
-object OidcRequestValidator {
+@Singleton
+class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator){
 
     /**
      * Verifies that Oidc request.
@@ -17,7 +20,7 @@ object OidcRequestValidator {
      */
     suspend fun validate(request: OidcRequest): Boolean {
         return request.content.exp != null
-                && JwsValidator.verifySignature(request.token)
+                && jwsValidator.verifySignature(request.token)
                 && hasTokenExpired(request.content.exp)
                 && hasMatchingParams(request.content, request.oidcParameters)
     }
@@ -37,6 +40,4 @@ object OidcRequestValidator {
     private fun hasMatchingParams(requestContents: OidcRequestContent, params: Map<String, List<String>>): Boolean {
         return params["client_id"]?.first() == requestContents.clientId
     }
-
-
 }

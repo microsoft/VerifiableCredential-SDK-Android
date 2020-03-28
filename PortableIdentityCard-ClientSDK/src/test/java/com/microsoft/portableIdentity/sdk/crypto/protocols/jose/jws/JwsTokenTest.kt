@@ -7,21 +7,19 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
 import kotlin.random.Random
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class JwsTokenTest {
-    val logger = ConsoleLogger()
-    val keyStore = InMemoryKeyStore(logger)
-    val subtle = Subtle(setOf(MockProvider()), logger)
-    val crypto = CryptoOperations(keyStore = keyStore, subtleCrypto = subtle, logger = logger)
+    val keyStore = InMemoryKeyStore()
+    val subtle = Subtle(setOf(MockProvider()))
+    val crypto = CryptoOperations(keyStore = keyStore, subtleCrypto = subtle)
     var keyRef = ""
 
     @BeforeTest
     fun setup() {
-        keyRef = Base64Url.encode(Random.nextBytes(8), logger)
+        keyRef = Base64Url.encode(Random.nextBytes(8))
         var keyPair =  subtle.generateKeyPair(
             RsaOaepParams(),
             true,
@@ -34,13 +32,13 @@ class JwsTokenTest {
     @Test
     fun signAndVerify() {
         val testData = Random.Default.nextBytes(32)
-        val token = JwsToken(testData, logger)
+        val token = JwsToken(testData)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(JwsFormat.Compact)
 
         println(serialized)
 
-        val verifyToken = JwsToken.deserialize(serialized, logger)
+        val verifyToken = JwsToken.deserialize(serialized)
         verifyToken.verify(crypto)
     }
 

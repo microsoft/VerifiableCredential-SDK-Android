@@ -6,14 +6,13 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
 /**
  * Interface defining methods and properties to
  * be implemented by specific resolver methods.
  * @interface
  */
-abstract class IResolver(internal val logger: ILogger) {
+abstract class IResolver() {
 
     /**
      * Returns the identifier document for the specified
@@ -40,9 +39,8 @@ abstract class IResolver(internal val logger: ILogger) {
             encKey,
             "",
             cryptoOperations,
-            logger,
             this,
-            NullRegistrar(logger)
+            NullRegistrar()
         )
     }
 }
