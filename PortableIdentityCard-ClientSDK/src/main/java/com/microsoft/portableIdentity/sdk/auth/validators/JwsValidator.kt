@@ -10,7 +10,6 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.BaseLogger
 import java.lang.Exception
 
@@ -36,8 +35,8 @@ object JwsValidator {
         return Pair(parsedKid[0], parsedKid[1])
     }
 
-    private suspend fun resolvePublicKeys(kid: String, cryptoOperations: CryptoOperations): List<PublicKey> {
-        val requesterDidDocument = DidSdkConfig.identityManager.resolver.resolve(kid, cryptoOperations)
+    private suspend fun resolvePublicKeys(did: String, cryptoOperations: CryptoOperations): List<PublicKey> {
+        val requesterDidDocument = DidSdkConfig.identityManager.resolver.resolve(did, cryptoOperations)
         return requesterDidDocument.document.publicKeys.map {
             it.toPublicKey(BaseLogger)
         }

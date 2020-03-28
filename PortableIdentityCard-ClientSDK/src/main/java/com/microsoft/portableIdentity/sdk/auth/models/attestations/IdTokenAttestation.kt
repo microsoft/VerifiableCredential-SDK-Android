@@ -17,6 +17,8 @@ data class IdTokenAttestation (
 
     val configuration: String,
 
+    val required: Boolean = false,
+
     @SerialName(CLIENT_ID)
     val clientId: String,
 

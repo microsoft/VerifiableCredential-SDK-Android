@@ -1,9 +1,12 @@
 package com.microsoft.portableIdentity.sdk.auth.validators
 
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.CLIENT_ID
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import java.util.*
 
+const val MILLISECONDS = 1000
+const val MINUTES_TO_SECONDS_CONVERTER = 60
 /**
  * Static class that Validates an OIDC Request.
  */
@@ -16,25 +19,20 @@ object OidcRequestValidator {
      * @return true, if valid.
      */
     suspend fun validate(request: OidcRequest): Boolean {
-        return request.content.exp != null
-                && JwsValidator.verifySignature(request.token)
-                && hasTokenExpired(request.content.exp)
-                && hasMatchingParams(request.content, request.oidcParameters)
+        return JwsValidator.verifySignature(request.token) && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
     }
 
     private fun hasTokenExpired(expiration: Long): Boolean {
         return expiration > getExpirationDeadlineInSeconds()
     }
 
-    private fun getExpirationDeadlineInSeconds(): Long {
-        val currentTime = Date().time
-        val milliseconds = 1000
-        val expirationCheckTimeOffsetInMinutes = 5
-        return (currentTime + milliseconds * 60 * expirationCheckTimeOffsetInMinutes) / milliseconds
+    private fun getExpirationDeadlineInSeconds(expirationCheckTimeOffsetInMinutes: Int = 5): Long {
+        val currentTimeInSeconds = Date().time / MILLISECONDS
+        return currentTimeInSeconds + MINUTES_TO_SECONDS_CONVERTER * expirationCheckTimeOffsetInMinutes
     }
 
     private fun hasMatchingParams(requestContents: OidcRequestContent, params: Map<String, List<String>>): Boolean {
-        return params["client_id"]?.first() == requestContents.clientId
+        return params[CLIENT_ID]?.first() == requestContents.clientId
     }
 
 
