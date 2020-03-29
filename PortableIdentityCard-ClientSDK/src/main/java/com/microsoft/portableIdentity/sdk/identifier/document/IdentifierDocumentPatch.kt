@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 class IdentifierDocumentPatch (
     val action: String,
 /*    @SerialName("publicKeys")
-    val publicKeys: List<IdentifierDocPublicKey>*/
+    val publicKeys: List<IdentifierDocumentPublicKey>,*/
     @SerialName("document")
     val document: IdentifierDocumentPayload
 ){}

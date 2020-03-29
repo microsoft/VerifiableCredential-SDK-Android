@@ -55,7 +55,7 @@ class Identifier constructor(
             val recoveryKey = cryptoOperations.generateKeyPair(personaRecKeyRef, KeyType.EllipticCurve)
             val recoveryKeyJWK = recoveryKey.toJWK()
 
-            val microsoftIdentityHubDocument: IdentifierDocumentPayload = IdentifierDocumentPayload(
+            val identifierDocumentPayload: IdentifierDocumentPayload = IdentifierDocumentPayload(
                 publicKeys = listOf(
                     IdentifierDocumentPublicKey(
                         id = signingKeyJWK.kid!!,
@@ -65,32 +65,31 @@ class Identifier constructor(
                 )
             )
 
-            val idDocPatches = IdentifierDocumentPatch("replace", microsoftIdentityHubDocument)
+            val identifierDocumentPatch = IdentifierDocumentPatch("replace", identifierDocumentPayload)
             val updateCommitmentHashEncoded = generateCommitmentHash(logger)
 
-            val operationData = OperationData(updateCommitmentHashEncoded, listOf(idDocPatches))
-            val opDataJson = Serializer.stringify(OperationData.serializer(), operationData)
-            val opDataByteArray = stringToByteArray(opDataJson)
-            val opDataHashed = byteArrayOf(18, 32)+hash(opDataByteArray)
-            val opDataHashEncoded = Base64Url.encode(opDataHashed, logger)
+            val operationData = OperationData(updateCommitmentHashEncoded, listOf(identifierDocumentPatch))
+            val operationDataJson = Serializer.stringify(OperationData.serializer(), operationData)
+            val operationDataByteArray = stringToByteArray(operationDataJson)
+            val operationDataHash = byteArrayOf(18, 32)+hash(operationDataByteArray)
+            val operationDataHashEncoded = Base64Url.encode(operationDataHash, logger)
 
-            val opDataEncoded = encodeOperationData(operationData, logger)
-
+            val operationDataEncoded = encodeOperationData(operationData, logger)
             val recoveryCommitmentHashEncoded = generateCommitmentHash(logger)
 
             val suffixData = SuffixData(
-                opDataHashEncoded,
+                operationDataHashEncoded,
                 RecoveryKey(convertCryptoKeyToCompressedHex(Base64.decode(recoveryKeyJWK.x!!, logger), Base64.decode(recoveryKeyJWK.y!!, logger))),
                 recoveryCommitmentHashEncoded
             )
             val uniqueSuffix = computeUniqueSuffix(suffixData, logger)
-            val did = "did:ion:test:$uniqueSuffix"
+            val portableIdentity = "did:ion:test:$uniqueSuffix"
 
-            val suffixDataEncodedString = encodeSuffixData(suffixData, logger)
-            val regDoc = RegistrationDocument("create", suffixDataEncodedString, opDataEncoded)
-            val regDocEncodedString = encodeRegDoc(regDoc, logger)
+            val suffixDataEncoded = encodeSuffixData(suffixData, logger)
+            val registrationDocument = RegistrationDocument("create", suffixDataEncoded, operationDataEncoded)
+            val registrationDocumentEncoded = encodeRegDoc(registrationDocument, logger)
 
-            val identifierDocument = resolver.resolve(did, regDocEncodedString, cryptoOperations)
+            val identifierDocument = resolver.resolve(portableIdentity, registrationDocumentEncoded, cryptoOperations)
             logger.debug("Registered new decentralized identity")
             return identifierDocument
         }
