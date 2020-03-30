@@ -113,7 +113,7 @@ class AndroidKeyStoreInstrumentedTest {
     }
 
     @Test
-    fun saveSecretKeyTest() {
+    fun saveAndGetSecretKeyTest() {
         val secretKey = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
@@ -122,6 +122,19 @@ class AndroidKeyStoreInstrumentedTest {
         )
         keyStore.save(keyRef, secretKey)
         val actualSecretKey = keyStore.getSecretKey(keyRef)
+        assertThat(actualSecretKey).isNotNull()
+    }
+
+    @Test
+    fun getSecretKeyByIdTest() {
+        val secretKey = SecretKey(
+            JsonWebKey(
+                kty = KeyType.Octets.value,
+                kid = "#secret.2"
+            ), logger
+        )
+        keyStore.save("secret", secretKey)
+        val actualSecretKey = keyStore.getSecretKeyById(secretKey.kid)
         assertThat(actualSecretKey).isNotNull()
     }
 
