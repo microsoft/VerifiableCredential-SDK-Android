@@ -3,17 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.credentialRequests
+package com.microsoft.portableIdentity.sdk.auth.models.contracts
 
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import kotlinx.serialization.Polymorphic
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+const val SCHEMA = "schema"
 /**
- * Object that bundles types of credential requests together if exists.
+ * A structured data model used to describe the set of claims in a Verifiable Credential.
  */
-open class CredentialRequests() {
-    // TODO(implement new protocol)
-}
+@Serializable
+data class SchemaContract (
 
+    // Should be set to "schema".
+    val id: String = SCHEMA
+)

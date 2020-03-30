@@ -7,8 +7,10 @@ package com.microsoft.portableIdentity.sdk.auth.validators
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,15 +27,20 @@ class JwsValidator @Inject constructor(
      * Verify the signature on the JwsToken.
      */
     suspend fun verifySignature(token: JwsToken): Boolean {
-        val headers = token.signatures.first().header ?: throw Exception("JwsToken is not signed")
-        val cryptoOperations = cryptoOperations
-        val publicKeys = resolvePublicKeys(headers, cryptoOperations)
+        val signature = token.signatures.first()
+        val (did, _) = getKid(signature)
+        val publicKeys = resolvePublicKeys(did, cryptoOperations)
         return token.verify(cryptoOperations, publicKeys)
     }
 
-    private suspend fun resolvePublicKeys(tokenHeaders: Map<String, String>, cryptoOperations: CryptoOperations): List<PublicKey> {
-        val requesterDid = tokenHeaders["kid"] ?: throw Exception("No kid specified in header")
-        val requesterDidDocument = resolver.resolve(requesterDid, cryptoOperations)
+    private fun getKid(signature: JwsSignature): Pair<String, String> {
+        val kid = signature.getKid() ?: throw Exception("no kid specified in token")
+        val parsedKid = kid.split("#")
+        return Pair(parsedKid[0], parsedKid[1])
+    }
+
+    private suspend fun resolvePublicKeys(did: String, cryptoOperations: CryptoOperations): List<PublicKey> {
+        val requesterDidDocument = resolver.resolve(did, cryptoOperations)
         return requesterDidDocument.document.publicKeys.map {
             it.toPublicKey()
         }
