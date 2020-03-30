@@ -1,7 +1,5 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
-import com.microsoft.portableIdentity.sdk.identifier.OperationData
-import com.microsoft.portableIdentity.sdk.identifier.SuffixData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -11,6 +9,6 @@ data class RegistrationDocument (
     val type:String,
     @SerialName("suffixData")
     val suffixData: String,
-    @SerialName("operationData")
-    val operationData: String
+    @SerialName("patchData")
+    val patchData: String
 ) {}

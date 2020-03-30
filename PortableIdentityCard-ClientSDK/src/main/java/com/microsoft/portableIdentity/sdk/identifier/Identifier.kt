@@ -68,17 +68,17 @@ class Identifier constructor(
             val identifierDocumentPatch = IdentifierDocumentPatch("replace", identifierDocumentPayload)
             val updateCommitmentHashEncoded = generateCommitmentHash(logger)
 
-            val operationData = OperationData(updateCommitmentHashEncoded, listOf(identifierDocumentPatch))
-            val operationDataJson = Serializer.stringify(OperationData.serializer(), operationData)
-            val operationDataByteArray = stringToByteArray(operationDataJson)
-            val operationDataHash = byteArrayOf(18, 32)+hash(operationDataByteArray)
-            val operationDataHashEncoded = Base64Url.encode(operationDataHash, logger)
+            val patchData = PatchData(updateCommitmentHashEncoded, listOf(identifierDocumentPatch))
+            val patchDataJson = Serializer.stringify(PatchData.serializer(), patchData)
+            val patchDataByteArray = stringToByteArray(patchDataJson)
+            val patchDataHash = byteArrayOf(18, 32)+hash(patchDataByteArray)
+            val patchDataHashEncoded = Base64Url.encode(patchDataHash, logger)
 
-            val operationDataEncoded = encodeOperationData(operationData, logger)
+            val patchDataEncoded = encodePatchData(patchData, logger)
             val recoveryCommitmentHashEncoded = generateCommitmentHash(logger)
 
             val suffixData = SuffixData(
-                operationDataHashEncoded,
+                patchDataHashEncoded,
                 RecoveryKey(convertCryptoKeyToCompressedHex(Base64.decode(recoveryKeyJWK.x!!, logger), Base64.decode(recoveryKeyJWK.y!!, logger))),
                 recoveryCommitmentHashEncoded
             )
@@ -86,7 +86,7 @@ class Identifier constructor(
             val portableIdentity = "did:ion:test:$uniqueSuffix"
 
             val suffixDataEncoded = encodeSuffixData(suffixData, logger)
-            val registrationDocument = RegistrationDocument("create", suffixDataEncoded, operationDataEncoded)
+            val registrationDocument = RegistrationDocument("create", suffixDataEncoded, patchDataEncoded)
             val registrationDocumentEncoded = encodeRegDoc(registrationDocument, logger)
 
             val identifierDocument = resolver.resolve(portableIdentity, registrationDocumentEncoded, cryptoOperations)
@@ -121,10 +121,10 @@ class Identifier constructor(
             return Base64Url.encode(stringToByteArray(suffixDataJson), logger)
         }
 
-        private fun encodeOperationData(operationData: OperationData, logger: ILogger): String {
-            val opDataJson = Serializer.stringify(OperationData.serializer(), operationData)
-            val opDataByteArray = stringToByteArray(opDataJson)
-            return Base64Url.encode(opDataByteArray, logger)
+        private fun encodePatchData(patchData: PatchData, logger: ILogger): String {
+            val patchDataJson = Serializer.stringify(PatchData.serializer(), patchData)
+            val patchDataByteArray = stringToByteArray(patchDataJson)
+            return Base64Url.encode(patchDataByteArray, logger)
         }
 
         private fun convertCryptoKeyToCompressedHex(ecKeyX: ByteArray, ecKeyY: ByteArray): String {

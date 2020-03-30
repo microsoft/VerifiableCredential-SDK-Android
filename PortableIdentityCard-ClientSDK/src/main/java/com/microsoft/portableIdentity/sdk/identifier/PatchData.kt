@@ -5,8 +5,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class OperationData (
-    @SerialName("nextUpdateOtpHash")
+data class PatchData (
+    @SerialName("nextUpdateCommitmentHash")
     val nextUpdateCommitmentHash: String,
     @SerialName("patches")
     val patches: List<IdentifierDocumentPatch>

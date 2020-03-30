@@ -10,9 +10,6 @@ import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.*
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.OperationData
-import com.microsoft.portableIdentity.sdk.identifier.SuffixData
-import com.microsoft.portableIdentity.sdk.identifier.document.*
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.*
@@ -20,7 +17,6 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.security.MessageDigest
 import kotlin.random.Random
 
 @RunWith(AndroidJUnit4ClassRunner::class)
