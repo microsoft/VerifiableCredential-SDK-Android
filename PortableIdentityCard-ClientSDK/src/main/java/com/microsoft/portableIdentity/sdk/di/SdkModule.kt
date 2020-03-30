@@ -4,6 +4,7 @@ package com.microsoft.portableIdentity.sdk.di
 
 import android.content.Context
 import androidx.room.Room
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
@@ -20,6 +21,9 @@ import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import dagger.Module
 import dagger.Provides
+import okhttp3.OkHttpClient
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 /**
@@ -51,6 +55,14 @@ internal class SdkModule {
         )
         return defaultCryptoOperations
     }
+
+    @Provides
+    @Singleton
+    fun defaultRetrofit() : Retrofit = Retrofit.Builder()
+        .client(OkHttpClient())
+        .addConverterFactory(GsonConverterFactory.create())
+        .addCallAdapterFactory(CoroutineCallAdapterFactory())
+        .build()
 
     @Provides
     @Singleton

@@ -7,6 +7,7 @@ import com.microsoft.portableIdentity.sdk.CardManager
 import com.microsoft.portableIdentity.sdk.IdentityManager
 import dagger.BindsInstance
 import dagger.Component
+import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -44,5 +45,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun registrationUrl(@Named("registrationUrl") registrationUrl: String): Builder
+
+        @BindsInstance
+        fun retrofit(): Builder
     }
 }
