@@ -22,7 +22,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
      * @return true, if valid.
      */
     suspend fun validate(request: OidcRequest): Boolean {
-        return JwsValidator.verifySignature(request.token) && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
+        return jwsValidator.verifySignature(request.token) && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
     }
 
     private fun hasTokenExpired(expiration: Long): Boolean {
