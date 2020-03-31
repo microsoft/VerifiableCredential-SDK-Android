@@ -42,7 +42,6 @@ object PortableIdentitySdk {
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
-            .retrofit()
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .signatureKeyReference(defaultSignatureKeyReference)

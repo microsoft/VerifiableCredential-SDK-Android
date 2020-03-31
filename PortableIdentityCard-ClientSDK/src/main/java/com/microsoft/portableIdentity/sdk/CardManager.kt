@@ -44,6 +44,10 @@ class CardManager @Inject constructor(
     }
 
     /**
+     * Get Verifiable Credential from Repository.
+     */
+
+    /**
      * Create a Request Object from a uri.
      */
     suspend fun getRequest(uri: String): Request {
