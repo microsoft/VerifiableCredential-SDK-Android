@@ -8,8 +8,9 @@ package com.microsoft.portableIdentity.sdk.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.SerialClaimObject
+import com.microsoft.portableIdentity.sdk.cards.Card
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
 import com.microsoft.portableIdentity.sdk.repository.networking.HttpBaseRepository
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.PortableIdentityCardApi
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -24,25 +25,37 @@ import javax.inject.Singleton
  * ever care to get the object it wants.
  */
 @Singleton
-class VerifiableCredentialRepository @Inject constructor(database: SdkDatabase, retrofit: Retrofit): HttpBaseRepository() {
+class CardRepository @Inject constructor(database: SdkDatabase, retrofit: Retrofit): HttpBaseRepository() {
 
     private val picApi: PortableIdentityCardApi = retrofit.create(PortableIdentityCardApi::class.java)
 
-    private val claimObjectDao = database.claimObjectDao()
+    private val cardDao = database.cardDao()
 
     private val serialClaimObjectDao = database.serialClaimObjectDao()
 
+    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
     fun getAllClaimObjects(): LiveData<List<ClaimObject>> {
         val serialClaimObjects = serialClaimObjectDao.getAllClaimObjects()
         return Transformations.map(serialClaimObjects) { serialList -> transformList(serialList) }
     }
 
+    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
     suspend fun insert(claimObject: ClaimObject) = serialClaimObjectDao.insert(SerialClaimObject(claimObject.serialize()))
 
+    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
     suspend fun delete(claimObject: ClaimObject) = serialClaimObjectDao.delete(SerialClaimObject(claimObject.serialize()))
 
+    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
     private fun transformList(serialClaimObjects: List<SerialClaimObject>): List<ClaimObject> =
         serialClaimObjects.map { Serializer.parse(ClaimObject.serializer(), it.serialClaimObject) }
+
+    suspend fun insert(card: Card) = cardDao.insert(card)
+
+    suspend fun delete(card: Card) = cardDao.delete(card)
+
+    fun getAllCards(): LiveData<List<Card>> {
+        return cardDao.getAllCards()
+    }
 
     /**
      * Get Request from url.

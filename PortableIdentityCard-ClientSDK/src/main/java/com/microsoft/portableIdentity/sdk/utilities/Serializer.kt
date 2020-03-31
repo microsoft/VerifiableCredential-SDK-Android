@@ -1,8 +1,8 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.SignedClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.UnsignedClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.SignedClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.UnsignedClaimDetail
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
 import com.microsoft.portableIdentity.sdk.identifier.document.service.Endpoint
 import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService

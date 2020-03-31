@@ -3,11 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.credentials
+package com.microsoft.portableIdentity.sdk.auth.models
 
-data class VerifiableCredential(
-    val context: String
-) : Credential
-{
-    // TODO: define VC.
-}
+data class IssuanceServiceResponse (
+    val vc: String
+)

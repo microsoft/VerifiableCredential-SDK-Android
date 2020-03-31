@@ -3,11 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.credentials
+package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
+
+import kotlinx.serialization.Serializable
 
 /**
- * Interface for defining a Credential object.
+ * Data model to describe a service provided in Verifiable Credential.
+ * (e.g. status service, revocation service)
  */
-interface Credential {
-    // TODO: define Credential Interface
-}
+@Serializable
+data class ServiceDescriptor (
+    val id: String,
+    val type: String
+)

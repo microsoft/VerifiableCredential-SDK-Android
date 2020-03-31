@@ -5,7 +5,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.SerialClaimObject
+import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
 
 @Deprecated("Old Claim Object for old POC. Remove when new Model is up.")
 @Dao

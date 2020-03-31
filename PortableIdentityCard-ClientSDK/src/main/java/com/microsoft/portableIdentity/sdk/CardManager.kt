@@ -7,28 +7,28 @@ package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.AuthenticationException
+import com.microsoft.portableIdentity.sdk.auth.models.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.repository.VerifiableCredentialRepository
+import com.microsoft.portableIdentity.sdk.repository.CardRepository
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Retrofit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CardManager @Inject constructor(
-    private val vcRepository: VerifiableCredentialRepository,
+    private val picRepository: CardRepository,
     private val cryptoOperations: CryptoOperations,
     private val resolver: IResolver,
     private val validator: OidcRequestValidator, // TODO: should this be a generic Validator?
@@ -39,7 +39,7 @@ class CardManager @Inject constructor(
      * Get contract from PICS.
      */
     suspend fun getContract(url: String): PicContract? {
-        val contract = vcRepository.getContract(url)
+        val contract = picRepository.getContract(url)
         print(contract)
         return contract
     }
@@ -64,7 +64,7 @@ class CardManager @Inject constructor(
         }
 
         val requestUri = requestParameters["request_uri"]?.first() ?: throw AuthenticationException("Cannot fetch request: No request uri found")
-        val requestToken = vcRepository.getRequest(requestUri) ?: throw AuthenticationException("Cannot fetch request: No request token found")
+        val requestToken = picRepository.getRequest(requestUri) ?: throw AuthenticationException("Cannot fetch request: No request token found")
         return OidcRequest(requestParameters, requestToken)
     }
 
@@ -83,23 +83,23 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Send a Response
+     * Send a Presentation Response.
      */
-    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier) {
+    suspend fun sendPresentationResponse(response: OidcResponse, responderIdentifier: Identifier) {
         val signedResponse = signer.sign(response, responderIdentifier)
         val serializedSignedResponse = signedResponse.serialize()
         val url = response.getRequestContents().redirectUrl
-        return vcRepository.sendResponse(url, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+        return picRepository.sendResponse(url, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
     }
 
     /**
      *
      */
     suspend fun saveClaim(claim: ClaimObject) {
-        vcRepository.insert(claim)
+        picRepository.insert(claim)
     }
 
     fun getClaims(): LiveData<List<ClaimObject>> {
-        return vcRepository.getAllClaimObjects()
+        return picRepository.getAllClaimObjects()
     }
 }

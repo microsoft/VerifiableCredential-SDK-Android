@@ -1,6 +1,5 @@
-package com.microsoft.portableIdentity.sdk.credentials.deprecated
+package com.microsoft.portableIdentity.sdk.cards.deprecated
 
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

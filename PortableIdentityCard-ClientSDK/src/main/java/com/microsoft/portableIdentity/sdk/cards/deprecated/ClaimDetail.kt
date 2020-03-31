@@ -1,8 +1,7 @@
-package com.microsoft.portableIdentity.sdk.credentials.deprecated
+package com.microsoft.portableIdentity.sdk.cards.deprecated
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 interface ClaimDetail {
     val type: String
