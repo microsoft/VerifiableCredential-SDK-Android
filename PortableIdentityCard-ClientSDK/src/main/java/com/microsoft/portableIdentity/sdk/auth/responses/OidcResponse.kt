@@ -6,12 +6,9 @@
 package com.microsoft.portableIdentity.sdk.auth.responses
 
 import com.microsoft.did.sdk.credentials.Credential
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
  * OIDC Response formed from a Request.
@@ -19,7 +16,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
  * @param request that response is responding to.
  * @param signer optional parameter used to protect the response.
  */
-class OidcResponse(request: OidcRequest): Response {
+class OidcResponse(private val request: OidcRequest): Response {
 
     /**
      * list of collected credentials to be sent in response.
@@ -33,6 +30,10 @@ class OidcResponse(request: OidcRequest): Response {
      */
     override fun addCredential(credential: Credential) {
         collectedCredentials.add(credential)
+    }
+
+    fun getRequestContents(): OidcRequestContent {
+        return request.content
     }
 
     // TODO: This has to be moved somewhere else. Currently it contains business logic while being an entity. You can't reference `Signer` here
