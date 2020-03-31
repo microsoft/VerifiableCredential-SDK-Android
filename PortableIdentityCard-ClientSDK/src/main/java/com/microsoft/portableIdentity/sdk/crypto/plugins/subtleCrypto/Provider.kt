@@ -171,7 +171,7 @@ abstract class Provider() {
             // check to see if its a private (or fall back to public)
             try {
                 checkKeyUsages(keyUsages, this.privateKeyUsage!!)
-            } catch (error: Error) {
+            } catch (error: Throwable) {
                 checkKeyUsages(keyUsages, this.publicKeyUsage!!)
             }
         }
