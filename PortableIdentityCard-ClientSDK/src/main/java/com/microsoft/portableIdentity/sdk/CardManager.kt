@@ -102,9 +102,9 @@ class CardManager @Inject constructor(
      * Send a Response.
      */
     suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
-        val responseContent = formatter.formContents(response, responderIdentifier.document.id)
+        val responseContent = formatter.formContents(response, responderIdentifier.document.id, responderIdentifier.signatureKeyReference)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
-        val signedResponse = signer.sign(serializedResponseContent)
+        val signedResponse = signer.sign(serializedResponseContent, responderIdentifier.signatureKeyReference)
         val serializedSignedResponse = signedResponse.serialize()
         val url = response.getRequestContents().redirectUrl
         return picRepository.sendResponse(url, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
