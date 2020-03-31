@@ -68,6 +68,7 @@ class IdentityManager(private val config: DidSdkConfig) {
                 JsonWebKey(
                     kty = KeyType.Octets.value,
                     kid = "#$didSecretName.1",
+                    //TODO: Save only signing key or recovery key as well?
                     k = identifier.serialize()
                 ),
                 logger = config.logger
