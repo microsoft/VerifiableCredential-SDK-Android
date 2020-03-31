@@ -8,6 +8,7 @@ package com.microsoft.portableIdentity.sdk.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.cards.Card
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
@@ -80,7 +81,7 @@ class CardRepository @Inject constructor(database: SdkDatabase, retrofit: Retrof
     /**
      * Post Response to url.
      */
-    suspend fun sendResponse(url: String, serializedResponse: String): Unit? {
+    suspend fun sendResponse(url: String, serializedResponse: String): ServiceResponse? {
         return safeApiCall(
             call = {picApi.sendResponse(url, serializedResponse).await()},
             errorMessage = "Error Sending Response to $url."

@@ -6,6 +6,7 @@
 package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import kotlinx.coroutines.Deferred
 import retrofit2.Response
 import retrofit2.http.Body
@@ -22,5 +23,5 @@ interface PortableIdentityCardApi {
     fun getRequest(@Url overrideUrl: String): Deferred<Response<String>>
 
     @POST
-    fun sendResponse(@Url overrideUrl: String, @Body body: String): Deferred<Response<Unit>>
+    fun sendResponse(@Url overrideUrl: String, @Body body: String): Deferred<Response<ServiceResponse>>
 }

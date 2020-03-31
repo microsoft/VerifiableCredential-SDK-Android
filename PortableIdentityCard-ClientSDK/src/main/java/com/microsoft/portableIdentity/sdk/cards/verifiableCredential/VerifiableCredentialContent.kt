@@ -5,11 +5,14 @@
 
 package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 
+import kotlinx.serialization.Serializable
+
 /**
  * Contents of a Verifiable Credential Jws Token.
  *
  * @see [Verifiable Credential Spec](https://www.w3.org/TR/vc-data-model/#basic-concepts)
  */
+@Serializable
 data class VerifiableCredentialContent (
 
     // ID of the Verifiable Credential.

@@ -7,18 +7,24 @@ package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.AuthenticationException
-import com.microsoft.portableIdentity.sdk.auth.models.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
+import com.microsoft.portableIdentity.sdk.cards.Card
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers
@@ -32,26 +38,14 @@ class CardManager @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val resolver: IResolver,
     private val validator: OidcRequestValidator, // TODO: should this be a generic Validator?
-    private val signer: OidcResponseSigner
+    private val signer: OidcResponseSigner,
+    private val formatter: OidcResponseFormatter
 ) {
-
-    /**
-     * Get contract from PICS.
-     */
-    suspend fun getContract(url: String): PicContract? {
-        val contract = picRepository.getContract(url)
-        print(contract)
-        return contract
-    }
-
-    /**
-     * Get Verifiable Credential from Repository.
-     */
 
     /**
      * Create a Request Object from a uri.
      */
-    suspend fun getRequest(uri: String): Request {
+    suspend fun getRequest(uri: String): OidcRequest {
         val url = Url(uri)
         if (url.protocol.name != "openid") {
             throw AuthenticationException("request format not supported")
@@ -68,13 +62,6 @@ class CardManager @Inject constructor(
         return OidcRequest(requestParameters, requestToken)
     }
 
-    @Deprecated("Old OidcRequest for old POC. Remove when new Model is up.")
-    suspend fun parseOidcRequest(request: String): com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest {
-        return withContext(Dispatchers.IO) {
-            com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest.parseAndVerify(request, cryptoOperations, resolver)
-        }
-    }
-
     /**
      * Validate an OpenID Connect Request.
      */
@@ -83,23 +70,78 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Send a Presentation Response.
+     * Get contract from PICS.
+     * PP: gets first contract from each Verifiable Credential Attestation.
      */
-    suspend fun sendPresentationResponse(response: OidcResponse, responderIdentifier: Identifier) {
-        val signedResponse = signer.sign(response, responderIdentifier)
+    fun getContractUrls(request: OidcRequest): List<String> {
+        val attestations = request.content.attestations ?: return emptyList()
+        val contracts = mutableListOf<String>()
+        attestations.presentations.forEach {
+            contracts.add(it.contracts.first())
+        }
+        return contracts
+    }
+
+    /**
+     * Get contract from PICS.
+     */
+    suspend fun getContract(url: String): PicContract? {
+        val contract = picRepository.getContract(url)
+        print(contract)
+        return contract
+    }
+
+    /**
+     * Create OidcResponse from OidcRequest.
+     */
+    fun createResponse(request: OidcRequest): OidcResponse {
+        return OidcResponse(request)
+    }
+
+    /**
+     * Send a Response.
+     */
+    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
+        val responseContent = formatter.formContents(response, responderIdentifier.document.id)
+        val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
+        val signedResponse = signer.sign(serializedResponseContent)
         val serializedSignedResponse = signedResponse.serialize()
         val url = response.getRequestContents().redirectUrl
         return picRepository.sendResponse(url, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
     }
 
     /**
-     *
+     * Puts together card and saves in repository.
      */
+    suspend fun saveCard(signedVerifiableCredential: String, contract: PicContract) {
+        val vc = unwrapSignedVerifiableCredential(signedVerifiableCredential)
+        val card = Card(vc.jti, signedVerifiableCredential, contract.display)
+        picRepository.insert(card)
+    }
+
+    private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
+        val token = JwsToken.deserialize(signedVerifiableCredential)
+        return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
+    }
+
+    fun getCards(): LiveData<List<Card>> {
+        return picRepository.getAllCards()
+    }
+
+    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
     suspend fun saveClaim(claim: ClaimObject) {
         picRepository.insert(claim)
     }
 
+    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
     fun getClaims(): LiveData<List<ClaimObject>> {
         return picRepository.getAllClaimObjects()
+    }
+
+    @Deprecated("Old OidcRequest for old POC. Remove when new Model is up.")
+    suspend fun parseOidcRequest(request: String): com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest {
+        return withContext(Dispatchers.IO) {
+            com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest.parseAndVerify(request, cryptoOperations, resolver)
+        }
     }
 }

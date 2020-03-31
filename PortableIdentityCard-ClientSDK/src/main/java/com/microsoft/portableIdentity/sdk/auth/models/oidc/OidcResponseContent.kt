@@ -60,7 +60,7 @@ data class OidcResponseContent(
     // response contains claims that fulfills this contract.
     val contract: String? = null,
     // claims that were being requested.
-    val attestations: String,
+    // TODO (val attestations)
     //id of the response
     val jti: String? = null
 )
