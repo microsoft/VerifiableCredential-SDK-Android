@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credentials
+package com.microsoft.portableIdentity.sdk.credentials
 
 data class VerifiableCredential(
     val context: String

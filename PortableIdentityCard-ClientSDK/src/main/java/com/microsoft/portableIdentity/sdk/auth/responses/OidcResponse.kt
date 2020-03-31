@@ -5,7 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.did.sdk.credentials.Credential
+import com.microsoft.portableIdentity.sdk.credentials.Credential
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
