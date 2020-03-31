@@ -19,9 +19,11 @@ import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -58,11 +60,20 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultRetrofit() : Retrofit = Retrofit.Builder()
-        .client(OkHttpClient())
-        .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(CoroutineCallAdapterFactory())
-        .build()
+    fun defaultRetrofit() : Retrofit {
+        
+        val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.i(it) }
+        val okHttpClient = OkHttpClient()
+            .newBuilder()
+            .addInterceptor(httpLoggingInterceptor)
+            .build()
+
+        return Retrofit.Builder()
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .build()
+    }
 
     @Provides
     @Singleton
