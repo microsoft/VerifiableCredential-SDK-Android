@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="abcf4e3f-0df2-4b16-8be4-94a9a5bcec36" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/requests/OidcRequest.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/requests/OidcRequest.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/requests/Request.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/requests/Request.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/validators/JwsValidator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/validators/JwsValidator.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/validators/OidcRequestValidator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/validators/OidcRequestValidator.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="Pixel_2_API_28" />
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="f1a62948:ProjectNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="f1a62948:ProjectNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="f1a62948:ProjectNode" />
+                <item name="PortableIdentityCard-ClientSDK-Android" type="2d1252cf:ModuleNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Object" />
+        <option value="Kotlin Enum" />
+        <option value="Kotlin Interface" />
+        <option value="Kotlin File" />
+        <option value="Kotlin Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1YuGLZNnPo24prtgmJqc1gbmQO5" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="not.eligible.for.single.variant.sync" value="true" />
+    <property name="project.structure.last.edited" value="SDK Location" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.0" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Kotlin" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="com.microsoft.portableIdentity.sdk.auth.models.claimRequests" />
+      <recent name="com.microsoft.portableIdentity.sdk.auth.models.contracts.display" />
+      <recent name="com.microsoft.portableIdentity.sdk.auth" />
+      <recent name="com.microsoft.portableIdentity.sdk.auth.requests" />
+      <recent name="com.microsoft.portableIdentity.sdk.auth.responses" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/deprecated/oidc" />
+      <recent name="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/models/oidc" />
+      <recent name="$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/main/java/com/microsoft/portableIdentity/sdk/auth/models" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.PortableIdentityCard-ClientSDK-Android [build]">
+    <configuration name="CredentialRequestsTest" type="AndroidJUnit" factoryName="Android JUnit" temporary="true" nameIsGenerated="true">
+      <module name="PortableIdentityCard-ClientSDK" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.microsoft.portableIdentity.sdk.auth.credentialRequests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.microsoft.portableIdentity.sdk.auth.credentialRequests" />
+      <option name="MAIN_CLASS_NAME" value="com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequestsTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="PortableIdentityCard-ClientSDK-Android [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="CredentialRequestsTest.testSerializer" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="PortableIdentityCard-ClientSDK" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.microsoft.portableIdentity.sdk.auth.credentialRequests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.microsoft.portableIdentity.sdk.auth.credentialRequests" />
+      <option name="MAIN_CLASS_NAME" value="com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequestsTest" />
+      <option name="METHOD_NAME" value="testSerializer" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="OidcRequestTest.testRequest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="PortableIdentityCard-ClientSDK" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.microsoft.portableIdentity.sdk.auth.requests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.microsoft.portableIdentity.sdk.auth.requests" />
+      <option name="MAIN_CLASS_NAME" value="com.microsoft.portableIdentity.sdk.auth.requests.OidcRequestTest" />
+      <option name="METHOD_NAME" value="testRequest" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.PortableIdentityCard-ClientSDK-Android [build]" />
+        <item itemvalue="JUnit.OidcRequestTest.testRequest" />
+        <item itemvalue="JUnit.CredentialRequestsTest.testSerializer" />
+        <item itemvalue="Android JUnit.CredentialRequestsTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="abcf4e3f-0df2-4b16-8be4-94a9a5bcec36" name="Default Changelist" comment="" />
+      <created>1583785010869</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1583785010869</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="502" y="162" key="#com.intellij.ide.util.MemberChooser" timestamp="1584801334886">
+      <screen x="0" y="23" width="1440" height="837" />
+    </state>
+    <state x="502" y="162" key="#com.intellij.ide.util.MemberChooser/0.23.1440.833@0.23.1440.833" timestamp="1584480368109" />
+    <state x="502" y="162" key="#com.intellij.ide.util.MemberChooser/0.23.1440.834@0.23.1440.834" timestamp="1584484530340" />
+    <state x="502" y="162" key="#com.intellij.ide.util.MemberChooser/0.23.1440.835@0.23.1440.835" timestamp="1583957891541" />
+    <state x="502" y="162" key="#com.intellij.ide.util.MemberChooser/0.23.1440.836@0.23.1440.836" timestamp="1584026791786" />
+    <state x="502" y="162" key="#com.intellij.ide.util.MemberChooser/0.23.1440.837@0.23.1440.837" timestamp="1584801334886" />
+    <state x="1" y="371" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog" timestamp="1584115040014">
+      <screen x="0" y="23" width="1440" height="832" />
+    </state>
+    <state x="1" y="371" key="#com.intellij.refactoring.move.MoveHandler.SelectRefactoringDialog/0.23.1440.832@0.23.1440.832" timestamp="1584115040014" />
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog" timestamp="1585411933754">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.1440.833@0.23.1440.833" timestamp="1585411933754" />
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.1440.835@0.23.1440.835" timestamp="1585341664172" />
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.1440.836@0.23.1440.836" timestamp="1584643852533" />
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.1440.837@0.23.1440.837" timestamp="1584802975668" />
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.1440.838@0.23.1440.838" timestamp="1585068571711" />
+    <state x="354" y="23" key="#com.intellij.refactoring.rename.AutomaticRenamingDialog/0.23.1440.839@0.23.1440.839" timestamp="1585091757852" />
+    <state x="459" y="192" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1585185241720">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state x="459" y="192" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1440.835@0.23.1440.835" timestamp="1585185241720" />
+    <state x="459" y="193" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1440.836@0.23.1440.836" timestamp="1583954761036" />
+    <state x="459" y="193" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1440.837@0.23.1440.837" timestamp="1584803959352" />
+    <state x="459" y="193" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.23.1440.838@0.23.1440.838" timestamp="1585094750904" />
+    <state x="350" y="98" key="#org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.ui.MoveKotlinTopLevelDeclarationsDialog" timestamp="1585341412169">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state x="350" y="98" key="#org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.ui.MoveKotlinTopLevelDeclarationsDialog/0.23.1440.832@0.23.1440.832" timestamp="1584114970325" />
+    <state x="350" y="98" key="#org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.ui.MoveKotlinTopLevelDeclarationsDialog/0.23.1440.835@0.23.1440.835" timestamp="1585341412169" />
+    <state x="350" y="98" key="#org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.ui.MoveKotlinTopLevelDeclarationsDialog/0.23.1440.837@0.23.1440.837" timestamp="1584802959557" />
+    <state x="350" y="98" key="#org.jetbrains.kotlin.idea.refactoring.move.moveDeclarations.ui.MoveKotlinTopLevelDeclarationsDialog/0.23.1440.839@0.23.1440.839" timestamp="1585091530704" />
+    <state x="102" y="41" key="CommitChangelistDialog2" timestamp="1584482494995">
+      <screen x="0" y="23" width="1440" height="834" />
+    </state>
+    <state x="102" y="41" key="CommitChangelistDialog2/0.23.1440.834@0.23.1440.834" timestamp="1584482494995" />
+    <state width="699" height="215" key="GridCell.Tab.0.bottom" timestamp="1585483878012">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="699" height="215" key="GridCell.Tab.0.bottom/0.23.1440.833@0.23.1440.833" timestamp="1585483878012" />
+    <state width="1382" height="215" key="GridCell.Tab.0.bottom/0.23.1440.834@0.23.1440.834" timestamp="1585334549487" />
+    <state width="1295" height="215" key="GridCell.Tab.0.bottom/0.23.1440.835@0.23.1440.835" timestamp="1585349184700" />
+    <state width="1398" height="215" key="GridCell.Tab.0.bottom/0.23.1440.836@0.23.1440.836" timestamp="1584645136527" />
+    <state width="1398" height="215" key="GridCell.Tab.0.bottom/0.23.1440.837@0.23.1440.837" timestamp="1584803592508" />
+    <state width="699" height="215" key="GridCell.Tab.0.center" timestamp="1585483878011">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="699" height="215" key="GridCell.Tab.0.center/0.23.1440.833@0.23.1440.833" timestamp="1585483878011" />
+    <state width="1382" height="215" key="GridCell.Tab.0.center/0.23.1440.834@0.23.1440.834" timestamp="1585334549486" />
+    <state width="1295" height="215" key="GridCell.Tab.0.center/0.23.1440.835@0.23.1440.835" timestamp="1585349184699" />
+    <state width="1398" height="215" key="GridCell.Tab.0.center/0.23.1440.836@0.23.1440.836" timestamp="1584645136525" />
+    <state width="1398" height="215" key="GridCell.Tab.0.center/0.23.1440.837@0.23.1440.837" timestamp="1584803592507" />
+    <state width="699" height="215" key="GridCell.Tab.0.left" timestamp="1585483878010">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="699" height="215" key="GridCell.Tab.0.left/0.23.1440.833@0.23.1440.833" timestamp="1585483878010" />
+    <state width="1382" height="215" key="GridCell.Tab.0.left/0.23.1440.834@0.23.1440.834" timestamp="1585334549486" />
+    <state width="1295" height="215" key="GridCell.Tab.0.left/0.23.1440.835@0.23.1440.835" timestamp="1585349184698" />
+    <state width="1398" height="215" key="GridCell.Tab.0.left/0.23.1440.836@0.23.1440.836" timestamp="1584645136524" />
+    <state width="1398" height="215" key="GridCell.Tab.0.left/0.23.1440.837@0.23.1440.837" timestamp="1584803592506" />
+    <state width="699" height="215" key="GridCell.Tab.0.right" timestamp="1585483878012">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="699" height="215" key="GridCell.Tab.0.right/0.23.1440.833@0.23.1440.833" timestamp="1585483878012" />
+    <state width="1382" height="215" key="GridCell.Tab.0.right/0.23.1440.834@0.23.1440.834" timestamp="1585334549486" />
+    <state width="1295" height="215" key="GridCell.Tab.0.right/0.23.1440.835@0.23.1440.835" timestamp="1585349184700" />
+    <state width="1398" height="215" key="GridCell.Tab.0.right/0.23.1440.836@0.23.1440.836" timestamp="1584645136526" />
+    <state width="1398" height="215" key="GridCell.Tab.0.right/0.23.1440.837@0.23.1440.837" timestamp="1584803592507" />
+    <state width="1295" height="267" key="GridCell.Tab.1.bottom" timestamp="1585437007598">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="1295" height="267" key="GridCell.Tab.1.bottom/0.23.1440.833@0.23.1440.833" timestamp="1585437007598" />
+    <state width="1382" height="267" key="GridCell.Tab.1.bottom/0.23.1440.834@0.23.1440.834" timestamp="1585334521348" />
+    <state width="1295" height="267" key="GridCell.Tab.1.bottom/0.23.1440.835@0.23.1440.835" timestamp="1585348244430" />
+    <state width="1295" height="267" key="GridCell.Tab.1.center" timestamp="1585437007598">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="1295" height="267" key="GridCell.Tab.1.center/0.23.1440.833@0.23.1440.833" timestamp="1585437007598" />
+    <state width="1382" height="267" key="GridCell.Tab.1.center/0.23.1440.834@0.23.1440.834" timestamp="1585334521348" />
+    <state width="1295" height="267" key="GridCell.Tab.1.center/0.23.1440.835@0.23.1440.835" timestamp="1585348244430" />
+    <state width="1295" height="267" key="GridCell.Tab.1.left" timestamp="1585437007597">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="1295" height="267" key="GridCell.Tab.1.left/0.23.1440.833@0.23.1440.833" timestamp="1585437007597" />
+    <state width="1382" height="267" key="GridCell.Tab.1.left/0.23.1440.834@0.23.1440.834" timestamp="1585334521347" />
+    <state width="1295" height="267" key="GridCell.Tab.1.left/0.23.1440.835@0.23.1440.835" timestamp="1585348244429" />
+    <state width="1295" height="267" key="GridCell.Tab.1.right" timestamp="1585437007598">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state width="1295" height="267" key="GridCell.Tab.1.right/0.23.1440.833@0.23.1440.833" timestamp="1585437007598" />
+    <state width="1382" height="267" key="GridCell.Tab.1.right/0.23.1440.834@0.23.1440.834" timestamp="1585334521348" />
+    <state width="1295" height="267" key="GridCell.Tab.1.right/0.23.1440.835@0.23.1440.835" timestamp="1585348244430" />
+    <state x="221" y="78" key="SettingsEditor" timestamp="1584652844170">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state x="221" y="78" key="SettingsEditor/0.23.1440.835@0.23.1440.835" timestamp="1584652844170" />
+    <state width="720" height="416" key="XDebugger.FullValuePopup" timestamp="1584619860923">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state width="720" height="416" key="XDebugger.FullValuePopup/0.23.1440.835@0.23.1440.835" timestamp="1584619860923" />
+    <state x="397" y="271" key="com.intellij.ide.util.TipDialog" timestamp="1585437047948">
+      <screen x="0" y="23" width="1440" height="833" />
+    </state>
+    <state x="397" y="271" key="com.intellij.ide.util.TipDialog/0.23.1440.832@0.23.1440.832" timestamp="1584151867001" />
+    <state x="397" y="271" key="com.intellij.ide.util.TipDialog/0.23.1440.833@0.23.1440.833" timestamp="1585437047948" />
+    <state x="397" y="272" key="com.intellij.ide.util.TipDialog/0.23.1440.834@0.23.1440.834" timestamp="1584383021233" />
+    <state x="483" y="76" key="refactoring.ChangeSignatureDialog" timestamp="1583940829458">
+      <screen x="0" y="23" width="1440" height="837" />
+    </state>
+    <state x="483" y="76" key="refactoring.ChangeSignatureDialog/0.23.1440.837@0.23.1440.837" timestamp="1583940829458" />
+    <state x="384" y="182" width="670" height="676" key="search.everywhere.popup" timestamp="1585185523908">
+      <screen x="0" y="23" width="1440" height="835" />
+    </state>
+    <state x="384" y="182" width="670" height="676" key="search.everywhere.popup/0.23.1440.835@0.23.1440.835" timestamp="1585185523908" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/test/java/com/microsoft/portableIdentity/sdk/auth/requests/OidcRequestTest.kt</url>
+          <line>16</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/PortableIdentityCard-ClientSDK/src/test/java/com/microsoft/portableIdentity/sdk/auth/requests/OidcRequestTest.kt</url>
+          <line>14</line>
+          <option name="timeStamp" value="27" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

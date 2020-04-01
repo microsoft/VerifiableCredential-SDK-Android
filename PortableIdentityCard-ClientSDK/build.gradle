@@ -27,6 +27,10 @@ android {
     sourceSets {
         main.jniLibs.srcDirs = ['libs']
     }
+
+    useLibrary 'android.test.mock'
+    useLibrary 'android.test.runner'
+    useLibrary 'android.test.base'
 }
 
 buildscript {
@@ -83,6 +87,7 @@ dependencies {
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:3.11.1"
+    testImplementation "androidx.test:core:1.0.0"
 
     // TODO: Cleanup dependencies
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
