@@ -17,11 +17,11 @@ import retrofit2.http.Url
 interface PortableIdentityCardApi {
 
     @GET
-    fun getContract(@Url overrideUrl: String): Deferred<Response<PicContract>>
+    suspend fun getContract(@Url overrideUrl: String): Response<PicContract>
 
     @GET
-    fun getRequest(@Url overrideUrl: String): Deferred<Response<String>>
+    suspend fun getRequest(@Url overrideUrl: String): Response<String>
 
     @POST
-    fun sendResponse(@Url overrideUrl: String, @Body body: String): Deferred<Response<ServiceResponse>>
+    suspend fun sendResponse(@Url overrideUrl: String, @Body body: String): Response<ServiceResponse>
 }
