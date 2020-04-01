@@ -14,15 +14,12 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class CryptoOperationsInstrumentedTest {
-    private val logger: ILogger = ConsoleLogger()
     private val androidSubtle: SubtleCrypto
     private val ellipticCurveSubtleCrypto: EllipticCurveSubtleCrypto
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -32,10 +29,10 @@ class CryptoOperationsInstrumentedTest {
 //    private val keyPair: CryptoKeyPair
 
     init {
-        keyStore = AndroidKeyStore(context, logger)
-        androidSubtle = AndroidSubtle(keyStore, logger)
-        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, logger)
-        crypto = CryptoOperations(androidSubtle, keyStore, logger)
+        keyStore = AndroidKeyStore(context)
+        androidSubtle = AndroidSubtle(keyStore)
+        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle)
+        crypto = CryptoOperations(androidSubtle, keyStore)
 /*        keyPair =  androidSubtle.generateKeyPair(
             RsaOaepParams(additionalParams = mapOf(Pair("KeyReference", keyRef))),
             true,

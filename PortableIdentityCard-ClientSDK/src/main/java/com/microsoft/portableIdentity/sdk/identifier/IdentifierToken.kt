@@ -4,7 +4,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.Serializable
 
@@ -33,7 +33,6 @@ data class IdentifierToken (
         fun deserialize(
             identifierToken: String,
             cryptoOperations: CryptoOperations,
-            logger: ILogger,
             resolver: IResolver,
             registrar: IRegistrar
         ): Identifier {
@@ -44,7 +43,6 @@ data class IdentifierToken (
                 signatureKeyReference = token.signatureKeyReference,
                 encryptionKeyReference = token.encryptionKeyReference,
                 cryptoOperations = cryptoOperations,
-                logger = logger,
                 resolver = resolver,
                 registrar = registrar
             )

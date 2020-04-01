@@ -5,12 +5,11 @@ import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPublicKey
 import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.document.service.ServiceHubEndpoint
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
 class SerializationTest {
-    private var actualDocument : IdentifierDocument = IdentifierDocument(
+    private var actualDocument: IdentifierDocument = IdentifierDocument(
         context = "https://w3id.org/did/v1",
         id = "did:test:hub.id",
         created = "2019-07-15T22:36:00.881Z",
@@ -47,13 +46,8 @@ class SerializationTest {
         )
     )
 
-    @BeforeTest
-    fun setup() {
-
-    }
-
     @Test
-    fun serializationTest() {
+    fun `serialize and deserialize an identity document`() {
         val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
         val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedDocument)
         assertThat(actualDocument).isEqualToComparingFieldByFieldRecursively(expectedDocument)

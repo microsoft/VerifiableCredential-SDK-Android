@@ -14,17 +14,15 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaHashedKeyAlgorithm
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.RuntimeException
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class AndroidKeyStoreInstrumentedTest {
 
-    private val logger: ILogger = ConsoleLogger()
     private val androidSubtle: AndroidSubtle
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val keyStore: AndroidKeyStore
@@ -34,8 +32,8 @@ class AndroidKeyStoreInstrumentedTest {
     private var actualPrivateKey: RsaPrivateKey
 
     init {
-        keyStore = AndroidKeyStore(context, logger)
-        androidSubtle = AndroidSubtle(keyStore, logger)
+        keyStore = AndroidKeyStore(context)
+        androidSubtle = AndroidSubtle(keyStore)
         keyPair = androidSubtle.generateKeyPair(
             RsaHashedKeyAlgorithm(
                 modulusLength = 4096UL,
@@ -44,8 +42,8 @@ class AndroidKeyStoreInstrumentedTest {
                 additionalParams = mapOf("KeyReference" to keyRef)
             ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
         )
-        actualPublicKey = RsaPublicKey(androidSubtle.exportKeyJwk(keyPair.publicKey), logger)
-        actualPrivateKey = RsaPrivateKey(androidSubtle.exportKeyJwk(keyPair.privateKey), logger)
+        actualPublicKey = RsaPublicKey(androidSubtle.exportKeyJwk(keyPair.publicKey))
+        actualPrivateKey = RsaPrivateKey(androidSubtle.exportKeyJwk(keyPair.privateKey))
     }
 
     @Test
@@ -74,7 +72,7 @@ class AndroidKeyStoreInstrumentedTest {
     @Test
     fun invalidKeyReferenceTest() {
         val nonExistingPublicKeyRef = "kid1"
-        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(Error::class.java)
+        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(RuntimeException::class.java)
     }
 
     @Test
@@ -118,7 +116,7 @@ class AndroidKeyStoreInstrumentedTest {
             JsonWebKey(
                 kty = KeyType.Octets.value,
                 kid = "#$keyRef.1"
-            ), logger
+            )
         )
         keyStore.save(keyRef, secretKey)
         val actualSecretKey = keyStore.getSecretKey(keyRef)
@@ -131,7 +129,7 @@ class AndroidKeyStoreInstrumentedTest {
             JsonWebKey(
                 kty = KeyType.Octets.value,
                 kid = "#secret.2"
-            ), logger
+            )
         )
         keyStore.save("secret", secretKey)
         val actualSecretKey = keyStore.getSecretKeyById(secretKey.kid)

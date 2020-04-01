@@ -9,22 +9,19 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class AndroidSubtleInstrumentedTest {
-    private val logger: ILogger = ConsoleLogger()
     private val androidSubtle: AndroidSubtle
     private var cryptoKeyPair: CryptoKeyPair
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val keyStore = AndroidKeyStore(context, logger)
-        androidSubtle = AndroidSubtle(keyStore, logger)
+        val keyStore = AndroidKeyStore(context)
+        androidSubtle = AndroidSubtle(keyStore)
         val keyReference: String = "KeyReference1"
         cryptoKeyPair = androidSubtle.generateKeyPair(
             EcKeyGenParams(
@@ -126,7 +123,7 @@ class AndroidSubtleInstrumentedTest {
         )*/
         val actualJwk = androidSubtle.exportKeyJwk(cryptoKeyPair.publicKey)
         actualJwk.alg = cryptoKeyPair.publicKey.algorithm.name
-        val actualAlgorithm = JwaCryptoConverter.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name, logger = logger)
+        val actualAlgorithm = JwaCryptoConverter.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name)
         val actualCryptoKey = androidSubtle.importKey(KeyFormat.Jwk, actualJwk, actualAlgorithm, false, listOf(KeyUsage.Sign))
         assertThat(actualCryptoKey.type).isEqualTo(KeyType.Public)
     }
