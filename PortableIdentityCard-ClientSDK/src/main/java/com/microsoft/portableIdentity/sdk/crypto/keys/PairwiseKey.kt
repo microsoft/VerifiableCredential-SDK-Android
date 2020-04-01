@@ -5,6 +5,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
@@ -31,7 +32,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
 
         val keyType = KeyTypeFactory.createViaWebCrypto(algorithm);
         return when (keyType) {
-//            KeyType.EllipticCurve -> EcPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <EcKeyGenParams>algorithm, peerId);
+            KeyType.EllipticCurve -> EllipticCurvePairwiseKey().generate(this.crypto, personaMasterKey, algorithm as EcKeyGenParams, peerId);
 //            KeyType.RSA -> RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
             else -> error("Pairwise key for type '${keyType.value}' is not supported.");
         }
