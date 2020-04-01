@@ -1,5 +1,10 @@
 package com.microsoft.portableIdentity.sdk.identifier.document
 
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
+import com.microsoft.portableIdentity.sdk.utilities.ILogger
 import kotlinx.serialization.Serializable
 
 /**
@@ -32,4 +37,23 @@ data class IdentifierDocumentPublicKey (
      */
     val publicKeyHex: String
 ) {
+/*    fun toPublicKey(logger: ILogger): PublicKey {
+        return when (type) {
+            in LinkedDataKeySpecification.RsaSignature2018.values -> {
+                return RsaPublicKey(this.publicKeyJwk, logger = logger)
+            }
+            in LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values -> {
+                return EllipticCurvePublicKey(this.publicKeyJwk, logger = logger)
+            }
+            in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
+                throw logger.error("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
+            }
+            in LinkedDataKeySpecification.Ed25519Signature2018.values -> {
+                throw logger.error("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
+            }
+            else -> {
+                throw logger.error("Unknown key type: $type")
+            }
+        }
+    }*/
 }

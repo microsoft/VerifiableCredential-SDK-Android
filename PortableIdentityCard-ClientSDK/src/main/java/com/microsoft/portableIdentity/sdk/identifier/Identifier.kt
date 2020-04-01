@@ -4,8 +4,11 @@ import com.google.crypto.tink.subtle.Hex
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
+import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
+import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierToken
 import com.microsoft.portableIdentity.sdk.identifier.document.*
+import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentifierDocumentService
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
@@ -62,7 +65,13 @@ class Identifier constructor(
                         type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                         publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(signingKeyJWK.x!!, logger), Base64.decode(signingKeyJWK.y!!, logger))
                     )
-                )
+                )/*,
+                services = listOf(IdentityHubService(
+                    id = "#hubEndpoint",
+                    publicKey = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
+                    serviceEndpoint = "https://beta.hub.microsoft.com/"
+                    )
+                )*/
             )
 
             val identifierDocumentPatch = IdentifierDocumentPatch("replace", identifierDocumentPayload)
@@ -91,6 +100,8 @@ class Identifier constructor(
 
             val identifierDocument = resolver.resolve(portableIdentity, registrationDocumentEncoded, cryptoOperations)
             logger.debug("Registered new decentralized identity")
+            identifierDocument.alias = alias
+            identifierDocument.signatureKeyReference = personaSigKeyRef
             return identifierDocument
         }
 

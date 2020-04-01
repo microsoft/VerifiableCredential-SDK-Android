@@ -26,7 +26,8 @@ class IdentityManager(private val config: DidSdkConfig) {
 
     private val didSecretName = "did.identifier"
 
-    val did: IdentifierResponse by lazy { initLongFormDid() }
+//    val did: IdentifierResponse by lazy { initLongFormDid() }
+    val did = initLongFormDid()
 
     internal val cryptoOperations: CryptoOperations = config.cryptoOperations
 

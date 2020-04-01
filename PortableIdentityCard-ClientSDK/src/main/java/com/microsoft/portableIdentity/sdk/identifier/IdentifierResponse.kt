@@ -1,5 +1,7 @@
 package com.microsoft.portableIdentity.sdk.identifier
 
+import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.document.*
 
 /**
@@ -11,8 +13,12 @@ import com.microsoft.portableIdentity.sdk.identifier.document.*
  * @param registrar to register Identifiers.
  */
 class IdentifierResponse constructor(
-    val document: IdentifierDocument
-) {
+    val document: IdentifierDocument,
+    var signatureKeyReference: String,
+    val encryptionKeyReference: String,
+    var alias: String,
+    private val cryptoOperations: CryptoOperations
+    ) {
     companion object {
         var microsoftIdentityHubDocument: IdentifierDocumentPayload = IdentifierDocumentPayload(
             publicKeys = listOf(
@@ -23,10 +29,10 @@ class IdentifierResponse constructor(
                 )
             )/*,
             services = listOf(
-                IdHubService(
+                IdentityHubService(
                     id = "IdentityHub",
                     publicKey = "#key1",
-                    serviceEndpoint = UserHubEndpoint(listOf("did:bar:456", "did:zaz:789"))
+                    serviceEndpoint = "https://testendpoint"*//*UserHubEndpoint(listOf("did:bar:456", "did:zaz:789"))*//*
                 )
             )*/
         )

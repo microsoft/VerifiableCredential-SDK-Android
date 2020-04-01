@@ -6,6 +6,6 @@ import kotlinx.serialization.Polymorphic
 interface IdentifierDocumentService {
     val id: String
     val type: String
-    @Polymorphic
-    val serviceEndpoint: Endpoint
+//    @Polymorphic
+    val serviceEndpoint: String
 }

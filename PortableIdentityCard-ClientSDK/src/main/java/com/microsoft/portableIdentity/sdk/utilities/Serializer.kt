@@ -27,13 +27,13 @@ object Serializer : ISerializer {
             IdentityHubService::class with IdentityHubService.serializer()
         }
     }
-
+/*
     private val serviceEndpointSerializer = SerializersModule {
         polymorphic(Endpoint::class) {
             ServiceHubEndpoint::class with ServiceHubEndpoint.serializer()
             UserHubEndpoint::class with UserHubEndpoint.serializer()
         }
-    }
+    }*/
 
     private val claimDetailSerializer = SerializersModule {
         polymorphic(ClaimDetail::class) {
@@ -43,7 +43,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = identifierDocServiceSerializer + identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
+        context = identifierDocServiceSerializer + identifierDocumentServiceSerializer /*+ serviceEndpointSerializer*/ + claimDetailSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

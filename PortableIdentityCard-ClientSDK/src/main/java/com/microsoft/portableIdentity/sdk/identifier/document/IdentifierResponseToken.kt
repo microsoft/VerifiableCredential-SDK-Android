@@ -10,12 +10,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IdentifierResponseToken (
-    val document: IdentifierDocument
+    val document: IdentifierDocument,
+    val alias: String,
+    val signatureKeyReference: String,
+    val encryptionKeyReference: String
 ) {
     companion object {
         private fun tokenize(identifier: IdentifierResponse): IdentifierResponseToken {
             return IdentifierResponseToken(
-                identifier.document
+                identifier.document,
+                identifier.alias,
+                identifier.signatureKeyReference,
+                identifier.encryptionKeyReference
             )
         }
 
@@ -33,7 +39,11 @@ data class IdentifierResponseToken (
         ): IdentifierResponse {
             val token = Serializer.parse(IdentifierResponseToken.serializer(), identifierToken)
             return IdentifierResponse(
-                document = token.document
+                document = token.document,
+                alias = token.alias,
+                signatureKeyReference = token.signatureKeyReference,
+                encryptionKeyReference = token.encryptionKeyReference,
+                cryptoOperations = cryptoOperations
             )
         }
     }

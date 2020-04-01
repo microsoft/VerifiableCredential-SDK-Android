@@ -57,7 +57,11 @@ abstract class IResolver(internal val logger: ILogger) {
     ): IdentifierResponse {
         val document = this.resolveDocument(identifier, initialValues)
         return IdentifierResponse(
-            document
+            document,
+            "",
+            "",
+            "",
+            cryptoOperations
         )
     }
 }
