@@ -4,9 +4,8 @@ import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
 class Base64Test {
-    private val logger = ConsoleLogger()
-    /**
-     * @see https://tools.ietf.org/html/rfc4648#section-10
+
+     /* @see https://tools.ietf.org/html/rfc4648#section-10
      */
     private val base64TestPairs = listOf(
         Pair("", ""),
@@ -32,7 +31,7 @@ class Base64Test {
     fun `rfc base64 encode vectors`() {
         base64TestPairs.forEach {
             val suppliedInput = it.first.map { character -> character.toByte() }.toByteArray()
-            val actualEncodedOutput = Base64.encode(suppliedInput, logger)
+            val actualEncodedOutput = Base64.encode(suppliedInput)
             val expectedEncodedOutput = it.second
             assertThat(actualEncodedOutput).isEqualTo(expectedEncodedOutput)
         }
@@ -43,7 +42,7 @@ class Base64Test {
         base64TestPairs.forEach {
             val expectedDecodedOutput = it.first.map { character -> character.toByte() }.toByteArray()
             val suppliedInput = it.second
-            val actualDecodedOutput = Base64.decode(suppliedInput, logger)
+            val actualDecodedOutput = Base64.decode(suppliedInput)
             assertEqualsByteArray(expectedDecodedOutput, actualDecodedOutput)
         }
     }
@@ -52,7 +51,7 @@ class Base64Test {
     fun `rfc base64url encode vectors`() {
         base64UrlTestPairs.forEach {
             val suppliedInput = it.first.map { character -> character.toByte() }.toByteArray()
-            val actualEncodedOutput = Base64Url.encode(suppliedInput, logger)
+            val actualEncodedOutput = Base64Url.encode(suppliedInput)
             val expectedEncodedOutput = it.second
             assertThat(actualEncodedOutput).isEqualTo(expectedEncodedOutput)
         }
@@ -63,7 +62,7 @@ class Base64Test {
         base64UrlTestPairs.forEach {
             val expectedDecodedOutput = it.first.map { character -> character.toByte() }.toByteArray()
             val suppliedInput = it.second
-            val actualDecodedOutput = Base64Url.decode(suppliedInput, logger)
+            val actualDecodedOutput = Base64Url.decode(suppliedInput)
             assertEqualsByteArray(expectedDecodedOutput, actualDecodedOutput)
         }
     }
@@ -80,7 +79,7 @@ class Base64Test {
         suppliedInput[1] = 0xFE.toByte()
         suppliedInput[2] = 0x41.toByte()
         val expectedOutput = "yv5B"
-        val actualOutput = Base64Url.encode(suppliedInput, logger)
+        val actualOutput = Base64Url.encode(suppliedInput)
         assertThat(actualOutput).isEqualTo(expectedOutput)
 
         val suppliedInputString = "1234"
@@ -92,7 +91,7 @@ class Base64Test {
         expectedOutputByteArray[0] = 0xD7.toByte()
         expectedOutputByteArray[1] = 0x6D.toByte()
         expectedOutputByteArray[2] = 0xF8.toByte()
-        val actualOutputByteArray = Base64Url.decode(suppliedInputString, logger)
+        val actualOutputByteArray = Base64Url.decode(suppliedInputString)
         assertEqualsByteArray(expectedOutputByteArray, actualOutputByteArray)
     }
 

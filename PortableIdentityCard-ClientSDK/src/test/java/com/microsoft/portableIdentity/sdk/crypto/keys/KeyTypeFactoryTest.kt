@@ -1,13 +1,11 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class KeyTypeFactoryTest {
-    private val logger = ConsoleLogger()
 
     @Test
     fun `finding key type for rsa-oaep algorithm`() {
@@ -54,6 +52,6 @@ class KeyTypeFactoryTest {
     @Test
     fun `failing with invalid algorithm while finding key type`() {
         val nonExistingAlgorithmName = "Test"
-        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName, logger) }.isInstanceOf(IllegalStateException::class.java)
+        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName) }.isInstanceOf(IllegalStateException::class.java)
     }
 }

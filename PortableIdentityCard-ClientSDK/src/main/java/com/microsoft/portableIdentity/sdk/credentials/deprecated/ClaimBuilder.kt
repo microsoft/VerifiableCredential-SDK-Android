@@ -4,10 +4,10 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
-class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
+class ClaimBuilder(forClass: ClaimClass? = null) {
     var context: String? = null
     var type: String? = null
     var issuerName: String? = forClass?.issuerName
@@ -57,11 +57,11 @@ class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
 
     fun buildObject(classUri: String, identifier: Identifier, cryptoOperations: CryptoOperations? = null): ClaimObject {
         if (context.isNullOrBlank() || type.isNullOrBlank()) {
-            throw logger.error("Context and Type must be set.")
+            throw SdkLog.error("Context and Type must be set.")
         }
         val claims = if (cryptoOperations != null) {
             val serializedData = Serializer.stringify(claimDetails, Map::class)
-            val token = JwsToken(serializedData, logger = logger)
+            val token = JwsToken(serializedData)
             token.sign(identifier.signatureKeyReference, cryptoOperations)
             SignedClaimDetail(
                 data = token.serialize(JwsFormat.Compact)
@@ -75,8 +75,8 @@ class ClaimBuilder(forClass: ClaimClass? = null, private val logger: ILogger) {
             classUri,
             context!!,
             type!!,
-            claimDescriptions,
             identifier.document.id,
+            claimDescriptions,
             claims
         )
     }

@@ -7,15 +7,14 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaOaepParams
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.*
+import java.lang.RuntimeException
 
 class InMemoryKeyStoreTest {
-    private val logger = ConsoleLogger()
-    private val inMemoryKeyStore = InMemoryKeyStore(logger)
-    private val subtle = Subtle(setOf(MockProvider()), logger)
+    private val inMemoryKeyStore = InMemoryKeyStore()
+    private val subtle = Subtle(setOf(MockProvider()))
     private val keyRef: String = "TestKeys"
     private var keyPair: CryptoKeyPair
     private var actualPublicKey: MockPublicKey
@@ -108,7 +107,7 @@ class InMemoryKeyStoreTest {
     @Test
     fun `fail retrieve public key`() {
         val nonExistingPublicKeyRef = "kid1"
-        assertThatThrownBy { inMemoryKeyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(Error::class.java)
+        assertThatThrownBy { inMemoryKeyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(RuntimeException::class.java)
     }
 
     @Test

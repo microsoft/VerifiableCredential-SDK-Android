@@ -7,17 +7,16 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
-import com.microsoft.portableIdentity.sdk.utilities.ConsoleLogger
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import java.lang.RuntimeException
 
 class PublicKeyTest {
-    private val logger = ConsoleLogger()
-    private val keyStore = InMemoryKeyStore(logger)
-    private val subtle = Subtle(setOf(MockProvider()), logger)
+    private val keyStore = InMemoryKeyStore()
+    private val subtle = Subtle(setOf(MockProvider()))
     private var rsaPublicKey: RsaPublicKey
     @MockK
     private var actualJwk: JsonWebKey
@@ -30,7 +29,7 @@ class PublicKeyTest {
             kid = "#key1",
             key_ops = listOf(KeyUsage.Verify.value)
         )
-        rsaPublicKey = RsaPublicKey(actualJwk, logger)
+        rsaPublicKey = RsaPublicKey(actualJwk)
 
     }
 
@@ -52,6 +51,6 @@ class PublicKeyTest {
     @Test
     fun `failing rsa public key creation with wrong key type`() {
         actualJwk = mockk(relaxed = true)
-        Assertions.assertThatThrownBy { RsaPublicKey(actualJwk, logger) }.isInstanceOf(Error::class.java)
+        Assertions.assertThatThrownBy { RsaPublicKey(actualJwk) }.isInstanceOf(RuntimeException::class.java)
     }
 }

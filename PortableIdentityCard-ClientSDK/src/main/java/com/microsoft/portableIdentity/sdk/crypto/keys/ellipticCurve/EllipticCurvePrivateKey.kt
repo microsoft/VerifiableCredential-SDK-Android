@@ -4,9 +4,8 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
-class EllipticCurvePrivateKey (key: JsonWebKey, logger: ILogger): PrivateKey(key, logger) {
+class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     var crv = key.crv
     var x = key.x
     var y = key.y
@@ -29,6 +28,6 @@ class EllipticCurvePrivateKey (key: JsonWebKey, logger: ILogger): PrivateKey(key
     }
 
     override fun getPublicKey(): PublicKey {
-        return EllipticCurvePublicKey(this.toJWK(), logger)
+        return EllipticCurvePublicKey(this.toJWK())
     }
 }

@@ -9,7 +9,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoAp
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
-class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.value) : Provider(ConsoleLogger()) {
+class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.value) : Provider() {
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,
         KeyUsage.Decrypt
@@ -49,12 +49,12 @@ class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.val
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         val datagram = Datagram.deserialize(signature)
         if (key.handle != datagram.keyId) {
-            throw logger.error("Incorrect key used")
+            throw SdkLog.error("Incorrect key used")
         }
         datagram.getData().forEachIndexed {
                 index, byte ->
             if (data[index] != byte) {
-                throw logger.error("Signed data differs at byte $index")
+                throw SdkLog.error("Signed data differs at byte $index")
             }
         }
         return true
@@ -69,7 +69,7 @@ class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.val
         extractable: Boolean,
         keyUsages: Set<KeyUsage>
     ): CryptoKeyPair {
-        val kid = Base64Url.encode(Random.Default.nextBytes(8), logger)
+        val kid = Base64Url.encode(Random.Default.nextBytes(8))
         return CryptoKeyPair(
             publicKey = CryptoKey(
                 KeyType.Public,
@@ -98,7 +98,7 @@ class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.val
         return CryptoKey(
             KeyType.Secret,
             extractable = extractable,
-            handle = keyData.kid ?: Base64Url.encode(Random.Default.nextBytes(8), logger),
+            handle = keyData.kid ?: Base64Url.encode(Random.Default.nextBytes(8)),
             usages = keyUsages.toList(),
             algorithm = algorithm
         )
