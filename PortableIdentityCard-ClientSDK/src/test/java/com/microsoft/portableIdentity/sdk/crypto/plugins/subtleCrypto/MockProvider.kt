@@ -2,11 +2,14 @@ package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.utilities.*
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
-class MockProvider : Provider() {
-    override val name: String = W3cCryptoApiConstants.RsaOaep.value
+class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.value) : Provider() {
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,
         KeyUsage.Decrypt
