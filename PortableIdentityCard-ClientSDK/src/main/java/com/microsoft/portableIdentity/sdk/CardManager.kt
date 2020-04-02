@@ -101,13 +101,12 @@ class CardManager @Inject constructor(
     /**
      * Send a Response.
      */
-    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
-        val responseContent = formatter.formContents(response, responderIdentifier.document.id)
+    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier, contractUrl: String, issuanceUrl: String): ServiceResponse {
+        val responseContent = formatter.formContents(response, responderIdentifier.document.id, responderIdentifier.signatureKeyReference, contractUrl = contractUrl, issuanceUrl = issuanceUrl)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
-        val signedResponse = signer.sign(serializedResponseContent)
+        val signedResponse = signer.sign(serializedResponseContent, responderIdentifier.signatureKeyReference)
         val serializedSignedResponse = signedResponse.serialize()
-        val url = response.getRequestContents().redirectUrl
-        return picRepository.sendResponse(url, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+        return picRepository.sendResponse(issuanceUrl, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
     }
 
     /**
@@ -119,7 +118,7 @@ class CardManager @Inject constructor(
         picRepository.insert(card)
     }
 
-    private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
+    fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
         val token = JwsToken.deserialize(signedVerifiableCredential)
         return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
     }

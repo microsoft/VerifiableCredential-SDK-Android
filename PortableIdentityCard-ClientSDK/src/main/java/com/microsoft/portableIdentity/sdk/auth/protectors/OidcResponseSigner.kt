@@ -32,7 +32,7 @@ class OidcResponseSigner @Inject constructor(
      * Sign content with keyReference.
      * @return JwsToken
      */
-    fun sign(payload: String, keyReference: String = signatureKeyReference, additionalHeaders: Map<String, String> = emptyMap()): JwsToken {
+    fun sign(payload: String, keyReference: String, additionalHeaders: Map<String, String> = emptyMap()): JwsToken {
         val token = JwsToken(payload)
         token.sign(keyReference, cryptoOperations, additionalHeaders)
         return token

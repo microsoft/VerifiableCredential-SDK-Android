@@ -9,6 +9,8 @@ import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.CLAIM_NAM
 import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.CLAIM_SOURCES
 import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.SELF_ISSUED
 import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.SUB_JWK
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.SelfIssuedAttestation
+import com.microsoft.portableIdentity.sdk.cards.SelfIssued
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
@@ -32,10 +34,10 @@ data class OidcResponseContent(
     val aud: String,
 
     // nonce from the request.
-    val nonce: String,
+    val nonce: String? = null,
 
     // state from the request.
-    val state: String?,
+    val state: String? = null,
 
     // did tied to the private key that signed response.
     val did: String?,
@@ -62,5 +64,7 @@ data class OidcResponseContent(
     // claims that were being requested.
     // TODO (val attestations)
     //id of the response
-    val jti: String? = null
+    val jti: String? = null,
+
+    val attestations: SelfIssued
 )

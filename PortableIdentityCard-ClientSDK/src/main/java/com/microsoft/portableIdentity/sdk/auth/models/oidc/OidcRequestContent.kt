@@ -39,13 +39,14 @@ data class OidcRequestContent(
     @SerialName(REDIRECT_URL)
     val redirectUrl: String = "",
 
+        // did of the entity who sent the request.
     val iss: String = "",
 
     // should contain "openid did_authn"
     val scope: String = "",
 
     // opaque values that should be passed back to the requester.
-    val state: String = "",
+    val state: String? = null,
     val nonce: String = "",
 
     // Claims that are being requested.

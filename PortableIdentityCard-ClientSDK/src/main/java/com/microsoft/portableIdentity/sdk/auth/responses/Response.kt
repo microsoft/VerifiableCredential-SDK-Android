@@ -9,6 +9,8 @@ import com.microsoft.portableIdentity.sdk.cards.Card
 
 interface Response {
 
+    val audience: String
+
     /**
      * Add Credential to be put into response.
      *
