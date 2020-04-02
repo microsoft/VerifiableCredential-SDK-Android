@@ -14,7 +14,9 @@ import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
+import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.cards.Card
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
@@ -95,18 +97,21 @@ class CardManager @Inject constructor(
      * Create OidcResponse from OidcRequest.
      */
     fun createResponse(request: OidcRequest): OidcResponse {
-        return OidcResponse(request)
+        return PresentationResponse(request)
+    }
+    fun createResponse(contract: PicContract): OidcResponse {
+        return IssuanceResponse(contract)
     }
 
     /**
      * Send a Response.
      */
-    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier, contractUrl: String, issuanceUrl: String): ServiceResponse {
-        val responseContent = formatter.formContents(response, responderIdentifier.document.id, responderIdentifier.signatureKeyReference, contractUrl = contractUrl, issuanceUrl = issuanceUrl)
+    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
+        val responseContent = formatter.formContents(response, responderIdentifier.document.id, responderIdentifier.signatureKeyReference)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
         val signedResponse = signer.sign(serializedResponseContent, responderIdentifier.signatureKeyReference)
         val serializedSignedResponse = signedResponse.serialize()
-        return picRepository.sendResponse(issuanceUrl, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+        return picRepository.sendResponse(response.audience, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
     }
 
     /**

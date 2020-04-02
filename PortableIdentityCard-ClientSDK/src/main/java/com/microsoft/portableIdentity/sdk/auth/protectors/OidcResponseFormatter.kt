@@ -18,9 +18,9 @@ import kotlin.math.floor
  * Class that forms Response Contents Properly.
  */
 @Singleton
-class OidcResponseFormatter@Inject constructor(
-    private val cryptoOperations: CryptoOperations,
-    @Named("signatureKeyReference") private val signatureKeyReference: String
+class OidcResponseFormatter @Inject constructor(
+        private val cryptoOperations: CryptoOperations,
+        @Named("signatureKeyReference") private val signatureKeyReference: String
 ) {
 
     fun formContents(response: OidcResponse, responderDid: String, useKey: String, expiresIn: Int = AuthenticationConstants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
@@ -43,15 +43,15 @@ class OidcResponseFormatter@Inject constructor(
         }
 
         return OidcResponseContent(
-            sub = key.getThumbprint(cryptoOperations, Sha.Sha256),
-            aud = response.audience,
-            nonce = nonce,
-            did = responderDid,
-            subJwk = key.toJWK(),
-            iat = iat,
-            exp = exp,
-            state = state,
-            jti = jti,
+                sub = key.getThumbprint(cryptoOperations, Sha.Sha256),
+                aud = response.audience,
+                nonce = nonce,
+                did = responderDid,
+                subJwk = key.toJWK(),
+                iat = iat,
+                exp = exp,
+                state = state,
+                jti = jti,
                 contract = contract,
                 attestations = SelfIssued(mapOf("name" to "Sydney"))
         )
@@ -61,7 +61,7 @@ class OidcResponseFormatter@Inject constructor(
         val currentTime = Date().time
         val expiration = currentTime + 1000 * 60 * expiresIn
         val exp = floor(expiration / 1000f).toLong()
-        val iat = floor( currentTime / 1000f).toLong()
+        val iat = floor(currentTime / 1000f).toLong()
         return Pair(iat, exp)
     }
 }
