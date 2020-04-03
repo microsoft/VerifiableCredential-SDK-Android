@@ -1,9 +1,13 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.portableIdentity.sdk.di
 
 import android.content.Context
 import androidx.room.Room
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
@@ -18,8 +22,14 @@ import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import dagger.Module
 import dagger.Provides
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
 /**
@@ -54,7 +64,33 @@ internal class SdkModule {
 
     @Provides
     @Singleton
+<<<<<<< HEAD
     fun defaultResolver(resolver: HttpResolver): Resolver {
+=======
+    fun defaultOkHttpClient() : OkHttpClient {
+        val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.i(it) }
+        return OkHttpClient()
+            .newBuilder()
+            .addInterceptor(httpLoggingInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun defaultRetrofit(okHttpClient: OkHttpClient) : Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("")
+            .client(okHttpClient)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun defaultResolver(resolver: HttpResolver): IResolver {
+>>>>>>> master
         return resolver
     }
 

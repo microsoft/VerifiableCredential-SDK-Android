@@ -3,11 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credentials
+package com.microsoft.portableIdentity.sdk.repository.networking
 
 /**
- * Interface for defining a Credential object.
+ * Class to handle Network response.
+ * It either can be Success with the required data or Error with an exception.
  */
-interface Credential {
-    // TODO: define Credential Interface
+sealed class HttpResult<out T: Any> {
+    data class Success<out T : Any>(val data: T) : HttpResult<T>()
+    data class Error(val exception: Exception) : HttpResult<Nothing>()
 }

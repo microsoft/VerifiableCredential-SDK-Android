@@ -1,10 +1,13 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
 import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentifierDocumentService
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.SignedClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.UnsignedClaimDetail
 import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentityHubService
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.SignedClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.UnsignedClaimDetail
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
@@ -39,8 +42,15 @@ object Serializer : ISerializer {
         }
     }
 
+    private val serviceResponseSerializer = SerializersModule {
+        polymorphic(ServiceResponse::class) {
+            IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()
+            PresentationServiceResponse::class with PresentationServiceResponse.serializer()
+        }
+    }
+
     val json: Json = Json(
-        context = identifierDocServiceSerializer + identifierDocumentServiceSerializer /*+ serviceEndpointSerializer*/ + claimDetailSerializer,
+        context = identifierDocumentServiceSerializer + /*serviceEndpointSerializer +*/ claimDetailSerializer + serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

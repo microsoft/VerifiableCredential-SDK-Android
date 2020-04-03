@@ -3,11 +3,17 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credentials
+package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 
-data class VerifiableCredential(
-    val context: String
-) : Credential
-{
-    // TODO: define VC.
-}
+import androidx.room.Entity
+import kotlinx.serialization.Serializable
+
+/**
+ * Data model to describe a service provided in Verifiable Credential.
+ * (e.g. status service, revocation service)
+ */
+@Serializable
+data class ServiceDescriptor (
+    val id: String,
+    val type: String
+)

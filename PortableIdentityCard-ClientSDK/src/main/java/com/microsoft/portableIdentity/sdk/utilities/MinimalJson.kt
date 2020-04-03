@@ -5,9 +5,9 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.UserHubEndpoint
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.SignedClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.UnsignedClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.SignedClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.UnsignedClaimDetail
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.SerializersModule

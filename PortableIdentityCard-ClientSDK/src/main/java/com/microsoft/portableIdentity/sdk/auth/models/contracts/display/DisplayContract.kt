@@ -5,11 +5,14 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.contracts.display
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 /**
  * A user experience data file that describes how information in a Verifiable Credential may be displayed.
  */
+@Entity
 @Serializable
 data class DisplayContract (
 
