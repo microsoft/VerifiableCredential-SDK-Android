@@ -5,7 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.cards.Card
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 
 interface Response {
 
@@ -16,6 +16,6 @@ interface Response {
      *
      * @param credential to be added to response.
      */
-    fun addCredential(credential: Card)
+    fun addCredential(credential: PortableIdentityCard)
 
 }

@@ -66,5 +66,5 @@ data class OidcResponseContent(
     //id of the response
     val jti: String? = null,
 
-    val attestations: SelfIssued
+    val attestations: SelfIssued?
 )

@@ -5,7 +5,9 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.contracts
 
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
+import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import kotlinx.serialization.Serializable
 
 /**
@@ -27,4 +29,9 @@ data class PicContract (
 
     // An optional structured data model used to describe the set of claims in a Verifiable Credential.
     val schema: SchemaContract? = null
-)
+): Request {
+
+    override fun getCredentialAttestations(): CredentialAttestations {
+        return input.attestations
+    }
+}

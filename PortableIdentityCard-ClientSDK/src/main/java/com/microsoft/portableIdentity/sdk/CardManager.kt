@@ -13,13 +13,13 @@ import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceRe
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
-import com.microsoft.portableIdentity.sdk.cards.Card
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
@@ -118,8 +118,9 @@ class CardManager @Inject constructor(
      * Puts together card and saves in repository.
      */
     suspend fun saveCard(signedVerifiableCredential: String, contract: PicContract) {
-        val vc = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        val card = Card(vc.jti, signedVerifiableCredential, contract.display)
+        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
+        val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
+        val card = PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
         picRepository.insert(card)
     }
 
@@ -128,7 +129,7 @@ class CardManager @Inject constructor(
         return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
     }
 
-    fun getCards(): LiveData<List<Card>> {
+    fun getCards(): LiveData<List<PortableIdentityCard>> {
         return picRepository.getAllCards()
     }
 

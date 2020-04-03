@@ -53,7 +53,7 @@ class OidcResponseFormatter @Inject constructor(
                 state = state,
                 jti = jti,
                 contract = contract,
-                attestations = SelfIssued(mapOf("name" to "Sydney"))
+                attestations = response.selfIssuedClaims
         )
     }
 

@@ -5,10 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.cards.Card
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
-import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import com.microsoft.portableIdentity.sdk.cards.SelfIssued
 
 /**
  * OIDC Response formed from a Request.
@@ -21,21 +19,23 @@ open abstract class OidcResponse(override val audience: String): Response {
     /**
      * list of collected credentials to be sent in response.
      */
-    private val collectedCredentials: MutableList<Card> = mutableListOf()
+    private val collectedCredentials: MutableList<PortableIdentityCard> = mutableListOf()
+
+    var selfIssuedClaims: SelfIssued? = null
 
     /**
      * Add Credential to be put into response.
-     *
+     * TODO(Figure out how to gather claims)
      * @param credential to be added to response.
      */
-    override fun addCredential(credential: Card) {
+    override fun addCredential(credential: PortableIdentityCard) {
         collectedCredentials.add(credential)
     }
 
     /**
      * Get Credentials
      */
-    fun getCredentials(): MutableList<Card> {
+    fun getCredentials(): MutableList<PortableIdentityCard> {
         return collectedCredentials
     }
 }
