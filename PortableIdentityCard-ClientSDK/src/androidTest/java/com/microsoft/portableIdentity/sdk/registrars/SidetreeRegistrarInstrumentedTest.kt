@@ -11,7 +11,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.*
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -22,8 +22,8 @@ import kotlin.random.Random
 @RunWith(AndroidJUnit4ClassRunner::class)
 class SidetreeRegistrarInstrumentedTest {
 
-    private val registrar: IRegistrar
-    private val resolver: IResolver
+    private val registrar: Registrar
+    private val resolver: Resolver
     private val cryptoOperations: CryptoOperations
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto

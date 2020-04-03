@@ -13,8 +13,8 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
 //import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponseToken
-import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.registrars.Registrar
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -30,8 +30,8 @@ import kotlin.random.Random
 @Singleton
 class IdentityManager @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver,
-    private val registrar: IRegistrar,
+    private val resolver: Resolver,
+    private val registrar: Registrar,
     @Named("signatureKeyReference") private val signatureKeyReference: String,
     @Named("encryptionKeyReference") private val encryptionKeyReference: String,
     @Named("recoveryKeyReference") private val recoveryKeyReference: String

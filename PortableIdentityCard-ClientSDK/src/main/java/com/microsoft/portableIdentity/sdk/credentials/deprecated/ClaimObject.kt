@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -38,7 +38,7 @@ data class ClaimObject(var claimClass: String,
         return ClaimClass.resolve(claimClass)
     }
 
-    suspend fun verify(cryptoOperations: CryptoOperations, resolver: IResolver) {
+    suspend fun verify(cryptoOperations: CryptoOperations, resolver: Resolver) {
         claimDetails.verify(cryptoOperations, resolver)
     }
 }

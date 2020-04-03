@@ -10,7 +10,7 @@ import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.repository.VerifiableCredentialRepository
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.HttpWrapper
 import io.ktor.http.Url
 import io.ktor.util.toMap
@@ -23,7 +23,7 @@ import javax.inject.Singleton
 class CardManager @Inject constructor(
     private val vcRepository: VerifiableCredentialRepository,
     private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver,
+    private val resolver: Resolver,
     private val validator: OidcRequestValidator // TODO: should this be a generic Validator?
 ) {
 

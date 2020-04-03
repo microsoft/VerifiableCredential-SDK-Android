@@ -25,7 +25,7 @@ import javax.inject.Named
  * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String): IRegistrar() {
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String): Registrar() {
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
         val content = Serializer.stringify(RegistrationDocument.serializer(), document)

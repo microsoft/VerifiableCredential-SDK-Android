@@ -6,7 +6,7 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.Identif
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
-class NullRegistrar(): IRegistrar() {
+class NullRegistrar(): Registrar() {
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         throw SdkLog.error("Attempted to register from the null registrar.")
     }

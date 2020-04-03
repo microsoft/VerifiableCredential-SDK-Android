@@ -4,16 +4,17 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 object DidKeyResolver {
-    suspend fun resolveIdentiferFromKid(kid: String, crypto: CryptoOperations, resolver: IResolver): Identifier {
+    //TODO Replace error with exception something generic related to Keys
+    suspend fun resolveIdentiferFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): Identifier {
         val did = Regex("^([^#]+)#.+$").matchEntire(kid) ?: throw SdkLog.error("No identifier found in key id")
         return resolver.resolve(did.groupValues[1], crypto)
     }
 
-    suspend fun resolveKeyFromKid(kid: String, crypto: CryptoOperations, resolver: IResolver): PublicKey {
+    suspend fun resolveKeyFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): PublicKey {
         val identifier = resolveIdentiferFromKid(kid, crypto, resolver)
         val did = Regex("^[^#]+(#.+)$").matchEntire(kid)!!
         return identifier.document.publicKeys.filter {
@@ -29,7 +30,7 @@ object DidKeyResolver {
         jws.verify(crypto, keys)
     }
 
-    suspend fun verifyJws(jws: JwsToken, crypto: CryptoOperations, resolver: IResolver, forDid: String? = null) {
+    suspend fun verifyJws(jws: JwsToken, crypto: CryptoOperations, resolver: Resolver, forDid: String? = null) {
         if (forDid.isNullOrBlank()) {
             val sender = resolver.resolve(forDid!!, crypto)
             // verify the request

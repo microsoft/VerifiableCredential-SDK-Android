@@ -9,7 +9,7 @@ import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocu
  * @interface defining methods and properties
  * to be implemented by specific registration methods.
  */
-abstract class IRegistrar() {
+abstract class Registrar() {
 
     /**
      * Registers the identifier document on the ledger

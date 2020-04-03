@@ -11,7 +11,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.*
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import io.ktor.client.request.post
@@ -70,7 +70,7 @@ class OidcResponse (
                                    clockSkewInMinutes: Int = 5,
                                    issuedWithinLastMinutes: Int? = null,
                                    crypto: CryptoOperations,
-                                   resolver: IResolver,
+                                   resolver: Resolver,
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
                 ContentType.Application.FormUrlEncoded -> {

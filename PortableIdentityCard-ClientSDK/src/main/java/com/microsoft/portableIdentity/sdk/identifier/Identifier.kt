@@ -3,14 +3,13 @@ package com.microsoft.portableIdentity.sdk.identifier
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 //import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponse
-import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
+import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
-import java.security.MessageDigest
 
 /**
  * Class for creating and managing identifiers,
@@ -27,8 +26,8 @@ class Identifier constructor(
     val recoveryKeyReference: String,
     val alias: String,
     private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver,
-    private val registrar: IRegistrar
+    private val resolver: Resolver,
+    private val registrar: Registrar
 ) {
     companion object {
         // TODO: needs refactoring! Dependency inject this object instead of having this companion etc.
@@ -38,8 +37,8 @@ class Identifier constructor(
             signatureKeyReference: String,
             encryptionKeyReference: String,
             recoveryKeyReference: String,
-            resolver: IResolver,
-            registrar: IRegistrar
+            resolver: Resolver,
+            registrar: Registrar
         ): Identifier {
             // TODO: Use software generated keys from the seed
 //        val seed = cryptoOperations.generateSeed()

@@ -11,9 +11,9 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.Identif
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
-import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
+import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /**
@@ -30,8 +30,8 @@ class Identifier constructor (
     val encryptionKeyReference: String,
     val alias: String,
     private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver,
-    private val registrar: IRegistrar) {
+    private val resolver: Resolver,
+    private val registrar: Registrar) {
     companion object {
 
         private val microsoftIdentityHubDocument =
@@ -79,8 +79,8 @@ class Identifier constructor (
             cryptoOperations: CryptoOperations,
             signatureKeyReference: String,
             encryptionKeyReference: String,
-            resolver: IResolver,
-            registrar: IRegistrar,
+            resolver: Resolver,
+            registrar: Registrar,
             identityHubDid: List<String>? = null
             ): Identifier {
             // TODO: Use software generated keys from the seed

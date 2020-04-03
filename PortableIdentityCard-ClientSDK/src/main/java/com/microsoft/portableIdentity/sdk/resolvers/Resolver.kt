@@ -13,7 +13,7 @@ import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
  * be implemented by specific resolver methods.
  * @interface
  */
-abstract class IResolver() {
+abstract class Resolver() {
 
     /**
      * Returns the identifier document for the specified

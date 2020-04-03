@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class HttpResolver @Inject constructor(
     @Named("resolverUrl") private val baseUrl: String
-) : IResolver() {
+) : Resolver() {
 
     @Serializable
     data class ResolverMetadata(val driverId: String?, val driver: String?, val retrieved: String?, val duration: String?)

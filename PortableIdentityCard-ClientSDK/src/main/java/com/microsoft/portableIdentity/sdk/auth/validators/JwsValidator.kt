@@ -9,8 +9,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +19,7 @@ import javax.inject.Singleton
 @Singleton
 class JwsValidator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver
+    private val resolver: Resolver
     ) {
 
     /**
