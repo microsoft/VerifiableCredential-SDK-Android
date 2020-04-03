@@ -16,7 +16,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
      * Get Contract from url.
      */
     suspend fun getContract(url: String): PicContract? {
-        return safeApiCall(
+        return fire(
             call = {picApi.getContract(url)},
             errorMessage = "Error Fetching Contract from $url."
         )
@@ -26,7 +26,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
      * Get Request from url.
      */
     suspend fun getRequest(url: String): String? {
-        return safeApiCall(
+        return fire(
             call = {picApi.getRequest(url)},
             errorMessage = "Error Fetching Request from $url."
         )
@@ -36,7 +36,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
      * Post Response to url.
      */
     suspend fun sendResponse(url: String, serializedResponse: String): ServiceResponse? {
-        return safeApiCall(
+        return fire(
             call = {picApi.sendResponse(url, serializedResponse)},
             errorMessage = "Error Sending Response to $url."
         )

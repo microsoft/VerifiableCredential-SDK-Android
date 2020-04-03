@@ -8,6 +8,7 @@ package com.microsoft.portableIdentity.sdk.cards
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,12 +16,12 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-data class Card (
+data class PortableIdentityCard (
 
     @PrimaryKey
     val id: String,
 
-    val signedVerifiableCredential: String,
+    val verifiableCredential: VerifiableCredential,
 
     val displayContract: DisplayContract
 )

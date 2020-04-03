@@ -5,7 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.cards.Card
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
@@ -21,14 +21,14 @@ class OidcResponse(private val request: OidcRequest): Response {
     /**
      * list of collected credentials to be sent in response.
      */
-    private val collectedCredentials: MutableList<Card> = mutableListOf()
+    private val collectedCredentials: MutableList<PortableIdentityCard> = mutableListOf()
 
     /**
      * Add Credential to be put into response.
      *
      * @param credential to be added to response.
      */
-    override fun addCredential(credential: Card) {
+    override fun addCredential(credential: PortableIdentityCard) {
         collectedCredentials.add(credential)
     }
 
@@ -53,7 +53,7 @@ class OidcResponse(private val request: OidcRequest): Response {
     /**
      * Create Response Content object from collectedCredentials and Request Contents.
      */
-    private fun createResponseContent(collectedCredentials: List<Card>): OidcResponseContent {
+    private fun createResponseContent(collectedCredentials: List<PortableIdentityCard>): OidcResponseContent {
         TODO("implement when protocol is finalized")
     }
 }

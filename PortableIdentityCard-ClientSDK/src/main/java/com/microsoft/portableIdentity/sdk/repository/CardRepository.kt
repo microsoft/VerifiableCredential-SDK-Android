@@ -7,7 +7,7 @@ package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-import com.microsoft.portableIdentity.sdk.cards.Card
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
 import com.microsoft.portableIdentity.sdk.repository.networking.PicNetworkOperation
@@ -44,11 +44,11 @@ class CardRepository @Inject constructor(database: SdkDatabase, private val picN
     private fun transformList(serialClaimObjects: List<SerialClaimObject>): List<ClaimObject> =
         serialClaimObjects.map { Serializer.parse(ClaimObject.serializer(), it.serialClaimObject) }
 
-    suspend fun insert(card: Card) = cardDao.insert(card)
+    suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
 
-    suspend fun delete(card: Card) = cardDao.delete(card)
+    suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
 
-    fun getAllCards(): LiveData<List<Card>> {
+    fun getAllCards(): LiveData<List<PortableIdentityCard>> {
         return cardDao.getAllCards()
     }
 

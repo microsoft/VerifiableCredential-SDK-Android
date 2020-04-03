@@ -12,8 +12,8 @@ import retrofit2.Response
 
 open class HttpBaseOperation {
 
-    suspend fun <T : Any> safeApiCall(call: suspend () -> Response<T>, errorMessage: String): T? {
-        val result: HttpResult<T> = safeApiResult(call, errorMessage)
+    suspend fun <T : Any> fire(call: suspend () -> Response<T>, errorMessage: String): T? {
+        val result: HttpResult<T> = getHttpResult(call, errorMessage)
         var data: T? = null
 
         when (result) {
@@ -29,7 +29,7 @@ open class HttpBaseOperation {
     /**
      * TODO(is this a good place for error handling different status codes?)
      */
-    private suspend fun <T : Any> safeApiResult(call: suspend () -> Response<T>, errorMessage: String): HttpResult<T> {
+    private suspend fun <T : Any> getHttpResult(call: suspend () -> Response<T>, errorMessage: String): HttpResult<T> {
         val response = call.invoke()
         if (response.code() == 401) {
             throw AuthenticationException("Http request forbidden.")

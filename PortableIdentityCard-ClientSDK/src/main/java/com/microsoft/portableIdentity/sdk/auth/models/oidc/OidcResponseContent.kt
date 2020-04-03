@@ -5,10 +5,10 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.CLAIM_NAMES
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.CLAIM_SOURCES
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.SELF_ISSUED
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.SUB_JWK
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_NAMES
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_SOURCES
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SELF_ISSUED
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SUB_JWK
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName

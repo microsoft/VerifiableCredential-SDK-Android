@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.protectors
 
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants
+import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
@@ -20,7 +20,7 @@ class OidcResponseFormatter@Inject constructor(
     @Named("signatureKeyReference") private val signatureKeyReference: String
 ) {
 
-    fun formContents(response: OidcResponse, responderDid: String, useKey: String = signatureKeyReference, expiresIn: Int = AuthenticationConstants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
+    fun formContents(response: OidcResponse, responderDid: String, useKey: String = signatureKeyReference, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
         val requestContent = response.getRequestContents()
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(useKey).getKey()
@@ -39,7 +39,7 @@ class OidcResponseFormatter@Inject constructor(
         )
     }
 
-    private fun createIatAndExp(expiresIn: Int = AuthenticationConstants.RESPONSE_EXPIRATION_IN_MINUTES): Pair<Long, Long> {
+    private fun createIatAndExp(expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Pair<Long, Long> {
         val currentTime = Date().time
         val expiration = currentTime + 1000 * 60 * expiresIn
         val exp = floor(expiration / 1000f).toLong()
