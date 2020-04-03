@@ -20,7 +20,7 @@ open class HttpBaseOperation {
             is HttpResult.Success ->
                 data = result.data
             is HttpResult.Error -> {
-                SdkLog.e("1.DataRepository", result.exception)
+                SdkLog.e("Could not do http operation.", result.exception)
             }
         }
         return data
