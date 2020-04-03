@@ -1,7 +1,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.plugins
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -11,7 +11,7 @@ import com.microsoft.portableIdentity.sdk.utilities.ILogger
 /**
  * Utility class to handle all CryptoSuite dependency injection
  */
-class SubtleCryptoFactory(default: SubtleCrypto, val logger: ILogger) {
+class SubtleCryptoFactory(default: SubtleCrypto) {
 
     private val defaultSubtleCryptoMapItem = SubtleCryptoMapItem(default, SubtleCryptoScope.All)
 
@@ -218,6 +218,6 @@ class SubtleCryptoFactory(default: SubtleCrypto, val logger: ILogger) {
                 return closeEnoughScope.first().subtleCrypto
             }
         }
-        throw logger.error("Could not find SubtleCrypto of appropriate scope")
+        throw SdkLog.error("Could not find SubtleCrypto of appropriate scope")
     }
 }

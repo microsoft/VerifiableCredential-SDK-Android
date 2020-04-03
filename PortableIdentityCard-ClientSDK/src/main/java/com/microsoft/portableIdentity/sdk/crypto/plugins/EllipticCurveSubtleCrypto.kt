@@ -2,7 +2,8 @@ package com.microsoft.portableIdentity.sdk.crypto.plugins
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class EllipticCurveSubtleCrypto(default: SubtleCrypto, logger: ILogger): Subtle(setOf(Secp256k1Provider(default, logger)), logger), SubtleCrypto {
-}
+@Singleton
+class EllipticCurveSubtleCrypto @Inject constructor(default: SubtleCrypto): Subtle(setOf(Secp256k1Provider(default)))

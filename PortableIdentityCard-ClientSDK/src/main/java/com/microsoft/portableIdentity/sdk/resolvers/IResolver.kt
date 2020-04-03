@@ -3,18 +3,17 @@ package com.microsoft.portableIdentity.sdk.resolvers
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.portableIdentity.sdk.identifier.IdentifierResponse
+//import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
 /**
  * Interface defining methods and properties to
  * be implemented by specific resolver methods.
  * @interface
  */
-abstract class IResolver(internal val logger: ILogger) {
+abstract class IResolver() {
 
     /**
      * Returns the identifier document for the specified
@@ -23,7 +22,7 @@ abstract class IResolver(internal val logger: ILogger) {
      */
     abstract suspend fun resolveDocument(identifier: String): IdentifierDocument
 
-    abstract suspend fun resolveDocument(identifier: String, initialValues: String): com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
+    abstract suspend fun resolveDocument(identifier: String, initialValues: String): com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 
     suspend fun resolve(
         identifier: String,
@@ -45,23 +44,25 @@ abstract class IResolver(internal val logger: ILogger) {
             encKey,
             "",
             cryptoOperations,
-            logger,
             this,
-            NullRegistrar(logger)
+            NullRegistrar()
         )
     }
 
     suspend fun resolve(
         identifier: String, initialValues: String,
         cryptoOperations: CryptoOperations
-    ): IdentifierResponse {
+    ): com.microsoft.portableIdentity.sdk.identifier.Identifier {
         val document = this.resolveDocument(identifier, initialValues)
-        return IdentifierResponse(
+        return com.microsoft.portableIdentity.sdk.identifier.Identifier(
             document,
             "",
             "",
             "",
-            cryptoOperations
+            "",
+            cryptoOperations,
+            this,
+            NullRegistrar()
         )
     }
 }

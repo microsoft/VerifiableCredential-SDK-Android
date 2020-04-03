@@ -1,10 +1,13 @@
 package com.microsoft.portableIdentity.sdk.resolvers
 
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
 import kotlinx.serialization.Serializable
+import javax.inject.Inject
+import javax.inject.Named
+import javax.inject.Singleton
 
 /**
  * Fetches Identifier Documents from remote resolvers over http.
@@ -12,7 +15,10 @@ import kotlinx.serialization.Serializable
  * @implements IResolver
  * @param url of the remote resolver.
  */
-class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(logger) {
+@Singleton
+class HttpResolver @Inject constructor(
+    @Named("resolverUrl") private val baseUrl: String
+) : IResolver() {
 
     @Serializable
     data class ResolverMetadata(val driverId: String?, val driver: String?, val retrieved: String?, val duration: String?)
@@ -37,7 +43,7 @@ class HttpResolver(private val baseUrl : String, logger: ILogger): IResolver(log
         return result.document
     }
 
-    override suspend fun resolveDocument(identifier: String, initialValues: String): com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument {
+    override suspend fun resolveDocument(identifier: String, initialValues: String): com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument {
         val client = getHttpClient()
         val response = client.get<String>() {
             url("$baseUrl/$identifier?-ion-initial-state=$initialValues ")

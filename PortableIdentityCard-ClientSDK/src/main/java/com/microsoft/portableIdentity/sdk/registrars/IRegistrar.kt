@@ -1,16 +1,15 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPayload
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
 
 /**
  * @interface defining methods and properties
  * to be implemented by specific registration methods.
  */
-abstract class IRegistrar(internal val logger: ILogger) {
+abstract class IRegistrar() {
 
     /**
      * Registers the identifier document on the ledger

@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.requests
 
-import com.microsoft.portableIdentity.sdk.auth.credentialRequests.CredentialRequests
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 
 interface Request {
 
@@ -9,5 +9,5 @@ interface Request {
      *
      * @return credentials requests if exist, null if no credentials requested.
      */
-    fun getCredentialRequests(): CredentialRequests?
+    fun getCredentialAttestations(): CredentialAttestations
 }

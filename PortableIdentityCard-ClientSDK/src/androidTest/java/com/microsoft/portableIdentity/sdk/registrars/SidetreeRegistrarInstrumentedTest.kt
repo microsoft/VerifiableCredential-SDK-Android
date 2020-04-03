@@ -5,7 +5,6 @@ package com.microsoft.portableIdentity.sdk.registrars
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.crypto.tink.subtle.EllipticCurves
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
@@ -25,19 +24,18 @@ class SidetreeRegistrarInstrumentedTest {
 
     private val registrar: IRegistrar
     private val resolver: IResolver
-    private val logger = ConsoleLogger()
     private val cryptoOperations: CryptoOperations
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val keyStore = AndroidKeyStore(context, logger)
-        androidSubtle = AndroidSubtle(keyStore, logger)
-        ecSubtle = EllipticCurveSubtleCrypto(androidSubtle, logger)
-        registrar = SidetreeRegistrar("http://10.91.6.163:3000", logger)
-        resolver = HttpResolver("http://10.91.6.163:3000", logger)
-        cryptoOperations = CryptoOperations(androidSubtle, keyStore, logger)
+        val keyStore = AndroidKeyStore(context)
+        androidSubtle = AndroidSubtle(keyStore)
+        ecSubtle = EllipticCurveSubtleCrypto(androidSubtle)
+        registrar = SidetreeRegistrar("http://10.91.6.163:3000")
+        resolver = HttpResolver("http://10.91.6.163:3000")
+        cryptoOperations = CryptoOperations(androidSubtle, keyStore)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
@@ -61,20 +59,20 @@ class SidetreeRegistrarInstrumentedTest {
             )
         )
         val identifierDocumentPatch = IdentifierDocumentPatch("replace", identifierDocumentPayload)
-        val nextUpdateOtp = Base64Url.encode(Random.Default.nextBytes(32), logger)
+        val nextUpdateOtp = Base64Url.encode(Random.Default.nextBytes(32))
         val nextUpdateOtpHash = byteArrayOf(18, 32) + hash(stringToByteArray(nextUpdateOtp))
-        val nextUpdateOtpHashString = Base64Url.encode(nextUpdateOtpHash, logger)
+        val nextUpdateOtpHashString = Base64Url.encode(nextUpdateOtpHash)
 
         val operationData = OperationData(nextUpdateOtpHashString, listOf(identifierDocumentPatch))
         val opDataJson = Serializer.stringify(OperationData.serializer(), operationData)
         val opDataByteArray = stringToByteArray(opDataJson)
         val opDataHashed = byteArrayOf(18, 32) + hash(opDataByteArray)
-        val opDataHash = Base64Url.encode(opDataHashed, logger)
-        val opDataEncodedString = Base64Url.encode(opDataByteArray, logger)
+        val opDataHash = Base64Url.encode(opDataHashed)
+        val opDataEncodedString = Base64Url.encode(opDataByteArray)
 
-        val nextRecoveryOtp = Base64Url.encode(Random.Default.nextBytes(32), logger)
+        val nextRecoveryOtp = Base64Url.encode(Random.Default.nextBytes(32))
         val nextRecoveryOtpHash = byteArrayOf(18, 32) + hash(stringToByteArray(nextRecoveryOtp))
-        val nextRecoveryOtpHashString = Base64.encode(nextRecoveryOtpHash, logger)
+        val nextRecoveryOtpHashString = Base64.encode(nextRecoveryOtpHash)
 
         val suffixData = SuffixData(
             opDataHash,
@@ -82,14 +80,14 @@ class SidetreeRegistrarInstrumentedTest {
             nextRecoveryOtpHashString
         )
         val suffixDataJson = Serializer.stringify(SuffixData.serializer(), suffixData)
-        val suffixDataEncodedString = Base64Url.encode(stringToByteArray(suffixDataJson), logger)
+        val suffixDataEncodedString = Base64Url.encode(stringToByteArray(suffixDataJson))
         val suffixDataHashed = byteArrayOf(18, 32) + hash(stringToByteArray(suffixDataJson))
-        val uniqueSuffix = Base64Url.encode(suffixDataHashed, logger)
+        val uniqueSuffix = Base64Url.encode(suffixDataHashed)
         val did = "did:ion:test:$uniqueSuffix"
 
         val regDoc = RegistrationDocument("create", suffixDataEncodedString, opDataEncodedString)
         val regDocJson = Serializer.stringify(RegistrationDocument.serializer(), regDoc)
-        val regDocEncodedString = Base64Url.encode(stringToByteArray(regDocJson), logger)
+        val regDocEncodedString = Base64Url.encode(stringToByteArray(regDocJson))
 
         println("did is $did and initial-state is $regDocEncodedString")
         runBlocking {
@@ -101,9 +99,17 @@ class SidetreeRegistrarInstrumentedTest {
 
     @Test
     fun idCreationTest() {
-        val alias = Base64Url.encode(Random.nextBytes(5), logger)
+        val alias = Base64Url.encode(Random.nextBytes(5))
         runBlocking {
-            val id = Identifier.createLongFormIdentifier(alias, cryptoOperations, logger, "", "", "", resolver, registrar)
+            val id = Identifier.createLongFormIdentifier(
+                alias,
+                cryptoOperations,
+                "signatureKeyReference",
+                "encryptionKeyReference",
+                "recoveryKeyReference",
+                resolver,
+                registrar
+            )
             assertThat(id).isNotNull
         }
     }

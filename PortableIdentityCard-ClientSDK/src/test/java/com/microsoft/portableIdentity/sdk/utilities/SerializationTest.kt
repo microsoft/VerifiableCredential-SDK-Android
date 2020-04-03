@@ -5,8 +5,7 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.Identif
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocumentPublicKey
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
 class SerializationTest {
@@ -50,13 +49,8 @@ class SerializationTest {
             )
         )
 
-    @BeforeTest
-    fun setup() {
-
-    }
-
     @Test
-    fun serializationTest() {
+    fun `serialize and deserialize an identity document`() {
         val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
         val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedDocument)
         assertThat(actualDocument).isEqualToComparingFieldByFieldRecursively(expectedDocument)

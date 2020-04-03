@@ -6,7 +6,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPayload
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.utilities.*
@@ -15,6 +15,8 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
+import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Registrar implementation for the Sidetree network
@@ -23,11 +25,11 @@ import io.ktor.http.ContentType
  * @param registrarUrl to the registration endpoint
  * @param cryptoOperations
  */
-class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistrar(logger) {
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String): IRegistrar() {
     override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
         // create JWS request
         val content = Serializer.stringify(RegistrationDocument.serializer(), document)
-        val jwsToken = JwsToken(content, logger = logger)
+        val jwsToken = JwsToken(content)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         val kid = key.kid
         jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))
@@ -41,7 +43,7 @@ class SidetreeRegistrar(private val baseUrl: String, logger: ILogger): IRegistra
     override suspend fun register(document: com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocumentPayload {
         // create JWS request
         val content = Serializer.stringify(com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument.serializer(), document)
-        val jwsToken = JwsToken(content, logger = logger)
+        val jwsToken = JwsToken(content)
         val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
         val kid = key.kid
         jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))

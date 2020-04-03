@@ -5,7 +5,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /**
  * Factory class to create @enum KeyType objects
@@ -28,8 +28,8 @@ object KeyTypeFactory {
      * Create the key use according to the selected algorithm.
      * @param algorithm JWA algorithm constant
      */
-    fun createViaJwa (algorithm: String, logger: ILogger): KeyType {
-        val alg = CryptoHelpers.jwaToWebCrypto(algorithm, logger = logger);
+    fun createViaJwa (algorithm: String): KeyType {
+        val alg = CryptoHelpers.jwaToWebCrypto(algorithm);
         return KeyTypeFactory.createViaWebCrypto(alg);
     }
 }

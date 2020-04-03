@@ -3,9 +3,9 @@ package com.microsoft.portableIdentity.sdk.crypto.keys.rsa
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.utilities.ILogger
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
-class RsaPublicKey(jwk: JsonWebKey, logger: ILogger): PublicKey(jwk, logger = logger) {
+class RsaPublicKey(jwk: JsonWebKey): PublicKey(jwk) {
     override fun minimumAlphabeticJwk(): String {
         return "{\"e\":\"${e}\",\"kty\":\"${kty.value}\",\"n\":\"${n}\"}"
     }

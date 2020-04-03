@@ -25,7 +25,6 @@ import kotlin.math.floor
 class OidcResponse (
     val responder: Identifier,
     val crypto: CryptoOperations,
-    private val logger: ILogger,
     val nonce: String,
     val state: String? = null,
     val claims: MutableList<ClaimObject> = mutableListOf(),
@@ -56,11 +55,10 @@ class OidcResponse (
     companion object {
         const val SELFISSUED = "https://self-issued.me"
 
-        fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier, logger: ILogger): OidcResponse {
+        fun create(oidcRequest: OidcRequest, respondWithIdentifier: Identifier): OidcResponse {
             return OidcResponse(
                 responder = respondWithIdentifier,
                 crypto = oidcRequest.crypto,
-                logger = logger,
                 nonce = oidcRequest.nonce,
                 state = oidcRequest.state,
                 redirectUrl = oidcRequest.redirectUrl,
@@ -72,58 +70,55 @@ class OidcResponse (
                                    clockSkewInMinutes: Int = 5,
                                    issuedWithinLastMinutes: Int? = null,
                                    crypto: CryptoOperations,
-                                   logger: ILogger,
                                    resolver: IResolver,
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
                 ContentType.Application.FormUrlEncoded -> {
                     val idToken = getQueryStringParameter(
                         OAuthRequestParameter.IdToken,
-                        data,
-                        logger = logger
-                    ) ?: throw logger.error("No id_token given.")
+                        data
+                    ) ?: throw SdkLog.error("No id_token given.")
                     val state = getQueryStringParameter(
                         OAuthRequestParameter.State,
-                        data,
-                        logger = logger
+                        data
                     )
-                    val token = JwsToken(idToken, logger = logger)
+                    val token = JwsToken(idToken)
                     val response = Serializer.parse(OidcResponseObject.serializer(), token.content())
 
                     val clockSkew = clockSkewInMinutes * 60
                     val currentTime = Date().time / 1000
                     if (currentTime - clockSkew < response.exp) {
-                        throw logger.error("Id token has expired.")
+                        throw SdkLog.error("Id token has expired.")
                     }
                     if (issuedWithinLastMinutes != null &&
                         (response.iat < (currentTime - clockSkew - (issuedWithinLastMinutes * 60)))) {
-                        throw logger.error("Id token issued before time frame set by issuedWithinLastMinutes ($issuedWithinLastMinutes)")
+                        throw SdkLog.error("Id token issued before time frame set by issuedWithinLastMinutes ($issuedWithinLastMinutes)")
                     }
 
                     val responder = if (response.did != null) {
                         resolver.resolve(response.did, crypto)
                     } else {
                         DidKeyResolver.resolveIdentiferFromKid(token.signatures.first {
-                            !it.getKid(logger = logger).isNullOrBlank()
-                        }.getKid(logger = logger)!!, crypto, resolver, logger = logger)
+                            !it.getKid().isNullOrBlank()
+                        }.getKid()!!, crypto, resolver)
                     }
 
-                    DidKeyResolver.verifyJws(token, crypto, responder, logger = logger)
+                    DidKeyResolver.verifyJws(token, crypto, responder)
                     val claimObjects = mutableListOf<ClaimObject>()
                     if (response.claimNames != null) {
                         // for each claim class
                         response.claimNames.forEach {
                             claimClass ->
-                            val claims = response.claimSources?.get(claimClass.value) ?: throw logger.error("Could not find claims for ${claimClass.key}")
+                            val claims = response.claimSources?.get(claimClass.value) ?: throw SdkLog.error("Could not find claims for ${claimClass.key}")
                             claims.forEach { claim ->
                                 if (claim.containsKey("JWT")) {
-                                    val claimObjectData = JwsToken(claim["JWT"]!!, logger = logger)
-                                    DidKeyResolver.verifyJws(claimObjectData, crypto, responder, logger = logger)
+                                    val claimObjectData = JwsToken(claim["JWT"]!!)
+                                    DidKeyResolver.verifyJws(claimObjectData, crypto, responder)
                                     val claimObject = Serializer.parse(ClaimObject.serializer(), claimObjectData.content())
                                     if (claimObject.claimClass != claimClass.key) {
-                                        throw logger.error("Claim Object class does not match expected class.")
+                                        throw SdkLog.error("Claim Object class does not match expected class.")
                                     }
-                                    claimObject.verify(crypto, resolver, logger = logger)
+                                    claimObject.verify(crypto, resolver)
                                     claimObjects.add(claimObject)
                                 }
                             }
@@ -133,7 +128,6 @@ class OidcResponse (
                     OidcResponse(
                         responder,
                         crypto,
-                        logger,
                         response.nonce,
                         state,
                         claimObjects,
@@ -142,7 +136,7 @@ class OidcResponse (
                     )
                 }
                 else -> {
-                    throw logger.error("Unable to parse content of type $contentType")
+                    throw SdkLog.error("Unable to parse content of type $contentType")
                 }
             }
         }
@@ -172,7 +166,7 @@ class OidcResponse (
             claimSources = mutableMapOf()
             claims.forEachIndexed { index, it ->
                 val claimData = Serializer.stringify(ClaimObject.serializer(), it)
-                val token = JwsToken(claimData, logger = logger)
+                val token = JwsToken(claimData)
                 token.sign(useKey, crypto)
                 val serialized = token.serialize(JwsFormat.Compact)
                 val name = if (claimNames.containsKey(it.claimClass)) {
@@ -204,7 +198,7 @@ class OidcResponse (
         )
         val responseData = Serializer.stringify(OidcResponseObject.serializer(), response)
         println("Responding with data: $responseData")
-        val token = JwsToken(responseData, logger = logger)
+        val token = JwsToken(responseData)
         token.sign(useKey, crypto)
         val responseSerialized = token.serialize(JwsFormat.Compact)
 
@@ -217,17 +211,23 @@ class OidcResponse (
 //                val responseBody = "id_token=${idToken}" + if (!state.isNullOrBlank()) {
 //                    "&state=${state}"
                     // DISABLED WHILE EnterpiseAgent is not percent decoding
-                val responseBody = "id_token=${PercentEncoding.encode(idToken, logger = logger)}" + if (!state.isNullOrBlank()) {
-                    "&state=${PercentEncoding.encode(state, logger = logger)}"
+                val responseBody = "id_token=${PercentEncoding.encode(idToken)}" + if (!state.isNullOrBlank()) {
+                    "&state=${PercentEncoding.encode(state)}"
                 } else {
                     ""
                 }
                 println("Encoded as: $responseBody")
-                val response = getHttpClient().post<String> {
-                    url(redirectUrl)
-                    body = ByteArrayContent(
-                        bytes = stringToByteArray(responseBody),
-                        contentType = ContentType.Application.FormUrlEncoded)
+                val response = try {
+                    getHttpClient().post<String> {
+                        url(redirectUrl)
+                        body = ByteArrayContent(
+                            bytes = stringToByteArray(responseBody),
+                            contentType = ContentType.Application.FormUrlEncoded
+                        )
+                    }
+                } catch (exception: Exception) {
+                    println("Exception sending response: ${exception.message}")
+                    throw exception
                 }
                 if (response.isNotBlank()) {
                     try {
@@ -241,7 +241,7 @@ class OidcResponse (
                 }
             }
             else -> {
-                throw logger.error("Unknown Response Mode $responseMode")
+                throw SdkLog.error("Unknown Response Mode $responseMode")
             }
         }
     }
