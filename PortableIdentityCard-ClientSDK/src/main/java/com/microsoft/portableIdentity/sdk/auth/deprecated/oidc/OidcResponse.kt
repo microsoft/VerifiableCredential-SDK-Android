@@ -2,8 +2,8 @@
 
 package com.microsoft.portableIdentity.sdk.auth.deprecated.oidc
 
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimResponse
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimResponse
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey

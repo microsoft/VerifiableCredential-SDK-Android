@@ -1,8 +1,11 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.ClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.SignedClaimDetail
-import com.microsoft.portableIdentity.sdk.credentials.deprecated.UnsignedClaimDetail
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
+import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.SignedClaimDetail
+import com.microsoft.portableIdentity.sdk.cards.deprecated.UnsignedClaimDetail
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
 import com.microsoft.portableIdentity.sdk.identifier.document.service.Endpoint
 import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
@@ -36,8 +39,15 @@ object Serializer : ISerializer {
         }
     }
 
+    private val serviceResponseSerializer = SerializersModule {
+        polymorphic(ServiceResponse::class) {
+            IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()
+            PresentationServiceResponse::class with PresentationServiceResponse.serializer()
+        }
+    }
+
     val json: Json = Json(
-        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
+        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer + serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false
