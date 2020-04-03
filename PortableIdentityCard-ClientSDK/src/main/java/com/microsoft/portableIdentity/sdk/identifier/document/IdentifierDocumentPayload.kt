@@ -15,9 +15,9 @@ class IdentifierDocumentPayload(
     val created: String? = null,
     val updated: String? = null,
     @SerialName("publicKeys")
-    val publicKeys: List<IdentifierDocumentPublicKey>/*,
+    val publicKeys: List<IdentifierDocumentPublicKey>,
     @SerialName("serviceEndpoints")
-    val services: List<IdentifierDocumentService>*/
+    val serviceEndpoints: List<IdentifierDocumentService>
 
 ) {
     val id: String = ""

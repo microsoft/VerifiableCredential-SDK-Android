@@ -61,17 +61,16 @@ class Identifier constructor(
             val identifierDocumentPayload: IdentifierDocumentPayload = IdentifierDocumentPayload(
                 publicKeys = listOf(
                     IdentifierDocumentPublicKey(
-                        id = signingKeyJWK.kid!!,
+                        id = "cIiCWr41",
                         type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                         publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(signingKeyJWK.x!!, logger), Base64.decode(signingKeyJWK.y!!, logger))
                     )
-                )/*,
-                services = listOf(IdentityHubService(
-                    id = "#hubEndpoint",
-                    publicKey = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
-                    serviceEndpoint = "https://beta.hub.microsoft.com/"
+                ),
+                serviceEndpoints = listOf(IdentityHubService(
+                    id = "test",
+                    serviceEndpoint = "https://beta.hub.microsoft.com"
                     )
-                )*/
+                )
             )
 
             val identifierDocumentPatch = IdentifierDocumentPatch("replace", identifierDocumentPayload)
