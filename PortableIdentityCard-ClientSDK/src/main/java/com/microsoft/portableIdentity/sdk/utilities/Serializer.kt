@@ -50,7 +50,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = identifierDocumentServiceSerializer + /*serviceEndpointSerializer +*/ claimDetailSerializer + serviceResponseSerializer,
+        context = identifierDocServiceSerializer + identifierDocumentServiceSerializer + /*serviceEndpointSerializer +*/ claimDetailSerializer + serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

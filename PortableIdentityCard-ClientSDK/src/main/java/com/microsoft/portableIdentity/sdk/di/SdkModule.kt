@@ -64,9 +64,6 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-<<<<<<< HEAD
-    fun defaultResolver(resolver: HttpResolver): Resolver {
-=======
     fun defaultOkHttpClient() : OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.i(it) }
         return OkHttpClient()
@@ -89,8 +86,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultResolver(resolver: HttpResolver): IResolver {
->>>>>>> master
+    fun defaultResolver(resolver: HttpResolver): Resolver {
         return resolver
     }
 
