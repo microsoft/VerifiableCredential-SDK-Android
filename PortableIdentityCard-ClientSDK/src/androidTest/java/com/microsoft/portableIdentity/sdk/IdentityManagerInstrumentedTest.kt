@@ -3,6 +3,7 @@ package com.microsoft.portableIdentity.sdk
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.portableIdentity.sdk.PortableIdentitySdk.identityManager
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
@@ -27,7 +28,7 @@ class IdentityManagerInstrumentedTest {
     private val recoveryKeyReference: String
     private val registrar: Registrar
     private val resolver: Resolver
-    private val identityManager: IdentityManager
+//    private val identityManager: IdentityManager
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
     private val cryptoOperations: CryptoOperations
@@ -47,12 +48,13 @@ class IdentityManagerInstrumentedTest {
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
-        identityManager = IdentityManager(cryptoOperations, resolver, registrar, signatureKeyReference, encryptionKeyReference, recoveryKeyReference)
+        PortableIdentitySdk.init(context)
+//        identityManager = IdentityManager(cryptoOperations, resolver, registrar, signatureKeyReference, encryptionKeyReference, recoveryKeyReference)
     }
 
     @Test
     fun createIdentifierTest() {
-        assertThat(identityManager.did).isNotNull
+        assertThat(PortableIdentitySdk.identityManager.did).isNotNull
     }
 
     @Test
@@ -60,7 +62,7 @@ class IdentityManagerInstrumentedTest {
         val test = "test string"
         val testPayload = test.toByteArray()
         val token = JwsToken(testPayload)
-        token.sign(identityManager.did.signatureKeyReference, cryptoOperations)
+        token.sign(PortableIdentitySdk.identityManager.did.signatureKeyReference, cryptoOperations)
         assertThat(token.signatures).isNotNull
 /*        val matched = token.verify(cryptoOperations)
         assertThat(matched).isTrue()*/

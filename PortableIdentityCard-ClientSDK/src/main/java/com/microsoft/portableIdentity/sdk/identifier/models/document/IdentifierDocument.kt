@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.identifier.models.document
 
-import kotlinx.serialization.SerialName
+import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentityHubService
 import kotlinx.serialization.Serializable
 
 /**
@@ -9,11 +9,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class IdentifierDocument(
-    @SerialName("@context")
-    val context: String = "https://www.w3.org/2019/did/v1",
+//    val context: String = "https://www.w3.org/2019/did/v1",
     val created: String? = null,
     val updated: String? = null,
     val publicKey: List<IdentifierDocumentPublicKey>,
+    val service: List<IdentityHubService>,
     val recoveryKey: RecoveryKey
 ) {
     val id: String = ""

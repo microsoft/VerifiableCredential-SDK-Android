@@ -38,10 +38,11 @@ object PortableIdentitySdk {
     fun init(
         context: Context,
         logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(),
-        registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
-        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
+        registrationUrl: String = "http://10.91.6.163:3000",
+        resolverUrl: String = "http://10.91.6.163:3000",
         defaultSignatureKeyReference: String = "signature",
-        defaultEncryptionKeyReference: String = "encryption"
+        defaultEncryptionKeyReference: String = "encryption",
+        defaultRecoveryKeyReference: String = "recovery"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
@@ -49,6 +50,7 @@ object PortableIdentitySdk {
             .resolverUrl(resolverUrl)
             .signatureKeyReference(defaultSignatureKeyReference)
             .encryptionKeyReference(defaultEncryptionKeyReference)
+            .recoveryKeyReference(defaultRecoveryKeyReference)
             .build()
 
         identityManager = sdkComponent.identityManager()

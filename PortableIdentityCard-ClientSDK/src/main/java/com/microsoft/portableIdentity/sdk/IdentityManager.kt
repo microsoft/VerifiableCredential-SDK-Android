@@ -12,10 +12,16 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 //import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
+import com.microsoft.portableIdentity.sdk.identifier.PayloadGenerator
+import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
 //import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponseToken
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
+import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
+import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -29,19 +35,51 @@ import kotlin.random.Random
  */
 @Singleton
 class IdentityManager @Inject constructor(
+    private val identityRepository: PortableIdentityRepository,
     private val cryptoOperations: CryptoOperations,
     private val resolver: Resolver,
     private val registrar: Registrar,
     @Named("signatureKeyReference") private val signatureKeyReference: String,
     @Named("encryptionKeyReference") private val encryptionKeyReference: String,
-    @Named("recoveryKeyReference") private val recoveryKeyReference: String
+    @Named("recoveryKeyReference") private val recoveryKeyReference: String,
+    @Named("resolverUrl") resolverUrl: String
 ) {
 
     private val didSecretName = "did.identifier"
+    private val url = resolverUrl
 
-//    val did: IdentifierResponse by lazy { initLongFormDid() }
-    val did = initLongFormDid()
+    val did: Identifier by lazy { initLongFormDid() }
+//    val did = initLongFormDid()
 
+    suspend fun registerPortableIdentity(url: String): Identifier {
+        val alias = Base64Url.encode(Random.nextBytes(16))
+        val personaEncKeyRef = "$alias.$encryptionKeyReference"
+        val personaSigKeyRef = "$alias.$signatureKeyReference"
+        val personaRecKeyRef = "$alias.$recoveryKeyReference"
+        val payloadGenerator = PayloadGenerator(
+            cryptoOperations,
+            signatureKeyReference,
+            encryptionKeyReference,
+            recoveryKeyReference
+        )
+        val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
+        val registrationDocument = Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
+        val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
+        val portableIdentity = "did:ion:test:$uniqueSuffix"
+        val identifier = "$portableIdentity?-ion-initial-state=$registrationDocumentEncoded"
+        val resolveUrl = "$url/$identifier"
+        val identifierDocument = identityRepository.resolveIdentifier(resolveUrl)
+        return Identifier(
+            identifierDocument!!,
+            personaSigKeyRef,
+            personaEncKeyRef,
+            personaRecKeyRef,
+            alias,
+            cryptoOperations,
+            resolver,
+            NullRegistrar()
+        )
+    }
     // TODO: Cleanup method
 /*  private fun initDid(): Identifier {
         val did = if (cryptoOperations.keyStore.list().containsKey(didSecretName)) {
@@ -136,11 +174,12 @@ class IdentityManager @Inject constructor(
 
     suspend fun createLongFormIdentifier(): Identifier {
         return withContext(Dispatchers.Default) {
-            val alias = Base64Url.encode(Random.nextBytes(16))
+/*            val alias = Base64Url.encode(Random.nextBytes(16))
             Identifier.createLongFormIdentifier(
                 alias, cryptoOperations, signatureKeyReference,
                 encryptionKeyReference, recoveryKeyReference, resolver, registrar
-            )
+            )*/
+            registerPortableIdentity(url)
         }
     }
 
