@@ -3,7 +3,6 @@ package com.microsoft.portableIdentity.sdk
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.portableIdentity.sdk.PortableIdentitySdk.identityManager
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
@@ -28,7 +27,6 @@ class IdentityManagerInstrumentedTest {
     private val recoveryKeyReference: String
     private val registrar: Registrar
     private val resolver: Resolver
-//    private val identityManager: IdentityManager
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
     private val cryptoOperations: CryptoOperations
@@ -49,7 +47,6 @@ class IdentityManagerInstrumentedTest {
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
         PortableIdentitySdk.init(context)
-//        identityManager = IdentityManager(cryptoOperations, resolver, registrar, signatureKeyReference, encryptionKeyReference, recoveryKeyReference)
     }
 
     @Test

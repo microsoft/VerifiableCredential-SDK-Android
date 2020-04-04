@@ -31,7 +31,7 @@ class Identifier constructor(
 ) {
     companion object {
         // TODO: needs refactoring! Dependency inject this object instead of having this companion etc.
-        suspend fun createLongFormIdentifier(
+/*        suspend fun createLongFormIdentifier(
             alias: String,
             cryptoOperations: CryptoOperations,
             signatureKeyReference: String,
@@ -70,7 +70,7 @@ class Identifier constructor(
                 resolver = resolver,
                 registrar = registrar
             )
-        }
+        }*/
     }
 
     fun serialize(): String {

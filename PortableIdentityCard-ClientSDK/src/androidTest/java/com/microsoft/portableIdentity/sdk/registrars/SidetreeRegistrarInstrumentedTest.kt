@@ -97,7 +97,7 @@ class SidetreeRegistrarInstrumentedTest {
         }
     }*/
 
-    @Test
+/*    @Test
     fun idCreationTest() {
         val alias = Base64Url.encode(Random.nextBytes(5))
         runBlocking {
@@ -112,5 +112,5 @@ class SidetreeRegistrarInstrumentedTest {
             )
             assertThat(id).isNotNull
         }
-    }
+    }*/
 }

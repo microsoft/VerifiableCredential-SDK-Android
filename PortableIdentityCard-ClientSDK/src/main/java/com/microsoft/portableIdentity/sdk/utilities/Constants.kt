@@ -22,4 +22,9 @@ object Constants {
     const val MILLISECONDS_IN_A_SECOND = 1000
     const val SECONDS_IN_A_MINUTE = 60
     const val RESPONSE_EXPIRATION_IN_MINUTES = 5
+
+    //Portable Identity Constants
+    const val IDENTITY_SECRET_KEY_NAME = "did.identifier"
+    const val METHOD_NAME = "ion"
+    const val INITIAL_STATE_LONGFORM = "-$METHOD_NAME-initial-state"
 }

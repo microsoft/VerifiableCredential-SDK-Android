@@ -69,6 +69,7 @@ class PayloadGenerator @Inject constructor(
         return IdentifierDocumentPayload(
             publicKeys = listOf(
                 IdentifierDocumentPublicKey(
+                    //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
                     id = "cIiCWr41",
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(signingKeyJWK.x!!), Base64.decode(signingKeyJWK.y!!))
@@ -76,6 +77,7 @@ class PayloadGenerator @Inject constructor(
             ),
             serviceEndpoints = listOf(
                 IdentityHubService(
+                    //TODO: What should be the default values for these while registering portable identity
                     id = "test",
                     serviceEndpoint = "https://beta.hub.microsoft.com"
                 )

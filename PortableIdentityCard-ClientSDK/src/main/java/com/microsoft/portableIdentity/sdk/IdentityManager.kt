@@ -9,17 +9,20 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-//import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
+import com.microsoft.portableIdentity.sdk.identifier.LongformIdentifier
 import com.microsoft.portableIdentity.sdk.identifier.PayloadGenerator
+import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
-//import com.microsoft.portableIdentity.sdk.identifier.response.IdentifierResponseToken
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Constants.INITIAL_STATE_LONGFORM
+import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
+import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTITY_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import kotlinx.coroutines.*
@@ -45,13 +48,12 @@ class IdentityManager @Inject constructor(
     @Named("resolverUrl") resolverUrl: String
 ) {
 
-    private val didSecretName = "did.identifier"
     private val url = resolverUrl
 
     val did: Identifier by lazy { initLongFormDid() }
 //    val did = initLongFormDid()
 
-    suspend fun registerPortableIdentity(url: String): Identifier {
+    private suspend fun registerPortableIdentity(url: String): Identifier {
         val alias = Base64Url.encode(Random.nextBytes(16))
         val personaEncKeyRef = "$alias.$encryptionKeyReference"
         val personaSigKeyRef = "$alias.$signatureKeyReference"
@@ -65,10 +67,15 @@ class IdentityManager @Inject constructor(
         val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
         val registrationDocument = Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
         val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
-        val portableIdentity = "did:ion:test:$uniqueSuffix"
-        val identifier = "$portableIdentity?-ion-initial-state=$registrationDocumentEncoded"
+        val portableIdentity = "did:$METHOD_NAME:test:$uniqueSuffix"
+        val identifier = "$portableIdentity?$INITIAL_STATE_LONGFORM=$registrationDocumentEncoded"
         val resolveUrl = "$url/$identifier"
         val identifierDocument = identityRepository.resolveIdentifier(resolveUrl)
+        val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
+        val nextUpdateCommitmentHash =Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
+        val longformIdentifier = LongformIdentifier(portableIdentity, alias, nextUpdateCommitmentHash, identifierDocument!!)
+        identityRepository.insert(longformIdentifier)
+        val saved = identityRepository.query(portableIdentity)
         return Identifier(
             identifierDocument!!,
             personaSigKeyRef,
@@ -104,22 +111,22 @@ class IdentityManager @Inject constructor(
     }*/
 
     private fun initLongFormDid(): Identifier {
-        val did = if (cryptoOperations.keyStore.list().containsKey(didSecretName)) {
+        val did = if (cryptoOperations.keyStore.list().containsKey(IDENTITY_SECRET_KEY_NAME)) {
             println("Identifier found, deserializing")
-            val keySerialized = cryptoOperations.keyStore.getSecretKey(didSecretName).getKey()
+            val keySerialized = cryptoOperations.keyStore.getSecretKey(IDENTITY_SECRET_KEY_NAME).getKey()
             deserializeIdentifier(keySerialized.k!!)
         } else {
             println("No identifier found, registering new DID")
-            val identifier = registerNewLongFormDid()
+            val identifier = registerPortableIdentity()
             val key = SecretKey(
                 JsonWebKey(
                     kty = KeyType.Octets.value,
-                    kid = "#$didSecretName.1",
+                    kid = "#$IDENTITY_SECRET_KEY_NAME.1",
                     //TODO: Save only signing key or recovery key as well?
                     k = identifier.serialize()
                 )
             )
-            cryptoOperations.keyStore.save(didSecretName, key)
+            cryptoOperations.keyStore.save(IDENTITY_SECRET_KEY_NAME, key)
             identifier
         }
         println("Using identifier ${did.document.id}")
@@ -137,13 +144,13 @@ class IdentityManager @Inject constructor(
         return did!!
     }*/
 
-    private fun registerNewLongFormDid(): Identifier {
+    private fun registerPortableIdentity(): Identifier {
         var did: Identifier? = null
         // TODO: Verify runBlocking is proper here
         runBlocking {
-            did = createLongFormIdentifier()
+            did = createPortableIdentity()
         }
-        println("Registered ${did!!.document.id}")
+        println("Created ${did!!.document.id}")
         return did!!
     }
 
@@ -153,9 +160,9 @@ class IdentityManager @Inject constructor(
         }
     }*/
 
-    fun createLongFormIdentifier(callback: (Identifier) -> Unit) {
+    fun createPortableIdentity(callback: (Identifier) -> Unit) {
         GlobalScope.launch {
-            callback.invoke(createLongFormIdentifier())
+            callback.invoke(createPortableIdentity())
         }
     }
 
@@ -172,13 +179,8 @@ class IdentityManager @Inject constructor(
         }
     }*/
 
-    suspend fun createLongFormIdentifier(): Identifier {
+    private suspend fun createPortableIdentity(): Identifier {
         return withContext(Dispatchers.Default) {
-/*            val alias = Base64Url.encode(Random.nextBytes(16))
-            Identifier.createLongFormIdentifier(
-                alias, cryptoOperations, signatureKeyReference,
-                encryptionKeyReference, recoveryKeyReference, resolver, registrar
-            )*/
             registerPortableIdentity(url)
         }
     }

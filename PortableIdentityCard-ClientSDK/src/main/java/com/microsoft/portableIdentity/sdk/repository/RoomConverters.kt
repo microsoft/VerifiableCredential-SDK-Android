@@ -9,6 +9,7 @@ import androidx.room.TypeConverter
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialDescriptor
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 object RoomConverters {
@@ -28,4 +29,12 @@ object RoomConverters {
     @TypeConverter
     @JvmStatic
     fun stringToVerifiableCredential(serializedVc: String) = Serializer.parse(VerifiableCredential.serializer(), serializedVc)
+
+    @TypeConverter
+    @JvmStatic
+    fun stringToIdentifierDocument(serializedDoc: String) = Serializer.parse(IdentifierDocument.serializer(), serializedDoc)
+
+    @TypeConverter
+    @JvmStatic
+    fun identifierDocumentToString(idDocument: IdentifierDocument) = Serializer.stringify(IdentifierDocument.serializer(), idDocument)
 }
