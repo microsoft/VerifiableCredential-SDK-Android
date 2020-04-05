@@ -149,7 +149,7 @@ open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
                 val jwk = JsonWebKey(keyData.toList().joinToString());
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
-            } catch (error: Error) {
+            } catch (error: Throwable) {
                 throw SdkLog.error("wrappedKey is not a JSON web key")
             }
         }
