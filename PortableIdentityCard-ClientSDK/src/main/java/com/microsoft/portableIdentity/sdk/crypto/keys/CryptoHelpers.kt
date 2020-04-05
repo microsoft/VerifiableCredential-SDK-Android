@@ -7,6 +7,7 @@ package com.microsoft.portableIdentity.sdk.crypto.keys
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
+import java.util.*
 
 object CryptoHelpers {
 //    /**
@@ -44,9 +45,10 @@ object CryptoHelpers {
      * @param jwaAlgorithmName Requested algorithm
      * @see https://www.w3.org/TR/WebCryptoAPI/#jwk-mapping
      */
-    fun jwaToWebCrypto(jwa: String, vararg args: List<Any>): Algorithm {
+    @ExperimentalUnsignedTypes
+    fun jwaToWebCrypto(jwa: String): Algorithm {
         val regex = Regex("\\d+")
-        return when (jwa.toUpperCase()) {
+        return when (jwa.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value,
             JoseConstants.Rs384.value,
             JoseConstants.Rs512.value -> {
@@ -67,8 +69,8 @@ object CryptoHelpers {
             JoseConstants.AesGcm128.value,
             JoseConstants.AesGcm192.value,
             JoseConstants.AesGcm256.value -> {
-                val iv = args[0] as ByteArray
-                val aad = args[1] as ByteArray
+                val iv = ByteArray(1) //args[0] as ByteArray // TODO: this code was broken. Cast can't succeed.
+                val aad = ByteArray(1) //args[1] as ByteArray
                 val matches = regex.findAll(jwa)
                 val length = matches.first().value.toUShort()
                 return AesGcmParams(
