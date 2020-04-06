@@ -70,7 +70,8 @@ class PayloadGenerator @Inject constructor(
             publicKeys = listOf(
                 IdentifierDocumentPublicKey(
                     //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
-                    id = "cIiCWr41",
+                    /*id = signingKeyJWK.kid!!,*/
+                    id = "testkeys",
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(signingKeyJWK.x!!), Base64.decode(signingKeyJWK.y!!))
                 )

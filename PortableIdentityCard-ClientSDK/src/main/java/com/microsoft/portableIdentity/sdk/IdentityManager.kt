@@ -74,8 +74,7 @@ class IdentityManager @Inject constructor(
         val portableIdentity = "did:$METHOD_NAME:test:$uniqueSuffix"
 
         val identifier = "$portableIdentity?$INITIAL_STATE_LONGFORM=$registrationDocumentEncoded"
-        val resolveUrl = "$url/$identifier"
-        val identifierDocument = identityRepository.resolveIdentifier(resolveUrl)
+        val identifierDocument = identityRepository.resolveIdentifier(url, identifier)
 
         val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
         val nextUpdateCommitmentHash = Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
@@ -84,18 +83,17 @@ class IdentityManager @Inject constructor(
 
         val longformIdentifier =
             LongformIdentifier(
-                portableIdentity,
+                identifier,
                 alias,
                 personaSigKeyRef,
                 personaEncKeyRef,
                 personaEncKeyRef,
                 nextUpdateCommitmentHash,
                 nextRecoveryCommitmentHash,
-                identifierDocument!!,
-                registrationDocumentEncoded
+                identifierDocument!!
             )
         identityRepository.insert(longformIdentifier)
-        val saved = identityRepository.query(portableIdentity)
+        val saved = identityRepository.query(identifier)
         return Identifier(
             identifierDocument!!,
             personaSigKeyRef,

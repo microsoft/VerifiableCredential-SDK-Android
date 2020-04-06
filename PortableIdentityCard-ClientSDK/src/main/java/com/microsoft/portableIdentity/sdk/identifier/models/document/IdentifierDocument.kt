@@ -16,5 +16,5 @@ class IdentifierDocument(
     val service: List<IdentityHubService>,
     val recoveryKey: RecoveryKey
 ) {
-    val id: String = ""
+    var id: String = ""
 }

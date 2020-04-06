@@ -16,7 +16,7 @@ import kotlinx.serialization.Serializable
 data class IdentifierDocumentPublicKey (
     /**
      * The id of the public key in the format
-     * #{keyIdentifier}.
+     * {keyIdentifier}
      */
     val id: String,
 

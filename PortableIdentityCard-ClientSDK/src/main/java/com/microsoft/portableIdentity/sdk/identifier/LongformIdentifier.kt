@@ -22,7 +22,5 @@ data class LongformIdentifier (
     val recoveryKeyReference: String,
     val nextUpdateCommitmentHash: String,
     val nextRecoveryCommitmentHash: String,
-    val document: IdentifierDocument,
-    val payload: String
-
+    val document: IdentifierDocument
 )
