@@ -2,6 +2,7 @@ package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import java.util.*
 
 abstract class Provider() {
     abstract val name: String
@@ -171,14 +172,14 @@ abstract class Provider() {
             // check to see if its a private (or fall back to public)
             try {
                 checkKeyUsages(keyUsages, this.privateKeyUsage!!)
-            } catch (error: Error) {
+            } catch (error: Throwable) {
                 checkKeyUsages(keyUsages, this.publicKeyUsage!!)
             }
         }
     }
 
     protected open fun checkAlgorithmName(algorithm: Algorithm) {
-        if (algorithm.name.toLowerCase() != this.name.toLowerCase()) {
+        if (algorithm.name.toLowerCase(Locale.ENGLISH) != this.name.toLowerCase(Locale.ENGLISH)) {
             throw SdkLog.error("Unrecognized Algorithm ${algorithm.name}")
         }
     }

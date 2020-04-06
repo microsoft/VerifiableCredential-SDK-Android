@@ -4,17 +4,18 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import java.util.*
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
 open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
     val provider = providers.map({
-        Pair<String, Provider>(it.name.toLowerCase(), it)
+        Pair(it.name.toLowerCase(Locale.ENGLISH), it)
     }).toMap()
 
     private fun getProvider(algorithm: String): Provider {
-        return provider[algorithm.toLowerCase()] ?: throw SdkLog.error("Unknown algorithm $algorithm")
+        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw SdkLog.error("Unknown algorithm $algorithm")
     }
 
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -149,7 +150,7 @@ open class Subtle(providers: Set<Provider> = emptySet()): SubtleCrypto {
                 val jwk = JsonWebKey(keyData.toList().joinToString());
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
-            } catch (error: Error) {
+            } catch (error: Throwable) {
                 throw SdkLog.error("wrappedKey is not a JSON web key")
             }
         }

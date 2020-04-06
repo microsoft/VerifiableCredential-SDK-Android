@@ -3,6 +3,8 @@ package com.microsoft.portableIdentity.sdk.crypto.protocols.jose
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.CryptoException
+import java.util.*
 
 object JwaCryptoConverter {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
@@ -19,7 +21,7 @@ object JwaCryptoConverter {
     }
 
     fun jwaAlgToWebCrypto(algorithm: String): Algorithm {
-        return when (algorithm.toUpperCase()) {
+        return when (algorithm.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
                 // get hash size
                 val hashSize = Regex("[Rr][Ss](\\d+)").matchEntire(algorithm)!!.groupValues[0]
@@ -91,13 +93,14 @@ object JwaCryptoConverter {
                 }
             }
             else -> {
-                throw SdkLog.error("Unknown algorithm: ${algorithm.name}");
+                throw CryptoException("Unknown algorithm: ${algorithm.name}")
             }
         }
     }
 
+    @ExperimentalUnsignedTypes
     fun jwkAlgToKeyGenWebCrypto(algorithm: String): Algorithm {
-        return when (algorithm.toUpperCase()) {
+        return when (algorithm.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
                 // get hash size
                 val hashSize = Regex("[Rr][Ss](\\d+)").matchEntire(algorithm)!!.groupValues[0]
@@ -138,7 +141,7 @@ object JwaCryptoConverter {
                 )
             }
             else -> {
-                throw SdkLog.error("Unknown JOSE algorithm: $algorithm")
+                throw CryptoException("Unknown JOSE algorithm: $algorithm")
             }
         }
     }
