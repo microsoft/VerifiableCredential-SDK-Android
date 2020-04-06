@@ -13,10 +13,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceRe
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-<<<<<<< HEAD
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
-=======
->>>>>>> master
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator

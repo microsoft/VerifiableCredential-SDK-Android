@@ -7,11 +7,6 @@ package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
-<<<<<<< HEAD
-import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
-=======
->>>>>>> master
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject

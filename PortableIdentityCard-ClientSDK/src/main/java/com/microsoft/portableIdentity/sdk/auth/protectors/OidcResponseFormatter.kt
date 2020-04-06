@@ -23,12 +23,7 @@ class OidcResponseFormatter @Inject constructor(
         @Named("signatureKeyReference") private val signatureKeyReference: String
 ) {
 
-<<<<<<< HEAD
-    fun formContents(response: OidcResponse, responderDid: String, useKey: String, expiresIn: Int = AuthenticationConstants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
-=======
     fun formContents(response: OidcResponse, responderDid: String, useKey: String = signatureKeyReference, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
-        val requestContent = response.getRequestContents()
->>>>>>> master
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(useKey).getKey()
         val jti = UUID.randomUUID().toString()
