@@ -1,11 +1,12 @@
 package com.microsoft.portableIdentity.sdk.auth.protectors
 
+import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.PicBinding
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.AttestationResponse
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
-import com.microsoft.portableIdentity.sdk.cards.SelfIssued
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import java.util.*
@@ -42,6 +43,8 @@ class OidcResponseFormatter @Inject constructor(
             }
         }
 
+        val attestationResponse = createAttestationResponse(response)
+
         return OidcResponseContent(
                 sub = key.getThumbprint(cryptoOperations, Sha.Sha256),
                 aud = response.audience,
@@ -53,8 +56,28 @@ class OidcResponseFormatter @Inject constructor(
                 state = state,
                 jti = jti,
                 contract = contract,
-                attestations = response.selfIssuedClaims
+                attestations = attestationResponse
         )
+    }
+
+    private fun createAttestationResponse(response: OidcResponse): AttestationResponse? {
+        var selfIssuedAttestations: Map<String, String>? = null
+        var tokenAttestations: Map<String, String>? = null
+        if (response is IssuanceResponse) {
+            if (!response.getIdTokenBindings().isNullOrEmpty()) {
+                tokenAttestations = response.getIdTokenBindings()
+            }
+            if (!response.getSelfIssuedClaimBindings().isNullOrEmpty()) {
+                selfIssuedAttestations = response.getSelfIssuedClaimBindings()
+            }
+        }
+        val presentationAttestation = createPresentations(response.getCardBindings())
+        return AttestationResponse(selfIssuedAttestations, tokenAttestations, presentationAttestation)
+    }
+
+    // TODO(wrap VC in a VP and map it to the type)
+    private fun createPresentations(binding: List<PicBinding>): Map<String, String>? {
+        return null
     }
 
     private fun createIatAndExp(expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Pair<Long, Long> {

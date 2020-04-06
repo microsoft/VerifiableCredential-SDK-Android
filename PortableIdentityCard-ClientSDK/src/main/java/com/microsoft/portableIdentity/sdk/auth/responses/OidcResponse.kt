@@ -22,19 +22,16 @@ open abstract class OidcResponse(override val audience: String): Response {
      */
     private val collectedCards: MutableList<PicBinding> = mutableListOf()
 
-    // TODO(deprecate once new models are implemented).
-    var selfIssuedClaims: SelfIssued? = null
-
     /**
      * Add Credential to be put into response.
      * @param credential to be added to response.
      */
-    override fun addCard(card: PortableIdentityCard, attestation: PresentationAttestation) {
-        val cardBinding = PicBinding(card, attestation)
+    override fun addCard(card: PortableIdentityCard, type: String) {
+        val cardBinding = PicBinding(card, type)
         collectedCards.add(cardBinding)
     }
 
-    fun getCardBindings(): MutableList<PicBinding> {
+    fun getCardBindings(): List<PicBinding> {
         return collectedCards
     }
 }

@@ -7,5 +7,5 @@ import com.microsoft.portableIdentity.sdk.auth.models.attestations.IdTokenAttest
 data class IdTokenBinding(
         val token: String,
 
-        val attestation: IdTokenAttestation
+        val configuration: String
 )

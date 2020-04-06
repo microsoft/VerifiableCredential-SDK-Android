@@ -11,25 +11,23 @@ class IssuanceResponse(val request: IssuanceRequest): OidcResponse(request.contr
 
     val contractUrl: String = request.contract.display.contract
 
-    private val collectedTokens: MutableList<IdTokenBinding> = mutableListOf()
+    private val collectedTokens: MutableMap<String, String> = mutableMapOf()
 
-    private val collectedSelfIssued: MutableList<SelfIssuedBinding> = mutableListOf()
+    private val collectedSelfIssued: MutableMap<String, String> = mutableMapOf()
 
-    fun addIdToken(idToken: String, attestation: IdTokenAttestation) {
-        val tokenBinding = IdTokenBinding(idToken, attestation)
-        collectedTokens.add(tokenBinding)
+    fun addIdToken(configuration: String, token: String) {
+        collectedTokens[configuration] = token
     }
 
-    fun addSelfIssuedClaim(claim: String, attestation: String) {
-        val selfIssuedBinding = SelfIssuedBinding(claim, attestation)
-        collectedSelfIssued.add(selfIssuedBinding)
+    fun addSelfIssuedClaim(field: String, claim: String) {
+        collectedSelfIssued[field] = claim
     }
 
-    fun getIdTokenBindings(): List<IdTokenBinding> {
+    fun getIdTokenBindings(): Map<String, String> {
         return collectedTokens
     }
 
-    fun getSelfIssuedClaimBindings(): List<SelfIssuedBinding> {
+    fun getSelfIssuedClaimBindings(): Map<String, String> {
         return collectedSelfIssued
     }
 }

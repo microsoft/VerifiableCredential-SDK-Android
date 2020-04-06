@@ -8,5 +8,5 @@ import com.microsoft.portableIdentity.sdk.cards.SelfIssued
 data class SelfIssuedBinding(
         val claim: String,
 
-        val attestation: String
+        val field: String
 )

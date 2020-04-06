@@ -9,5 +9,5 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 data class PicBinding(
         val card: PortableIdentityCard,
 
-        val attestation: PresentationAttestation
+        val type: String
 )

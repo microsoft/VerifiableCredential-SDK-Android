@@ -17,8 +17,8 @@ interface Response {
      * Add Credential to be put into response.
      *
      * @param card to be added to response.
-     * @param attestation that maps to the card.
+     * @param type that maps to the card.
      */
-    fun addCard(card: PortableIdentityCard, attestation: PresentationAttestation)
+    fun addCard(card: PortableIdentityCard, type: String)
 
 }
