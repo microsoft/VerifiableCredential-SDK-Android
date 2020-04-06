@@ -27,9 +27,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         private val regexForKeyReference = Regex("^#(.*)\\.[^.]+$")
         private val regexForKeyIndex = Regex("^#.*\\.([^.]+$)")
 
-        val keyStore: KeyStore = KeyStore.getInstance(provider).apply {
-            load(null)
-        }
+        val keyStore: KeyStore by lazy { KeyStore.getInstance(provider).apply { load(null) } }
     }
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
