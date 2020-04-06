@@ -136,7 +136,7 @@ class CardManager @Inject constructor(
         picRepository.insert(card)
     }
 
-    fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
+    private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
         val token = JwsToken.deserialize(signedVerifiableCredential)
         return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
     }

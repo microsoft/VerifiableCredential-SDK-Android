@@ -5,6 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
+import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.PicBinding
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 
 interface Response {
@@ -14,8 +16,9 @@ interface Response {
     /**
      * Add Credential to be put into response.
      *
-     * @param credential to be added to response.
+     * @param card to be added to response.
+     * @param attestation that maps to the card.
      */
-    fun addCredential(credential: PortableIdentityCard)
+    fun addCard(card: PortableIdentityCard, attestation: PresentationAttestation)
 
 }
