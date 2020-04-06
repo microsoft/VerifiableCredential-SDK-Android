@@ -46,7 +46,7 @@ object CryptoHelpers {
      * @see https://www.w3.org/TR/WebCryptoAPI/#jwk-mapping
      */
     @ExperimentalUnsignedTypes
-    fun jwaToWebCrypto(jwa: String): Algorithm {
+    fun jwaToWebCrypto(jwa: String, vararg args: List<Any>): Algorithm {
         val regex = Regex("\\d+")
         return when (jwa.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value,
@@ -69,8 +69,8 @@ object CryptoHelpers {
             JoseConstants.AesGcm128.value,
             JoseConstants.AesGcm192.value,
             JoseConstants.AesGcm256.value -> {
-                val iv = ByteArray(1) //args[0] as ByteArray // TODO: this code was broken. Cast can't succeed.
-                val aad = ByteArray(1) //args[1] as ByteArray
+                val iv = args[0] as ByteArray // TODO: cast can never succeed. This code is broken?
+                val aad = args[1] as ByteArray
                 val matches = regex.findAll(jwa)
                 val length = matches.first().value.toUShort()
                 return AesGcmParams(
@@ -83,7 +83,7 @@ object CryptoHelpers {
                 )
             }
             JoseConstants.Es256K.value -> EcdsaParams(
-                    hash =  Sha.Sha256,
+                hash =  Sha.Sha256,
                 additionalParams = mapOf(
                     "namedCurve" to "P-256K",
                     "format" to "DER"
