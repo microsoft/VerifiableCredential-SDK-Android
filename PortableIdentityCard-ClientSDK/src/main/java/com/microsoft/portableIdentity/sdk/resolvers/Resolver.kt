@@ -7,13 +7,15 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
+import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
+import com.microsoft.portableIdentity.sdk.utilities.Constants
 
 /**
  * Interface defining methods and properties to
  * be implemented by specific resolver methods.
  * @interface
  */
-abstract class Resolver() {
+abstract class Resolver(private val identityRepository: PortableIdentityRepository) {
 
     /**
      * Returns the identifier document for the specified
@@ -22,7 +24,10 @@ abstract class Resolver() {
      */
     abstract suspend fun resolveDocument(identifier: String): IdentifierDocument
 
-    abstract suspend fun resolveDocument(identifier: String, initialValues: String): com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+    abstract suspend fun resolveDocument(
+        identifier: String,
+        initialValues: String
+    ): com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 
     suspend fun resolve(
         identifier: String,
@@ -49,7 +54,7 @@ abstract class Resolver() {
         )
     }
 
-    suspend fun resolve(
+/*    suspend fun resolve(
         identifier: String, initialValues: String,
         cryptoOperations: CryptoOperations
     ): com.microsoft.portableIdentity.sdk.identifier.Identifier {
@@ -64,5 +69,22 @@ abstract class Resolver() {
             this,
             NullRegistrar()
         )
-    }
+    }*/
+
+/*    suspend fun resolve(
+        identifier: String,
+        cryptoOperations: CryptoOperations
+    ): com.microsoft.portableIdentity.sdk.identifier.Identifier {
+        val document = identityRepository.resolveIdentifier("$identifier")
+        return com.microsoft.portableIdentity.sdk.identifier.Identifier(
+            document!!,
+            "",
+            "",
+            "",
+            "",
+            cryptoOperations,
+            this,
+            NullRegistrar()
+        )
+    }*/
 }

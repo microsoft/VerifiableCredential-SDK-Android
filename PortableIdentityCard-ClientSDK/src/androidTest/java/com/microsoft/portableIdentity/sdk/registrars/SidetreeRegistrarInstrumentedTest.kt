@@ -5,6 +5,7 @@ package com.microsoft.portableIdentity.sdk.registrars
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.portableIdentity.sdk.PortableIdentitySdk
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
@@ -30,11 +31,12 @@ class SidetreeRegistrarInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
+        PortableIdentitySdk.init(context)
         val keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
         ecSubtle = EllipticCurveSubtleCrypto(androidSubtle)
         registrar = SidetreeRegistrar("http://10.91.6.163:3000")
-        resolver = HttpResolver("http://10.91.6.163:3000")
+        resolver = HttpResolver("http://10.91.6.163:3000", PortableIdentitySdk.identityManager.identityRepository)
         cryptoOperations = CryptoOperations(androidSubtle, keyStore)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,

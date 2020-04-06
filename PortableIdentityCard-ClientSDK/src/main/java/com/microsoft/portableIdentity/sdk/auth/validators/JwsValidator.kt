@@ -9,6 +9,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class JwsValidator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
+//    private val identityRepository: PortableIdentityRepository,
     private val resolver: Resolver
     ) {
 
@@ -38,7 +40,12 @@ class JwsValidator @Inject constructor(
         return Pair(parsedKid[0], parsedKid[1])
     }
 
+    //TODO: Test this when key format is changed from hex to jwk
     private suspend fun resolvePublicKeys(did: String, cryptoOperations: CryptoOperations): List<PublicKey> {
+/*        val requesterDidDocument = resolver.resolve(did, cryptoOperations)
+        return requesterDidDocument.document.publicKey.map {
+            it.toPublicKey()
+        }*/
         val requesterDidDocument = resolver.resolve(did, cryptoOperations)
         return requesterDidDocument.document.publicKeys.map {
             it.toPublicKey()

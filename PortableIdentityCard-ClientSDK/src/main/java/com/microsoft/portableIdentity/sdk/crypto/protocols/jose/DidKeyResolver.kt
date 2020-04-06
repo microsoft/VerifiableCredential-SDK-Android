@@ -4,6 +4,8 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
@@ -17,6 +19,10 @@ object DidKeyResolver {
     suspend fun resolveKeyFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): PublicKey {
         val identifier = resolveIdentiferFromKid(kid, crypto, resolver)
         val did = Regex("^[^#]+(#.+)$").matchEntire(kid)!!
+/*        return identifier.document.publicKey.filter {
+            it.publicKeyJwk.kid?.endsWith(did.groupValues[1]) ?: false ||
+                    it.id.endsWith(did.groupValues[1])
+        }.firstOrNull()?.toPublicKey() ?: throw SdkLog.error("Could not find key $kid")*/
         return identifier.document.publicKeys.filter {
             it.publicKeyJwk.kid?.endsWith(did.groupValues[1]) ?: false ||
                     it.id.endsWith(did.groupValues[1])
@@ -24,6 +30,9 @@ object DidKeyResolver {
     }
     
     suspend fun verifyJws(jws: JwsToken, crypto: CryptoOperations, forDid: Identifier) {
+/*        val keys = forDid.document.publicKey.map {
+            it.toPublicKey()
+        }*/
         val keys = forDid.document.publicKeys.map {
             it.toPublicKey()
         }

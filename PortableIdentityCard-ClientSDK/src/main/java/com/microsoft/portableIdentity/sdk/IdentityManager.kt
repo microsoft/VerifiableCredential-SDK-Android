@@ -14,6 +14,7 @@ import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
 import com.microsoft.portableIdentity.sdk.identifier.LongformIdentifier
 import com.microsoft.portableIdentity.sdk.identifier.PayloadGenerator
 import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
+import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
@@ -23,6 +24,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants.INITIAL_STATE_LONGFORM
 import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTITY_SECRET_KEY_NAME
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import kotlinx.coroutines.*
@@ -38,7 +40,7 @@ import kotlin.random.Random
  */
 @Singleton
 class IdentityManager @Inject constructor(
-    private val identityRepository: PortableIdentityRepository,
+    val identityRepository: PortableIdentityRepository,
     private val cryptoOperations: CryptoOperations,
     private val resolver: Resolver,
     private val registrar: Registrar,
@@ -65,15 +67,33 @@ class IdentityManager @Inject constructor(
             recoveryKeyReference
         )
         val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
-        val registrationDocument = Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
+        val registrationDocument =
+            Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
+
         val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
         val portableIdentity = "did:$METHOD_NAME:test:$uniqueSuffix"
+
         val identifier = "$portableIdentity?$INITIAL_STATE_LONGFORM=$registrationDocumentEncoded"
         val resolveUrl = "$url/$identifier"
         val identifierDocument = identityRepository.resolveIdentifier(resolveUrl)
+
         val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
-        val nextUpdateCommitmentHash =Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
-        val longformIdentifier = LongformIdentifier(portableIdentity, alias, nextUpdateCommitmentHash, identifierDocument!!)
+        val nextUpdateCommitmentHash = Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
+        val suffixDataJson = byteArrayToString(Base64Url.decode(registrationDocument.suffixData))
+        val nextRecoveryCommitmentHash = Serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
+
+        val longformIdentifier =
+            LongformIdentifier(
+                portableIdentity,
+                alias,
+                personaSigKeyRef,
+                personaEncKeyRef,
+                personaEncKeyRef,
+                nextUpdateCommitmentHash,
+                nextRecoveryCommitmentHash,
+                identifierDocument!!,
+                registrationDocumentEncoded
+            )
         identityRepository.insert(longformIdentifier)
         val saved = identityRepository.query(portableIdentity)
         return Identifier(
@@ -112,11 +132,11 @@ class IdentityManager @Inject constructor(
 
     private fun initLongFormDid(): Identifier {
         val did = if (cryptoOperations.keyStore.list().containsKey(IDENTITY_SECRET_KEY_NAME)) {
-            println("Identifier found, deserializing")
+            SdkLog.d("Identifier found, de-serializing")
             val keySerialized = cryptoOperations.keyStore.getSecretKey(IDENTITY_SECRET_KEY_NAME).getKey()
             deserializeIdentifier(keySerialized.k!!)
         } else {
-            println("No identifier found, registering new DID")
+            SdkLog.d("No identifier found, registering new DID")
             val identifier = registerPortableIdentity()
             val key = SecretKey(
                 JsonWebKey(
@@ -129,7 +149,7 @@ class IdentityManager @Inject constructor(
             cryptoOperations.keyStore.save(IDENTITY_SECRET_KEY_NAME, key)
             identifier
         }
-        println("Using identifier ${did.document.id}")
+        SdkLog.d("Using identifier ${did.document.id}")
         return did
     }
 
@@ -150,7 +170,7 @@ class IdentityManager @Inject constructor(
         runBlocking {
             did = createPortableIdentity()
         }
-        println("Created ${did!!.document.id}")
+        SdkLog.d("Created ${did!!.document.id}")
         return did!!
     }
 
@@ -167,7 +187,7 @@ class IdentityManager @Inject constructor(
     }
 
     /**
-     * Creates and registers an Identifier.
+     * Creates an Identifier.
      */
 /*    private suspend fun createIdentifier(): com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier {
         return withContext(Dispatchers.Default) {

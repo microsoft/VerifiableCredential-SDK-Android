@@ -3,6 +3,8 @@ package com.microsoft.portableIdentity.sdk.identifier
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.registrars.Registrar
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,7 +17,12 @@ data class LongformIdentifier (
     @PrimaryKey
     val identifier: String,
     val alias: String,
+    val signatureKeyReference: String,
+    val encryptionKeyReference: String,
+    val recoveryKeyReference: String,
     val nextUpdateCommitmentHash: String,
-    val document: IdentifierDocument
+    val nextRecoveryCommitmentHash: String,
+    val document: IdentifierDocument,
+    val payload: String
 
 )

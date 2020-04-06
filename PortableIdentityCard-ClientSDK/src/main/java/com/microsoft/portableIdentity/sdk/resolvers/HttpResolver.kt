@@ -1,6 +1,7 @@
 package com.microsoft.portableIdentity.sdk.resolvers
 
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
 import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
@@ -17,8 +18,9 @@ import javax.inject.Singleton
  */
 @Singleton
 class HttpResolver @Inject constructor(
-    @Named("resolverUrl") private val baseUrl: String
-) : Resolver() {
+    @Named("resolverUrl") private val baseUrl: String,
+    private val identityRepository: PortableIdentityRepository
+    ) : Resolver(identityRepository) {
 
     @Serializable
     data class ResolverMetadata(val driverId: String?, val driver: String?, val retrieved: String?, val duration: String?)

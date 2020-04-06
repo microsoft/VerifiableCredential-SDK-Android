@@ -33,8 +33,9 @@ class IdentityManagerInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
+        PortableIdentitySdk.init(context)
         registrar = SidetreeRegistrar("http://10.91.6.163:3000")
-        resolver = HttpResolver("http://10.91.6.163:3000")
+        resolver = HttpResolver("http://10.91.6.163:3000", PortableIdentitySdk.identityManager.identityRepository)
         signatureKeyReference = "signature"
         encryptionKeyReference = "encryption"
         recoveryKeyReference = "recovery"
@@ -46,7 +47,6 @@ class IdentityManagerInstrumentedTest {
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
-        PortableIdentitySdk.init(context)
     }
 
     @Test
