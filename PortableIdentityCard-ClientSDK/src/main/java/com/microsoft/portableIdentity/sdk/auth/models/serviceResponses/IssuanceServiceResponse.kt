@@ -3,17 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth.responses
+package com.microsoft.portableIdentity.sdk.auth.models.serviceResponses
 
-import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import kotlinx.serialization.Serializable
 
-interface Response {
-
-    /**
-     * Add Credential to be put into response.
-     *
-     * @param credential to be added to response.
-     */
-    fun addCredential(credential: PortableIdentityCard)
-
-}
+@Serializable
+data class IssuanceServiceResponse (
+    val vc: String
+): ServiceResponse
