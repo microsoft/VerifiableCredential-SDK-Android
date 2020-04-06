@@ -64,16 +64,19 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultRetrofit() : Retrofit {
-
+    fun defaultOkHttpClient() : OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.i(it) }
-        val okHttpClient = OkHttpClient()
+        return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)
             .build()
+    }
 
+    @Provides
+    @Singleton
+    fun defaultRetrofit(okHttpClient: OkHttpClient) : Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://didwebtest.azurewebsites.net")
+            .baseUrl("")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())

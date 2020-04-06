@@ -5,11 +5,11 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.CLIENT_ID
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.MAX_AGE
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.REDIRECT_URL
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.RESPONSE_MODE
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.RESPONSE_TYPE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CLIENT_ID
+import com.microsoft.portableIdentity.sdk.utilities.Constants.MAX_AGE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.REDIRECT_URL
+import com.microsoft.portableIdentity.sdk.utilities.Constants.RESPONSE_MODE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.RESPONSE_TYPE
 import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import kotlinx.serialization.SerialName

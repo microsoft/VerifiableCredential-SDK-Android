@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 
+import androidx.room.Entity
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.ServiceDescriptor
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

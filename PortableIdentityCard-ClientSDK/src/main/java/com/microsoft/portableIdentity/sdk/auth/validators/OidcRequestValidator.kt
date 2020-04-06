@@ -1,8 +1,8 @@
 package com.microsoft.portableIdentity.sdk.auth.validators
 
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.CLIENT_ID
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.MILLISECONDS
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationConstants.SECONDS_IN_A_MINUTE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CLIENT_ID
+import com.microsoft.portableIdentity.sdk.utilities.Constants.MILLISECONDS_IN_A_SECOND
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import java.util.*
@@ -30,7 +30,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
     }
 
     private fun getExpirationDeadlineInSeconds(expirationCheckTimeOffsetInMinutes: Int = 5): Long {
-        val currentTimeInSeconds = Date().time / MILLISECONDS
+        val currentTimeInSeconds = Date().time / MILLISECONDS_IN_A_SECOND
         return currentTimeInSeconds + SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
     }
 

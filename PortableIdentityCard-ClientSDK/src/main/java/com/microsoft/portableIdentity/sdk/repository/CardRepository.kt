@@ -7,15 +7,16 @@ package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Transformations
+<<<<<<< HEAD
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
+=======
+>>>>>>> master
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
-import com.microsoft.portableIdentity.sdk.repository.networking.HttpBaseRepository
-import com.microsoft.portableIdentity.sdk.repository.networking.apis.PortableIdentityCardApi
+import com.microsoft.portableIdentity.sdk.repository.networking.PicNetworkOperation
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import retrofit2.Retrofit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,9 +27,7 @@ import javax.inject.Singleton
  * ever care to get the object it wants.
  */
 @Singleton
-class CardRepository @Inject constructor(database: SdkDatabase, retrofit: Retrofit): HttpBaseRepository() {
-
-    private val picApi: PortableIdentityCardApi = retrofit.create(PortableIdentityCardApi::class.java)
+class CardRepository @Inject constructor(database: SdkDatabase, private val picNetworkOperation: PicNetworkOperation) {
 
     private val cardDao = database.cardDao()
 
@@ -58,33 +57,9 @@ class CardRepository @Inject constructor(database: SdkDatabase, retrofit: Retrof
         return cardDao.getAllCards()
     }
 
-    /**
-     * Get Request from url.
-     */
-    suspend fun getRequest(url: String): String? {
-        return safeApiCall(
-            call = {picApi.getRequest(url).await()},
-            errorMessage = "Error Fetching Request from $url."
-        )
-    }
+    suspend fun getContract(url: String) = picNetworkOperation.getContract(url)
 
-    /**
-     * Get Contract from url.
-     */
-    suspend fun getContract(url: String): PicContract? {
-        return safeApiCall(
-            call = {picApi.getContract(url).await()},
-            errorMessage = "Error Fetching Contract from $url."
-        )
-    }
+    suspend fun getRequest(url: String) = picNetworkOperation.getRequest(url)
 
-    /**
-     * Post Response to url.
-     */
-    suspend fun sendResponse(url: String, serializedResponse: String): ServiceResponse? {
-        return safeApiCall(
-            call = {picApi.sendResponse(url, serializedResponse).await()},
-            errorMessage = "Error Sending Response to $url."
-        )
-    }
+    suspend fun sendResponse(url: String, serializedResponse: String)= picNetworkOperation.sendResponse(url, serializedResponse)
 }

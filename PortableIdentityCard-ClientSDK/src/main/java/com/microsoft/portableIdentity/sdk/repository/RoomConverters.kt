@@ -8,6 +8,10 @@ package com.microsoft.portableIdentity.sdk.repository
 import androidx.room.TypeConverter
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
+<<<<<<< HEAD
+=======
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialDescriptor
+>>>>>>> master
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 object RoomConverters {
