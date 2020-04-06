@@ -137,24 +137,3 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     implementation files('libs/org.bitcoin.jar')
 }
-
-/**
- * Task that starts all test tasks and merges reports from them into one report.
- */
-task jacocoTestReport(type: JacocoReport, dependsOn: ['test']) {
-    reports {
-        xml.enabled = true
-        html.enabled = true
-    }
-
-    final def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*']
-    final def debugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-    final def kotlinClasses = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-    final def mainSrc = "src/main/java"
-
-    sourceDirectories = files([mainSrc])
-    classDirectories = files([debugTree, kotlinClasses])
-    executionData = fileTree(dir:"$buildDir", includes: [
-            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/**/*coverage.ec'
-    ])
-}
