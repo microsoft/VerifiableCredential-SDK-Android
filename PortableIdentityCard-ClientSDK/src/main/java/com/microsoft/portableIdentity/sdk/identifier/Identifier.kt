@@ -3,8 +3,14 @@
 package com.microsoft.portableIdentity.sdk.identifier
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.crypto.keys.CryptoHelpers
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.keys.KeyTypeFactory
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
+import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.EcKeyGenParams
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocumentPublicKey
 import com.microsoft.portableIdentity.sdk.identifier.document.LinkedDataKeySpecification
@@ -23,14 +29,15 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
  * @param resolver to resolve the Identifier Document for Identifier.
  * @param registrar to register Identifiers.
  */
-class Identifier constructor (
-                 val document: IdentifierDocument,
-                 val signatureKeyReference: String,
-                 val encryptionKeyReference: String,
-                 val alias: String,
-                 private val cryptoOperations: CryptoOperations,
-                 private val resolver: IResolver,
-                 private val registrar: IRegistrar) {
+class Identifier constructor(
+    val document: IdentifierDocument,
+    val signatureKeyReference: String,
+    val encryptionKeyReference: String,
+    val alias: String,
+    private val cryptoOperations: CryptoOperations,
+    private val resolver: IResolver,
+    private val registrar: IRegistrar
+) {
     companion object {
 
         private val microsoftIdentityHubDocument = IdentifierDocument(
@@ -58,12 +65,16 @@ class Identifier constructor (
                                 "oqrVOZzO59mOycz0Mx4rKTxyWcDwUrO8wb846m11JL06I-D5i7KBrQpHy8E0Yeabr5gWkdR" +
                                 "rAc_9Ifox5vJ3lZzkBYHYq871xneyURPh9LZqP2E",
                         e = "AQAB"
-                    ))),
-            services = listOf(IdentityHubService(
-                id = "#hubEndpoint",
-                publicKey = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
-                serviceEndpoint = ServiceHubEndpoint(listOf("https://beta.hub.microsoft.com/"))
-            ))
+                    )
+                )
+            ),
+            services = listOf(
+                IdentityHubService(
+                    id = "#hubEndpoint",
+                    publicKey = "did:test:hub.id#HubSigningKey-RSA?9a1142b622c342f38d41b20b09960467",
+                    serviceEndpoint = ServiceHubEndpoint(listOf("https://beta.hub.microsoft.com/"))
+                )
+            )
         )
 
 
@@ -76,10 +87,10 @@ class Identifier constructor (
             resolver: IResolver,
             registrar: IRegistrar,
             identityHubDid: List<String>? = null
-            ): Identifier {
+        ): Identifier {
             // TODO: Use software generated keys from the seed
-//        val seed = cryptoOperations.generateSeed()
-//        val publicKey = cryptoOperations.generatePairwise(seed)
+//            val seed = cryptoOperations.generateSeed()
+//            val publicKey = cryptoOperations.generatePairwise(seed)
             SdkLog.d("Creating identifier ($alias)")
             val personaEncKeyRef = "$alias.$encryptionKeyReference"
             val personaSigKeyRef = "$alias.$signatureKeyReference"
@@ -91,7 +102,7 @@ class Identifier constructor (
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
-                type =  LinkedDataKeySpecification.RsaSignature2018.values.first(),
+                type = LinkedDataKeySpecification.RsaSignature2018.values.first(),
                 publicKeyJwk = encJwk
             )
             // Secp256k1 key
@@ -119,7 +130,11 @@ class Identifier constructor (
             val document = RegistrationDocument(
                 context = "https://w3id.org/did/v1",
                 publicKeys = listOf(encPubKey, sigPubKey),
-                services = if (hubService != null) {listOf(hubService)} else { null }
+                services = if (hubService != null) {
+                    listOf(hubService)
+                } else {
+                    null
+                }
             )
 
             val registered = registrar.register(document, personaSigKeyRef, cryptoOperations)
@@ -135,6 +150,31 @@ class Identifier constructor (
                 registrar = registrar
             )
         }
+    }
+
+    fun createAndSaveKey(
+        cryptoOperations: CryptoOperations,
+        algorithm: String,
+        target: String,
+        kid: String,
+        keyReference: String
+    ): PublicKey {
+        val alg = CryptoHelpers.jwaToWebCrypto(algorithm)
+        val privateKey = cryptoOperations.generatePairwise(alg as EcKeyGenParams, AndroidConstants.masterSeed.value, document.id, target)
+        privateKey.kid = kid
+//        privateKey.use = KeyTypeFactory.createViaWebCrypto(alg)
+        val publicKey = privateKey.getPublicKey()
+        publicKey.kid = kid
+        val pairwiseKeyStorageId =
+            keyReference ?: keyStorageIdentifier(document.id, target, algorithm, KeyTypeFactory.createViaJwa(algorithm).value)
+        cryptoOperations.keyStore.save(pairwiseKeyStorageId, privateKey)
+        return publicKey
+    }
+
+    private fun keyStorageIdentifier(personaId: String, target: String, algorithm: String, keyType: String): String {
+        SdkLog.d("$personaId-$target-$algorithm-$keyType")
+        return "$personaId-$target-$algorithm-$keyType"
+
     }
 
     fun serialize(): String {

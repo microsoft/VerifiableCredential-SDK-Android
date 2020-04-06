@@ -24,5 +24,6 @@ enum class AndroidConstants(val value: String) {
     //////////////////////
     // Custom Constants //
     //////////////////////
-    KeyReference("KeyReference")
+    KeyReference("KeyReference"),
+    masterSeed("masterSeed")
 }

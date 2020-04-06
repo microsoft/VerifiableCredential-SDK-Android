@@ -4,6 +4,8 @@ package com.microsoft.portableIdentity.sdk.crypto
 
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.keys.PairwiseKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
@@ -119,8 +121,10 @@ class CryptoOperations (
      * @param seed to be used to create pairwise key.
      *
      */
-    fun generatePairwise(seed: String) {
-        TODO("Not implemented")
+    fun generatePairwise(algorithm: EcKeyGenParams, seed: String, personaId: String, peerId: String): PrivateKey {
+//        TODO("Not implemented")
+        val pairwiseKey = PairwiseKey(this)
+        return pairwiseKey.generatePairwiseKey(algorithm, seed, personaId, peerId)
     }
 
     /**

@@ -12,6 +12,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConvert
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import org.bitcoin.NativeSecp256k1
+import java.math.BigInteger
 
 class EllipticCurvePairwiseKey {
 
@@ -38,8 +39,7 @@ class EllipticCurvePairwiseKey {
             val pairwiseKeySeed = crypto.sign(alg, key, peerId.map { it.toByte() }.toByteArray())
             if (supportedCurves.indexOf(algorithm.namedCurve) == -1)
                 throw SdkLog.error("Curve ${algorithm.namedCurve} is not supported")
-
-//        val privateKey = BigInteger(pairwiseKeySeed)
+            
             val pair = NativeSecp256k1.computePubkey(pairwiseKeySeed)
             val keyPair = CryptoKeyPair(
                 privateKey = CryptoKey(

@@ -30,9 +30,8 @@ class PairwiseKey(private val crypto: CryptoOperations) {
     fun generatePairwiseKey(algorithm: Algorithm, seedReference: String, personaId: String, peerId: String): PrivateKey {
         val personaMasterKey: ByteArray = this.generatePersonaMasterKey(seedReference, personaId);
 
-        val keyType = KeyTypeFactory.createViaWebCrypto(algorithm);
-        return when (keyType) {
-            KeyType.EllipticCurve -> EllipticCurvePairwiseKey().generate(this.crypto, personaMasterKey, algorithm as EcKeyGenParams, peerId);
+        return when (val keyType = KeyTypeFactory.createViaWebCrypto(algorithm)) {
+            KeyType.EllipticCurve -> EllipticCurvePairwiseKey.generate(this.crypto, personaMasterKey, algorithm as EcKeyGenParams, peerId);
 //            KeyType.RSA -> RsaPairwiseKey.generate(this.cryptoFactory, personaMasterKey, <RsaHashedKeyGenParams>algorithm, peerId);
             else -> error("Pairwise key for type '${keyType.value}' is not supported.");
         }
