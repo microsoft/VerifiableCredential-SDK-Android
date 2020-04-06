@@ -6,6 +6,7 @@ package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import java.util.*
 
 /**
  * Factory class to create @enum KeyType objects
@@ -16,7 +17,7 @@ object KeyTypeFactory {
      * @param algorithm Web crypto compliant algorithm object
      */
     fun createViaWebCrypto (algorithm: Algorithm): KeyType {
-        return when (algorithm.name.toLowerCase()) {
+        return when (algorithm.name.toLowerCase(Locale.ENGLISH)) {
             "hmac" -> KeyType.Octets
             "ecdsa", "ecdh" -> KeyType.EllipticCurve;
             "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA;

@@ -8,6 +8,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.*
+import java.util.*
 import kotlin.collections.Map
 
 /**
@@ -35,7 +36,7 @@ class JwsToken private constructor(private val payload: String,
                     signature = signature
                 )
                 return JwsToken(payload, listOf(jwsSignatureObject))
-            } else if (jws.toLowerCase().contains("\"signatures\"")) { // check for signature or signatures
+            } else if (jws.toLowerCase(Locale.ENGLISH).contains("\"signatures\"")) { // check for signature or signatures
                 // GENERAL
                 println("General format detected")
                 val token = Serializer.parse(JwsGeneralJson.serializer(), jws)
@@ -43,7 +44,7 @@ class JwsToken private constructor(private val payload: String,
                     payload = token.payload,
                     signatures = token.signatures
                 )
-            } else if (jws.toLowerCase().contains("\"signature\"")) {
+            } else if (jws.toLowerCase(Locale.ENGLISH).contains("\"signature\"")) {
                 // Flat
                 println("Flat format detected")
                 val token = Serializer.parse(JwsFlatJson.serializer(), jws)
