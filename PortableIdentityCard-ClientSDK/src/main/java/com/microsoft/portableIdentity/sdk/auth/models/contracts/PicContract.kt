@@ -29,9 +29,4 @@ data class PicContract (
 
     // An optional structured data model used to describe the set of claims in a Verifiable Credential.
     val schema: SchemaContract? = null
-): Request {
-
-    override fun getCredentialAttestations(): CredentialAttestations {
-        return input.attestations
-    }
-}
+)

@@ -9,5 +9,5 @@ interface Request {
      *
      * @return credentials requests if exist, null if no credentials requested.
      */
-    fun getCredentialAttestations(): CredentialAttestations
+    fun getCredentialAttestations(): CredentialAttestations?
 }

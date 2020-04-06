@@ -12,10 +12,14 @@ import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
+import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
@@ -45,9 +49,13 @@ class CardManager @Inject constructor(
 ) {
 
     /**
-     * Create a Request Object from a uri.
+     * Get Presentation Request.
+     *
+     * @param uri OpenID Connect Uri that points to the presentation request.
+     *
+     * @return PresentationRequest object that contains all attestations.
      */
-    suspend fun getRequest(uri: String): OidcRequest {
+    suspend fun getPresentationRequest(uri: String): PresentationRequest {
         val url = Url(uri)
         if (url.protocol.name != "openid") {
             throw AuthenticationException("request format not supported")
@@ -56,12 +64,24 @@ class CardManager @Inject constructor(
         val requestParameters = url.parameters.toMap()
         val serializedToken = requestParameters["request"]?.first()
         if (serializedToken != null) {
-            return OidcRequest(requestParameters, serializedToken)
+            return PresentationRequest(requestParameters, serializedToken)
         }
 
         val requestUri = requestParameters["request_uri"]?.first() ?: throw AuthenticationException("Cannot fetch request: No request uri found")
         val requestToken = picRepository.getRequest(requestUri) ?: throw AuthenticationException("Cannot fetch request: No request token found")
-        return OidcRequest(requestParameters, requestToken)
+        return PresentationRequest(requestParameters, requestToken)
+    }
+
+    /**
+     * Get Issuance Request from a contract.
+     *
+     * @param contractUrl url that the contract is fetched from
+     *
+     * @return IssuanceRequest object containing all metadata about what is needed to fulfill request including display information.
+     */
+    suspend fun getIssuanceRequest(contractUrl: String): IssuanceRequest {
+        val contract = picRepository.getContract(contractUrl) ?: throw AuthenticationException("No contract found")
+        return IssuanceRequest(contract)
     }
 
     /**
@@ -72,8 +92,8 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Get contract from PICS.
-     * PP: gets first contract from each Verifiable Credential Attestation.
+     * Get contract Urls from VC Attestations.
+     * Private Preview: gets first contract from each Verifiable Credential Attestation.
      */
     fun getContractUrls(request: OidcRequest): List<String> {
         val attestations = request.content.attestations ?: return emptyList()
@@ -85,20 +105,14 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Get contract from PICS.
+     * Create Response from Request.
      */
-    suspend fun getContract(url: String): PicContract? {
-        return picRepository.getContract(url)
-    }
-
-    /**
-     * Create OidcResponse from OidcRequest.
-     */
-    fun createResponse(request: OidcRequest): OidcResponse {
-        return PresentationResponse(request)
-    }
-    fun createResponse(contract: PicContract): OidcResponse {
-        return IssuanceResponse(contract)
+    fun createResponse(request: Request): Response {
+        return when (request) {
+            is PresentationRequest -> PresentationResponse(request)
+            is IssuanceRequest -> IssuanceResponse(request)
+            else -> throw AuthenticationException("No Response Type that matches Request Type.")
+        }
     }
 
     /**
