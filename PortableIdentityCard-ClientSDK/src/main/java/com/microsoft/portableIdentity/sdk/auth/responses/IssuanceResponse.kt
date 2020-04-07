@@ -1,10 +1,10 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.IdTokenBinding
-import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.SelfIssuedBinding
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.IdTokenAttestation
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 
 class IssuanceResponse(val request: IssuanceRequest): OidcResponse(request.contract.input.credentialIssuer) {

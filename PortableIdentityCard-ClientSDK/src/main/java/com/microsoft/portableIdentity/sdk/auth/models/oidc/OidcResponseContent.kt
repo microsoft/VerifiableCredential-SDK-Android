@@ -5,7 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.cards.SelfIssued
 import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_NAMES
 import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_SOURCES
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SELF_ISSUED

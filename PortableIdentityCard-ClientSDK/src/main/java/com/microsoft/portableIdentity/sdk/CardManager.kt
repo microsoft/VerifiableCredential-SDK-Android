@@ -6,7 +6,6 @@
 package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationException
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
@@ -31,6 +30,7 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers

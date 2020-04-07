@@ -5,8 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.PicBinding
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 
 interface Response {

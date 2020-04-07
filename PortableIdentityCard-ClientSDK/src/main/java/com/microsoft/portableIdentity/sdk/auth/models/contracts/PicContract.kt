@@ -5,9 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.contracts
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
-import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import kotlinx.serialization.Serializable
 
 /**
