@@ -56,5 +56,5 @@ class CardRepository @Inject constructor(database: SdkDatabase, private val picN
 
     suspend fun getRequest(url: String) = picNetworkOperation.getRequest(url)
 
-    suspend fun sendResponse(url: String, serializedResponse: String)= picNetworkOperation.sendResponse(url, serializedResponse)
+    suspend fun sendResponse(url: String, serializedResponse: String) = picNetworkOperation.sendResponse(url, serializedResponse)
 }
