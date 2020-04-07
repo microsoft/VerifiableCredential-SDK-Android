@@ -11,7 +11,7 @@ import androidx.room.TypeConverters
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
-import com.microsoft.portableIdentity.sdk.identifier.LongformIdentifier
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.dao.ClaimObjectDao
 import com.microsoft.portableIdentity.sdk.repository.dao.PortableIdentityCardDao
 import com.microsoft.portableIdentity.sdk.repository.dao.PortableIdentityDao
@@ -27,7 +27,7 @@ import com.microsoft.portableIdentity.sdk.repository.dao.SerialClaimObjectDao
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [ClaimObject::class, SerialClaimObject::class, PortableIdentityCard::class, LongformIdentifier::class], version = 1)
+@Database(entities = [ClaimObject::class, SerialClaimObject::class, PortableIdentityCard::class, Identifier::class], version = 1)
 @TypeConverters(RoomConverters::class)
 abstract class SdkDatabase : RoomDatabase() {
     abstract fun claimObjectDao(): ClaimObjectDao

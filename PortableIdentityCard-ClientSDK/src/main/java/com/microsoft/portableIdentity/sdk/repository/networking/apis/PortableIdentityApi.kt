@@ -9,5 +9,5 @@ import retrofit2.http.Url
 interface PortableIdentityApi {
 
     @GET
-    suspend fun resolveIdentifier(@Url overrideUrl: String/*, @Path ("identifier") identifier: String*/): Response<IdentifierDocument>
+    suspend fun resolveIdentifier(@Url overrideUrl: String): Response<IdentifierDocument>
 }
