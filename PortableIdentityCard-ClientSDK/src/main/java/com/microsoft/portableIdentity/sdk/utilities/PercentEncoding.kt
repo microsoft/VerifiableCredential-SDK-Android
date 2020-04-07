@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
+import java.util.*
 import kotlin.collections.Map
 
 object PercentEncoding {
@@ -71,7 +72,7 @@ object PercentEncoding {
     private fun decodePercent(hex: String): Char {
         val mapping = decodeCharacters.map {
             it.entries.firstOrNull { mapping ->
-                mapping.value.toUpperCase() == hex.toUpperCase()
+                mapping.value.toUpperCase(Locale.ENGLISH) == hex.toUpperCase(Locale.ENGLISH)
             }
         }.reduce {
                 acc, mapping ->

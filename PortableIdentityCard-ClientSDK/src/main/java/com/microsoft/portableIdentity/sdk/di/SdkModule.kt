@@ -78,7 +78,7 @@ internal class SdkModule {
     @Singleton
     fun defaultRetrofit(okHttpClient: OkHttpClient) : Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://10.91.6.163:3000")
+            .baseUrl("http://TODO.me")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
