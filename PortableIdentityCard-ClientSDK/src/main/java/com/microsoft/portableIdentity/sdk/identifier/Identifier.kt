@@ -87,7 +87,7 @@ class Identifier constructor (
             val sigKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
             val encJwk = encKey.toJWK()
             val sigJwk = sigKey.toJWK()
-            SdkLog.d("Created keys ${encJwk.kid} and ${sigJwk.kid}")
+            SdkLog.d("Created keys ${encJwk.kid} and ${sigJwk.kid}") // TODO(get rid)
             // RSA key
             val encPubKey = IdentifierDocumentPublicKey(
                 id = encJwk.kid!!,
