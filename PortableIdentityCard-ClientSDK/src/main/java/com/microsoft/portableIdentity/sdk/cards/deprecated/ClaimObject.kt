@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.credentials.deprecated
+package com.microsoft.portableIdentity.sdk.cards.deprecated
 
 import androidx.room.Entity
 import androidx.room.Ignore

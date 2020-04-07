@@ -5,13 +5,10 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.did.sdk.credentials.Credential
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.protectors.Signer
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
  * OIDC Response formed from a Request.
@@ -19,20 +16,24 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
  * @param request that response is responding to.
  * @param signer optional parameter used to protect the response.
  */
-class OidcResponse(request: OidcRequest): Response {
+class OidcResponse(private val request: OidcRequest): Response {
 
     /**
      * list of collected credentials to be sent in response.
      */
-    private val collectedCredentials: MutableList<Credential> = mutableListOf()
+    private val collectedCredentials: MutableList<PortableIdentityCard> = mutableListOf()
 
     /**
      * Add Credential to be put into response.
      *
      * @param credential to be added to response.
      */
-    override fun addCredential(credential: Credential) {
+    override fun addCredential(credential: PortableIdentityCard) {
         collectedCredentials.add(credential)
+    }
+
+    fun getRequestContents(): OidcRequestContent {
+        return request.content
     }
 
     // TODO: This has to be moved somewhere else. Currently it contains business logic while being an entity. You can't reference `Signer` here
@@ -52,7 +53,7 @@ class OidcResponse(request: OidcRequest): Response {
     /**
      * Create Response Content object from collectedCredentials and Request Contents.
      */
-    private fun createResponseContent(collectedCredentials: List<Credential>): OidcResponseContent {
+    private fun createResponseContent(collectedCredentials: List<PortableIdentityCard>): OidcResponseContent {
         TODO("implement when protocol is finalized")
     }
 }

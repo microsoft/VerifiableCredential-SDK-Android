@@ -37,6 +37,7 @@ class HttpResolver @Inject constructor(
             url("$baseUrl/$identifier ")
         }
         client.close()
+        println("url is $baseUrl/$identifier")
         println("GOT $response")
         val result = Serializer.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")

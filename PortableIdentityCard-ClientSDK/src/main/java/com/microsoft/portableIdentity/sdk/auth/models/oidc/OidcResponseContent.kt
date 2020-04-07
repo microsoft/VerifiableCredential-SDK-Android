@@ -5,16 +5,14 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_NAMES
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_SOURCES
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SELF_ISSUED
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SUB_JWK
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-const val SELF_ISSUED = "https://self-issued.me"
-const val SUB_JWK = "sub_jwk"
-const val CLAIM_NAMES = "_claim_names"
-const val CLAIM_SOURCES = "_claim_sources"
-
 
 /**
  * Contents of an OpenID Self-Issued Token Response.
@@ -62,7 +60,7 @@ data class OidcResponseContent(
     // response contains claims that fulfills this contract.
     val contract: String? = null,
     // claims that were being requested.
-    val attestations: String,
+    // TODO (val attestations)
     //id of the response
     val jti: String? = null
 )
