@@ -64,7 +64,7 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
                 alias,
                 personaSigKeyRef,
                 personaEncKeyRef,
-                personaEncKeyRef,
+                personaRecKeyRef,
                 nextUpdateCommitmentHash,
                 nextRecoveryCommitmentHash,
                 identifierDocument!!,
