@@ -40,7 +40,7 @@ class IdentityManager @Inject constructor(
 
     private val didSecretName = "did.identifier"
 
-    val did: Identifier by lazy { registerNewDid() }
+    val did: Identifier by lazy { initDid() }
 
     // TODO: Cleanup method
     private fun initDid(): Identifier {
@@ -70,7 +70,7 @@ class IdentityManager @Inject constructor(
         var did: Identifier? = null
         // TODO: Verify runBlocking is proper here
         runBlocking {
-            did = createTempIdentifier()
+            did = createIdentifier()
         }
         println("Registered ${did!!.document.id}")
         return did!!

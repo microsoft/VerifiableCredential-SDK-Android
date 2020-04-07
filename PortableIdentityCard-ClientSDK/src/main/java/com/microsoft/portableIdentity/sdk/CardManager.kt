@@ -120,7 +120,7 @@ class CardManager @Inject constructor(
      * Send a Response.
      */
     suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
-        val responseContent = formatter.formContents(response, responderIdentifier.document.id, responderIdentifier.signatureKeyReference)
+        val responseContent = formatter.formContents(response, responderIdentifier, responderIdentifier.signatureKeyReference)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
         val signedResponse = signer.sign(serializedResponseContent, responderIdentifier)
         val serializedSignedResponse = signedResponse.serialize()
