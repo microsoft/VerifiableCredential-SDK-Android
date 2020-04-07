@@ -1,17 +1,17 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
-import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
-class NullRegistrar(): Registrar() {
-    override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
-        throw SdkLog.error("Attempted to register from the null registrar.")
-    }
+class NullRegistrar() : Registrar() {
 
-    override suspend fun register(document: com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocumentPayload {
+    override suspend fun register(
+        signatureKeyReference: String,
+        encryptionKeyReference: String,
+        recoveryKeyReference: String,
+        cryptoOperations: CryptoOperations
+    ): Identifier {
         throw SdkLog.error("Attempted to register from the null registrar.")
     }
 }

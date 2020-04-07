@@ -19,9 +19,11 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
+import com.microsoft.portableIdentity.sdk.registrars.deprecated.IRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import dagger.Module
 import dagger.Provides
@@ -114,5 +116,17 @@ internal class SdkModule {
         return Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db")
             .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun defaultIResolver(resolver: com.microsoft.portableIdentity.sdk.resolvers.deprecated.HttpResolver): IResolver {
+        return resolver
+    }
+
+    @Provides
+    @Singleton
+    fun defaultIRegistrar(registrar: com.microsoft.portableIdentity.sdk.registrars.deprecated.SidetreeRegistrar): IRegistrar {
+        return registrar
     }
 }

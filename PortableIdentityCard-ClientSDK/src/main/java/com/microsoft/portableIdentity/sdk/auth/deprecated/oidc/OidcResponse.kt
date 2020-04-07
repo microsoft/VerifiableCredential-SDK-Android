@@ -11,15 +11,29 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.*
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.content.ByteArrayContent
 import io.ktor.http.ContentType
-import kotlinx.serialization.*
+import kotlinx.serialization.Required
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import java.util.*
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.MutableList
+import kotlin.collections.MutableMap
+import kotlin.collections.first
+import kotlin.collections.forEach
+import kotlin.collections.forEachIndexed
+import kotlin.collections.isNullOrEmpty
+import kotlin.collections.mapOf
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
 import kotlin.math.floor
 
 class OidcResponse (
@@ -70,7 +84,7 @@ class OidcResponse (
                                    clockSkewInMinutes: Int = 5,
                                    issuedWithinLastMinutes: Int? = null,
                                    crypto: CryptoOperations,
-                                   resolver: Resolver,
+                                   resolver: IResolver,
                                    contentType: ContentType): OidcResponse {
             return when(contentType) {
                 ContentType.Application.FormUrlEncoded -> {

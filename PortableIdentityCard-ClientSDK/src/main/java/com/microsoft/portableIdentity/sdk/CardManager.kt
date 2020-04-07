@@ -20,10 +20,10 @@ import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
+import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import io.ktor.http.Url
 import io.ktor.util.toMap
@@ -36,7 +36,7 @@ import javax.inject.Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
     private val cryptoOperations: CryptoOperations,
-    private val resolver: Resolver,
+    private val resolver: IResolver,
     private val validator: OidcRequestValidator, // TODO: should this be a generic Validator?
     private val signer: OidcResponseSigner,
     private val formatter: OidcResponseFormatter

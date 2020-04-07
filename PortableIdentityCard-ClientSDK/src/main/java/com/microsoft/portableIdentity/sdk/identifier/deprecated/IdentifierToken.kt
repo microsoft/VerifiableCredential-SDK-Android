@@ -2,8 +2,8 @@ package com.microsoft.portableIdentity.sdk.identifier.deprecated
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.registrars.Registrar
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.registrars.deprecated.IRegistrar
+import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.Serializable
 
@@ -33,8 +33,8 @@ data class IdentifierToken (
         fun deserialize(
             identifierToken: String,
             cryptoOperations: CryptoOperations,
-            resolver: Resolver,
-            registrar: Registrar
+            resolver: IResolver,
+            registrar: IRegistrar
         ): Identifier {
             val token = Serializer.parse(IdentifierToken.serializer(), identifierToken)
             return Identifier(

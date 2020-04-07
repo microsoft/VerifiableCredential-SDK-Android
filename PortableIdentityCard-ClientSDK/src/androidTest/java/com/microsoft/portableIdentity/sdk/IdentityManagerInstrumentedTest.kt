@@ -34,7 +34,7 @@ class IdentityManagerInstrumentedTest {
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         PortableIdentitySdk.init(context)
-        registrar = SidetreeRegistrar("http://10.91.6.163:3000")
+        registrar = SidetreeRegistrar("http://10.91.6.163:3000", PortableIdentitySdk.identityManager.identityRepository)
         resolver = HttpResolver("http://10.91.6.163:3000", PortableIdentitySdk.identityManager.identityRepository)
         signatureKeyReference = "signature"
         encryptionKeyReference = "encryption"

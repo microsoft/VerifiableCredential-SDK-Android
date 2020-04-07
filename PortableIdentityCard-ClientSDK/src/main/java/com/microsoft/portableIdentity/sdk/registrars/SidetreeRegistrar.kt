@@ -3,83 +3,74 @@
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
-import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.utilities.*
-import io.ktor.client.features.ResponseException
-import io.ktor.client.request.post
-import io.ktor.client.request.url
-import io.ktor.content.ByteArrayContent
-import io.ktor.http.ContentType
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.PayloadGenerator
+import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
+import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
+import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Constants
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.random.Random
 
 /**
  * Registrar implementation for the Sidetree network
  * @class
  * @implements IRegistrar
  * @param registrarUrl to the registration endpoint
- * @param cryptoOperations
+ * @param identityRepository repository to perform portable identity related operations in network/database
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String): Registrar() {
-    override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
-        // create JWS request
-        val content = Serializer.stringify(RegistrationDocument.serializer(), document)
-        val jwsToken = JwsToken(content)
-        val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
-        val kid = key.kid
-        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))
-        val jws = jwsToken.serialize(JwsFormat.FlatJson)
-        jwsToken.verify(crypto);
-        val response = sendRequest(jws)
-        println(response)
-        return Serializer.parse(IdentifierDocument.serializer(), response)
-    }
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val identityRepository: PortableIdentityRepository) :
+    Registrar() {
 
-    override suspend fun register(document: com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocumentPayload {
-        // create JWS request
-        val content = Serializer.stringify(com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument.serializer(), document)
-        val jwsToken = JwsToken(content)
-        val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
-        val kid = key.kid
-        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))
-        val jws = jwsToken.serialize(JwsFormat.FlatJson)
-        jwsToken.verify(crypto);
-        val response = sendRequest(jws)
-        println(response)
-        return Serializer.parse(IdentifierDocumentPayload.serializer(), response)
-    }
+    override suspend fun register(
+        signatureKeyReference: String,
+        encryptionKeyReference: String,
+        recoveryKeyReference: String,
+        cryptoOperations: CryptoOperations
+    ): Identifier {
+        val alias = Base64Url.encode(Random.nextBytes(16))
+        val personaEncKeyRef = "$alias.$encryptionKeyReference"
+        val personaSigKeyRef = "$alias.$signatureKeyReference"
+        val personaRecKeyRef = "$alias.$recoveryKeyReference"
+        val payloadGenerator = PayloadGenerator(
+            cryptoOperations,
+            signatureKeyReference,
+            encryptionKeyReference,
+            recoveryKeyReference
+        )
+        val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
+        val registrationDocument =
+            Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
 
-    /**
-     * Send request to the registration service
-     * returning the fully discoverable Identifier Document.
-     * @param request request sent to the registration service.
-     */
-    private suspend fun sendRequest(request: String): String {
-        val client = getHttpClient()
-        try {
-            return client.post<String> {
-                url(baseUrl)
-                body = ByteArrayContent(
-                    bytes = stringToByteArray(request),
-                    contentType = ContentType.Application.Json
-                )
-            }
-        } catch (error: ResponseException) {
-            println("Registration failed (${error.response.status})")
-            while (!error.response.content.isClosedForRead) {
-                val data = error.response.content.readUTF8Line(error.response.content.availableForRead)
-                if (!data.isNullOrBlank()) {
-                    println(data)
-                }
-            }
-            throw error
-        } finally {
-            client.close()
-        }
+        val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
+        val portableIdentity = "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
+
+        //Resolves the created long form identifier as validation before saving it
+        val identifier = "$portableIdentity?${Constants.INITIAL_STATE_LONGFORM}=$registrationDocumentEncoded"
+        val identifierDocument = identityRepository.resolveIdentifier(baseUrl, identifier)
+
+        val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
+        val nextUpdateCommitmentHash = Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
+        val suffixDataJson = byteArrayToString(Base64Url.decode(registrationDocument.suffixData))
+        val nextRecoveryCommitmentHash = Serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
+
+        val longformIdentifier =
+            Identifier(
+                identifier,
+                alias,
+                personaSigKeyRef,
+                personaEncKeyRef,
+                personaEncKeyRef,
+                nextUpdateCommitmentHash,
+                nextRecoveryCommitmentHash,
+                identifierDocument!!,
+                Constants.IDENTITY_SECRET_KEY_NAME
+            )
+        identityRepository.insert(longformIdentifier)
+        return identityRepository.queryById(identifier)
     }
 }

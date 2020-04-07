@@ -5,7 +5,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.DidKeyResolver
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.Identifier
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.getHttpClient
@@ -74,7 +74,8 @@ class OidcRequest constructor(
         
         suspend fun parseAndVerify(signedRequest: String,
                                    crypto: CryptoOperations,
-                                   resolver: Resolver): OidcRequest {
+                                   resolver: IResolver
+        ): OidcRequest {
             if (!signedRequest.startsWith("openid://")) {
                 throw SdkLog.error("Must be passed a string beginning in \"openid://\"")
             }

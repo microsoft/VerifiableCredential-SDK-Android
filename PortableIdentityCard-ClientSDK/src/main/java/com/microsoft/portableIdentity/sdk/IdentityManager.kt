@@ -40,56 +40,10 @@ class IdentityManager @Inject constructor(
     private val registrar: Registrar,
     @Named("signatureKeyReference") private val signatureKeyReference: String,
     @Named("encryptionKeyReference") private val encryptionKeyReference: String,
-    @Named("recoveryKeyReference") private val recoveryKeyReference: String,
-    @Named("resolverUrl") resolverUrl: String
+    @Named("recoveryKeyReference") private val recoveryKeyReference: String
 ) {
 
-    private val url = resolverUrl
-
     val did: Identifier by lazy { initLongFormDid() }
-//    val did = initLongFormDid()
-
-    private suspend fun registerPortableIdentity(url: String): Identifier {
-        val alias = Base64Url.encode(Random.nextBytes(16))
-        val personaEncKeyRef = "$alias.$encryptionKeyReference"
-        val personaSigKeyRef = "$alias.$signatureKeyReference"
-        val personaRecKeyRef = "$alias.$recoveryKeyReference"
-        val payloadGenerator = PayloadGenerator(
-            cryptoOperations,
-            signatureKeyReference,
-            encryptionKeyReference,
-            recoveryKeyReference
-        )
-        val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
-        val registrationDocument =
-            Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
-
-        val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
-        val portableIdentity = "did:$METHOD_NAME:test:$uniqueSuffix"
-
-        val identifier = "$portableIdentity?$INITIAL_STATE_LONGFORM=$registrationDocumentEncoded"
-        val identifierDocument = identityRepository.resolveIdentifier(url, identifier)
-
-        val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
-        val nextUpdateCommitmentHash = Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
-        val suffixDataJson = byteArrayToString(Base64Url.decode(registrationDocument.suffixData))
-        val nextRecoveryCommitmentHash = Serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
-
-        val longformIdentifier =
-            Identifier(
-                identifier,
-                alias,
-                personaSigKeyRef,
-                personaEncKeyRef,
-                personaEncKeyRef,
-                nextUpdateCommitmentHash,
-                nextRecoveryCommitmentHash,
-                identifierDocument!!,
-                IDENTITY_SECRET_KEY_NAME
-            )
-        identityRepository.insert(longformIdentifier)
-        return identityRepository.queryById(identifier)
-    }
 
     private fun initLongFormDid(): Identifier {
         val did = if (identityRepository.queryByName(IDENTITY_SECRET_KEY_NAME) != null) {
@@ -125,7 +79,11 @@ class IdentityManager @Inject constructor(
      */
     private suspend fun createPortableIdentity(): Identifier {
         return withContext(Dispatchers.Default) {
-            registerPortableIdentity(url)
+            createAndRegisterPortableIdentity()
         }
+    }
+
+    private suspend fun createAndRegisterPortableIdentity(): Identifier {
+        return registrar.register(signatureKeyReference, encryptionKeyReference, recoveryKeyReference, cryptoOperations)
     }
 }
