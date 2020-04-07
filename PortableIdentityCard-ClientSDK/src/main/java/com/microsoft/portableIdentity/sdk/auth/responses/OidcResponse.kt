@@ -5,10 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.PicBinding
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.SelfIssued
 
 /**
  * OIDC Response formed from a Request.
@@ -20,18 +17,17 @@ open abstract class OidcResponse(override val audience: String): Response {
     /**
      * list of collected credentials to be sent in response.
      */
-    private val collectedCards: MutableList<PicBinding> = mutableListOf()
+    private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
 
     /**
      * Add Credential to be put into response.
      * @param credential to be added to response.
      */
     override fun addCard(card: PortableIdentityCard, type: String) {
-        val cardBinding = PicBinding(card, type)
-        collectedCards.add(cardBinding)
+        collectedCards[type] = card
     }
 
-    fun getCardBindings(): List<PicBinding> {
+    fun getCardBindings(): Map<String, PortableIdentityCard> {
         return collectedCards
     }
 }

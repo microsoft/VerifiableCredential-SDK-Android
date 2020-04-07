@@ -5,13 +5,13 @@
 
 package com.microsoft.portableIdentity.sdk.auth.protectors
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestationBindings.PicBinding
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.AttestationResponse
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
+import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import java.util.*
@@ -81,7 +81,7 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     // TODO(wrap VC in a VP and map it to the type)
-    private fun createPresentations(binding: List<PicBinding>): Map<String, String>? {
+    private fun createPresentations(binding: Map<String, PortableIdentityCard>): Map<String, String>? {
         return null
     }
 
