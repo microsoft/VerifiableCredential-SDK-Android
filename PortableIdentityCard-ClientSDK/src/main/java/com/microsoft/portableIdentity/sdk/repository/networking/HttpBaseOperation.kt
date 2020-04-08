@@ -26,6 +26,10 @@ open class HttpBaseOperation {
         return data
     }
 
+    suspend fun <T : Any> call(call: suspend () -> Response<T>, errorMessage: String): Response<T>? {
+        return call.invoke()
+    }
+
     /**
      * TODO(is this a good place for error handling different status codes?)
      */
