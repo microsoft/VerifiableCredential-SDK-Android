@@ -73,8 +73,7 @@ class JwsToken private constructor(private val payload: String,
     fun serialize (format: JwsFormat = JwsFormat.Compact): String {
         return when(format) {
             JwsFormat.Compact -> {
-                val jws = intermediateCompactSerialize()
-                "${jws.protected}.${jws.payload}.${jws.signature}"
+                intermediateCompactSerialize()
             }
             JwsFormat.FlatJson -> {
                 val jws = intermediateFlatJsonSerialize()
@@ -90,13 +89,22 @@ class JwsToken private constructor(private val payload: String,
         }
     }
 
-    fun intermediateCompactSerialize(): JwsCompact {
-        val signature = this.signatures.firstOrNull() ?: throw SdkLog.error("This JWS token contains no signatures")
-        return JwsCompact(
+    fun intermediateCompactSerialize(): String {
+        val signature = this.signatures.firstOrNull()
+        if (signature == null) {
+            val jws = JwsCompact(
+                protected = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0",
+                payload = this.payload,
+                signature = ""
+            )
+            return "${jws.protected}.${jws.payload}"
+        }
+        val jws = JwsCompact(
             protected = signature.protected,
             payload = this.payload,
             signature = signature.signature
         )
+        return "${jws.protected}.${jws.payload}.${jws.signature}"
     }
 
     fun intermediateFlatJsonSerialize(): JwsFlatJson {

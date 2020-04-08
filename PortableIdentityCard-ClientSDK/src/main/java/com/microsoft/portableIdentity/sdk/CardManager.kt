@@ -82,7 +82,7 @@ class CardManager @Inject constructor(
      */
     suspend fun getIssuanceRequest(contractUrl: String): IssuanceRequest {
         val contract = picRepository.getContract(contractUrl) ?: throw AuthenticationException("No contract found")
-        return IssuanceRequest(contract)
+        return IssuanceRequest(contract, contractUrl)
     }
 
     /**
@@ -119,22 +119,30 @@ class CardManager @Inject constructor(
     /**
      * Send a Response.
      */
-    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
+    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): Any {
         val responseContent = formatter.formContents(response, responderIdentifier, responderIdentifier.signatureKeyReference)
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
         val signedResponse = signer.sign(serializedResponseContent, responderIdentifier)
         val serializedSignedResponse = signedResponse.serialize()
-        return picRepository.sendResponse(response.audience, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+        return when (response) {
+            is IssuanceResponse -> picRepository.sendResponse(response.audience, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+            is PresentationResponse -> picRepository.sendPresentationResponse(response.audience, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+            else -> throw AuthenticationException("Response Not Supported")
+        }
     }
 
     /**
      * Puts together card and saves in repository.
      */
     suspend fun saveCard(signedVerifiableCredential: String, contract: PicContract) {
+        val card = createCard(signedVerifiableCredential, contract)
+        picRepository.insert(card)
+    }
+
+    fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
         val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
-        val card = PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
-        picRepository.insert(card)
+        return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {

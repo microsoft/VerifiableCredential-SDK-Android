@@ -20,7 +20,7 @@ data class VerifiableCredentialDescriptor(
 
     val credentialSubject: Map<String, String>,
 
-    val credentialStatus: ServiceDescriptor,
+    val credentialStatus: ServiceDescriptor? = null,
 
-    val revokeService: ServiceDescriptor
+    val revokeService: ServiceDescriptor? = null
 )

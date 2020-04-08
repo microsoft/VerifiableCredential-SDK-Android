@@ -37,7 +37,7 @@ class OidcResponseFormatter @Inject constructor(
 ) {
 
     fun formContents(response: OidcResponse, responder: Identifier, useKey: String = signatureKeyReference, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
-        val (iat, exp) = createIatAndExp(expiresIn)
+        val (iat, exp) = createIatAndExp(1000)
         val key = cryptoOperations.keyStore.getPublicKey(useKey).getKey()
         val jti = UUID.randomUUID().toString()
         val did = responder.document.id
@@ -74,15 +74,16 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createAttestationResponse(response: OidcResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse? {
-        var selfIssuedAttestations: Map<String, String>? = null
+        var selfIssuedAttestations: String? = null
         var tokenAttestations: Map<String, String>? = null
         if (response is IssuanceResponse) {
             if (!response.getIdTokenBindings().isNullOrEmpty()) {
                 tokenAttestations = response.getIdTokenBindings()
             }
             if (!response.getSelfIssuedClaimBindings().isNullOrEmpty()) {
-                selfIssuedAttestations = response.getSelfIssuedClaimBindings()
-                // val token = JwsToken(Serializer.stringify(response.getSelfIssuedClaimBindings(), String::class, String::class))
+                val serializedSelfIssued = Serializer.stringify(response.getSelfIssuedClaimBindings(), String::class, String::class)
+                val token = JwsToken(serializedSelfIssued)
+                selfIssuedAttestations = token.serialize()
             }
         }
         val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
@@ -133,7 +134,8 @@ class OidcResponseFormatter @Inject constructor(
 
     private fun createIatAndExp(expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Pair<Long, Long> {
         val currentTime = Date().time
-        val expiration = currentTime + 1000 * 60 * expiresIn
+        val expiresInMilliseconds = 1000 * 60 * expiresIn
+        val expiration = currentTime + expiresInMilliseconds.toLong()
         val exp = floor(expiration / 1000f).toLong()
         val iat = floor(currentTime / 1000f).toLong()
         return Pair(iat, exp)

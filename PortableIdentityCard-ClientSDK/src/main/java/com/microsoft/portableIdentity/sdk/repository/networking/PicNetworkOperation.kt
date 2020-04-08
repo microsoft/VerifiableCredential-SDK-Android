@@ -1,6 +1,7 @@
 package com.microsoft.portableIdentity.sdk.repository.networking
 
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.PortableIdentityCardApi
 import retrofit2.Retrofit
@@ -35,9 +36,19 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Post Response to url.
      */
-    suspend fun sendResponse(url: String, serializedResponse: String): ServiceResponse? {
+    suspend fun sendResponse(url: String, serializedResponse: String): IssuanceServiceResponse? {
         return fire(
             call = {picApi.sendResponse(url, serializedResponse)},
+            errorMessage = "Error Sending Response to $url."
+        )
+    }
+
+    /**
+     * Post Presentation Response to url.
+     */
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String): Unit? {
+        return fire(
+            call = {picApi.sendPresentationResponse(url, serializedResponse)},
             errorMessage = "Error Sending Response to $url."
         )
     }

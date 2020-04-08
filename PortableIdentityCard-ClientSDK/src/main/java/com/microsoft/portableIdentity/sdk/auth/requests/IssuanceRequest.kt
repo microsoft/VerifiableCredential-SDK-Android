@@ -8,7 +8,7 @@ package com.microsoft.portableIdentity.sdk.auth.requests
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 
-class IssuanceRequest(val contract: PicContract): Request {
+class IssuanceRequest(val contract: PicContract, val contractUrl: String): Request {
     override fun getCredentialAttestations(): CredentialAttestations? {
         return contract.input.attestations
     }
