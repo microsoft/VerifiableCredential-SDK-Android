@@ -45,9 +45,7 @@ class SidetreeRegistrarInstrumentedTest {
         androidSubtle = AndroidSubtle(keyStore)
         val ecSubtle = EllipticCurveSubtleCrypto(androidSubtle)
         registrar = SidetreeRegistrar("https://beta.ion.microsoft.com/api/1.0/register")
-//        registrar = SidetreeRegistrar("http://10.91.6.163:3000")
         resolver = HttpResolver("https://beta.discover.did.microsoft.com/1.0/identifiers")
-//        resolver = HttpResolver("http://10.91.6.163:3000")
         cryptoOperations = CryptoOperations(androidSubtle, keyStore)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
@@ -121,10 +119,6 @@ class SidetreeRegistrarInstrumentedTest {
         var hubService: IdentifierDocumentService? = null
         val identityHubDid = listOf("did:test:hub.id")
         if (!identityHubDid.isNullOrEmpty()) {
-//                        val hubs = identityHubDid.map {
-//                            resolver.resolve(it,
-//                                cryptoOperations
-//                            )}
             val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, resolver, registrar)
             hubService = IdentityHubService.create(
                 id = "#hub",
@@ -160,10 +154,7 @@ class SidetreeRegistrarInstrumentedTest {
 
     @Test
     fun resolutionTest() {
-        //did = "did:ion:test:EiD0fhJIYZwBNn2akeiVC5hT1K9ncP0HJCN0LkhnFrHyTg"
-        did = "did:ion:test:EiCAvQuaAu5awq_e_hXyJImdQ5-xJsZzzQ3Xd9a2EAphtQ"
-        val didDocHash =
-            "eyJ0eXBlIjoiY3JlYXRlIiwic3VmZml4RGF0YSI6ImV5SnZjR1Z5WVhScGIyNUVZWFJoU0dGemFDSTZJa1ZwUVhKTGIwVlhaSFJ5YkdST05YaHplRTR6WW05bWFVRXhTbFl4YjNKdVlWRjNOVVJTY21sT1Qwd3RaRUVpTENKeVpXTnZkbVZ5ZVV0bGVTSTZleUp3ZFdKc2FXTkxaWGxJWlhnaU9pSXdNMlkxTVRNME5qRmlNalpqWm1WaU5UQTRZemM1WVdVNE9EUm1NVEE1TUdVNFpUUXpNV1F3Tm1KaVl6WmhaVFV5WldWaE16Rm1aRE00TVdKak5USm1ZVFVpZlN3aWJtVjRkRkpsWTI5MlpYSjVUM1J3U0dGemFDSTZJa1ZwUkVVeVl6ZE9lbmR3U2tZdGVVTTBTazF3UkRreVRVdHdWV1l5Y0hFM1ZEbFpRMDB6UzFFM2F6Vk9jMmNpZlEiLCJvcGVyYXRpb25EYXRhIjoiZXlKdVpYaDBWWEJrWVhSbFQzUndTR0Z6YUNJNklrVnBRVXhoT0dScVZGbzNZMkpEZDBsdFpXWkNkV1V6Ykd4eWRrUjJjWGRNVVZGUFZtVjRjelJLY2xJMmVsRWlMQ0prYjJOMWJXVnVkQ0k2ZXlKQVkyOXVkR1Y0ZENJNkltaDBkSEJ6T2k4dmR6TnBaQzV2Y21jdlpHbGtMM1l4SWl3aWNIVmliR2xqUzJWNUlqcGJleUpwWkNJNklpTnphV2R1YVc1blMyVjVJaXdpZEhsd1pTSTZJbE5sWTNBeU5UWnJNVlpsY21sbWFXTmhkR2x2Ymt0bGVUSXdNVGdpTENKMWMyRm5aU0k2SW5OcFoyNXBibWNpTENKd2RXSnNhV05MWlhsSVpYZ2lPaUl3TWpCbVpUUXpOVEEwTlRRek9UbGxORFF5T0ROalpqTmpObVZqWW1WaE5qWTNZVE0wWmpOaVpqY3pPVEl3TWpjMVlqY3pOak0zTm1aaFlUVm1ObU0zWVRraWZWMHNJbk5sY25acFkyVWlPbHQ3SW1sa0lqb2lTV1JsYm5ScGRIbElkV0lpTENKMGVYQmxJam9pU1dSbGJuUnBkSGxJZFdJaUxDSnpaWEoyYVdObFJXNWtjRzlwYm5RaU9uc2lRR052Ym5SbGVIUWlPaUp6WTJobGJXRXVhV1JsYm5ScGRIa3VabTkxYm1SaGRHbHZiaTlvZFdJaUxDSkFkSGx3WlNJNklsVnpaWEpUWlhKMmFXTmxSVzVrY0c5cGJuUWlMQ0pwYm5OMFlXNWpaWE1pT2xzaVpHbGtPbk5wWkdWMGNtVmxPblpoYkhWbE1DSmRmWDFkZlgwIn0"
+        did = "did:ion:test:EiBvuqdsYCLWgkDlY_Jc9Hnk4SqDxqq6VTmFfygRII49FQ"
         runBlocking {
             val identifier = resolver.resolve(did, cryptoOperations)
             val resolvedIdentifierDocument = identifier.document
