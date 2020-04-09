@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AttestationResponse(
-        val selfIssued: Map<String, String>? = null,
+        val selfIssued: String? = null,
 
         val idTokens: Map<String, String>? = null,
 

@@ -11,10 +11,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceRe
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import kotlinx.coroutines.Deferred
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Url
+import retrofit2.http.*
 
 interface PortableIdentityCardApi {
 
@@ -26,4 +23,8 @@ interface PortableIdentityCardApi {
 
     @POST
     suspend fun sendResponse(@Url overrideUrl: String, @Body body: String): Response<IssuanceServiceResponse>
+
+    @FormUrlEncoded
+    @POST
+    suspend fun sendPresentationResponse(@Url overrideUrl: String, @Field("id_token") token: String): Response<Unit>
 }

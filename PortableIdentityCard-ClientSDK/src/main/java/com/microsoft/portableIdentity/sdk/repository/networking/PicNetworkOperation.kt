@@ -1,8 +1,12 @@
 package com.microsoft.portableIdentity.sdk.repository.networking
 
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.PortableIdentityCardApi
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.PortableIdentitySdkException
+import retrofit2.Response
 import retrofit2.Retrofit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,10 +39,22 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Post Response to url.
      */
-    suspend fun sendResponse(url: String, serializedResponse: String): ServiceResponse? {
+    suspend fun sendResponse(url: String, serializedResponse: String): IssuanceServiceResponse? {
         return fire(
             call = {picApi.sendResponse(url, serializedResponse)},
             errorMessage = "Error Sending Response to $url."
         )
+    }
+
+    /**
+     * Post Presentation Response to url.
+     */
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String): String {
+        val response = call(
+            call = {picApi.sendPresentationResponse(url, serializedResponse)},
+            errorMessage = "Error Sending Response to $url."
+        )
+        val requestUrl = response?.raw()?.request()?.url()
+        return requestUrl.toString()
     }
 }

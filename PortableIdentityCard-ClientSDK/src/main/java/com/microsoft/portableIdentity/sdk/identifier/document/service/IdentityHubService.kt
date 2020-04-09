@@ -10,13 +10,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("IdentityHub") // serializer writes this value for "type"
-class IdentityHubService(override val id: String, val publicKey: String, @Polymorphic override val serviceEndpoint: Endpoint): IdentifierDocumentService {
-    override val type: String = "IdentityHub"
+data class IdentityHubService(override val id: String, override val type: String = "IdentityHub", val publicKey: String, @Polymorphic override val serviceEndpoint: Endpoint): IdentifierDocumentService {
     companion object {
         fun create(id: String, signatureKeyRef: String, instances: List<Identifier>, keyStore: KeyStore): IdentifierDocumentService {
             val keyId = keyStore.list()[signatureKeyRef] ?: throw SdkLog.error("Could not find key $signatureKeyRef")
             val didList = instances.map { it.document.id }
-            return IdentityHubService(id, keyId.getLatestKeyId(), UserHubEndpoint(instance = didList))
+            return IdentityHubService(id, publicKey = keyId.getLatestKeyId(), serviceEndpoint = UserHubEndpoint(instance = didList))
         }
     }
 }

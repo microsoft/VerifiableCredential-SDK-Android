@@ -9,7 +9,7 @@ import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 
 class IssuanceResponse(val request: IssuanceRequest): OidcResponse(request.contract.input.credentialIssuer) {
 
-    val contractUrl: String = request.contract.display.contract
+    val contractUrl: String = request.contractUrl
 
     private val collectedTokens: MutableMap<String, String> = mutableMapOf()
 
