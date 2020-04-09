@@ -6,7 +6,9 @@
 package com.microsoft.portableIdentity.sdk.auth.protectors
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -24,9 +26,13 @@ class OidcResponseSigner @Inject constructor(
      * Sign content with keyReference.
      * @return JwsToken
      */
-    fun sign(payload: String, keyReference: String = signatureKeyReference, additionalHeaders: Map<String, String> = emptyMap()): JwsToken {
+    fun sign(payload: String, identifier: Identifier): JwsToken {
         val token = JwsToken(payload)
-        token.sign(keyReference, cryptoOperations, additionalHeaders)
+        val kid = cryptoOperations.keyStore.getPrivateKey(identifier.signatureKeyReference).getKey().kid
+        // adding kid value to header.
+        val additionalHeaders = mutableMapOf<String, String>()
+        additionalHeaders[JoseConstants.Kid.value] = "${identifier.document.id}#${kid}"
+        token.sign(identifier.signatureKeyReference, cryptoOperations, additionalHeaders)
         return token
     }
 }

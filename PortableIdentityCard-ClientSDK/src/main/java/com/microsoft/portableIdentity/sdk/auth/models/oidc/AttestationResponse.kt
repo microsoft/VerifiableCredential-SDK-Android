@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
+package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import androidx.room.Entity
 import kotlinx.serialization.Serializable
 
-@Entity
 @Serializable
-data class VerifiableCredential(
-        val raw: String,
+data class AttestationResponse(
+        val selfIssued: Map<String, String>? = null,
 
-        val contents: VerifiableCredentialContent
+        val idTokens: Map<String, String>? = null,
+
+        val presentations: Map<String, String>? = null
 )

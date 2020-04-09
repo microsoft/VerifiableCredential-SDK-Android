@@ -146,9 +146,12 @@ class JwsToken private constructor(private val payload: String,
             algorithmName = headers[JoseConstants.Alg.value]!!
         }
 
-        if (!headers.containsKey(JoseConstants.Kid.value)) {
+        val kid = headers[JoseConstants.Kid.value]
+        if (kid == null) {
             protected[JoseConstants.Kid.value] = signingKey.kid
             println("Using key ${protected[JoseConstants.Kid.value]}")
+        } else {
+            protected[JoseConstants.Kid.value] = kid
         }
 
         var encodedProtected = ""

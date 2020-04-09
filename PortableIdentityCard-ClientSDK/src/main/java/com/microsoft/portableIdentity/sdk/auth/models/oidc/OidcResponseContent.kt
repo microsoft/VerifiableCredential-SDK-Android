@@ -32,10 +32,10 @@ data class OidcResponseContent(
     val aud: String,
 
     // nonce from the request.
-    val nonce: String,
+    val nonce: String? = null,
 
     // state from the request.
-    val state: String?,
+    val state: String? = null,
 
     // did tied to the private key that signed response.
     val did: String?,
@@ -62,5 +62,8 @@ data class OidcResponseContent(
     // claims that were being requested.
     // TODO (val attestations)
     //id of the response
-    val jti: String? = null
+    val jti: String? = null,
+
+    // attestations that were asked for in Request.
+    val attestations: AttestationResponse? = null
 )

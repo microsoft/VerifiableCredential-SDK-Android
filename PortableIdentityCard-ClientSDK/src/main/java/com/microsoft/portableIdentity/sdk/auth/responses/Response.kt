@@ -9,11 +9,14 @@ import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 
 interface Response {
 
+    val audience: String
+
     /**
      * Add Credential to be put into response.
      *
-     * @param credential to be added to response.
+     * @param card to be added to response.
+     * @param type that maps to the card.
      */
-    fun addCredential(credential: PortableIdentityCard)
+    fun addCard(card: PortableIdentityCard, type: String)
 
 }
