@@ -8,7 +8,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IdentifierToken (
+data class IdentifierToken(
     val document: IdentifierDocument,
     val alias: String,
     val signatureKeyReference: String,
@@ -25,8 +25,7 @@ data class IdentifierToken (
         }
 
         fun serialize(identifier: Identifier): String {
-            val token =
-                tokenize(identifier)
+            val token = tokenize(identifier)
             return Serializer.stringify(IdentifierToken.serializer(), token)
         }
 

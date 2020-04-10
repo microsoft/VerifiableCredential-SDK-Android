@@ -1,7 +1,6 @@
 package com.microsoft.portableIdentity.sdk.identifier.models
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.identifier.models.document.RecoveryKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,4 +12,4 @@ data class SuffixData(
     val recoveryKey: JsonWebKey,
     @SerialName("nextRecoveryCommitmentHash")
     val nextRecoveryCommitmentHash: String
-) {}
+)

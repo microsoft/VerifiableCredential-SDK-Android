@@ -27,4 +27,6 @@ object Constants {
     const val IDENTITY_SECRET_KEY_NAME = "did.identifier"
     const val METHOD_NAME = "ion"
     const val INITIAL_STATE_LONGFORM = "-$METHOD_NAME-initial-state"
+    const val SIDETREE_OPERATION_TYPE = "create"
+    const val SIDETREE_PATCH_ACTION = "replace"
 }

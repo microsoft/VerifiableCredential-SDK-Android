@@ -12,6 +12,8 @@ import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierD
 import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_OPERATION_TYPE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_PATCH_ACTION
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
@@ -28,39 +30,46 @@ class PayloadGenerator @Inject constructor(
     @Named("encryptionKeyReference") private val encryptionKeyReference: String,
     @Named("recoveryKeyReference") private val recoveryKeyReference: String
 ) {
+    /**
+     * Generates input payload for create operation on Sidetree.
+     * In unpublished resolution or long form it is same as the initial-state portion of the identifier which can be used
+     * to resolve portable identifier
+     */
     fun generateCreatePayload(alias: String): String {
-        val personaEncKeyRef = "$alias.$encryptionKeyReference"
+        //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
         val personaSigKeyRef = "$alias.$signatureKeyReference"
+        val personaEncKeyRef = "$alias.$encryptionKeyReference"
         val personaRecKeyRef = "$alias.$recoveryKeyReference"
-        val signingKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
-        val signingKeyJwk = signingKey.toJWK()
-        var curveName = if(signingKeyJwk.kty == KeyType.EllipticCurve.value) "secp256k1" else signingKeyJwk.crv
-        val signingKeyJWK = JsonWebKey(kty = signingKeyJwk.kty, crv = curveName, x = signingKeyJwk.x, y = signingKeyJwk.y)
-        val encryptionKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
-        val encryptionKeyJWK = encryptionKey.toJWK()
-        val recoveryKey = cryptoOperations.generateKeyPair(personaRecKeyRef, KeyType.EllipticCurve)
-        val recoveryKeyJwk = recoveryKey.toJWK()
-        curveName = if(recoveryKeyJwk.kty == KeyType.EllipticCurve.value) "secp256k1" else recoveryKeyJwk.crv
-        val recoveryKeyJWK = JsonWebKey(kty = recoveryKeyJwk.kty, crv = curveName, x = recoveryKeyJwk.x, y = recoveryKeyJwk.y)
+        val signingKeyJWK = generatePublicKeyJwk(personaSigKeyRef, KeyType.EllipticCurve)
+        //TODO: Do we need encryption keys for MVP?
+        val encryptionKeyJWK = generatePublicKeyJwk(personaEncKeyRef, KeyType.RSA)
+        val recoveryKeyJWK = generatePublicKeyJwk(personaRecKeyRef, KeyType.EllipticCurve)
 
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingKeyJWK, encryptionKeyJWK)
-
-        val updateCommitmentHash = generateCommitmentValue()
-        val updateCommitmentHashEncoded = Base64Url.encode(updateCommitmentHash)
-        val patchData = PatchData(
-            updateCommitmentHashEncoded,
-            listOf(identifierDocumentPatch)
-        )
-
+        val patchData = createPatchData(identifierDocumentPatch)
         val patchDataEncoded = encodePatchData(patchData)
-        val recoveryCommitmentHash = generateCommitmentValue()
-        val suffixData = createSuffixDataPayload(patchData, recoveryCommitmentHash, recoveryKeyJWK)
 
-        val suffixDataEncoded = encodeSuffixData(suffixData)
-        val registrationDocument = RegistrationDocument("create", suffixDataEncoded, patchDataEncoded)
+        val suffixDataEncoded = createSuffixDataEncoded(patchData, recoveryKeyJWK)
+
+        val registrationDocument = RegistrationDocument(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
         return encodeRegDoc(registrationDocument)
     }
 
+    private fun generatePublicKeyJwk(personaKeyRef: String, keyType: KeyType): JsonWebKey {
+        val publicKey = cryptoOperations.generateKeyPair(personaKeyRef, keyType)
+        val publicKeyJwk = publicKey.toJWK()
+        return if (keyType == KeyType.RSA)
+            publicKeyJwk
+        else {
+            var curveName = if (publicKeyJwk.kty == KeyType.EllipticCurve.value) "secp256k1" else publicKeyJwk.crv
+            JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
+        }
+    }
+
+    /**
+     * Computes unique suffix for portable identifier.
+     * In unpublished resolution or long form, id is generated in SDK.
+     */
     fun computeUniqueSuffix(suffixDataEncoded: String): String {
         val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
         val suffixDataJson = byteArrayToString(suffixDataDecoded)
@@ -74,9 +83,16 @@ class PayloadGenerator @Inject constructor(
                 IdentifierDocumentPublicKeyInput(
                     //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
                     /*id = signingKeyJWK.kid!!,*/
-                    id = "testkeys",
+                    id = "testkey",
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     jwk = signingKeyJWK
+                ),
+                IdentifierDocumentPublicKeyInput(
+                    //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
+                    /*id = signingKeyJWK.kid!!,*/
+                    id = "testkeys",
+                    type = LinkedDataKeySpecification.RsaSignature2018.values.first(),
+                    jwk = encryptionKeyJWK
                 )
             ),
             serviceEndpoints = listOf(
@@ -91,7 +107,17 @@ class PayloadGenerator @Inject constructor(
 
     private fun createIdentifierDocumentPatch(signingKeyJWK: JsonWebKey, encryptionKeyJWK: JsonWebKey): IdentifierDocumentPatch {
         val identifierDocumentPayload = createDocumentPayload(signingKeyJWK, encryptionKeyJWK)
-        return IdentifierDocumentPatch("replace", identifierDocumentPayload)
+        return IdentifierDocumentPatch(SIDETREE_PATCH_ACTION, identifierDocumentPayload)
+    }
+
+    private fun createPatchData(identifierDocumentPatch: IdentifierDocumentPatch): PatchData {
+        //Generates hash of commit-reveal value which would be used while requesting next update operation on Sidetree
+        val updateCommitmentHash = generateCommitmentValue()
+        val updateCommitmentHashEncoded = Base64Url.encode(updateCommitmentHash)
+        return PatchData(
+            updateCommitmentHashEncoded,
+            listOf(identifierDocumentPatch)
+        )
     }
 
     private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray, recoveryKeyJWK: JsonWebKey): SuffixData {
@@ -107,6 +133,13 @@ class PayloadGenerator @Inject constructor(
             recoveryKeyJWK,
             recoveryCommitmentHashEncoded
         )
+    }
+
+    private fun createSuffixDataEncoded(patchData: PatchData, recoveryKeyJWK: JsonWebKey): String {
+        //Generates hash of commit-reveal value which would be used while requesting recovery on Sidetree
+        val recoveryCommitmentHash = generateCommitmentValue()
+        val suffixData = createSuffixDataPayload(patchData, recoveryCommitmentHash, recoveryKeyJWK)
+        return encodeSuffixData(suffixData)
     }
 
     private fun hash(bytes: ByteArray): ByteArray {
@@ -134,10 +167,4 @@ class PayloadGenerator @Inject constructor(
         val patchDataByteArray = stringToByteArray(patchDataJson)
         return Base64Url.encode(patchDataByteArray)
     }
-
-/*    private fun convertCryptoKeyToCompressedHex(ecKeyX: ByteArray, ecKeyY: ByteArray): String {
-        var yForCompressedHex = "0" + (2 + (ecKeyY[ecKeyY.size - 1] and 1)).toString()
-        val xForCompressedHex = Hex.encode(ecKeyX)
-        return """$yForCompressedHex$xForCompressedHex"""
-    }*/
 }

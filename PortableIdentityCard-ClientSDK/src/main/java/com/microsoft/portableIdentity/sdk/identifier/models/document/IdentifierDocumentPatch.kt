@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class IdentifierDocumentPatch (
+class IdentifierDocumentPatch(
     val action: String,
     @SerialName("document")
     val document: IdentifierDocumentPayload
-){}
+)

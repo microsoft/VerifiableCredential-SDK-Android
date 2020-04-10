@@ -9,8 +9,7 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import kotlinx.serialization.Serializable
 
 /**
- * Data Class for defining an Identifier Document
- * Public Key.
+ * Data Class for defining a Public Key in Identifier Document in Jwk format which can be used for signing/encryption
  */
 @Serializable
 data class IdentifierDocumentPublicKey (

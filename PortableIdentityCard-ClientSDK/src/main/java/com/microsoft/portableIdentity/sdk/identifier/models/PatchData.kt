@@ -10,4 +10,4 @@ data class PatchData (
     val nextUpdateCommitmentHash: String,
     @SerialName("patches")
     val patches: List<IdentifierDocumentPatch>
-) {}
+)

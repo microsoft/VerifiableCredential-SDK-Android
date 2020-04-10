@@ -60,7 +60,6 @@ class IdentityManagerInstrumentedTest {
         val testPayload = test.toByteArray()
         val token = JwsToken(testPayload)
         token.sign(PortableIdentitySdk.identityManager.did.signatureKeyReference, cryptoOperations)
-        assertThat(token.signatures).isNotNull
         val publicKeys = PortableIdentitySdk.identityManager.did.document.publicKey.map {
             it.toPublicKey()
         }

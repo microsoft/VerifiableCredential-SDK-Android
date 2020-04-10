@@ -27,13 +27,6 @@ object Serializer : ISerializer {
             IdentityHubService::class with IdentityHubService.serializer()
         }
     }
-/*
-    private val serviceEndpointSerializer = SerializersModule {
-        polymorphic(Endpoint::class) {
-            ServiceHubEndpoint::class with ServiceHubEndpoint.serializer()
-            UserHubEndpoint::class with UserHubEndpoint.serializer()
-        }
-    }*/
 
     private val claimDetailSerializer = SerializersModule {
         polymorphic(ClaimDetail::class) {
