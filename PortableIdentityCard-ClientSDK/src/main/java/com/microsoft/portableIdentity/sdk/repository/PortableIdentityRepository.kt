@@ -12,9 +12,7 @@ class PortableIdentityRepository @Inject constructor(
     private val portableIdentityDao = database.portableIdentityDao()
 
     suspend fun resolveIdentifier(url: String, identifier: String): IdentifierDocument {
-        val identifierDocument = identityNetworkOperation.resolveIdentifier(url, identifier)
-        identifierDocument!!.id = identifier
-        return identifierDocument
+        return identityNetworkOperation.resolveIdentifier(url, identifier)!!
     }
 
     fun insert(identifier: Identifier) = portableIdentityDao.insert(identifier)

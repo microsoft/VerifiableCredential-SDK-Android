@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.identifier.models.document
 
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentityHubService
 import kotlinx.serialization.Serializable
 
@@ -9,12 +10,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 class IdentifierDocument(
-//    val context: String = "https://www.w3.org/2019/did/v1",
-    val created: String? = null,
-    val updated: String? = null,
     val publicKey: List<IdentifierDocumentPublicKey>,
     val service: List<IdentityHubService>,
-    val recoveryKey: RecoveryKey
+    val recoveryKey: JsonWebKey
 ) {
     var id: String = ""
 }

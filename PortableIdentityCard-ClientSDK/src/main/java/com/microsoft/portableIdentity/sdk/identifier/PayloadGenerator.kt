@@ -1,6 +1,5 @@
 package com.microsoft.portableIdentity.sdk.identifier
 
-import com.google.crypto.tink.subtle.Hex
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -9,16 +8,17 @@ import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
 import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPatch
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPublicKey
-import com.microsoft.portableIdentity.sdk.identifier.models.document.RecoveryKey
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPublicKeyInput
 import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.utilities.*
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
+import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.experimental.and
 import kotlin.random.Random
 
 @Singleton
@@ -28,16 +28,20 @@ class PayloadGenerator @Inject constructor(
     @Named("encryptionKeyReference") private val encryptionKeyReference: String,
     @Named("recoveryKeyReference") private val recoveryKeyReference: String
 ) {
-    fun generateCreatePayload(alias: String):String {
+    fun generateCreatePayload(alias: String): String {
         val personaEncKeyRef = "$alias.$encryptionKeyReference"
         val personaSigKeyRef = "$alias.$signatureKeyReference"
         val personaRecKeyRef = "$alias.$recoveryKeyReference"
         val signingKey = cryptoOperations.generateKeyPair(personaSigKeyRef, KeyType.EllipticCurve)
-        val signingKeyJWK = signingKey.toJWK()
+        val signingKeyJwk = signingKey.toJWK()
+        var curveName = if(signingKeyJwk.kty == KeyType.EllipticCurve.value) "secp256k1" else signingKeyJwk.crv
+        val signingKeyJWK = JsonWebKey(kty = signingKeyJwk.kty, crv = curveName, x = signingKeyJwk.x, y = signingKeyJwk.y)
         val encryptionKey = cryptoOperations.generateKeyPair(personaEncKeyRef, KeyType.RSA)
         val encryptionKeyJWK = encryptionKey.toJWK()
         val recoveryKey = cryptoOperations.generateKeyPair(personaRecKeyRef, KeyType.EllipticCurve)
-        val recoveryKeyJWK = recoveryKey.toJWK()
+        val recoveryKeyJwk = recoveryKey.toJWK()
+        curveName = if(recoveryKeyJwk.kty == KeyType.EllipticCurve.value) "secp256k1" else recoveryKeyJwk.crv
+        val recoveryKeyJWK = JsonWebKey(kty = recoveryKeyJwk.kty, crv = curveName, x = recoveryKeyJwk.x, y = recoveryKeyJwk.y)
 
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingKeyJWK, encryptionKeyJWK)
 
@@ -50,8 +54,7 @@ class PayloadGenerator @Inject constructor(
 
         val patchDataEncoded = encodePatchData(patchData)
         val recoveryCommitmentHash = generateCommitmentValue()
-        val recoveryKeyHex = RecoveryKey(convertCryptoKeyToCompressedHex(Base64.decode(recoveryKeyJWK.x!!), Base64.decode(recoveryKeyJWK.y!!)))
-        val suffixData = createSuffixDataPayload(patchData, recoveryCommitmentHash, recoveryKeyHex)
+        val suffixData = createSuffixDataPayload(patchData, recoveryCommitmentHash, recoveryKeyJWK)
 
         val suffixDataEncoded = encodeSuffixData(suffixData)
         val registrationDocument = RegistrationDocument("create", suffixDataEncoded, patchDataEncoded)
@@ -61,24 +64,24 @@ class PayloadGenerator @Inject constructor(
     fun computeUniqueSuffix(suffixDataEncoded: String): String {
         val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
         val suffixDataJson = byteArrayToString(suffixDataDecoded)
-        val suffixDataHash = byteArrayOf(18, 32)+hash(stringToByteArray(suffixDataJson))
+        val suffixDataHash = byteArrayOf(18, 32) + hash(stringToByteArray(suffixDataJson))
         return Base64Url.encode(suffixDataHash)
     }
 
     private fun createDocumentPayload(signingKeyJWK: JsonWebKey, encryptionKeyJWK: JsonWebKey): IdentifierDocumentPayload {
         return IdentifierDocumentPayload(
             publicKeys = listOf(
-                IdentifierDocumentPublicKey(
+                IdentifierDocumentPublicKeyInput(
                     //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
                     /*id = signingKeyJWK.kid!!,*/
                     id = "testkeys",
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
-                    publicKeyHex = convertCryptoKeyToCompressedHex(Base64.decode(signingKeyJWK.x!!), Base64.decode(signingKeyJWK.y!!))
+                    jwk = signingKeyJWK
                 )
             ),
             serviceEndpoints = listOf(
                 IdentityHubService(
-                    //TODO: What should be the default values for these while registering portable identity
+                    //TODO: What should be the default values for these while registering portable identity? Are we supporting these for MVP?
                     id = "test",
                     serviceEndpoint = "https://beta.hub.microsoft.com"
                 )
@@ -91,17 +94,17 @@ class PayloadGenerator @Inject constructor(
         return IdentifierDocumentPatch("replace", identifierDocumentPayload)
     }
 
-    private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray, recoveryKeyHex: RecoveryKey): SuffixData {
+    private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray, recoveryKeyJWK: JsonWebKey): SuffixData {
         val patchDataJson = Serializer.stringify(PatchData.serializer(), patchData)
         val patchDataByteArray = stringToByteArray(patchDataJson)
-        val patchDataHash = byteArrayOf(18, 32)+ hash(patchDataByteArray)
+        val patchDataHash = byteArrayOf(18, 32) + hash(patchDataByteArray)
         val patchDataHashEncoded = Base64Url.encode(patchDataHash)
 
         val recoveryCommitmentHashEncoded = Base64Url.encode(recoveryCommitmentHash)
 
         return SuffixData(
             patchDataHashEncoded,
-            recoveryKeyHex,
+            recoveryKeyJWK,
             recoveryCommitmentHashEncoded
         )
     }
@@ -113,10 +116,10 @@ class PayloadGenerator @Inject constructor(
 
     private fun generateCommitmentValue(): ByteArray {
         val commitmentValue = Base64Url.encode(Random.Default.nextBytes(32))
-        return byteArrayOf(18, 32)+ hash(stringToByteArray(commitmentValue))
+        return byteArrayOf(18, 32) + hash(stringToByteArray(commitmentValue))
     }
 
-    private fun encodeRegDoc(registrationDocument: RegistrationDocument): String{
+    private fun encodeRegDoc(registrationDocument: RegistrationDocument): String {
         val regDocJson = Serializer.stringify(RegistrationDocument.serializer(), registrationDocument)
         return Base64Url.encode(stringToByteArray(regDocJson))
     }
@@ -132,9 +135,9 @@ class PayloadGenerator @Inject constructor(
         return Base64Url.encode(patchDataByteArray)
     }
 
-    private fun convertCryptoKeyToCompressedHex(ecKeyX: ByteArray, ecKeyY: ByteArray): String {
-        var yForCompressedHex = "0"+(2 + (ecKeyY[ecKeyY.size - 1] and 1)).toString()
+/*    private fun convertCryptoKeyToCompressedHex(ecKeyX: ByteArray, ecKeyY: ByteArray): String {
+        var yForCompressedHex = "0" + (2 + (ecKeyY[ecKeyY.size - 1] and 1)).toString()
         val xForCompressedHex = Hex.encode(ecKeyX)
         return """$yForCompressedHex$xForCompressedHex"""
-    }
+    }*/
 }

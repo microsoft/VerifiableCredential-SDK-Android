@@ -14,8 +14,6 @@ class IdentityHubService(override val id: String, override val serviceEndpoint: 
 
     companion object {
         fun create(id: String, signatureKeyRef: String, instances: List<Identifier>, keyStore: KeyStore): IdentifierDocumentService {
-            val keyId = keyStore.list()[signatureKeyRef] ?: throw SdkLog.error("Could not find key $signatureKeyRef")
-            val didList = instances.map { it.document.id }
             return IdentityHubService(
                 id, "https://testendpoint"
             )

@@ -51,7 +51,7 @@ class IdentityManagerInstrumentedTest {
 
     @Test
     fun createIdentifierTest() {
-        assertThat(PortableIdentitySdk.identityManager.did).isNotNull
+        assertThat(PortableIdentitySdk.identityManager.did).isNotNull()
     }
 
     @Test
@@ -61,7 +61,10 @@ class IdentityManagerInstrumentedTest {
         val token = JwsToken(testPayload)
         token.sign(PortableIdentitySdk.identityManager.did.signatureKeyReference, cryptoOperations)
         assertThat(token.signatures).isNotNull
-/*        val matched = token.verify(cryptoOperations)
-        assertThat(matched).isTrue()*/
+        val publicKeys = PortableIdentitySdk.identityManager.did.document.publicKey.map {
+            it.toPublicKey()
+        }
+        val matched = token.verify(cryptoOperations, publicKeys)
+        assertThat(matched).isTrue()
     }
 }

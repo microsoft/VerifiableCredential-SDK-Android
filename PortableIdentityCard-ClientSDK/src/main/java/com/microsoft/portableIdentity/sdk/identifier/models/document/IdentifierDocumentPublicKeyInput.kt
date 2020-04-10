@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved
+
 package com.microsoft.portableIdentity.sdk.identifier.models.document
 
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
@@ -8,12 +10,8 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedD
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import kotlinx.serialization.Serializable
 
-/**
- * Data Class for defining an Identifier Document
- * Public Key.
- */
 @Serializable
-data class IdentifierDocumentPublicKey (
+data class IdentifierDocumentPublicKeyInput (
     /**
      * The id of the public key in the format
      * {keyIdentifier}
@@ -36,15 +34,15 @@ data class IdentifierDocumentPublicKey (
     /**
      * The JWK public key.
      */
-    val publicKeyJwk: JsonWebKey
+    val jwk: JsonWebKey
 ) {
     fun toPublicKey(): PublicKey {
         return when (type) {
             in LinkedDataKeySpecification.RsaSignature2018.values -> {
-                return RsaPublicKey(this.publicKeyJwk)
+                return RsaPublicKey(this.jwk)
             }
             in LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values -> {
-                return EllipticCurvePublicKey(this.publicKeyJwk)
+                return EllipticCurvePublicKey(this.jwk)
             }
             in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
                 throw SdkLog.error("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
