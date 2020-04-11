@@ -21,19 +21,17 @@ import kotlin.random.Random
  * @class
  * @implements IRegistrar
  * @param registrarUrl to the registration endpoint
- * @param identityRepository repository to perform portable identity related operations in network/database
+ * @param identifierRepository repository to perform portable identity related operations in network/database
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val identityRepository: IdentifierRepository) :
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val identifierRepository: IdentifierRepository) :
     Registrar() {
 
     override suspend fun register(
         signatureKeyReference: String,
-        encryptionKeyReference: String,
         recoveryKeyReference: String,
         cryptoOperations: CryptoOperations
     ): Identifier {
         val alias = Base64Url.encode(Random.nextBytes(16))
-        val personaEncKeyRef = "$alias.$encryptionKeyReference"
         val personaSigKeyRef = "$alias.$signatureKeyReference"
         val personaRecKeyRef = "$alias.$recoveryKeyReference"
         val payloadGenerator = SidetreePayloadProcessor(
@@ -43,14 +41,14 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         )
         val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
         val registrationDocument =
-            Serializer.parse(RegistrationDocument.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
+            Serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
 
         val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
-        val portableIdentity = "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
+        val identifierShortForm = "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
 
         //Resolves the created long form identifier as validation before saving it
-        val identifier = "$portableIdentity?${Constants.INITIAL_STATE_LONGFORM}=$registrationDocumentEncoded"
-        val identifierDocument = identityRepository.resolveIdentifier(baseUrl, identifier)
+        val identifierLongForm = "$identifierShortForm?${Constants.INITIAL_STATE_LONGFORM}=$registrationDocumentEncoded"
+        val identifierDocument = identifierRepository.resolveIdentifier(baseUrl, identifierLongForm)
 
         val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
         val nextUpdateCommitmentHash = Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
@@ -59,17 +57,18 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
 
         val longformIdentifier =
             Identifier(
-                identifier,
+                identifierLongForm,
                 alias,
                 personaSigKeyRef,
-                personaEncKeyRef,
+                //TODO: Since we know encryption is coming in the future, do we want to add encryption key now so that we don't have to modify the table later.
+                "",
                 personaRecKeyRef,
                 nextUpdateCommitmentHash,
                 nextRecoveryCommitmentHash,
                 identifierDocument!!,
                 Constants.IDENTIFIER_SECRET_KEY_NAME
             )
-        identityRepository.insert(longformIdentifier)
+        identifierRepository.insert(longformIdentifier)
         return longformIdentifier
     }
 }

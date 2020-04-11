@@ -20,9 +20,6 @@ import org.assertj.core.api.Assertions.assertThat
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class IdentifierManagerInstrumentedTest {
-    private val signatureKeyReference: String
-    private val encryptionKeyReference: String
-    private val recoveryKeyReference: String
     private val registrar: Registrar
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
@@ -32,9 +29,6 @@ class IdentifierManagerInstrumentedTest {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         PortableIdentitySdk.init(context)
         registrar = SidetreeRegistrar("http://10.91.6.163:3000", PortableIdentitySdk.identifierManager.identifierRepository)
-        signatureKeyReference = "signature"
-        encryptionKeyReference = "encryption"
-        recoveryKeyReference = "recovery"
         val keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
         ecSubtle = EllipticCurveSubtleCrypto(androidSubtle)
@@ -47,7 +41,7 @@ class IdentifierManagerInstrumentedTest {
 
     @Test
     fun createIdentifierTest() {
-        assertThat(PortableIdentitySdk.identifierManager.did).isNotNull()
+        assertThat(PortableIdentitySdk.identifierManager.did).isNotNull
     }
 
     @Test

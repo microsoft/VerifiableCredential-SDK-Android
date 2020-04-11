@@ -10,7 +10,7 @@ import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPatch
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
 import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPublicKeyInput
-import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
+import com.microsoft.portableIdentity.sdk.registrars.RegistrationPayload
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_CURVE_NAME_FOR_EC
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_MULTIHASH_CODE
@@ -50,7 +50,7 @@ class SidetreePayloadProcessor @Inject constructor(
 
         val suffixDataEncoded = createSuffixDataEncoded(patchData, recoveryKeyJWK)
 
-        val registrationDocument = RegistrationDocument(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
+        val registrationDocument = RegistrationPayload(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
         return encodeRegDoc(registrationDocument)
     }
 
@@ -143,8 +143,8 @@ class SidetreePayloadProcessor @Inject constructor(
         return hash(stringToByteArray(commitmentValue))
     }
 
-    private fun encodeRegDoc(registrationDocument: RegistrationDocument): String {
-        val regDocJson = Serializer.stringify(RegistrationDocument.serializer(), registrationDocument)
+    private fun encodeRegDoc(registrationPayload: RegistrationPayload): String {
+        val regDocJson = Serializer.stringify(RegistrationPayload.serializer(), registrationPayload)
         return Base64Url.encode(stringToByteArray(regDocJson))
     }
 

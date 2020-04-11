@@ -10,6 +10,8 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
+import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -25,10 +27,7 @@ import javax.inject.Singleton
 class IdentifierManager @Inject constructor(
     val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
-    private val registrar: Registrar,
-    @Named("signatureKeyReference") private val signatureKeyReference: String,
-    @Named("encryptionKeyReference") private val encryptionKeyReference: String,
-    @Named("recoveryKeyReference") private val recoveryKeyReference: String
+    private val registrar: Registrar
 ) {
 
     val did: Identifier by lazy { initLongFormDid() }
@@ -72,6 +71,6 @@ class IdentifierManager @Inject constructor(
     }
 
     private suspend fun createAndRegisterPortableIdentity(): Identifier {
-        return registrar.register(signatureKeyReference, encryptionKeyReference, recoveryKeyReference, cryptoOperations)
+        return registrar.register(SIGNATURE_KEYREFERENCE, RECOVERY_KEYREFERENCE, cryptoOperations)
     }
 }

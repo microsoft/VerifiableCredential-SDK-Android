@@ -84,12 +84,6 @@ internal class SdkModule {
             .build()
     }
 
-/*    @Provides
-    @Singleton
-    fun defaultResolver(resolver: HttpResolver): Resolver {
-        return resolver
-    }*/
-
     @Provides
     @Singleton
     fun defaultRegistrar(registrar: SidetreeRegistrar): Registrar {

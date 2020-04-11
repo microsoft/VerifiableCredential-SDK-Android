@@ -32,4 +32,7 @@ object Constants {
     const val SIDETREE_MULTIHASH_CODE = 18
     const val SIDETREE_MULTIHASH_LENGTH = 32
     const val SIDETREE_CURVE_NAME_FOR_EC = "secp256k1"
+    const val SIGNATURE_KEYREFERENCE = "signature"
+    const val RECOVERY_KEYREFERENCE = "recovery"
+    const val ENCRYPTION_KEYREFERENCE = "encryption"
 }

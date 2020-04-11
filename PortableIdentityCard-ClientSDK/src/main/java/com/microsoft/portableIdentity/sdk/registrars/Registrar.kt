@@ -21,7 +21,6 @@ abstract class Registrar() {
      */
     abstract suspend fun register(
         signatureKeyReference: String,
-        encryptionKeyReference: String,
         recoveryKeyReference: String,
         cryptoOperations: CryptoOperations
     ): Identifier

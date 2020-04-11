@@ -20,12 +20,6 @@ object Serializer : ISerializer {
         }
     }
 
-/*    private val identifierDocServiceSerializer = SerializersModule {
-        polymorphic(IdentifierDocumentService::class) {
-            IdentityHubService::class with IdentityHubService.serializer()
-        }
-    }*/
-
     private val claimDetailSerializer = SerializersModule {
         polymorphic(ClaimDetail::class) {
             UnsignedClaimDetail::class with UnsignedClaimDetail.serializer()
@@ -41,7 +35,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = /*identifierDocServiceSerializer +*/ identifierDocumentServiceSerializer + /*serviceEndpointSerializer +*/ claimDetailSerializer + serviceResponseSerializer,
+        context = identifierDocumentServiceSerializer + claimDetailSerializer + serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

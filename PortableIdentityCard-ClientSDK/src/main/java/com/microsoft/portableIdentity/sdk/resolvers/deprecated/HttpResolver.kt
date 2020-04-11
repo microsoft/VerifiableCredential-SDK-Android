@@ -20,8 +20,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class HttpResolver @Inject constructor(
-    @Named("resolverUrl") private val baseUrl: String,
-    private val identityRepository: IdentifierRepository
+    @Named("resolverUrl") private val baseUrl: String
 ) : IResolver() {
 
     @Serializable

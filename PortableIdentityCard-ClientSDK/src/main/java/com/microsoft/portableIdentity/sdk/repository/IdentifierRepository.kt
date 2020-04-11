@@ -17,7 +17,7 @@ class IdentifierRepository @Inject constructor(
 
     fun insert(identifier: Identifier) = identifierDao.insert(identifier)
 
-    fun queryById(identifier: String): Identifier = identifierDao.queryById(identifier)
+    fun queryByIdentifier(identifier: String): Identifier = identifierDao.queryByIdentifier(identifier)
 
     fun queryByName(name: String): Identifier = identifierDao.queryByName(name)
 }

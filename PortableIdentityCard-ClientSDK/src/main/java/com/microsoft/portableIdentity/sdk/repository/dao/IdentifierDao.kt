@@ -12,7 +12,7 @@ interface IdentifierDao {
     fun insert(identifier: Identifier)
 
     @Query("SELECT * FROM Identifier where identifier = :identifier")
-    fun queryById(identifier: String): Identifier
+    fun queryByIdentifier(identifier: String): Identifier
 
     //TODO: See how identifiers are stored with pairwise in picture and modify accordingly
     @Query("SELECT * FROM Identifier where name= :name")
