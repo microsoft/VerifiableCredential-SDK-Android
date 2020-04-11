@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.auth
+package com.microsoft.portableIdentity.sdk.auth.requests
 
-class AuthenticationException(message: String): Exception(message) {
+class PresentationRequest(override val oidcParameters: Map<String, List<String>>, serializedToken: String): OidcRequest(oidcParameters, serializedToken) {
 }

@@ -2,12 +2,8 @@ package com.microsoft.portableIdentity.sdk.identifier
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 import kotlinx.serialization.Serializable
-
-/**
- * Data model to describe a Portable Identifier (identifier document, key references, commit-reveal values for next operations)
- */
+import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
 
 @Entity
 @Serializable

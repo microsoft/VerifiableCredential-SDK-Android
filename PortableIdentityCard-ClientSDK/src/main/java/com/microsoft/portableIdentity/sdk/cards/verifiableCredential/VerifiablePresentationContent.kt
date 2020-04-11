@@ -8,18 +8,20 @@ package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 import kotlinx.serialization.Serializable
 
 /**
- * Contents of a Verifiable Credential Jws Token.
+ * Contents of a Verifiable Presentation Jws Token.
  *
  * @see [Verifiable Credential Spec](https://www.w3.org/TR/vc-data-model/#basic-concepts)
  */
 @Serializable
-data class VerifiableCredentialContent (
+data class VerifiablePresentationContent (
 
     // ID of the Verifiable Credential.
     val jti: String,
 
-    // Claims and Service information.
-    val vc: VerifiableCredentialDescriptor,
+    // purpose of presentation
+    val purpose: String = "verify",
+
+    val vp: VerifiablePresentationDescriptor,
 
     // Subject of the VC (e.g. did owned by the user.)
     val sub: String,
@@ -32,6 +34,8 @@ data class VerifiableCredentialContent (
 
     // When the token expires.
     val exp: Long,
+
+    val nbf: Long? = null,
 
     // optional parameter.
     val wrn: String = ""
