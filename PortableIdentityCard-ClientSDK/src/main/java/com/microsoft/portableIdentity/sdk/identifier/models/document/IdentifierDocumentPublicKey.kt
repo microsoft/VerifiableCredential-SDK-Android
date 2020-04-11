@@ -29,9 +29,6 @@ data class IdentifierDocumentPublicKey (
      */
     val controller: String? = null,
 
-    @Deprecated("against spec", ReplaceWith("this.controller"))
-    val owner: String? = null,
-
     /**
      * The JWK public key.
      */

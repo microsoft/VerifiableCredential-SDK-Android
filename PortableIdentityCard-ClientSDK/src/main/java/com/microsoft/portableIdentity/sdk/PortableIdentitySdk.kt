@@ -31,7 +31,7 @@ object PortableIdentitySdk {
     lateinit var cardManager: CardManager
 
     @JvmStatic
-    lateinit var identityManager: IdentityManager
+    lateinit var identifierManager: IdentifierManager
 
     @JvmOverloads
     @JvmStatic
@@ -53,7 +53,7 @@ object PortableIdentitySdk {
             .recoveryKeyReference(defaultRecoveryKeyReference)
             .build()
 
-        identityManager = sdkComponent.identityManager()
+        identifierManager = sdkComponent.identityManager()
         cardManager = sdkComponent.cardManager()
 
         SdkLog.addConsumer(logConsumerBridge)

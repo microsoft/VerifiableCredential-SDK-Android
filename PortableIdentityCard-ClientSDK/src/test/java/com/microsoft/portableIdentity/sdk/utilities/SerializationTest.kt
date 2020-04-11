@@ -5,8 +5,8 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.Identif
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocumentPublicKey
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
-import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 
 class SerializationTest {
     private var actualDocument : IdentifierDocument =

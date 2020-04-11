@@ -6,7 +6,7 @@ import androidx.room.Query
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 
 @Dao
-interface PortableIdentityDao {
+interface IdentifierDao {
 
     @Insert
     fun insert(identifier: Identifier)

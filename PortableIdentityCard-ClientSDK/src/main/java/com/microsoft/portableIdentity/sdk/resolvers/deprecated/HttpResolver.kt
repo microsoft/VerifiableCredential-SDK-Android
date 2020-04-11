@@ -3,7 +3,7 @@
 package com.microsoft.portableIdentity.sdk.resolvers.deprecated
 
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
+import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.*
 import io.ktor.client.request.get
 import io.ktor.client.request.url
@@ -21,7 +21,7 @@ import javax.inject.Singleton
 @Singleton
 class HttpResolver @Inject constructor(
     @Named("resolverUrl") private val baseUrl: String,
-    private val identityRepository: PortableIdentityRepository
+    private val identityRepository: IdentifierRepository
 ) : IResolver() {
 
     @Serializable

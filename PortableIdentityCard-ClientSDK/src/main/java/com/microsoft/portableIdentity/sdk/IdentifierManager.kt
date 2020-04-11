@@ -7,25 +7,14 @@ package com.microsoft.portableIdentity.sdk
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.PayloadGenerator
-import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
-import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
-import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
-import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.Constants.INITIAL_STATE_LONGFORM
-import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
-import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTITY_SECRET_KEY_NAME
+import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
+import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.random.Random
 
 /**
  * Class for creating identifiers and
@@ -33,10 +22,9 @@ import kotlin.random.Random
  * @class
  */
 @Singleton
-class IdentityManager @Inject constructor(
-    val identityRepository: PortableIdentityRepository,
+class IdentifierManager @Inject constructor(
+    val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
-    private val resolver: Resolver,
     private val registrar: Registrar,
     @Named("signatureKeyReference") private val signatureKeyReference: String,
     @Named("encryptionKeyReference") private val encryptionKeyReference: String,
@@ -46,9 +34,9 @@ class IdentityManager @Inject constructor(
     val did: Identifier by lazy { initLongFormDid() }
 
     private fun initLongFormDid(): Identifier {
-        val did = if (identityRepository.queryByName(IDENTITY_SECRET_KEY_NAME) != null) {
+        val did = if (identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME) != null) {
             SdkLog.d("Identifier found, de-serializing")
-            identityRepository.queryByName(IDENTITY_SECRET_KEY_NAME)
+            identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
         } else {
             SdkLog.d("No identifier found, registering new DID")
             val identifier = registerPortableIdentity()

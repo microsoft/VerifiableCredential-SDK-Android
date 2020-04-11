@@ -14,19 +14,16 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
-import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.assertj.core.api.Assertions.assertThat
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class IdentityManagerInstrumentedTest {
+class IdentifierManagerInstrumentedTest {
     private val signatureKeyReference: String
     private val encryptionKeyReference: String
     private val recoveryKeyReference: String
     private val registrar: Registrar
-    private val resolver: Resolver
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
     private val cryptoOperations: CryptoOperations
@@ -34,8 +31,7 @@ class IdentityManagerInstrumentedTest {
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         PortableIdentitySdk.init(context)
-        registrar = SidetreeRegistrar("http://10.91.6.163:3000", PortableIdentitySdk.identityManager.identityRepository)
-        resolver = HttpResolver("http://10.91.6.163:3000", PortableIdentitySdk.identityManager.identityRepository)
+        registrar = SidetreeRegistrar("http://10.91.6.163:3000", PortableIdentitySdk.identifierManager.identifierRepository)
         signatureKeyReference = "signature"
         encryptionKeyReference = "encryption"
         recoveryKeyReference = "recovery"
@@ -51,7 +47,7 @@ class IdentityManagerInstrumentedTest {
 
     @Test
     fun createIdentifierTest() {
-        assertThat(PortableIdentitySdk.identityManager.did).isNotNull()
+        assertThat(PortableIdentitySdk.identifierManager.did).isNotNull()
     }
 
     @Test
@@ -59,8 +55,8 @@ class IdentityManagerInstrumentedTest {
         val test = "test string"
         val testPayload = test.toByteArray()
         val token = JwsToken(testPayload)
-        token.sign(PortableIdentitySdk.identityManager.did.signatureKeyReference, cryptoOperations)
-        val publicKeys = PortableIdentitySdk.identityManager.did.document.publicKey.map {
+        token.sign(PortableIdentitySdk.identifierManager.did.signatureKeyReference, cryptoOperations)
+        val publicKeys = PortableIdentitySdk.identifierManager.did.document.publicKey.map {
             it.toPublicKey()
         }
         val matched = token.verify(cryptoOperations, publicKeys)

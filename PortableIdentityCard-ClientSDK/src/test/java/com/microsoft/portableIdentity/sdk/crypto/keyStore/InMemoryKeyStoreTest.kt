@@ -9,7 +9,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvid
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.*
+import org.junit.Test
 import java.lang.RuntimeException
 
 class InMemoryKeyStoreTest {

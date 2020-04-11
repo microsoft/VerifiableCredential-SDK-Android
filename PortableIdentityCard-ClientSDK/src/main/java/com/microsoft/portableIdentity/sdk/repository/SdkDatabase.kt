@@ -14,7 +14,7 @@ import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.dao.ClaimObjectDao
 import com.microsoft.portableIdentity.sdk.repository.dao.PortableIdentityCardDao
-import com.microsoft.portableIdentity.sdk.repository.dao.PortableIdentityDao
+import com.microsoft.portableIdentity.sdk.repository.dao.IdentifierDao
 import com.microsoft.portableIdentity.sdk.repository.dao.SerialClaimObjectDao
 
 /**
@@ -36,5 +36,5 @@ abstract class SdkDatabase : RoomDatabase() {
 
     abstract fun cardDao(): PortableIdentityCardDao
 
-    abstract fun portableIdentityDao(): PortableIdentityDao
+    abstract fun identifierDao(): IdentifierDao
 }

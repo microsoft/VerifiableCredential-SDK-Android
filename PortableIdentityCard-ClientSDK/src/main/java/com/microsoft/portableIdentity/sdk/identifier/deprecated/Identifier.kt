@@ -11,10 +11,8 @@ import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.Identif
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.service.ServiceHubEndpoint
-import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.RegistrationDocument
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 

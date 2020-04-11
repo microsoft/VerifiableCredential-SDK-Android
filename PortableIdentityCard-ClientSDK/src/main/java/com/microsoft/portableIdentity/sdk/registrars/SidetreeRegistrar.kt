@@ -4,10 +4,10 @@ package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.PayloadGenerator
+import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
 import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
 import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
-import com.microsoft.portableIdentity.sdk.repository.PortableIdentityRepository
+import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -23,7 +23,7 @@ import kotlin.random.Random
  * @param registrarUrl to the registration endpoint
  * @param identityRepository repository to perform portable identity related operations in network/database
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val identityRepository: PortableIdentityRepository) :
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val identityRepository: IdentifierRepository) :
     Registrar() {
 
     override suspend fun register(
@@ -36,10 +36,9 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         val personaEncKeyRef = "$alias.$encryptionKeyReference"
         val personaSigKeyRef = "$alias.$signatureKeyReference"
         val personaRecKeyRef = "$alias.$recoveryKeyReference"
-        val payloadGenerator = PayloadGenerator(
+        val payloadGenerator = SidetreePayloadProcessor(
             cryptoOperations,
             signatureKeyReference,
-            encryptionKeyReference,
             recoveryKeyReference
         )
         val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
@@ -68,9 +67,9 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
                 nextUpdateCommitmentHash,
                 nextRecoveryCommitmentHash,
                 identifierDocument!!,
-                Constants.IDENTITY_SECRET_KEY_NAME
+                Constants.IDENTIFIER_SECRET_KEY_NAME
             )
         identityRepository.insert(longformIdentifier)
-        return identityRepository.queryById(identifier)
+        return longformIdentifier
     }
 }

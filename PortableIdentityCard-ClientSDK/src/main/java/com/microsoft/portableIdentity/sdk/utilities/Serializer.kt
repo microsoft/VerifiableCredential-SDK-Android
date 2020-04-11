@@ -1,7 +1,5 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
-import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentifierDocumentService
-import com.microsoft.portableIdentity.sdk.identifier.models.document.service.IdentityHubService
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
@@ -22,11 +20,11 @@ object Serializer : ISerializer {
         }
     }
 
-    private val identifierDocServiceSerializer = SerializersModule {
+/*    private val identifierDocServiceSerializer = SerializersModule {
         polymorphic(IdentifierDocumentService::class) {
             IdentityHubService::class with IdentityHubService.serializer()
         }
-    }
+    }*/
 
     private val claimDetailSerializer = SerializersModule {
         polymorphic(ClaimDetail::class) {
@@ -43,7 +41,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = identifierDocServiceSerializer + identifierDocumentServiceSerializer + /*serviceEndpointSerializer +*/ claimDetailSerializer + serviceResponseSerializer,
+        context = /*identifierDocServiceSerializer +*/ identifierDocumentServiceSerializer + /*serviceEndpointSerializer +*/ claimDetailSerializer + serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

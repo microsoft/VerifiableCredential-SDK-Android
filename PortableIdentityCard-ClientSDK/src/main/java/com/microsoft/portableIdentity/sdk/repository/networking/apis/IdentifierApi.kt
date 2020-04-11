@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Url
 
-interface PortableIdentityApi {
+interface IdentifierApi {
 
     @GET
     suspend fun resolveIdentifier(@Url overrideUrl: String): Response<IdentifierDocument>

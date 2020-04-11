@@ -21,8 +21,6 @@ import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.deprecated.IRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
-import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import dagger.Module
@@ -86,11 +84,11 @@ internal class SdkModule {
             .build()
     }
 
-    @Provides
+/*    @Provides
     @Singleton
     fun defaultResolver(resolver: HttpResolver): Resolver {
         return resolver
-    }
+    }*/
 
     @Provides
     @Singleton
