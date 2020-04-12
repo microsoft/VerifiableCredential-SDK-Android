@@ -10,7 +10,8 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,11 +27,17 @@ class JwsValidator @Inject constructor(
     /**
      * Verify the signature on the JwsToken.
      */
-    suspend fun verifySignature(token: JwsToken): Boolean {
-        val signature = token.signatures.first()
-        val (did, _) = getKid(signature)
-        val publicKeys = resolvePublicKeys(did, cryptoOperations)
-        return token.verify(cryptoOperations, publicKeys)
+    suspend fun verifySignature(token: JwsToken): Result<Boolean, Exception> {
+        return try {
+            val signature = token.signatures.first()
+            val (did, _) = getKid(signature)
+            val publicKeys = resolvePublicKeys(did, cryptoOperations)
+            val isValid = token.verify(cryptoOperations, publicKeys)
+            Result.Success(isValid)
+        } catch (exception: Exception) {
+            val cryptoException = ValidatorException("Unable to validate signature", exception)
+            Result.Failure(cryptoException)
+        }
     }
 
     private fun getKid(signature: JwsSignature): Pair<String, String> {

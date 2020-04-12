@@ -12,4 +12,14 @@ class IssuanceRequest(val contract: PicContract, val contractUrl: String): Reque
     override fun getCredentialAttestations(): CredentialAttestations? {
         return contract.input.attestations
     }
+
+    // Private Preview: gets first contract from each Verifiable Credential Attestation.
+    fun getContractUrls(): List<String> {
+        val attestations = contract.input.attestations ?: return emptyList()
+        val contracts = mutableListOf<String>()
+        attestations.presentations.forEach {
+            contracts.add(it.contracts.first())
+        }
+        return contracts
+    }
 }

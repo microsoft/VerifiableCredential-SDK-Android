@@ -4,8 +4,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.PortableIdentityCardApi
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.PortableIdentitySdkException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import retrofit2.Response
 import retrofit2.Retrofit
 import javax.inject.Inject
@@ -19,42 +18,55 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Get Contract from url.
      */
-    suspend fun getContract(url: String): PicContract? {
-        return fire(
+    suspend fun getContract(url: String): Result<PicContract, Exception> {
+        val contract = fire(
             call = {picApi.getContract(url)},
             errorMessage = "Error Fetching Contract from $url."
-        )
+        ) ?: return Result.Failure(NetworkException("Unable to fetch contrct"))
+        return Result.Success(contract)
     }
 
     /**
      * Get Request from url.
      */
-    suspend fun getRequest(url: String): String? {
-        return fire(
+    suspend fun getRequestToken(url: String): Result<String, Exception> {
+        val request = fire(
             call = {picApi.getRequest(url)},
             errorMessage = "Error Fetching Request from $url."
-        )
+        ) ?: return Result.Failure(NetworkException("Unable to fetch request token."))
+        return Result.Success(request)
     }
 
     /**
      * Post Response to url.
      */
-    suspend fun sendResponse(url: String, serializedResponse: String): IssuanceServiceResponse? {
-        return fire(
-            call = {picApi.sendResponse(url, serializedResponse)},
-            errorMessage = "Error Sending Response to $url."
-        )
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String): Result<IssuanceServiceResponse?, Exception> {
+        return try {
+            val result = fire(
+                call = {picApi.sendResponse(url, serializedResponse)},
+                errorMessage = "Error Sending Response to $url."
+            )
+            Result.Success(result)
+        } catch (exception: Exception) {
+            val presentationException = PresentationException("Failed to send Response", exception)
+            Result.Failure(presentationException)
+        }
     }
 
     /**
      * Post Presentation Response to url.
      */
-    suspend fun sendPresentationResponse(url: String, serializedResponse: String): String {
-        val response = call(
-            call = {picApi.sendPresentationResponse(url, serializedResponse)},
-            errorMessage = "Error Sending Response to $url."
-        )
-        val requestUrl = response?.raw()?.request()?.url()
-        return requestUrl.toString()
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String): Result<String, Exception> {
+        return try {
+            val response = call(
+                call = { picApi.sendPresentationResponse(url, serializedResponse) },
+                errorMessage = "Error Sending Response to $url."
+            )
+            val requestUrl = response?.raw()?.request()?.url()
+            Result.Success(requestUrl.toString())
+        } catch (exception: Exception) {
+            val presentationException = PresentationException("Failed to send Response", exception)
+            Result.Failure(presentationException)
+        }
     }
 }

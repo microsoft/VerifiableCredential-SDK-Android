@@ -11,6 +11,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiablePresentationContent
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiablePresentationDescriptor
@@ -19,10 +20,11 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import kotlinx.serialization.ImplicitReflectionSerializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.TokenFormatterException
+import java.lang.Exception
 import java.util.*
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.math.floor
 
@@ -32,13 +34,32 @@ import kotlin.math.floor
 @Singleton
 class OidcResponseFormatter @Inject constructor(
         private val cryptoOperations: CryptoOperations,
-        @Named("signatureKeyReference") private val signatureKeyReference: String,
-        private val signer: OidcResponseSigner
-) {
+        private val signer: TokenSigner
+): Formatter {
 
-    fun formContents(response: OidcResponse, responder: Identifier, useKey: String = signatureKeyReference, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
-        val (iat, exp) = createIatAndExp(1000)
-        val key = cryptoOperations.keyStore.getPublicKey(useKey).getKey()
+    override fun formAndSignResponse(response: Response, responder: Identifier, expiresIn: Int): Result<String, Exception> {
+        if (response !is OidcResponse) {
+            val exception = TokenFormatterException("Response type does not match OidcResponse")
+            return Result.Failure(exception)
+        }
+
+        return try {
+            val contents = formContents(response, responder, expiresIn)
+            val signedToken = signContents(contents, responder)
+            Result.Success(signedToken)
+        } catch (exception: Exception) {
+            Result.Failure(exception)
+        }
+    }
+
+    private fun signContents(contents: OidcResponseContent, responder: Identifier): String {
+        val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), contents)
+        return signer.signWithIdentifier(serializedResponseContent, responder)
+    }
+
+    private fun formContents(response: OidcResponse, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
+        val (iat, exp) = createIatAndExp(expiresIn)
+        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
         val did = responder.document.id
 
@@ -76,21 +97,39 @@ class OidcResponseFormatter @Inject constructor(
     private fun createAttestationResponse(response: OidcResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse? {
         var selfIssuedAttestations: String? = null
         var tokenAttestations: Map<String, String>? = null
+        return when (response) {
+            is IssuanceResponse -> createIssuanceAttestationResponse(response, responder, iat, exp)
+            is PresentationResponse -> createPresentationAttestationResponse(response, responder, iat, exp)
+            else -> throw TokenFormatterException("Response Type not Supported.")
+        }
+    }
+
+    private fun createIssuanceAttestationResponse(response: IssuanceResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
+        var selfIssuedAttestations: String? = null
+        var tokenAttestations: Map<String, String>? = null
         if (response is IssuanceResponse) {
             if (!response.getIdTokenBindings().isNullOrEmpty()) {
                 tokenAttestations = response.getIdTokenBindings()
             }
             if (!response.getSelfIssuedClaimBindings().isNullOrEmpty()) {
-                val serializedSelfIssued = Serializer.stringify(response.getSelfIssuedClaimBindings(), String::class, String::class)
-                val token = JwsToken(serializedSelfIssued)
-                selfIssuedAttestations = token.serialize()
+                selfIssuedAttestations = formSelfIssuedToken(response.getSelfIssuedClaimBindings())
             }
         }
         val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
         return AttestationResponse(selfIssuedAttestations, tokenAttestations, presentationAttestation)
     }
 
-    // TODO(wrap VC in a VP and map it to the type)
+    private fun createPresentationAttestationResponse(response: PresentationResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
+        val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
+        return AttestationResponse(null, null, presentationAttestation)
+    }
+
+    private fun formSelfIssuedToken(selfIssuedClaims: Map<String, String>): String? {
+        val serializedSelfIssued = Serializer.stringify(selfIssuedClaims, String::class, String::class)
+        val token = JwsToken(serializedSelfIssued)
+        return token.serialize()
+    }
+
     private fun createPresentations(typeToCardsMapping: Map<String, PortableIdentityCard>,
                                     response: OidcResponse,
                                     responder: Identifier,
@@ -100,11 +139,9 @@ class OidcResponseFormatter @Inject constructor(
         typeToCardsMapping.forEach {
             presentations[it.key] = createPresentation(it.value, response, responder, iat, exp)
         }
-
         if (presentations.isEmpty()) {
             return null
         }
-
         return presentations
     }
 
@@ -127,9 +164,7 @@ class OidcResponseFormatter @Inject constructor(
             exp = exp
             )
         val serializedContents = Serializer.stringify(VerifiablePresentationContent.serializer(), contents)
-        val token = signer.sign(serializedContents, responder)
-        return token.serialize()
-
+        return signer.signWithIdentifier(serializedContents, responder)
     }
 
     private fun createIatAndExp(expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Pair<Long, Long> {

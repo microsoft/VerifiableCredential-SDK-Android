@@ -11,6 +11,16 @@ class CryptoException(message: String? = null, cause: Throwable? = null) : Porta
 
 class AuthenticationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
+class PresentationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class IssuanceException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class ValidatorException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class TokenFormatterException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
 class ResolverException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
 class RegistrarException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class NetworkException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
