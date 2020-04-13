@@ -1,9 +1,8 @@
 package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Path
 import retrofit2.http.Url
 
 interface IdentifierApi {

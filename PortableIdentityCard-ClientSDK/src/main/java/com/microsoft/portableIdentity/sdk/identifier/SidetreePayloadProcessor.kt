@@ -4,13 +4,13 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.portableIdentity.sdk.identifier.deprecated.document.LinkedDataKeySpecification
-import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
-import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPatch
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPayload
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocumentPublicKeyInput
-import com.microsoft.portableIdentity.sdk.registrars.RegistrationPayload
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.PatchData
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.SuffixData
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.IdentifierDocumentPatch
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.document.IdentifierDocumentPayload
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.document.IdentifierDocumentPublicKeyInput
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.LinkedDataKeySpecification
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_CURVE_NAME_FOR_EC
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_MULTIHASH_CODE
@@ -50,7 +50,11 @@ class SidetreePayloadProcessor @Inject constructor(
 
         val suffixDataEncoded = createSuffixDataEncoded(patchData, recoveryKeyJWK)
 
-        val registrationDocument = RegistrationPayload(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
+        val registrationDocument = RegistrationPayload(
+            SIDETREE_OPERATION_TYPE,
+            suffixDataEncoded,
+            patchDataEncoded
+        )
         return encodeRegDoc(registrationDocument)
     }
 
@@ -98,7 +102,10 @@ class SidetreePayloadProcessor @Inject constructor(
 
     private fun createIdentifierDocumentPatch(signingKeyJWK: JsonWebKey): IdentifierDocumentPatch {
         val identifierDocumentPayload = createDocumentPayload(signingKeyJWK)
-        return IdentifierDocumentPatch(SIDETREE_PATCH_ACTION, identifierDocumentPayload)
+        return IdentifierDocumentPatch(
+            SIDETREE_PATCH_ACTION,
+            identifierDocumentPayload
+        )
     }
 
     private fun createPatchData(identifierDocumentPatch: IdentifierDocumentPatch): PatchData {

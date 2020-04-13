@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.repository.networking
 
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.IdentifierApi
 import retrofit2.Retrofit
 import javax.inject.Inject

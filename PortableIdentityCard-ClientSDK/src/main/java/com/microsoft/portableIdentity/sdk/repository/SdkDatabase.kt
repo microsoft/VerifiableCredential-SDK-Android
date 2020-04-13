@@ -9,13 +9,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.repository.dao.ClaimObjectDao
 import com.microsoft.portableIdentity.sdk.repository.dao.PortableIdentityCardDao
 import com.microsoft.portableIdentity.sdk.repository.dao.IdentifierDao
-import com.microsoft.portableIdentity.sdk.repository.dao.SerialClaimObjectDao
 
 /**
  * Abstract description of the database interface that is supposed to be provided by Room. New entities have to be
@@ -27,12 +23,9 @@ import com.microsoft.portableIdentity.sdk.repository.dao.SerialClaimObjectDao
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [ClaimObject::class, SerialClaimObject::class, PortableIdentityCard::class, Identifier::class], version = 1)
+@Database(entities = [PortableIdentityCard::class, Identifier::class], version = 1)
 @TypeConverters(RoomConverters::class)
 abstract class SdkDatabase : RoomDatabase() {
-    abstract fun claimObjectDao(): ClaimObjectDao
-
-    abstract fun serialClaimObjectDao(): SerialClaimObjectDao
 
     abstract fun cardDao(): PortableIdentityCardDao
 

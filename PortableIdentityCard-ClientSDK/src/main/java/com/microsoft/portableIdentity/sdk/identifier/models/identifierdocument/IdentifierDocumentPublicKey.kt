@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.identifier.deprecated.document
+package com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument
 
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
@@ -8,14 +8,13 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import kotlinx.serialization.Serializable
 
 /**
- * Data Class for defining an Identifier Document
- * Public Key.
+ * Data Class for defining a Public Key in Identifier Document in Jwk format which can be used for signing/encryption
  */
 @Serializable
 data class IdentifierDocumentPublicKey (
     /**
      * The id of the public key in the format
-     * #{keyIdentifier}.
+     * {keyIdentifier}
      */
     val id: String,
 
@@ -29,15 +28,11 @@ data class IdentifierDocumentPublicKey (
      */
     val controller: String? = null,
 
-    @Deprecated("against spec", ReplaceWith("this.controller"))
-    val owner: String? = null,
-
     /**
      * The JWK public key.
      */
     val publicKeyJwk: JsonWebKey
-    ) {
-
+) {
     fun toPublicKey(): PublicKey {
         return when (type) {
             in LinkedDataKeySpecification.RsaSignature2018.values -> {

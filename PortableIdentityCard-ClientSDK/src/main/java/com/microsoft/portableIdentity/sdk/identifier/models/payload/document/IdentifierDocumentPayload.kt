@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.identifier.models.document
+package com.microsoft.portableIdentity.sdk.identifier.models.payload.document
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,7 +15,8 @@ data class IdentifierDocumentPayload(
     val updated: String? = null,
     @SerialName("publicKeys")
     val publicKeys: List<IdentifierDocumentPublicKeyInput>,
-    @SerialName("serviceEndpoints") val serviceEndpoints: List<IdentifierDocumentService> = emptyList()
+    @SerialName("serviceEndpoints")
+    val serviceEndpoints: List<IdentifierDocumentService> = emptyList()
 ) {
     val id: String = ""
 }

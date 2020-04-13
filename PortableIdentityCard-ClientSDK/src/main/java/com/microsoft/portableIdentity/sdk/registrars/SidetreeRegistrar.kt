@@ -5,8 +5,9 @@ package com.microsoft.portableIdentity.sdk.registrars
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
-import com.microsoft.portableIdentity.sdk.identifier.models.PatchData
-import com.microsoft.portableIdentity.sdk.identifier.models.SuffixData
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.PatchData
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.SuffixData
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
@@ -46,9 +47,9 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         val uniqueSuffix = payloadGenerator.computeUniqueSuffix(registrationDocument.suffixData)
         val identifierShortForm = "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
 
-        //Resolves the created long form identifier as validation before saving it
+        //TODO: Remove this when long form is finalized. Validates created long form create payload and identifier before saving it by resolving it
         val identifierLongForm = "$identifierShortForm?${Constants.INITIAL_STATE_LONGFORM}=$registrationDocumentEncoded"
-        val identifierDocument = identifierRepository.resolveIdentifier(baseUrl, identifierLongForm)
+//        val identifierDocument = identifierRepository.resolveIdentifier(baseUrl, identifierLongForm)
 
         val patchDataJson = byteArrayToString(Base64Url.decode(registrationDocument.patchData))
         val nextUpdateCommitmentHash = Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
@@ -65,7 +66,7 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
                 personaRecKeyRef,
                 nextUpdateCommitmentHash,
                 nextRecoveryCommitmentHash,
-                identifierDocument!!,
+//                identifierDocument!!,
                 Constants.IDENTIFIER_SECRET_KEY_NAME
             )
         identifierRepository.insert(longformIdentifier)

@@ -6,12 +6,8 @@
 package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
 import com.microsoft.portableIdentity.sdk.repository.networking.PicNetworkOperation
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,24 +21,6 @@ import javax.inject.Singleton
 class CardRepository @Inject constructor(database: SdkDatabase, private val picNetworkOperation: PicNetworkOperation) {
 
     private val cardDao = database.cardDao()
-
-    private val serialClaimObjectDao = database.serialClaimObjectDao()
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    fun getAllClaimObjects(): LiveData<List<ClaimObject>> {
-        val serialClaimObjects = serialClaimObjectDao.getAllClaimObjects()
-        return Transformations.map(serialClaimObjects) { serialList -> transformList(serialList) }
-    }
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    suspend fun insert(claimObject: ClaimObject) = serialClaimObjectDao.insert(SerialClaimObject(claimObject.serialize()))
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    suspend fun delete(claimObject: ClaimObject) = serialClaimObjectDao.delete(SerialClaimObject(claimObject.serialize()))
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    private fun transformList(serialClaimObjects: List<SerialClaimObject>): List<ClaimObject> =
-        serialClaimObjects.map { Serializer.parse(ClaimObject.serializer(), it.serialClaimObject) }
 
     suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
 

@@ -15,7 +15,6 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFER
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import kotlinx.coroutines.*
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -41,7 +40,7 @@ class IdentifierManager @Inject constructor(
             val identifier = registerPortableIdentity()
             identifier
         }
-        SdkLog.d("Using identifier ${did.document.id}")
+        SdkLog.d("Using identifier ${did.id}")
         return did
     }
 
@@ -51,7 +50,7 @@ class IdentifierManager @Inject constructor(
         runBlocking {
             did = createPortableIdentity()
         }
-        SdkLog.d("Created ${did!!.document.id}")
+        SdkLog.d("Created ${did!!.id}")
         return did!!
     }
 

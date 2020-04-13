@@ -1,7 +1,7 @@
 package com.microsoft.portableIdentity.sdk.repository
 
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.models.document.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.repository.networking.IdentifierNetworkOperation
 import javax.inject.Inject
 

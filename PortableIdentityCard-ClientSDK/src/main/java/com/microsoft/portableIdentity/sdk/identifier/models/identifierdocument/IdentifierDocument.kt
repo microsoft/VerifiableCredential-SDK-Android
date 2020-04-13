@@ -1,6 +1,7 @@
-package com.microsoft.portableIdentity.sdk.identifier.models.document
+package com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.document.IdentifierDocumentService
 import kotlinx.serialization.Serializable
 
 /**

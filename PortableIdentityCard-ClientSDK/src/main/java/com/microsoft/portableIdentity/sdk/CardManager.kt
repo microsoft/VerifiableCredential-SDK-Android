@@ -8,7 +8,6 @@ package com.microsoft.portableIdentity.sdk
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
@@ -21,29 +20,22 @@ import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
-import com.microsoft.portableIdentity.sdk.resolvers.deprecated.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
 import io.ktor.http.Url
 import io.ktor.util.toMap
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.ImplicitReflectionSerializer
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
-    private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver,
     private val validator: OidcRequestValidator, // TODO: should this be a generic Validator?
     private val signer: OidcResponseSigner,
     private val formatter: OidcResponseFormatter
@@ -152,22 +144,5 @@ class CardManager @Inject constructor(
 
     fun getCards(): LiveData<List<PortableIdentityCard>> {
         return picRepository.getAllCards()
-    }
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    suspend fun saveClaim(claim: ClaimObject) {
-        picRepository.insert(claim)
-    }
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    fun getClaims(): LiveData<List<ClaimObject>> {
-        return picRepository.getAllClaimObjects()
-    }
-
-    @Deprecated("Old OidcRequest for old POC. Remove when new Model is up.")
-    suspend fun parseOidcRequest(request: String): com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest {
-        return withContext(Dispatchers.IO) {
-            com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest.parseAndVerify(request, cryptoOperations, resolver)
-        }
     }
 }

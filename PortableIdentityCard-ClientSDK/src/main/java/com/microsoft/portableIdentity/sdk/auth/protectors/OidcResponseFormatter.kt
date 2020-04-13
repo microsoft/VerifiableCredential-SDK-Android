@@ -19,7 +19,6 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import kotlinx.serialization.ImplicitReflectionSerializer
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -40,7 +39,7 @@ class OidcResponseFormatter @Inject constructor(
         val (iat, exp) = createIatAndExp(1000)
         val key = cryptoOperations.keyStore.getPublicKey(useKey).getKey()
         val jti = UUID.randomUUID().toString()
-        val did = responder.document.id
+        val did = responder.id
 
         var contract: String? = null
         var nonce: String? = null
@@ -116,7 +115,7 @@ class OidcResponseFormatter @Inject constructor(
                                    exp: Long): String {
         val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw))
         val jti = UUID.randomUUID().toString()
-        val did = responder.document.id
+        val did = responder.id
         val contents = VerifiablePresentationContent(
             jti = jti,
             vp = vp,

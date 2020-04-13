@@ -1,5 +1,6 @@
-package com.microsoft.portableIdentity.sdk.identifier.models.document
+package com.microsoft.portableIdentity.sdk.identifier.models.payload
 
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.document.IdentifierDocumentPayload
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

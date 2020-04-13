@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.registrars
+package com.microsoft.portableIdentity.sdk.identifier.models.payload
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -11,4 +11,4 @@ data class RegistrationPayload (
     val suffixData: String,
     @SerialName("patchData")
     val patchData: String
-) {}
+)
