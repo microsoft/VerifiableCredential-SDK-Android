@@ -16,17 +16,13 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
  * @param oidcParameters OpenId Connect specific parameters.
  * @param serializedToken Serialized JwsToken that contains additional request params.
  */
-open abstract class OidcRequest(open val oidcParameters: Map<String, List<String>>, serializedToken: String): Request {
+abstract class OidcRequest(open val oidcParameters: Map<String, List<String>>, serializedToken: String): Request {
 
     val content: OidcRequestContent
 
-    val token: JwsToken = JwsToken.deserialize(serializedToken)
+    val raw: JwsToken = JwsToken.deserialize(serializedToken)
 
     init {
-        content = Serializer.parse(OidcRequestContent.serializer(), token.content())
-    }
-
-    override fun getCredentialAttestations(): CredentialAttestations? {
-        return content.attestations
+        content = Serializer.parse(OidcRequestContent.serializer(), raw.content())
     }
 }

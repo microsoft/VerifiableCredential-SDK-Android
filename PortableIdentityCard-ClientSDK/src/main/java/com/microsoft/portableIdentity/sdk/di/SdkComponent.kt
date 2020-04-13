@@ -38,12 +38,6 @@ internal interface SdkComponent {
         fun context(context: Context): Builder
 
         @BindsInstance
-        fun signatureKeyReference(@Named("signatureKeyReference") signatureKeyReference: String): Builder
-
-        @BindsInstance
-        fun encryptionKeyReference(@Named("encryptionKeyReference") encryptionKeyReference: String): Builder
-
-        @BindsInstance
         fun resolverUrl(@Named("resolverUrl") resolverUrl: String): Builder
 
         @BindsInstance

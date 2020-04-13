@@ -9,12 +9,13 @@ import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAtt
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 
 class IssuanceRequest(val contract: PicContract, val contractUrl: String): Request {
+
     override fun getCredentialAttestations(): CredentialAttestations? {
         return contract.input.attestations
     }
 
     // Private Preview: gets first contract from each Verifiable Credential Attestation.
-    fun getContractUrls(): List<String> {
+    override fun getContractUrls(): List<String> {
         val attestations = contract.input.attestations ?: return emptyList()
         val contracts = mutableListOf<String>()
         attestations.presentations.forEach {
