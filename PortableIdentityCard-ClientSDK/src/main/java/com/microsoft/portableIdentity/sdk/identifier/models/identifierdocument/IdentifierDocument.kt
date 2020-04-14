@@ -5,8 +5,8 @@ import com.microsoft.portableIdentity.sdk.identifier.models.payload.document.Ide
 import kotlinx.serialization.Serializable
 
 /**
- * Class to represent Identifier Documents.
- * @class
+ * Class to represent Identifier Document returned on resolving an identifier
+ * Refer to https://www.w3.org/TR/did-core/#core-properties for more details on identifier document
  */
 @Serializable
 data class IdentifierDocument(
@@ -14,5 +14,4 @@ data class IdentifierDocument(
     val service: List<IdentifierDocumentService>?,
     val recoveryKey: JsonWebKey,
     val id: String
-) {
-}
+)

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Class to represent Identifier Documents.
+ * Class to represent document payload required to make a Create request on Sidetree
  * @class
  */
 @Serializable
@@ -17,6 +17,4 @@ data class IdentifierDocumentPayload(
     val publicKeys: List<IdentifierDocumentPublicKeyInput>,
     @SerialName("serviceEndpoints")
     val serviceEndpoints: List<IdentifierDocumentService> = emptyList()
-) {
-    val id: String = ""
-}
+)

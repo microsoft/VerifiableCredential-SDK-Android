@@ -4,6 +4,9 @@ package com.microsoft.portableIdentity.sdk.identifier.models.payload.document
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Data class for defining service endpoint inside document payload sent to Sidetree operation
+ */
 @Serializable
 data class IdentifierDocumentService (
     val id: String,

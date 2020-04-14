@@ -5,6 +5,10 @@ package com.microsoft.portableIdentity.sdk.identifier.models.payload.document
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.Serializable
 
+/**
+ * Data Class for defining public key used for encryption/signing inside document payload sent to Sidetree operation
+ */
+
 @Serializable
 data class IdentifierDocumentPublicKeyInput (
     /**
