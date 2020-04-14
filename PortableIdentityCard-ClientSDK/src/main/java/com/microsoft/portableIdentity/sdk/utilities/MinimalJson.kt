@@ -1,8 +1,5 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
-import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimDetail
-import com.microsoft.portableIdentity.sdk.cards.deprecated.SignedClaimDetail
-import com.microsoft.portableIdentity.sdk.cards.deprecated.UnsignedClaimDetail
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
 import com.microsoft.portableIdentity.sdk.identifier.document.service.Endpoint
 import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
@@ -27,15 +24,8 @@ object MinimalJson {
         }
     }
 
-    private val claimDetailSerializer = SerializersModule {
-        polymorphic(ClaimDetail::class) {
-            UnsignedClaimDetail::class with UnsignedClaimDetail.serializer()
-            SignedClaimDetail::class with SignedClaimDetail.serializer()
-        }
-    }
-
     val serializer = Json(
-        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + claimDetailSerializer,
+        context = identifierDocumentServiceSerializer + serviceEndpointSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false

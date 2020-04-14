@@ -5,41 +5,27 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking
 
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.NetworkException
 import kotlinx.io.errors.IOException
+import okhttp3.ResponseBody
 import retrofit2.Response
 
 open class HttpBaseOperation {
 
-    suspend fun <T : Any> fire(call: suspend () -> Response<T>, errorMessage: String): T? {
-        val result: HttpResult<T> = getHttpResult(call, errorMessage)
-        var data: T? = null
-
-        when (result) {
-            is HttpResult.Success ->
-                data = result.data
-            is HttpResult.Error -> {
-                SdkLog.e("Could not do http operation.", result.exception)
+    protected suspend fun <S, E> fire(call: suspend () -> Response<S>, parseError: (error: ResponseBody?) -> E): HttpResult<S, E, Exception> {
+        try {
+            val response = call.invoke()
+            if (response.isSuccessful) {
+                val body = response.body() ?: return HttpResult.Failure(NetworkException("Fetched data is null."))
+                return HttpResult.Success(response.code(), body)
             }
+            val error = parseError.invoke(response.errorBody())
+            return HttpResult.Error(response.code(), error)
+        } catch (exception: IOException) {
+            return HttpResult.Failure(NetworkException("unable to perform http operation", exception))
         }
-        return data
     }
 
-    suspend fun <T : Any> call(call: suspend () -> Response<T>, errorMessage: String): Response<T>? {
-        return call.invoke()
-    }
-
-    /**
-     * TODO(is this a good place for error handling different status codes?)
-     */
-    private suspend fun <T : Any> getHttpResult(call: suspend () -> Response<T>, errorMessage: String): HttpResult<T> {
-        val response = call.invoke()
-        if (response.code() == 401) {
-            throw AuthenticationException("Http request forbidden.")
-        }
-        if (response.isSuccessful) return HttpResult.Success(response.body()!!)
-
-        return HttpResult.Error(IOException("Error Occurred during getting safe Api result, Custom ERROR - $errorMessage"))
-    }
+    // generic error body parser that converts error body into a string for now.
+    val parseGenericErrorBody = { body: ResponseBody? -> body?.string() ?: "" }
 }

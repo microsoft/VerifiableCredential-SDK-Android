@@ -5,11 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking
 
-/**
- * Class to handle Network response.
- * It either can be Success with the required data or Error with an exception.
- */
-sealed class HttpResult<out T: Any> {
-    data class Success<out T : Any>(val data: T) : HttpResult<T>()
-    data class Error(val exception: Exception) : HttpResult<Nothing>()
+sealed class HttpResult<out S, out E, out F> {
+    class Success<out S>(val code: Int, val body: S): HttpResult<S, Nothing, Nothing>()
+    class Error<out E>(val code: Int, val body: E): HttpResult<Nothing, E, Nothing>()
+    class Failure<out F>(val body: F): HttpResult<Nothing, Nothing, F>()
 }

@@ -7,6 +7,7 @@ package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import kotlinx.coroutines.Deferred
@@ -26,5 +27,5 @@ interface PortableIdentityCardApi {
 
     @FormUrlEncoded
     @POST
-    suspend fun sendPresentationResponse(@Url overrideUrl: String, @Field("id_token") token: String): Response<Unit>
+    suspend fun sendPresentationResponse(@Url overrideUrl: String, @Field("id_token") token: String): Response<PresentationServiceResponse>
 }
