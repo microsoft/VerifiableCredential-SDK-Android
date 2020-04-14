@@ -19,6 +19,7 @@ import kotlin.random.Random
 
 /**
  * Registrar implementation for the Sidetree long form identifier
+ * @param baseUrl url used for registering an identifier
  * @class
  * @implements Registrar
  */
