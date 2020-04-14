@@ -24,7 +24,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class IdentifierManager @Inject constructor(
-    val identifierRepository: IdentifierRepository,
+    private val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
     private val registrar: Registrar
 ) {
@@ -70,6 +70,8 @@ class IdentifierManager @Inject constructor(
     }
 
     private suspend fun createAndRegisterPortableIdentity(): Identifier {
-        return registrar.register(SIGNATURE_KEYREFERENCE, RECOVERY_KEYREFERENCE, cryptoOperations)
+        val identifier =  registrar.register(SIGNATURE_KEYREFERENCE, RECOVERY_KEYREFERENCE, cryptoOperations)
+        identifierRepository.insert(identifier)
+        return identifier
     }
 }

@@ -5,6 +5,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.MILLISECONDS_IN_A_
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -13,7 +14,7 @@ import javax.inject.Singleton
  * Static class that Validates an OIDC Request.
  */
 @Singleton
-class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator){
+class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator) {
 
     /**
      * Verifies that Oidc request.
@@ -21,8 +22,17 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
      * @param request to be validated.
      * @return true, if valid.
      */
-    suspend fun validate(request: OidcRequest): Boolean {
-        return jwsValidator.verifySignature(request.token) && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
+    suspend fun validate(request: OidcRequest): Result<Boolean, Exception> {
+        return when (val verified = jwsValidator.verifySignature(request.token)) {
+            is Result.Success -> Result.Success(
+                verified.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(
+                    request.content,
+                    request.oidcParameters
+                )
+            )
+            is Result.Failure -> Result.Failure(verified.payload)
+        }
+        //return verifiedSignature && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
     }
 
     private fun hasTokenExpired(expiration: Long): Boolean {

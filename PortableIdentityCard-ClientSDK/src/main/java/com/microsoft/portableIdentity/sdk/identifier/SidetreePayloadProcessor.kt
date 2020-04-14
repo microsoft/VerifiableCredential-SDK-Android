@@ -39,38 +39,32 @@ class SidetreePayloadProcessor @Inject constructor(
      */
     fun generateCreatePayload(alias: String): String {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
-        val personaSigKeyRef = "$alias.$signatureKeyReference"
-        val personaRecKeyRef = "$alias.$recoveryKeyReference"
-        val signingKeyJWK = generatePublicKeyJwk(personaSigKeyRef, KeyType.EllipticCurve)
-        val recoveryKeyJWK = generatePublicKeyJwk(personaRecKeyRef, KeyType.EllipticCurve)
+        val signingKeyJWK = generatePublicKeyJwk("$alias.$signatureKeyReference", KeyType.EllipticCurve)
+        val recoveryKeyJWK = generatePublicKeyJwk("$alias.$recoveryKeyReference", KeyType.EllipticCurve)
 
+        val registrationDocument = generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK)
+        return encodeRegDoc(registrationDocument)
+    }
+
+    private fun generateRegistrationPayload(signingKeyJWK: JsonWebKey, recoveryKeyJWK: JsonWebKey): RegistrationPayload {
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingKeyJWK)
         val patchData = createPatchData(identifierDocumentPatch)
         val patchDataEncoded = encodePatchData(patchData)
 
         val suffixDataEncoded = createSuffixDataEncoded(patchData, recoveryKeyJWK)
-
-        val registrationDocument = RegistrationPayload(
-            SIDETREE_OPERATION_TYPE,
-            suffixDataEncoded,
-            patchDataEncoded
-        )
-        return encodeRegDoc(registrationDocument)
+        return RegistrationPayload(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
     }
 
     private fun generatePublicKeyJwk(personaKeyRef: String, keyType: KeyType): JsonWebKey {
         val publicKey = cryptoOperations.generateKeyPair(personaKeyRef, keyType)
         val publicKeyJwk = publicKey.toJWK()
-        return if (keyType == KeyType.RSA)
-            publicKeyJwk
-        else {
-            var curveName =
-                if (publicKeyJwk.kty == KeyType.EllipticCurve.value) {
-                    //Sidetree api specifically checks for curve name for elliptic curve keys. Hence it is set here.
-                    SIDETREE_CURVE_NAME_FOR_EC
-                } else
-                    publicKeyJwk.crv
-            JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
+        return when (keyType) {
+            KeyType.RSA -> publicKeyJwk
+            else -> {
+                //Sidetree api specifically checks for curve name for elliptic curve keys. Hence it is set here.
+                val curveName = if (publicKeyJwk.kty == KeyType.EllipticCurve.value) SIDETREE_CURVE_NAME_FOR_EC else publicKeyJwk.crv
+                JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
+            }
         }
     }
 
@@ -81,7 +75,6 @@ class SidetreePayloadProcessor @Inject constructor(
     fun computeUniqueSuffix(suffixDataEncoded: String): String {
         val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
         val suffixDataJson = byteArrayToString(suffixDataDecoded)
-        //Prepend the hash value with hash algorithm code and digest length to be in multihash format as expected by Sidetree
         val suffixDataHash = hash(stringToByteArray(suffixDataJson))
         return Base64Url.encode(suffixDataHash)
     }
@@ -102,20 +95,14 @@ class SidetreePayloadProcessor @Inject constructor(
 
     private fun createIdentifierDocumentPatch(signingKeyJWK: JsonWebKey): IdentifierDocumentPatch {
         val identifierDocumentPayload = createDocumentPayload(signingKeyJWK)
-        return IdentifierDocumentPatch(
-            SIDETREE_PATCH_ACTION,
-            identifierDocumentPayload
-        )
+        return IdentifierDocumentPatch(SIDETREE_PATCH_ACTION, identifierDocumentPayload)
     }
 
     private fun createPatchData(identifierDocumentPatch: IdentifierDocumentPatch): PatchData {
         //Generates hash of commit-reveal value which would be used while requesting next update operation on Sidetree
         val updateCommitmentHash = generateCommitmentValue()
         val updateCommitmentHashEncoded = Base64Url.encode(updateCommitmentHash)
-        return PatchData(
-            updateCommitmentHashEncoded,
-            listOf(identifierDocumentPatch)
-        )
+        return PatchData(updateCommitmentHashEncoded, listOf(identifierDocumentPatch))
     }
 
     private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray, recoveryKeyJWK: JsonWebKey): SuffixData {
@@ -126,11 +113,7 @@ class SidetreePayloadProcessor @Inject constructor(
 
         val recoveryCommitmentHashEncoded = Base64Url.encode(recoveryCommitmentHash)
 
-        return SuffixData(
-            patchDataHashEncoded,
-            recoveryKeyJWK,
-            recoveryCommitmentHashEncoded
-        )
+        return SuffixData(patchDataHashEncoded, recoveryKeyJWK, recoveryCommitmentHashEncoded)
     }
 
     private fun createSuffixDataEncoded(patchData: PatchData, recoveryKeyJWK: JsonWebKey): String {
@@ -142,6 +125,7 @@ class SidetreePayloadProcessor @Inject constructor(
 
     private fun hash(bytes: ByteArray): ByteArray {
         val digest = MessageDigest.getInstance(W3cCryptoApiConstants.Sha256.value)
+        //Prepend the hash value with hash algorithm code and digest length to be in multihash format as expected by Sidetree
         return byteArrayOf(SIDETREE_MULTIHASH_CODE.toByte(), SIDETREE_MULTIHASH_LENGTH.toByte()) + digest.digest(bytes)
     }
 

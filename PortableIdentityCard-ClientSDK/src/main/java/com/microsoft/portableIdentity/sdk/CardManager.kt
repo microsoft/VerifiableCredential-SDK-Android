@@ -28,6 +28,7 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import javax.inject.Inject
@@ -80,7 +81,7 @@ class CardManager @Inject constructor(
     /**
      * Validate an OpenID Connect Request.
      */
-    suspend fun isValid(request: OidcRequest): Boolean {
+    suspend fun isValid(request: OidcRequest): Result<Boolean, Exception> {
         return validator.validate(request)
     }
 

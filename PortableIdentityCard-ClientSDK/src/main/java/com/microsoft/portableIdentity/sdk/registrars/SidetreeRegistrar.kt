@@ -18,28 +18,17 @@ import javax.inject.Named
 import kotlin.random.Random
 
 /**
- * Registrar implementation for the Sidetree network
+ * Registrar implementation for the Sidetree long form identifier
  * @class
- * @implements IRegistrar
- * @param registrarUrl to the registration endpoint
- * @param identifierRepository repository to perform portable identity related operations in network/database
+ * @implements Registrar
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val identifierRepository: IdentifierRepository) :
-    Registrar() {
+class SidetreeRegistrar@Inject constructor(@Named("registrationUrl") private val baseUrl: String): Registrar() {
 
-    override suspend fun register(
-        signatureKeyReference: String,
-        recoveryKeyReference: String,
-        cryptoOperations: CryptoOperations
-    ): Identifier {
+    override suspend fun register(signatureKeyReference: String, recoveryKeyReference: String, cryptoOperations: CryptoOperations): Identifier {
         val alias = Base64Url.encode(Random.nextBytes(16))
         val personaSigKeyRef = "$alias.$signatureKeyReference"
         val personaRecKeyRef = "$alias.$recoveryKeyReference"
-        val payloadGenerator = SidetreePayloadProcessor(
-            cryptoOperations,
-            signatureKeyReference,
-            recoveryKeyReference
-        )
+        val payloadGenerator = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference)
         val registrationDocumentEncoded = payloadGenerator.generateCreatePayload(alias)
         val registrationDocument =
             Serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationDocumentEncoded)))
@@ -56,20 +45,17 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         val suffixDataJson = byteArrayToString(Base64Url.decode(registrationDocument.suffixData))
         val nextRecoveryCommitmentHash = Serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
 
-        val longformIdentifier =
-            Identifier(
-                identifierLongForm,
-                alias,
-                personaSigKeyRef,
-                //TODO: Since we know encryption is coming in the future, do we want to add encryption key now so that we don't have to modify the table later.
-                "",
-                personaRecKeyRef,
-                nextUpdateCommitmentHash,
-                nextRecoveryCommitmentHash,
+        return Identifier(
+            identifierLongForm,
+            alias,
+            personaSigKeyRef,
+            //TODO: Since we know encryption is coming in the future, do we want to add encryption key now so that we don't have to modify the table later.
+            "",
+            personaRecKeyRef,
+            nextUpdateCommitmentHash,
+            nextRecoveryCommitmentHash,
 //                identifierDocument!!,
-                Constants.IDENTIFIER_SECRET_KEY_NAME
-            )
-        identifierRepository.insert(longformIdentifier)
-        return longformIdentifier
+            Constants.IDENTIFIER_SECRET_KEY_NAME
+        )
     }
 }

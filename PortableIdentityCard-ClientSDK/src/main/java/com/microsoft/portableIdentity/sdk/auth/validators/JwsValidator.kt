@@ -10,6 +10,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,11 +26,13 @@ class JwsValidator @Inject constructor(
     /**
      * Verify the signature on the JwsToken.
      */
-    suspend fun verifySignature(token: JwsToken): Boolean {
+    suspend fun verifySignature(token: JwsToken): Result<Boolean, Exception> {
         val signature = token.signatures.first()
         val (did, _) = getKid(signature)
-        val publicKeys = resolvePublicKeys(did, cryptoOperations)
-        return token.verify(cryptoOperations, publicKeys)
+        return when(val publicKeys = resolvePublicKeys(did, cryptoOperations)) {
+            is Result.Success -> Result.Success(token.verify(cryptoOperations, publicKeys.payload))
+            is Result.Failure -> Result.Failure(publicKeys.payload)
+        }
     }
 
     private fun getKid(signature: JwsSignature): Pair<String, String> {
@@ -39,10 +42,10 @@ class JwsValidator @Inject constructor(
     }
 
     //TODO: Test this when key format is changed from hex to jwk
-    private suspend fun resolvePublicKeys(did: String, cryptoOperations: CryptoOperations): List<PublicKey> {
-        val requesterDidDocument = resolver.resolve(did)
-        return requesterDidDocument.publicKey.map {
-            it.toPublicKey()
+    private suspend fun resolvePublicKeys(did: String, cryptoOperations: CryptoOperations): Result<List<PublicKey>, Exception> {
+        return when(val requesterDidDocument = resolver.resolve(did)) {
+            is Result.Success -> Result.Success(requesterDidDocument.payload.publicKey.map { it.toPublicKey() })
+            is Result.Failure -> Result.Failure(requesterDidDocument.payload)
         }
 /*        val requesterDidDocument = resolver.resolve(did, cryptoOperations)
         return requesterDidDocument.document.publicKeys.map {
