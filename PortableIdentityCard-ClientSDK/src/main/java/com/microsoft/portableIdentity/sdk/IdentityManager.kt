@@ -8,9 +8,13 @@ package com.microsoft.portableIdentity.sdk
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierToken
+import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
@@ -72,9 +76,33 @@ class IdentityManager @Inject constructor(
         return did!!
     }
 
+    private suspend fun createTempIdentifier(): Identifier {
+        val did = "did:ion:test:EiCAvQuaAu5awq_e_hXyJImdQ5-xJsZzzQ3Xd9a2EAphtQ"
+        val document = resolver.resolveDocument(did)
+        val jsonWebKey = JsonWebKey( kid = "#sigKey",
+        x= "AU+WZrK8O/rx4wlq3idyuFlvACM/sMXZputpkzyHPMk=",
+        y= "qOpL6upm2RSrwrTBbUvL/4xYnSTdSFLtjOlQlJ74pt0=",
+        d= "JB4hmMeNb0cownkvkoY83HZRZBowqz7DhsFSlpeq0JY=")
+        val subtle =
+            cryptoOperations.subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.Private)
+        cryptoOperations.keyStore.save(
+            "sigKey",
+            EllipticCurvePrivateKey(jsonWebKey)
+        )
+        return Identifier(
+            alias = "alias",
+            document = document,
+            signatureKeyReference = "sigKey",
+            encryptionKeyReference = "encKey",
+            cryptoOperations = cryptoOperations,
+            resolver = resolver,
+            registrar = registrar
+        )
+    }
+
     fun createIdentifier(callback: (Identifier) -> Unit) {
         GlobalScope.launch {
-            callback.invoke(createIdentifier())
+            callback.invoke(createTempIdentifier())
         }
     }
 

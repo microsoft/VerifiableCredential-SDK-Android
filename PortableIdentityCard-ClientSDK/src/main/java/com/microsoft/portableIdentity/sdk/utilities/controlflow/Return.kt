@@ -3,15 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
+package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
-import androidx.room.Entity
-import kotlinx.serialization.Serializable
-
-@Entity
-@Serializable
-data class VerifiableCredential(
-        val raw: String,
-
-        val contents: VerifiableCredentialContent
-)
+sealed class Return<S, F> {
+    class Success<S, F>(val payload: S) : Return<S, F>()
+    class Failure<S, F>(val payload: F) : Return<S, F>()
+}

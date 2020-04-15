@@ -16,7 +16,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
  * @param oidcParameters OpenId Connect specific parameters.
  * @param serializedToken Serialized JwsToken that contains additional request params.
  */
-class OidcRequest(val oidcParameters: Map<String, List<String>>, serializedToken: String): Request {
+open abstract class OidcRequest(open val oidcParameters: Map<String, List<String>>, serializedToken: String): Request {
 
     val content: OidcRequestContent
 
@@ -26,7 +26,7 @@ class OidcRequest(val oidcParameters: Map<String, List<String>>, serializedToken
         content = Serializer.parse(OidcRequestContent.serializer(), token.content())
     }
 
-    override fun getCredentialAttestations(): CredentialAttestations {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getCredentialAttestations(): CredentialAttestations? {
+        return content.attestations
     }
 }

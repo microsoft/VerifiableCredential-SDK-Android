@@ -65,7 +65,7 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun defaultOkHttpClient() : OkHttpClient {
-        val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.i(it) }
+        val httpLoggingInterceptor = HttpLoggingInterceptor { println(it) }
         return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)

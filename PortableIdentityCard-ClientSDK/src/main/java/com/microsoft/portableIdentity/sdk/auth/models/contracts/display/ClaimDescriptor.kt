@@ -14,13 +14,13 @@ import kotlinx.serialization.Serializable
 data class ClaimDescriptor (
 
     // What data type the claim is (ex. "Date")
-    val type: String,
+    val type: String? = null,
 
     // A label used to describe the claim (ex. "Birthday").
-    val label: String,
+    val label: String? = null,
 
     // Used to describe to claim if claim is an image for alt text or voice over.
-    val description: String = ""
+    val description: String? = null
 
 
 )

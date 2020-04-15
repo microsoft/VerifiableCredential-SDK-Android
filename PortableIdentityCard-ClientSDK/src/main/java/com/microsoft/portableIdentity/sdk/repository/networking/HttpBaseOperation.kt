@@ -5,8 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking
 
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationException
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
 import kotlinx.io.errors.IOException
 import retrofit2.Response
 
@@ -24,6 +24,10 @@ open class HttpBaseOperation {
             }
         }
         return data
+    }
+
+    suspend fun <T : Any> call(call: suspend () -> Response<T>, errorMessage: String): Response<T>? {
+        return call.invoke()
     }
 
     /**
