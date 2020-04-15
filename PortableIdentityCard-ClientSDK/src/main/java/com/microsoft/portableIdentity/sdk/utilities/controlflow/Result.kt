@@ -28,14 +28,14 @@ fun <U, T> Result<T>.andThen(transform: (T) -> Result<U>): Result<U> =
         is Result.Failure -> this
     }
 
-suspend fun <T, E> runResultTry(block: suspend RunResultTryContext<E>.() -> Result<T>): Result<T> =
+suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>): Result<T> =
     try {
-        RunResultTryContext<E>().block()
+        RunResultTryContext().block()
     } catch (ex: RunResultTryAbortion) {
         Result.Failure(ex.error as PortableIdentitySdkException)
     }
 
-class RunResultTryContext<E> {
+class RunResultTryContext {
     fun <T> Result<T>.abortOnError(): T =
         when (this) {
             is Result.Success -> payload

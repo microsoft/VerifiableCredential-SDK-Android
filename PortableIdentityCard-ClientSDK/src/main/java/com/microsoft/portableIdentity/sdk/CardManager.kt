@@ -51,24 +51,39 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
-        val url = Url(uri)
-        if (url.protocol.name != "openid") {
-            val protocolException = PresentationException("Request Protocol not supported.")
-            return Result.Failure(protocolException)
-        }
+        return runResultTry {
+            val url = verifyUri(uri).abortOnError()
+            val requestParameters = url.parameters.toMap()
+            val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
+            Result.Success(PresentationRequest(requestParameters, requestToken))
+        }.mapError { it }
+    }
 
-        val requestParameters = url.parameters.toMap()
-        val serializedToken = requestParameters["request"]?.first()
-        if (serializedToken != null) {
-            return Result.Success(PresentationRequest(requestParameters, serializedToken))
+    private fun verifyUri(uri: String): Result<Url> {
+        try {
+            val url = Url(uri)
+            if (url.protocol.name != "openid") {
+                val protocolException = PresentationException("Request Protocol not supported.")
+                return Result.Failure(protocolException)
+            }
+            return Result.Success(url)
+        } catch (exception: Exception) {
+            return Result.Failure(PresentationException("Uri String is not a Url", exception))
         }
+    }
 
-        val requestUri =
-            requestParameters["request_uri"]?.first()
-                ?: return Result.Failure(PresentationException("Cannot fetch request: No request uri found"))
-        return when (val tokenResult = picRepository.getRequest(requestUri)) {
-            is Result.Success -> Result.Success(PresentationRequest(requestParameters, tokenResult.payload))
-            is Result.Failure -> Result.Failure(tokenResult.payload)
+    private suspend fun getPresentationRequestToken(requestParameters: Map<String, List<String>>): Result<String> {
+        return runResultTry {
+            val serializedToken = requestParameters["request"]?.first()
+            if (serializedToken != null) {
+                Result.Success(serializedToken)
+            }
+            val requestUri = requestParameters["request_uri"]?.first()
+            if (requestUri == null) {
+                Result.Failure(PresentationException("Request Uri does not exist."))
+            } else {
+                picRepository.getRequest(requestUri)
+            }
         }
     }
 
@@ -81,10 +96,10 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
-        return when (val contractResult = picRepository.getContract(contractUrl)) {
-            is Result.Success -> Result.Success(IssuanceRequest(contractResult.payload, contractUrl))
-            is Result.Failure -> Result.Failure(contractResult.payload)
-        }
+        return runResultTry {
+            val contract = picRepository.getContract(contractUrl).abortOnError()
+            Result.Success(IssuanceRequest(contract, contractUrl))
+        }.mapError { it }
     }
 
     /**
@@ -96,11 +111,7 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun isValid(request: OidcRequest): Result<Boolean> {
-        return try {
-            validator.validate(request)
-        } catch (exception: Exception) {
-            Result.Failure(ValidatorException("Unable to validate request.", exception))
-        }
+        return validator.validate(request)
     }
 
     /**
@@ -129,13 +140,11 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<IssuanceServiceResponse?> {
-        return when (val formattingResult = formatter.formAndSignResponse(response, responder)) {
-            is Result.Success -> picRepository.sendIssuanceResponse(response.audience, formattingResult.payload)
-            is Result.Failure -> {
-                val exception = IssuanceException("Unable to format response", formattingResult.payload)
-                Result.Failure(exception)
-            }
-        }
+        return runResultTry {
+            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+            picRepository.sendIssuanceResponse(response.audience, formattedResponse)
+
+        }.mapError { it }
     }
 
     /**
@@ -148,12 +157,12 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<String> {
-        return when (val formattingResult = formatter.formAndSignResponse(response, responder)) {
-            is Result.Success -> picRepository.sendPresentationResponse(response.audience, formattingResult.payload)
-            is Result.Failure -> {
-                val exception = PresentationException("Unable to format response.", formattingResult.payload)
-                Result.Failure(exception)
-            }
+        return runResultTry {
+            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+            picRepository.sendPresentationResponse(response.audience, formattedResponse)
+
+        }.mapError {
+            it
         }
     }
 

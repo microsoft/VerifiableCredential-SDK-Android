@@ -40,12 +40,12 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Post Response to url.
      */
-    suspend fun sendIssuanceResponse(url: String, serializedResponse: String): Result<IssuanceServiceResponse?> {
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String): Result<IssuanceServiceResponse> {
         return try {
             val result = fire(
                 call = {picApi.sendResponse(url, serializedResponse)},
                 errorMessage = "Error Sending Response to $url."
-            )
+            ) ?: return Result.Failure(IssuanceException("Unable to get Service Response"))
             Result.Success(result)
         } catch (exception: Exception) {
             Result.Failure(PresentationException("Failed to send Response", exception))
@@ -64,8 +64,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
             val requestUrl = response?.raw()?.request()?.url()
             Result.Success(requestUrl.toString())
         } catch (exception: Exception) {
-            val presentationException = PresentationException("Failed to send Response", exception)
-            Result.Failure(presentationException)
+            Result.Failure(PresentationException("Failed to send Response", exception))
         }
     }
 }
