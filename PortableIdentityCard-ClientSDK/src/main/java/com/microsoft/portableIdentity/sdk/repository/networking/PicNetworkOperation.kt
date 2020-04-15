@@ -18,7 +18,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Get Contract from url.
      */
-    suspend fun getContract(url: String): Result<PicContract, Exception> {
+    suspend fun getContract(url: String): Result<PicContract> {
         val contract = fire(
             call = {picApi.getContract(url)},
             errorMessage = "Error Fetching Contract from $url."
@@ -29,7 +29,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Get Request from url.
      */
-    suspend fun getRequestToken(url: String): Result<String, Exception> {
+    suspend fun getRequestToken(url: String): Result<String> {
         val request = fire(
             call = {picApi.getRequest(url)},
             errorMessage = "Error Fetching Request from $url."
@@ -40,7 +40,7 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
     /**
      * Post Response to url.
      */
-    suspend fun sendIssuanceResponse(url: String, serializedResponse: String): Result<IssuanceServiceResponse?, Exception> {
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String): Result<IssuanceServiceResponse?> {
         return try {
             val result = fire(
                 call = {picApi.sendResponse(url, serializedResponse)},
@@ -48,15 +48,14 @@ class PicNetworkOperation @Inject constructor(retrofit: Retrofit): HttpBaseOpera
             )
             Result.Success(result)
         } catch (exception: Exception) {
-            val presentationException = PresentationException("Failed to send Response", exception)
-            Result.Failure(presentationException)
+            Result.Failure(PresentationException("Failed to send Response", exception))
         }
     }
 
     /**
      * Post Presentation Response to url.
      */
-    suspend fun sendPresentationResponse(url: String, serializedResponse: String): Result<String, Exception> {
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String): Result<String> {
         return try {
             val response = call(
                 call = { picApi.sendPresentationResponse(url, serializedResponse) },

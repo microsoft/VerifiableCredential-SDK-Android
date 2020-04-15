@@ -24,3 +24,5 @@ class ResolverException(message: String? = null, cause: Throwable? = null) : Por
 class RegistrarException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
 class NetworkException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class RepositoryException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
