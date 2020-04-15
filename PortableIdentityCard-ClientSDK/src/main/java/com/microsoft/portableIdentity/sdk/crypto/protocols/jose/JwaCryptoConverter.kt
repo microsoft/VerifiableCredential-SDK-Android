@@ -92,9 +92,7 @@ object JwaCryptoConverter {
                     }
                 }
             }
-            else -> {
-                throw CryptoException("Unknown algorithm: ${algorithm.name}")
-            }
+            else -> throw CryptoException("Unknown algorithm: ${algorithm.name}")
         }
     }
 
