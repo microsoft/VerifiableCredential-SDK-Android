@@ -58,12 +58,11 @@ class AndroidSubtleInstrumentedTest {
         val actualKey = androidSubtle.exportKeyJwk(cryptoKeyPair.publicKey)
         assertThat(actualKey.kty).isEqualTo(com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.EllipticCurve.value)
         assertThat(actualKey.key_ops?.firstOrNull()).isEqualTo("verify")
-//        assertThat(actualKey.alg).isNotNull()
     }
 
     @Test
     fun signPayloadTest() {
-        val keyReference: String = "KeyReference3"
+        val keyReference = "KeyReference3"
         cryptoKeyPair = androidSubtle.generateKeyPair(EcdsaParams(
             hash =  Sha.Sha256,
             additionalParams = mapOf(
@@ -85,7 +84,7 @@ class AndroidSubtleInstrumentedTest {
 
     @Test
     fun verifySignatureTest() {
-        val keyReference: String = "KeyReference4"
+        val keyReference = "KeyReference4"
         cryptoKeyPair = androidSubtle.generateKeyPair(EcdsaParams(
             hash =  Sha.Sha256,
             additionalParams = mapOf(
@@ -108,7 +107,7 @@ class AndroidSubtleInstrumentedTest {
 
     @Test
     fun importKeyTest() {
-        val keyReference: String = "KeyReference5"
+        val keyReference = "KeyReference5"
         cryptoKeyPair = androidSubtle.generateKeyPair(
             RsaHashedKeyAlgorithm(
                 modulusLength = 4096UL,
@@ -117,13 +116,6 @@ class AndroidSubtleInstrumentedTest {
                 additionalParams = mapOf("KeyReference" to keyReference)
             ), true, listOf(KeyUsage.Sign)
         )
-/*        val actualJwk = JsonWebKey(
-            kty = com.microsoft.did.sdk.crypto.keys.KeyType.RSA.value,
-            alg = "RSA-OAEP",
-            use = KeyUse.Signature.value,
-            kid = "#key1",
-            key_ops = listOf(KeyUsage.Verify.value)
-        )*/
         val actualJwk = androidSubtle.exportKeyJwk(cryptoKeyPair.publicKey)
         actualJwk.alg = cryptoKeyPair.publicKey.algorithm.name
         val actualAlgorithm = JwaCryptoConverter.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name)

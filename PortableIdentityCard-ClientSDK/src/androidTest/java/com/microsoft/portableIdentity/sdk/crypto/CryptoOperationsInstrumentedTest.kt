@@ -10,15 +10,9 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
-import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
-import com.microsoft.portableIdentity.sdk.crypto.models.Sha
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCrypto
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
