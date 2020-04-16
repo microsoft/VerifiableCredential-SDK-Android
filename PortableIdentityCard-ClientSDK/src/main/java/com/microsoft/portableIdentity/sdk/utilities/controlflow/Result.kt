@@ -5,42 +5,46 @@
 
 package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
-sealed class Result<out S, out F> {
-    class Success<out S>(val payload: S) : Result<S, Nothing>()
-    class Failure<out F>(val payload: F) : Result<Nothing, F>()
+sealed class Result<out S> {
+    class Success<out S>(val payload: S) : Result<S>()
+    class Failure(val payload: PortableIdentitySdkException) : Result<Nothing>()
 }
 
-fun <U, T, E> Result<T, E>.map(transform: (T) -> U): Result<U, E> =
+fun <U, T> Result<T>.map(transform: (T) -> U): Result<U> =
     when (this) {
         is Result.Success -> Result.Success(transform(payload))
         is Result.Failure -> this
     }
 
-fun <U, T, E> Result<T, E>.mapError(transform: (E) -> U): Result<T, U> =
+fun <T> Result<T>.mapError(transform: (PortableIdentitySdkException) -> PortableIdentitySdkException): Result<T> =
     when (this) {
         is Result.Success -> this
         is Result.Failure -> Result.Failure(transform(payload))
     }
 
-fun <U, T, E> Result<T, E>.andThen(transform: (T) -> Result<U, E>): Result<U, E> =
+fun <U, T> Result<T>.andThen(transform: (T) -> Result<U>): Result<U> =
     when (this) {
         is Result.Success -> transform(payload)
         is Result.Failure -> this
     }
 
-suspend fun <T, E> runResultTry(block: suspend RunResultTryContext<E>.() -> Result<T, E>): Result<T, E> =
+suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>): Result<T> =
     try {
-        RunResultTryContext<E>().block()
+        RunResultTryContext().block()
     } catch (ex: RunResultTryAbortion) {
-        Result.Failure(ex.error as E)
+        Result.Failure(ex.error as PortableIdentitySdkException)
+    } catch (ex: PortableIdentitySdkException) {
+        Result.Failure(ex)
+    } catch (ex: Exception) {
+        Result.Failure(PortableIdentitySdkException("Unhandled Exception", ex))
     }
 
-class RunResultTryContext<E> {
-    fun <T> Result<T, E>.abortOnError(): T =
+class RunResultTryContext {
+    fun <T> Result<T>.abortOnError(): T =
         when (this) {
             is Result.Success -> payload
             is Result.Failure -> throw RunResultTryAbortion(payload as Any)
         }
 }
 
-private class RunResultTryAbortion(val error: Any) : Exception()
+private class RunResultTryAbortion(val error: Any) : PortableIdentitySdkException()

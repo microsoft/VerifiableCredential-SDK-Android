@@ -20,15 +20,15 @@ suspend fun <S> awaitCallback(block: (AwaitCallback<S>) -> Unit) : S =
         })
     }
 
-interface AwaitResultCallback<S, F> {
+interface AwaitResultCallback<S> {
     fun onSuccess(payload: S)
-    fun onFailure(payload: F)
+    fun onFailure(payload: PortableIdentitySdkException)
 }
 
-suspend fun <S, F> awaitResultCallback(block: (AwaitResultCallback<S, F>) -> Unit) : Result<S, F> =
+suspend fun <S> awaitResultCallback(block: (AwaitResultCallback<S>) -> Unit) : Result<S> =
     suspendCoroutine { cont ->
-        block(object : AwaitResultCallback<S, F> {
+        block(object : AwaitResultCallback<S> {
             override fun onSuccess(payload: S) = cont.resume(Result.Success(payload))
-            override fun onFailure(payload: F) = cont.resume(Result.Failure(payload))
+            override fun onFailure(payload: PortableIdentitySdkException) = cont.resume(Result.Failure(payload))
         })
     }

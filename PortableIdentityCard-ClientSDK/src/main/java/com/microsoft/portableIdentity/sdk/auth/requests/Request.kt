@@ -9,10 +9,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAtt
 
 interface Request {
 
-    /**
-     * Get Credential Requests if there are any in Request.
-     *
-     * @return credentials requests if exist, null if no credentials requested.
-     */
     fun getCredentialAttestations(): CredentialAttestations?
+
+    fun getContractUrls(): List<String>
 }
