@@ -6,35 +6,31 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKeyPair
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaHashedKeyAlgorithm
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.RuntimeException
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class AndroidKeyStoreInstrumentedTest {
 
-    private val androidSubtle: AndroidSubtle
     private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val keyStore: AndroidKeyStore
     private val keyRef: String = "TestKeys"
-    private var keyPair: CryptoKeyPair
     private var actualPublicKey: RsaPublicKey
     private var actualPrivateKey: RsaPrivateKey
 
     init {
         keyStore = AndroidKeyStore(context)
-        androidSubtle = AndroidSubtle(keyStore)
-        keyPair = androidSubtle.generateKeyPair(
+        val androidSubtle = AndroidSubtle(keyStore)
+        val keyPair = androidSubtle.generateKeyPair(
             RsaHashedKeyAlgorithm(
                 modulusLength = 4096UL,
                 publicExponent = 65537UL,
