@@ -24,6 +24,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
+import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import dagger.Module
@@ -129,5 +130,11 @@ internal class SdkModule {
     @Singleton
     fun defaultFormatter(formatter: OidcResponseFormatter): Formatter {
         return formatter
+    }
+
+    @Provides
+    @Singleton
+    fun defaultApiCreator(retrofit: Retrofit): ApiProvider {
+        return ApiProvider(retrofit)
     }
 }

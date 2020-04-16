@@ -9,9 +9,9 @@ import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import com.microsoft.portableIdentity.sdk.repository.networking.FetchContractNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.HttpResult
-import com.microsoft.portableIdentity.sdk.repository.networking.IssuanceNetworkOperations
-import com.microsoft.portableIdentity.sdk.repository.networking.PresentationNetworkOperations
+import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import javax.inject.Inject
@@ -26,8 +26,7 @@ import kotlin.Exception
  */
 @Singleton
 class CardRepository @Inject constructor(database: SdkDatabase,
-                                         private val presentationNetworkOperations: PresentationNetworkOperations,
-                                         private val issuanceNetworkOperations: IssuanceNetworkOperations) {
+                                         apiProvider: ApiProvider) {
 
     private val cardDao = database.cardDao()
 
@@ -37,7 +36,7 @@ class CardRepository @Inject constructor(database: SdkDatabase,
 
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
-    suspend fun getContract(url: String): Result<PicContract, Exception> = handleHttpResults(issuanceNetworkOperations.fetchContract(url), "fetch Contract")
+    suspend fun getContract(url: String): Result<PicContract, Exception> = FetchContractNetworkOperation(url).fire()
 
     suspend fun getRequest(url: String) = handleHttpResults(presentationNetworkOperations.fetchRequestToken(url), "fetch request token")
 
