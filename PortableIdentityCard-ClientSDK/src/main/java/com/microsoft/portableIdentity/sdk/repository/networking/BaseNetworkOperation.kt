@@ -3,15 +3,10 @@ package com.microsoft.portableIdentity.sdk.repository.networking
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import kotlinx.io.IOException
 import retrofit2.Response
-import retrofit2.Retrofit
-import javax.inject.Inject
-import javax.inject.Singleton
 
 abstract class BaseNetworkOperation<S> {
 
     abstract val call: suspend () -> Response<S>
-
-    var
 
     open suspend fun fire(): Result<S> {
         try {
