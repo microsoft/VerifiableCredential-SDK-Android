@@ -52,24 +52,19 @@ class CardManager @Inject constructor(
      */
     suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
         return runResultTry {
-            val url = verifyUri(uri).abortOnError()
+            val url = verifyUri(uri)
             val requestParameters = url.parameters.toMap()
             val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
             Result.Success(PresentationRequest(requestParameters, requestToken))
-        }.mapError { it }
+        }
     }
 
-    private fun verifyUri(uri: String): Result<Url> {
-        try {
-            val url = Url(uri)
-            if (url.protocol.name != "openid") {
-                val protocolException = PresentationException("Request Protocol not supported.")
-                return Result.Failure(protocolException)
-            }
-            return Result.Success(url)
-        } catch (exception: Exception) {
-            return Result.Failure(PresentationException("Uri String is not a Url", exception))
+    private fun verifyUri(uri: String): Url {
+        val url = Url(uri)
+        if (url.protocol.name != "openid") {
+            throw PresentationException("Request Protocol not supported.")
         }
+        return url
     }
 
     private suspend fun getPresentationRequestToken(requestParameters: Map<String, List<String>>): Result<String> {
@@ -99,7 +94,7 @@ class CardManager @Inject constructor(
         return runResultTry {
             val contract = picRepository.getContract(contractUrl).abortOnError()
             Result.Success(IssuanceRequest(contract, contractUrl))
-        }.mapError { it }
+        }
     }
 
     /**
@@ -143,8 +138,7 @@ class CardManager @Inject constructor(
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendIssuanceResponse(response.audience, formattedResponse)
-
-        }.mapError { it }
+        }
     }
 
     /**
@@ -160,9 +154,6 @@ class CardManager @Inject constructor(
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
-
-        }.mapError {
-            it
         }
     }
 
