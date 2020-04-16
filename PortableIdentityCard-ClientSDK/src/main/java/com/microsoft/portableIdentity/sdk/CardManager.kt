@@ -200,12 +200,8 @@ class CardManager @Inject constructor(
      * @return Result.Success: List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCards(): Result<LiveData<List<PortableIdentityCard>>> {
-        return try {
-            Result.Success(picRepository.getAllCards())
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to get all cards from repository.", exception))
-        }
+    fun getCards(): LiveData<List<PortableIdentityCard>> {
+        return picRepository.getAllCards()
     }
 
     /**

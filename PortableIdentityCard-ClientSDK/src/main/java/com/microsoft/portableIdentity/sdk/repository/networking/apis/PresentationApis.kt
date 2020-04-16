@@ -5,15 +5,16 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
-import retrofit2.Retrofit
-import javax.inject.Inject
-import javax.inject.Singleton
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
+import retrofit2.Response
+import retrofit2.http.*
 
-@Singleton
-class ApiProvider @Inject constructor(retrofit: Retrofit) {
+interface PresentationApis {
 
-    // maybe refactor these into different interface apis?
-    val presentationApis: PresentationApis = retrofit.create(PresentationApis::class.java)
+    @GET
+    suspend fun getRequest(@Url overrideUrl: String): Response<String>
 
-    val issuanceApis: IssuanceApis = retrofit.create(IssuanceApis::class.java)
+    @FormUrlEncoded
+    @POST
+    suspend fun sendResponse(@Url overrideUrl: String, @Field("id_token") token: String): Response<PresentationServiceResponse>
 }

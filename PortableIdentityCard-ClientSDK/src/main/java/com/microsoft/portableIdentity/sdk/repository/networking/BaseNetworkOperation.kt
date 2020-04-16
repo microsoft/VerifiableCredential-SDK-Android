@@ -11,7 +11,7 @@ abstract class BaseNetworkOperation<S> {
 
     abstract val call: suspend () -> Response<S>
 
-    val isRetryable: Boolean = false
+    var
 
     open suspend fun fire(): Result<S> {
         try {

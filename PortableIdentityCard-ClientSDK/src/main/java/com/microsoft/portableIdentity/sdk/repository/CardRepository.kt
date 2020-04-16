@@ -6,16 +6,14 @@
 package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
-import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.repository.networking.*
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchContractNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.Exception
 
 /**
  * Repository is an abstraction layer that is consumed by business logic and abstracts away the various data sources
@@ -35,11 +33,25 @@ class CardRepository @Inject constructor(database: SdkDatabase,
 
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
-    suspend fun getContract(url: String) = FetchContractNetworkOperation(url, apiProvider).fire()
+    suspend fun getContract(url: String) = FetchContractNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
 
-    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
+    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
 
-    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(url, serializedResponse, apiProvider).fire()
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(
+        url,
+        serializedResponse,
+        apiProvider
+    ).fire()
 
-    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(url, serializedResponse, apiProvider).fire()
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(
+        url,
+        serializedResponse,
+        apiProvider
+    ).fire()
 }
