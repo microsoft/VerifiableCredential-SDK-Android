@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.crypto
 
 import android.content.Context
@@ -26,31 +31,12 @@ class CryptoOperationsInstrumentedTest {
     private val keyStore: AndroidKeyStore
     private val keyRef: String = "TestKeysCryptoOperations"
     private val crypto: CryptoOperations
-//    private val keyPair: CryptoKeyPair
 
     init {
         keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle)
         crypto = CryptoOperations(androidSubtle, keyStore)
-/*        keyPair =  androidSubtle.generateKeyPair(
-            RsaOaepParams(additionalParams = mapOf(Pair("KeyReference", keyRef))),
-            true,
-            listOf(KeyUsage.Sign, KeyUsage.Verify)
-        )
-        val privateKey = RsaPrivateKey(androidSubtle.exportKeyJwk(keyPair.privateKey), logger)
-        keyStore.save(keyRef, privateKey)*/
-/*        keyPair = ellipticCurveSubtleCrypto.generateKeyPair(
-            EcKeyGenParams(
-                namedCurve = W3cCryptoApiConstants.Secp256k1.value,
-                additionalParams = mapOf(
-                    "hash" to Sha.Sha256,
-                    "KeyReference" to keyRef
-                )
-            ), true, listOf(KeyUsage.Sign)
-        )
-        val ecPrivateKey = EllipticCurvePrivateKey(ellipticCurveSubtleCrypto.exportKeyJwk(keyPair.privateKey), logger)
-        keyStore.save(keyRef, ecPrivateKey)*/
     }
 
     @Test
@@ -72,15 +58,4 @@ class CryptoOperationsInstrumentedTest {
         val actualKeyType = publicKeyJWK.kty
         assertThat(actualKeyType).isEqualTo(expectedKeyType)
     }
-
-/*    @Test
-    fun signAndVerifyPayloadTest() {
-        val testPayload = "test string"
-        val payload = testPayload.toByteArray()
-        val signingKey = crypto.keyStore.getPrivateKey(keyRef).getKey()
-        val algorithmName = signingKey.alg!!
-        val signedPayload = crypto.sign(payload, keyRef, JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName, logger = logger))
-
-        crypto.verify(payload, signedPayload, keyRef, Algorithm(algorithmName))
-    }*/
 }

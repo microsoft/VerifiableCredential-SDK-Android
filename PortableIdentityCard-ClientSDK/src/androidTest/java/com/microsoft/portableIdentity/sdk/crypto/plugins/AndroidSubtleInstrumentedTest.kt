@@ -1,4 +1,8 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.crypto.plugins
 
 import android.content.Context
@@ -22,7 +26,7 @@ class AndroidSubtleInstrumentedTest {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         val keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
-        val keyReference: String = "KeyReference1"
+        val keyReference = "KeyReference1"
         cryptoKeyPair = androidSubtle.generateKeyPair(
             EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
@@ -35,8 +39,7 @@ class AndroidSubtleInstrumentedTest {
     }
 
     @Test
-    fun getKeyTest() {
-        val keyReference: String = "KeyReference2"
+    fun generateKeyTest() {
         val expectedAlgorithm = AesKeyGenParams(W3cCryptoApiConstants.AesCbc.value, 128u)
         val cryptoKey = androidSubtle.generateKey(expectedAlgorithm, true, listOf(KeyUsage.Sign))
         assertThat(cryptoKey.type).isNotNull()
@@ -46,7 +49,7 @@ class AndroidSubtleInstrumentedTest {
     }
 
     @Test
-    fun getKeyPairTest() {
+    fun generateKeyPairTest() {
         assertThat(cryptoKeyPair.privateKey).isNotNull()
     }
 

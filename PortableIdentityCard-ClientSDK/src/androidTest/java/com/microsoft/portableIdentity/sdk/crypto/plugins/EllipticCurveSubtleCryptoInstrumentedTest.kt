@@ -1,4 +1,8 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.crypto.plugins
 
 import android.content.Context
@@ -22,7 +26,7 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
         val keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle)
-        val keyReference: String = "KeyReference1"
+        val keyReference = "KeyReference1"
         cryptoKeyPair = ellipticCurveSubtleCrypto.generateKeyPair(
             EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,

@@ -63,4 +63,17 @@ class JwsTokenTest {
         assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isGreaterThanOrEqualTo(1)
     }
+
+    @Test
+    fun signAndVerify() {
+        val testData = Random.Default.nextBytes(32)
+        val token = JwsToken(testData)
+        token.sign(keyRef, crypto)
+        val serialized = token.serialize(JwsFormat.Compact)
+
+        println(serialized)
+
+        val verifyToken = JwsToken.deserialize(serialized)
+        verifyToken.verify(crypto)
+    }
 }

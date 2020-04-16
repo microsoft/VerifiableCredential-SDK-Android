@@ -1,13 +1,19 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.crypto.keyStore
 
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
+import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
@@ -45,10 +51,11 @@ class AndroidKeyStoreInstrumentedTest {
     @Test
     fun savePublicAndPrivateKeyPairTest() {
         keyStore.save(keyRef, actualPublicKey)
+        keyStore.save(keyRef, actualPrivateKey)
+
         val expectedPublicKeyById = keyStore.getPublicKeyById(actualPublicKey.kid)
         assertThat(actualPublicKey).isEqualToComparingFieldByFieldRecursively(expectedPublicKeyById)
 
-        keyStore.save(keyRef, actualPrivateKey)
         val expectedPrivateKeyById = keyStore.getPrivateKeyById(actualPrivateKey.kid)
         assertThat(actualPrivateKey).isEqualToComparingFieldByFieldRecursively(expectedPrivateKeyById)
     }
