@@ -4,11 +4,18 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import kotlinx.io.IOException
 import retrofit2.Response
 
-abstract class BaseNetworkOperation<S> {
+/**
+ * Base Network Operation class with default methods for all Network Operations.
+ * S: The Response Body Type from the Service.
+ * T: The Object transformed from the response body.
+ * In default methods, S == T, for no transformation takes place.
+ * fire method will just return Result.Success(responseBody: S)
+ */
+abstract class BaseNetworkOperation<S, T> {
 
     abstract val call: suspend () -> Response<S>
 
-    open suspend fun fire(): Result<S> {
+    open suspend fun fire(): Result<T> {
         try {
             val response = call.invoke()
             if (response.isSuccessful) {
@@ -20,13 +27,16 @@ abstract class BaseNetworkOperation<S> {
         }
     }
 
-    open fun onSuccess(response: Response<S>): Result<S> {
+    open fun onSuccess(response: Response<S>): Result<T> {
         // TODO("how do we want to handle null bodies")
-        return Result.Success(response.body() ?: throw NetworkException("Body of Response is null."))
+        // TODO("how to not suppress this warning")
+        @Suppress("UNCHECKED_CAST")
+        val transformedPayload = (response.body() ?: throw NetworkException("Body of Response is null.")) as T
+        return Result.Success(transformedPayload)
     }
 
     // TODO("what do we want our base to look like")
-    open fun onFailure(response: Response<S>): Result<S> {
+    open fun onFailure(response: Response<S>): Result<Nothing> {
         return when (response.code()) {
             401 -> Result.Failure(UnauthorizedException(response.message()))
             402, 403, 404 -> Result.Failure(ServiceErrorException(response.message()))

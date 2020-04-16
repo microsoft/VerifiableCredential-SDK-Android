@@ -135,10 +135,11 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<IssuanceServiceResponse?> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
-            picRepository.sendIssuanceResponse(response.audience, formattedResponse)
+            val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
+            Result.Success(createCard(verifiableCredential.raw, response.request.contract))
         }
     }
 

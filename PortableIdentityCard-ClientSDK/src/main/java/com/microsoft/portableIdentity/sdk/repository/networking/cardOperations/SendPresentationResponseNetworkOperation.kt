@@ -7,6 +7,6 @@ import com.microsoft.portableIdentity.sdk.repository.networking.PostNetworkOpera
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import retrofit2.Response
 
-class SendPresentationResponseNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider): PostNetworkOperation<PresentationServiceResponse>() {
+class SendPresentationResponseNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider): PostNetworkOperation<PresentationServiceResponse, PresentationServiceResponse>() {
     override val call: suspend () -> Response<PresentationServiceResponse> = { apiProvider.presentationApis.sendResponse(url, serializedResponse) }
 }

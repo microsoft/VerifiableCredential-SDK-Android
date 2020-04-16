@@ -1,4 +1,3 @@
 package com.microsoft.portableIdentity.sdk.repository.networking
 
-abstract class PostNetworkOperation<S>: BaseNetworkOperation<S>() {
-}
+abstract class PostNetworkOperation<S, T>: BaseNetworkOperation<S, T>()
