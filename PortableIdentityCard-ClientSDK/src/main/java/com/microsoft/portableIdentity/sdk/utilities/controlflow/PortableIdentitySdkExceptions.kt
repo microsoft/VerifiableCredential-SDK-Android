@@ -5,12 +5,24 @@
 
 package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
-abstract class PortableIdentitySdkException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
+open class PortableIdentitySdkException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
 
 class CryptoException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
 class AuthenticationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
+class PresentationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class IssuanceException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class ValidatorException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class TokenFormatterException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
 class ResolverException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
 class RegistrarException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class NetworkException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class RepositoryException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)

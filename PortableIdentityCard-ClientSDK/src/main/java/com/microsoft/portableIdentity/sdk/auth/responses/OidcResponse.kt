@@ -12,17 +12,10 @@ import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
  *
  * @param audience entity to send the response to.
  */
-open abstract class OidcResponse(override val audience: String): Response {
+abstract class OidcResponse(override val audience: String): Response {
 
-    /**
-     * list of collected credentials to be sent in response.
-     */
     private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
 
-    /**
-     * Add Credential to be put into response.
-     * @param credential to be added to response.
-     */
     override fun addCard(card: PortableIdentityCard, type: String) {
         collectedCards[type] = card
     }
