@@ -8,6 +8,7 @@ package com.microsoft.portableIdentity.sdk
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
@@ -134,10 +135,11 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<IssuanceServiceResponse?> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
-            picRepository.sendIssuanceResponse(response.audience, formattedResponse)
+            val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
+            Result.Success(createCard(verifiableCredential.raw, response.request.contract))
         }
     }
 
@@ -150,7 +152,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<String> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<PresentationServiceResponse> {
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
@@ -176,7 +178,7 @@ class CardManager @Inject constructor(
         }
     }
 
-    private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
+    fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
         val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
         return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
@@ -193,12 +195,8 @@ class CardManager @Inject constructor(
      * @return Result.Success: List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCards(): Result<LiveData<List<PortableIdentityCard>>> {
-        return try {
-            Result.Success(picRepository.getAllCards())
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to get all cards from repository.", exception))
-        }
+    fun getCards(): LiveData<List<PortableIdentityCard>> {
+        return picRepository.getAllCards()
     }
 
     /**
