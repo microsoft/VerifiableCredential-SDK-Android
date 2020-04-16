@@ -33,6 +33,10 @@ suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>)
         RunResultTryContext().block()
     } catch (ex: RunResultTryAbortion) {
         Result.Failure(ex.error as PortableIdentitySdkException)
+    } catch (ex: PortableIdentitySdkException) {
+        Result.Failure(ex)
+    } catch (ex: Exception) {
+        Result.Failure(PortableIdentitySdkException("Unhandled Exception", ex))
     }
 
 class RunResultTryContext {
