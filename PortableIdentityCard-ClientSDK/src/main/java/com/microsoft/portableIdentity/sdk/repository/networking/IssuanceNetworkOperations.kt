@@ -12,7 +12,6 @@ import com.microsoft.portableIdentity.sdk.repository.networking.apis.PortableIde
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceException
 import okhttp3.ResponseBody
-import retrofit2.Response
 import retrofit2.Retrofit
 import javax.inject.Inject
 
@@ -32,7 +31,7 @@ class IssuanceNetworkOperations @Inject constructor(retrofit: Retrofit): HttpBas
      */
     suspend fun sendResponse(url: String, serializedResponse: String): HttpResult<IssuanceServiceResponse, IssuanceServiceError, Exception> {
         val parseIssuanceError = { body: ResponseBody? -> parseError(body)}
-        return fire(call = {picApi.sendResponse(url, serializedResponse)}, parseError = parseIssuanceError)
+        return fire(call = {picApi.sendIssuanceResponse(url, serializedResponse)}, parseError = parseIssuanceError)
     }
 
     private fun parseError(body: ResponseBody?): IssuanceServiceError {

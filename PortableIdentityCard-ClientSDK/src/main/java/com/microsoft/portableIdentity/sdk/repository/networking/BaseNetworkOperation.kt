@@ -13,7 +13,7 @@ abstract class BaseNetworkOperation<S> {
 
     val isRetryable: Boolean = false
 
-    open suspend fun fire(url: String): Result<S, PortableIdentitySdkException> {
+    open suspend fun fire(): Result<S> {
         try {
             val response = call.invoke()
             if (response.isSuccessful) {
@@ -25,13 +25,13 @@ abstract class BaseNetworkOperation<S> {
         }
     }
 
-    open fun onSuccess(response: Response<S>): Result<S, PortableIdentitySdkException> {
+    open fun onSuccess(response: Response<S>): Result<S> {
         // TODO("how do we want to handle null bodies")
         return Result.Success(response.body() ?: throw NetworkException("Body of Response is null."))
     }
 
     // TODO("what do we want our base to look like")
-    open fun onFailure(response: Response<S>): Result<S, PortableIdentitySdkException> {
+    open fun onFailure(response: Response<S>): Result<S> {
         return when (response.code()) {
             401 -> Result.Failure(UnauthorizedException(response.message()))
             402, 403, 404 -> Result.Failure(ServiceErrorException(response.message()))
@@ -40,7 +40,7 @@ abstract class BaseNetworkOperation<S> {
         }
     }
 
-    fun <S> onRetry(): Result<S, PortableIdentitySdkException> {
+    fun <S> onRetry(): Result<S> {
         throw NetworkException("Retry Not Supported.")
     }
 }

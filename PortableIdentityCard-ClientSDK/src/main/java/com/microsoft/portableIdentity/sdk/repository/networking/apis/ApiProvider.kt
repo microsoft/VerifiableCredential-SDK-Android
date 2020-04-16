@@ -7,5 +7,6 @@ import javax.inject.Singleton
 @Singleton
 class ApiProvider @Inject constructor(retrofit: Retrofit) {
 
+    // maybe refactor these into different interface apis?
     val picApi: PortableIdentityCardApi = retrofit.create(PortableIdentityCardApi::class.java)
 }

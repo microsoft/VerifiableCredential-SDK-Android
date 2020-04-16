@@ -23,7 +23,7 @@ interface PortableIdentityCardApi {
     suspend fun getRequest(@Url overrideUrl: String): Response<String>
 
     @POST
-    suspend fun sendResponse(@Url overrideUrl: String, @Body body: String): Response<IssuanceServiceResponse>
+    suspend fun sendIssuanceResponse(@Url overrideUrl: String, @Body body: String): Response<IssuanceServiceResponse>
 
     @FormUrlEncoded
     @POST

@@ -9,8 +9,7 @@ import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.repository.networking.FetchContractNetworkOperation
-import com.microsoft.portableIdentity.sdk.repository.networking.HttpResult
+import com.microsoft.portableIdentity.sdk.repository.networking.*
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -26,7 +25,7 @@ import kotlin.Exception
  */
 @Singleton
 class CardRepository @Inject constructor(database: SdkDatabase,
-                                         apiProvider: ApiProvider) {
+                                         private val apiProvider: ApiProvider) {
 
     private val cardDao = database.cardDao()
 
@@ -36,30 +35,11 @@ class CardRepository @Inject constructor(database: SdkDatabase,
 
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
-    suspend fun getContract(url: String): Result<PicContract, Exception> = FetchContractNetworkOperation(url).fire()
+    suspend fun getContract(url: String) = FetchContractNetworkOperation(url, apiProvider).fire()
 
-    suspend fun getRequest(url: String) = handleHttpResults(presentationNetworkOperations.fetchRequestToken(url), "fetch request token")
+    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
 
-    suspend fun sendIssuanceResponse(url: String, serializedResponse: String): Result<IssuanceServiceResponse, Exception> {
-        return when (val httpResult = issuanceNetworkOperations.sendResponse(url, serializedResponse)) {
-            is HttpResult.Success -> Result.Success(httpResult.body)
-            is HttpResult.Error -> Result.Failure(IssuanceException("Server Error (${httpResult.code}): ${httpResult.body.code}."))
-            is HttpResult.Failure -> Result.Failure(IssuanceException("Unable to send issuance response", httpResult.body))
-        }
-    }
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(url, serializedResponse, apiProvider).fire()
 
-    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = handleHttpResults(presentationNetworkOperations.sendResponse(url, serializedResponse), "send presentation response")
-
-    /**
-     * Wrapper method to convert HttpResults to Results when dealing with Network Operations.
-     * HttpResults are handled in this class in case we want to support retries based on status codes in the future.
-     * We can implement retry for specific api in this class.
-     */
-    private fun <S, E> handleHttpResults(httpResult: HttpResult<S, E, Exception>, actionPerformed: String): Result<S, Exception> {
-        return when (httpResult) {
-            is HttpResult.Success -> Result.Success(httpResult.body)
-            is HttpResult.Error -> Result.Failure(IssuanceException("Server Error: unable to $actionPerformed: (code: ${httpResult.code}) body: ${httpResult.body}."))
-            is HttpResult.Failure -> Result.Failure(IssuanceException("Unable to $actionPerformed", httpResult.body))
-        }
-    }
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(url, serializedResponse, apiProvider).fire()
 }

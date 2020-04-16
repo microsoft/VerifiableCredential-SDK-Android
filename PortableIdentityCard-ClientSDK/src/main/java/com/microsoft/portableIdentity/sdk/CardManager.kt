@@ -157,13 +157,10 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<String> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<PresentationServiceResponse> {
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
-
-        }.mapError {
-            it
         }
     }
 
@@ -205,7 +202,7 @@ class CardManager @Inject constructor(
      */
     fun getCards(): Result<LiveData<List<PortableIdentityCard>>> {
         return try {
-            picRepository.getAllCards()
+            Result.Success(picRepository.getAllCards())
         } catch (exception: Exception) {
             Result.Failure(RepositoryException("Unable to get all cards from repository.", exception))
         }
