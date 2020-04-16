@@ -30,3 +30,5 @@ class ServiceUnreachableException(message: String? = null, cause: Throwable? = n
 class ServiceErrorException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
 
 class UnauthorizedException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+
+class RepositoryException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)

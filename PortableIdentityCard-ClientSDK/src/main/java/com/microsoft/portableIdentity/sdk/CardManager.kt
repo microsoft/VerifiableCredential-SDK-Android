@@ -25,10 +25,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.AuthenticationException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.PresentationException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import javax.inject.Inject
@@ -54,25 +51,40 @@ class CardManager @Inject constructor(
      * @return Result.Success: PresentationRequest object that contains all attestations.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getPresentationRequest(uri: String): Result<PresentationRequest, Exception> {
-        val url = Url(uri)
-        if (url.protocol.name != "openid") {
-            val protocolException = PresentationException("Request Protocol not supported.")
-            return Result.Failure(protocolException)
-        }
+    suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
+        return runResultTry {
+            val url = verifyUri(uri).abortOnError()
+            val requestParameters = url.parameters.toMap()
+            val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
+            Result.Success(PresentationRequest(requestParameters, requestToken))
+        }.mapError { it }
+    }
 
-        val requestParameters = url.parameters.toMap()
-        val serializedToken = requestParameters["request"]?.first()
-        if (serializedToken != null) {
-            return Result.Success(PresentationRequest(requestParameters, serializedToken))
+    private fun verifyUri(uri: String): Result<Url> {
+        try {
+            val url = Url(uri)
+            if (url.protocol.name != "openid") {
+                val protocolException = PresentationException("Request Protocol not supported.")
+                return Result.Failure(protocolException)
+            }
+            return Result.Success(url)
+        } catch (exception: Exception) {
+            return Result.Failure(PresentationException("Uri String is not a Url", exception))
         }
+    }
 
-        val requestUri =
-            requestParameters["request_uri"]?.first()
-                ?: return Result.Failure(PresentationException("Cannot fetch request: No request uri found"))
-        return when (val tokenResult = picRepository.getRequest(requestUri)) {
-            is Result.Success -> Result.Success(PresentationRequest(requestParameters, tokenResult.payload))
-            is Result.Failure -> Result.Failure(tokenResult.payload)
+    private suspend fun getPresentationRequestToken(requestParameters: Map<String, List<String>>): Result<String> {
+        return runResultTry {
+            val serializedToken = requestParameters["request"]?.first()
+            if (serializedToken != null) {
+                Result.Success(serializedToken)
+            }
+            val requestUri = requestParameters["request_uri"]?.first()
+            if (requestUri == null) {
+                Result.Failure(PresentationException("Request Uri does not exist."))
+            } else {
+                picRepository.getRequest(requestUri)
+            }
         }
     }
 
@@ -84,11 +96,11 @@ class CardManager @Inject constructor(
      * @return Result.Success: IssuanceRequest object containing all metadata about what is needed to fulfill request including display information.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest, Exception> {
-        return when (val contractResult = picRepository.getContract(contractUrl)) {
-            is Result.Success -> Result.Success(IssuanceRequest(contractResult.payload, contractUrl))
-            is Result.Failure -> Result.Failure(contractResult.payload)
-        }
+    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
+        return runResultTry {
+            val contract = picRepository.getContract(contractUrl).abortOnError()
+            Result.Success(IssuanceRequest(contract, contractUrl))
+        }.mapError { it }
     }
 
     /**
@@ -99,12 +111,8 @@ class CardManager @Inject constructor(
      * @return Result.Success true, if request is valid, false if it is not valid.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun isValid(request: OidcRequest): Result<Boolean, Exception> {
-        return try {
-            validator.validate(request)
-        } catch (exception: Exception) {
-            Result.Failure(exception)
-        }
+    suspend fun isValid(request: OidcRequest): Result<Boolean> {
+        return validator.validate(request)
     }
 
     /**
@@ -115,7 +123,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: Response that was created.
      *         Result.Failure: Exception because request type not supported.
      */
-    fun createResponse(request: Request): Result<Response, Exception> {
+    fun createResponse(request: Request): Result<Response> {
         return when (request) {
             is PresentationRequest -> Result.Success(PresentationResponse(request))
             is IssuanceRequest -> Result.Success(IssuanceResponse(request))
@@ -132,14 +140,12 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<IssuanceServiceResponse, Exception> {
-        return when (val formattingResult = formatter.formAndSignResponse(response, responder)) {
-            is Result.Success -> picRepository.sendIssuanceResponse(response.audience, formattingResult.payload)
-            is Result.Failure -> {
-                val exception = IssuanceException("Unable to format response", formattingResult.payload)
-                Result.Failure(exception)
-            }
-        }
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<IssuanceServiceResponse?> {
+        return runResultTry {
+            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+            picRepository.sendIssuanceResponse(response.audience, formattedResponse)
+
+        }.mapError { it }
     }
 
     /**
@@ -151,13 +157,13 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<PresentationServiceResponse, Exception> {
-        return when (val formattingResult = formatter.formAndSignResponse(response, responder)) {
-            is Result.Success -> picRepository.sendPresentationResponse(response.audience, formattingResult.payload)
-            is Result.Failure -> {
-                val exception = PresentationException("Unable to format response.", formattingResult.payload)
-                Result.Failure(exception)
-            }
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<String> {
+        return runResultTry {
+            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+            picRepository.sendPresentationResponse(response.audience, formattedResponse)
+
+        }.mapError {
+            it
         }
     }
 
@@ -170,13 +176,13 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card that was saved to Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard, Exception> {
+    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard> {
         return try {
             val card = createCard(signedVerifiableCredential, response.request.contract)
             picRepository.insert(card)
             Result.Success(card)
         } catch (exception: Exception) {
-            Result.Failure(exception)
+            Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
         }
     }
 
@@ -197,11 +203,11 @@ class CardManager @Inject constructor(
      * @return Result.Success: List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCards(): LiveData<List<PortableIdentityCard>> {
+    fun getCards(): Result<LiveData<List<PortableIdentityCard>>> {
         return try {
             picRepository.getAllCards()
         } catch (exception: Exception) {
-            throw Exception("Temporary fix.")
+            Result.Failure(RepositoryException("Unable to get all cards from repository.", exception))
         }
     }
 
@@ -211,7 +217,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCardsByType(type: String): Result<LiveData<List<PortableIdentityCard>>, Exception> {
+    fun getCardsByType(type: String): Result<LiveData<List<PortableIdentityCard>>> {
         TODO("Refactor Database to have this functionality.")
     }
 
@@ -221,7 +227,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCardByContract(contractUrl: String): Result<LiveData<PortableIdentityCard>, Exception> {
+    fun getCardByContract(contractUrl: String): Result<LiveData<PortableIdentityCard>> {
         TODO("Refactor Database to have this functionality.")
     }
 }

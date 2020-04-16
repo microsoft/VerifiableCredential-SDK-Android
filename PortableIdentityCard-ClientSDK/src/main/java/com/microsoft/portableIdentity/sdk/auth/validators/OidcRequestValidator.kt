@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator) : Validator {
 
-    override suspend fun validate(request: Request): Result<Boolean, Exception> {
+    override suspend fun validate(request: Request): Result<Boolean> {
         if (request !is OidcRequest) {
             val exception = ValidatorException("Request is not an OidcRequest")
             return Result.Failure(exception)

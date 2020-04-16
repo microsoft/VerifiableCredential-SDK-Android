@@ -5,5 +5,5 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 
 interface Validator {
 
-    suspend fun validate(request: Request): Result<Boolean, Exception>
+    suspend fun validate(request: Request): Result<Boolean>
 }
