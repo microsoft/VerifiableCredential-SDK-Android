@@ -3,7 +3,7 @@ package com.microsoft.portableIdentity.sdk.crypto.keys
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.Test
+import org.junit.Test
 
 class KeyTypeFactoryTest {
 

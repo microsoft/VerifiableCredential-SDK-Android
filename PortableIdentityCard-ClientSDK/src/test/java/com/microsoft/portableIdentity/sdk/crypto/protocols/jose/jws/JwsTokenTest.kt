@@ -8,7 +8,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import org.junit.jupiter.api.Test
+import org.junit.Test
 import kotlin.random.Random
 import org.assertj.core.api.Assertions.assertThat
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
