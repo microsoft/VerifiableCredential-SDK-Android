@@ -127,7 +127,7 @@ class AndroidKeyStoreInstrumentedTest {
         )
         keyStore.save(keyRef, secretKey)
         val actualSecretKey = keyStore.getSecretKey(keyRef)
-        assertThat(actualSecretKey).isNotNull()
+        assertThat(actualSecretKey.keys.firstOrNull()).isEqualToComparingFieldByFieldRecursively(secretKey)
     }
 
     @Test
@@ -140,7 +140,7 @@ class AndroidKeyStoreInstrumentedTest {
         )
         keyStore.save("secret", secretKey)
         val actualSecretKey = keyStore.getSecretKeyById(secretKey.kid)
-        assertThat(actualSecretKey).isNotNull()
+        assertThat(actualSecretKey).isEqualToComparingFieldByFieldRecursively(secretKey)
     }
 
 }
