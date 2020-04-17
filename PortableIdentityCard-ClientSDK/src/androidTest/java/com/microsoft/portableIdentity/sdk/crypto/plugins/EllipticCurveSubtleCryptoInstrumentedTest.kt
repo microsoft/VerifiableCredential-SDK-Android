@@ -40,33 +40,26 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
 
     @Test
     fun generateKeyPairTest() {
+        val actualPrivateKey = cryptoKeyPair.privateKey
         val expectedPrivateKeyUsage = KeyUsage.Sign
+        val expectedPrivateKeyType = KeyType.Private
+        val expectedAlgorithm = W3cCryptoApiConstants.EcDsa.value
+        assertThat(actualPrivateKey.type).isEqualTo(expectedPrivateKeyType)
+        assertThat(actualPrivateKey.extractable).isTrue()
+        assertThat(actualPrivateKey.usages.firstOrNull()).isEqualTo(expectedPrivateKeyUsage)
+        assertThat(actualPrivateKey.algorithm.name).isEqualTo(expectedAlgorithm)
+
+        val actualPublicKey = cryptoKeyPair.publicKey
+        val expectedPublicKeyType = KeyType.Public
         val expectedPublicKeyUsage = KeyUsage.Verify
-        assertThat(cryptoKeyPair.privateKey).isNotNull()
-        assertThat(cryptoKeyPair.privateKey.type).isEqualTo(KeyType.Private)
-        assertThat(cryptoKeyPair.privateKey.algorithm.name).isEqualTo(W3cCryptoApiConstants.EcDsa.value)
-        assertThat(cryptoKeyPair.privateKey.usages.firstOrNull()).isEqualTo(expectedPrivateKeyUsage)
-        assertThat(cryptoKeyPair.publicKey).isNotNull()
-        assertThat(cryptoKeyPair.publicKey.type).isEqualTo(KeyType.Public)
-        assertThat(cryptoKeyPair.publicKey.algorithm.name).isEqualTo(W3cCryptoApiConstants.EcDsa.value)
-        assertThat(cryptoKeyPair.publicKey.usages.firstOrNull()).isEqualTo(expectedPublicKeyUsage)
+        assertThat(actualPublicKey.type).isEqualTo(expectedPublicKeyType)
+        assertThat(actualPublicKey.extractable).isTrue()
+        assertThat(actualPublicKey.algorithm.name).isEqualTo(expectedAlgorithm)
+        assertThat(actualPublicKey.usages.firstOrNull()).isEqualTo(expectedPublicKeyUsage)
     }
 
     @Test
-    fun signPayloadTest() {
-        val payload = byteArrayOf(
-            123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
-            32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
-            32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
-            109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
-            111, 116, 34, 58, 116, 114, 117, 101, 125
-        )
-        var signedPayload = ellipticCurveSubtleCrypto.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
-        assertThat(signedPayload).isNotNull()
-    }
-
-    @Test
-    fun verifySignatureTest() {
+    fun signAndVerifySignatureTest() {
         val payload = byteArrayOf(
             123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
             32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
@@ -82,19 +75,23 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
     @Test
     fun exportPublicKeyJwk() {
         val actualKey = ellipticCurveSubtleCrypto.exportKeyJwk(cryptoKeyPair.publicKey)
-        assertThat(actualKey.kty).isEqualTo(com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.EllipticCurve.value)
-        assertThat(actualKey.alg).isNotNull()
-        assertThat(actualKey.alg).isEqualTo("ES256K")
-        assertThat(actualKey.key_ops?.firstOrNull()).isEqualTo("verify")
+        val expectedAlgorithm = "ES256K"
+        val expectedKeyUsage = KeyUsage.Verify.value
+        val expectedKeyType = com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.EllipticCurve.value
+        assertThat(actualKey.kty).isEqualTo(expectedKeyType)
+        assertThat(actualKey.alg).isEqualTo(expectedAlgorithm)
+        assertThat(actualKey.key_ops?.firstOrNull()).isEqualTo(expectedKeyUsage)
     }
 
     @Test
     fun exportPrivateKeyJwk() {
         val actualKey = ellipticCurveSubtleCrypto.exportKeyJwk(cryptoKeyPair.privateKey)
-        assertThat(actualKey.kty).isEqualTo(com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.EllipticCurve.value)
-        assertThat(actualKey.alg).isNotNull()
-        assertThat(actualKey.alg).isEqualTo("ES256K")
-        assertThat(actualKey.key_ops?.firstOrNull()).isEqualTo("sign")
+        val expectedAlgorithm = "ES256K"
+        val expectedKeyUsage = KeyUsage.Sign.value
+        val expectedKeyType = com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.EllipticCurve.value
+        assertThat(actualKey.kty).isEqualTo(expectedKeyType)
+        assertThat(actualKey.alg).isEqualTo(expectedAlgorithm)
+        assertThat(actualKey.key_ops?.firstOrNull()).isEqualTo(expectedKeyUsage)
     }
 
     @Test

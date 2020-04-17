@@ -12,7 +12,6 @@ import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,16 +19,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4ClassRunner::class)
 class CryptoOperationsInstrumentedTest {
     private val androidSubtle: SubtleCrypto
-    private val ellipticCurveSubtleCrypto: EllipticCurveSubtleCrypto
-    private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val keyStore: AndroidKeyStore
     private val keyRef: String = "TestKeysCryptoOperations"
     private val crypto: CryptoOperations
 
     init {
+        val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
-        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle)
         crypto = CryptoOperations(androidSubtle, keyStore)
     }
 

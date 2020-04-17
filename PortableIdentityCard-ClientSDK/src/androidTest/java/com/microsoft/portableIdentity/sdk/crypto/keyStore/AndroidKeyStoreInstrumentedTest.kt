@@ -9,11 +9,9 @@ import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
-import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
-import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
@@ -27,13 +25,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4ClassRunner::class)
 class AndroidKeyStoreInstrumentedTest {
 
-    private val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
     private val keyStore: AndroidKeyStore
     private val keyRef: String = "TestKeys"
     private var actualPublicKey: RsaPublicKey
     private var actualPrivateKey: RsaPrivateKey
 
     init {
+        val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         keyStore = AndroidKeyStore(context)
         val androidSubtle = AndroidSubtle(keyStore)
         val keyPair = androidSubtle.generateKeyPair(
@@ -110,7 +108,13 @@ class AndroidKeyStoreInstrumentedTest {
     fun checkOrCreateKidTest() {
         keyStore.save(keyRef, actualPrivateKey)
         val kid = keyStore.checkOrCreateKeyId(keyRef, null)
-        assertThat(kid).isNotNull()
+        assertThat(kid).startsWith("#$keyRef.")
+    }
+
+    @Test
+    fun checkOrCreateKidFirstKeyTest() {
+        val kid = keyStore.checkOrCreateKeyId(keyRef, null)
+        assertThat(kid).startsWith("#$keyRef.1")
     }
 
     @Test

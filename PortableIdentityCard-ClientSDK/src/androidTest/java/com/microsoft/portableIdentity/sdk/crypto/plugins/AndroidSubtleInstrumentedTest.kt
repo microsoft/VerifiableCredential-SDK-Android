@@ -13,6 +13,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,10 +22,11 @@ import org.junit.runner.RunWith
 class AndroidSubtleInstrumentedTest {
     private val androidSubtle: AndroidSubtle
     private var cryptoKeyPair: CryptoKeyPair
+    private val keyStore: AndroidKeyStore
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val keyStore = AndroidKeyStore(context)
+        keyStore = AndroidKeyStore(context)
         androidSubtle = AndroidSubtle(keyStore)
         val keyReference = "KeyReference1"
         cryptoKeyPair = androidSubtle.generateKeyPair(
@@ -40,17 +42,26 @@ class AndroidSubtleInstrumentedTest {
 
     @Test
     fun generateKeyTest() {
-        val expectedAlgorithm = AesKeyGenParams(W3cCryptoApiConstants.AesCbc.value, 128u)
-        val cryptoKey = androidSubtle.generateKey(expectedAlgorithm, true, listOf(KeyUsage.Sign))
-        assertThat(cryptoKey.type).isNotNull()
-        assertThat(cryptoKey.type).isEqualTo(KeyType.Secret)
-        assertThat(cryptoKey.usages.firstOrNull()).isEqualTo(KeyUsage.Sign)
-        assertThat(cryptoKey.algorithm.name).isEqualTo(W3cCryptoApiConstants.AesCbc.value)
+        val suppliedAlgorithm = AesKeyGenParams(W3cCryptoApiConstants.AesCbc.value, 128u)
+        val expectedKeyType = KeyType.Secret
+        val expectedKeyUsage = KeyUsage.Sign
+        val actualKey = androidSubtle.generateKey(suppliedAlgorithm, true, listOf(KeyUsage.Sign))
+        assertThat(actualKey.type).isEqualTo(expectedKeyType)
+        assertThat(actualKey.extractable).isTrue()
+        assertThat(actualKey.usages.firstOrNull()).isEqualTo(expectedKeyUsage)
+        assertThat(actualKey.algorithm).isEqualToComparingFieldByFieldRecursively(suppliedAlgorithm)
     }
 
     @Test
     fun generateKeyPairTest() {
-        assertThat(cryptoKeyPair.privateKey).isNotNull()
+        val expectedKeyType = KeyType.Private
+        val expectedKeyUsage = KeyUsage.Sign
+        val expectedAlgorithm = W3cCryptoApiConstants.EcDsa.value
+        val actualPrivateKey = cryptoKeyPair.privateKey
+        assertThat(actualPrivateKey.type).isEqualTo(expectedKeyType)
+        assertThat(actualPrivateKey.extractable).isFalse()
+        assertThat(actualPrivateKey.usages.firstOrNull()).isEqualTo(expectedKeyUsage)
+        assertThat(actualPrivateKey.algorithm.name).isEqualToIgnoringCase(expectedAlgorithm)
     }
 
     @Test
@@ -61,29 +72,7 @@ class AndroidSubtleInstrumentedTest {
     }
 
     @Test
-    fun signPayloadTest() {
-        val keyReference = "KeyReference3"
-        cryptoKeyPair = androidSubtle.generateKeyPair(EcdsaParams(
-            hash =  Sha.Sha256,
-            additionalParams = mapOf(
-                "namedCurve" to "P-256K",
-                "format" to "DER",
-                "KeyReference" to keyReference
-            )
-        ), true, listOf(KeyUsage.Sign))
-        val payload = byteArrayOf(
-            123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
-            32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
-            32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
-            109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
-            111, 116, 34, 58, 116, 114, 117, 101, 125
-        )
-        var signedPayload = androidSubtle.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
-        assertThat(signedPayload).isNotNull()
-    }
-
-    @Test
-    fun verifySignatureTest() {
+    fun signAndVerifySignatureTest() {
         val keyReference = "KeyReference4"
         cryptoKeyPair = androidSubtle.generateKeyPair(EcdsaParams(
             hash =  Sha.Sha256,
@@ -100,8 +89,9 @@ class AndroidSubtleInstrumentedTest {
             109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
             111, 116, 34, 58, 116, 114, 117, 101, 125
         )
-        var signedPayload = androidSubtle.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
-        val verified = androidSubtle.verify(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.publicKey, signedPayload, payload)
+
+        var signature = androidSubtle.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
+        val verified = androidSubtle.verify(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.publicKey, signature, payload)
         assertThat(verified).isTrue()
     }
 
@@ -117,22 +107,31 @@ class AndroidSubtleInstrumentedTest {
             ), true, listOf(KeyUsage.Sign)
         )
         val actualJwk = androidSubtle.exportKeyJwk(cryptoKeyPair.publicKey)
+
         actualJwk.alg = cryptoKeyPair.publicKey.algorithm.name
-        val actualAlgorithm = JwaCryptoConverter.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name)
-        val actualCryptoKey = androidSubtle.importKey(KeyFormat.Jwk, actualJwk, actualAlgorithm, false, listOf(KeyUsage.Sign))
-        assertThat(actualCryptoKey.type).isEqualTo(KeyType.Public)
+        val expectedAlgorithm = JwaCryptoConverter.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name)
+        val expectedKeyUsage = KeyUsage.Sign
+        val expectedKeyType = KeyType.Public
+        val actualCryptoKey = androidSubtle.importKey(KeyFormat.Jwk, actualJwk, expectedAlgorithm, false, listOf(KeyUsage.Sign))
+        assertThat(actualCryptoKey.type).isEqualTo(expectedKeyType)
+        assertThat(actualCryptoKey.extractable).isFalse()
+        assertThat(actualCryptoKey.algorithm).isEqualToComparingFieldByFieldRecursively(expectedAlgorithm)
+        assertThat(actualCryptoKey.usages.firstOrNull()).isEqualTo(expectedKeyUsage)
     }
 
     @Test
     fun digestTest() {
-        val payload = byteArrayOf(
-            123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
-            32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
-            32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
-            109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
-            111, 116, 34, 58, 116, 114, 117, 101, 125
-        )
+        val testString = "abc"
+        val payload = stringToByteArray(testString)
+        val expectedDigestHex =
+            "DDAF35A193617ABACC417349AE20413112E6FA4E89A97EA20A9EEEE64B55D39A2192992A274FC1A836BA3C23A3FEEBBD454D4423643CE80E2A9AC94FA54CA49F"
         val actualDigest = androidSubtle.digest(Sha.Sha512, payload)
-        assertThat(actualDigest).isNotNull()
+        var actualDigestHex = ""
+        for (b in actualDigest) {
+            val st = String.format("%02X", b)
+            actualDigestHex += st
+        }
+        assertThat(actualDigestHex).isEqualTo(expectedDigestHex)
     }
+
 }

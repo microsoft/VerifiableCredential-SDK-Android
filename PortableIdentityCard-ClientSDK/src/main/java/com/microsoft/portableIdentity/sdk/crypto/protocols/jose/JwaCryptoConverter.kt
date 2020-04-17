@@ -24,7 +24,7 @@ object JwaCryptoConverter {
         return when (algorithm.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
                 // get hash size
-                val hashSize = Regex("[Rr][Ss](\\d+)").matchEntire(algorithm)!!.groupValues[0]
+                val hashSize = Regex("[Rr][Ss](\\d+)").matchEntire(algorithm)!!.groupValues[1]
                 Algorithm(
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
                     additionalParams = mapOf(
