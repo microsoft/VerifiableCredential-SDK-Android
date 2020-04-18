@@ -44,10 +44,8 @@ class JwsTokenTest {
         val token = JwsToken(testData)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(JwsFormat.FlatJson)
-        assertThat(serialized).isNotNull()
         assertThat(serialized).doesNotContain("signatures")
         val verifyToken = JwsToken.deserialize(serialized)
-        assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isEqualTo(1)
     }
 
@@ -57,10 +55,8 @@ class JwsTokenTest {
         val token = JwsToken(testData)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(JwsFormat.GeneralJson)
-        assertThat(serialized).isNotNull()
         assertThat(serialized).contains("signatures")
         val verifyToken = JwsToken.deserialize(serialized)
-        assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isGreaterThanOrEqualTo(1)
     }
 
