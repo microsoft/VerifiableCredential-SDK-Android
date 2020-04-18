@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
-import org.junit.jupiter.api.Test
+import org.junit.Test
 import org.assertj.core.api.Assertions.assertThat
 
 class Base64Test {
