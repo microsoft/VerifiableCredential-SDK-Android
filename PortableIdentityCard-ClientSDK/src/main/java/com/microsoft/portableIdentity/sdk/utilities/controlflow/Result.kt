@@ -5,6 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
+typealias Success = Boolean
+
 sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
     class Failure(val payload: PortableIdentitySdkException) : Result<Nothing>()
