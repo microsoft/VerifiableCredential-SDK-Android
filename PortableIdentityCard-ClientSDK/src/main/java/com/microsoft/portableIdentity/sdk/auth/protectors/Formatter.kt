@@ -7,5 +7,5 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 
 interface Formatter {
-    fun formAndSignResponse(response: Response, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Result<String, Exception>
+    fun formAndSignResponse(response: Response, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Result<String>
 }

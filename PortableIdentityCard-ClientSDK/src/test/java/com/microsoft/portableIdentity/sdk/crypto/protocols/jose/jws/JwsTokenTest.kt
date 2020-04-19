@@ -8,7 +8,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import org.junit.jupiter.api.Test
+import org.junit.Test
 import kotlin.random.Random
 import org.assertj.core.api.Assertions.assertThat
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
@@ -44,10 +44,8 @@ class JwsTokenTest {
         val token = JwsToken(testData)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(JwsFormat.FlatJson)
-        assertThat(serialized).isNotNull()
         assertThat(serialized).doesNotContain("signatures")
         val verifyToken = JwsToken.deserialize(serialized)
-        assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isEqualTo(1)
     }
 
@@ -57,10 +55,19 @@ class JwsTokenTest {
         val token = JwsToken(testData)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(JwsFormat.GeneralJson)
-        assertThat(serialized).isNotNull()
         assertThat(serialized).contains("signatures")
         val verifyToken = JwsToken.deserialize(serialized)
-        assertThat(verifyToken).isNotNull()
         assertThat(verifyToken.signatures.size).isGreaterThanOrEqualTo(1)
+    }
+
+    @Test
+    fun signAndVerify() {
+        val testData = Random.Default.nextBytes(32)
+        val token = JwsToken(testData)
+        token.sign(keyRef, crypto)
+        val serialized = token.serialize(JwsFormat.Compact)
+        val verifyToken = JwsToken.deserialize(serialized)
+        val matched = verifyToken.verify(crypto)
+        assertThat(matched).isTrue()
     }
 }

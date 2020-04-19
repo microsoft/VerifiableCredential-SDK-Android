@@ -4,7 +4,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvid
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Test
+import org.junit.Test
 
 class SubtleCryptoFactoryTest {
     private val subtle = Subtle(setOf(MockProvider()))

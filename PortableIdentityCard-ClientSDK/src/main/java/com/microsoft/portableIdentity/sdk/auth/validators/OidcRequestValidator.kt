@@ -13,18 +13,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Validates an OIDC Request.
+ * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator): Validator {
+class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator) : Validator {
 
-    override suspend fun validate(request: Request): Result<Boolean, Exception> {
+    override suspend fun validate(request: Request): Result<Boolean> {
         if (request !is OidcRequest) {
             val exception = ValidatorException("Request is not an OidcRequest")
             return Result.Failure(exception)
         }
 
-        return when (val validationResult = jwsValidator.verifySignature(request.token)) {
+        return when (val validationResult = jwsValidator.verifySignature(request.raw)) {
             is Result.Success -> {
                 val isValid = validationResult.payload && !hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
                 Result.Success(isValid)

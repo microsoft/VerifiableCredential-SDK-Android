@@ -27,7 +27,7 @@ class JwsValidator @Inject constructor(
     /**
      * Verify the signature on the JwsToken.
      */
-    suspend fun verifySignature(token: JwsToken): Result<Boolean, Exception> {
+    suspend fun verifySignature(token: JwsToken): Result<Boolean> {
         return try {
             val signature = token.signatures.first()
             val (did, _) = getKid(signature)

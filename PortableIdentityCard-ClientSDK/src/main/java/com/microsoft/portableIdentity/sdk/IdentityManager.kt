@@ -33,12 +33,13 @@ import kotlin.random.Random
 class IdentityManager @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val resolver: IResolver,
-    private val registrar: IRegistrar,
-    @Named("signatureKeyReference") private val signatureKeyReference: String,
-    @Named("encryptionKeyReference") private val encryptionKeyReference: String
+    private val registrar: IRegistrar
 ) {
 
     private val didSecretName = "did.identifier"
+
+    private val signatureKeyReference = "signature"
+    private val encryptionKeyReference = "encryption"
 
     val did: Identifier by lazy { initDid() }
 
