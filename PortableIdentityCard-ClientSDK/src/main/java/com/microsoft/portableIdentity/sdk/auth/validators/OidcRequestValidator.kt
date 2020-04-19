@@ -26,7 +26,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
 
         return when (val validationResult = jwsValidator.verifySignature(request.token)) {
             is Result.Success -> {
-                val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
+                val isValid = validationResult.payload && !hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
                 Result.Success(isValid)
             }
             is Result.Failure -> validationResult
@@ -34,12 +34,12 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
     }
 
     private fun hasTokenExpired(expiration: Long): Boolean {
-        return expiration > getExpirationDeadlineInSeconds()
+        return expiration < getExpirationDeadlineInSeconds()
     }
 
     private fun getExpirationDeadlineInSeconds(expirationCheckTimeOffsetInMinutes: Int = 5): Long {
         val currentTimeInSeconds = Date().time / MILLISECONDS_IN_A_SECOND
-        return currentTimeInSeconds + SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
+        return currentTimeInSeconds - SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
     }
 
     private fun hasMatchingParams(requestContents: OidcRequestContent, params: Map<String, List<String>>): Boolean {
