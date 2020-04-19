@@ -5,13 +5,16 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Url
+import retrofit2.http.*
 
-interface IdentifierApi {
+interface PresentationApis {
 
     @GET
-    suspend fun resolveIdentifier(@Url overrideUrl: String): Response<IdentifierDocument>
+    suspend fun getRequest(@Url overrideUrl: String): Response<String>
+
+    @FormUrlEncoded
+    @POST
+    suspend fun sendResponse(@Url overrideUrl: String, @Field("id_token") token: String): Response<PresentationServiceResponse>
 }

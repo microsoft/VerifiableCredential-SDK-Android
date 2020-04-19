@@ -10,25 +10,23 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 
 object DidKeyResolver {
     //TODO Replace error with exception something generic related to Keys
-    private suspend fun resolveIdentifierFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): Result<IdentifierDocument, Exception> {
+    private suspend fun resolveIdentifierFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): Result<IdentifierDocument> {
         val did = Regex("^([^#]+)#.+$").matchEntire(kid) ?: throw SdkLog.error("No identifier found in key id")
         return when (val identifierDocument = resolver.resolve(did.groupValues[1])) {
             is Result.Success -> Result.Success(identifierDocument.payload)
-            is Result.Failure -> Result.Failure(identifierDocument.payload)
+            is Result.Failure -> identifierDocument
         }
     }
 
-    private suspend fun resolveKeyFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): Result<PublicKey, Exception> {
+    private suspend fun resolveKeyFromKid(kid: String, crypto: CryptoOperations, resolver: Resolver): Result<PublicKey> {
         val did = Regex("^[^#]+(#.+)$").matchEntire(kid)!!
         return when (val identifierDocument = resolveIdentifierFromKid(kid, crypto, resolver)) {
             is Result.Success -> Result.Success(identifierDocument.payload.publicKey.firstOrNull {
                 it.publicKeyJwk.kid?.endsWith(did.groupValues[1]) ?: false ||
                         it.id.endsWith(did.groupValues[1])
             }?.toPublicKey() ?: throw SdkLog.error("Could not find key $kid"))
-            is Result.Failure -> Result.Failure(identifierDocument.payload)
+            is Result.Failure -> identifierDocument
         }
-
-
     }
 
     private suspend fun verifyJws(jws: JwsToken, crypto: CryptoOperations, identifierDocument: IdentifierDocument) {
@@ -44,14 +42,12 @@ object DidKeyResolver {
             when (val sender = resolver.resolve(forDid!!)) {
                 is Result.Success -> verifyJws(jws, crypto, sender.payload)
             }
-//            verifyJws(jws, crypto, sender)
         } else {
             val keys = mutableListOf<PublicKey>()
             jws.signatures.forEachIndexed { index, signature ->
                 val kid = signature.getKid() ?: throw SdkLog.error("Could not find kid in signature $index")
                 when(val key = resolveKeyFromKid(kid, crypto, resolver)) {
                     is Result.Success -> keys.add(key.payload)
-//                    is Result.Failure -> Result.Failure(key.payload)
                 }
 
             }

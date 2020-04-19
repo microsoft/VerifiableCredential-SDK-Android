@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.microsoft.portableIdentity.sdk", appContext.packageName)
+        assertEquals("com.microsoft.portableIdentity.sdk.test", appContext.packageName)
     }
 }

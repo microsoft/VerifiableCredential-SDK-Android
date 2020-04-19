@@ -20,6 +20,5 @@ data class Identifier (
     val recoveryKeyReference: String,
     val nextUpdateCommitmentHash: String,
     val nextRecoveryCommitmentHash: String,
-    //val document: IdentifierDocument,
     val name: String
 )

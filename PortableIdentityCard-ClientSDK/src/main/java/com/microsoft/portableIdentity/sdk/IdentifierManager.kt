@@ -13,6 +13,9 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.runResultTry
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,37 +27,38 @@ import javax.inject.Singleton
  */
 @Singleton
 class IdentifierManager @Inject constructor(
-    private val identifierRepository: IdentifierRepository,
+    val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
     private val registrar: Registrar
 ) {
 
-    val did: Identifier by lazy { initLongFormDid() }
+    val did: Identifier = initLongFormDid()
+    /*by lazy { initLongFormDid() }*/
 
     private fun initLongFormDid(): Identifier {
-        val did = if (identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME) != null) {
+        val did = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
+        return if (did != null) {
             SdkLog.d("Identifier found, de-serializing")
-            identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
+            did
         } else {
             SdkLog.d("No identifier found, registering new DID")
             val identifier = registerPortableIdentity()
             identifier
         }
-        SdkLog.d("Using identifier ${did.id}")
-        return did
     }
 
     private fun registerPortableIdentity(): Identifier {
-        var did: Identifier? = null
         // TODO: Verify runBlocking is proper here
+        var did: Identifier? = null
         runBlocking {
-            did = createPortableIdentity()
+            val id = createPortableIdentity()
+            if (id is Result.Success)
+                did = id.payload
         }
-        SdkLog.d("Created ${did!!.id}")
         return did!!
     }
 
-    fun createPortableIdentity(callback: (Identifier) -> Unit) {
+    fun createPortableIdentity(callback: (Result<Identifier>) -> Unit) {
         GlobalScope.launch {
             callback.invoke(createPortableIdentity())
         }
@@ -63,15 +67,25 @@ class IdentifierManager @Inject constructor(
     /**
      * Creates an Identifier.
      */
-    private suspend fun createPortableIdentity(): Identifier {
+    private suspend fun createPortableIdentity(): Result<Identifier> {
         return withContext(Dispatchers.Default) {
             createAndRegisterPortableIdentity()
         }
     }
 
-    private suspend fun createAndRegisterPortableIdentity(): Identifier {
-        val identifier =  registrar.register(SIGNATURE_KEYREFERENCE, RECOVERY_KEYREFERENCE, cryptoOperations)
-        identifierRepository.insert(identifier)
-        return identifier
+    private suspend fun createAndRegisterPortableIdentity(): Result<Identifier> {
+        return runResultTry {
+            val registeredIdentifier = registrar.register(SIGNATURE_KEYREFERENCE, RECOVERY_KEYREFERENCE, cryptoOperations).abortOnError()
+            saveIdentifier(registeredIdentifier)
+        }
+    }
+
+    private fun saveIdentifier(identifier: Identifier): Result<Identifier> {
+        return try {
+            identifierRepository.insert(identifier)
+            Result.Success(identifier)
+        } catch (exception: Exception) {
+            throw RepositoryException("Unable to save identifier in repository", exception)
+        }
     }
 }

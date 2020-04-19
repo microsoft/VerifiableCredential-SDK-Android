@@ -7,7 +7,11 @@ package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.repository.networking.PicNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchContractNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,7 +22,8 @@ import javax.inject.Singleton
  * ever care to get the object it wants.
  */
 @Singleton
-class CardRepository @Inject constructor(database: SdkDatabase, private val picNetworkOperation: PicNetworkOperation) {
+class CardRepository @Inject constructor(database: SdkDatabase,
+                                         private val apiProvider: ApiProvider) {
 
     private val cardDao = database.cardDao()
 
@@ -26,15 +31,27 @@ class CardRepository @Inject constructor(database: SdkDatabase, private val picN
 
     suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
 
-    fun getAllCards(): LiveData<List<PortableIdentityCard>> {
-        return cardDao.getAllCards()
-    }
+    fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
-    suspend fun getContract(url: String) = picNetworkOperation.getContract(url)
+    suspend fun getContract(url: String) = FetchContractNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
 
-    suspend fun getRequest(url: String) = picNetworkOperation.getRequest(url)
+    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
 
-    suspend fun sendResponse(url: String, serializedResponse: String)= picNetworkOperation.sendResponse(url, serializedResponse)
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(
+        url,
+        serializedResponse,
+        apiProvider
+    ).fire()
 
-    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = picNetworkOperation.sendPresentationResponse(url, serializedResponse)
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(
+        url,
+        serializedResponse,
+        apiProvider
+    ).fire()
 }

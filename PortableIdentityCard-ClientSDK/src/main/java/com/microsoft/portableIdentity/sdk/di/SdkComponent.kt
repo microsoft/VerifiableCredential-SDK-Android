@@ -25,7 +25,7 @@ import javax.inject.Singleton
 @Component(modules = [SdkModule::class])
 internal interface SdkComponent {
 
-    fun identityManager(): IdentifierManager
+    fun identifierManager(): IdentifierManager
 
     fun cardManager(): CardManager
 
@@ -35,15 +35,6 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
-
-        @BindsInstance
-        fun signatureKeyReference(@Named("signatureKeyReference") signatureKeyReference: String): Builder
-
-        @BindsInstance
-        fun encryptionKeyReference(@Named("encryptionKeyReference") encryptionKeyReference: String): Builder
-
-        @BindsInstance
-        fun recoveryKeyReference(@Named("recoveryKeyReference") recoveryKeyReference: String): Builder
 
         @BindsInstance
         fun resolverUrl(@Named("resolverUrl") resolverUrl: String): Builder

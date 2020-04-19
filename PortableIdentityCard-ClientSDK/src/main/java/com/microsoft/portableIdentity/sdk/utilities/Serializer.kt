@@ -10,7 +10,6 @@ import kotlin.reflect.KClass
 import kotlin.collections.Map
 
 object Serializer : ISerializer {
-
     private val serviceResponseSerializer = SerializersModule {
         polymorphic(ServiceResponse::class) {
             IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()

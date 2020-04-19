@@ -1,7 +1,13 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 
 /**
  * @interface defining methods and properties
@@ -15,8 +21,12 @@ abstract class Registrar {
      * @param signingKeyReference reference to the key to be used for signing request.
      * @param recoveryKeyReference reference to the key to be used if recovery/deactivation has to be performed on sidetree later
      * @param cryptoOperations crypto operations used to generate key pairs
-     * @return Identifier that was created and saved in database.
+     * @return Identifier that was created.
      * @throws Exception if unable to create an Identifier.
      */
-    abstract suspend fun register(signatureKeyReference: String, recoveryKeyReference: String, cryptoOperations: CryptoOperations): Identifier
+    abstract suspend fun register(
+        signatureKeyReference: String,
+        recoveryKeyReference: String,
+        cryptoOperations: CryptoOperations
+    ): Result<Identifier>
 }

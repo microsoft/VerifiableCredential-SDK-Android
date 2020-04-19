@@ -43,6 +43,7 @@ class SerializationTest {
     fun `serialize and deserialize an identity document`() {
         val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
         val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedDocument)
-        assertThat(actualDocument).isEqualToComparingFieldByFieldRecursively(expectedDocument)
+        val serializedExpectedDocument = Serializer.stringify(IdentifierDocument.serializer(), expectedDocument)
+        assertThat(serializedDocument).isEqualTo(serializedExpectedDocument)
     }
 }

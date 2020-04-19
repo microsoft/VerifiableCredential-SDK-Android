@@ -17,12 +17,12 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
  *
  * PortableIdentitySdk.init(getApplicationContext());
  *
- * The `CardManager` and `IdentityManager` can be accessed through this static reference, but ideally should be provided
+ * The `CardManager` and `IdentifierManager` can be accessed through this static reference, but ideally should be provided
  * by your own dependency injection library. In the case of Dagger2 as such:
  *
  * @Provides
- * fun provideIdentityManager(): IdentityManager {
- *     return PortableIdentitySdk.identityManager
+ * fun provideIdentifierManager(): IdentifierManager {
+ *     return PortableIdentitySdk.identifierManager
  * }
  */
 object PortableIdentitySdk {
@@ -38,22 +38,16 @@ object PortableIdentitySdk {
     fun init(
         context: Context,
         logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(),
-        registrationUrl: String = "http://10.91.6.163:3000",
-        resolverUrl: String = "http://10.91.6.163:3000",
-        defaultSignatureKeyReference: String = "signature",
-        defaultEncryptionKeyReference: String = "encryption",
-        defaultRecoveryKeyReference: String = "recovery"
+        registrationUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
+        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
-            .signatureKeyReference(defaultSignatureKeyReference)
-            .encryptionKeyReference(defaultEncryptionKeyReference)
-            .recoveryKeyReference(defaultRecoveryKeyReference)
             .build()
 
-        identifierManager = sdkComponent.identityManager()
+        identifierManager = sdkComponent.identifierManager()
         cardManager = sdkComponent.cardManager()
 
         SdkLog.addConsumer(logConsumerBridge)

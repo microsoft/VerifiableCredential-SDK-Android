@@ -46,6 +46,27 @@ class SidetreePayloadProcessor @Inject constructor(
         return encodeRegDoc(registrationDocument)
     }
 
+    /**
+     * Computes unique suffix for did short form.
+     * In unpublished resolution or long form, id is generated in SDK.
+     */
+    fun computeUniqueSuffix(suffixDataEncoded: String): String {
+        val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
+        val suffixDataJson = byteArrayToString(suffixDataDecoded)
+        val suffixDataHash = hash(stringToByteArray(suffixDataJson))
+        return Base64Url.encode(suffixDataHash)
+    }
+
+    fun extractNextUpdateCommitmentHash(registrationPayload: RegistrationPayload): String {
+        val patchDataJson = byteArrayToString(Base64Url.decode(registrationPayload.patchData))
+        return Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
+    }
+
+    fun extractNextRecoveryCommitmentHash(registrationPayload: RegistrationPayload): String {
+        val suffixDataJson = byteArrayToString(Base64Url.decode(registrationPayload.suffixData))
+        return Serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
+    }
+
     private fun generateRegistrationPayload(signingKeyJWK: JsonWebKey, recoveryKeyJWK: JsonWebKey): RegistrationPayload {
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingKeyJWK)
         val patchData = createPatchData(identifierDocumentPatch)
@@ -66,17 +87,6 @@ class SidetreePayloadProcessor @Inject constructor(
                 JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
             }
         }
-    }
-
-    /**
-     * Computes unique suffix for did short form.
-     * In unpublished resolution or long form, id is generated in SDK.
-     */
-    fun computeUniqueSuffix(suffixDataEncoded: String): String {
-        val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
-        val suffixDataJson = byteArrayToString(suffixDataDecoded)
-        val suffixDataHash = hash(stringToByteArray(suffixDataJson))
-        return Base64Url.encode(suffixDataHash)
     }
 
     private fun createDocumentPayload(signingKeyJWK: JsonWebKey): IdentifierDocumentPayload {
