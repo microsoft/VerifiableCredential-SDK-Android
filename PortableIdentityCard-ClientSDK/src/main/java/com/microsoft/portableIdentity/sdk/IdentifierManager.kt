@@ -27,13 +27,12 @@ import javax.inject.Singleton
  */
 @Singleton
 class IdentifierManager @Inject constructor(
-    val identifierRepository: IdentifierRepository,
+    private val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
     private val registrar: Registrar
 ) {
 
-    val did: Identifier = initLongFormDid()
-    /*by lazy { initLongFormDid() }*/
+    val did: Identifier by lazy { initLongFormDid() }
 
     private fun initLongFormDid(): Identifier {
         val did = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
