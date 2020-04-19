@@ -53,12 +53,12 @@ class OidcResponseFormatter @Inject constructor(
         }
     }
 
-    private fun signContents(contents: OidcResponseContent, responder: Identifier): String {
+    internal fun signContents(contents: OidcResponseContent, responder: Identifier): String {
         val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
-    private fun formContents(response: OidcResponse, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
+    internal fun formContents(response: OidcResponse, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
@@ -103,9 +103,12 @@ class OidcResponseFormatter @Inject constructor(
         }
     }
 
-    private fun createIssuanceAttestationResponse(response: IssuanceResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
+    private fun createIssuanceAttestationResponse(response: IssuanceResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse? {
         var selfIssuedAttestations: String? = null
         var tokenAttestations: Map<String, String>? = null
+        if (response.getIdTokenBindings().isNullOrEmpty() && response.getSelfIssuedClaimBindings().isNullOrEmpty() && response.getCardBindings().isNullOrEmpty()) {
+            return null
+        }
         if (!response.getIdTokenBindings().isNullOrEmpty()) {
             tokenAttestations = response.getIdTokenBindings()
         }
@@ -116,7 +119,10 @@ class OidcResponseFormatter @Inject constructor(
         return AttestationResponse(selfIssuedAttestations, tokenAttestations, presentationAttestation)
     }
 
-    private fun createPresentationAttestationResponse(response: PresentationResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
+    private fun createPresentationAttestationResponse(response: PresentationResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse? {
+        if (response.getCardBindings().isNullOrEmpty()) {
+            return null
+        }
         val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
         return AttestationResponse(null, null, presentationAttestation)
     }

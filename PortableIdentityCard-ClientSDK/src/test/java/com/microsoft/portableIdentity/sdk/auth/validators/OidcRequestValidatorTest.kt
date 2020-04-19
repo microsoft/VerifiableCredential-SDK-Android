@@ -1,7 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.validators
 
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
