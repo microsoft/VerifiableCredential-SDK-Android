@@ -11,7 +11,6 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.REDIRECT_URL
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RESPONSE_MODE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RESPONSE_TYPE
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
-import io.ktor.http.cio.internals.WeakTimeoutQueue
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -58,7 +57,6 @@ data class OidcRequestContent(
     val nbf: Long = 0,
 
     // optional parameters
-    val registration: WeakTimeoutQueue.Registration? = null,
     val aud: String = "",
     @SerialName(MAX_AGE)
     val maxAge: Int = 0
