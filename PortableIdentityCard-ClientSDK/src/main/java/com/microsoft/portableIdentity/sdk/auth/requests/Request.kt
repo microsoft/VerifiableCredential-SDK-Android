@@ -5,11 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.requests
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
-
 interface Request {
 
-    fun getCredentialAttestations(): CredentialAttestations?
-
-    fun getContractUrls(): List<String>
 }

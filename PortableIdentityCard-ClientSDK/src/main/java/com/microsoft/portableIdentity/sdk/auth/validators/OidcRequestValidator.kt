@@ -6,6 +6,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUT
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
 import java.util.*
@@ -24,7 +25,8 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
             return Result.Failure(exception)
         }
 
-        return when (val validationResult = jwsValidator.verifySignature(request.raw)) {
+        val token = JwsToken.deserialize(request.rawToken)
+        return when (val validationResult = jwsValidator.verifySignature(token)) {
             is Result.Success -> {
                 val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
                 Result.Success(isValid)

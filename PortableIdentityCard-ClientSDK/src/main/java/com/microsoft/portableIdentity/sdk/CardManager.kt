@@ -9,13 +9,10 @@ import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestationToCardsBindings
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
-import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.Request
+import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.Response
@@ -42,7 +39,8 @@ import kotlin.Exception
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
     private val validator: Validator,
-    private val formatter: Formatter
+    private val formatter: Formatter,
+    private val cardConverter: CardConverter
 ) {
 
     /**
@@ -58,7 +56,13 @@ class CardManager @Inject constructor(
             val url = verifyUri(uri)
             val requestParameters = url.parameters.toMap()
             val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
-            Result.Success(PresentationRequest(requestParameters, requestToken))
+            val tokenContents = Serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken).content())
+            val request = PresentationRequest(requestParameters, requestToken, tokenContents)
+            if (request.hasPresentationAttestations()) {
+                val bindings = getCardBindings(request.getPresentationAttestations()).abortOnError()
+                request.addPresentationBindings(bindings)
+            }
+            Result.Success(request)
         }
     }
 
@@ -85,32 +89,9 @@ class CardManager @Inject constructor(
         }
     }
 
-    private fun getRequiredSavedCards(presentationAttestations: List<PresentationAttestation>): Result<PresentationAttestationToCardsBindings> {
-        var typeToSavedCards = mutableMapOf<String, List<PortableIdentityCard>>()
-        var neededCards = mutableListOf<PresentationAttestation>()
-        presentationAttestations.forEach {
-            when (val result = getRequiredCardsByType(it.credentialType)) {
-                is Result.Success -> {
-                    if (result.payload.second.isNullOrEmpty()) {
-                        neededCards.add(it)
-                    } else {
-                        typeToSavedCards[result.payload.first] = result.payload.second
-                    }
-                }
-                is Result.Failure -> return result
-            }
-        }
-        return Result.Success(PresentationAttestationToCardsBindings(typeToSavedCards, neededCards))
-    }
-
-    private fun getRequiredCardsByType(type: String): Result<Pair<String, List<PortableIdentityCard>>> {
-        return when (val cardResults = getCardsByType(type)) {
-            is Result.Success -> {
-                val cards = cardResults.payload.value ?: emptyList()
-                Result.Success(Pair(type, cards))
-            }
-            is Result.Failure -> cardResults
-        }
+    private fun getCardBindings(presentationAttestations: List<PresentationAttestation>): Result<PresentationAttestationToCardsBindings> {
+        val savedCards = getCards().value ?: throw RepositoryException("Cards not founds.")
+        return cardConverter.getRequiredSavedCards(presentationAttestations, savedCards)
     }
 
     /**
@@ -124,7 +105,12 @@ class CardManager @Inject constructor(
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = picRepository.getContract(contractUrl).abortOnError()
-            Result.Success(IssuanceRequest(contract, contractUrl))
+            val request = IssuanceRequest(contract, contractUrl)
+            if (request.hasPresentationAttestations()) {
+                val bindings = getCardBindings(request.getPresentationAttestations()).abortOnError()
+                request.addPresentationBindings(bindings)
+            }
+            Result.Success(request)
         }
     }
 

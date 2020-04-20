@@ -9,6 +9,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAtt
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import kotlinx.serialization.json.JsonNull.content
 
 /**
  * Class that represents a generic Request.
@@ -16,13 +17,4 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
  * @param oidcParameters OpenId Connect specific parameters.
  * @param serializedToken Serialized JwsToken that contains additional request params.
  */
-abstract class OidcRequest(open val oidcParameters: Map<String, List<String>>, serializedToken: String): Request {
-
-    val content: OidcRequestContent
-
-    val raw: JwsToken = JwsToken.deserialize(serializedToken)
-
-    init {
-        content = Serializer.parse(OidcRequestContent.serializer(), raw.content())
-    }
-}
+abstract class OidcRequest(val oidcParameters: Map<String, List<String>>, val rawToken: String, val content: OidcRequestContent): CredentialRequest(content.attestations)

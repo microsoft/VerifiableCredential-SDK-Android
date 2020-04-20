@@ -5,21 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.requests
 
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 
-class PresentationRequest(override val oidcParameters: Map<String, List<String>>, serializedToken: String): OidcRequest(oidcParameters, serializedToken) {
-
-    override fun getCredentialAttestations(): CredentialAttestations? {
-        return content.attestations
-    }
-
-    // Private Preview: gets first contract from each Verifiable Credential Attestation.
-    override fun getContractUrls(): List<String> {
-        val attestations = content.attestations ?: return emptyList()
-        val contracts = mutableListOf<String>()
-        attestations.presentations.forEach {
-            contracts.add(it.contracts.first())
-        }
-        return contracts
-    }
-}
+class PresentationRequest(oidcParameters: Map<String, List<String>>, serializedToken: String, contents: OidcRequestContent) :
+    OidcRequest(oidcParameters, serializedToken, contents)
