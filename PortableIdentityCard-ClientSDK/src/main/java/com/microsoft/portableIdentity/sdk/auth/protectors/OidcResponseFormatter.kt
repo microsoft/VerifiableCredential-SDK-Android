@@ -104,13 +104,13 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createIssuanceAttestationResponse(response: IssuanceResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
-        var selfIssuedAttestations: String? = null
+        var selfIssuedAttestations: Map<String, String>? = null
         var tokenAttestations: Map<String, String>? = null
         if (!response.getIdTokenBindings().isNullOrEmpty()) {
             tokenAttestations = response.getIdTokenBindings()
         }
         if (!response.getSelfIssuedClaimBindings().isNullOrEmpty()) {
-            selfIssuedAttestations = formSelfIssuedToken(response.getSelfIssuedClaimBindings())
+            selfIssuedAttestations = response.getSelfIssuedClaimBindings()
         }
         val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
         return AttestationResponse(selfIssuedAttestations, tokenAttestations, presentationAttestation)
@@ -119,12 +119,6 @@ class OidcResponseFormatter @Inject constructor(
     private fun createPresentationAttestationResponse(response: PresentationResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
         val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
         return AttestationResponse(null, null, presentationAttestation)
-    }
-
-    private fun formSelfIssuedToken(selfIssuedClaims: Map<String, String>): String? {
-        val serializedSelfIssued = Serializer.stringify(selfIssuedClaims, String::class, String::class)
-        val token = JwsToken(serializedSelfIssued)
-        return token.serialize()
     }
 
     private fun createPresentations(typeToCardsMapping: Map<String, PortableIdentityCard>, response: OidcResponse, responder: Identifier, iat: Long, exp: Long): Map<String, String>? {
