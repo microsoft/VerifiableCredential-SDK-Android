@@ -14,6 +14,7 @@ import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.registrars.RegistrationDocument
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
  * Class for creating and managing identifiers,
@@ -30,7 +31,8 @@ class Identifier constructor (
                  val alias: String,
                  private val cryptoOperations: CryptoOperations,
                  private val resolver: IResolver,
-                 private val registrar: IRegistrar) {
+                 private val registrar: IRegistrar,
+                 private val serializer: Serializer) {
     companion object {
 
         private val microsoftIdentityHubDocument = IdentifierDocument(
@@ -75,6 +77,7 @@ class Identifier constructor (
             encryptionKeyReference: String,
             resolver: IResolver,
             registrar: IRegistrar,
+            serializer: Serializer,
             identityHubDid: List<String>? = null
             ): Identifier {
             // TODO: Use software generated keys from the seed
@@ -107,7 +110,7 @@ class Identifier constructor (
 //                                cryptoOperations
 //                            )}
                 SdkLog.d("Adding Microsoft Identity Hub")
-                val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, resolver, registrar)
+                val microsoftHub = Identifier(microsoftIdentityHubDocument, "", "", "", cryptoOperations, resolver, registrar, serializer)
                 hubService = IdentityHubService.create(
                     id = "#hub",
                     keyStore = cryptoOperations.keyStore,
@@ -132,12 +135,13 @@ class Identifier constructor (
                 encryptionKeyReference = personaEncKeyRef,
                 cryptoOperations = cryptoOperations,
                 resolver = resolver,
-                registrar = registrar
+                registrar = registrar,
+                serializer = serializer
             )
         }
     }
 
     fun serialize(): String {
-        return IdentifierToken.serialize(this)
+        return IdentifierToken.serialize(this, serializer)
     }
 }

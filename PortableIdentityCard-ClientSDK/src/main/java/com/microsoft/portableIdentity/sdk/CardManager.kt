@@ -7,7 +7,7 @@ package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestationToCardsBindings
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.CardRequestBinding
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
@@ -38,9 +38,10 @@ import kotlin.Exception
 @Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
+    private val serializer: Serializer,
     private val validator: Validator,
     private val formatter: Formatter,
-    private val cardConverter: CardConverter
+    private val cardRequestBindingCreator: CardRequestBindingCreator
 ) {
 
     /**
@@ -56,10 +57,10 @@ class CardManager @Inject constructor(
             val url = verifyUri(uri)
             val requestParameters = url.parameters.toMap()
             val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
-            val tokenContents = Serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken).content())
+            val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
             val request = PresentationRequest(requestParameters, requestToken, tokenContents)
             if (request.hasPresentationAttestations()) {
-                val bindings = getCardBindings(request.getPresentationAttestations()).abortOnError()
+                val bindings = getCardRequestBinding(request.getPresentationAttestations())
                 request.addPresentationBindings(bindings)
             }
             Result.Success(request)
@@ -89,9 +90,9 @@ class CardManager @Inject constructor(
         }
     }
 
-    private fun getCardBindings(presentationAttestations: List<PresentationAttestation>): Result<PresentationAttestationToCardsBindings> {
+    private fun getCardRequestBinding(presentationAttestations: List<PresentationAttestation>): CardRequestBinding {
         val savedCards = getCards().value ?: throw RepositoryException("Cards not founds.")
-        return cardConverter.getRequiredSavedCards(presentationAttestations, savedCards)
+        return cardRequestBindingCreator.getRequiredSavedCards(presentationAttestations, savedCards)
     }
 
     /**
@@ -107,7 +108,7 @@ class CardManager @Inject constructor(
             val contract = picRepository.getContract(contractUrl).abortOnError()
             val request = IssuanceRequest(contract, contractUrl)
             if (request.hasPresentationAttestations()) {
-                val bindings = getCardBindings(request.getPresentationAttestations()).abortOnError()
+                val bindings = getCardRequestBinding(request.getPresentationAttestations())
                 request.addPresentationBindings(bindings)
             }
             Result.Success(request)
@@ -201,8 +202,8 @@ class CardManager @Inject constructor(
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
-        val token = JwsToken.deserialize(signedVerifiableCredential)
-        return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
+        val token = JwsToken.deserialize(signedVerifiableCredential, serializer)
+        return serializer.parse(VerifiableCredentialContent.serializer(), token.content())
     }
 
     /**
@@ -213,25 +214,5 @@ class CardManager @Inject constructor(
      */
     fun getCards(): LiveData<List<PortableIdentityCard>> {
         return picRepository.getAllCards()
-    }
-
-    /**
-     * Get Portable Identity Cards by type from Storage.
-     *
-     * @return Result.Success: List of Portable Identity Card from Storage.
-     *         Result.Failure: Exception explaining what went wrong.
-     */
-    fun getCardsByType(type: String): Result<LiveData<List<PortableIdentityCard>>> {
-        TODO("Refactor Database to have this functionality.")
-    }
-
-    /**
-     * Get Portable Identity Card by Contract Url from Storage.
-     *
-     * @return Result.Success: Portable Identity Card from Storage.
-     *         Result.Failure: Exception explaining what went wrong.
-     */
-    fun getCardByContract(contractUrl: String): Result<LiveData<PortableIdentityCard>> {
-        TODO("Refactor Database to have this functionality.")
     }
 }

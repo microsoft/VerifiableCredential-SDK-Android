@@ -6,6 +6,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.NullRegistrar
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 /**
  * Interface defining methods and properties to
@@ -22,7 +23,7 @@ abstract class IResolver() {
     abstract suspend fun resolveDocument(identifier: String): IdentifierDocument
 
     suspend fun resolve(identifier: String,
-                cryptoOperations: CryptoOperations): Identifier {
+                cryptoOperations: CryptoOperations, serializer: Serializer): Identifier {
         val document = this.resolveDocument(identifier)
         val encKey = document.publicKeys.filter{
             if (it.publicKeyJwk.use != null) {
@@ -40,7 +41,8 @@ abstract class IResolver() {
             "",
             cryptoOperations,
             this,
-            NullRegistrar()
+            NullRegistrar(),
+            serializer
         )
     }
 }

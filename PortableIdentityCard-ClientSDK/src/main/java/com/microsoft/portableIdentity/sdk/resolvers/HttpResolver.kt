@@ -17,7 +17,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class HttpResolver @Inject constructor(
-    @Named("resolverUrl") private val baseUrl: String
+    @Named("resolverUrl") private val baseUrl: String,
+    private val serializer: Serializer
 ) : IResolver() {
 
     @Serializable
@@ -38,7 +39,7 @@ class HttpResolver @Inject constructor(
         }
         client.close()
         println("GOT $response")
-        val result = Serializer.parse(ResolverResult.serializer(), response)
+        val result = serializer.parse(ResolverResult.serializer(), response)
         println("resolved ${result.document.id} with metadata ${result.resolverMetadata}")
         return result.document
     }

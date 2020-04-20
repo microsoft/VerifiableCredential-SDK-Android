@@ -7,6 +7,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
 import java.util.*
@@ -17,7 +18,8 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator) : Validator {
+class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator,
+                                               private val serializer: Serializer) : Validator {
 
     override suspend fun validate(request: Request): Result<Boolean> {
         if (request !is OidcRequest) {
@@ -25,7 +27,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
             return Result.Failure(exception)
         }
 
-        val token = JwsToken.deserialize(request.rawToken)
+        val token = JwsToken.deserialize(request.rawToken, serializer)
         return when (val validationResult = jwsValidator.verifySignature(token)) {
             is Result.Success -> {
                 val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)

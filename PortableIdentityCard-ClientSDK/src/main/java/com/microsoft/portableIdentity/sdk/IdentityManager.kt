@@ -18,6 +18,7 @@ import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import kotlinx.coroutines.*
 import javax.inject.Inject
 import javax.inject.Named
@@ -33,7 +34,8 @@ import kotlin.random.Random
 class IdentityManager @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val resolver: IResolver,
-    private val registrar: IRegistrar
+    private val registrar: IRegistrar,
+    private val serializer: Serializer
 ) {
 
     private val didSecretName = "did.identifier"
@@ -97,7 +99,8 @@ class IdentityManager @Inject constructor(
             encryptionKeyReference = "encKey",
             cryptoOperations = cryptoOperations,
             resolver = resolver,
-            registrar = registrar
+            registrar = registrar,
+            serializer = serializer
         )
     }
 
@@ -115,7 +118,7 @@ class IdentityManager @Inject constructor(
             val alias = Base64Url.encode(Random.nextBytes(16))
             Identifier.createAndRegister(
                 alias, cryptoOperations, signatureKeyReference,
-                encryptionKeyReference, resolver, registrar, listOf("did:test:hub.id")
+                encryptionKeyReference, resolver, registrar, serializer, listOf("did:test:hub.id")
             )
         }
     }
@@ -125,7 +128,8 @@ class IdentityManager @Inject constructor(
             identifierToken,
             cryptoOperations,
             resolver,
-            registrar
+            registrar,
+            serializer
         )
     }
 }

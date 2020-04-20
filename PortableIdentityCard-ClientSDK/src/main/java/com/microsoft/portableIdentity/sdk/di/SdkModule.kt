@@ -10,7 +10,7 @@ import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
-import com.microsoft.portableIdentity.sdk.auth.requests.CardConverter
+import com.microsoft.portableIdentity.sdk.auth.requests.CardRequestBindingCreator
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
@@ -28,6 +28,7 @@ import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
 import com.microsoft.portableIdentity.sdk.resolvers.IResolver
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -141,7 +142,13 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultCardConverter(): CardConverter {
-        return CardConverter()
+    fun defaultCardConverter(): CardRequestBindingCreator {
+        return CardRequestBindingCreator()
+    }
+
+    @Provides
+    @Singleton
+    fun defaultSerializer(): Serializer {
+        return Serializer()
     }
 }

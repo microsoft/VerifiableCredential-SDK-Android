@@ -12,6 +12,7 @@ import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.F
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +24,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class CardRepository @Inject constructor(database: SdkDatabase,
-                                         private val apiProvider: ApiProvider) {
+                                         private val apiProvider: ApiProvider,
+                                         private val serializer: Serializer) {
 
     private val cardDao = database.cardDao()
 
@@ -46,7 +48,8 @@ class CardRepository @Inject constructor(database: SdkDatabase,
     suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(
         url,
         serializedResponse,
-        apiProvider
+        apiProvider,
+        serializer
     ).fire()
 
     suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(

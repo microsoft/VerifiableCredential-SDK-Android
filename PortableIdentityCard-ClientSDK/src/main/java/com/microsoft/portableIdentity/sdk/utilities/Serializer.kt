@@ -12,10 +12,12 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.plus
+import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.collections.Map
 
-object Serializer : ISerializer {
+@Singleton
+class Serializer : ISerializer {
     private val identifierDocumentServiceSerializer = SerializersModule {
         polymorphic(IdentifierDocumentService::class) {
             IdentityHubService::class with IdentityHubService.serializer()

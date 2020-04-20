@@ -9,6 +9,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -18,7 +19,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class TokenSigner @Inject constructor(
-    private val cryptoOperations: CryptoOperations
+    private val cryptoOperations: CryptoOperations,
+    private val serializer: Serializer
 ) {
 
     /**
@@ -26,12 +28,12 @@ class TokenSigner @Inject constructor(
      * @return JwsToken
      */
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
-        val token = JwsToken(payload)
+        val token = JwsToken(payload, serializer)
         val kid = cryptoOperations.keyStore.getPrivateKey(identifier.signatureKeyReference).getKey().kid
         // adding kid value to header.
         val additionalHeaders = mutableMapOf<String, String>()
         additionalHeaders[JoseConstants.Kid.value] = "${identifier.document.id}${kid}"
         token.sign(identifier.signatureKeyReference, cryptoOperations, additionalHeaders)
-        return token.serialize()
+        return token.serialize(serializer)
     }
 }

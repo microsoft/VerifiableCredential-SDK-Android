@@ -5,6 +5,4 @@
 
 package com.microsoft.portableIdentity.sdk.auth.requests
 
-interface Request {
-
-}
+interface Request

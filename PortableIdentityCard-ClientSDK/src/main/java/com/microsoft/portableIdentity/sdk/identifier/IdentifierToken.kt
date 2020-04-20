@@ -25,18 +25,19 @@ data class IdentifierToken (
             )
         }
 
-        fun serialize(identifier: Identifier): String {
+        fun serialize(identifier: Identifier, serializer: Serializer): String {
             val token = tokenize(identifier)
-            return Serializer.stringify(IdentifierToken.serializer(), token)
+            return serializer.stringify(IdentifierToken.serializer(), token)
         }
 
         fun deserialize(
             identifierToken: String,
             cryptoOperations: CryptoOperations,
             resolver: IResolver,
-            registrar: IRegistrar
+            registrar: IRegistrar,
+            serializer: Serializer
         ): Identifier {
-            val token = Serializer.parse(IdentifierToken.serializer(), identifierToken)
+            val token = serializer.parse(IdentifierToken.serializer(), identifierToken)
             return Identifier(
                 alias = token.alias,
                 document = token.document,
@@ -44,7 +45,8 @@ data class IdentifierToken (
                 encryptionKeyReference = token.encryptionKeyReference,
                 cryptoOperations = cryptoOperations,
                 resolver = resolver,
-                registrar = registrar
+                registrar = registrar,
+                serializer = serializer
             )
         }
     }
