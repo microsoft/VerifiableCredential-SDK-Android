@@ -6,6 +6,8 @@
 package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestationToCardsBindings
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
@@ -80,6 +82,34 @@ class CardManager @Inject constructor(
             } else {
                 picRepository.getRequest(requestUri)
             }
+        }
+    }
+
+    private fun getRequiredSavedCards(presentationAttestations: List<PresentationAttestation>): Result<PresentationAttestationToCardsBindings> {
+        var typeToSavedCards = mutableMapOf<String, List<PortableIdentityCard>>()
+        var neededCards = mutableListOf<PresentationAttestation>()
+        presentationAttestations.forEach {
+            when (val result = getRequiredCardsByType(it.credentialType)) {
+                is Result.Success -> {
+                    if (result.payload.second.isNullOrEmpty()) {
+                        neededCards.add(it)
+                    } else {
+                        typeToSavedCards[result.payload.first] = result.payload.second
+                    }
+                }
+                is Result.Failure -> return result
+            }
+        }
+        return Result.Success(PresentationAttestationToCardsBindings(typeToSavedCards, neededCards))
+    }
+
+    private fun getRequiredCardsByType(type: String): Result<Pair<String, List<PortableIdentityCard>>> {
+        return when (val cardResults = getCardsByType(type)) {
+            is Result.Success -> {
+                val cards = cardResults.payload.value ?: emptyList()
+                Result.Success(Pair(type, cards))
+            }
+            is Result.Failure -> cardResults
         }
     }
 
