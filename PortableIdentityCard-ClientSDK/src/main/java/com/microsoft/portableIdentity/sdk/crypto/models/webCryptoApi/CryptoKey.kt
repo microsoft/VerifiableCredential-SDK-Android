@@ -6,4 +6,4 @@ data class CryptoKey(
     val algorithm: Algorithm,
     val usages: List<KeyUsage>,
     val handle: Any?
-) {}
+)

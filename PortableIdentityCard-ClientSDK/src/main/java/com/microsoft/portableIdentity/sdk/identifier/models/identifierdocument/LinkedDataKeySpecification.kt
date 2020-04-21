@@ -1,4 +1,4 @@
-package com.microsoft.portableIdentity.sdk.identifier.document
+package com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument
 
 enum class LinkedDataKeySpecification(val values: List<String>) {
     Ed25519Signature2018(listOf("Ed25519VerificationKey2018", "Ed25519Signature2018")),

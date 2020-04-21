@@ -331,6 +331,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         return alias
     }
 
+    //TODO: Modify kid derived from key reference to not use . and not begin with #. It should be Base64url charset for sidetree registration to work with these as ids
     fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
         if (!kid.isNullOrBlank() && !kid.startsWith(keyReference) && !kid.startsWith("#$keyReference")) {
             throw SdkLog.error("Key ID must begin with key reference")
