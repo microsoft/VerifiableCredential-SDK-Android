@@ -110,20 +110,12 @@ class CardManager @Inject constructor(
         return validator.validate(request)
     }
 
-    /**
-     * Create a Response from Request.
-     *
-     * @param request to create response for (could be an Issuance or Presentation request)
-     *
-     * @return Result.Success: Response that was created.
-     *         Result.Failure: Exception because request type not supported.
-     */
-    fun createResponse(request: Request): Result<Response> {
-        return when (request) {
-            is PresentationRequest -> Result.Success(PresentationResponse(request))
-            is IssuanceRequest -> Result.Success(IssuanceResponse(request))
-            else -> Result.Failure(AuthenticationException("Request Type not Supported."))
-        }
+    fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
+        return IssuanceResponse(request)
+    }
+
+    fun createPresentationResponse(request: PresentationRequest): PresentationResponse {
+        return PresentationResponse(request)
     }
 
     /**
@@ -176,6 +168,10 @@ class CardManager @Inject constructor(
         } catch (exception: Exception) {
             Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
         }
+    }
+
+    suspend fun saveCard(portableIdentityCard: PortableIdentityCard) {
+        picRepository.insert(portableIdentityCard)
     }
 
     fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
