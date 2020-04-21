@@ -2,7 +2,6 @@ package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import java.lang.IllegalStateException
 import org.junit.Test
 
 class CryptoHelpersTest {

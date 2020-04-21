@@ -7,7 +7,6 @@ package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
@@ -30,7 +29,6 @@ import io.ktor.http.Url
 import io.ktor.util.toMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.Exception
 
 /**
  * This class manages all functionality for managing, getting/creating, presenting, and storing Portable Identity Cards.

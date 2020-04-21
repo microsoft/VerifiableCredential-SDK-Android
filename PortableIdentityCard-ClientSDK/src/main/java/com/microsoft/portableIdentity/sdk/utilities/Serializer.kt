@@ -3,32 +3,13 @@ package com.microsoft.portableIdentity.sdk.utilities
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
-import com.microsoft.portableIdentity.sdk.identifier.IdentifierDocumentService
-import com.microsoft.portableIdentity.sdk.identifier.document.service.Endpoint
-import com.microsoft.portableIdentity.sdk.identifier.document.service.IdentityHubService
-import com.microsoft.portableIdentity.sdk.identifier.document.service.ServiceHubEndpoint
-import com.microsoft.portableIdentity.sdk.identifier.document.service.UserHubEndpoint
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.plus
 import kotlin.reflect.KClass
 import kotlin.collections.Map
 
 object Serializer : ISerializer {
-    private val identifierDocumentServiceSerializer = SerializersModule {
-        polymorphic(IdentifierDocumentService::class) {
-            IdentityHubService::class with IdentityHubService.serializer()
-        }
-    }
-
-    private val serviceEndpointSerializer = SerializersModule {
-        polymorphic(Endpoint::class) {
-            ServiceHubEndpoint::class with ServiceHubEndpoint.serializer()
-            UserHubEndpoint::class with UserHubEndpoint.serializer()
-        }
-    }
-
     private val serviceResponseSerializer = SerializersModule {
         polymorphic(ServiceResponse::class) {
             IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()
@@ -37,7 +18,7 @@ object Serializer : ISerializer {
     }
 
     val json: Json = Json(
-        context = identifierDocumentServiceSerializer + serviceEndpointSerializer + serviceResponseSerializer,
+        context = serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             strictMode = false
