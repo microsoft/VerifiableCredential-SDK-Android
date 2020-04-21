@@ -168,8 +168,11 @@ class CardManager @Inject constructor(
         }
     }
 
-    suspend fun saveCard(portableIdentityCard: PortableIdentityCard) {
-        picRepository.insert(portableIdentityCard)
+    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Nothing?> {
+        return runResultTry {
+            picRepository.insert(portableIdentityCard)
+            Result.Success(null)
+        }
     }
 
     fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {

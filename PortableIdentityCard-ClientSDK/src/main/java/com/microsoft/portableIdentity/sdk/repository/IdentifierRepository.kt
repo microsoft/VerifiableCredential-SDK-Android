@@ -21,5 +21,5 @@ class IdentifierRepository @Inject constructor(database: SdkDatabase, private va
 
     fun queryByIdentifier(identifier: String): Identifier = identifierDao.queryByIdentifier(identifier)
 
-    fun queryByName(name: String): Identifier = identifierDao.queryByName(name)
+    fun queryByName(name: String): Identifier? = identifierDao.queryByName(name)
 }
