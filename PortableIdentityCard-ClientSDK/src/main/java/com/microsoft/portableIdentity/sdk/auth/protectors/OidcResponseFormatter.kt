@@ -104,13 +104,13 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createIssuanceAttestationResponse(response: IssuanceResponse, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
-        var selfIssuedAttestations: String? = null
+        var selfIssuedAttestations: Map<String, String>? = null
         var tokenAttestations: Map<String, String>? = null
         if (!response.getIdTokenBindings().isNullOrEmpty()) {
             tokenAttestations = response.getIdTokenBindings()
         }
         if (!response.getSelfIssuedClaimBindings().isNullOrEmpty()) {
-            selfIssuedAttestations = formSelfIssuedToken(response.getSelfIssuedClaimBindings())
+            selfIssuedAttestations = response.getSelfIssuedClaimBindings()
         }
         val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
         return AttestationResponse(selfIssuedAttestations, tokenAttestations, presentationAttestation)
