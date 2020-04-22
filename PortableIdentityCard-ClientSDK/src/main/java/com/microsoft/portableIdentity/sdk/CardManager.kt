@@ -1,7 +1,4 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.portableIdentity.sdk
 
@@ -214,4 +211,15 @@ class CardManager @Inject constructor(
     fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
         return picRepository.getCardsByType(type)
     }
+
+    /**
+     * Get A Portable Identity Card by card id from storage
+     * @param  id: card id of requested card
+     * @return Result.Success: Portable Identity Card corresponding to id passed
+     *         Result.Failure: Exception explaining the problem
+     */
+    fun getCardById(id: String): LiveData<PortableIdentityCard> {
+        return picRepository.getCardById(id)
+    }
+
 }
