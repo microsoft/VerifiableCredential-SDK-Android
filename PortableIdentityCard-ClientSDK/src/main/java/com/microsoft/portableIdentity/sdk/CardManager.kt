@@ -141,7 +141,8 @@ class CardManager @Inject constructor(
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
-            Result.Success(createCard(verifiableCredential.raw, response.request.contract))
+            val card = createCard(verifiableCredential.raw, response.request.contract)
+            Result.Success(card)
         }
     }
 
@@ -159,16 +160,6 @@ class CardManager @Inject constructor(
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
         }
-    }
-
-    suspend fun createAndSaveReceipt(action: ReceiptAction, cardId: String, relyingPartyDid: String, requestToken: String) {
-        val date = Date().time / Constants.MILLISECONDS_IN_A_SECOND
-        val receipt = Receipt(action = action,
-                              cardId = cardId,
-                              activityDate = date,
-                              entity = relyingPartyDid,
-                              token = requestToken)
-        picRepository.insert(receipt)
     }
 
     /**
@@ -190,7 +181,7 @@ class CardManager @Inject constructor(
         }
     }
 
-    fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
+    private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
         val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
         return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
@@ -238,5 +229,18 @@ class CardManager @Inject constructor(
      */
     fun getReceiptByCardId(cardId: String): LiveData<List<Receipt>> {
         return picRepository.getAllReceiptsByCardId(cardId)
+    }
+
+    /**
+     * Get Receipts by Card Id from Storage.
+     *
+     * @return List of Receipts
+     */
+    suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
+        return try {
+            Result.Success(picRepository.insert(receipt))
+        } catch (exception: Exception) {
+            Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
+        }
     }
 }
