@@ -17,12 +17,12 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
  *
  * PortableIdentitySdk.init(getApplicationContext());
  *
- * The `CardManager` and `IdentityManager` can be accessed through this static reference, but ideally should be provided
+ * The `CardManager` and `IdentifierManager` can be accessed through this static reference, but ideally should be provided
  * by your own dependency injection library. In the case of Dagger2 as such:
  *
  * @Provides
- * fun provideIdentityManager(): IdentityManager {
- *     return PortableIdentitySdk.identityManager
+ * fun provideIdentifierManager(): IdentifierManager {
+ *     return PortableIdentitySdk.identifierManager
  * }
  */
 object PortableIdentitySdk {
@@ -31,14 +31,14 @@ object PortableIdentitySdk {
     lateinit var cardManager: CardManager
 
     @JvmStatic
-    lateinit var identityManager: IdentityManager
+    lateinit var identifierManager: IdentifierManager
 
     @JvmOverloads
     @JvmStatic
     fun init(
         context: Context,
         logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(),
-        registrationUrl: String = "https://beta.ion.microsoft.com/api/1.0/register",
+        registrationUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
@@ -47,7 +47,7 @@ object PortableIdentitySdk {
             .resolverUrl(resolverUrl)
             .build()
 
-        identityManager = sdkComponent.identityManager()
+        identifierManager = sdkComponent.identifierManager()
         cardManager = sdkComponent.cardManager()
 
         SdkLog.addConsumer(logConsumerBridge)

@@ -22,12 +22,10 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
+import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
-import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import dagger.Module
 import dagger.Provides
@@ -92,13 +90,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultResolver(resolver: HttpResolver): IResolver {
-        return resolver
-    }
-
-    @Provides
-    @Singleton
-    fun defaultRegistrar(registrar: SidetreeRegistrar): IRegistrar {
+    fun defaultRegistrar(registrar: SidetreeRegistrar): Registrar {
         return registrar
     }
 

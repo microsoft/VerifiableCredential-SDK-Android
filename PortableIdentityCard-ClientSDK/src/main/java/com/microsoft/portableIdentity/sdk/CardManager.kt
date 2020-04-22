@@ -29,7 +29,6 @@ import io.ktor.http.Url
 import io.ktor.util.toMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.Exception
 
 /**
  * This class manages all functionality for managing, getting/creating, presenting, and storing Portable Identity Cards.

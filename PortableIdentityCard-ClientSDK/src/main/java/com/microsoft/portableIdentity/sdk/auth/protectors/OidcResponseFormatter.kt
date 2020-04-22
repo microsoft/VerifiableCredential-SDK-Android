@@ -63,7 +63,7 @@ class OidcResponseFormatter @Inject constructor(
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
-        val did = responder.document.id
+        val did = responder.id
 
         var contract: String? = null
         var nonce: String? = null
@@ -137,7 +137,7 @@ class OidcResponseFormatter @Inject constructor(
     private fun createPresentation(card: PortableIdentityCard, response: OidcResponse, responder: Identifier, iat: Long, exp: Long): String {
         val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw))
         val jti = UUID.randomUUID().toString()
-        val did = responder.document.id
+        val did = responder.id
         val contents = VerifiablePresentationContent(
             jti = jti,
             vp = vp,

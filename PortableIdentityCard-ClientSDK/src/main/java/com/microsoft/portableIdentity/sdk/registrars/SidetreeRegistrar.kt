@@ -1,69 +1,101 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.portableIdentity.sdk.registrars
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsFormat
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.portableIdentity.sdk.identifier.document.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.utilities.*
-import io.ktor.client.features.ResponseException
-import io.ktor.client.request.post
-import io.ktor.client.request.url
-import io.ktor.content.ByteArrayContent
-import io.ktor.http.ContentType
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
+import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Constants
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.RegistrarException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.random.Random
 
 /**
- * Registrar implementation for the Sidetree network
+ * Registrar implementation for the Sidetree long form identifier
+ * @param baseUrl url used for registering an identifier
  * @class
- * @implements IRegistrar
- * @param registrarUrl to the registration endpoint
- * @param cryptoOperations
+ * @implements Registrar
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer): IRegistrar() {
-    override suspend fun register(document: RegistrationDocument, signatureKeyRef: String, crypto: CryptoOperations): IdentifierDocument {
-        // create JWS request
-        val content = serializer.stringify(RegistrationDocument.serializer(), document)
-        val jwsToken = JwsToken(content, serializer)
-        val key = crypto.keyStore.getPublicKey(signatureKeyRef).getKey() as EllipticCurvePublicKey
-        val kid = key.kid
-        jwsToken.sign(signatureKeyRef, crypto, mapOf("kid" to kid, "operation" to "create", "alg" to "ES256K"))
-        val jws = jwsToken.serialize(serializer, JwsFormat.FlatJson)
-        jwsToken.verify(crypto);
-        val response = sendRequest(jws)
-        println(response)
-        return serializer.parse(IdentifierDocument.serializer(), response)
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer) : Registrar() {
+
+    override suspend fun register(
+        signatureKeyReference: String,
+        recoveryKeyReference: String,
+        cryptoOperations: CryptoOperations
+    ): Result<Identifier> {
+        return try {
+            val alias = Base64Url.encode(Random.nextBytes(16))
+            val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
+            val registrationPayloadEncoded = payloadProcessor.generateCreatePayload(alias)
+            val registrationPayload =
+                serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))
+
+            val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
+
+            Result.Success(
+                transformIdentifierDocumentToIdentifier(
+                    payloadProcessor,
+                    registrationPayload,
+                    identifierLongForm,
+                    alias,
+                    signatureKeyReference,
+                    recoveryKeyReference
+                )
+            )
+        } catch (exception: Exception) {
+            Result.Failure(RegistrarException("Unable to create an identifier", exception))
+        }
     }
 
-    /**
-     * Send request to the registration service
-     * returning the fully discoverable Identifier Document.
-     * @param request request sent to the registration service.
-     */
-    private suspend fun sendRequest(request: String): String {
-        val client = getHttpClient()
-        try {
-            return client.post<String> {
-                url(baseUrl)
-                body = ByteArrayContent(
-                    bytes = stringToByteArray(request),
-                    contentType = ContentType.Application.Json
-                )
-            }
-        } catch (error: ResponseException) {
-            println("Registration failed (${error.response.status})")
-            while (!error.response.content.isClosedForRead) {
-                val data = error.response.content.readUTF8Line(error.response.content.availableForRead)
-                if (!data.isNullOrBlank()) {
-                    println(data)
-                }
-            }
-            throw error
-        } finally {
-            client.close()
-        }
+    private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {
+        val uniqueSuffix = payloadProcessor.computeUniqueSuffix(registrationPayload.suffixData)
+        //TODO: Confirm the final method name (ion-test???)
+        return "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
+    }
+
+    private fun computeLongFormIdentifier(
+        payloadProcessor: SidetreePayloadProcessor,
+        registrationPayload: RegistrationPayload,
+        registrationPayloadEncoded: String
+    ): String {
+        val identifierShortForm = computeUniqueSuffix(payloadProcessor, registrationPayload)
+        return "$identifierShortForm?${Constants.INITIAL_STATE_LONGFORM}=$registrationPayloadEncoded"
+    }
+
+    private fun transformIdentifierDocumentToIdentifier(
+        payloadProcessor: SidetreePayloadProcessor,
+        registrationPayload: RegistrationPayload,
+        identifierLongForm: String,
+        alias: String,
+        signatureKeyReference: String,
+        recoveryKeyReference: String
+    ): Identifier {
+        val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
+        val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
+
+        val personaSigKeyRef = "$alias.$signatureKeyReference"
+        val personaRecKeyRef = "$alias.$recoveryKeyReference"
+
+        return Identifier(
+            identifierLongForm,
+            alias,
+            personaSigKeyRef,
+            //TODO: Since we know encryption is coming in the future, do we want to add encryption key now so that we don't have to modify the table later.
+            "",
+            personaRecKeyRef,
+            nextUpdateCommitmentHash,
+            nextRecoveryCommitmentHash,
+            Constants.IDENTIFIER_SECRET_KEY_NAME
+        )
     }
 }
