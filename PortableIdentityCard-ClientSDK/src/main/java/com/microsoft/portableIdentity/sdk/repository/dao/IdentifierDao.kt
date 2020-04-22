@@ -16,5 +16,5 @@ interface IdentifierDao {
 
     //TODO: See how identifiers are stored with pairwise in picture and modify accordingly
     @Query("SELECT * FROM Identifier where name= :name")
-    fun queryByName(name: String): Identifier
+    fun queryByName(name: String): Identifier?
 }
