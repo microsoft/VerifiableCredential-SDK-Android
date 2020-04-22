@@ -38,14 +38,18 @@ class CardRepository @Inject constructor(database: SdkDatabase,
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
     fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
-        val cards = getAllCards().value ?: throw RepositoryException("Not Cards Found.")
+        val mutableList = MutableLiveData<List<PortableIdentityCard>>()
+        val cards = getAllCards().value
+        if (cards == null) {
+            mutableList.postValue(emptyList())
+            return mutableList
+        }
         val filteredCards = mutableListOf<PortableIdentityCard>()
         cards.forEach {
-            if (it.verifiableCredential.type.contains(type)) {
+            if (it.verifiableCredential.contents.vc.type.contains(type)) {
                 filteredCards.add(it)
             }
         }
-        val mutableList = MutableLiveData<List<PortableIdentityCard>>()
         mutableList.postValue(filteredCards)
         return mutableList
     }

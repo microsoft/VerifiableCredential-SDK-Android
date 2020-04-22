@@ -6,12 +6,13 @@ import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceRe
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.SerializersModule
+import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
 import kotlin.collections.Map
 
 @Singleton
-class Serializer : ISerializer {
+class Serializer @Inject constructor(): ISerializer {
     private val serviceResponseSerializer = SerializersModule {
         polymorphic(ServiceResponse::class) {
             IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()

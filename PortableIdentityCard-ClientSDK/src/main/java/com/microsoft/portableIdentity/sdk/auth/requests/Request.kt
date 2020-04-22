@@ -7,11 +7,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.PresentationException
 
-sealed class CredentialRequest(val attestations: CredentialAttestations?) {
-
-    // Credential Request can be either an Issuance or Presentation Request only.
-    class IssuanceRequest(val contract: PicContract, val contractUrl: String): CredentialRequest(contract.input.attestations)
-    class PresentationRequest(val oidcParameters: Map<String, List<String>>, val serializedToken: String, val contents: OidcRequestContent) : CredentialRequest(contents.attestations)
+sealed class Request(val attestations: CredentialAttestations?) {
 
     private var presentationBinding: CardRequestBinding? = null
 
@@ -31,14 +27,10 @@ sealed class CredentialRequest(val attestations: CredentialAttestations?) {
         if (attestations != null) {
             return attestations
         }
-        throw PresentationException("No Presentation Attestations")
-    }
-
-    fun addPresentationBindings(binding: CardRequestBinding) {
-        presentationBinding = binding
-    }
-
-    fun getPresentationBindings(): CardRequestBinding? {
-        return presentationBinding
+        return emptyList()
     }
 }
+
+// Request can be either an Issuance or Presentation Request only.
+class IssuanceRequest(val contract: PicContract, val contractUrl: String): Request(contract.input.attestations)
+class PresentationRequest(val oidcParameters: Map<String, List<String>>, val serializedToken: String, val contents: OidcRequestContent) : Request(contents.attestations)

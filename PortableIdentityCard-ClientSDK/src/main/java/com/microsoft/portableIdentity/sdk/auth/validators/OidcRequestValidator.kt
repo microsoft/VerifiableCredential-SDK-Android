@@ -4,7 +4,8 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.CLIENT_ID
 import com.microsoft.portableIdentity.sdk.utilities.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.portableIdentity.sdk.auth.requests.CredentialRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -20,8 +21,8 @@ import javax.inject.Singleton
 class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator,
                                                private val serializer: Serializer) : Validator {
 
-    override suspend fun validate(request: CredentialRequest): Result<Boolean> {
-        if (request !is CredentialRequest.PresentationRequest) {
+    override suspend fun validate(request: Request): Result<Boolean> {
+        if (request !is PresentationRequest) {
             val exception = ValidatorException("Request is not an OidcRequest")
             return Result.Failure(exception)
         }

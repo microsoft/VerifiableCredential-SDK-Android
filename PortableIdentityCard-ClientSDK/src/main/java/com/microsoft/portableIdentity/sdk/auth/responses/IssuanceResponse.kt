@@ -5,9 +5,9 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import com.microsoft.portableIdentity.sdk.auth.requests.CredentialRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 
-class IssuanceResponse(val request: CredentialRequest.IssuanceRequest): OidcResponse(request.contract.input.credentialIssuer) {
+class IssuanceResponse(val request: IssuanceRequest): OidcResponse(request.contract.input.credentialIssuer) {
 
     val contractUrl: String = request.contractUrl
 

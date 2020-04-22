@@ -10,7 +10,6 @@ import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
-import com.microsoft.portableIdentity.sdk.auth.requests.CardRequestBindingCreator
 import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
@@ -124,23 +123,5 @@ internal class SdkModule {
     @Singleton
     fun defaultFormatter(formatter: OidcResponseFormatter): Formatter {
         return formatter
-    }
-
-    @Provides
-    @Singleton
-    fun defaultApiCreator(retrofit: Retrofit): ApiProvider {
-        return ApiProvider(retrofit)
-    }
-
-    @Provides
-    @Singleton
-    fun defaultCardConverter(): CardRequestBindingCreator {
-        return CardRequestBindingCreator()
-    }
-
-    @Provides
-    @Singleton
-    fun defaultSerializer(): Serializer {
-        return Serializer()
     }
 }

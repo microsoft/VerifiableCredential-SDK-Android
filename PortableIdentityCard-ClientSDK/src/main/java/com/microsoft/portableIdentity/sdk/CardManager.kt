@@ -5,7 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk
 
-import android.net.wifi.hotspot2.pps.Credential
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CardRequestBinding
@@ -39,8 +38,7 @@ class CardManager @Inject constructor(
     private val picRepository: CardRepository,
     private val serializer: Serializer,
     private val validator: Validator,
-    private val formatter: Formatter,
-    private val cardRequestBindingCreator: CardRequestBindingCreator
+    private val formatter: Formatter
 ) {
 
     /**
@@ -51,17 +49,13 @@ class CardManager @Inject constructor(
      * @return Result.Success: PresentationRequest object that contains all attestations.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getPresentationRequest(uri: String): Result<CredentialRequest.PresentationRequest> {
+    suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
         return runResultTry {
             val url = verifyUri(uri)
             val requestParameters = url.parameters.toMap()
             val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
             val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
-            val request = CredentialRequest.PresentationRequest(requestParameters, requestToken, tokenContents)
-            if (request.hasPresentationAttestations()) {
-                val bindings = getCardRequestBinding(request.getPresentationAttestations())
-                request.addPresentationBindings(bindings)
-            }
+            val request = PresentationRequest(requestParameters, requestToken, tokenContents)
             Result.Success(request)
         }
     }
@@ -89,11 +83,6 @@ class CardManager @Inject constructor(
         }
     }
 
-    private fun getCardRequestBinding(presentationAttestations: List<PresentationAttestation>): CardRequestBinding {
-        val savedCards = getCards().value ?: throw RepositoryException("Cards not founds.")
-        return cardRequestBindingCreator.getRequiredSavedCards(presentationAttestations, savedCards)
-    }
-
     /**
      * Get Issuance Request from a contract.
      *
@@ -102,14 +91,10 @@ class CardManager @Inject constructor(
      * @return Result.Success: IssuanceRequest object containing all metadata about what is needed to fulfill request including display information.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getIssuanceRequest(contractUrl: String): Result<CredentialRequest.IssuanceRequest> {
+    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = picRepository.getContract(contractUrl).abortOnError()
-            val request = CredentialRequest.IssuanceRequest(contract, contractUrl)
-            if (request.hasPresentationAttestations()) {
-                val bindings = getCardRequestBinding(request.getPresentationAttestations())
-                request.addPresentationBindings(bindings)
-            }
+            val request = IssuanceRequest(contract, contractUrl)
             Result.Success(request)
         }
     }
@@ -122,7 +107,7 @@ class CardManager @Inject constructor(
      * @return Result.Success true, if request is valid, false if it is not valid.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun isValid(request: CredentialRequest.PresentationRequest): Result<Boolean> {
+    suspend fun isValid(request: PresentationRequest): Result<Boolean> {
         return validator.validate(request)
     }
 
@@ -134,10 +119,10 @@ class CardManager @Inject constructor(
      * @return Result.Success: Response that was created.
      *         Result.Failure: Exception because request type not supported.
      */
-    fun createResponse(request: CredentialRequest): Result<Response> {
+    fun createResponse(request: Request): Result<Response> {
         return when (request) {
-            is CredentialRequest.PresentationRequest -> Result.Success(PresentationResponse(request))
-            is CredentialRequest.IssuanceRequest -> Result.Success(IssuanceResponse(request))
+            is PresentationRequest -> Result.Success(PresentationResponse(request))
+            is IssuanceRequest -> Result.Success(IssuanceResponse(request))
         }
     }
 
