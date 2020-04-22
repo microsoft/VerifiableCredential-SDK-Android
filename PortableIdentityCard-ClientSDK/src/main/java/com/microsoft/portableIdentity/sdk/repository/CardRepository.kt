@@ -38,20 +38,15 @@ class CardRepository @Inject constructor(database: SdkDatabase,
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
     fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
-        val mutableList = MutableLiveData<List<PortableIdentityCard>>()
-        val cards = getAllCards().value
-        if (cards == null) {
-            mutableList.postValue(emptyList())
-            return mutableList
-        }
+        val cards = getAllCards().value ?: return MutableLiveData(emptyList())
+
         val filteredCards = mutableListOf<PortableIdentityCard>()
         cards.forEach {
             if (it.verifiableCredential.contents.vc.type.contains(type)) {
                 filteredCards.add(it)
             }
         }
-        mutableList.postValue(filteredCards)
-        return mutableList
+        return MutableLiveData(filteredCards)
     }
 
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
