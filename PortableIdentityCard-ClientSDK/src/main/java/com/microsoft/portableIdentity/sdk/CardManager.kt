@@ -18,15 +18,19 @@ import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
+import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
 import io.ktor.util.toMap
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -157,6 +161,16 @@ class CardManager @Inject constructor(
         }
     }
 
+    suspend fun createAndSaveReceipt(action: ReceiptAction, cardId: String, relyingPartyDid: String, requestToken: String) {
+        val date = Date().time / Constants.MILLISECONDS_IN_A_SECOND
+        val receipt = Receipt(action = action,
+                              cardId = cardId,
+                              activityDate = date,
+                              entity = relyingPartyDid,
+                              token = requestToken)
+        picRepository.insert(receipt)
+    }
+
     /**
      * Puts together a Portable Identity Card and saves in repository.
      *
@@ -215,5 +229,14 @@ class CardManager @Inject constructor(
      */
     fun getCardByContract(contractUrl: String): Result<LiveData<PortableIdentityCard>> {
         TODO("Refactor Database to have this functionality.")
+    }
+
+    /**
+     * Get Receipts by Card Id from Storage.
+     *
+     * @return List of Receipts
+     */
+    fun getReceiptByCardId(cardId: String): LiveData<List<Receipt>> {
+        return picRepository.getAllReceiptsByCardId(cardId)
     }
 }
