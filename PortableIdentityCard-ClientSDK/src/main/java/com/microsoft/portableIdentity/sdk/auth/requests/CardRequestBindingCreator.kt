@@ -15,6 +15,7 @@ import javax.inject.Singleton
 @Singleton
 class CardRequestBindingCreator {
 
+    // TODO (Do we want this or do we want to just use the getCardsByType method in CardManager)
     fun getRequiredSavedCards(presentationAttestations: List<PresentationAttestation>, cards: List<PortableIdentityCard>): CardRequestBinding {
         var typeToSavedCards = mutableMapOf<String, List<PortableIdentityCard>>()
         var neededCards = mutableListOf<PresentationAttestation>()

@@ -5,12 +5,12 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import android.net.wifi.hotspot2.pps.Credential
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CardRequestBinding
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
@@ -51,13 +51,13 @@ class CardManager @Inject constructor(
      * @return Result.Success: PresentationRequest object that contains all attestations.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
+    suspend fun getPresentationRequest(uri: String): Result<CredentialRequest.PresentationRequest> {
         return runResultTry {
             val url = verifyUri(uri)
             val requestParameters = url.parameters.toMap()
             val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
             val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
-            val request = PresentationRequest(requestParameters, requestToken, tokenContents)
+            val request = CredentialRequest.PresentationRequest(requestParameters, requestToken, tokenContents)
             if (request.hasPresentationAttestations()) {
                 val bindings = getCardRequestBinding(request.getPresentationAttestations())
                 request.addPresentationBindings(bindings)
@@ -102,10 +102,10 @@ class CardManager @Inject constructor(
      * @return Result.Success: IssuanceRequest object containing all metadata about what is needed to fulfill request including display information.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
+    suspend fun getIssuanceRequest(contractUrl: String): Result<CredentialRequest.IssuanceRequest> {
         return runResultTry {
             val contract = picRepository.getContract(contractUrl).abortOnError()
-            val request = IssuanceRequest(contract, contractUrl)
+            val request = CredentialRequest.IssuanceRequest(contract, contractUrl)
             if (request.hasPresentationAttestations()) {
                 val bindings = getCardRequestBinding(request.getPresentationAttestations())
                 request.addPresentationBindings(bindings)
@@ -122,7 +122,7 @@ class CardManager @Inject constructor(
      * @return Result.Success true, if request is valid, false if it is not valid.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun isValid(request: OidcRequest): Result<Boolean> {
+    suspend fun isValid(request: CredentialRequest.PresentationRequest): Result<Boolean> {
         return validator.validate(request)
     }
 
@@ -134,11 +134,10 @@ class CardManager @Inject constructor(
      * @return Result.Success: Response that was created.
      *         Result.Failure: Exception because request type not supported.
      */
-    fun createResponse(request: Request): Result<Response> {
+    fun createResponse(request: CredentialRequest): Result<Response> {
         return when (request) {
-            is PresentationRequest -> Result.Success(PresentationResponse(request))
-            is IssuanceRequest -> Result.Success(IssuanceResponse(request))
-            else -> Result.Failure(AuthenticationException("Request Type not Supported."))
+            is CredentialRequest.PresentationRequest -> Result.Success(PresentationResponse(request))
+            is CredentialRequest.IssuanceRequest -> Result.Success(IssuanceResponse(request))
         }
     }
 
@@ -213,5 +212,15 @@ class CardManager @Inject constructor(
      */
     fun getCards(): LiveData<List<PortableIdentityCard>> {
         return picRepository.getAllCards()
+    }
+
+    /**
+     * Get All Portable Identity Cards from Storage by Credential Type.
+     *
+     * @return Result.Success: Filtered List of Portable Identity Card from Storage.
+     *         Result.Failure: Exception explaining what went wrong.
+     */
+    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+        return picRepository.getCardsByType(type)
     }
 }

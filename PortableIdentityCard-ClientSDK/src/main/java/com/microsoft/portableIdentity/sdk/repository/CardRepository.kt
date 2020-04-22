@@ -6,6 +6,7 @@
 package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchContractNetworkOperation
@@ -13,6 +14,7 @@ import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.F
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,6 +36,19 @@ class CardRepository @Inject constructor(database: SdkDatabase,
     suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
 
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
+
+    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+        val cards = getAllCards().value ?: throw RepositoryException("Not Cards Found.")
+        val filteredCards = mutableListOf<PortableIdentityCard>()
+        cards.forEach {
+            if (it.verifiableCredential.type.contains(type)) {
+                filteredCards.add(it)
+            }
+        }
+        val mutableList = MutableLiveData<List<PortableIdentityCard>>()
+        mutableList.postValue(filteredCards)
+        return mutableList
+    }
 
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
         url,
