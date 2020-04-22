@@ -27,6 +27,8 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
 import io.ktor.util.toMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -108,20 +110,12 @@ class CardManager @Inject constructor(
         return validator.validate(request)
     }
 
-    /**
-     * Create a Response from Request.
-     *
-     * @param request to create response for (could be an Issuance or Presentation request)
-     *
-     * @return Result.Success: Response that was created.
-     *         Result.Failure: Exception because request type not supported.
-     */
-    fun createResponse(request: Request): Result<Response> {
-        return when (request) {
-            is PresentationRequest -> Result.Success(PresentationResponse(request))
-            is IssuanceRequest -> Result.Success(IssuanceResponse(request))
-            else -> Result.Failure(AuthenticationException("Request Type not Supported."))
-        }
+    fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
+        return IssuanceResponse(request)
+    }
+
+    fun createPresentationResponse(request: PresentationRequest): PresentationResponse {
+        return PresentationResponse(request)
     }
 
     /**
@@ -134,10 +128,12 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
-        return runResultTry {
-            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
-            val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
-            Result.Success(createCard(verifiableCredential.raw, response.request.contract))
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+                val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
+                Result.Success(createCard(verifiableCredential.raw, response.request.contract))
+            }
         }
     }
 
@@ -173,6 +169,15 @@ class CardManager @Inject constructor(
             Result.Success(card)
         } catch (exception: Exception) {
             Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
+        }
+    }
+
+    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Nothing?> {
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                picRepository.insert(portableIdentityCard)
+                Result.Success(null)
+            }
         }
     }
 
