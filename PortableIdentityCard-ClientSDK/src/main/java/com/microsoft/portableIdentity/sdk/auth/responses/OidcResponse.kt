@@ -28,18 +28,18 @@ abstract class OidcResponse(override val audience: String): Response {
         return collectedCards
     }
 
-    fun createReceiptsForPresentedCards(action: ReceiptAction, requestToken: String): List<Receipt> {
+    fun createReceiptsForPresentedCredentials(requestToken: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(action, it.component2().id, it.component2().verifiableCredential.contents.iss, requestToken)
+            val receipt = createPresentedCredentialReceipt(it.component2().id, it.component2().verifiableCredential.contents.iss, requestToken)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    private fun createReceipt(action: ReceiptAction, cardId: String, relyingPartyDid: String, requestToken: String): Receipt {
+    private fun createPresentedCredentialReceipt(cardId: String, relyingPartyDid: String, requestToken: String): Receipt {
         val date = Date().time / Constants.MILLISECONDS_IN_A_SECOND
-        return Receipt(action = action,
+        return Receipt(action = ReceiptAction.Presentation,
             cardId = cardId,
             activityDate = date,
             entity = relyingPartyDid,

@@ -6,6 +6,10 @@
 package com.microsoft.portableIdentity.sdk.auth.responses
 
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
+import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
+import com.microsoft.portableIdentity.sdk.utilities.Constants
+import java.util.*
 
 class IssuanceResponse(val request: IssuanceRequest): OidcResponse(request.contract.input.credentialIssuer) {
 
@@ -29,5 +33,14 @@ class IssuanceResponse(val request: IssuanceRequest): OidcResponse(request.contr
 
     fun getSelfIssuedClaimBindings(): Map<String, String> {
         return collectedSelfIssued
+    }
+
+    fun createIssuanceReceipt(cardId: String, relyingPartyDid: String, requestToken: String): Receipt {
+        val date = Date().time / Constants.MILLISECONDS_IN_A_SECOND
+        return Receipt(action = ReceiptAction.Issuance,
+            cardId = cardId,
+            activityDate = date,
+            entity = relyingPartyDid,
+            token = requestToken)
     }
 }
