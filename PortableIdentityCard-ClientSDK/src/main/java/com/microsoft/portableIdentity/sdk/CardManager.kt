@@ -6,13 +6,12 @@
 package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
+import com.microsoft.portableIdentity.sdk.auth.models.attestations.CardRequestBinding
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
-import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
-import com.microsoft.portableIdentity.sdk.auth.requests.Request
+import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.Response
@@ -39,6 +38,7 @@ import javax.inject.Singleton
 @Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
+    private val serializer: Serializer,
     private val validator: Validator,
     private val formatter: Formatter
 ) {
@@ -56,7 +56,9 @@ class CardManager @Inject constructor(
             val url = verifyUri(uri)
             val requestParameters = url.parameters.toMap()
             val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
-            Result.Success(PresentationRequest(requestParameters, requestToken))
+            val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
+            val request = PresentationRequest(requestParameters, requestToken, tokenContents)
+            Result.Success(request)
         }
     }
 
@@ -94,7 +96,8 @@ class CardManager @Inject constructor(
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = picRepository.getContract(contractUrl).abortOnError()
-            Result.Success(IssuanceRequest(contract, contractUrl))
+            val request = IssuanceRequest(contract, contractUrl)
+            Result.Success(request)
         }
     }
 
@@ -106,10 +109,10 @@ class CardManager @Inject constructor(
      * @return Result.Success true, if request is valid, false if it is not valid.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun isValid(request: OidcRequest): Result<Boolean> {
+    suspend fun isValid(request: PresentationRequest): Result<Boolean> {
         return validator.validate(request)
     }
-
+  
     fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
         return IssuanceResponse(request)
     }
@@ -146,7 +149,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<PresentationServiceResponse> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<Unit> {
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
@@ -188,8 +191,8 @@ class CardManager @Inject constructor(
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
-        val token = JwsToken.deserialize(signedVerifiableCredential)
-        return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
+        val token = JwsToken.deserialize(signedVerifiableCredential, serializer)
+        return serializer.parse(VerifiableCredentialContent.serializer(), token.content())
     }
 
     /**
@@ -203,22 +206,12 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Get Portable Identity Cards by type from Storage.
+     * Get All Portable Identity Cards from Storage by Credential Type.
      *
-     * @return Result.Success: List of Portable Identity Card from Storage.
+     * @return Result.Success: Filtered List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCardsByType(type: String): Result<LiveData<List<PortableIdentityCard>>> {
-        TODO("Refactor Database to have this functionality.")
-    }
-
-    /**
-     * Get Portable Identity Card by Contract Url from Storage.
-     *
-     * @return Result.Success: Portable Identity Card from Storage.
-     *         Result.Failure: Exception explaining what went wrong.
-     */
-    fun getCardByContract(contractUrl: String): Result<LiveData<PortableIdentityCard>> {
-        TODO("Refactor Database to have this functionality.")
+    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+        return picRepository.getCardsByType(type)
     }
 }

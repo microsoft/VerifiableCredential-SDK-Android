@@ -20,7 +20,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidKeyStore @Inject constructor(private val context: Context): com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore() {
+class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Serializer): com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore() {
 
     companion object {
         const val provider = "AndroidKeyStore"
@@ -158,7 +158,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         var jwk = key.toJWK();
         jwk.kid = alias;
-        val jwkString = Serializer.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -173,7 +173,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         // This key is not natively supported
         var jwk = key.toJWK();
         jwk.kid = alias;
-        val jwkString = Serializer.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -235,7 +235,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
                 val keyRef = keyReferenceMatch.groupValues[1];
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-                val key = Serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
+                val key = serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
                 val keyType = toKeyType(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
@@ -258,7 +258,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
 
     private fun getSecurePrivateKey(alias: String): PrivateKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = Serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty == KeyType.RSA.value) {
             return RsaPrivateKey(jwk)
         } else if (jwk.kty == KeyType.EllipticCurve.value) {
@@ -270,7 +270,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
 
     private fun getSecureSecretkey(alias: String): SecretKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = Serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty != KeyType.Octets.value) {
             throw SdkLog.error("$alias is not a secret key.")
         }

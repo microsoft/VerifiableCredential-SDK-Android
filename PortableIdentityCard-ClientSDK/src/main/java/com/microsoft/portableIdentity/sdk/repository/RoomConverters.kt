@@ -10,30 +10,34 @@ import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayC
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import javax.inject.Inject
 
+//TODO(
 object RoomConverters {
 
-    @TypeConverter
-    @JvmStatic
-    fun displayContractToString(displayContract: DisplayContract) = Serializer.stringify(DisplayContract.serializer(), displayContract)
+    private val serializer: Serializer = Serializer()
 
     @TypeConverter
     @JvmStatic
-    fun stringToDisplayContract(serializedContract: String) = Serializer.parse(DisplayContract.serializer(), serializedContract)
+    fun displayContractToString(displayContract: DisplayContract) = serializer.stringify(DisplayContract.serializer(), displayContract)
 
     @TypeConverter
     @JvmStatic
-    fun verifiableCredentialToString(vc: VerifiableCredential) = Serializer.stringify(VerifiableCredential.serializer(), vc)
+    fun stringToDisplayContract(serializedContract: String) = serializer.parse(DisplayContract.serializer(), serializedContract)
 
     @TypeConverter
     @JvmStatic
-    fun stringToVerifiableCredential(serializedVc: String) = Serializer.parse(VerifiableCredential.serializer(), serializedVc)
+    fun verifiableCredentialToString(vc: VerifiableCredential) = serializer.stringify(VerifiableCredential.serializer(), vc)
 
     @TypeConverter
     @JvmStatic
-    fun stringToIdentifierDocument(serializedDoc: String) = Serializer.parse(IdentifierDocument.serializer(), serializedDoc)
+    fun stringToVerifiableCredential(serializedVc: String) = serializer.parse(VerifiableCredential.serializer(), serializedVc)
 
     @TypeConverter
     @JvmStatic
-    fun identifierDocumentToString(idDocument: IdentifierDocument) = Serializer.stringify(IdentifierDocument.serializer(), idDocument)
+    fun stringToIdentifierDocument(serializedDoc: String) = serializer.parse(IdentifierDocument.serializer(), serializedDoc)
+
+    @TypeConverter
+    @JvmStatic
+    fun identifierDocumentToString(idDocument: IdentifierDocument) = serializer.stringify(IdentifierDocument.serializer(), idDocument)
 }

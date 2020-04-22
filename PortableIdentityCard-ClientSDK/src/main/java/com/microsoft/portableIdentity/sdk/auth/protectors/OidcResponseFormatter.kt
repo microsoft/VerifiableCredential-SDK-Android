@@ -35,6 +35,7 @@ import kotlin.math.floor
 @Singleton
 class OidcResponseFormatter @Inject constructor(
     private val cryptoOperations: CryptoOperations,
+    private val serializer: Serializer,
     private val signer: TokenSigner
 ) : Formatter {
 
@@ -54,7 +55,7 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun signContents(contents: OidcResponseContent, responder: Identifier): String {
-        val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), contents)
+        val serializedResponseContent = serializer.stringify(OidcResponseContent.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
@@ -121,12 +122,6 @@ class OidcResponseFormatter @Inject constructor(
         return AttestationResponse(null, null, presentationAttestation)
     }
 
-    private fun formSelfIssuedToken(selfIssuedClaims: Map<String, String>): String? {
-        val serializedSelfIssued = Serializer.stringify(selfIssuedClaims, String::class, String::class)
-        val token = JwsToken(serializedSelfIssued)
-        return token.serialize()
-    }
-
     private fun createPresentations(typeToCardsMapping: Map<String, PortableIdentityCard>, response: OidcResponse, responder: Identifier, iat: Long, exp: Long): Map<String, String>? {
         val presentations = mutableMapOf<String, String>()
         typeToCardsMapping.forEach {
@@ -152,7 +147,7 @@ class OidcResponseFormatter @Inject constructor(
             nbf = iat,
             exp = exp
         )
-        val serializedContents = Serializer.stringify(VerifiablePresentationContent.serializer(), contents)
+        val serializedContents = serializer.stringify(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)
     }
 

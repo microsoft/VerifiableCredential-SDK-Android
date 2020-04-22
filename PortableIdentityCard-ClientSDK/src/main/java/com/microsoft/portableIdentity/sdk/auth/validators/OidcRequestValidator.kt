@@ -4,8 +4,10 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.CLIENT_ID
 import com.microsoft.portableIdentity.sdk.utilities.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
+import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
 import java.util.*
@@ -16,17 +18,19 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator) : Validator {
+class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsValidator,
+                                               private val serializer: Serializer) : Validator {
 
     override suspend fun validate(request: Request): Result<Boolean> {
-        if (request !is OidcRequest) {
+        if (request !is PresentationRequest) {
             val exception = ValidatorException("Request is not an OidcRequest")
             return Result.Failure(exception)
         }
 
-        return when (val validationResult = jwsValidator.verifySignature(request.raw)) {
+        val token = JwsToken.deserialize(request.serializedToken, serializer)
+        return when (val validationResult = jwsValidator.verifySignature(token)) {
             is Result.Success -> {
-                val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
+                val isValid = validationResult.payload && hasTokenExpired(request.contents.exp) && hasMatchingParams(request.contents, request.oidcParameters)
                 Result.Success(isValid)
             }
             is Result.Failure -> validationResult

@@ -30,7 +30,8 @@ import kotlin.random.Random
 class SidetreePayloadProcessor @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     @Named("signatureKeyReference") private val signatureKeyReference: String,
-    @Named("recoveryKeyReference") private val recoveryKeyReference: String
+    @Named("recoveryKeyReference") private val recoveryKeyReference: String,
+    private val serializer: Serializer
 ) {
     /**
      * Generates input payload for create operation on Sidetree.
@@ -59,12 +60,12 @@ class SidetreePayloadProcessor @Inject constructor(
 
     fun extractNextUpdateCommitmentHash(registrationPayload: RegistrationPayload): String {
         val patchDataJson = byteArrayToString(Base64Url.decode(registrationPayload.patchData))
-        return Serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
+        return serializer.parse(PatchData.serializer(), patchDataJson).nextUpdateCommitmentHash
     }
 
     fun extractNextRecoveryCommitmentHash(registrationPayload: RegistrationPayload): String {
         val suffixDataJson = byteArrayToString(Base64Url.decode(registrationPayload.suffixData))
-        return Serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
+        return serializer.parse(SuffixData.serializer(), suffixDataJson).nextRecoveryCommitmentHash
     }
 
     private fun generateRegistrationPayload(signingKeyJWK: JsonWebKey, recoveryKeyJWK: JsonWebKey): RegistrationPayload {
@@ -116,7 +117,7 @@ class SidetreePayloadProcessor @Inject constructor(
     }
 
     private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray, recoveryKeyJWK: JsonWebKey): SuffixData {
-        val patchDataJson = Serializer.stringify(PatchData.serializer(), patchData)
+        val patchDataJson = serializer.stringify(PatchData.serializer(), patchData)
         val patchDataByteArray = stringToByteArray(patchDataJson)
         val patchDataHash = hash(patchDataByteArray)
         val patchDataHashEncoded = Base64Url.encode(patchDataHash)
@@ -145,17 +146,17 @@ class SidetreePayloadProcessor @Inject constructor(
     }
 
     private fun encodeRegDoc(registrationPayload: RegistrationPayload): String {
-        val regDocJson = Serializer.stringify(RegistrationPayload.serializer(), registrationPayload)
+        val regDocJson = serializer.stringify(RegistrationPayload.serializer(), registrationPayload)
         return Base64Url.encode(stringToByteArray(regDocJson))
     }
 
     private fun encodeSuffixData(suffixData: SuffixData): String {
-        val suffixDataJson = Serializer.stringify(SuffixData.serializer(), suffixData)
+        val suffixDataJson = serializer.stringify(SuffixData.serializer(), suffixData)
         return Base64Url.encode(stringToByteArray(suffixDataJson))
     }
 
     private fun encodePatchData(patchData: PatchData): String {
-        val patchDataJson = Serializer.stringify(PatchData.serializer(), patchData)
+        val patchDataJson = serializer.stringify(PatchData.serializer(), patchData)
         val patchDataByteArray = stringToByteArray(patchDataJson)
         return Base64Url.encode(patchDataByteArray)
     }

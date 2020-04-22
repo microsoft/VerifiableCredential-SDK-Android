@@ -25,6 +25,7 @@ import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -122,11 +123,5 @@ internal class SdkModule {
     @Singleton
     fun defaultFormatter(formatter: OidcResponseFormatter): Formatter {
         return formatter
-    }
-
-    @Provides
-    @Singleton
-    fun defaultApiCreator(retrofit: Retrofit): ApiProvider {
-        return ApiProvider(retrofit)
     }
 }
