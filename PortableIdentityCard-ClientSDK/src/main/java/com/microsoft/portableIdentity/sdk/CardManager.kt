@@ -27,6 +27,8 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
 import io.ktor.util.toMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -126,10 +128,12 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
-        return runResultTry {
-            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
-            val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
-            Result.Success(createCard(verifiableCredential.raw, response.request.contract))
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+                val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
+                Result.Success(createCard(verifiableCredential.raw, response.request.contract))
+            }
         }
     }
 
@@ -169,9 +173,11 @@ class CardManager @Inject constructor(
     }
 
     suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Nothing?> {
-        return runResultTry {
-            picRepository.insert(portableIdentityCard)
-            Result.Success(null)
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                picRepository.insert(portableIdentityCard)
+                Result.Success(null)
+            }
         }
     }
 
