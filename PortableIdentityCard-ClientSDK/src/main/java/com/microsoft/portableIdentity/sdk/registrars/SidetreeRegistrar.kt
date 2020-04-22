@@ -26,7 +26,7 @@ import kotlin.random.Random
  * @class
  * @implements Registrar
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String) : Registrar() {
+class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer) : Registrar() {
 
     override suspend fun register(
         signatureKeyReference: String,
@@ -35,10 +35,10 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
     ): Result<Identifier> {
         return try {
             val alias = Base64Url.encode(Random.nextBytes(16))
-            val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference)
+            val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
             val registrationPayloadEncoded = payloadProcessor.generateCreatePayload(alias)
             val registrationPayload =
-                Serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))
+                serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))
 
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
 

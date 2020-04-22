@@ -10,8 +10,4 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-data class VerifiableCredential(
-        val raw: String,
-
-        val contents: VerifiableCredentialContent
-)
+data class VerifiableCredential(val raw: String, val contents: VerifiableCredentialContent)

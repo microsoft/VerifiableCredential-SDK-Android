@@ -24,18 +24,18 @@ data class JwsSignature (
      */
     val signature: String
 ) {
-    fun getKid(): String? {
-        return getMember(JoseConstants.Kid.value)
+    fun getKid(serializer: Serializer): String? {
+        return getMember(JoseConstants.Kid.value, serializer)
     }
     
-    fun getAlg(): String? {
-        return getMember(JoseConstants.Alg.value)
+    fun getAlg(serializer: Serializer): String? {
+        return getMember(JoseConstants.Alg.value, serializer)
     }
     
-    private fun getMember(member: String): String? {
+    private fun getMember(member: String, serializer: Serializer): String? {
         if (protected.isNotEmpty()) {
             val jsonProtected = Base64Url.decode(protected)
-            val mapObject = Serializer.parseMap(byteArrayToString(jsonProtected), String::class, String::class)
+            val mapObject = serializer.parseMap(byteArrayToString(jsonProtected), String::class, String::class)
             if (mapObject.containsKey(member)) {
                 return mapObject[member]
             }

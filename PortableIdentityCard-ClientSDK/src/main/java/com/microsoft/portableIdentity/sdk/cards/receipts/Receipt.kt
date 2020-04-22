@@ -1,13 +1,11 @@
 package com.microsoft.portableIdentity.sdk.cards.receipts
 
-import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity
-enum class ReceiptAction {
-    Issuance,
-    Presentation
+enum class ReceiptAction(action: String) {
+    Issuance("issuance"),
+    Presentation("presentation")
 }
 
 @Entity
@@ -16,7 +14,6 @@ data class Receipt (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
 
-    @Embedded
     val action: ReceiptAction,
 
     val token: String,

@@ -5,6 +5,10 @@
 
 package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+
+typealias Success = Boolean
+
 sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
     class Failure(val payload: PortableIdentitySdkException) : Result<Nothing>()
@@ -34,8 +38,10 @@ suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>)
     } catch (ex: RunResultTryAbortion) {
         Result.Failure(ex.error as PortableIdentitySdkException)
     } catch (ex: PortableIdentitySdkException) {
+        SdkLog.w("Internal Sdk Exception", ex)
         Result.Failure(ex)
     } catch (ex: Exception) {
+        SdkLog.e("Unhandled Sdk Exception", ex)
         Result.Failure(PortableIdentitySdkException("Unhandled Exception", ex))
     }
 

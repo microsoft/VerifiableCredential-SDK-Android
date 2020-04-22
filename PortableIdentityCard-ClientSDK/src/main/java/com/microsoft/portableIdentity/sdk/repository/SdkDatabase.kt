@@ -10,6 +10,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.dao.PortableIdentityCardDao
 import com.microsoft.portableIdentity.sdk.repository.dao.IdentifierDao

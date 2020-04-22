@@ -10,6 +10,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.resolvers.Resolver
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
 import javax.inject.Inject
@@ -21,8 +22,9 @@ import javax.inject.Singleton
 @Singleton
 class JwsValidator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val resolver: Resolver
-) {
+    private val resolver: Resolver,
+    private val serializer: Serializer
+    ) {
 
     /**
      * Verify the signature on the JwsToken.
@@ -45,7 +47,7 @@ class JwsValidator @Inject constructor(
     }
 
     private fun getKid(signature: JwsSignature): Pair<String, String> {
-        val kid = signature.getKid() ?: throw Exception("no kid specified in token")
+        val kid = signature.getKid(serializer) ?: throw Exception("no kid specified in token")
         val parsedKid = kid.split("#")
         return Pair(parsedKid[0], parsedKid[1])
     }
