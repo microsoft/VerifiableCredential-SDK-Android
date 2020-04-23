@@ -239,7 +239,7 @@ class CardManager @Inject constructor(
         }
     }
 
-     * Get A Portable Identity Card by card id from storage
+     /* Get A Portable Identity Card by card id from storage
      * @param  id: card id of requested card
      * @return Result.Success: Portable Identity Card corresponding to id passed
      *         Result.Failure: Exception explaining the problem
