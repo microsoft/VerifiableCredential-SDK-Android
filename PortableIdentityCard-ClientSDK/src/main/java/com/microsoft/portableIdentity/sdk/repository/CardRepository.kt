@@ -49,6 +49,8 @@ class CardRepository @Inject constructor(database: SdkDatabase,
         return MutableLiveData(filteredCards)
     }
 
+    fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
+
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
         url,
         apiProvider
