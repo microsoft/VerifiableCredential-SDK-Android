@@ -19,10 +19,13 @@ data class Receipt (
     val token: String,
 
     // did of the verifier/issuer
-    val entity: String,
+    val entityDid: String,
 
     // date action occurred
     val activityDate: Long,
+
+    // Host name of verifier/issuer
+    val entityHostName: String,
 
     val cardId: String
 )
