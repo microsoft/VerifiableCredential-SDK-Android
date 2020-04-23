@@ -8,6 +8,7 @@ package com.microsoft.portableIdentity.sdk.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchContractNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
@@ -31,11 +32,19 @@ class CardRepository @Inject constructor(database: SdkDatabase,
 
     private val cardDao = database.cardDao()
 
+    private val receiptDao = database.receiptDao()
+
     suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
 
     suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
 
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
+
+    fun getAllReceipts(): LiveData<List<Receipt>> = receiptDao.getAllReceipts()
+
+    fun getAllReceiptsByCardId(cardId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByCardId(cardId)
+
+    suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
         val cards = getAllCards().value ?: return MutableLiveData(emptyList())

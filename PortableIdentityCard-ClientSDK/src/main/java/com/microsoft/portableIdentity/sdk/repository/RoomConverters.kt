@@ -7,6 +7,7 @@ package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.room.TypeConverter
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -40,4 +41,12 @@ object RoomConverters {
     @TypeConverter
     @JvmStatic
     fun identifierDocumentToString(idDocument: IdentifierDocument) = serializer.stringify(IdentifierDocument.serializer(), idDocument)
+
+    @TypeConverter
+    @JvmStatic
+    fun toReceiptAction(value: String) = enumValueOf<ReceiptAction>(value)
+
+    @TypeConverter
+    @JvmStatic
+    fun fromReceiptAction(value: ReceiptAction) = value.name
 }

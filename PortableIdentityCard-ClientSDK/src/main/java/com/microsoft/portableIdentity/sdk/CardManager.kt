@@ -6,17 +6,15 @@
 package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.PresentationAttestation
-import com.microsoft.portableIdentity.sdk.auth.models.attestations.CardRequestBinding
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
-import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
+import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
@@ -130,12 +128,15 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<Pair<PortableIdentityCard, List<Receipt>>> {
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
-                Result.Success(createCard(verifiableCredential.raw, response.request.contract))
+                val card = createCard(verifiableCredential.raw, response.request.contract)
+                val receipts = response.createReceiptsForPresentedCredentials(formattedResponse).toMutableList()
+                receipts.add(response.createIssuanceReceipt(card.id, card.verifiableCredential.contents.iss, formattedResponse))
+                Result.Success(Pair(card, receipts))
             }
         }
     }
@@ -149,10 +150,11 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<Unit> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<List<Receipt>> {
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
+            Result.Success(response.createReceiptsForPresentedCredentials(formattedResponse))
         }
     }
 
@@ -184,7 +186,7 @@ class CardManager @Inject constructor(
         }
     }
 
-    fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
+    private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
         val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
         return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
@@ -216,6 +218,27 @@ class CardManager @Inject constructor(
     }
 
     /**
+     * Get Receipts by Card Id from Storage.
+     *
+     * @return List of Receipts
+     */
+    fun getReceiptByCardId(cardId: String): LiveData<List<Receipt>> {
+        return picRepository.getAllReceiptsByCardId(cardId)
+    }
+
+    /**
+     * Get Receipts by Card Id from Storage.
+     *
+     * @return List of Receipts
+     */
+    suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
+        return try {
+            Result.Success(picRepository.insert(receipt))
+        } catch (exception: Exception) {
+            Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
+        }
+    }
+
      * Get A Portable Identity Card by card id from storage
      * @param  id: card id of requested card
      * @return Result.Success: Portable Identity Card corresponding to id passed
@@ -224,5 +247,4 @@ class CardManager @Inject constructor(
     fun getCardById(id: String): LiveData<PortableIdentityCard> {
         return picRepository.getCardById(id)
     }
-
 }
