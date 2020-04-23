@@ -30,7 +30,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
         val token = JwsToken.deserialize(request.serializedToken, serializer)
         return when (val validationResult = jwsValidator.verifySignature(token)) {
             is Result.Success -> {
-                val isValid = validationResult.payload && hasTokenExpired(request.contents.exp) && hasMatchingParams(request.contents, request.oidcParameters)
+                val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
                 Result.Success(isValid)
             }
             is Result.Failure -> validationResult

@@ -5,13 +5,13 @@ package com.microsoft.portableIdentity.sdk.auth.responses
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 
-class PresentationResponse(val request: PresentationRequest): OidcResponse(request.contents.clientId) {
+class PresentationResponse(val request: PresentationRequest): OidcResponse(request.content.clientId) {
 
-    val nonce: String? = request.contents.nonce
+    val nonce: String? = request.content.nonce
 
-    val state: String? = request.contents.state
+    val state: String? = request.content.state
 
     fun getRequestContents(): OidcRequestContent {
-        return request.contents
+        return request.content
     }
 }
