@@ -41,9 +41,10 @@ class SerializationTest {
 
     @Test
     fun `serialize and deserialize an identity document`() {
-        val serializedDocument = Serializer.stringify(IdentifierDocument.serializer(), actualDocument)
-        val expectedDocument = Serializer.parse(IdentifierDocument.serializer(), serializedDocument)
-        val serializedExpectedDocument = Serializer.stringify(IdentifierDocument.serializer(), expectedDocument)
+        val serializer = Serializer()
+        val serializedDocument = serializer.stringify(IdentifierDocument.serializer(), actualDocument)
+        val expectedDocument = serializer.parse(IdentifierDocument.serializer(), serializedDocument)
+        val serializedExpectedDocument = serializer.stringify(IdentifierDocument.serializer(), expectedDocument)
         assertThat(serializedDocument).isEqualTo(serializedExpectedDocument)
     }
 }

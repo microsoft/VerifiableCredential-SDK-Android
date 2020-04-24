@@ -15,6 +15,7 @@ import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
@@ -134,8 +135,8 @@ class CardManager @Inject constructor(
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
                 val card = createCard(verifiableCredential.raw, response.request.contract)
-                val receipts = response.createReceiptsForPresentedCredentials(formattedResponse).toMutableList()
-                receipts.add(response.createIssuanceReceipt(card.id, card.verifiableCredential.contents.iss, formattedResponse))
+                val receipts = response.createReceiptsForPresentedCredentials(entityDid = response.request.contract.input.issuer, entityHostName = response.audience, requestToken = formattedResponse).toMutableList()
+                receipts.add(response.createReceipt(ReceiptAction.Issuance, card.id, card.verifiableCredential.contents.iss, response.audience, formattedResponse))
                 Result.Success(Pair(card, receipts))
             }
         }
@@ -154,7 +155,7 @@ class CardManager @Inject constructor(
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
-            Result.Success(response.createReceiptsForPresentedCredentials(formattedResponse))
+            Result.Success(response.createReceiptsForPresentedCredentials(entityDid = response.request.content.iss, entityHostName = response.audience, requestToken = formattedResponse))
         }
     }
 
@@ -238,8 +239,8 @@ class CardManager @Inject constructor(
             Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
         }
     }
-
-     /* Get A Portable Identity Card by card id from storage
+  
+     /** Get A Portable Identity Card by card id from storage
      * @param  id: card id of requested card
      * @return Result.Success: Portable Identity Card corresponding to id passed
      *         Result.Failure: Exception explaining the problem
