@@ -30,5 +30,7 @@ data class IdentifierDocumentPublicKeyInput (
     /**
      * The JWK public key.
      */
-    val jwk: JsonWebKey
+    val jwk: JsonWebKey,
+
+    val usage: List<String>
 )

@@ -17,6 +17,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaHashedKeyAlgorithm
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -32,7 +33,8 @@ class AndroidKeyStoreInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        keyStore = AndroidKeyStore(context)
+        val serializer = Serializer()
+        keyStore = AndroidKeyStore(context, serializer)
         val androidSubtle = AndroidSubtle(keyStore)
         val keyPair = androidSubtle.generateKeyPair(
             RsaHashedKeyAlgorithm(

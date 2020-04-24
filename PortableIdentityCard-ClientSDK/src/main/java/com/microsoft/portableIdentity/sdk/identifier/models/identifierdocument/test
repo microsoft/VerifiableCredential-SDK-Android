@@ -1,0 +1,56 @@
+{
+  "@context": "https://www.w3.org/ns/did-resolution/v1",
+  "didDocument": {
+    "id": "did:ion:test:EiDRPAETJeLINVPwpSqboRYmKyWh8JbM2FVHmaPdLEw6ng?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEa2d5eHRxNkZTVUNyV19MM2Jzby05X3hIazlETUI2TU1ROUI0U25qTVlPQSIsInJlY292ZXJ5X2tleSI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJBYUt1a3BDMFhBeW9qRUtpVVdXZS1KeUxYbzBIZzExY3FFNzc0T2xRVjZZIiwieSI6Imt5dXViNDBXaTFoMENMVWFQZ3h5QXNFd1hpWlFLX2RXUXVzYjhZTllzMW8ifSwicmVjb3ZlcnlfY29tbWl0bWVudCI6IkVpQ3FBajBUanFoaU5LU1hWNllfTThzdFZFODNHVmltLXNwMHhzVERBTERaTlEifQ.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQlZMOEVDZ2ViaTUwSVE3SzVETzRxOUIxaGd0akxGWjhnWEJ0RWpiVjFxV0EiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJzaWduaW5nS2V5IiwidHlwZSI6IlNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiY0Y0ZFFOXzUxZGxOOXkzdml1REJWM2hOcm9zbHpha2dKYW9OZzJTcFNVYyIsInkiOiJVdWdtcVljZHJyWlBZdVZ1d0J6dENHRUtEYlZhbzE0OFd4ZjM5U0pOVTRRIn0sInVzYWdlIjpbIm9wcyIsImF1dGgiLCJnZW5lcmFsIl19XSwic2VydmljZUVuZHBvaW50cyI6W3siaWQiOiJzZXJ2aWNlRW5kcG9pbnRJZDEyMyIsInR5cGUiOiJzb21lVHlwZSIsInNlcnZpY2VFbmRwb2ludCI6Imh0dHBzOi8vd3d3LnVybC5jb20ifV19fV19",
+    "@context": [
+      "https://www.w3.org/ns/did/v1",
+      {
+        "@base": "did:ion:test:EiDRPAETJeLINVPwpSqboRYmKyWh8JbM2FVHmaPdLEw6ng?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEa2d5eHRxNkZTVUNyV19MM2Jzby05X3hIazlETUI2TU1ROUI0U25qTVlPQSIsInJlY292ZXJ5X2tleSI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJBYUt1a3BDMFhBeW9qRUtpVVdXZS1KeUxYbzBIZzExY3FFNzc0T2xRVjZZIiwieSI6Imt5dXViNDBXaTFoMENMVWFQZ3h5QXNFd1hpWlFLX2RXUXVzYjhZTllzMW8ifSwicmVjb3ZlcnlfY29tbWl0bWVudCI6IkVpQ3FBajBUanFoaU5LU1hWNllfTThzdFZFODNHVmltLXNwMHhzVERBTERaTlEifQ.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQlZMOEVDZ2ViaTUwSVE3SzVETzRxOUIxaGd0akxGWjhnWEJ0RWpiVjFxV0EiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJzaWduaW5nS2V5IiwidHlwZSI6IlNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiY0Y0ZFFOXzUxZGxOOXkzdml1REJWM2hOcm9zbHpha2dKYW9OZzJTcFNVYyIsInkiOiJVdWdtcVljZHJyWlBZdVZ1d0J6dENHRUtEYlZhbzE0OFd4ZjM5U0pOVTRRIn0sInVzYWdlIjpbIm9wcyIsImF1dGgiLCJnZW5lcmFsIl19XSwic2VydmljZUVuZHBvaW50cyI6W3siaWQiOiJzZXJ2aWNlRW5kcG9pbnRJZDEyMyIsInR5cGUiOiJzb21lVHlwZSIsInNlcnZpY2VFbmRwb2ludCI6Imh0dHBzOi8vd3d3LnVybC5jb20ifV19fV19"
+      }
+    ],
+    "service": [
+      {
+        "id": "#serviceEndpointId123",
+        "type": "someType",
+        "serviceEndpoint": "https://www.url.com"
+      }
+    ],
+    "publicKey": [
+      {
+        "id": "#signingKey",
+        "controller": "",
+        "type": "Secp256k1VerificationKey2019",
+        "publicKeyJwk": {
+          "kty": "EC",
+          "crv": "secp256k1",
+          "x": "cF4dQN_51dlN9y3viuDBV3hNroslzakgJaoNg2SpSUc",
+          "y": "UugmqYcdrrZPYuVuwBztCGEKDbVao148Wxf39SJNU4Q"
+        }
+      }
+    ],
+    "authentication": [
+      "#signingKey"
+    ]
+  },
+  "methodMetadata": {
+    "operationPublicKeys": [
+      {
+        "id": "#signingKey",
+        "controller": "",
+        "type": "Secp256k1VerificationKey2019",
+        "publicKeyJwk": {
+          "kty": "EC",
+          "crv": "secp256k1",
+          "x": "cF4dQN_51dlN9y3viuDBV3hNroslzakgJaoNg2SpSUc",
+          "y": "UugmqYcdrrZPYuVuwBztCGEKDbVao148Wxf39SJNU4Q"
+        }
+      }
+    ],
+    "recoveryKey": {
+      "kty": "EC",
+      "crv": "secp256k1",
+      "x": "AaKukpC0XAyojEKiUWWe-JyLXo0Hg11cqE774OlQV6Y",
+      "y": "kyuub40Wi1h0CLUaPgxyAsEwXiZQK_dWQusb8YNYs1o"
+    }
+  }
+}

@@ -38,13 +38,13 @@ class SidetreePayloadProcessor @Inject constructor(
      * In unpublished resolution or long form it is same as the initial-state portion of the identifier which can be used
      * to resolve portable identifier
      */
-    fun generateCreatePayload(alias: String): String {
+    fun generateCreatePayload(alias: String): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
         val signingKeyJWK = generatePublicKeyJwk("$alias.$signatureKeyReference", KeyType.EllipticCurve)
         val recoveryKeyJWK = generatePublicKeyJwk("$alias.$recoveryKeyReference", KeyType.EllipticCurve)
 
-        val registrationDocument = generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK)
-        return encodeRegDoc(registrationDocument)
+        return generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK)
+//        return encodeRegDoc(registrationDocument)
     }
 
     /**
@@ -74,7 +74,7 @@ class SidetreePayloadProcessor @Inject constructor(
         val patchDataEncoded = encodePatchData(patchData)
 
         val suffixDataEncoded = createSuffixDataEncoded(patchData, recoveryKeyJWK)
-        return RegistrationPayload(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
+        return RegistrationPayload(/*SIDETREE_OPERATION_TYPE,*/ suffixDataEncoded, patchDataEncoded)
     }
 
     private fun generatePublicKeyJwk(personaKeyRef: String, keyType: KeyType): JsonWebKey {
@@ -98,7 +98,8 @@ class SidetreePayloadProcessor @Inject constructor(
                     /*id = signingKeyJWK.kid!!,*/
                     id = "testkey",
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
-                    jwk = signingKeyJWK
+                    jwk = signingKeyJWK,
+                    usage = listOf("general")
                 )
             )
         )

@@ -9,6 +9,8 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
+import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
+import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -26,7 +28,10 @@ import kotlin.random.Random
  * @class
  * @implements Registrar
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer) : Registrar() {
+class SidetreeRegistrar @Inject constructor(
+    @Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer,
+    private val identifierRepository: IdentifierRepository
+) : Registrar() {
 
     override suspend fun register(
         signatureKeyReference: String,
@@ -36,11 +41,14 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         return try {
             val alias = Base64Url.encode(Random.nextBytes(16))
             val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
-            val registrationPayloadEncoded = payloadProcessor.generateCreatePayload(alias)
-            val registrationPayload =
-                serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))
+            val registrationPayload = payloadProcessor.generateCreatePayload(alias)
+            val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
+/*            val registrationPayload =
+                serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))*/
 
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
+            val resolver = Resolver("http://10.91.6.163:3000", identifierRepository)
+            val doc = resolver.resolve(identifierLongForm)
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(

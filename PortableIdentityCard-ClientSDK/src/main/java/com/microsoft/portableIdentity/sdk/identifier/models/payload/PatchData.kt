@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PatchData(
-    @SerialName("nextUpdateCommitmentHash")
+    @SerialName("update_commitment")
     val nextUpdateCommitmentHash: String,
     @SerialName("patches")
     val patches: List<IdentifierDocumentPatch>
