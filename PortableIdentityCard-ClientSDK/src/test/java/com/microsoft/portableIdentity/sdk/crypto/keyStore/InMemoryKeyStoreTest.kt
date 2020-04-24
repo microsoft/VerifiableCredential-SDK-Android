@@ -7,6 +7,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaOaepParams
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -14,7 +15,7 @@ import java.lang.RuntimeException
 
 class InMemoryKeyStoreTest {
     private val inMemoryKeyStore = InMemoryKeyStore()
-    private val subtle = Subtle(setOf(MockProvider()))
+    private val subtle = Subtle(setOf(MockProvider()), Serializer())
     private val keyRef: String = "TestKeys"
     private var keyPair: CryptoKeyPair
     private var actualPublicKey: MockPublicKey

@@ -32,12 +32,12 @@ class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.val
         companion object {
             fun serialize(key: CryptoKey, data: ByteArray): ByteArray {
                 val datagram = Datagram(key.handle as String, byteArrayToString(data))
-                val json = Serializer.stringify(serializer(), datagram)
+                val json = Serializer().stringify(serializer(), datagram)
                 return stringToByteArray(json)
             }
 
             fun deserialize(datagram: ByteArray): Datagram {
-                return Serializer.parse(serializer(), byteArrayToString(datagram))
+                return Serializer().parse(serializer(), byteArrayToString(datagram))
             }
         }
     }

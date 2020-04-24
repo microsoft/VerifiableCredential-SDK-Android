@@ -24,8 +24,8 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     companion object {
         const val provider = "AndroidKeyStore"
-        private val regexForKeyReference = Regex("^#(.*)\\.[^.]+$")
-        private val regexForKeyIndex = Regex("^#.*\\.([^.]+$)")
+        private val regexForKeyReference = Regex("(.*)\\_[^.]+$")
+        private val regexForKeyIndex = Regex(".*\\_([^.]+\$)")
 
         val keyStore: KeyStore by lazy { KeyStore.getInstance(provider).apply { load(null) } }
     }
@@ -345,8 +345,8 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
             // generate a key id
             val listItem = this.list()[keyReference]
             if (listItem == null) { // no previous keys
-                SdkLog.d("New key reference #$keyReference.1")
-                "#$keyReference.1"
+                SdkLog.d("New key reference $keyReference"+"_1")
+                keyReference+"_1"
             } else {
                 // heuristic, find the last digit and count up
                 var latestVersion = listItem.kids.reduce {
@@ -363,8 +363,8 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 }.toIntOrNull() ?: 0
 
                 latestVersion++
-                SdkLog.d("New key reference #$keyReference.$latestVersion")
-                "#$keyReference.$latestVersion"
+                SdkLog.d("New key reference $keyReference"+"_$latestVersion")
+                keyReference+"_$latestVersion"
             }
         }
     }

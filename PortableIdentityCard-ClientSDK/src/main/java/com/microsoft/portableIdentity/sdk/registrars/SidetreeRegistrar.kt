@@ -10,7 +10,6 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
-import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -37,14 +36,14 @@ class SidetreeRegistrar @Inject constructor(
         cryptoOperations: CryptoOperations
     ): Result<Identifier> {
         return try {
-            val alias = Base64Url.encode(Random.nextBytes(16))
+            val alias = Base64Url.encode(Random.nextBytes(8))
             val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
             val registrationPayload = payloadProcessor.generateCreatePayload(alias)
             val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
 
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
-            val resolver = Resolver("http://10.91.6.163:3000", identifierRepository)
-            val doc = resolver.resolve(identifierLongForm)
+/*            val resolver = Resolver("http://10.91.6.163:3000", identifierRepository)
+            val doc = resolver.resolve(identifierLongForm)*/
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(
@@ -87,8 +86,8 @@ class SidetreeRegistrar @Inject constructor(
         val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
         val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
 
-        val personaSigKeyRef = "$alias.$signatureKeyReference"
-        val personaRecKeyRef = "$alias.$recoveryKeyReference"
+        val personaSigKeyRef = "$alias" + "_" + "$signatureKeyReference"
+        val personaRecKeyRef = "$alias" + "_" + "$recoveryKeyReference"
 
         return Identifier(
             identifierLongForm,
