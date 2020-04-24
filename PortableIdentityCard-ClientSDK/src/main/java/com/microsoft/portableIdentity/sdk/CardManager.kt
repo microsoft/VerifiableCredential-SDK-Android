@@ -239,7 +239,7 @@ class CardManager @Inject constructor(
             Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
         }
     }
-
+  
      /** Get A Portable Identity Card by card id from storage
      * @param  id: card id of requested card
      * @return Result.Success: Portable Identity Card corresponding to id passed
