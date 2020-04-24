@@ -14,10 +14,8 @@ import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RegistrarException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
-import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.random.Random
@@ -43,8 +41,6 @@ class SidetreeRegistrar @Inject constructor(
             val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
             val registrationPayload = payloadProcessor.generateCreatePayload(alias)
             val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
-/*            val registrationPayload =
-                serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))*/
 
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
             val resolver = Resolver("http://10.91.6.163:3000", identifierRepository)

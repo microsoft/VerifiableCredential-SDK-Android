@@ -44,7 +44,6 @@ class SidetreePayloadProcessor @Inject constructor(
         val recoveryKeyJWK = generatePublicKeyJwk("$alias.$recoveryKeyReference", KeyType.EllipticCurve)
 
         return generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK)
-//        return encodeRegDoc(registrationDocument)
     }
 
     /**
@@ -52,9 +51,7 @@ class SidetreePayloadProcessor @Inject constructor(
      * In unpublished resolution or long form, id is generated in SDK.
      */
     fun computeUniqueSuffix(suffixDataEncoded: String): String {
-        val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
-        val suffixDataJson = byteArrayToString(suffixDataDecoded)
-        val suffixDataHash = hash(stringToByteArray(suffixDataJson))
+        val suffixDataHash = hash(stringToByteArray(suffixDataEncoded))
         return Base64Url.encode(suffixDataHash)
     }
 
@@ -99,7 +96,7 @@ class SidetreePayloadProcessor @Inject constructor(
                     id = "testkey",
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     jwk = signingKeyJWK,
-                    usage = listOf("general")
+                    usage = listOf("ops", "auth", "general")
                 )
             )
         )
@@ -144,11 +141,6 @@ class SidetreePayloadProcessor @Inject constructor(
     private fun generateCommitmentValue(): ByteArray {
         val commitmentValue = Base64Url.encode(Random.Default.nextBytes(32))
         return hash(stringToByteArray(commitmentValue))
-    }
-
-    private fun encodeRegDoc(registrationPayload: RegistrationPayload): String {
-        val regDocJson = serializer.stringify(RegistrationPayload.serializer(), registrationPayload)
-        return Base64Url.encode(stringToByteArray(regDocJson))
     }
 
     private fun encodeSuffixData(suffixData: SuffixData): String {
