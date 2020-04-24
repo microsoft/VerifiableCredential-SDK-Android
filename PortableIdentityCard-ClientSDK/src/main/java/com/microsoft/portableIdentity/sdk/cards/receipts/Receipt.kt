@@ -19,7 +19,7 @@ data class Receipt (
     val token: String,
 
     // did of the verifier/issuer
-    val entityDid: String,
+    val entityIdentifier: String,
 
     // date action occurred
     val activityDate: Long,
