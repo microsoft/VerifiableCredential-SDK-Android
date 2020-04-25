@@ -9,7 +9,6 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
-import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -26,8 +25,7 @@ import kotlin.random.Random
  * @implements Registrar
  */
 class SidetreeRegistrar @Inject constructor(
-    @Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer,
-    private val identifierRepository: IdentifierRepository
+    @Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer
 ) : Registrar() {
 
     override suspend fun register(
@@ -42,8 +40,6 @@ class SidetreeRegistrar @Inject constructor(
             val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
 
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
-/*            val resolver = Resolver("http://10.91.6.163:3000", identifierRepository)
-            val doc = resolver.resolve(identifierLongForm)*/
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(
@@ -62,8 +58,7 @@ class SidetreeRegistrar @Inject constructor(
 
     private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {
         val uniqueSuffix = payloadProcessor.computeUniqueSuffix(registrationPayload.suffixData)
-        //TODO: Confirm the final method name (ion-test???)
-        return "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
+        return "did:${Constants.METHOD_NAME}:$uniqueSuffix"
     }
 
     private fun computeLongFormIdentifier(

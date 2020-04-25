@@ -5,8 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.resolvers
 
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.DiscoveryDocument
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ResolverException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -21,7 +21,7 @@ class Resolver @Inject constructor(@Named("resolverUrl") private val baseUrl: St
             when(val id = identifierRepository.resolveIdentifier(baseUrl, identifier)) {
                 is Result.Success ->  {
                     if(id.payload != null)
-                        Result.Success((id.payload as IdentifierResponse).didDocument)
+                        Result.Success((id.payload as DiscoveryDocument).document.didDocument)
                     else
                         Result.Success(id.payload)
                 }

@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@SerialName("document")
 data class IdentifierResponse(
     @SerialName("didDocument")
     val didDocument: IdentifierDocument,

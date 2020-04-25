@@ -16,5 +16,5 @@ data class IdentifierDocumentPayload(
     @SerialName("publicKeys")
     val publicKeys: List<IdentifierDocumentPublicKeyInput>,
     @SerialName("serviceEndpoints")
-    val serviceEndpoints: List<IdentifierDocumentService> = emptyList()
+    var serviceEndpoints: List<IdentifierDocumentService> = emptyList()
 )

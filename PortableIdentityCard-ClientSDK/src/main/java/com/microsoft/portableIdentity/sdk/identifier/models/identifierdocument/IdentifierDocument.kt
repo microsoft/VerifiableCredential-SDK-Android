@@ -10,6 +10,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IdentifierDocument(
     val publicKey: List<IdentifierDocumentPublicKey>,
-    val service: List<IdentifierDocumentService>?,
     val id: String
-)
+) {
+    var service: List<IdentifierDocumentService>? = emptyList()
+}

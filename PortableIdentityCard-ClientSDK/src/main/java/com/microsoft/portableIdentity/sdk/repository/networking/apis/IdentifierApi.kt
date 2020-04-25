@@ -5,8 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.DiscoveryDocument
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Url
@@ -14,5 +13,5 @@ import retrofit2.http.Url
 interface IdentifierApi {
 
     @GET
-    suspend fun resolveIdentifier(@Url overrideUrl: String): Response<IdentifierResponse>
+    suspend fun resolveIdentifier(@Url overrideUrl: String): Response<DiscoveryDocument>
 }
