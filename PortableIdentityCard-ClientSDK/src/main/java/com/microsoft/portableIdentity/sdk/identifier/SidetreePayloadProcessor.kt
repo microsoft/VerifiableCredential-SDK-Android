@@ -94,8 +94,10 @@ class SidetreePayloadProcessor @Inject constructor(
             publicKeys = listOf(
                 IdentifierDocumentPublicKeyInput(
                     //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
-                    id = signingKeyJWK.kid!!,
-//                    id = "testkey",
+                    id = if (signingKeyJWK.kid!!.startsWith("#"))
+                        signingKeyJWK.kid!!.substringAfter('#')
+                    else
+                        signingKeyJWK.kid!!,
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     jwk = generatePublicKeyJwk(signingKeyJWK),
                     usage = listOf("ops", "auth", "general")

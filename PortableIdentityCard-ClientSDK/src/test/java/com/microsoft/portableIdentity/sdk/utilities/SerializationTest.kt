@@ -3,7 +3,6 @@ package com.microsoft.portableIdentity.sdk.utilities
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
-import com.microsoft.portableIdentity.sdk.identifier.models.payload.document.IdentifierDocumentService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -23,20 +22,7 @@ class SerializationTest {
                         y = "ICzV5CiqZJeAS34tJ6t9AwKoe5dQpqlf25Eay5Stpco"
                     )
                 )
-            ),
-            service = listOf(
-                IdentifierDocumentService(
-                    id = "#serviceEndpointId123",
-                    type = "IdentityHub",
-                    serviceEndpoint = "https://beta.hub.microsoft.com/"
-                )
-            )/*,
-            recoveryKey = JsonWebKey(
-                kty = "EC",
-                crv = "secp256k1",
-                x = "AEaA_TMpNsRwmZNwe70z2q_dz1rQ7G8gN0_UAydEMyU",
-                y = "ICzV5CiqZJeAS34tJ6t9AwKoe5dQpqlf25Eay5Stpco"
-            )*/
+            )
         )
 
     @Test
