@@ -2,7 +2,9 @@ package com.microsoft.portableIdentity.sdk.identifier
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.PatchData
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.SuffixData
@@ -38,13 +40,14 @@ class SidetreePayloadProcessor @Inject constructor(
      * In unpublished resolution or long form it is same as the initial-state portion of the identifier which can be used
      * to resolve portable identifier
      */
-    fun generateCreatePayload(alias: String): String {
+    fun generateCreatePayload(alias: String): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
-        val signingKeyJWK = generatePublicKeyJwk("$alias.$signatureKeyReference", KeyType.EllipticCurve)
-        val recoveryKeyJWK = generatePublicKeyJwk("$alias.$recoveryKeyReference", KeyType.EllipticCurve)
+        val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
+        val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
+        val signingKeyJWK = signingPublicKey.toJWK()
+        val recoveryKeyJWK = recoveryPublicKey.toJWK()
 
-        val registrationDocument = generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK)
-        return encodeRegDoc(registrationDocument)
+        return generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK)
     }
 
     /**
@@ -52,9 +55,7 @@ class SidetreePayloadProcessor @Inject constructor(
      * In unpublished resolution or long form, id is generated in SDK.
      */
     fun computeUniqueSuffix(suffixDataEncoded: String): String {
-        val suffixDataDecoded = Base64Url.decode(suffixDataEncoded)
-        val suffixDataJson = byteArrayToString(suffixDataDecoded)
-        val suffixDataHash = hash(stringToByteArray(suffixDataJson))
+        val suffixDataHash = hash(stringToByteArray(suffixDataEncoded))
         return Base64Url.encode(suffixDataHash)
     }
 
@@ -73,18 +74,16 @@ class SidetreePayloadProcessor @Inject constructor(
         val patchData = createPatchData(identifierDocumentPatch)
         val patchDataEncoded = encodePatchData(patchData)
 
-        val suffixDataEncoded = createSuffixDataEncoded(patchData, recoveryKeyJWK)
-        return RegistrationPayload(SIDETREE_OPERATION_TYPE, suffixDataEncoded, patchDataEncoded)
+        val suffixDataEncoded = createSuffixDataEncoded(patchData, generatePublicKeyJwk(recoveryKeyJWK))
+        return RegistrationPayload(suffixDataEncoded, patchDataEncoded)
     }
 
-    private fun generatePublicKeyJwk(personaKeyRef: String, keyType: KeyType): JsonWebKey {
-        val publicKey = cryptoOperations.generateKeyPair(personaKeyRef, keyType)
-        val publicKeyJwk = publicKey.toJWK()
-        return when (keyType) {
-            KeyType.RSA -> publicKeyJwk
+    private fun generatePublicKeyJwk(publicKeyJwk: JsonWebKey): JsonWebKey {
+        return when (publicKeyJwk.kty) {
+            KeyType.RSA.value -> publicKeyJwk
             else -> {
                 //Sidetree api specifically checks for curve name for elliptic curve keys. Hence it is set here.
-                val curveName = if (publicKeyJwk.kty == KeyType.EllipticCurve.value) SIDETREE_CURVE_NAME_FOR_EC else publicKeyJwk.crv
+                val curveName = SIDETREE_CURVE_NAME_FOR_EC
                 JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
             }
         }
@@ -94,11 +93,10 @@ class SidetreePayloadProcessor @Inject constructor(
         return IdentifierDocumentPayload(
             publicKeys = listOf(
                 IdentifierDocumentPublicKeyInput(
-                    //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
-                    /*id = signingKeyJWK.kid!!,*/
-                    id = "testkey",
+                    id = signingKeyJWK.kid!!.substringAfter('#'),
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
-                    jwk = signingKeyJWK
+                    jwk = generatePublicKeyJwk(signingKeyJWK),
+                    usage = listOf("ops", "auth", "general")
                 )
             )
         )
@@ -143,11 +141,6 @@ class SidetreePayloadProcessor @Inject constructor(
     private fun generateCommitmentValue(): ByteArray {
         val commitmentValue = Base64Url.encode(Random.Default.nextBytes(32))
         return hash(stringToByteArray(commitmentValue))
-    }
-
-    private fun encodeRegDoc(registrationPayload: RegistrationPayload): String {
-        val regDocJson = serializer.stringify(RegistrationPayload.serializer(), registrationPayload)
-        return Base64Url.encode(stringToByteArray(regDocJson))
     }
 
     private fun encodeSuffixData(suffixData: SuffixData): String {

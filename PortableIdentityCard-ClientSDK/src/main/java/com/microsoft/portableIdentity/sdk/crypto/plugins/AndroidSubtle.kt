@@ -93,7 +93,6 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
                 .build()
         )
         val keyPair = keyPairGenerator.genKeyPair()
-//        AndroidKeyStore.keyStore.
         SdkLog.d("Key pair generated ($alias)")
         // convert keypair.
         return CryptoKeyPair(

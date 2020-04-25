@@ -10,10 +10,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegistrationPayload (
-    @SerialName("type")
-    val type:String,
-    @SerialName("suffixData")
+    @SerialName("suffix_data")
     val suffixData: String,
-    @SerialName("patchData")
+    @SerialName("delta")
     val patchData: String
 )

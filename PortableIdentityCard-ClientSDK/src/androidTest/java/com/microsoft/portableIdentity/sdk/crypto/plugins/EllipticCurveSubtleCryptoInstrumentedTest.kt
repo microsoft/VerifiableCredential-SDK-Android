@@ -11,6 +11,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.assertj.core.api.Assertions.assertThat
@@ -23,9 +24,10 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val keyStore = AndroidKeyStore(context)
+        val serializer = Serializer()
+        val keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
-        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle)
+        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, serializer)
         val keyReference = "KeyReference1"
         cryptoKeyPair = ellipticCurveSubtleCrypto.generateKeyPair(
             EcKeyGenParams(

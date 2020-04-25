@@ -38,8 +38,8 @@ object PortableIdentitySdk {
     fun init(
         context: Context,
         logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(),
-        registrationUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
-        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
+        registrationUrl: String = "",
+        resolverUrl: String = "https://dev.discover.did.msidentity.com/1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)

@@ -9,12 +9,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class IdentifierDocumentPayload(
-    @SerialName("@context")
-    val context: String = "https://www.w3.org/2019/did/v1",
-    val created: String? = null,
-    val updated: String? = null,
     @SerialName("publicKeys")
     val publicKeys: List<IdentifierDocumentPublicKeyInput>,
     @SerialName("serviceEndpoints")
-    val serviceEndpoints: List<IdentifierDocumentService> = emptyList()
+    var serviceEndpoints: List<IdentifierDocumentService> = emptyList()
 )

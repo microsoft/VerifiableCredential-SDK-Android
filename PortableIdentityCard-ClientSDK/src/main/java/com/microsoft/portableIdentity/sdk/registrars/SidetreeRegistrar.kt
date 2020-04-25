@@ -12,10 +12,8 @@ import com.microsoft.portableIdentity.sdk.identifier.models.payload.Registration
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RegistrarException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
-import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.random.Random
@@ -26,7 +24,9 @@ import kotlin.random.Random
  * @class
  * @implements Registrar
  */
-class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer) : Registrar() {
+class SidetreeRegistrar @Inject constructor(
+    @Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer
+) : Registrar() {
 
     override suspend fun register(
         signatureKeyReference: String,
@@ -34,11 +34,10 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         cryptoOperations: CryptoOperations
     ): Result<Identifier> {
         return try {
-            val alias = Base64Url.encode(Random.nextBytes(16))
+            val alias = Base64Url.encode(Random.nextBytes(8))
             val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
-            val registrationPayloadEncoded = payloadProcessor.generateCreatePayload(alias)
-            val registrationPayload =
-                serializer.parse(RegistrationPayload.serializer(), byteArrayToString(Base64Url.decode(registrationPayloadEncoded)))
+            val registrationPayload = payloadProcessor.generateCreatePayload(alias)
+            val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
 
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
 
@@ -59,8 +58,7 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
 
     private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {
         val uniqueSuffix = payloadProcessor.computeUniqueSuffix(registrationPayload.suffixData)
-        //TODO: Confirm the final method name (ion-test???)
-        return "did:${Constants.METHOD_NAME}:test:$uniqueSuffix"
+        return "did:${Constants.METHOD_NAME}:$uniqueSuffix"
     }
 
     private fun computeLongFormIdentifier(
@@ -83,14 +81,13 @@ class SidetreeRegistrar @Inject constructor(@Named("registrationUrl") private va
         val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
         val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
 
-        val personaSigKeyRef = "$alias.$signatureKeyReference"
-        val personaRecKeyRef = "$alias.$recoveryKeyReference"
+        val personaSigKeyRef = "${alias}_$signatureKeyReference"
+        val personaRecKeyRef = "${alias}_$recoveryKeyReference"
 
         return Identifier(
             identifierLongForm,
             alias,
             personaSigKeyRef,
-            //TODO: Since we know encryption is coming in the future, do we want to add encryption key now so that we don't have to modify the table later.
             "",
             personaRecKeyRef,
             nextUpdateCommitmentHash,

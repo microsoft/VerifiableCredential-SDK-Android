@@ -43,6 +43,7 @@ class JwsTokenTest {
 
     @Test
     fun `test serialization of json in flat format`() {
+        val serializer = Serializer()
         val testData: ByteArray = stringToByteArray(payload)
         val token = JwsToken(testData, serializer)
         token.sign(keyRef, crypto)
@@ -54,6 +55,7 @@ class JwsTokenTest {
 
     @Test
     fun `test serialization of json in general json format`() {
+        val serializer = Serializer()
         val testData: ByteArray = stringToByteArray(payload)
         val token = JwsToken(testData, serializer)
         token.sign(keyRef, crypto)
@@ -65,6 +67,7 @@ class JwsTokenTest {
 
     @Test
     fun signAndVerify() {
+        val serializer = Serializer()
         val testData = Random.Default.nextBytes(32)
         val token = JwsToken(testData, serializer)
         token.sign(keyRef, crypto)

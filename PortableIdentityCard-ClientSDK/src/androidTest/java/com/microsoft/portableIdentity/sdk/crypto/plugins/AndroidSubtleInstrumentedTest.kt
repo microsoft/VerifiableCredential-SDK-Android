@@ -13,6 +13,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -26,7 +27,8 @@ class AndroidSubtleInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        keyStore = AndroidKeyStore(context)
+        val serializer = Serializer()
+        keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
         val keyReference = "KeyReference1"
         cryptoKeyPair = androidSubtle.generateKeyPair(

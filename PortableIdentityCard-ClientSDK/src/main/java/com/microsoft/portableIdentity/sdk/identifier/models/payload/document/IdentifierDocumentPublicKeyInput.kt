@@ -3,6 +3,7 @@
 package com.microsoft.portableIdentity.sdk.identifier.models.payload.document
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -30,5 +31,8 @@ data class IdentifierDocumentPublicKeyInput (
     /**
      * The JWK public key.
      */
-    val jwk: JsonWebKey
+    val jwk: JsonWebKey,
+
+    @SerialName("usage")
+    val usage: List<String>
 )

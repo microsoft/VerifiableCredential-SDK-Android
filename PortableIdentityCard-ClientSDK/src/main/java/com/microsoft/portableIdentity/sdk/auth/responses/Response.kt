@@ -11,6 +11,7 @@ import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.utilities.Constants
+import java.time.LocalDateTime
 import java.util.*
 
 /**
@@ -60,8 +61,8 @@ sealed class Response(val audience: String) {
     }
 
     fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityHostName: String, requestToken: String): Receipt {
-        val date = Date().time / Constants.MILLISECONDS_IN_A_SECOND
-        return Receipt(action = ReceiptAction.Presentation,
+        val date = System.currentTimeMillis()
+        return Receipt(action = action,
             cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,

@@ -12,6 +12,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +26,8 @@ class CryptoOperationsInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        keyStore = AndroidKeyStore(context)
+        val serializer = Serializer()
+        keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
         crypto = CryptoOperations(androidSubtle, keyStore)
     }
