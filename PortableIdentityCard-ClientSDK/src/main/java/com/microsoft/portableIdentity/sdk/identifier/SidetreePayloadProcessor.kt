@@ -42,8 +42,8 @@ class SidetreePayloadProcessor @Inject constructor(
      */
     fun generateCreatePayload(alias: String): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
-        val signingPublicKey = cryptoOperations.generateKeyPair("$alias" + "_" + "$signatureKeyReference", KeyType.EllipticCurve)
-        val recoveryPublicKey = cryptoOperations.generateKeyPair("$alias" + "_" + "$recoveryKeyReference", KeyType.EllipticCurve)
+        val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
+        val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
         val signingKeyJWK = signingPublicKey.toJWK()
         val recoveryKeyJWK = recoveryPublicKey.toJWK()
 
@@ -75,7 +75,7 @@ class SidetreePayloadProcessor @Inject constructor(
         val patchDataEncoded = encodePatchData(patchData)
 
         val suffixDataEncoded = createSuffixDataEncoded(patchData, generatePublicKeyJwk(recoveryKeyJWK))
-        return RegistrationPayload(/*SIDETREE_OPERATION_TYPE,*/ suffixDataEncoded, patchDataEncoded)
+        return RegistrationPayload(suffixDataEncoded, patchDataEncoded)
     }
 
     private fun generatePublicKeyJwk(publicKeyJwk: JsonWebKey): JsonWebKey {
@@ -93,11 +93,7 @@ class SidetreePayloadProcessor @Inject constructor(
         return IdentifierDocumentPayload(
             publicKeys = listOf(
                 IdentifierDocumentPublicKeyInput(
-                    //TODO: Look into new restrictions on Sidetree api for id length(20) and characters allowed(only base64url charsets)
-                    id = if (signingKeyJWK.kid!!.startsWith("#"))
-                        signingKeyJWK.kid!!.substringAfter('#')
-                    else
-                        signingKeyJWK.kid!!,
+                    id = signingKeyJWK.kid!!.substringAfter('#'),
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     jwk = generatePublicKeyJwk(signingKeyJWK),
                     usage = listOf("ops", "auth", "general")

@@ -81,14 +81,13 @@ class SidetreeRegistrar @Inject constructor(
         val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
         val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
 
-        val personaSigKeyRef = "$alias" + "_" + "$signatureKeyReference"
-        val personaRecKeyRef = "$alias" + "_" + "$recoveryKeyReference"
+        val personaSigKeyRef = "${alias}_$signatureKeyReference"
+        val personaRecKeyRef = "${alias}_$recoveryKeyReference"
 
         return Identifier(
             identifierLongForm,
             alias,
             personaSigKeyRef,
-            //TODO: Since we know encryption is coming in the future, do we want to add encryption key now so that we don't have to modify the table later.
             "",
             personaRecKeyRef,
             nextUpdateCommitmentHash,
