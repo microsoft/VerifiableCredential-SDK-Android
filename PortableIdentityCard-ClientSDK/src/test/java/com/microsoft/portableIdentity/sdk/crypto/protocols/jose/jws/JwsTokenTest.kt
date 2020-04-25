@@ -23,9 +23,11 @@ class JwsTokenTest {
  "exp":1300819380,${'\r'}
  "http://example.com/is_root":true}"""
 
+    private val serializer = Serializer()
+
     init {
         /* This is the payload used for all the operations below */
-        subtle = Subtle(setOf(MockProvider()), Serializer())
+        subtle = Subtle(setOf(MockProvider()), serializer)
         crypto = CryptoOperations(subtle, keyStore)
         keyRef = Base64Url.encode(Random.nextBytes(8))
         val keyPair = subtle.generateKeyPair(

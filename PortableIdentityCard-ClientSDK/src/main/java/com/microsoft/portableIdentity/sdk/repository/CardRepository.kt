@@ -6,7 +6,7 @@
 package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
@@ -15,7 +15,6 @@ import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.F
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,9 +25,11 @@ import javax.inject.Singleton
  * ever care to get the object it wants.
  */
 @Singleton
-class CardRepository @Inject constructor(database: SdkDatabase,
-                                         private val apiProvider: ApiProvider,
-                                         private val serializer: Serializer) {
+class CardRepository @Inject constructor(
+    database: SdkDatabase,
+    private val apiProvider: ApiProvider,
+    private val serializer: Serializer
+) {
 
     private val cardDao = database.cardDao()
 
@@ -47,15 +48,11 @@ class CardRepository @Inject constructor(database: SdkDatabase,
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
-        val cards = getAllCards().value ?: return MutableLiveData(emptyList())
+        return getAllCards().map { cardList -> filterCardsByType(cardList, type) }
+    }
 
-        val filteredCards = mutableListOf<PortableIdentityCard>()
-        cards.forEach {
-            if (it.verifiableCredential.contents.vc.type.contains(type)) {
-                filteredCards.add(it)
-            }
-        }
-        return MutableLiveData(filteredCards)
+    private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
+        return cardList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
     }
 
     fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)

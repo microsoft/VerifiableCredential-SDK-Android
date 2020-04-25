@@ -7,7 +7,8 @@ import com.microsoft.portableIdentity.sdk.utilities.Serializer
 
 class MockPublicKey(key: JsonWebKey): PublicKey(key) {
     override fun minimumAlphabeticJwk(): String {
-        return Serializer().stringify(JsonWebKey.serializer(), this.toJWK())
+        val serializer = Serializer()
+        return serializer.stringify(JsonWebKey.serializer(), this.toJWK())
     }
 
     override fun toJWK(): JsonWebKey {
