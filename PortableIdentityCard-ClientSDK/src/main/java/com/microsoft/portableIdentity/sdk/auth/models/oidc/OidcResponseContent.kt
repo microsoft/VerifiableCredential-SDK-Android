@@ -50,11 +50,8 @@ data class OidcResponseContent(
     // time the token expires.
     val exp: Long,
 
-    // aggregated claims
-    @SerialName(CLAIM_NAMES)
-    val claimNames: Map<String, String>? = null,
-    @SerialName(CLAIM_SOURCES)
-    val claimSources: Map<String, List<Map<String, String>>>? = null,
+    // for now nbf == iat
+    val nbf: Long,
 
     // PICS specific
     // response contains claims that fulfills this contract.
@@ -65,5 +62,10 @@ data class OidcResponseContent(
     val jti: String? = null,
 
     // attestations that were asked for in Request.
-    val attestations: AttestationResponse? = null
+    val attestations: AttestationResponse? = null,
+
+    // For revocation requests.
+    val rp: List<String>? = null,
+    val vc: String? = null,
+    val reason: String? = null
 )

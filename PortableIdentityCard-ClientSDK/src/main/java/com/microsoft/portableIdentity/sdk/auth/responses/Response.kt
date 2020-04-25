@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
+import com.microsoft.portableIdentity.sdk.auth.ActionRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
@@ -18,7 +19,7 @@ import java.util.*
  *
  * @param audience entity to send the response to.
  */
-sealed class Response(val audience: String) {
+sealed class Response(override val audience: String): ActionRequest {
 
     private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
 

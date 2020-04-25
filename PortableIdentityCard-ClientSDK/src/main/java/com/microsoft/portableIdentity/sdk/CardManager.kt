@@ -6,6 +6,7 @@
 package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
+import com.microsoft.portableIdentity.sdk.auth.RevocationRequest
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
@@ -135,6 +136,12 @@ class CardManager @Inject constructor(
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
                 val card = createCard(verifiableCredential.raw, response.request.contract)
+                val revocationRequest = RevocationRequest("https://dev.did.msidentity.com/api/portable/v1.0/revoke/1234", card, "see ya never.")
+                revocationRequest.addRelyingParty("did:ion:relyingparty1")
+                revocationRequest.addRelyingParty("did:ion:relyingparty2")
+                revocationRequest.addRelyingParty("did:ion:ayyybye")
+                val formattedRevocationRequest = formatter.formAndSignResponse(revocationRequest, responder)
+                print(formattedRevocationRequest)
                 val receipts = response.createReceiptsForPresentedCredentials(entityDid = response.request.contract.input.issuer, entityHostName = response.audience, requestToken = formattedResponse).toMutableList()
                 receipts.add(response.createReceipt(ReceiptAction.Issuance, card.id, card.verifiableCredential.contents.iss, response.audience, formattedResponse))
                 Result.Success(Pair(card, receipts))

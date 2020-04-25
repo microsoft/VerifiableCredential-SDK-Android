@@ -5,6 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.auth.protectors
 
+import com.microsoft.portableIdentity.sdk.auth.ActionRequest
+import com.microsoft.portableIdentity.sdk.auth.RevocationRequest
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.AttestationResponse
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
@@ -36,7 +38,7 @@ class OidcResponseFormatter @Inject constructor(
     private val signer: TokenSigner
 ) : Formatter {
 
-    override fun formAndSignResponse(response: Response, responder: Identifier, expiresIn: Int): Result<String> {
+    override fun formAndSignResponse(response: ActionRequest, responder: Identifier, expiresIn: Int): Result<String> {
 
         return try {
             val contents = formContents(response, responder, expiresIn)
@@ -52,7 +54,7 @@ class OidcResponseFormatter @Inject constructor(
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
-    private fun formContents(response: Response, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
+    private fun formContents(response: ActionRequest, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
@@ -72,20 +74,39 @@ class OidcResponseFormatter @Inject constructor(
             }
         }
 
-        val attestationResponse = createAttestationResponse(response, responder, iat, exp)
+        var attestationResponse: AttestationResponse? = null
+        var vcForRevocation: String? = null
+        var relyPartiesForRevocation: List<String>? = null
+        var reason: String? = null
+        if (response is Response) {
+            attestationResponse = createAttestationResponse(response, responder, iat, exp)
+        }
+        if (response is RevocationRequest) {
+            vcForRevocation = response.card.verifiableCredential.raw
+            relyPartiesForRevocation = response.getRelyingParties()
+            reason = response.reason
+
+        }
 
         return OidcResponseContent(
             sub = key.getThumbprint(cryptoOperations, Sha.Sha256),
             aud = response.audience,
-            nonce = nonce,
             did = did,
             subJwk = key.toJWK(),
             iat = iat,
+            nbf = iat,
             exp = exp,
-            state = state,
             jti = jti,
             contract = contract,
-            attestations = attestationResponse
+            // only for presentation requests
+            nonce = nonce,
+            state = state,
+            // for presentation and issuance requests
+            attestations = attestationResponse,
+            // for revocation requests
+            vc = vcForRevocation,
+            rp = relyPartiesForRevocation,
+            reason = reason
         )
     }
 
