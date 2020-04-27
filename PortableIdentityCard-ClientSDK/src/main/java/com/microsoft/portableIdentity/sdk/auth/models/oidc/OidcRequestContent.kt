@@ -56,6 +56,7 @@ data class OidcRequestContent(
     val iat: Long = 0,
     val nbf: Long = 0,
 
+    // if set to "create", request is just for issuance.
     val prompt: String = "",
 
     // object for relying parties to give user more details about themselves.
