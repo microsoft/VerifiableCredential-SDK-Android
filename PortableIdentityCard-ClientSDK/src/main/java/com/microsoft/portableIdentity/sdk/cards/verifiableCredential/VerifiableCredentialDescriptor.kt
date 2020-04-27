@@ -5,8 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 
-import androidx.room.Entity
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.ServiceDescriptor
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,13 +13,14 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class VerifiableCredentialDescriptor(
+        @SerialName("@context")
     val context: List<String>,
 
     val type: List<String>,
 
     val credentialSubject: Map<String, String>,
 
-    val credentialStatus: ServiceDescriptor,
+    val credentialStatus: ServiceDescriptor? = null,
 
-    val revokeService: ServiceDescriptor
+    val revokeService: ServiceDescriptor? = null
 )

@@ -10,7 +10,6 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.MAX_AGE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.REDIRECT_URL
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RESPONSE_MODE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RESPONSE_TYPE
-import com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.Registration
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -39,13 +38,14 @@ data class OidcRequestContent(
     @SerialName(REDIRECT_URL)
     val redirectUrl: String = "",
 
+        // did of the entity who sent the request.
     val iss: String = "",
 
     // should contain "openid did_authn"
     val scope: String = "",
 
     // opaque values that should be passed back to the requester.
-    val state: String = "",
+    val state: String? = null,
     val nonce: String = "",
 
     // Claims that are being requested.
@@ -57,7 +57,6 @@ data class OidcRequestContent(
     val nbf: Long = 0,
 
     // optional parameters
-    val registration: Registration? = null,
     val aud: String = "",
     @SerialName(MAX_AGE)
     val maxAge: Int = 0

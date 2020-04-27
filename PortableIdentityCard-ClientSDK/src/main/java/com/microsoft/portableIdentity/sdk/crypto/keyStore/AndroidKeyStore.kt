@@ -20,16 +20,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidKeyStore @Inject constructor(private val context: Context): com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore() {
+class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Serializer): com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore() {
 
     companion object {
         const val provider = "AndroidKeyStore"
-        private val regexForKeyReference = Regex("^#(.*)\\.[^.]+$")
-        private val regexForKeyIndex = Regex("^#.*\\.([^.]+$)")
+        private val regexForKeyReference = Regex("^#(.*)_[^.]+$")
+        private val regexForKeyIndex = Regex("^#.*_([^.]+\$)")
 
-        val keyStore: KeyStore = KeyStore.getInstance(provider).apply {
-            load(null)
-        }
+        val keyStore: KeyStore by lazy { KeyStore.getInstance(provider).apply { load(null) } }
     }
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
@@ -160,7 +158,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         var jwk = key.toJWK();
         jwk.kid = alias;
-        val jwkString = Serializer.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -175,7 +173,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         // This key is not natively supported
         var jwk = key.toJWK();
         jwk.kid = alias;
-        val jwkString = Serializer.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -237,7 +235,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
                 val keyRef = keyReferenceMatch.groupValues[1];
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-                val key = Serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
+                val key = serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
                 val keyType = toKeyType(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
@@ -260,7 +258,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
 
     private fun getSecurePrivateKey(alias: String): PrivateKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = Serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty == KeyType.RSA.value) {
             return RsaPrivateKey(jwk)
         } else if (jwk.kty == KeyType.EllipticCurve.value) {
@@ -272,7 +270,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
 
     private fun getSecureSecretkey(alias: String): SecretKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = Serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty != KeyType.Octets.value) {
             throw SdkLog.error("$alias is not a secret key.")
         }
@@ -333,6 +331,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
         return alias
     }
 
+    //TODO: Modify kid derived from key reference to not use . and not begin with #. It should be Base64url charset for sidetree registration to work with these as ids
     fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
         if (!kid.isNullOrBlank() && !kid.startsWith(keyReference) && !kid.startsWith("#$keyReference")) {
             throw SdkLog.error("Key ID must begin with key reference")
@@ -346,8 +345,8 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
             // generate a key id
             val listItem = this.list()[keyReference]
             if (listItem == null) { // no previous keys
-                SdkLog.d("New key reference #$keyReference.1")
-                "#$keyReference.1"
+                SdkLog.d("New key reference #${keyReference}_1")
+                "#${keyReference}_1"
             } else {
                 // heuristic, find the last digit and count up
                 var latestVersion = listItem.kids.reduce {
@@ -364,8 +363,8 @@ class AndroidKeyStore @Inject constructor(private val context: Context): com.mic
                 }.toIntOrNull() ?: 0
 
                 latestVersion++
-                SdkLog.d("New key reference #$keyReference.$latestVersion")
-                "#$keyReference.$latestVersion"
+                SdkLog.d("New key reference #${keyReference}_$latestVersion")
+                "#${keyReference}_$latestVersion"
             }
         }
     }

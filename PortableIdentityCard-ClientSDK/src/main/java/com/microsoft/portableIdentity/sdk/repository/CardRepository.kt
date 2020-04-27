@@ -6,11 +6,14 @@
 package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
+import androidx.lifecycle.map
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
-import com.microsoft.portableIdentity.sdk.cards.deprecated.SerialClaimObject
-import com.microsoft.portableIdentity.sdk.repository.networking.PicNetworkOperation
+import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchContractNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,39 +25,58 @@ import javax.inject.Singleton
  * ever care to get the object it wants.
  */
 @Singleton
-class CardRepository @Inject constructor(database: SdkDatabase, private val picNetworkOperation: PicNetworkOperation) {
+class CardRepository @Inject constructor(
+    database: SdkDatabase,
+    private val apiProvider: ApiProvider,
+    private val serializer: Serializer
+) {
 
     private val cardDao = database.cardDao()
 
-    private val serialClaimObjectDao = database.serialClaimObjectDao()
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    fun getAllClaimObjects(): LiveData<List<ClaimObject>> {
-        val serialClaimObjects = serialClaimObjectDao.getAllClaimObjects()
-        return Transformations.map(serialClaimObjects) { serialList -> transformList(serialList) }
-    }
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    suspend fun insert(claimObject: ClaimObject) = serialClaimObjectDao.insert(SerialClaimObject(claimObject.serialize()))
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    suspend fun delete(claimObject: ClaimObject) = serialClaimObjectDao.delete(SerialClaimObject(claimObject.serialize()))
-
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    private fun transformList(serialClaimObjects: List<SerialClaimObject>): List<ClaimObject> =
-        serialClaimObjects.map { Serializer.parse(ClaimObject.serializer(), it.serialClaimObject) }
+    private val receiptDao = database.receiptDao()
 
     suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
 
     suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
 
-    fun getAllCards(): LiveData<List<PortableIdentityCard>> {
-        return cardDao.getAllCards()
+    fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
+
+    fun getAllReceipts(): LiveData<List<Receipt>> = receiptDao.getAllReceipts()
+
+    fun getAllReceiptsByCardId(cardId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByCardId(cardId)
+
+    suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
+
+    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+        return getAllCards().map { cardList -> filterCardsByType(cardList, type) }
     }
 
-    suspend fun getContract(url: String) = picNetworkOperation.getContract(url)
+    private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
+        return cardList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
+    }
 
-    suspend fun getRequest(url: String) = picNetworkOperation.getRequest(url)
+    fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
 
-    suspend fun sendResponse(url: String, serializedResponse: String)= picNetworkOperation.sendResponse(url, serializedResponse)
+    suspend fun getContract(url: String) = FetchContractNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
+
+    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
+
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(
+        url,
+        serializedResponse,
+        apiProvider,
+        serializer
+    ).fire()
+
+    suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(
+        url,
+        serializedResponse,
+        apiProvider
+    ).fire()
 }

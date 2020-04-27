@@ -7,10 +7,9 @@ package com.microsoft.portableIdentity.sdk.di
 
 import android.content.Context
 import com.microsoft.portableIdentity.sdk.CardManager
-import com.microsoft.portableIdentity.sdk.IdentityManager
+import com.microsoft.portableIdentity.sdk.IdentifierManager
 import dagger.BindsInstance
 import dagger.Component
-import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -26,7 +25,7 @@ import javax.inject.Singleton
 @Component(modules = [SdkModule::class])
 internal interface SdkComponent {
 
-    fun identityManager(): IdentityManager
+    fun identifierManager(): IdentifierManager
 
     fun cardManager(): CardManager
 
@@ -36,12 +35,6 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
-
-        @BindsInstance
-        fun signatureKeyReference(@Named("signatureKeyReference") signatureKeyReference: String): Builder
-
-        @BindsInstance
-        fun encryptionKeyReference(@Named("encryptionKeyReference") encryptionKeyReference: String): Builder
 
         @BindsInstance
         fun resolverUrl(@Named("resolverUrl") resolverUrl: String): Builder

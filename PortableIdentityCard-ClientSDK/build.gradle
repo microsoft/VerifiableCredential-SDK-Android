@@ -4,6 +4,12 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = "0.8.4"
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -15,6 +21,9 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -27,6 +36,27 @@ android {
     sourceSets {
         main.jniLibs.srcDirs = ['libs']
     }
+
+    compileOptions {
+        sourceCompatibility '1.8'
+        targetCompatibility '1.8'
+    }
+
+    testOptions {
+        unitTestVariants.all {
+            testDebugUnitTest.useJUnit()
+        }
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    lintOptions {
+        // TODO: fix lint warnings
+        abortOnError false
+        warningsAsErrors false
+    }
 }
 
 buildscript {
@@ -38,16 +68,18 @@ buildscript {
     repositories {
         google()
         jcenter()
+        mavenCentral()
     }
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
 
@@ -73,15 +105,28 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp3_version"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
 
+    //other
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+
+    // KTX
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_ktx_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_ktx_version"
+    implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
+    implementation "androidx.collection:collection-ktx:$collections_ktx_version"
+    implementation "androidx.core:core-ktx:$core_ktx_version"
+
     // test dependencies
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation "org.assertj:assertj-core:3.9.0"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
-    testImplementation("io.mockk:mockk:1.9.3")
+    testImplementation "io.mockk:mockk:1.9.3"
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
-    testImplementation "org.assertj:assertj-core:3.11.1"
+    testImplementation "org.assertj:assertj-core:3.9.0"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testImplementation "junit:junit:4.12"
 
     // TODO: Cleanup dependencies
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$serialization_version"
@@ -100,6 +145,28 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.1.1"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-
     implementation files('libs/org.bitcoin.jar')
+}
+
+/**
+ * Task that starts all test tasks and merges reports from them into one report.
+ */
+task jacocoCoverageReport(type: JacocoReport, dependsOn: ['createDebugCoverageReport', 'test']) {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    final def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*',
+                            '**/*_MembersInjector.class', '**/Dagger*Component*.class', '**/Dagger*Subcomponent*.class',
+                            '**/*Subcomponent$Builder.class', '**/*Module_*Factory.class']
+    final def debugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+    final def kotlinClasses = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+    final def mainSrc = "src/main/java"
+
+    sourceDirectories = files([mainSrc])
+    classDirectories = files([debugTree, kotlinClasses])
+    executionData = fileTree(dir: "$buildDir", includes: [
+            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/**/*coverage.ec'
+    ])
 }

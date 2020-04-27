@@ -6,25 +6,23 @@
 package com.microsoft.portableIdentity.sdk
 
 import androidx.lifecycle.LiveData
-import com.microsoft.portableIdentity.sdk.auth.AuthenticationException
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
-import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.ServiceResponse
-import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
-import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseSigner
-import com.microsoft.portableIdentity.sdk.auth.requests.OidcRequest
-import com.microsoft.portableIdentity.sdk.auth.responses.OidcResponse
-import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
+import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
+import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
+import com.microsoft.portableIdentity.sdk.auth.requests.*
+import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
+import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.deprecated.ClaimObject
+import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
-import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers
@@ -32,115 +30,222 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * This class manages all functionality for managing, getting/creating, presenting, and storing Portable Identity Cards.
+ * We only support OpenId Connect Protocol in order to get and present Portable Identity Cards.
+ */
 @Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
-    private val cryptoOperations: CryptoOperations,
-    private val resolver: IResolver,
-    private val validator: OidcRequestValidator, // TODO: should this be a generic Validator?
-    private val signer: OidcResponseSigner,
-    private val formatter: OidcResponseFormatter
+    private val serializer: Serializer,
+    private val validator: Validator,
+    private val formatter: Formatter
 ) {
 
     /**
-     * Create a Request Object from a uri.
+     * Get Presentation Request.
+     *
+     * @param uri OpenID Connect Uri that points to the presentation request.
+     *
+     * @return Result.Success: PresentationRequest object that contains all attestations.
+     *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getRequest(uri: String): OidcRequest {
+    suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
+        return runResultTry {
+            val url = verifyUri(uri)
+            val requestParameters = url.parameters.toMap()
+            val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
+            val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
+            val request = PresentationRequest(requestParameters, requestToken, tokenContents)
+            Result.Success(request)
+        }
+    }
+
+    private fun verifyUri(uri: String): Url {
         val url = Url(uri)
         if (url.protocol.name != "openid") {
-            throw AuthenticationException("request format not supported")
+            throw PresentationException("Request Protocol not supported.")
         }
+        return url
+    }
 
-        val requestParameters = url.parameters.toMap()
-        val serializedToken = requestParameters["request"]?.first()
-        if (serializedToken != null) {
-            return OidcRequest(requestParameters, serializedToken)
+    private suspend fun getPresentationRequestToken(requestParameters: Map<String, List<String>>): Result<String> {
+        return runResultTry {
+            val serializedToken = requestParameters["request"]?.first()
+            if (serializedToken != null) {
+                Result.Success(serializedToken)
+            }
+            val requestUri = requestParameters["request_uri"]?.first()
+            if (requestUri == null) {
+                Result.Failure(PresentationException("Request Uri does not exist."))
+            } else {
+                picRepository.getRequest(requestUri)
+            }
         }
-
-        val requestUri = requestParameters["request_uri"]?.first() ?: throw AuthenticationException("Cannot fetch request: No request uri found")
-        val requestToken = picRepository.getRequest(requestUri) ?: throw AuthenticationException("Cannot fetch request: No request token found")
-        return OidcRequest(requestParameters, requestToken)
     }
 
     /**
-     * Validate an OpenID Connect Request.
+     * Get Issuance Request from a contract.
+     *
+     * @param contractUrl url that the contract is fetched from
+     *
+     * @return Result.Success: IssuanceRequest object containing all metadata about what is needed to fulfill request including display information.
+     *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun isValid(request: OidcRequest): Boolean {
+    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
+        return runResultTry {
+            val contract = picRepository.getContract(contractUrl).abortOnError()
+            val request = IssuanceRequest(contract, contractUrl)
+            Result.Success(request)
+        }
+    }
+
+    /**
+     * Validate an OpenID Connect Request with default Validator.
+     *
+     * @param request to be validated.
+     *
+     * @return Result.Success true, if request is valid, false if it is not valid.
+     *         Result.Failure: Exception explaining what went wrong.
+     */
+    suspend fun isValid(request: PresentationRequest): Result<Boolean> {
         return validator.validate(request)
     }
+  
+    fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
+        return IssuanceResponse(request)
+    }
+
+    fun createPresentationResponse(request: PresentationRequest): PresentationResponse {
+        return PresentationResponse(request)
+    }
 
     /**
-     * Get contract from PICS.
-     * PP: gets first contract from each Verifiable Credential Attestation.
+     * Send an Issuance Response signed by a responder Identifier.
+     *
+     * @param response IssuanceResponse to be formed, signed, and sent.
+     * @param responder Identifier to be used to sign response.
+     *
+     * @return Result.Success: TODO("Support Error cases better (ex. 404)").
+     *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getContractUrls(request: OidcRequest): List<String> {
-        val attestations = request.content.attestations ?: return emptyList()
-        val contracts = mutableListOf<String>()
-        attestations.presentations.forEach {
-            contracts.add(it.contracts.first())
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<Pair<PortableIdentityCard, List<Receipt>>> {
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+                val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
+                val card = createCard(verifiableCredential.raw, response.request.contract)
+                val receipts = response.createReceiptsForPresentedCredentials(entityDid = response.request.contract.input.issuer, entityHostName = response.audience, requestToken = formattedResponse).toMutableList()
+                receipts.add(response.createReceipt(ReceiptAction.Issuance, card.id, card.verifiableCredential.contents.iss, response.audience, formattedResponse))
+                Result.Success(Pair(card, receipts))
+            }
         }
-        return contracts
     }
 
     /**
-     * Get contract from PICS.
+     * Send a Presentation Response signed by a responder Identifier.
+     *
+     * @param response PresentationResponse to be formed, signed, and sent.
+     * @param responder Identifier to be used to sign response.
+     *
+     * @return Result.Success: TODO("Support Error cases better (ex. 404)").
+     *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getContract(url: String): PicContract? {
-        return picRepository.getContract(url)
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<List<Receipt>> {
+        return runResultTry {
+            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+            picRepository.sendPresentationResponse(response.audience, formattedResponse)
+            Result.Success(response.createReceiptsForPresentedCredentials(entityDid = response.request.content.iss, entityHostName = response.audience, requestToken = formattedResponse))
+        }
     }
 
     /**
-     * Create OidcResponse from OidcRequest.
+     * Puts together a Portable Identity Card and saves in repository.
+     *
+     * @param signedVerifiableCredential in Compact JWT form.
+     * @param response that was used to get the verifiable credential.
+     *
+     * @return Result.Success: Portable Identity Card that was saved to Storage.
+     *         Result.Failure: Exception explaining what went wrong.
      */
-    fun createResponse(request: OidcRequest): OidcResponse {
-        return OidcResponse(request)
+    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard> {
+        return try {
+            val card = createCard(signedVerifiableCredential, response.request.contract)
+            picRepository.insert(card)
+            Result.Success(card)
+        } catch (exception: Exception) {
+            Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
+        }
     }
 
-    /**
-     * Send a Response.
-     */
-    suspend fun sendResponse(response: OidcResponse, responderIdentifier: Identifier): ServiceResponse {
-        val responseContent = formatter.formContents(response, responderIdentifier.document.id, responderIdentifier.signatureKeyReference)
-        val serializedResponseContent = Serializer.stringify(OidcResponseContent.serializer(), responseContent)
-        val signedResponse = signer.sign(serializedResponseContent, responderIdentifier.signatureKeyReference)
-        val serializedSignedResponse = signedResponse.serialize()
-        val url = response.getRequestContents().redirectUrl
-        return picRepository.sendResponse(url, serializedSignedResponse) ?: throw AuthenticationException("Unable to send response.")
+    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Nothing?> {
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                picRepository.insert(portableIdentityCard)
+                Result.Success(null)
+            }
+        }
     }
 
-    /**
-     * Puts together card and saves in repository.
-     */
-    suspend fun saveCard(signedVerifiableCredential: String, contract: PicContract) {
+    private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
         val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
-        val card = PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
-        picRepository.insert(card)
+        return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
-        val token = JwsToken.deserialize(signedVerifiableCredential)
-        return Serializer.parse(VerifiableCredentialContent.serializer(), token.content())
+        val token = JwsToken.deserialize(signedVerifiableCredential, serializer)
+        return serializer.parse(VerifiableCredentialContent.serializer(), token.content())
     }
 
+    /**
+     * Get All Portable Identity Cards from Storage.
+     *
+     * @return Result.Success: List of Portable Identity Card from Storage.
+     *         Result.Failure: Exception explaining what went wrong.
+     */
     fun getCards(): LiveData<List<PortableIdentityCard>> {
         return picRepository.getAllCards()
     }
 
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    suspend fun saveClaim(claim: ClaimObject) {
-        picRepository.insert(claim)
+    /**
+     * Get All Portable Identity Cards from Storage by Credential Type.
+     *
+     * @return Result.Success: Filtered List of Portable Identity Card from Storage.
+     *         Result.Failure: Exception explaining what went wrong.
+     */
+    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+        return picRepository.getCardsByType(type)
     }
 
-    @Deprecated("Old ClaimObject for old POC. Remove when new Model is up.")
-    fun getClaims(): LiveData<List<ClaimObject>> {
-        return picRepository.getAllClaimObjects()
+    /**
+     * Get Receipts by Card Id from Storage.
+     *
+     * @return List of Receipts
+     */
+    fun getReceiptByCardId(cardId: String): LiveData<List<Receipt>> {
+        return picRepository.getAllReceiptsByCardId(cardId)
     }
 
-    @Deprecated("Old OidcRequest for old POC. Remove when new Model is up.")
-    suspend fun parseOidcRequest(request: String): com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest {
-        return withContext(Dispatchers.IO) {
-            com.microsoft.portableIdentity.sdk.auth.deprecated.oidc.OidcRequest.parseAndVerify(request, cryptoOperations, resolver)
+    /**
+     * Get Receipts by Card Id from Storage.
+     *
+     * @return List of Receipts
+     */
+    suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
+        return try {
+            Result.Success(picRepository.insert(receipt))
+        } catch (exception: Exception) {
+            Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
         }
+    }
+
+     /** Get A Portable Identity Card by card id from storage
+     * @param  id: card id of requested card
+     * @return Result.Success: Portable Identity Card corresponding to id passed
+     *         Result.Failure: Exception explaining the problem
+     */
+    fun getCardById(id: String): LiveData<PortableIdentityCard> {
+        return picRepository.getCardById(id)
     }
 }

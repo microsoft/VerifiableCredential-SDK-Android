@@ -166,7 +166,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
             if (list != null) {
                 try {
                     return findSubtleCryptoFor(list, scope)
-                } catch (error: Error) {
+                } catch (error: Throwable) {
                     // no match
                 }
             }
@@ -201,7 +201,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
         if (list != null) {
             try {
                 return findSubtleCryptoFor(list, scope)
-            } catch (error: Error) {
+            } catch (error: Throwable) {
                 // oh darn we didn't find one in the specified algorithm :'(
             }
         }

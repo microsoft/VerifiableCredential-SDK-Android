@@ -8,6 +8,10 @@ package com.microsoft.portableIdentity.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
+import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
+import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
+import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
@@ -17,12 +21,11 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.portableIdentity.sdk.registrars.IRegistrar
+import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
-import com.microsoft.portableIdentity.sdk.resolvers.HttpResolver
-import com.microsoft.portableIdentity.sdk.resolvers.IResolver
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
+import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -65,7 +68,7 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun defaultOkHttpClient() : OkHttpClient {
-        val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.i(it) }
+        val httpLoggingInterceptor = HttpLoggingInterceptor { println(it) }
         return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)
@@ -76,7 +79,7 @@ internal class SdkModule {
     @Singleton
     fun defaultRetrofit(okHttpClient: OkHttpClient) : Retrofit {
         return Retrofit.Builder()
-            .baseUrl("")
+            .baseUrl("http://TODO.me")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(GsonConverterFactory.create())
@@ -86,13 +89,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultResolver(resolver: HttpResolver): IResolver {
-        return resolver
-    }
-
-    @Provides
-    @Singleton
-    fun defaultRegistrar(registrar: SidetreeRegistrar): IRegistrar {
+    fun defaultRegistrar(registrar: SidetreeRegistrar): Registrar {
         return registrar
     }
 
@@ -114,5 +111,17 @@ internal class SdkModule {
         return Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db")
             .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun defaultValidator(validator: OidcRequestValidator): Validator {
+        return validator
+    }
+
+    @Provides
+    @Singleton
+    fun defaultFormatter(formatter: OidcResponseFormatter): Formatter {
+        return formatter
     }
 }

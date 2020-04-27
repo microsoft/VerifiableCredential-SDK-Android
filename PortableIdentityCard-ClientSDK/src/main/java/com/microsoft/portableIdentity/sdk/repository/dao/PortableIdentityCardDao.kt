@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.portableIdentity.sdk.repository.dao
 
 import androidx.lifecycle.LiveData
@@ -12,6 +17,9 @@ interface PortableIdentityCardDao {
 
     @Query("SELECT * FROM PortableIdentityCard")
     fun getAllCards(): LiveData<List<PortableIdentityCard>>
+
+    @Query("SELECT * FROM PortableIdentityCard where id = :id")
+    fun getCardById(id:String): LiveData<PortableIdentityCard>
 
     @Insert
     suspend fun insert(portableIdentityCard: PortableIdentityCard)
