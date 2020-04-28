@@ -17,6 +17,11 @@ object Constants {
     const val SUB_JWK = "sub_jwk"
     const val CLAIM_NAMES = "_claim_names"
     const val CLAIM_SOURCES = "_claim_sources"
+    // OIDC Registration Constants
+    const val CLIENT_NAME = "client_name"
+    const val CLIENT_PURPOSE = "client_purpose"
+    const val TERMS_AND_SERVICES_URI = "tos_uri"
+    const val LOGO_URI = "logo_uri"
 
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000
