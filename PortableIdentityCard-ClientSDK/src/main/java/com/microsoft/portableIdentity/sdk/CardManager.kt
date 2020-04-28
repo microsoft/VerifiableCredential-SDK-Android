@@ -111,7 +111,7 @@ class CardManager @Inject constructor(
     suspend fun isValid(request: PresentationRequest): Result<Boolean> {
         return validator.validate(request)
     }
-  
+
     fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
         return IssuanceResponse(request)
     }
@@ -135,8 +135,21 @@ class CardManager @Inject constructor(
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
                 val card = createCard(verifiableCredential.raw, response.request.contract)
-                val receipts = response.createReceiptsForPresentedCredentials(entityDid = response.request.contract.input.issuer, entityHostName = response.audience, requestToken = formattedResponse).toMutableList()
-                receipts.add(response.createReceipt(ReceiptAction.Issuance, card.id, card.verifiableCredential.contents.iss, response.audience, formattedResponse))
+                val receipts = response.createReceiptsForPresentedCredentials(
+                    entityDid = response.request.contract.input.issuer,
+                    entityHostName = response.audience,
+                    requestToken = formattedResponse
+                ).toMutableList()
+                receipts.add(
+                    response.createReceipt(
+                        ReceiptAction.Issuance,
+                        card.id,
+                        card.verifiableCredential.contents.iss,
+                        response.audience,
+                        formattedResponse
+                    )
+                )
+                receipts.forEach { saveReceipt(it).abortOnError() }
                 Result.Success(Pair(card, receipts))
             }
         }
@@ -155,7 +168,13 @@ class CardManager @Inject constructor(
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
-            Result.Success(response.createReceiptsForPresentedCredentials(entityDid = response.request.content.iss, entityHostName = response.audience, requestToken = formattedResponse))
+            val receipts = response.createReceiptsForPresentedCredentials(
+                entityDid = response.request.content.iss,
+                entityHostName = response.audience,
+                requestToken = formattedResponse
+            )
+            receipts.forEach { saveReceipt(it).abortOnError() }
+            Result.Success(receipts)
         }
     }
 
@@ -232,7 +251,7 @@ class CardManager @Inject constructor(
      *
      * @return List of Receipts
      */
-    suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
+    private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
         return try {
             Result.Success(picRepository.insert(receipt))
         } catch (exception: Exception) {
