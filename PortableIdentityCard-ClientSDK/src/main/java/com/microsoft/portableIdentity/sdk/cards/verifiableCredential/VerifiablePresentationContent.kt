@@ -23,10 +23,7 @@ data class VerifiablePresentationContent (
 
     val vp: VerifiablePresentationDescriptor,
 
-    // Subject of the VC (e.g. did owned by the user.)
-    val sub: String,
-
-    // Issuer of the VC (e.g. did owned by the issuer.)
+    // Issuer of the VP (e.g. did owned by the user, SIOP.did = VP.iss)
     val iss: String,
 
     // When the token was signed.
@@ -36,6 +33,9 @@ data class VerifiablePresentationContent (
     val exp: Long,
 
     val nbf: Long? = null,
+
+    // audience of the request
+    val aud: String,
 
     // optional parameter.
     val wrn: String = ""

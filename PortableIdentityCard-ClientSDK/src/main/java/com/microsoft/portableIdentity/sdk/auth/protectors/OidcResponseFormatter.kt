@@ -17,6 +17,8 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableP
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.utilities.Constants.VERIFIABLE_PRESENTATION_TYPE
+import com.microsoft.portableIdentity.sdk.utilities.Constants.VP_CONTEXT_URL
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.CryptoException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -115,17 +117,19 @@ class OidcResponseFormatter @Inject constructor(
 
     // only support one VC per VP
     private fun createPresentation(card: PortableIdentityCard, response: Response, responder: Identifier, iat: Long, exp: Long): String {
-        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw))
+        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw),
+                                                  context = listOf(VP_CONTEXT_URL),
+                                                  type = listOf(VERIFIABLE_PRESENTATION_TYPE))
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val contents = VerifiablePresentationContent(
             jti = jti,
             vp = vp,
-            sub = response.audience,
             iss = did,
             iat = iat,
             nbf = iat,
-            exp = exp
+            exp = exp,
+            aud = response.request.entityIdentifier
         )
         val serializedContents = serializer.stringify(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)
