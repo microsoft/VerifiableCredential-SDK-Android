@@ -21,6 +21,7 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
@@ -133,6 +134,7 @@ class CardManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+                SdkLog.i(formattedResponse)
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
                 val card = createCard(verifiableCredential.raw, response.request.contract)
                 val receipts = response.createReceiptsForPresentedCredentials(

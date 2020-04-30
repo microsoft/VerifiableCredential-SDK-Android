@@ -19,9 +19,7 @@ data class IdTokenAttestation (
 
     val required: Boolean = false,
 
-    @SerialName(CLIENT_ID)
-    val clientId: String,
+    val client_id: String,
 
-    @SerialName(REDIRECT_URL)
-    val redirectUri: String
+    val redirect_uri: String
 )
