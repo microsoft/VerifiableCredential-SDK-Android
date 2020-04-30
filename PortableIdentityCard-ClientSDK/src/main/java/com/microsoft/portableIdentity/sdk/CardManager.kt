@@ -138,6 +138,7 @@ class CardManager @Inject constructor(
                 val receipts = response.createReceiptsForPresentedCredentials(
                     entityDid = response.request.contract.input.issuer,
                     entityHostName = response.audience,
+                    entityName = response.request.entityName,
                     requestToken = formattedResponse
                 ).toMutableList()
                 receipts.add(
@@ -146,6 +147,7 @@ class CardManager @Inject constructor(
                         card.id,
                         card.verifiableCredential.contents.iss,
                         response.audience,
+                        response.request.entityName,
                         formattedResponse
                     )
                 )
@@ -170,7 +172,8 @@ class CardManager @Inject constructor(
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
             val receipts = response.createReceiptsForPresentedCredentials(
                 entityDid = response.request.content.iss,
-                entityHostName = response.audience,
+                entityHostName = response.request.entityIdentifier,
+                entityName = response.request.entityName,
                 requestToken = formattedResponse
             )
             receipts.forEach { saveReceipt(it).abortOnError() }

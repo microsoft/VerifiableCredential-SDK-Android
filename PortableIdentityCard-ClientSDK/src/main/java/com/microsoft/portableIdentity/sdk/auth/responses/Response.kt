@@ -10,9 +10,6 @@ import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
-import com.microsoft.portableIdentity.sdk.utilities.Constants
-import java.time.LocalDateTime
-import java.util.*
 
 /**
  * OIDC Response formed from a Request.
@@ -51,22 +48,23 @@ sealed class Response(val audience: String) {
         return collectedCards
     }
 
-    fun createReceiptsForPresentedCredentials(requestToken: String, entityDid: String, entityHostName: String): List<Receipt> {
+    fun createReceiptsForPresentedCredentials(requestToken: String, entityDid: String, entityHostName: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().id, entityDid, entityHostName, requestToken)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().id, entityDid, entityHostName, entityName, requestToken)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityHostName: String, requestToken: String): Receipt {
+    fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityHostName: String, entityName: String, requestToken: String): Receipt {
         val date = System.currentTimeMillis()
         return Receipt(action = action,
             cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,
             entityHostName = entityHostName,
+            entityName = entityName,
             token = requestToken)
     }
 }
