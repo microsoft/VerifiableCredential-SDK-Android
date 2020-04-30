@@ -27,7 +27,7 @@ data class Receipt (
     // Host name of verifier/issuer
     val entityHostName: String,
 
-    //Host url of the verifier/issuer
+    //Name of the verifier/issuer
     val entityName: String,
 
     val cardId: String
