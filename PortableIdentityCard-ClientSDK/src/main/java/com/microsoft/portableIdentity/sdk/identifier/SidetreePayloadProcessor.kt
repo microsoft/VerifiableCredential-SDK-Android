@@ -40,10 +40,8 @@ class SidetreePayloadProcessor @Inject constructor(
      * In unpublished resolution or long form it is same as the initial-state portion of the identifier which can be used
      * to resolve portable identifier
      */
-    fun generateCreatePayload(alias: String): RegistrationPayload {
+    fun generateCreatePayload(alias: String, signingPublicKey: PublicKey, recoveryPublicKey: PublicKey): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
-        val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
-        val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
         val signingKeyJWK = signingPublicKey.toJWK()
         val recoveryKeyJWK = recoveryPublicKey.toJWK()
 

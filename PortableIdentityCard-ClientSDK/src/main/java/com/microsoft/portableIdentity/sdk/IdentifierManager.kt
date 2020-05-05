@@ -7,9 +7,11 @@ package com.microsoft.portableIdentity.sdk
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
+import com.microsoft.portableIdentity.sdk.identifier.IdentifierCreator
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
+import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -28,7 +30,7 @@ import javax.inject.Singleton
 class IdentifierManager @Inject constructor(
     private val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
-    private val registrar: Registrar
+    private val identifierCreator: IdentifierCreator
 ) {
 
     suspend fun getIdentifier(): Result<Identifier> {
@@ -37,14 +39,24 @@ class IdentifierManager @Inject constructor(
 
     private suspend fun initLongFormIdentifier(): Result<Identifier> {
         return when (val identifier = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)) {
-            null -> createAndRegisterNewIdentifier()
+            null -> createMasterIdentifier()
             else -> Result.Success(identifier)
         }
     }
 
-    private suspend fun createAndRegisterNewIdentifier(): Result<Identifier> {
+    private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
-            val registeredIdentifier = registrar.register(SIGNATURE_KEYREFERENCE, RECOVERY_KEYREFERENCE, cryptoOperations).abortOnError()
+            cryptoOperations.generateAndStoreSeed()
+            // peer id for master Identifier will be method name for now.
+            val registeredIdentifier = identifierCreator.create(METHOD_NAME).abortOnError()
+            saveIdentifier(registeredIdentifier)
+        }
+    }
+
+    // TODO(create pairwise Identifier based off new key generation algorithm).
+    suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
+        return runResultTry {
+            val registeredIdentifier = identifierCreator.create(peerId).abortOnError()
             saveIdentifier(registeredIdentifier)
         }
     }
