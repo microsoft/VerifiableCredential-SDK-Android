@@ -15,14 +15,12 @@ import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_CURVE_NAME_FOR_EC
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_MULTIHASH_CODE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_MULTIHASH_LENGTH
-import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_OPERATION_TYPE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIDETREE_PATCH_ACTION
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import java.security.MessageDigest
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.random.Random
 

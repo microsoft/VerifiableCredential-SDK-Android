@@ -8,12 +8,9 @@ package com.microsoft.portableIdentity.sdk
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierCreator
-import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
-import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
-import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.runResultTry

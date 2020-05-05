@@ -6,16 +6,12 @@ package com.microsoft.portableIdentity.sdk.identifier
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
-import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.IdentifierCreatorException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.RegistrarException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import javax.inject.Inject
 import javax.inject.Singleton
