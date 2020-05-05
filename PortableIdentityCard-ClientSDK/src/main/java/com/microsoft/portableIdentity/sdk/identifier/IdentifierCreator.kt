@@ -12,6 +12,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.IdentifierCreatorException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RegistrarException
@@ -25,16 +26,18 @@ import kotlin.random.Random
  * @class
  */
 @Singleton
-class IdentifierCreator @Inject constructor(private val serializer: Serializer, private val cryptoOperations: CryptoOperations) {
+class IdentifierCreator @Inject constructor(private val serializer: Serializer,
+                                            private val cryptoOperations: CryptoOperations,
+                                            private val payloadProcessor: SidetreePayloadProcessor) {
 
     fun create(peerId: String): Result<Identifier> {
         val signatureKeyReference = "$SIGNATURE_KEYREFERENCE.$peerId"
         val recoveryKeyReference = "$RECOVERY_KEYREFERENCE.$peerId"
         return try {
-            val alias = Base64Url.encode(Random.nextBytes(8))
-            val publicKeyPair = this.createAndSaveKeys(alias, signatureKeyReference, recoveryKeyReference)
-            val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
-            val registrationPayload = payloadProcessor.generateCreatePayload(alias, publicKeyPair.first, publicKeyPair.second)
+            val alias = Base64Url.encode(Random.nextBytes(2))
+            val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
+            val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
+            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
@@ -50,12 +53,6 @@ class IdentifierCreator @Inject constructor(private val serializer: Serializer, 
         } catch (exception: Exception) {
             Result.Failure(IdentifierCreatorException("Unable to create an identifier", exception))
         }
-    }
-
-    private fun createAndSaveKeys(alias: String, signatureKeyReference: String, recoveryKeyReference: String): Pair<PublicKey, PublicKey> {
-        val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
-        val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
-        return Pair(signingPublicKey, recoveryPublicKey)
     }
 
     private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {

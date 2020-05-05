@@ -131,7 +131,7 @@ class CryptoOperations (
     fun generateAndStoreSeed() {
         val randomNumberGenerator = SecureRandom()
         val seed = randomNumberGenerator.generateSeed(32)
-        val secretKey = SecretKey(seed, "masterSeed")
-        keyStore.save("masterSeed", secretKey)
+        val secretKey = SecretKey(seed)
+        keyStore.save("seed", secretKey)
     }
 }

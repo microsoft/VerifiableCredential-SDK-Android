@@ -1,10 +1,8 @@
 package com.microsoft.portableIdentity.sdk.identifier
 
-import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.PatchData
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.SuffixData
@@ -29,18 +27,13 @@ import javax.inject.Singleton
 import kotlin.random.Random
 
 @Singleton
-class SidetreePayloadProcessor @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
-    @Named("signatureKeyReference") private val signatureKeyReference: String,
-    @Named("recoveryKeyReference") private val recoveryKeyReference: String,
-    private val serializer: Serializer
-) {
+class SidetreePayloadProcessor @Inject constructor(private val serializer: Serializer) {
     /**
      * Generates input payload for create operation on Sidetree.
      * In unpublished resolution or long form it is same as the initial-state portion of the identifier which can be used
      * to resolve portable identifier
      */
-    fun generateCreatePayload(alias: String, signingPublicKey: PublicKey, recoveryPublicKey: PublicKey): RegistrationPayload {
+    fun generateCreatePayload(signingPublicKey: PublicKey, recoveryPublicKey: PublicKey): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
         val signingKeyJWK = signingPublicKey.toJWK()
         val recoveryKeyJWK = recoveryPublicKey.toJWK()

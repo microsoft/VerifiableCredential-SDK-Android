@@ -17,7 +17,9 @@ import com.microsoft.portableIdentity.sdk.utilities.byteArrayToString
  * Used for storing seeds.
  * @class
  */
-open class SecretKey(val k: ByteArray, override val kid: String): IKeyStoreItem {
+open class SecretKey(val k: ByteArray): IKeyStoreItem {
+
+    override val kid: String = "seed"
 
     /**
      * Set the Oct key type
