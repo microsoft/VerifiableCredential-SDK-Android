@@ -26,13 +26,13 @@ import kotlin.random.Random
  * @class
  */
 @Singleton
-class IdentifierCreator @Inject constructor(private val serializer: Serializer,
-                                            private val cryptoOperations: CryptoOperations,
+class IdentifierCreator @Inject constructor(private val cryptoOperations: CryptoOperations,
                                             private val payloadProcessor: SidetreePayloadProcessor) {
 
     fun create(peerId: String): Result<Identifier> {
-        val signatureKeyReference = "$SIGNATURE_KEYREFERENCE.$peerId"
-        val recoveryKeyReference = "$RECOVERY_KEYREFERENCE.$peerId"
+        //TODO(use different variable than peerId for end)
+        val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$peerId"
+        val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$peerId"
         return try {
             val alias = Base64Url.encode(Random.nextBytes(2))
             val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)

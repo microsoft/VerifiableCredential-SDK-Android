@@ -47,6 +47,7 @@ class IdentifierManager @Inject constructor(
     // Master Identifier will be created once per app.
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
+            //TODO(seed is needed for pairwise key generation)
             cryptoOperations.generateAndStoreSeed()
             // peer id for master Identifier will be method name for now.
             val registeredIdentifier = identifierCreator.create(METHOD_NAME).abortOnError()
