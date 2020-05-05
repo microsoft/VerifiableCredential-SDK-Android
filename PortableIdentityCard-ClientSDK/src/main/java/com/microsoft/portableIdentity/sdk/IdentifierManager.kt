@@ -44,6 +44,7 @@ class IdentifierManager @Inject constructor(
         }
     }
 
+    // Master Identifier will be created once per app.
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
             cryptoOperations.generateAndStoreSeed()
