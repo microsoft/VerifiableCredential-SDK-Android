@@ -270,11 +270,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     private fun getSecureSecretkey(alias: String): SecretKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
-        if (jwk.kty != KeyType.Octets.value) {
-            throw SdkLog.error("$alias is not a secret key.")
-        }
-        return SecretKey(jwk)
+        return SecretKey(data)
     }
 
     private fun getSecureData(alias: String): ByteArray? {

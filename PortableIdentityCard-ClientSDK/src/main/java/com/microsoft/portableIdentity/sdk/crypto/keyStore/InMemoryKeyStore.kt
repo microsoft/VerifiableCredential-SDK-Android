@@ -1,6 +1,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.keyStore
 
 import com.microsoft.portableIdentity.sdk.crypto.keys.*
+import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
@@ -74,9 +75,7 @@ class InMemoryKeyStore(): KeyStore() {
             secretKeys[keyReference] = KeyContainer<SecretKey>(
                 key.kty,
                 listOf(key),
-                key.use,
-                key.alg?.let { JwaCryptoConverter.jwaAlgToWebCrypto(it) }
-            )
+                KeyUse.Secret)
         }
     }
 
