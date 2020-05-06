@@ -147,7 +147,7 @@ class CardManager @Inject constructor(
                     response.createReceipt(
                         ReceiptAction.Issuance,
                         card.id,
-                        card.verifiableCredential.contents.iss,
+                        card.primeVerifiableCredential.contents.iss,
                         response.audience,
                         response.request.entityName,
                         formattedResponse
@@ -192,16 +192,6 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card that was saved to Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard> {
-        return try {
-            val card = createCard(signedVerifiableCredential, response.request.contract)
-            picRepository.insert(card)
-            Result.Success(card)
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
-        }
-    }
-
     suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Nothing?> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -213,7 +203,7 @@ class CardManager @Inject constructor(
 
     private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
+        val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents, contents.sub, contents.jti)
         return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
     }
 

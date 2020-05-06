@@ -9,10 +9,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchContractNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
-import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendIssuanceResponseNetworkOperation
+import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
@@ -35,27 +36,38 @@ class CardRepository @Inject constructor(
 
     private val receiptDao = database.receiptDao()
 
+    private val verifiableCredentialDao = database.verifiableCredentialDao()
+
+    // Portable Identity Card Methods
     suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
 
     suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
 
     fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
 
+    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+        return getAllCards().map { cardList -> filterCardsByType(cardList, type) }
+    }
+
+    private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
+        return cardList.filter { it.primeVerifiableCredential.contents.vc.type.contains(type) }
+    }
+
+    fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
+
+    // Receipt Methods
     fun getAllReceipts(): LiveData<List<Receipt>> = receiptDao.getAllReceipts()
 
     fun getAllReceiptsByCardId(cardId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByCardId(cardId)
 
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
-    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
-        return getAllCards().map { cardList -> filterCardsByType(cardList, type) }
-    }
+    // Verifiable Credential Methods
+    fun getAllVerifiableCredentials(): LiveData<List<VerifiableCredential>> = verifiableCredentialDao.getAllVerifiableCredentials()
 
-    private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
-        return cardList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
-    }
+    fun getAllVerifiableCredentialsByPrimeId(primeId: String): LiveData<List<VerifiableCredential>> = verifiableCredentialDao.getVerifiableCredentialById(primeId)
 
-    fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
+    suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
 
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
         url,
@@ -67,7 +79,7 @@ class CardRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendIssuanceResponseNetworkOperation(
+    suspend fun sendIssuanceResponse(url: String, serializedResponse: String) = SendVerifiableCredentialIssuanceRequestNetworkOperation(
         url,
         serializedResponse,
         apiProvider,
@@ -79,4 +91,8 @@ class CardRepository @Inject constructor(
         serializedResponse,
         apiProvider
     ).fire()
+
+    suspend fun getVerifiableCredentialForPairwiseIdentifier() {
+
+    }
 }

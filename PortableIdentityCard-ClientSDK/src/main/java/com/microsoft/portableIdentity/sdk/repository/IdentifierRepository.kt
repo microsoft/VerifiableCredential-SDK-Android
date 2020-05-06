@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.repository
 
+import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.repository.networking.identifierOperations.ResolveIdentifierNetworkOperation
@@ -19,7 +20,7 @@ class IdentifierRepository @Inject constructor(database: SdkDatabase, private va
 
     fun insert(identifier: Identifier) = identifierDao.insert(identifier)
 
-    fun queryByIdentifier(identifier: String): Identifier = identifierDao.queryByIdentifier(identifier)
+    fun queryByIdentifier(identifier: String): LiveData<Identifier> = identifierDao.queryByIdentifier(identifier)
 
-    fun queryByName(name: String): Identifier? = identifierDao.queryByName(name)
+    fun queryByName(name: String): LiveData<Identifier> = identifierDao.queryByName(name)
 }

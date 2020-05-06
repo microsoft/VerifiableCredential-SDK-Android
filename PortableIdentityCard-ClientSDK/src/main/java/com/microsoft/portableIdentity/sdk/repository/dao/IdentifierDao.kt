@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.repository.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -12,9 +13,9 @@ interface IdentifierDao {
     fun insert(identifier: Identifier)
 
     @Query("SELECT * FROM Identifier where id = :identifier")
-    fun queryByIdentifier(identifier: String): Identifier
+    fun queryByIdentifier(identifier: String): LiveData<Identifier>
 
     //TODO: See how identifiers are stored with pairwise in picture and modify accordingly
     @Query("SELECT * FROM Identifier where name= :name")
-    fun queryByName(name: String): Identifier?
+    fun queryByName(name: String): LiveData<Identifier>
 }

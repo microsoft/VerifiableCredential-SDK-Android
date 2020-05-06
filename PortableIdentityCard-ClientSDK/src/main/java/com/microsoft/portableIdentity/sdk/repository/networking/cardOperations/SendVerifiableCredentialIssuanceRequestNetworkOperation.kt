@@ -17,13 +17,13 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceExceptio
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import retrofit2.Response
 
-class SendIssuanceResponseNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider, private val serializer: Serializer): PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
+class SendVerifiableCredentialIssuanceRequestNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider, private val serializer: Serializer): PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
 
     override fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
         val signedVerifiableCredential = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        return Result.Success(VerifiableCredential(signedVerifiableCredential, contents))
+        return Result.Success(VerifiableCredential(signedVerifiableCredential, contents, contents.sub, contents.jti))
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {

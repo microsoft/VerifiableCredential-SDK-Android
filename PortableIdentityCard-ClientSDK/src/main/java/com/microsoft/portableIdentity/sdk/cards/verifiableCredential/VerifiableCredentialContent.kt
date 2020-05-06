@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 
+import androidx.room.Entity
 import kotlinx.serialization.Serializable
 
 /**
@@ -13,6 +14,7 @@ import kotlinx.serialization.Serializable
  * @see [Verifiable Credential Spec](https://www.w3.org/TR/vc-data-model/#basic-concepts)
  */
 @Serializable
+@Entity
 data class VerifiableCredentialContent (
 
     // ID of the Verifiable Credential.

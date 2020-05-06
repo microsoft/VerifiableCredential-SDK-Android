@@ -5,14 +5,17 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierCreator
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Success
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.runResultTry
 import kotlinx.coroutines.*
 import javax.inject.Inject
@@ -30,14 +33,17 @@ class IdentifierManager @Inject constructor(
     private val identifierCreator: IdentifierCreator
 ) {
 
-    suspend fun getIdentifier(): Result<Identifier> {
-        return withContext(Dispatchers.IO) { initLongFormIdentifier() }
+    suspend fun getMasterIdentifier(): Result<Identifier> {
+        return withContext(Dispatchers.IO) { getOrCreateMasterIdentifier() }
     }
 
-    private suspend fun initLongFormIdentifier(): Result<Identifier> {
-        return when (val identifier = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)) {
-            null -> createMasterIdentifier()
-            else -> Result.Success(identifier)
+    private suspend fun getOrCreateMasterIdentifier(): Result<Identifier> {
+        val identifierLiveData = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
+        val identifier = identifierLiveData.value
+        return if (identifier != null) {
+            Result.Success(identifier)
+        } else {
+            createMasterIdentifier()
         }
     }
 
@@ -47,16 +53,22 @@ class IdentifierManager @Inject constructor(
             //TODO(seed is needed for pairwise key generation)
             cryptoOperations.generateAndStoreSeed()
             // peer id for master Identifier will be method name for now.
-            val registeredIdentifier = identifierCreator.create(METHOD_NAME).abortOnError()
-            saveIdentifier(registeredIdentifier)
+            val identifier = identifierCreator.create(METHOD_NAME).abortOnError()
+            SdkLog.i("Creating Identifier: $identifier")
+            saveIdentifier(identifier)
         }
     }
 
     // TODO(create pairwise Identifier based off new key generation algorithm).
-    suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
+    suspend fun createPairwiseIdentifier(peerId: String): Result<Identifier> {
         return runResultTry {
-            val registeredIdentifier = identifierCreator.create(peerId).abortOnError()
-            saveIdentifier(registeredIdentifier)
+            when (val masterIdentifierResult = getMasterIdentifier()) {
+                is Result.Success -> {
+                    val registeredIdentifier = identifierCreator.create(peerId).abortOnError()
+                    saveIdentifier(registeredIdentifier)
+                }
+                is Result.Failure -> masterIdentifierResult
+            }
         }
     }
 
@@ -67,5 +79,9 @@ class IdentifierManager @Inject constructor(
         } catch (exception: Exception) {
             throw RepositoryException("Unable to save identifier in repository", exception)
         }
+    }
+
+    fun getIdentifierByName(name: String): LiveData<Identifier> {
+        return identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
     }
 }

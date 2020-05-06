@@ -18,10 +18,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PortableIdentityCard (
 
+    // id of the prime Verifiable Credential
     @PrimaryKey
     val id: String,
 
-    val verifiableCredential: VerifiableCredential,
+    // verifiable credential tied to Pairwise Identifier for Issuer.
+    val primeVerifiableCredential: VerifiableCredential,
 
     val displayContract: DisplayContract
 )

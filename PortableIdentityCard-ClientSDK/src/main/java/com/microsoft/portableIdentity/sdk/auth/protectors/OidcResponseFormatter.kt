@@ -117,7 +117,7 @@ class OidcResponseFormatter @Inject constructor(
 
     // only support one VC per VP
     private fun createPresentation(card: PortableIdentityCard, response: Response, responder: Identifier, iat: Long, exp: Long): String {
-        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw),
+        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.primeVerifiableCredential.raw),
                                                   context = listOf(VP_CONTEXT_URL),
                                                   type = listOf(VERIFIABLE_PRESENTATION_TYPE))
         val jti = UUID.randomUUID().toString()
