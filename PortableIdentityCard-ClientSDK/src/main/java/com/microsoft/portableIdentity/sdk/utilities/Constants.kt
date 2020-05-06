@@ -23,10 +23,15 @@ object Constants {
     const val TERMS_AND_SERVICES_URI = "tos_uri"
     const val LOGO_URI = "logo_uri"
 
+    //Verifiable Credential Constants
+    const val CONTEXT = "@context"
+    const val VP_CONTEXT_URL = "https://www.w3.org/2018/credentials/v1"
+    const val VERIFIABLE_PRESENTATION_TYPE = "VerifiablePresentation"
+
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000
     const val SECONDS_IN_A_MINUTE = 60
-    const val RESPONSE_EXPIRATION_IN_MINUTES = 5
+    const val RESPONSE_EXPIRATION_IN_MINUTES = 600
 
     //Identifier Constants
     const val IDENTIFIER_SECRET_KEY_NAME = "did.identifier"
@@ -39,5 +44,4 @@ object Constants {
     const val SIDETREE_CURVE_NAME_FOR_EC = "secp256k1"
     const val SIGNATURE_KEYREFERENCE = "sign"
     const val RECOVERY_KEYREFERENCE = "recover"
-    const val ENCRYPTION_KEYREFERENCE = "encrypt"
 }

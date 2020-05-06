@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
 
+import com.microsoft.portableIdentity.sdk.utilities.Constants.CONTEXT
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,7 +14,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class VerifiableCredentialDescriptor(
-        @SerialName("@context")
+    @SerialName(CONTEXT)
     val context: List<String>,
 
     val type: List<String>,

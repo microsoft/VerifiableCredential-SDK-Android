@@ -27,7 +27,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
      * @param peerId Id for the peer
      */
     fun generatePairwiseKey(algorithm: Algorithm, seedReference: String, personaId: String, peerId: String): PrivateKey {
-        val personaMasterKey: ByteArray = this.generatePersonaMasterKey(seedReference, personaId);
+        // val personaMasterKey: ByteArray = this.generatePersonaMasterKey(seedReference, personaId);
 
         val keyType = KeyTypeFactory.createViaWebCrypto(algorithm);
         return when (keyType) {
@@ -41,35 +41,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
      * Generate a pairwise master key.
      * @param seedReference  The master seed for generating pairwise keys
      * @param personaId  The owner DID
+     * TODO(Deleting Logan's translated code from Typescript SDK for now)
      */
-    private fun generatePersonaMasterKey (seedReference: String, personaId: String): ByteArray {
-        var mk: ByteArray? = this.masterKeys[personaId];
-
-        if (mk != null) {
-            return mk;
-        }
-
-        // Get the seed
-        val jwk = this.crypto.keyStore.getSecretKey(seedReference)
-
-        // Get the subtle crypto
-        val crypto: SubtleCrypto = this.crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);
-
-        // Generate the master key
-        val alg: Algorithm =
-            EcdsaParams(
-                hash = Sha.Sha512
-            )
-        val masterJwk = JsonWebKey(
-                kty = KeyType.Octets.value,
-                alg = JoseConstants.Hs512.value,
-                k = jwk.getKey().k
-            )
-        val key = crypto.importKey(
-            KeyFormat.Jwk, masterJwk, alg, false, listOf(
-                KeyUsage.Sign));
-        val masterKey = crypto.sign(alg, key, personaId.map { it.toByte() }.toByteArray());
-        this.masterKeys[personaId] = masterKey;
-        return masterKey;
-    }
+    private fun generatePersonaMasterKey (seedReference: String, personaId: String) {}
 }

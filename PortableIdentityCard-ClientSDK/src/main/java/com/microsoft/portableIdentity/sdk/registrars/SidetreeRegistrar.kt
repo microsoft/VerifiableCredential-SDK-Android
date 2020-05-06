@@ -5,18 +5,11 @@
 
 package com.microsoft.portableIdentity.sdk.registrars
 
-import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.identifier.SidetreePayloadProcessor
-import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
-import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.Constants
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RegistrarException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import javax.inject.Inject
 import javax.inject.Named
-import kotlin.random.Random
 
 /**
  * Registrar implementation for the Sidetree long form identifier
@@ -25,74 +18,17 @@ import kotlin.random.Random
  * @implements Registrar
  */
 class SidetreeRegistrar @Inject constructor(
-    @Named("registrationUrl") private val baseUrl: String, private val serializer: Serializer
-) : Registrar() {
+    @Named("registrationUrl") private val baseUrl: String) : Registrar() {
 
-    override suspend fun register(
-        signatureKeyReference: String,
-        recoveryKeyReference: String,
-        cryptoOperations: CryptoOperations
-    ): Result<Identifier> {
+    /**
+     * Registers Identifier that is passed in.
+     * TODO(we do not support registration for MVP)
+     */
+    override suspend fun register(identifier: Identifier): Result<Identifier> {
         return try {
-            val alias = Base64Url.encode(Random.nextBytes(8))
-            val payloadProcessor = SidetreePayloadProcessor(cryptoOperations, signatureKeyReference, recoveryKeyReference, serializer)
-            val registrationPayload = payloadProcessor.generateCreatePayload(alias)
-            val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
-
-            val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload, registrationPayloadEncoded)
-
-            Result.Success(
-                transformIdentifierDocumentToIdentifier(
-                    payloadProcessor,
-                    registrationPayload,
-                    identifierLongForm,
-                    alias,
-                    signatureKeyReference,
-                    recoveryKeyReference
-                )
-            )
+            Result.Success(identifier)
         } catch (exception: Exception) {
             Result.Failure(RegistrarException("Unable to create an identifier", exception))
         }
-    }
-
-    private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {
-        val uniqueSuffix = payloadProcessor.computeUniqueSuffix(registrationPayload.suffixData)
-        return "did:${Constants.METHOD_NAME}:$uniqueSuffix"
-    }
-
-    private fun computeLongFormIdentifier(
-        payloadProcessor: SidetreePayloadProcessor,
-        registrationPayload: RegistrationPayload,
-        registrationPayloadEncoded: String
-    ): String {
-        val identifierShortForm = computeUniqueSuffix(payloadProcessor, registrationPayload)
-        return "$identifierShortForm?${Constants.INITIAL_STATE_LONGFORM}=$registrationPayloadEncoded"
-    }
-
-    private fun transformIdentifierDocumentToIdentifier(
-        payloadProcessor: SidetreePayloadProcessor,
-        registrationPayload: RegistrationPayload,
-        identifierLongForm: String,
-        alias: String,
-        signatureKeyReference: String,
-        recoveryKeyReference: String
-    ): Identifier {
-        val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
-        val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
-
-        val personaSigKeyRef = "${alias}_$signatureKeyReference"
-        val personaRecKeyRef = "${alias}_$recoveryKeyReference"
-
-        return Identifier(
-            identifierLongForm,
-            alias,
-            personaSigKeyRef,
-            "",
-            personaRecKeyRef,
-            nextUpdateCommitmentHash,
-            nextRecoveryCommitmentHash,
-            Constants.IDENTIFIER_SECRET_KEY_NAME
-        )
     }
 }
