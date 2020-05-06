@@ -5,8 +5,8 @@
 
 package com.microsoft.portableIdentity.sdk.resolvers
 
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.DiscoveryDocument
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ResolverException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -22,7 +22,7 @@ class Resolver @Inject constructor(
         return runResultTry {
             when (val id = identifierRepository.resolveIdentifier(baseUrl, identifier)) {
                 is Result.Success -> {
-                    Result.Success(id.payload.document.didDocument)
+                    Result.Success((id.payload as IdentifierResponse).didDocument)
                 }
                 is Result.Failure -> Result.Failure(ResolverException("Unable to resolve identifier $identifier", id.payload))
             }

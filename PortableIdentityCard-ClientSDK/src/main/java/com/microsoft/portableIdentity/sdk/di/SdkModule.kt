@@ -62,6 +62,10 @@ internal class SdkModule {
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
         )
+        defaultCryptoOperations.subtleCryptoFactory.addMessageAuthenticationCodeSigner(
+            name = W3cCryptoApiConstants.Hmac.value,
+            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.All)
+        )
         return defaultCryptoOperations
     }
 

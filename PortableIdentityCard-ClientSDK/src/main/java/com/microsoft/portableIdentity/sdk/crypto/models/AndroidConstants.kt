@@ -18,6 +18,10 @@ enum class AndroidConstants(val value: String) {
     RsSha384("SHA384withRSA"),
     RsSha512("SHA512withRSA"),
 
+    //MAC Algorithm names from https://developer.android.com/training/articles/keystore.html#SupportedSignatures
+    HmacSha256("HmacSHA256"),
+    HmacSha512("HmacSHA512"),
+
 
 
 
