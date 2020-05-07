@@ -133,6 +133,7 @@ class CardManager @Inject constructor(
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<Pair<PortableIdentityCard, List<Receipt>>> {
         return withContext(Dispatchers.IO) {
             runResultTry {
+                response.transformCollectedCards { getPairwiseCard(it, responder) }
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
                 SdkLog.i(formattedResponse)
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
@@ -146,8 +147,8 @@ class CardManager @Inject constructor(
                 receipts.add(
                     response.createReceipt(
                         ReceiptAction.Issuance,
-                        card.id,
-                        card.primeVerifiableCredential.contents.iss,
+                        card.primaryVcId,
+                        card.verifiableCredential.contents.iss,
                         response.audience,
                         response.request.entityName,
                         formattedResponse
@@ -170,6 +171,7 @@ class CardManager @Inject constructor(
      */
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<List<Receipt>> {
         return runResultTry {
+            response.transformCollectedCards { getPairwiseCard(it, responder) }
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
             val receipts = response.createReceiptsForPresentedCredentials(
@@ -181,6 +183,21 @@ class CardManager @Inject constructor(
             receipts.forEach { saveReceipt(it).abortOnError() }
             Result.Success(receipts)
         }
+    }
+
+    /**
+     * Change Owner of Portable Identity Card.
+     * Card id and display information will be the same as the origin card.
+     * Only change will be the Pairwise Identifier who the card belongs to.
+     */
+    private fun getPairwiseCard(card: PortableIdentityCard, responder: Identifier): PortableIdentityCard {
+        val newVerifiableCredential = getVerifiableCredentialByIssuerId(card.primaryVcId, responder.id)
+        return PortableIdentityCard(card.primaryVcId, newVerifiableCredential, card.displayContract)
+    }
+
+    private fun getVerifiableCredentialByIssuerId(verifiableCredentialId: String, IssuerId: String): VerifiableCredential {
+        picRepository.getAllVerifiableCredentials()
+        TODO("not implemented")
     }
 
     /**
@@ -203,7 +220,7 @@ class CardManager @Inject constructor(
 
     private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents, contents.sub, contents.jti)
+        val verifiableCredential = VerifiableCredential(contents.sub, signedVerifiableCredential, contents, contents.sub, contents.jti)
         return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
     }
 

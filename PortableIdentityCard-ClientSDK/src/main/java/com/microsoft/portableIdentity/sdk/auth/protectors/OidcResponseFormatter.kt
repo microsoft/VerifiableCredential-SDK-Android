@@ -94,13 +94,13 @@ class OidcResponseFormatter @Inject constructor(
     private fun createAttestationResponse(response: Response, responder: Identifier, iat: Long, exp: Long): AttestationResponse {
         var selfIssuedAttestations: Map<String, String>? = null
         var tokenAttestations: Map<String, String>? = null
-        if (!response.getIdTokenBindings().isNullOrEmpty()) {
-            tokenAttestations = response.getIdTokenBindings()
+        if (!response.getCollectedIdTokens().isNullOrEmpty()) {
+            tokenAttestations = response.getCollectedIdTokens()
         }
-        if (!response.getSelfIssuedClaimBindings().isNullOrEmpty()) {
-            selfIssuedAttestations = response.getSelfIssuedClaimBindings()
+        if (!response.getCollectedSelfIssuedClaims().isNullOrEmpty()) {
+            selfIssuedAttestations = response.getCollectedSelfIssuedClaims()
         }
-        val presentationAttestation = createPresentations(response.getCardBindings(), response, responder, iat, exp)
+        val presentationAttestation = createPresentations(response.getCollectedCards(), response, responder, iat, exp)
         return AttestationResponse(selfIssuedAttestations, tokenAttestations, presentationAttestation)
     }
 
@@ -117,7 +117,7 @@ class OidcResponseFormatter @Inject constructor(
 
     // only support one VC per VP
     private fun createPresentation(card: PortableIdentityCard, response: Response, responder: Identifier, iat: Long, exp: Long): String {
-        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.primeVerifiableCredential.raw),
+        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw),
                                                   context = listOf(VP_CONTEXT_URL),
                                                   type = listOf(VERIFIABLE_PRESENTATION_TYPE))
         val jti = UUID.randomUUID().toString()

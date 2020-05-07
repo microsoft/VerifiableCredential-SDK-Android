@@ -33,26 +33,32 @@ sealed class Response(open val request: Request, val audience: String) {
         collectedSelfIssued[field] = claim
     }
 
-    fun getIdTokenBindings(): Map<String, String> {
-        return collectedTokens
-    }
-
-    fun getSelfIssuedClaimBindings(): Map<String, String> {
-        return collectedSelfIssued
-    }
-
     fun addCard(card: PortableIdentityCard, type: String) {
         collectedCards[type] = card
     }
 
-    fun getCardBindings(): Map<String, PortableIdentityCard> {
+    fun getCollectedIdTokens(): Map<String, String> {
+        return collectedTokens
+    }
+
+    fun getCollectedSelfIssuedClaims(): Map<String, String> {
+        return collectedSelfIssued
+    }
+
+    fun getCollectedCards(): Map<String, PortableIdentityCard> {
         return collectedCards
+    }
+
+    fun transformCollectedCards(transform: (input: PortableIdentityCard) -> PortableIdentityCard) {
+        collectedCards.mapValues {
+            transform(it.value)
+        }
     }
 
     fun createReceiptsForPresentedCredentials(requestToken: String, entityDid: String, entityHostName: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().id, entityDid, entityHostName, entityName, requestToken)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().primaryVcId, entityDid, entityHostName, entityName, requestToken)
             receiptList.add(receipt)
         }
         return receiptList

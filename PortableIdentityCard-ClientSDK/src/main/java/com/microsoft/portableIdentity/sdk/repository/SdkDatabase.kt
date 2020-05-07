@@ -28,7 +28,7 @@ import com.microsoft.portableIdentity.sdk.repository.dao.VerifiableCredentialDao
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [PortableIdentityCard::class, Identifier::class, Receipt::class, VerifiableCredential::class], version = 1)
+@Database(entities = [VerifiableCredential::class, PortableIdentityCard::class, Identifier::class, Receipt::class], version = 1)
 @TypeConverters(RoomConverters::class)
 abstract class SdkDatabase : RoomDatabase() {
 

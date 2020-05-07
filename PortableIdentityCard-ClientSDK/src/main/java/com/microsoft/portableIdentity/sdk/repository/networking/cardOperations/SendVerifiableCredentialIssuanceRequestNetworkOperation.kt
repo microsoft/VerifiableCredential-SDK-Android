@@ -23,7 +23,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(url: String, seria
     override fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
         val signedVerifiableCredential = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        return Result.Success(VerifiableCredential(signedVerifiableCredential, contents, contents.sub, contents.jti))
+        return Result.Success(VerifiableCredential(contents.sub, signedVerifiableCredential, contents, contents.sub, contents.jti))
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {

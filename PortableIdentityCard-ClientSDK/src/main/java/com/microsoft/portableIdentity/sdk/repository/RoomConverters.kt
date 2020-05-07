@@ -28,11 +28,11 @@ object RoomConverters {
 
     @TypeConverter
     @JvmStatic
-    fun verifiableCredentialToString(vc: VerifiableCredential) = serializer.stringify(VerifiableCredential.serializer(), vc)
+    fun vcContentsToString(verifiableCredentialContent: VerifiableCredentialContent) = serializer.stringify(VerifiableCredentialContent.serializer(), verifiableCredentialContent)
 
     @TypeConverter
     @JvmStatic
-    fun stringToVerifiableCredential(serializedVc: String) = serializer.parse(VerifiableCredential.serializer(), serializedVc)
+    fun stringToVcContents(serializedVcContent: String) = serializer.parse(VerifiableCredentialContent.serializer(), serializedVcContent)
 
     @TypeConverter
     @JvmStatic
@@ -49,12 +49,4 @@ object RoomConverters {
     @TypeConverter
     @JvmStatic
     fun fromReceiptAction(value: ReceiptAction) = value.name
-
-    @TypeConverter
-    @JvmStatic
-    fun toVerifiableCredentialContent(value: String) = serializer.parse(VerifiablePresentationContent.serializer(), value)
-
-    @TypeConverter
-    @JvmStatic
-    fun fromVerifiableCredentialContent(value: VerifiableCredentialContent) = serializer.stringify(VerifiableCredentialContent.serializer(), value)
 }

@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk.cards
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
@@ -20,10 +21,11 @@ data class PortableIdentityCard (
 
     // id of the prime Verifiable Credential
     @PrimaryKey
-    val id: String,
+    val primaryVcId: String,
 
     // verifiable credential tied to Pairwise Identifier for Issuer.
-    val primeVerifiableCredential: VerifiableCredential,
+    @Embedded
+    val verifiableCredential: VerifiableCredential,
 
     val displayContract: DisplayContract
 )

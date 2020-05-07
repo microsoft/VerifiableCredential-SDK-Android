@@ -50,7 +50,7 @@ class CardRepository @Inject constructor(
     }
 
     private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
-        return cardList.filter { it.primeVerifiableCredential.contents.vc.type.contains(type) }
+        return cardList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
     }
 
     fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
