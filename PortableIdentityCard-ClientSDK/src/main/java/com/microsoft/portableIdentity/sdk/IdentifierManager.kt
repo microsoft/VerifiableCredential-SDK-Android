@@ -38,8 +38,7 @@ class IdentifierManager @Inject constructor(
     }
 
     private suspend fun getOrCreateMasterIdentifier(): Result<Identifier> {
-        val identifierLiveData = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
-        val identifier = identifierLiveData.value
+        val identifier = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
         return if (identifier != null) {
             Result.Success(identifier)
         } else {
@@ -81,7 +80,7 @@ class IdentifierManager @Inject constructor(
         }
     }
 
-    fun getIdentifierByName(name: String): LiveData<Identifier> {
+    fun getIdentifierByName(name: String): Identifier? {
         return identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
     }
 }

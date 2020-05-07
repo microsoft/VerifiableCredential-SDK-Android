@@ -20,7 +20,7 @@ class IdentifierRepository @Inject constructor(database: SdkDatabase, private va
 
     fun insert(identifier: Identifier) = identifierDao.insert(identifier)
 
-    fun queryByIdentifier(identifier: String): LiveData<Identifier> = identifierDao.queryByIdentifier(identifier)
+    fun queryByIdentifier(identifier: String): Identifier = identifierDao.queryByIdentifier(identifier)
 
-    fun queryByName(name: String): LiveData<Identifier> = identifierDao.queryByName(name)
+    fun queryByName(name: String): Identifier? = identifierDao.queryByName(name)
 }
