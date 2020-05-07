@@ -10,6 +10,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
+import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoFactory
@@ -136,6 +137,6 @@ class CryptoOperations (
         val randomNumberGenerator = SecureRandom()
         val seed = randomNumberGenerator.generateSeed(32)
         val secretKey = SecretKey(JsonWebKey(k=Base64Url.encode(seed)))
-        keyStore.save("seed", secretKey)
+        keyStore.save(AndroidConstants.masterSeed.value, secretKey)
     }
 }
