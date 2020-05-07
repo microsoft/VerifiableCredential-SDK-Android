@@ -38,10 +38,6 @@ class PairwiseKeyInstrumentedTest {
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, serializer)
         crypto = CryptoOperations(androidSubtle, keyStore)
-    }
-
-    @Test
-    fun generatePersonaMasterKeyTest() {
         val suppliedStringForSeedGeneration = "abcdefg"
         val seed = SecretKey(
             JsonWebKey(
@@ -50,7 +46,10 @@ class PairwiseKeyInstrumentedTest {
             )
         )
         keyStore.save(seedReference, seed)
+    }
 
+    @Test
+    fun generatePersonaMasterKeyTest() {
         val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
         var persona = "persona"
         val pairwiseKey = PairwiseKey(crypto)
@@ -70,14 +69,6 @@ class PairwiseKeyInstrumentedTest {
 
     @Test
     fun generateDeterministicECPairwiseKey() {
-        val suppliedStringForSeedGeneration = "abcdefg"
-        val seed = SecretKey(
-            JsonWebKey(
-                kty = KeyType.Octets.value,
-                k = Base64Url.encode(stringToByteArray(suppliedStringForSeedGeneration))
-            )
-        )
-        keyStore.save(seedReference, seed)
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
