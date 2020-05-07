@@ -58,11 +58,19 @@ class OidcResponseFormatter @Inject constructor(
         val jti = UUID.randomUUID().toString()
         val did = responder.id
 
+        // For Issuance Request
         var contract: String? = null
+
+        // For Presentation Response
         var nonce: String? = null
         var state: String? = null
-        var vc: String? = null
+
+        // For Issuance and Presentation
         var attestationResponse: AttestationResponse? = null
+
+        // For Exchange Request
+        var vc: String? = null
+        var recipient: String? = null
 
         when (request) {
             is IssuanceResponse -> {
@@ -76,6 +84,7 @@ class OidcResponseFormatter @Inject constructor(
             }
             is PairwiseIssuanceRequest -> {
                 vc = request.verifiableCredential.raw
+                recipient = "did:ion:recipientIdentifier"
             }
         }
 
@@ -91,7 +100,8 @@ class OidcResponseFormatter @Inject constructor(
             jti = jti,
             contract = contract,
             attestations = attestationResponse,
-            vc = vc
+            vc = vc,
+            recipient = recipient
         )
     }
 

@@ -7,6 +7,7 @@ package com.microsoft.portableIdentity.sdk.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
@@ -29,6 +30,7 @@ import javax.inject.Singleton
 class CardRepository @Inject constructor(
     database: SdkDatabase,
     private val apiProvider: ApiProvider,
+    private val formatter: Formatter,
     private val serializer: Serializer
 ) {
 
@@ -69,12 +71,8 @@ class CardRepository @Inject constructor(
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
 
+    // Issuance Methods.
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
-        url,
-        apiProvider
-    ).fire()
-
-    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(
         url,
         apiProvider
     ).fire()
@@ -84,6 +82,12 @@ class CardRepository @Inject constructor(
         serializedResponse,
         apiProvider,
         serializer
+    ).fire()
+
+    // Presentation Methods.
+    suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(
+        url,
+        apiProvider
     ).fire()
 
     suspend fun sendPresentationResponse(url: String, serializedResponse: String) = SendPresentationResponseNetworkOperation(

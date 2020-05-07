@@ -4,5 +4,5 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.PairwiseIssuanceException
 
 class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential) : ServiceRequest {
-    override val audience: String = verifiableCredential.contents.vc.exchangeService?.id ?: throw PairwiseIssuanceException("No Exchange Service in Verifiable Credential.")
+    override val audience: String = "https://exchangeServiceEndpoint.com"//verifiableCredential.contents.vc.exchangeService?.id ?: throw PairwiseIssuanceException("No Exchange Service in Verifiable Credential.")
 }

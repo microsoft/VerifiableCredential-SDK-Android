@@ -10,6 +10,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
+import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import kotlinx.serialization.Serializable
 
 /**
@@ -26,6 +27,9 @@ data class PortableIdentityCard (
     // verifiable credential tied to Pairwise Identifier for Issuer.
     @Embedded
     val verifiableCredential: VerifiableCredential,
+
+    @Embedded
+    val owner: Identifier,
 
     val displayContract: DisplayContract
 )

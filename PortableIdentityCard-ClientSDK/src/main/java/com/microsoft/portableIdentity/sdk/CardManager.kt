@@ -11,7 +11,9 @@ import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.PairwiseIssuanceRequest
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
@@ -129,35 +131,18 @@ class CardManager @Inject constructor(
      * @param response IssuanceResponse to be formed, signed, and sent.
      * @param responder Identifier to be used to sign response.
      *
-     * @return Result.Success: TODO("Support Error cases better (ex. 404)").
+     * @return Result.Success:
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<Pair<PortableIdentityCard, List<Receipt>>> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                response.transformCollectedCards { runBlocking { getPairwiseCard(it, responder) } }
+                response.transformCollectedCards { getPairwiseCard(it, responder) }
                 val formattedResponse = formatter.formAndSignRequest(response, responder, DEFAULT_EXPIRATION_IN_MINUTES).abortOnError()
-                SdkLog.i(formattedResponse)
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
-                val card = createCard(verifiableCredential.raw, response.request.contract)
-                val receipts = response.createReceiptsForPresentedCredentials(
-                    entityDid = response.request.contract.input.issuer,
-                    entityHostName = response.audience,
-                    entityName = response.request.entityName,
-                    requestToken = formattedResponse
-                ).toMutableList()
-                receipts.add(
-                    response.createReceipt(
-                        ReceiptAction.Issuance,
-                        card.cardId,
-                        card.verifiableCredential.contents.iss,
-                        response.audience,
-                        response.request.entityName,
-                        formattedResponse
-                    )
-                )
-                receipts.forEach { saveReceipt(it).abortOnError() }
-                Result.Success(Pair(card, receipts))
+                val card = createCard(verifiableCredential.raw, responder, response.request.contract)
+                createAndSaveReceipt(response, formattedResponse)
+                Result.Success(card)
             }
         }
     }
@@ -168,23 +153,31 @@ class CardManager @Inject constructor(
      * @param response PresentationResponse to be formed, signed, and sent.
      * @param responder Identifier to be used to sign response.
      *
-     * @return Result.Success: TODO("Support Error cases better (ex. 404)").
+     * @return Result.Success: Unit
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_MINUTES): Result<List<Receipt>> {
+    suspend fun sendPresentationResponse(
+        response: PresentationResponse,
+        responder: Identifier,
+        expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_MINUTES
+    ): Result<Unit> {
         return runResultTry {
-            response.transformCollectedCards { runBlocking { getPairwiseCard(it, responder) } }
+            // response.transformCollectedCards { getPairwiseCard(it, responder) }
+            SdkLog.i(response.toString())
             val formattedResponse = formatter.formAndSignRequest(response, responder, expiresInMinutes).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
-            val receipts = response.createReceiptsForPresentedCredentials(
-                entityDid = response.request.content.iss,
-                entityHostName = response.request.entityIdentifier,
-                entityName = response.request.entityName,
-                requestToken = formattedResponse
-            )
-            receipts.forEach { saveReceipt(it).abortOnError() }
-            Result.Success(receipts)
+            createAndSaveReceipt(response, formattedResponse)
+            Result.Success(Unit)
         }
+    }
+
+    private suspend fun createAndSaveReceipt(response: Response, requestToken: String) {
+        val receipts = response.createReceiptsForPresentedCredentials(
+            entityDid = response.request.entityIdentifier,
+            entityName = response.request.entityName,
+            requestToken = requestToken
+        )
+        receipts.forEach { saveReceipt(it) }
     }
 
     /**
@@ -193,21 +186,35 @@ class CardManager @Inject constructor(
      * Only change will be the Pairwise Identifier who the card belongs to.
      */
     private suspend fun getPairwiseCard(card: PortableIdentityCard, responder: Identifier): PortableIdentityCard {
-        val newVerifiableCredential = getPairwiseVerifiableCredential(card.cardId, responder.id)
-        return PortableIdentityCard(card.cardId, newVerifiableCredential, card.displayContract)
+        val pairwiseVc = getPairwiseVerifiableCredential(card.verifiableCredential, responder, card.owner)
+        return PortableIdentityCard(card.cardId, pairwiseVc, responder, card.displayContract)
     }
 
-    private suspend fun getPairwiseVerifiableCredential(primaryVcId: String, pairwiseIdentifier: String): VerifiableCredential {
-        val verifiableCredentials = picRepository.getAllVerifiableCredentialsByPrimaryVcId(primaryVcId)
+    private suspend fun getPairwiseVerifiableCredential(verifiableCredential: VerifiableCredential, pairwiseIdentifier: Identifier, primaryIdentifier: Identifier): VerifiableCredential {
+        val verifiableCredentials = picRepository.getAllVerifiableCredentialsByPrimaryVcId(verifiableCredential.primaryVcId)
         // if there is already a verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
-            if (it.contents.sub == pairwiseIdentifier) {
-                return it
+            if (it.contents.sub == pairwiseIdentifier.id) {
+                Result.Success(it)
+                SdkLog.i("can reach?")
             }
         }
+        val pairwiseRequest = PairwiseIssuanceRequest(verifiableCredential)
+        when (val formattedRequestResult = formatter.formAndSignRequest(pairwiseRequest, primaryIdentifier, DEFAULT_EXPIRATION_IN_MINUTES)) {
+            is Result.Success -> {
+                val pairwiseVerifiableCredential = sendPairwiseIssuanceRequest(pairwiseRequest.audience, formattedRequestResult.payload)
+                picRepository.insert(pairwiseVerifiableCredential)
+                return pairwiseVerifiableCredential
+            }
+            is Result.Failure -> throw PairwiseIssuanceException("Could not format Issuance Request token", formattedRequestResult.payload)
+        }
+    }
 
-        // else get a new Verifiable Credential from Issuance Service
-        TODO("make network call to get new Verifiable Credential")
+    private suspend fun sendPairwiseIssuanceRequest(audience: String, requestToken: String): VerifiableCredential {
+        return when (val pairwiseVcResult = picRepository.sendIssuanceResponse(audience, requestToken)) {
+            is Result.Success -> pairwiseVcResult.payload
+            is Result.Failure -> throw PairwiseIssuanceException("Could not get Pairwise Verifiable Credential", pairwiseVcResult.payload)
+        }
     }
 
     /**
@@ -228,10 +235,10 @@ class CardManager @Inject constructor(
         }
     }
 
-    private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
+    private fun createCard(signedVerifiableCredential: String, owner: Identifier, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
-        return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
+        return PortableIdentityCard(contents.jti, verifiableCredential, owner, contract.display)
     }
 
     private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
@@ -281,7 +288,7 @@ class CardManager @Inject constructor(
         }
     }
 
-     /** Get A Portable Identity Card by card id from storage
+    /** Get A Portable Identity Card by card id from storage
      * @param  id: card id of requested card
      * @return Result.Success: Portable Identity Card corresponding to id passed
      *         Result.Failure: Exception explaining the problem

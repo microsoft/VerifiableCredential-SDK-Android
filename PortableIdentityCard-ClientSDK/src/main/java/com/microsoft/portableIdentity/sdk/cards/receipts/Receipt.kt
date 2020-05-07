@@ -24,9 +24,6 @@ data class Receipt (
     // date action occurred
     val activityDate: Long,
 
-    // Host name of verifier/issuer
-    val entityHostName: String,
-
     //Name of the verifier/issuer
     val entityName: String,
 
