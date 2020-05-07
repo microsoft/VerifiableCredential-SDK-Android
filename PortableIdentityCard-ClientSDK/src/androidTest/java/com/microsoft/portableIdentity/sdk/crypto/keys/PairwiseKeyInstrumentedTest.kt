@@ -52,17 +52,18 @@ class PairwiseKeyInstrumentedTest {
         keyStore.save(seedReference, seed)
 
         val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
-
+        var persona = "persona"
         val pairwiseKey = PairwiseKey(crypto)
-        var masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, "persona")
+        var masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, persona)
         var actualEncodedMasterKey = Base64Url.encode(masterKey)
         assertThat(actualEncodedMasterKey).isEqualTo(expectedEncodedMasterKey)
 
-        masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, "persona")
+        masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, persona)
         actualEncodedMasterKey = Base64Url.encode(masterKey)
         assertThat(actualEncodedMasterKey).isEqualTo(expectedEncodedMasterKey)
 
-        masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, "persona1")
+        persona = "persona1"
+        masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, persona)
         actualEncodedMasterKey = Base64Url.encode(masterKey)
         assertThat(actualEncodedMasterKey).isNotEqualTo(expectedEncodedMasterKey)
     }

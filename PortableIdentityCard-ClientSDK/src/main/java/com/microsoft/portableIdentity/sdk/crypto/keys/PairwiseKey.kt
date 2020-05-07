@@ -66,7 +66,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
             )
         val key = crypto.importKey(
             KeyFormat.Jwk, masterJwk, alg, false, listOf(
-                KeyUsage.Sign));
+                KeyUsage.Sign))
         val masterKey = crypto.sign(alg, key, personaId.map { it.toByte() }.toByteArray());
         this.masterKeys[personaId] = masterKey;
         return masterKey;

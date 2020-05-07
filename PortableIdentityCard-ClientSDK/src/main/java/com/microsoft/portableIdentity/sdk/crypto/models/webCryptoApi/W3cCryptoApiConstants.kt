@@ -59,6 +59,6 @@ enum class W3cCryptoApiConstants(val value: String) {
     AesKw("AES-KW"),
 
     Hmac("HMAC"),
-    HmacSha512("HMACSHA512"),
-    HmacSha256("HMACSHA256")
+    HmacSha512("HmacSha512"),
+    HmacSha256("HmacSha256")
 }
