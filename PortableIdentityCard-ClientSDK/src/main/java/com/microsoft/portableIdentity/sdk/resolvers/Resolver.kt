@@ -22,7 +22,7 @@ class Resolver @Inject constructor(
         return runResultTry {
             when (val id = identifierRepository.resolveIdentifier(baseUrl, identifier)) {
                 is Result.Success -> {
-                    Result.Success((id.payload as IdentifierResponse).didDocument)
+                    Result.Success(id.payload.didDocument)
                 }
                 is Result.Failure -> Result.Failure(ResolverException("Unable to resolve identifier $identifier", id.payload))
             }

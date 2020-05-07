@@ -7,13 +7,16 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
 import com.microsoft.portableIdentity.sdk.crypto.keys.PairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import java.security.SecureRandom
 
 /**
  * Class that encompasses all of Crypto
@@ -128,9 +131,12 @@ class CryptoOperations (
     }
 
     /**
-     * Generate a seed.
+     * Generates a 256 bit seed.
      */
-    fun generateSeed(): String {
-        TODO("Not implemented")
+    fun generateAndStoreSeed() {
+        val randomNumberGenerator = SecureRandom()
+        val seed = randomNumberGenerator.generateSeed(32)
+        val secretKey = SecretKey(JsonWebKey(k=Base64Url.encode(seed)))
+        keyStore.save("seed", secretKey)
     }
 }

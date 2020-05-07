@@ -28,7 +28,7 @@ class PairwiseKey(private val crypto: CryptoOperations) {
      * @param peerId Id for the peer
      */
     fun generatePairwiseKey(algorithm: Algorithm, seedReference: String, personaId: String, peerId: String): PrivateKey {
-        val personaMasterKey: ByteArray = this.generatePersonaMasterKey(seedReference, personaId);
+        val personaMasterKey: ByteArray = this.generatePersonaMasterKey(seedReference, personaId)
 
         return when (val keyType = KeyTypeFactory.createViaWebCrypto(algorithm)) {
             KeyType.EllipticCurve -> EllipticCurvePairwiseKey.generate(this.crypto, personaMasterKey, algorithm, peerId);

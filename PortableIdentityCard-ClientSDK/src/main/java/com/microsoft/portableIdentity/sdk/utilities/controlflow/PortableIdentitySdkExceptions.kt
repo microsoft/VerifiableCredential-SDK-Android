@@ -7,7 +7,9 @@ package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
 open class PortableIdentitySdkException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
 
-class CryptoException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+open class CryptoException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
+class IdentifierCreatorException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 
 open class AuthenticationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
@@ -16,8 +18,6 @@ class PresentationException(message: String? = null, cause: Throwable? = null) :
 class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
 class ValidatorException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
-
-class TokenFormatterException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
 class ResolverException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 

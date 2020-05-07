@@ -8,7 +8,6 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.toKeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.toKeyUsage
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 /**
  * Represents an OCT key

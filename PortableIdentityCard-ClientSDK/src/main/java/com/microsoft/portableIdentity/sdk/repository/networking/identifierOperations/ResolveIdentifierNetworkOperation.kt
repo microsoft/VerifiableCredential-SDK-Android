@@ -5,14 +5,14 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking.identifierOperations
 
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.DiscoveryDocument
+import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.repository.networking.GetNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import retrofit2.Response
 import javax.inject.Inject
 
 class ResolveIdentifierNetworkOperation @Inject constructor(apiProvider: ApiProvider, url: String, val identifier: String):
-    GetNetworkOperation<DiscoveryDocument, DiscoveryDocument>() {
+    GetNetworkOperation<IdentifierResponse, IdentifierResponse>() {
 
-    override val call: suspend() -> Response<DiscoveryDocument> = {apiProvider.identifierApi.resolveIdentifier("$url/$identifier")}
+    override val call: suspend() -> Response<IdentifierResponse> = {apiProvider.identifierApi.resolveIdentifier("$url/$identifier")}
 }

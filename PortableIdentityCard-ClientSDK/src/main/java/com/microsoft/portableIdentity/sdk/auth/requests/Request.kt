@@ -6,7 +6,7 @@ import com.microsoft.portableIdentity.sdk.auth.models.attestations.CardRequestBi
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 
-sealed class Request(val attestations: CredentialAttestations?) {
+sealed class Request(val attestations: CredentialAttestations?, val entityName: String = "", val entityIdentifier: String = "") {
 
     private var presentationBinding: CardRequestBinding? = null
 
@@ -31,5 +31,5 @@ sealed class Request(val attestations: CredentialAttestations?) {
 }
 
 // Request can be either an Issuance or Presentation Request only.
-class IssuanceRequest(val contract: PicContract, val contractUrl: String): Request(contract.input.attestations)
-class PresentationRequest(val oidcParameters: Map<String, List<String>>, val serializedToken: String, val content: OidcRequestContent) : Request(content.attestations)
+class IssuanceRequest(val contract: PicContract, val contractUrl: String): Request(contract.input.attestations, contract.display.card.issuedBy, contract.input.issuer)
+class PresentationRequest(val oidcParameters: Map<String, List<String>>, val serializedToken: String, val content: OidcRequestContent) : Request(content.attestations, content.registration?.clientName ?: "", content.iss)

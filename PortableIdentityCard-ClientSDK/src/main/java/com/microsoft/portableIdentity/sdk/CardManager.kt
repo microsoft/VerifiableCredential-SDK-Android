@@ -21,6 +21,7 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
@@ -111,7 +112,7 @@ class CardManager @Inject constructor(
     suspend fun isValid(request: PresentationRequest): Result<Boolean> {
         return validator.validate(request)
     }
-  
+
     fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
         return IssuanceResponse(request)
     }
@@ -133,10 +134,26 @@ class CardManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+                SdkLog.i(formattedResponse)
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
                 val card = createCard(verifiableCredential.raw, response.request.contract)
-                val receipts = response.createReceiptsForPresentedCredentials(entityDid = response.request.contract.input.issuer, entityHostName = response.audience, requestToken = formattedResponse).toMutableList()
-                receipts.add(response.createReceipt(ReceiptAction.Issuance, card.id, card.verifiableCredential.contents.iss, response.audience, formattedResponse))
+                val receipts = response.createReceiptsForPresentedCredentials(
+                    entityDid = response.request.contract.input.issuer,
+                    entityHostName = response.audience,
+                    entityName = response.request.entityName,
+                    requestToken = formattedResponse
+                ).toMutableList()
+                receipts.add(
+                    response.createReceipt(
+                        ReceiptAction.Issuance,
+                        card.id,
+                        card.verifiableCredential.contents.iss,
+                        response.audience,
+                        response.request.entityName,
+                        formattedResponse
+                    )
+                )
+                receipts.forEach { saveReceipt(it).abortOnError() }
                 Result.Success(Pair(card, receipts))
             }
         }
@@ -155,7 +172,14 @@ class CardManager @Inject constructor(
         return runResultTry {
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
-            Result.Success(response.createReceiptsForPresentedCredentials(entityDid = response.request.content.iss, entityHostName = response.audience, requestToken = formattedResponse))
+            val receipts = response.createReceiptsForPresentedCredentials(
+                entityDid = response.request.content.iss,
+                entityHostName = response.request.entityIdentifier,
+                entityName = response.request.entityName,
+                requestToken = formattedResponse
+            )
+            receipts.forEach { saveReceipt(it).abortOnError() }
+            Result.Success(receipts)
         }
     }
 
@@ -232,7 +256,7 @@ class CardManager @Inject constructor(
      *
      * @return List of Receipts
      */
-    suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
+    private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
         return try {
             Result.Success(picRepository.insert(receipt))
         } catch (exception: Exception) {
