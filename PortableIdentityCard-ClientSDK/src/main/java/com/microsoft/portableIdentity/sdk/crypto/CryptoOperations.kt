@@ -124,10 +124,9 @@ class CryptoOperations (
      * @param seed to be used to create pairwise key.
      *
      */
-    fun generatePairwise(algorithm: EcKeyGenParams, seed: String, personaId: String, peerId: String): PrivateKey {
-//        TODO("Not implemented")
+    fun generatePairwise(algorithm: Algorithm, seedReference: String, personaId: String, peerId: String): PrivateKey {
         val pairwiseKey = PairwiseKey(this)
-        return pairwiseKey.generatePairwiseKey(algorithm, seed, personaId, peerId)
+        return pairwiseKey.generatePairwiseKey(algorithm, seedReference, personaId, peerId)
     }
 
     /**

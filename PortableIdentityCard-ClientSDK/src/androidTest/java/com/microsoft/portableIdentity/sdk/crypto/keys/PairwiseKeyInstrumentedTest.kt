@@ -10,6 +10,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
@@ -17,6 +18,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCryp
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,32 +42,38 @@ class PairwiseKeyInstrumentedTest {
 
     @Test
     fun generatePersonaMasterKeyTest() {
+        val suppliedStringForSeedGeneration = "abcdefg"
         val seed = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
-                k = Base64Url.encode(stringToByteArray("abcdefg"))
+                k = Base64Url.encode(stringToByteArray(suppliedStringForSeedGeneration))
             )
         )
         keyStore.save(seedReference, seed)
 
+        val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
+
         val pairwiseKey = PairwiseKey(crypto)
         var masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, "persona")
-        var encodedMasterKey = Base64Url.encode(masterKey)
-        assertThat(encodedMasterKey).isEqualTo("h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw")
+        var actualEncodedMasterKey = Base64Url.encode(masterKey)
+        assertThat(actualEncodedMasterKey).isEqualTo(expectedEncodedMasterKey)
+
         masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, "persona")
-        encodedMasterKey = Base64Url.encode(masterKey)
-        assertThat(encodedMasterKey).isEqualTo("h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw")
+        actualEncodedMasterKey = Base64Url.encode(masterKey)
+        assertThat(actualEncodedMasterKey).isEqualTo(expectedEncodedMasterKey)
+
         masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, "persona1")
-        encodedMasterKey = Base64Url.encode(masterKey)
-        assertThat(encodedMasterKey).isNotEqualTo("h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw")
+        actualEncodedMasterKey = Base64Url.encode(masterKey)
+        assertThat(actualEncodedMasterKey).isNotEqualTo(expectedEncodedMasterKey)
     }
 
     @Test
     fun generateDeterministicECPairwiseKey() {
+        val suppliedStringForSeedGeneration = "abcdefg"
         val seed = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
-                k = Base64Url.encode(stringToByteArray("abcdefg"))
+                k = Base64Url.encode(stringToByteArray(suppliedStringForSeedGeneration))
             )
         )
         keyStore.save(seedReference, seed)
@@ -75,6 +83,14 @@ class PairwiseKeyInstrumentedTest {
                 "hash" to Sha.Sha256
             )
         )
+        val persona = "did:persona"
+        val peer = "did:peer"
+
+        // Generate pairwise key
+        val ecPairwiseKey = crypto.generatePairwise(alg, seedReference, persona, peer)
+        keyStore.save("key", ecPairwiseKey)
+
+        //Use the pairwise key generated to sign and verify just to make sure it is successful. Verify doesn't return anything to make assertions on that. If verification fails, test would fail automatically.
         val ecAlgorithm = EcdsaParams(
             hash = Algorithm(
                 name = W3cCryptoApiConstants.Sha256.value
@@ -83,15 +99,79 @@ class PairwiseKeyInstrumentedTest {
                 "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
             )
         )
-        // Generate key
-        val pairwiseKey = PairwiseKey(crypto)
-        val ecPairwiseKey = pairwiseKey.generatePairwiseKey(alg, seedReference, "did:persona", "did:peer");
-        keyStore.save("key", ecPairwiseKey);
         val data = stringToByteArray("1234567890")
         crypto = CryptoOperations(ellipticCurveSubtleCrypto, keyStore)
 
-        //Signing and verifying just to make sure it is successful. Verify doesn't return anything to make assertions on that. If verification fails, test would fail automatically.
         val signature = crypto.sign(data, "key", ecAlgorithm)
         val verify = crypto.verify(data, signature, "key", ecAlgorithm);
+    }
+
+    @Test
+    fun generateUniquePairwiseKeyUsingDifferentSeed() {
+        val results = Array<String?>(100){""}
+        val alg = EcKeyGenParams(
+            namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+            additionalParams = mapOf(
+                "hash" to Sha.Sha256
+            )
+        )
+        val persona = "did:persona:1"
+        val peer = "did:peer:1"
+        for(i in 0 .. 99) {
+            val keyReference = "key-$i"
+            val keyValue = SecretKey(
+                JsonWebKey(
+                    kty = KeyType.Octets.value,
+                    k = Base64Url.encode(stringToByteArray("1234567890-$i"))
+                )
+            )
+            keyStore.save(seedReference, keyValue)
+            keyStore.save(keyReference, keyValue)
+
+            val actualPairwiseKey = crypto.generatePairwise(alg, keyReference, persona, peer)
+            results[i] = (actualPairwiseKey as EllipticCurvePrivateKey).d
+            assertThat(results.filter { value -> value == actualPairwiseKey.d }.size).isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun generateUniquePairwiseKeyUsingDifferentPeer() {
+        val results = Array<String?>(100){""}
+        val alg = EcKeyGenParams(
+            namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+            additionalParams = mapOf(
+                "hash" to Sha.Sha256
+            )
+        )
+        val persona = "did:persona:1"
+        val peer = "did:peer:1"
+        for(i in 0 .. 99) {
+            val suppliedPeer = "$peer-$i"
+            val actualPairwiseKey = crypto.generatePairwise(alg, seedReference, persona, suppliedPeer)
+            results[i] = (actualPairwiseKey as EllipticCurvePrivateKey).d
+            assertThat(results.filter { value -> value == actualPairwiseKey.d }.size).isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun invalidCurveSuppliedForECPairwiseKeyGeneration() {
+        val alg = EcKeyGenParams(
+            namedCurve = W3cCryptoApiConstants.Secp256r1.value,
+            additionalParams = mapOf(
+                "hash" to Sha.Sha256
+            )
+        )
+        val persona = "did:persona"
+        val peer = "did:peer"
+        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(RuntimeException::class.java)
+    }
+
+    @Test
+    fun invalidAlgorithmSuppliedForECPairwiseKeyGeneration() {
+        val invalidAlgorithmName = "Hmac"
+        val alg = Algorithm(invalidAlgorithmName)
+        val persona = "did:persona"
+        val peer = "did:peer"
+        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(RuntimeException::class.java)
     }
 }

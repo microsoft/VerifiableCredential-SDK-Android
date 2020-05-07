@@ -6,7 +6,6 @@
 package com.microsoft.portableIdentity.sdk.resolvers
 
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ResolverException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
