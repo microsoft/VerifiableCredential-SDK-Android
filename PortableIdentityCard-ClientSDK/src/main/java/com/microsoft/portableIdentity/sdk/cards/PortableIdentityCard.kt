@@ -21,7 +21,7 @@ data class PortableIdentityCard (
 
     // id of the prime Verifiable Credential
     @PrimaryKey
-    val primaryVcId: String,
+    val cardId: String,
 
     // verifiable credential tied to Pairwise Identifier for Issuer.
     @Embedded

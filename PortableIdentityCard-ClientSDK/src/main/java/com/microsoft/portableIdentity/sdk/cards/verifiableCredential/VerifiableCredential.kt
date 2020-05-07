@@ -22,10 +22,7 @@ data class VerifiableCredential(
     // contents of the Verifiable Credential token.
     val contents: VerifiableCredentialContent,
 
-    // Owner identifier.
-    val owner: String,
-
     // id of the Prime Verifiable Credential.
-    val primeId: String
+    val primaryVcId: String
 
 )

@@ -81,6 +81,6 @@ class IdentifierManager @Inject constructor(
     }
 
     fun getIdentifierByName(name: String): Identifier? {
-        return identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
+        return identifierRepository.queryByName(name)
     }
 }

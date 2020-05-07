@@ -27,6 +27,7 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import io.ktor.http.Url
 import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -133,7 +134,7 @@ class CardManager @Inject constructor(
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<Pair<PortableIdentityCard, List<Receipt>>> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                response.transformCollectedCards { getPairwiseCard(it, responder) }
+                response.transformCollectedCards { runBlocking { getPairwiseCard(it, responder) } }
                 val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
                 SdkLog.i(formattedResponse)
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
@@ -147,7 +148,7 @@ class CardManager @Inject constructor(
                 receipts.add(
                     response.createReceipt(
                         ReceiptAction.Issuance,
-                        card.primaryVcId,
+                        card.cardId,
                         card.verifiableCredential.contents.iss,
                         response.audience,
                         response.request.entityName,
@@ -171,7 +172,7 @@ class CardManager @Inject constructor(
      */
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<List<Receipt>> {
         return runResultTry {
-            response.transformCollectedCards { getPairwiseCard(it, responder) }
+            response.transformCollectedCards { runBlocking { getPairwiseCard(it, responder) } }
             val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
             val receipts = response.createReceiptsForPresentedCredentials(
@@ -190,14 +191,22 @@ class CardManager @Inject constructor(
      * Card id and display information will be the same as the origin card.
      * Only change will be the Pairwise Identifier who the card belongs to.
      */
-    private fun getPairwiseCard(card: PortableIdentityCard, responder: Identifier): PortableIdentityCard {
-        val newVerifiableCredential = getVerifiableCredentialByIssuerId(card.primaryVcId, responder.id)
-        return PortableIdentityCard(card.primaryVcId, newVerifiableCredential, card.displayContract)
+    private suspend fun getPairwiseCard(card: PortableIdentityCard, responder: Identifier): PortableIdentityCard {
+        val newVerifiableCredential = getPairwiseVerifiableCredential(card.cardId, responder.id)
+        return PortableIdentityCard(card.cardId, newVerifiableCredential, card.displayContract)
     }
 
-    private fun getVerifiableCredentialByIssuerId(verifiableCredentialId: String, IssuerId: String): VerifiableCredential {
-        picRepository.getAllVerifiableCredentials()
-        TODO("not implemented")
+    private suspend fun getPairwiseVerifiableCredential(primaryVcId: String, pairwiseIdentifier: String): VerifiableCredential {
+        val verifiableCredentials = picRepository.getAllVerifiableCredentialsByPrimaryVcId(primaryVcId)
+        // if there is already a verifiable credential owned by pairwiseIdentifier return.
+        verifiableCredentials.forEach {
+            if (it.contents.sub == pairwiseIdentifier) {
+                return it
+            }
+        }
+
+        // else get a new Verifiable Credential from Issuance Service
+        TODO("make network call to get new Verifiable Credential")
     }
 
     /**
@@ -220,7 +229,7 @@ class CardManager @Inject constructor(
 
     private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
         val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        val verifiableCredential = VerifiableCredential(contents.sub, signedVerifiableCredential, contents, contents.sub, contents.jti)
+        val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
         return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
     }
 

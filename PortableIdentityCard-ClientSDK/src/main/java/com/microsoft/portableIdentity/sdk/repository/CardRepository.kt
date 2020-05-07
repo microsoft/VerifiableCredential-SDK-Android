@@ -63,9 +63,9 @@ class CardRepository @Inject constructor(
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    fun getAllVerifiableCredentials(): LiveData<List<VerifiableCredential>> = verifiableCredentialDao.getAllVerifiableCredentials()
+    fun getAllVerifiableCredentials(): List<VerifiableCredential> = verifiableCredentialDao.getAllVerifiableCredentials()
 
-    fun getAllVerifiableCredentialsByPrimeId(primeId: String): LiveData<List<VerifiableCredential>> = verifiableCredentialDao.getVerifiableCredentialById(primeId)
+    fun getAllVerifiableCredentialsByPrimaryVcId(primaryVcId: String): List<VerifiableCredential> = verifiableCredentialDao.getVerifiableCredentialByPrimaryVcId(primaryVcId)
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
 
@@ -91,8 +91,4 @@ class CardRepository @Inject constructor(
         serializedResponse,
         apiProvider
     ).fire()
-
-    suspend fun getVerifiableCredentialForPairwiseIdentifier() {
-
-    }
 }
