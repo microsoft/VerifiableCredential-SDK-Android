@@ -21,6 +21,7 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
+import com.microsoft.portableIdentity.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
@@ -135,7 +136,7 @@ class CardManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 response.transformCollectedCards { runBlocking { getPairwiseCard(it, responder) } }
-                val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+                val formattedResponse = formatter.formAndSignRequest(response, responder, DEFAULT_EXPIRATION_IN_MINUTES).abortOnError()
                 SdkLog.i(formattedResponse)
                 val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
                 val card = createCard(verifiableCredential.raw, response.request.contract)
@@ -170,10 +171,10 @@ class CardManager @Inject constructor(
      * @return Result.Success: TODO("Support Error cases better (ex. 404)").
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<List<Receipt>> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_MINUTES): Result<List<Receipt>> {
         return runResultTry {
             response.transformCollectedCards { runBlocking { getPairwiseCard(it, responder) } }
-            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
+            val formattedResponse = formatter.formAndSignRequest(response, responder, expiresInMinutes).abortOnError()
             picRepository.sendPresentationResponse(response.audience, formattedResponse)
             val receipts = response.createReceiptsForPresentedCredentials(
                 entityDid = response.request.content.iss,

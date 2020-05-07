@@ -17,7 +17,7 @@ import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
  *
  * @param audience entity to send the response to.
  */
-sealed class Response(open val request: Request, val audience: String) {
+sealed class Response(open val request: Request, override val audience: String): ServiceRequest {
 
     private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
 

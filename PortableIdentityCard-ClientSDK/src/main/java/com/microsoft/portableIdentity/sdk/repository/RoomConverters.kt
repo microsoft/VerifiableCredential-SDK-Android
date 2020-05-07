@@ -8,9 +8,7 @@ package com.microsoft.portableIdentity.sdk.repository
 import androidx.room.TypeConverter
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.display.DisplayContract
 import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiablePresentationContent
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 

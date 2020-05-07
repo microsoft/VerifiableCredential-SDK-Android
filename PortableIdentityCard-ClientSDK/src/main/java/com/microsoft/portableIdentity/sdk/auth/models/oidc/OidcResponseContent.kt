@@ -50,20 +50,16 @@ data class OidcResponseContent(
     // time the token expires.
     val exp: Long,
 
-    // aggregated claims
-    @SerialName(CLAIM_NAMES)
-    val claimNames: Map<String, String>? = null,
-    @SerialName(CLAIM_SOURCES)
-    val claimSources: Map<String, List<Map<String, String>>>? = null,
-
     // PICS specific
     // response contains claims that fulfills this contract.
     val contract: String? = null,
-    // claims that were being requested.
-    // TODO (val attestations)
+
     //id of the response
     val jti: String? = null,
 
-    // attestations that were asked for in Request.
-    val attestations: AttestationResponse? = null
+    // attestations that were asked for in request.
+    val attestations: AttestationResponse? = null,
+
+    // vc needed for Revocation or Exchange PIC API
+    val vc: String? = null
 )

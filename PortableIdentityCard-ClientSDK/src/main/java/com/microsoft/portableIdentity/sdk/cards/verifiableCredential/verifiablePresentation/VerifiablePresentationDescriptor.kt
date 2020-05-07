@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
+package com.microsoft.portableIdentity.sdk.cards.verifiableCredential.verifiablePresentation
 
 import com.microsoft.portableIdentity.sdk.utilities.Constants.CONTEXT
 import kotlinx.serialization.SerialName

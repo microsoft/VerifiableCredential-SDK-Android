@@ -31,7 +31,7 @@ object Constants {
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000
     const val SECONDS_IN_A_MINUTE = 60
-    const val RESPONSE_EXPIRATION_IN_MINUTES = 600
+    const val DEFAULT_EXPIRATION_IN_MINUTES = 600
 
     //Identifier Constants
     const val IDENTIFIER_SECRET_KEY_NAME = "did.identifier"

@@ -8,12 +8,10 @@ package com.microsoft.portableIdentity.sdk.auth.protectors
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.AttestationResponse
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcResponseContent
-import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
-import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
-import com.microsoft.portableIdentity.sdk.auth.responses.Response
+import com.microsoft.portableIdentity.sdk.auth.responses.*
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiablePresentationContent
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiablePresentationDescriptor
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.verifiablePresentation.VerifiablePresentationContent
+import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.verifiablePresentation.VerifiablePresentationDescriptor
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
@@ -38,10 +36,10 @@ class OidcResponseFormatter @Inject constructor(
     private val signer: TokenSigner
 ) : Formatter {
 
-    override fun formAndSignResponse(response: Response, responder: Identifier, expiresIn: Int): Result<String> {
+    override fun formAndSignRequest(request: ServiceRequest, responder: Identifier, expiresIn: Int): Result<String> {
 
         return try {
-            val contents = formContents(response, responder, expiresIn)
+            val contents = formContents(request, responder, expiresIn)
             val signedToken = signContents(contents, responder)
             Result.Success(signedToken)
         } catch (exception: Exception) {
@@ -54,7 +52,7 @@ class OidcResponseFormatter @Inject constructor(
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
-    private fun formContents(response: Response, responder: Identifier, expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): OidcResponseContent {
+    private fun formContents(request: ServiceRequest, responder: Identifier, expiresIn: Int = Constants.DEFAULT_EXPIRATION_IN_MINUTES): OidcResponseContent {
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
@@ -63,22 +61,27 @@ class OidcResponseFormatter @Inject constructor(
         var contract: String? = null
         var nonce: String? = null
         var state: String? = null
+        var vc: String? = null
+        var attestationResponse: AttestationResponse? = null
 
-        when (response) {
+        when (request) {
             is IssuanceResponse -> {
-                contract = response.request.contractUrl
+                contract = request.request.contractUrl
+               attestationResponse = createAttestationResponse(request, responder, iat, exp)
             }
             is PresentationResponse -> {
-                nonce = response.request.content.nonce
-                state = response.request.content.state
+                nonce = request.request.content.nonce
+                state = request.request.content.state
+                attestationResponse = createAttestationResponse(request, responder, iat, exp)
+            }
+            is PairwiseIssuanceRequest -> {
+                vc = request.verifiableCredential.raw
             }
         }
 
-        val attestationResponse = createAttestationResponse(response, responder, iat, exp)
-
         return OidcResponseContent(
             sub = key.getThumbprint(cryptoOperations, Sha.Sha256),
-            aud = response.audience,
+            aud = request.audience,
             nonce = nonce,
             did = did,
             subJwk = key.toJWK(),
@@ -87,7 +90,8 @@ class OidcResponseFormatter @Inject constructor(
             state = state,
             jti = jti,
             contract = contract,
-            attestations = attestationResponse
+            attestations = attestationResponse,
+            vc = vc
         )
     }
 
@@ -117,25 +121,29 @@ class OidcResponseFormatter @Inject constructor(
 
     // only support one VC per VP
     private fun createPresentation(card: PortableIdentityCard, response: Response, responder: Identifier, iat: Long, exp: Long): String {
-        val vp = VerifiablePresentationDescriptor(verifiableCredential = listOf(card.verifiableCredential.raw),
-                                                  context = listOf(VP_CONTEXT_URL),
-                                                  type = listOf(VERIFIABLE_PRESENTATION_TYPE))
+        val vp =
+            VerifiablePresentationDescriptor(
+                verifiableCredential = listOf(card.verifiableCredential.raw),
+                context = listOf(VP_CONTEXT_URL),
+                type = listOf(VERIFIABLE_PRESENTATION_TYPE)
+            )
         val jti = UUID.randomUUID().toString()
         val did = responder.id
-        val contents = VerifiablePresentationContent(
-            jti = jti,
-            vp = vp,
-            iss = did,
-            iat = iat,
-            nbf = iat,
-            exp = exp,
-            aud = response.request.entityIdentifier
-        )
+        val contents =
+            VerifiablePresentationContent(
+                jti = jti,
+                vp = vp,
+                iss = did,
+                iat = iat,
+                nbf = iat,
+                exp = exp,
+                aud = response.request.entityIdentifier
+            )
         val serializedContents = serializer.stringify(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)
     }
 
-    private fun createIatAndExp(expiresIn: Int = Constants.RESPONSE_EXPIRATION_IN_MINUTES): Pair<Long, Long> {
+    private fun createIatAndExp(expiresIn: Int = Constants.DEFAULT_EXPIRATION_IN_MINUTES): Pair<Long, Long> {
         val currentTime = Date().time
         val expiresInMilliseconds = 1000 * 60 * expiresIn
         val expiration = currentTime + expiresInMilliseconds.toLong()
