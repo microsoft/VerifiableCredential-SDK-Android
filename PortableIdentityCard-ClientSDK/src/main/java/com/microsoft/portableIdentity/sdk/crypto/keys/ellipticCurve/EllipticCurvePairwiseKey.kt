@@ -26,7 +26,7 @@ class EllipticCurvePairwiseKey {
         private val supportedCurves = listOf("K-256", "P-256K")
 
         fun generate(crypto: CryptoOperations, personaMasterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
-            val crypto: SubtleCrypto =
+            val subtleCrypto: SubtleCrypto =
                 crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);
             // Generate the master key
             val alg =
@@ -36,12 +36,12 @@ class EllipticCurvePairwiseKey {
                 alg = JoseConstants.Hs256.value,
                 k = Base64Url.encode(personaMasterKey)
             )
-            val key = crypto.importKey(
+            val key = subtleCrypto.importKey(
                 KeyFormat.Jwk, signingKey, alg, false, listOf(
                     KeyUsage.Sign
                 )
             )
-            val pairwiseKeySeed = crypto.sign(alg, key, peerId.map { it.toByte() }.toByteArray())
+            val pairwiseKeySeed = subtleCrypto.sign(alg, key, peerId.map { it.toByte() }.toByteArray())
 
             if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve) == -1)
                 throw SdkLog.error("Curve ${algorithm.namedCurve} is not supported")
