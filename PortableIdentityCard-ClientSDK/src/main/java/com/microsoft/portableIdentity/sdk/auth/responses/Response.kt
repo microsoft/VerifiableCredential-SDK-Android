@@ -49,29 +49,22 @@ sealed class Response(open val request: Request, override val audience: String):
         return collectedCards
     }
 
-    suspend fun transformCollectedCards(transform: suspend (input: PortableIdentityCard) -> PortableIdentityCard) {
-        collectedCards.mapValues {
-            transform(it.value)
-        }
-    }
-
-    fun createReceiptsForPresentedCredentials(requestToken: String, entityDid: String, entityName: String): List<Receipt> {
+    fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName, requestToken)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    private fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String, requestToken: String): Receipt {
+    private fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String): Receipt {
         val date = System.currentTimeMillis()
         return Receipt(action = action,
             cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,
-            entityName = entityName,
-            token = requestToken)
+            entityName = entityName)
     }
 }
 

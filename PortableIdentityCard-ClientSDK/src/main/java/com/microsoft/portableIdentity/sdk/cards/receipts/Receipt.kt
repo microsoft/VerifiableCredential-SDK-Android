@@ -16,8 +16,6 @@ data class Receipt (
 
     val action: ReceiptAction,
 
-    val token: String,
-
     // did of the verifier/issuer
     val entityIdentifier: String,
 
