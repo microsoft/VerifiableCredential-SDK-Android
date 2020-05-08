@@ -11,10 +11,10 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 interface VerifiableCredentialDao {
 
     @Query("SELECT * FROM VerifiableCredential")
-    fun getAllVerifiableCredentials(): List<VerifiableCredential>
+    suspend fun getAllVerifiableCredentials(): List<VerifiableCredential>
 
     @Query("SELECT * FROM VerifiableCredential where primaryVcId = :id")
-    fun getVerifiableCredentialByPrimaryVcId(id:String): List<VerifiableCredential>
+    suspend fun getVerifiableCredentialByPrimaryVcId(id:String): List<VerifiableCredential>
 
     @Insert
     suspend fun insert(verifiableCredential: VerifiableCredential)

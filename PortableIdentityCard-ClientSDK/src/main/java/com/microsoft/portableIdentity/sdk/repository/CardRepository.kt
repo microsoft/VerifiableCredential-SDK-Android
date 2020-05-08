@@ -73,10 +73,9 @@ class CardRepository @Inject constructor(
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    fun getAllVerifiableCredentials(): List<VerifiableCredential> = verifiableCredentialDao.getAllVerifiableCredentials()
+    suspend fun getAllVerifiableCredentials() = verifiableCredentialDao.getAllVerifiableCredentials()
 
-    private fun getAllVerifiableCredentialsByPrimaryVcId(primaryVcId: String): List<VerifiableCredential> =
-        verifiableCredentialDao.getVerifiableCredentialByPrimaryVcId(primaryVcId)
+    private suspend fun getAllVerifiableCredentialsByPrimaryVcId(primaryVcId: String) = verifiableCredentialDao.getVerifiableCredentialByPrimaryVcId(primaryVcId)
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
 
@@ -114,7 +113,7 @@ class CardRepository @Inject constructor(
         val formattedResponse = formatter.format(
             responder = responder,
             audience = response.audience,
-            requestedVcs = response.getCollectedCards().mapValues { it.value.verifiableCredential }, //getPairwiseVerifiableCredentialFromCard(it.value, responder) },
+            requestedVcs = response.getCollectedCards().mapValues { getPairwiseVerifiableCredentialFromCard(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedIdTokens(),
             nonce = response.request.content.nonce,
@@ -129,6 +128,7 @@ class CardRepository @Inject constructor(
     }
 
     private suspend fun getPairwiseVerifiableCredentialFromCard(card: PortableIdentityCard, responder: Identifier): VerifiableCredential {
+        SdkLog.i(card.toString())
         return getPairwiseVerifiableCredential(card.verifiableCredential, responder, card.owner)
     }
 
@@ -137,6 +137,8 @@ class CardRepository @Inject constructor(
         pairwiseIdentifier: Identifier,
         primaryIdentifier: Identifier
     ): VerifiableCredential {
+        //val verifiableCredentials = this.getAllVerifiableCredentials()
+        SdkLog.i("hello")
         val verifiableCredentials = this.getAllVerifiableCredentialsByPrimaryVcId(verifiableCredential.primaryVcId)
         // if there is already a verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
@@ -144,26 +146,26 @@ class CardRepository @Inject constructor(
                 return it
             }
         }
-        val pairwiseRequest = PairwiseIssuanceRequest(verifiableCredential)
+        val pairwiseRequest = PairwiseIssuanceRequest(verifiableCredential, pairwiseIdentifier.id)
+        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest, primaryIdentifier)
+        this.insert(pairwiseVerifiableCredential)
+        return pairwiseVerifiableCredential
+    }
+
+    private suspend fun sendPairwiseIssuanceRequest(pairwiseRequest: PairwiseIssuanceRequest, requester: Identifier): VerifiableCredential {
         val formattedPairwiseRequest = formatter.format(
-            responder = primaryIdentifier,
+            responder = requester,
             audience = pairwiseRequest.audience,
-            transformingVerifiableCredential = verifiableCredential,
-            recipientIdentifier = pairwiseIdentifier.id,
+            transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
+            recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
             requestedSelfIssuedClaims = emptyMap(),
             requestedIdTokens = emptyMap(),
             requestedVcs = emptyMap()
         )
-        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest.audience, formattedPairwiseRequest)
-        this.insert(pairwiseVerifiableCredential)
-        return pairwiseVerifiableCredential
-    }
-
-    private suspend fun sendPairwiseIssuanceRequest(audience: String, requestToken: String): VerifiableCredential {
         val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
-            audience,
-            requestToken,
+            pairwiseRequest.audience,
+            formattedPairwiseRequest,
             apiProvider,
             serializer
         ).fire()
