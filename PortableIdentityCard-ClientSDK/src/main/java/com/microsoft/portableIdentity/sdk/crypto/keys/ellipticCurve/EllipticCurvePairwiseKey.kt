@@ -14,12 +14,12 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.Secp256k1Provider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.PairwiseKeyException
 import org.bitcoin.NativeSecp256k1
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-class EllipticCurvePairwiseKey {
+class EllipticCurvePairwiseKey(crypto: CryptoOperations) {
 
     companion object {
         //TODO: Verify the list of supported curves. Is K-256 supported?
@@ -44,15 +44,15 @@ class EllipticCurvePairwiseKey {
             val pairwiseKeySeed = subtleCrypto.sign(alg, key, peerId.map { it.toByte() }.toByteArray())
 
             if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve) == -1)
-                throw SdkLog.error("Curve ${algorithm.namedCurve} is not supported")
+                throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
 
             val pubKey = NativeSecp256k1.computePubkey(pairwiseKeySeed)
             val xyData = publicToXY(pubKey)
 
-            val byteBuffer = ByteBuffer.allocate(32)
-            byteBuffer.put(pairwiseKeySeed)
-            byteBuffer.order(ByteOrder.BIG_ENDIAN)
-            byteBuffer.array()
+            val pairwiseKeySeedInBigEndian = ByteBuffer.allocate(32)
+            pairwiseKeySeedInBigEndian.put(pairwiseKeySeed)
+            pairwiseKeySeedInBigEndian.order(ByteOrder.BIG_ENDIAN)
+            pairwiseKeySeedInBigEndian.array()
 
             val pairwiseKey =
                 JsonWebKey(
@@ -67,7 +67,7 @@ class EllipticCurvePairwiseKey {
                             "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
                         )
                     ).name,
-                    d = Base64Url.encode(byteBuffer.array()),
+                    d = Base64Url.encode(pairwiseKeySeedInBigEndian.array()),
                     x = xyData.first.trim(),
                     y = xyData.second.trim()
                 )
@@ -75,16 +75,19 @@ class EllipticCurvePairwiseKey {
         }
 
         private fun publicToXY(keyData: ByteArray): Pair<String, String> {
+            //TODO: Confirm if we get back public key in compressed format from NativeSecp256k1
             if (keyData.size == 33 && (
                     keyData[0] == Secp256k1Provider.secp256k1Tag.even.byte ||
                         keyData[0] == Secp256k1Provider.secp256k1Tag.odd.byte)
             ) {
-                // compressed form
+                // Convert compressed hex format of public key to x and y co-ordinates to be used in JWK format
                 return Pair(
                     "",
                     ""
                 )
-            } else if (keyData.size == 65 && (
+            }
+            // Convert uncompressed hex and hybrid hex formats of public key to x and y co-ordinates to be used in JWK format
+            else if (keyData.size == 65 && (
                     keyData[0] == Secp256k1Provider.secp256k1Tag.uncompressed.byte ||
                         keyData[0] == Secp256k1Provider.secp256k1Tag.hybridEven.byte ||
                         keyData[0] == Secp256k1Provider.secp256k1Tag.hybridOdd.byte
@@ -98,7 +101,7 @@ class EllipticCurvePairwiseKey {
                     Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 )
             } else {
-                throw SdkLog.error("Public key improperly formatted")
+                throw PairwiseKeyException("Public key improperly formatted")
             }
         }
     }
