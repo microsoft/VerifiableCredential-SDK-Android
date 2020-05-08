@@ -202,11 +202,11 @@ class CardManager @Inject constructor(
         }
     }
 
-    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Nothing?> {
+    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
                 picRepository.insert(portableIdentityCard)
-                Result.Success(null)
+                Result.Success(Unit)
             }
         }
     }
