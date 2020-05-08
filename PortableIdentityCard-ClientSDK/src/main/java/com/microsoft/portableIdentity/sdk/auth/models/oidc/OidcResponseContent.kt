@@ -5,8 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_NAMES
-import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_SOURCES
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SELF_ISSUED
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SUB_JWK
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -58,7 +56,7 @@ data class OidcResponseContent(
     val jti: String? = null,
 
     // attestations that were asked for in request.
-    val attestations: AttestationResponse? = null,
+    val attestations: AttestationClaimModel? = null,
 
     // vc needed for Revocation or Exchange PIC API
     val vc: String? = null,

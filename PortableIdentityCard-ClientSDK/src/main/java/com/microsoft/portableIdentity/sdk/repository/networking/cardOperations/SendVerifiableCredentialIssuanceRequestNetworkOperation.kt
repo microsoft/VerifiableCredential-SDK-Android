@@ -6,7 +6,7 @@
 package com.microsoft.portableIdentity.sdk.repository.networking.cardOperations
 
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
-import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceServiceError
+import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceError
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
@@ -17,18 +17,12 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.IssuanceExceptio
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import retrofit2.Response
 
-class SendVerifiableCredentialIssuanceRequestNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider, private val serializer: Serializer): PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
+class SendVerifiableCredentialIssuanceRequestNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider, private val serializer: Serializer): PostNetworkOperation<IssuanceServiceResponse, String>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
 
-    override fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
-        val signedVerifiableCredential = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
-        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        return Result.Success(VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti))
-    }
-
-    private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
-        val token = JwsToken.deserialize(signedVerifiableCredential, serializer)
-        return serializer.parse(VerifiableCredentialContent.serializer(), token.content())
+    override fun onSuccess(response: Response<IssuanceServiceResponse>): Result<String> {
+        val rawVerifiableCredential = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
+        return Result.Success(rawVerifiableCredential)
     }
 
     override fun onFailure(response: Response<IssuanceServiceResponse>): Result<Nothing> {

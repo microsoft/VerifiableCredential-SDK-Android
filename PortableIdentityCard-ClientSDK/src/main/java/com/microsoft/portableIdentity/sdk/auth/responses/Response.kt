@@ -17,7 +17,7 @@ import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
  *
  * @param audience entity to send the response to.
  */
-sealed class Response(open val request: Request, override val audience: String): ServiceRequest {
+sealed class Response(open val request: Request, val audience: String) {
 
     private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
 
@@ -65,6 +65,10 @@ sealed class Response(open val request: Request, override val audience: String):
             activityDate = date,
             entityIdentifier = entityDid,
             entityName = entityName)
+    }
+
+    private fun areNoCollectedClaims(): Boolean {
+        return (collectedCards.isEmpty() && collectedTokens.isEmpty() && collectedSelfIssued.isEmpty())
     }
 }
 

@@ -1,6 +1,5 @@
 package com.microsoft.portableIdentity.sdk.repository.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -10,11 +9,8 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 @Dao
 interface VerifiableCredentialDao {
 
-    @Query("SELECT * FROM VerifiableCredential")
-    suspend fun getAllVerifiableCredentials(): List<VerifiableCredential>
-
-    @Query("SELECT * FROM VerifiableCredential where primaryVcId = :id")
-    suspend fun getVerifiableCredentialByPrimaryVcId(id:String): List<VerifiableCredential>
+    @Query("SELECT * FROM VerifiableCredential where cardId = :id")
+    suspend fun getVerifiableCredentialByCardId(id:String): List<VerifiableCredential>
 
     @Insert
     suspend fun insert(verifiableCredential: VerifiableCredential)

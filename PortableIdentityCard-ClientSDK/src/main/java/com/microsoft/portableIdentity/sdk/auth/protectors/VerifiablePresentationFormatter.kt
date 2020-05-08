@@ -21,17 +21,13 @@ class VerifiablePresentationFormatter @Inject constructor(
 )  {
 
     // only support one VC per VP
-    fun createPresentation(verifiableCredentials: List<VerifiableCredential>,
-                           audience: String,
-                           responder: Identifier,
-                           iat: Long,
-                           exp: Long): String {
-        val vp =
-            VerifiablePresentationDescriptor(
+    fun createPresentation(verifiableCredentials: List<VerifiableCredential>, audience: String, responder: Identifier, expiresIn: Int): String {
+        val vp = VerifiablePresentationDescriptor(
                 verifiableCredential = verifiableCredentials.map { it.raw },
                 context = listOf(Constants.VP_CONTEXT_URL),
-                type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
-            )
+                type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE))
+
+        val (iat, exp) = createIatAndExp(expiresIn)
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val contents =
