@@ -1,19 +1,22 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.portableIdentity.sdk.crypto
 
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keys.*
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
-import com.microsoft.portableIdentity.sdk.crypto.keys.PairwiseKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
-import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
+import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import java.security.SecureRandom
@@ -120,13 +123,20 @@ class CryptoOperations (
     }
 
     /**
-     * Generate a pairwise key.
-     * @param seed to be used to create pairwise key.
-     *
+     * Generate a pairwise key for the specified algorithms
+     * @param algorithm for the key
+     * @param seedReference Reference to the seed
+     * @param userDid Id for the user
+     * @param peerId Id for the peer
+     * @returns the pairwise private key
      */
-    fun generatePairwise(algorithm: Algorithm, seedReference: String, personaId: String, peerId: String): PrivateKey {
-        val pairwiseKey = PairwiseKey(this)
-        return pairwiseKey.generatePairwiseKey(algorithm, seedReference, personaId, peerId)
+    fun generatePairwise(algorithm: Algorithm, seedReference: String, userDid: String, peerId: String): PrivateKey {
+        val masterKey: ByteArray = this.generatePersonaMasterKey(seedReference, userDid)
+
+        return when (val keyType = KeyTypeFactory.createViaWebCrypto(algorithm)) {
+            KeyType.EllipticCurve -> EllipticCurvePairwiseKey.generate(this, masterKey, algorithm, peerId);
+            else -> error("Pairwise key for type '${keyType.value}' is not supported.")
+        }
     }
 
     /**
@@ -136,6 +146,45 @@ class CryptoOperations (
         val randomNumberGenerator = SecureRandom()
         val seed = randomNumberGenerator.generateSeed(32)
         val secretKey = SecretKey(JsonWebKey(k=Base64Url.encode(seed)))
-        keyStore.save("seed", secretKey)
+        keyStore.save(AndroidConstants.masterSeed.value, secretKey)
+    }
+
+    /**
+     * Generate a pairwise master key.
+     * @param seedReference  The master seed for generating pairwise keys
+     * @param userDid  The owner DID
+     * @returns the master key for the user
+     */
+    fun generatePersonaMasterKey (seedReference: String, userDid: String): ByteArray {
+        // Set of master keys for the different persona's
+        var masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
+
+        var mk: ByteArray? = masterKeys[userDid]
+
+        if (mk != null)
+            return mk
+
+        // Get the seed
+        val jwk = keyStore.getSecretKey(seedReference)
+
+        // Get the subtle crypto
+        val crypto: SubtleCrypto = subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private)
+
+        // Generate the master key
+        val alg =
+            Algorithm(
+                name = W3cCryptoApiConstants.HmacSha512.value
+            )
+        val masterJwk = JsonWebKey(
+            kty = KeyType.Octets.value,
+            alg = JoseConstants.Hs512.value,
+            k = jwk.getKey().k
+        )
+        val key = crypto.importKey(
+            KeyFormat.Jwk, masterJwk, alg, false, listOf(
+                KeyUsage.Sign))
+        val masterKey = crypto.sign(alg, key, userDid.map { it.toByte() }.toByteArray())
+        masterKeys[userDid] = masterKey
+        return masterKey
     }
 }

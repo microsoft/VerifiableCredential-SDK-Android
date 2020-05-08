@@ -25,7 +25,7 @@ class EllipticCurvePairwiseKey(crypto: CryptoOperations) {
         //TODO: Verify the list of supported curves. Is K-256 supported?
         private val supportedCurves = listOf("K-256", "P-256K")
 
-        fun generate(crypto: CryptoOperations, personaMasterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
+        fun generate(crypto: CryptoOperations, masterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
             val subtleCrypto: SubtleCrypto =
                 crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);
             // Generate the master key
@@ -34,7 +34,7 @@ class EllipticCurvePairwiseKey(crypto: CryptoOperations) {
             val signingKey = JsonWebKey(
                 kty = KeyType.Octets.value,
                 alg = JoseConstants.Hs256.value,
-                k = Base64Url.encode(personaMasterKey)
+                k = Base64Url.encode(masterKey)
             )
             val key = subtleCrypto.importKey(
                 KeyFormat.Jwk, signingKey, alg, false, listOf(

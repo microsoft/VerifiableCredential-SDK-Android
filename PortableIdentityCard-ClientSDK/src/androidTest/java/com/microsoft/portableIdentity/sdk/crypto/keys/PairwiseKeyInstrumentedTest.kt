@@ -17,6 +17,7 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.PairwiseKeyException
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -52,17 +53,16 @@ class PairwiseKeyInstrumentedTest {
     fun generatePersonaMasterKeyTest() {
         val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
         var persona = "persona"
-        val pairwiseKey = PairwiseKey(crypto)
-        var masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, persona)
+        var masterKey = crypto.generatePersonaMasterKey(seedReference, persona)
         var actualEncodedMasterKey = Base64Url.encode(masterKey)
         assertThat(actualEncodedMasterKey).isEqualTo(expectedEncodedMasterKey)
 
-        masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, persona)
+        masterKey = crypto.generatePersonaMasterKey(seedReference, persona)
         actualEncodedMasterKey = Base64Url.encode(masterKey)
         assertThat(actualEncodedMasterKey).isEqualTo(expectedEncodedMasterKey)
 
         persona = "persona1"
-        masterKey = pairwiseKey.generatePersonaMasterKey(seedReference, persona)
+        masterKey = crypto.generatePersonaMasterKey(seedReference, persona)
         actualEncodedMasterKey = Base64Url.encode(masterKey)
         assertThat(actualEncodedMasterKey).isNotEqualTo(expectedEncodedMasterKey)
     }
@@ -100,7 +100,7 @@ class PairwiseKeyInstrumentedTest {
 
     @Test
     fun generateUniquePairwiseKeyUsingDifferentSeed() {
-        val results = Array<String?>(100){""}
+        val results = Array<String?>(50){""}
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
@@ -109,7 +109,7 @@ class PairwiseKeyInstrumentedTest {
         )
         val persona = "did:persona:1"
         val peer = "did:peer:1"
-        for(i in 0 .. 99) {
+        for(i in 0 .. 49) {
             val keyReference = "key-$i"
             val keyValue = SecretKey(
                 JsonWebKey(
@@ -128,7 +128,7 @@ class PairwiseKeyInstrumentedTest {
 
     @Test
     fun generateUniquePairwiseKeyUsingDifferentPeer() {
-        val results = Array<String?>(100){""}
+        val results = Array<String?>(50){""}
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
@@ -137,7 +137,7 @@ class PairwiseKeyInstrumentedTest {
         )
         val persona = "did:persona:1"
         val peer = "did:peer:1"
-        for(i in 0 .. 99) {
+        for(i in 0 .. 49) {
             val suppliedPeer = "$peer-$i"
             val actualPairwiseKey = crypto.generatePairwise(alg, seedReference, persona, suppliedPeer)
             results[i] = (actualPairwiseKey as EllipticCurvePrivateKey).d
@@ -155,7 +155,7 @@ class PairwiseKeyInstrumentedTest {
         )
         val persona = "did:persona"
         val peer = "did:peer"
-        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(RuntimeException::class.java)
+        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(PairwiseKeyException::class.java)
     }
 
     @Test
