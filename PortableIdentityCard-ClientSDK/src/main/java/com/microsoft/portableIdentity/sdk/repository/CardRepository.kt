@@ -162,7 +162,7 @@ class CardRepository @Inject constructor(
         // we can't return a result here, so need to unwrap
         // TODO(should we allow retries here?)
         return when (pairwiseVerifiableCredentialResult) {
-            is Result.Success -> formVerifiableCredential(pairwiseVerifiableCredentialResult.payload, pairwiseRequest.verifiableCredential.cardId)
+            is Result.Success -> formVerifiableCredential(pairwiseVerifiableCredentialResult.payload, pairwiseRequest.verifiableCredential.picId)
             is Result.Failure -> throw PairwiseIssuanceException("Unable to reissue Pairwise Verifiable Credential.", pairwiseVerifiableCredentialResult.payload)
         }
     }

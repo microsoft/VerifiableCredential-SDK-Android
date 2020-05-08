@@ -9,7 +9,7 @@ import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableC
 @Dao
 interface VerifiableCredentialDao {
 
-    @Query("SELECT * FROM VerifiableCredential where cardId = :id")
+    @Query("SELECT * FROM VerifiableCredential where picId = :id")
     suspend fun getVerifiableCredentialByCardId(id:String): List<VerifiableCredential>
 
     @Insert
