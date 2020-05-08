@@ -160,13 +160,18 @@ class CryptoOperations (
         var masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
 
         var mk: ByteArray? = masterKeys[userDid]
-
         if (mk != null)
             return mk
 
         // Get the seed
         val jwk = keyStore.getSecretKey(seedReference)
 
+        val masterKey = generateMasterKeyFromSeed(jwk, userDid)
+        masterKeys[userDid] = masterKey
+        return masterKey
+    }
+
+    private fun generateMasterKeyFromSeed(jwk: KeyContainer<SecretKey>, userDid: String): ByteArray {
         // Get the subtle crypto
         val crypto: SubtleCrypto = subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private)
 
@@ -183,8 +188,6 @@ class CryptoOperations (
         val key = crypto.importKey(
             KeyFormat.Jwk, masterJwk, alg, false, listOf(
                 KeyUsage.Sign))
-        val masterKey = crypto.sign(alg, key, userDid.map { it.toByte() }.toByteArray())
-        masterKeys[userDid] = masterKey
-        return masterKey
+        return crypto.sign(alg, key, userDid.map { it.toByte() }.toByteArray())
     }
 }

@@ -28,7 +28,22 @@ class EllipticCurvePairwiseKey(crypto: CryptoOperations) {
         fun generate(crypto: CryptoOperations, masterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
             val subtleCrypto: SubtleCrypto =
                 crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);
-            // Generate the master key
+
+            val pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
+
+            if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve) == -1)
+                throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
+
+            val pubKey = NativeSecp256k1.computePubkey(pairwiseKeySeed)
+            val xyData = publicToXY(pubKey)
+
+            val pairwiseKeySeedInBigEndian = convertPairwiseSeedToBigEndian(pairwiseKeySeed)
+
+            return createPairwiseKeyFromPairwiseSeed(algorithm, pairwiseKeySeedInBigEndian, xyData)
+        }
+
+        private fun generatePairwiseSeed(subtleCrypto: SubtleCrypto, masterKey: ByteArray, peerId: String): ByteArray{
+            // Generate the pairwise seed
             val alg =
                 Algorithm(name = W3cCryptoApiConstants.HmacSha256.value)
             val signingKey = JsonWebKey(
@@ -41,24 +56,14 @@ class EllipticCurvePairwiseKey(crypto: CryptoOperations) {
                     KeyUsage.Sign
                 )
             )
-            val pairwiseKeySeed = subtleCrypto.sign(alg, key, peerId.map { it.toByte() }.toByteArray())
+            return subtleCrypto.sign(alg, key, peerId.map { it.toByte() }.toByteArray())
+        }
 
-            if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve) == -1)
-                throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
-
-            val pubKey = NativeSecp256k1.computePubkey(pairwiseKeySeed)
-            val xyData = publicToXY(pubKey)
-
-            val pairwiseKeySeedInBigEndian = ByteBuffer.allocate(32)
-            pairwiseKeySeedInBigEndian.put(pairwiseKeySeed)
-            pairwiseKeySeedInBigEndian.order(ByteOrder.BIG_ENDIAN)
-            pairwiseKeySeedInBigEndian.array()
-
+        private fun createPairwiseKeyFromPairwiseSeed(algorithm: Algorithm, pairwiseKeySeedInBigEndian: ByteBuffer, xyData: Pair<String, String>): PrivateKey {
             val pairwiseKey =
                 JsonWebKey(
-                    //Generate a kid
                     kty = KeyType.EllipticCurve.value,
-                    crv = algorithm.namedCurve,
+                    crv = (algorithm as EcKeyGenParams).namedCurve,
                     alg = EcdsaParams(
                         hash = Algorithm(
                             name = W3cCryptoApiConstants.Sha256.value
@@ -74,35 +79,48 @@ class EllipticCurvePairwiseKey(crypto: CryptoOperations) {
             return EllipticCurvePrivateKey(pairwiseKey)
         }
 
+        // Converts the public key returned by NativeSecp256K1 library from byte array to x and y co-ordinates to be used in JWK
         private fun publicToXY(keyData: ByteArray): Pair<String, String> {
             //TODO: Confirm if we get back public key in compressed format from NativeSecp256k1
-            if (keyData.size == 33 && (
-                    keyData[0] == Secp256k1Provider.secp256k1Tag.even.byte ||
-                        keyData[0] == Secp256k1Provider.secp256k1Tag.odd.byte)
-            ) {
+            return when {
                 // Convert compressed hex format of public key to x and y co-ordinates to be used in JWK format
-                return Pair(
-                    "",
-                    ""
-                )
+                isPublicKeyCompressedHex(keyData) -> Pair("", "")
+                // Convert uncompressed hex and hybrid hex formats of public key to x and y co-ordinates to be used in JWK format
+                isPublicKeyUncompressedOrHybridHex(keyData) -> publicKeyToXYForUncompressedOrHybridHex(keyData)
+                else -> throw PairwiseKeyException("Public key improperly formatted")
             }
-            // Convert uncompressed hex and hybrid hex formats of public key to x and y co-ordinates to be used in JWK format
-            else if (keyData.size == 65 && (
-                    keyData[0] == Secp256k1Provider.secp256k1Tag.uncompressed.byte ||
-                        keyData[0] == Secp256k1Provider.secp256k1Tag.hybridEven.byte ||
-                        keyData[0] == Secp256k1Provider.secp256k1Tag.hybridOdd.byte
-                    )
-            ) {
-                // uncompressed, bytes 1-32, and 33-end are x and y
-                val x = keyData.sliceArray(1..32)
-                val y = keyData.sliceArray(33..64)
-                return Pair(
-                    Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
-                    Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+        }
+
+        private fun publicKeyToXYForUncompressedOrHybridHex(keyData: ByteArray): Pair<String, String> {
+            // uncompressed, bytes 1-32, and 33-end are x and y
+            val x = keyData.sliceArray(1..32)
+            val y = keyData.sliceArray(33..64)
+            return Pair(
+                Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+            )
+        }
+
+        private fun isPublicKeyUncompressedOrHybridHex(keyData: ByteArray): Boolean {
+            return keyData.size == 65 && (keyData[0] == Secp256k1Provider.secp256k1Tag.uncompressed.byte ||
+                keyData[0] == Secp256k1Provider.secp256k1Tag.hybridEven.byte ||
+                keyData[0] == Secp256k1Provider.secp256k1Tag.hybridOdd.byte
                 )
-            } else {
-                throw PairwiseKeyException("Public key improperly formatted")
-            }
+        }
+
+        private fun isPublicKeyCompressedHex(keyData: ByteArray): Boolean {
+            return (keyData.size == 33 && (
+                keyData[0] == Secp256k1Provider.secp256k1Tag.even.byte ||
+                    keyData[0] == Secp256k1Provider.secp256k1Tag.odd.byte)
+                )
+        }
+
+        private fun convertPairwiseSeedToBigEndian(pairwiseKeySeed: ByteArray): ByteBuffer {
+            val pairwiseKeySeedInBigEndian = ByteBuffer.allocate(32)
+            pairwiseKeySeedInBigEndian.put(pairwiseKeySeed)
+            pairwiseKeySeedInBigEndian.order(ByteOrder.BIG_ENDIAN)
+            pairwiseKeySeedInBigEndian.array()
+            return pairwiseKeySeedInBigEndian
         }
     }
 }
