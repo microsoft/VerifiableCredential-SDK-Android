@@ -17,10 +17,14 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoAp
 import com.microsoft.portableIdentity.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants
+import com.microsoft.portableIdentity.sdk.utilities.Constants.HASHING_ALGORITHM_FOR_ID
+import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.IdentifierCreatorException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -33,10 +37,9 @@ import kotlin.random.Random
 class IdentifierCreator @Inject constructor(private val cryptoOperations: CryptoOperations,
                                             private val payloadProcessor: SidetreePayloadProcessor) {
 
-    fun create(peerId: String): Result<Identifier> {
-        //TODO(use different variable than peerId for end)
-        val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$peerId"
-        val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$peerId"
+    fun create(methodName: String): Result<Identifier> {
+        val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$methodName"
+        val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$methodName"
         return try {
             val alias = Base64Url.encode(Random.nextBytes(2))
             val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
@@ -51,7 +54,8 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
                     identifierLongForm,
                     alias,
                     signatureKeyReference,
-                    recoveryKeyReference
+                    recoveryKeyReference,
+                    IDENTIFIER_SECRET_KEY_NAME
                 )
             )
         } catch (exception: Exception) {
@@ -60,6 +64,7 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
     }
 
     fun createPairwiseId(personaId:String, peerId: String): Result<Identifier> {
+        //TODO: Add a utility class/method to hash all the details identifying a pairwise id's key and use the hash as the key reference/kid
         val randomValueForKeyReference = Base64Url.encode( Random.nextBytes(6))
         val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$randomValueForKeyReference"
         val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$randomValueForKeyReference"
@@ -86,7 +91,8 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
                     identifierLongForm,
                     alias,
                     signatureKeyReference,
-                    recoveryKeyReference
+                    recoveryKeyReference,
+                    pairwiseIdentifierName(peerId)
                 )
             )
         } catch (exception: Exception) {
@@ -129,7 +135,8 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
         identifierLongForm: String,
         alias: String,
         signatureKeyReference: String,
-        recoveryKeyReference: String
+        recoveryKeyReference: String,
+        name: String
     ): Identifier {
         val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
         val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
@@ -145,7 +152,12 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             personaRecKeyRef,
             nextUpdateCommitmentHash,
             nextRecoveryCommitmentHash,
-            Constants.IDENTIFIER_SECRET_KEY_NAME
+            name
         )
+    }
+
+    private fun pairwiseIdentifierName(peerId: String): String {
+        val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
+        return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
     }
 }
