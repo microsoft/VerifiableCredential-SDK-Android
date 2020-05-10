@@ -71,6 +71,7 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
                     "hash" to Sha.Sha256
                 )
             )
+            val keys = cryptoOperations.keyStore.list()
             //TODO: Update the last section to append incremented version number instead of 1
             val signingKeyIdForPairwiseKey = "${signatureKeyReference}_1"
             val recoveryKeyIdForPairwiseKey = "${recoveryKeyReference}_1"
