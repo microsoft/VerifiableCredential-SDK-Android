@@ -87,7 +87,7 @@ class CardRepository @Inject constructor(
             audience = response.audience,
             requestedVcs = response.getCollectedCards().mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedIdTokens(),
+            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             contract = response.request.contractUrl,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
         )
@@ -116,7 +116,7 @@ class CardRepository @Inject constructor(
             audience = response.audience,
             requestedVcs = response.getCollectedCards().mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedIdTokens(),
+            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             nonce = response.request.content.nonce,
             state = response.request.content.state,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
