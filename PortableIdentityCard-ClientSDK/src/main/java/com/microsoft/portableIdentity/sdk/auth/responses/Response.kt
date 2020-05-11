@@ -37,15 +37,24 @@ sealed class Response(open val request: Request, val audience: String) {
         collectedCards[type] = card
     }
 
-    fun getCollectedIdTokens(): Map<String, String> {
+    fun getCollectedIdTokens(): Map<String, String>? {
+        if (collectedTokens.isEmpty()) {
+            return null
+        }
         return collectedTokens
     }
 
-    fun getCollectedSelfIssuedClaims(): Map<String, String> {
+    fun getCollectedSelfIssuedClaims(): Map<String, String>? {
+        if (collectedSelfIssued.isEmpty()) {
+            return null
+        }
         return collectedSelfIssued
     }
 
-    fun getCollectedCards(): Map<String, PortableIdentityCard> {
+    fun getCollectedCards(): Map<String, PortableIdentityCard>? {
+        if (collectedCards.isEmpty()) {
+            return null
+        }
         return collectedCards
     }
 
