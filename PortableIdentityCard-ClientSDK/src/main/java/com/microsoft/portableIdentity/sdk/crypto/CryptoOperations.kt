@@ -28,7 +28,8 @@ import java.security.SecureRandom
  */
 class CryptoOperations (
     subtleCrypto: SubtleCrypto,
-    val keyStore: KeyStore
+    val keyStore: KeyStore,
+    private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
 ) {
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
 
@@ -134,10 +135,11 @@ class CryptoOperations (
         val masterKey: ByteArray = this.generatePersonaMasterKey(seedReference, userDid)
 
         return when (val keyType = KeyTypeFactory.createViaWebCrypto(algorithm)) {
-            KeyType.EllipticCurve -> EllipticCurvePairwiseKey.generate(this, masterKey, algorithm, peerId);
+            KeyType.EllipticCurve -> ellipticCurvePairwiseKey.generate(this, masterKey, algorithm, peerId)
             else -> error("Pairwise key for type '${keyType.value}' is not supported.")
         }
     }
+
 
     /**
      * Generates a 256 bit seed.
@@ -159,14 +161,14 @@ class CryptoOperations (
         // Set of master keys for the different persona's
         var masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
 
-        var mk: ByteArray? = masterKeys[userDid]
-        if (mk != null)
-            return mk
+        var masterKey: ByteArray? = masterKeys[userDid]
+        if (masterKey != null)
+            return masterKey
 
         // Get the seed
         val jwk = keyStore.getSecretKey(seedReference)
 
-        val masterKey = generateMasterKeyFromSeed(jwk, userDid)
+        masterKey = generateMasterKeyFromSeed(jwk, userDid)
         masterKeys[userDid] = masterKey
         return masterKey
     }

@@ -10,6 +10,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
@@ -30,6 +31,7 @@ class PairwiseKeyInstrumentedTest {
     private val ellipticCurveSubtleCrypto: SubtleCrypto
     private val keyStore: AndroidKeyStore
     private var crypto: CryptoOperations
+    private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val seedReference = "masterSeed"
 
     init {
@@ -37,8 +39,9 @@ class PairwiseKeyInstrumentedTest {
         val serializer = Serializer()
         keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
+        ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, serializer)
-        crypto = CryptoOperations(androidSubtle, keyStore)
+        crypto = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
         val suppliedStringForSeedGeneration = "abcdefg"
         val seed = SecretKey(
             JsonWebKey(
@@ -92,7 +95,7 @@ class PairwiseKeyInstrumentedTest {
             )
         )
         val data = stringToByteArray("1234567890")
-        crypto = CryptoOperations(ellipticCurveSubtleCrypto, keyStore)
+        crypto = CryptoOperations(ellipticCurveSubtleCrypto, keyStore, ellipticCurvePairwiseKey)
 
         val signature = crypto.sign(data, "key", ecAlgorithm)
         val verify = crypto.verify(data, signature, "key", ecAlgorithm);
