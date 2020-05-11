@@ -85,7 +85,7 @@ class CardRepository @Inject constructor(
         val formattedResponse = formatter.format(
             responder = responder,
             audience = response.audience,
-            requestedVcs = response.getCollectedCards().mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             contract = response.request.contractUrl,
@@ -114,7 +114,7 @@ class CardRepository @Inject constructor(
         val formattedResponse = formatter.format(
             responder = responder,
             audience = response.audience,
-            requestedVcs = response.getCollectedCards().mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             nonce = response.request.content.nonce,
