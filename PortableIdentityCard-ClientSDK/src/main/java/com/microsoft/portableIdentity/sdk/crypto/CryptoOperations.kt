@@ -144,7 +144,7 @@ class CryptoOperations (
      */
     fun generateAndStoreSeed() {
         val randomNumberGenerator = SecureRandom()
-        val seed = randomNumberGenerator.generateSeed(32)
+        val seed = randomNumberGenerator.generateSeed(16)
         val secretKey = SecretKey(JsonWebKey(k=Base64Url.encode(seed)))
         keyStore.save(AndroidConstants.masterSeed.value, secretKey)
     }

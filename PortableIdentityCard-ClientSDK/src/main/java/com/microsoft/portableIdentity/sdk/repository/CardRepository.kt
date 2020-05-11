@@ -8,6 +8,7 @@ package com.microsoft.portableIdentity.sdk.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.microsoft.portableIdentity.sdk.auth.picActionRequests.PairwiseIssuanceRequest
+import com.microsoft.portableIdentity.sdk.auth.picActionRequests.RevocationRequest
 import com.microsoft.portableIdentity.sdk.auth.protectors.OidcResponseFormatter
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
@@ -22,6 +23,7 @@ import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.S
 import com.microsoft.portableIdentity.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.portableIdentity.sdk.unwrapSignedVerifiableCredential
 import com.microsoft.portableIdentity.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.PairwiseIssuanceException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
@@ -111,6 +113,10 @@ class CardRepository @Inject constructor(
     ).fire()
 
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<Unit> {
+
+        val request = RevocationRequest(response.getCollectedCards()?.entries?.first()?.value?.verifiableCredential, "reason", listOf("did:ion:test", "did:ion:relyingparty2"))
+        val formatted = sendRevocationRequest(request, responder)
+
         val formattedResponse = formatter.format(
             responder = responder,
             audience = response.audience,
@@ -126,6 +132,17 @@ class CardRepository @Inject constructor(
             formattedResponse,
             apiProvider
         ).fire()
+    }
+
+    fun sendRevocationRequest(request: RevocationRequest, responder: Identifier): String {
+        return formatter.format(
+            responder = responder,
+            audience = request.audience,
+            transformingVerifiableCredential = request.verifiableCredential,
+            revocationReason = request.reason,
+            revokedRelyingParties = request.revokedRelyingParties,
+            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+        )
     }
 
     private suspend fun getPairwiseVerifiableCredential(card: PortableIdentityCard, pairwiseIdentifier: Identifier): VerifiableCredential {
@@ -148,11 +165,9 @@ class CardRepository @Inject constructor(
             audience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
-            requestedSelfIssuedClaims = emptyMap(),
-            requestedIdTokens = emptyMap(),
-            requestedVcs = emptyMap()
+            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
         )
+        SdkLog.i(formattedPairwiseRequest)
         val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             pairwiseRequest.audience,
             formattedPairwiseRequest,

@@ -30,7 +30,7 @@ data class OidcRequestContent(
     @SerialName(RESPONSE_MODE)
     val responseMode: String = "",
 
-    // did of the entity who sent the request.
+    // url of the entity who sent the request.
     @SerialName(CLIENT_ID)
     val clientId: String = "",
 
@@ -38,7 +38,7 @@ data class OidcRequestContent(
     @SerialName(REDIRECT_URL)
     val redirectUrl: String = "",
 
-        // did of the entity who sent the request.
+    // did of the entity who sent the request.
     val iss: String = "",
 
     // should contain "openid did_authn"

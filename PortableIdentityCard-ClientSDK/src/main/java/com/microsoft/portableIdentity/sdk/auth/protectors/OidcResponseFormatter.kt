@@ -38,7 +38,9 @@ class OidcResponseFormatter @Inject constructor(
         nonce: String? = null,
         state: String? = null,
         transformingVerifiableCredential: VerifiableCredential? = null,
-        recipientIdentifier: String? = null
+        recipientIdentifier: String? = null,
+        revocationReason: String? = null,
+        revokedRelyingParties: List<String>? = null
     ): String {
         val (iat, exp) = createIatAndExp(expiresIn)
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
@@ -59,7 +61,9 @@ class OidcResponseFormatter @Inject constructor(
             contract = contract,
             attestations = attestationResponse,
             vc = transformingVerifiableCredential?.raw,
-            recipient = recipientIdentifier
+            recipient = recipientIdentifier,
+            reason = revocationReason,
+            rp = revokedRelyingParties
         )
         return signContents(contents, responder)
     }

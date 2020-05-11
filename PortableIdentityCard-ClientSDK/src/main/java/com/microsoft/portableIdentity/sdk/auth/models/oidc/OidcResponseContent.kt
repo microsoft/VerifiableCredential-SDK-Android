@@ -61,5 +61,9 @@ data class OidcResponseContent(
     // vc needed for Revocation or Exchange PIC API
     val vc: String? = null,
     // recipient of VC for Exchange PIC API
-    val recipient: String? = null
+    val recipient: String? = null,
+
+    // revocation specific
+    val rp: List<String>? = null,
+    val reason: String? = null
 )

@@ -14,6 +14,6 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
 sealed class PicActionRequest(val audience: String)
 
 class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) : PicActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?:"")
-class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) : PicActionRequest(verifiableCredential.contents.vc.revokeService?.id ?:"")
+class RevocationRequest(val verifiableCredential: VerifiableCredential?, val reason: String, val revokedRelyingParties: List<String>) : PicActionRequest(verifiableCredential?.contents?.vc?.revokeService?.id ?:"https://audience.com")
 class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) : PicActionRequest(verifiableCredential.contents.vc.revokeService?.id ?:"")
 
