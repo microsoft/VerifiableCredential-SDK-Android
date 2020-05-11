@@ -10,7 +10,7 @@ class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
     var x = key.x
     var y = key.y
     override var kty = KeyType.EllipticCurve
-    override var alg: String? = if (key.alg != null) key.alg!! else "ES256K"
+    override var alg: String? = "ES256K" // if (key.alg != null) key.alg!! else "ES256K"
     var d = key.d
 
     override fun toJWK(): JsonWebKey {
