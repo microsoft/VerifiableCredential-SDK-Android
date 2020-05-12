@@ -61,13 +61,13 @@ sealed class Response(open val request: Request, val audience: String) {
     fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createPresentationReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    private fun createPresentationReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String): Receipt {
+    private fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String): Receipt {
         val date = System.currentTimeMillis()
         return Receipt(
             action = action,
