@@ -122,7 +122,7 @@ abstract class Provider {
         checkAlgorithmName(algorithm)
         checkGenerateKeyParams(algorithm)
         if (keyUsages.count() == 0) {
-            throw SdkLog.error("Usages cannot be empty when creating a key.")
+            throw KeyException("Usages cannot be empty when creating a key.")
         }
         var allowedUsages: Set<KeyUsage> = if (this.symmetricKeyUsage != null) {
             this.symmetricKeyUsage!!
@@ -156,7 +156,7 @@ abstract class Provider {
         checkAlgorithmParams(algorithm)
         checkCryptoKey(baseKey, KeyUsage.DeriveBits)
         if (length.rem(8u).compareTo(0u) != 0) {
-            throw SdkLog.error("Length is not a multiple of 8")
+            throw KeyException("Length is not a multiple of 8")
         }
     }
     private fun checkExportKey(format: KeyFormat, key: CryptoKey) {
