@@ -10,6 +10,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConvert
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import com.microsoft.portableIdentity.sdk.utilities.printBytes
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
@@ -218,7 +219,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
             )
         } else {
-            throw KeyException("Public key improperly formatted")
+            throw KeyFormatException("Public key improperly formatted")
         }
     }
 

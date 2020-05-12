@@ -14,6 +14,7 @@ import com.microsoft.portableIdentity.sdk.utilities.AndroidKeyConverter
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import java.math.BigInteger
 import java.security.*
@@ -195,7 +196,7 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
     }
 
     override fun exportKeyJwk(key: CryptoKey): JsonWebKey {
-        val internalHandle = key.handle as? AndroidKeyHandle ?: throw KeyException("Unknown format for CryptoKey passed")
+        val internalHandle = key.handle as? AndroidKeyHandle ?: throw KeyFormatException("Unknown format for CryptoKey passed")
         return when (internalHandle.key) {
             is PublicKey -> {
                 AndroidKeyConverter.androidPublicKeyToPublicKey(internalHandle.alias, internalHandle.key).toJWK()
@@ -204,7 +205,7 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
                 AndroidKeyConverter.androidPrivateKeyToPrivateKey(internalHandle.alias, AndroidKeyStore.keyStore).toJWK()
             }
             else -> {
-                throw KeyException("Unknown CryptoKey format")
+                throw KeyFormatException("Unknown CryptoKey format")
             }
         }
     }
@@ -232,14 +233,14 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
 
     private fun cryptoKeyToPublicKey(key: CryptoKey): PublicKey {
         val internalHandle = key.handle as? AndroidKeyHandle
-            ?: throw KeyException("Unknown format for CryptoKey passed")
+            ?: throw KeyFormatException("Unknown format for CryptoKey passed")
         return internalHandle.key as? PublicKey
             ?: throw KeyException("Private key passed when a public key was expected")
     }
 
     private fun cryptoKeyToPrivateKey(key: CryptoKey): PrivateKey {
         val internalHandle = key.handle as? AndroidKeyHandle
-            ?: throw KeyException("Unknown format for CryptoKey passed")
+            ?: throw KeyFormatException("Unknown format for CryptoKey passed")
         return AndroidKeyStore.keyStore.getKey(internalHandle.alias, null) as? PrivateKey
             ?: throw KeyException("Software private keys are not supported by the native Subtle.")
     }
