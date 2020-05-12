@@ -6,15 +6,20 @@
 package com.microsoft.portableIdentity.sdk
 
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierCreator
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.runResultTry
+import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import kotlinx.coroutines.*
+import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,9 +60,20 @@ class IdentifierManager @Inject constructor(
     // TODO(create pairwise Identifier based off new key generation algorithm).
     suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
         return runResultTry {
-            val registeredIdentifier = identifierCreator.create(peerId).abortOnError()
-            saveIdentifier(registeredIdentifier)
+            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
+                null -> {
+                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
+                    saveIdentifier(registeredIdentifier)
+                }
+                else -> Result.Success(pairwiseIdentifier)
+            }
+
         }
+    }
+
+    private fun pairwiseIdentifierName(peerId: String): String {
+        val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
+        return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
     }
 
     private fun saveIdentifier(identifier: Identifier): Result<Identifier> {
