@@ -152,10 +152,12 @@ class CardManager @Inject constructor(
         responder: Identifier,
         expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_MINUTES
     ): Result<Unit> {
-        return runResultTry {
-            picRepository.sendPresentationResponse(response, responder)
-            createAndSaveReceipt(response)
-            Result.Success(Unit)
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                picRepository.sendPresentationResponse(response, responder)
+                createAndSaveReceipt(response)
+                Result.Success(Unit)
+            }
         }
     }
 

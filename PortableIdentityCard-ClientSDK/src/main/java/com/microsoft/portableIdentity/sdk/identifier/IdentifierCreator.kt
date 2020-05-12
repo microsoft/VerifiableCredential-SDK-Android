@@ -108,6 +108,7 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
         publicKeyJwk.kid = "#${kid}"
         val pairwiseKeyReference = keyReference ?: generateKeyReferenceId(personaId, target, algorithm.name, KeyUse.Signature.value)
         cryptoOperations.keyStore.save(pairwiseKeyReference, privateKeyJwk)
+        cryptoOperations.keyStore.getPrivateKey(pairwiseKeyReference)
         return publicKeyJwk
     }
 

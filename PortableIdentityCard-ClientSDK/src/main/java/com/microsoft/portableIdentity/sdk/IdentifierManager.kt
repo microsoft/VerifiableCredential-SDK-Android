@@ -64,15 +64,16 @@ class IdentifierManager @Inject constructor(
     }
 
     suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
-        return runResultTry {
-            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
-                null -> {
-                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
-                    saveIdentifier(registeredIdentifier)
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
+                    null -> {
+                        val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
+                        saveIdentifier(registeredIdentifier)
+                    }
+                    else -> Result.Success(pairwiseIdentifier)
                 }
-                else -> Result.Success(pairwiseIdentifier)
             }
-
         }
     }
 
