@@ -10,7 +10,6 @@ import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
-import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 
 /**
  * OIDC Response formed from a Request.
@@ -61,16 +60,15 @@ sealed class Response(open val request: Request, val audience: String) {
     fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
+            val receipt = createPresentationReceipt(it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    private fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String): Receipt {
+    private fun createPresentationReceipt(cardId: String, entityDid: String, entityName: String): Receipt {
         val date = System.currentTimeMillis()
-        return Receipt(action = action,
-            cardId = cardId,
+        return Receipt(cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,
             entityName = entityName)
