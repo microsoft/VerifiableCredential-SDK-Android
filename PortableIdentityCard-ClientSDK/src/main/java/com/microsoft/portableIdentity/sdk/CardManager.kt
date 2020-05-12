@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
@@ -23,8 +24,6 @@ import com.microsoft.portableIdentity.sdk.repository.CardRepository
 import com.microsoft.portableIdentity.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
-import io.ktor.http.Url
-import io.ktor.util.toMap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -44,37 +43,36 @@ class CardManager @Inject constructor(
     /**
      * Get Presentation Request.
      *
-     * @param uri OpenID Connect Uri that points to the presentation request.
+     * @param stringUri OpenID Connect Uri that points to the presentation request.
      *
      * @return Result.Success: PresentationRequest object that contains all attestations.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun getPresentationRequest(uri: String): Result<PresentationRequest> {
+    suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
-            val url = verifyUri(uri)
-            val requestParameters = url.parameters.toMap()
-            val requestToken = getPresentationRequestToken(requestParameters).abortOnError()
+            val uri = verifyUri(stringUri)
+            val requestToken = getPresentationRequestToken(uri).abortOnError()
             val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
-            val request = PresentationRequest(requestParameters, requestToken, tokenContents)
+            val request = PresentationRequest(uri, requestToken, tokenContents)
             Result.Success(request)
         }
     }
 
-    private fun verifyUri(uri: String): Url {
-        val url = Url(uri)
-        if (url.protocol.name != "openid") {
+    private fun verifyUri(uri: String): Uri {
+        val url = Uri.parse(uri)
+        if (url.scheme != "openid") {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
     }
 
-    private suspend fun getPresentationRequestToken(requestParameters: Map<String, List<String>>): Result<String> {
+    private suspend fun getPresentationRequestToken(uri: Uri): Result<String> {
         return runResultTry {
-            val serializedToken = requestParameters["request"]?.first()
+            val serializedToken = uri.getQueryParameter("request")
             if (serializedToken != null) {
                 Result.Success(serializedToken)
             }
-            val requestUri = requestParameters["request_uri"]?.first()
+            val requestUri = uri.getQueryParameter("request_uri")
             if (requestUri == null) {
                 Result.Failure(PresentationException("Request Uri does not exist."))
             } else {
@@ -178,6 +176,19 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card that was saved to Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
+<<<<<<< HEAD
+=======
+    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard> {
+        return try {
+            val card = createCard(signedVerifiableCredential, response.request.contract)
+            picRepository.insert(card)
+            Result.Success(card)
+        } catch (exception: Exception) {
+            Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
+        }
+    }
+
+>>>>>>> master
     suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
