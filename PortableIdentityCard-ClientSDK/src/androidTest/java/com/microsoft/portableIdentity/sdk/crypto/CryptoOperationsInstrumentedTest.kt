@@ -10,6 +10,7 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
@@ -21,6 +22,7 @@ import org.junit.runner.RunWith
 class CryptoOperationsInstrumentedTest {
     private val androidSubtle: SubtleCrypto
     private val keyStore: AndroidKeyStore
+    private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val keyRef: String = "TestKeysCryptoOperations"
     private val crypto: CryptoOperations
 
@@ -29,7 +31,8 @@ class CryptoOperationsInstrumentedTest {
         val serializer = Serializer()
         keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
-        crypto = CryptoOperations(androidSubtle, keyStore)
+        ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
+        crypto = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
     }
 
     @Test

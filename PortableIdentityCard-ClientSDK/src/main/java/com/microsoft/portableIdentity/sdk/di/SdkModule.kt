@@ -15,6 +15,7 @@ import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
@@ -24,8 +25,6 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
-import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -55,12 +54,17 @@ internal class SdkModule {
     fun defaultCryptoOperations(
         subtleCrypto: SubtleCrypto,
         ecSubtle: EllipticCurveSubtleCrypto,
-        keyStore: KeyStore
+        keyStore: KeyStore,
+        ecPairwiseKey: EllipticCurvePairwiseKey
     ): CryptoOperations {
-        val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore)
+        val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore, ecPairwiseKey)
         defaultCryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
+        )
+        defaultCryptoOperations.subtleCryptoFactory.addMessageAuthenticationCodeSigner(
+            name = W3cCryptoApiConstants.Hmac.value,
+            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.All)
         )
         return defaultCryptoOperations
     }

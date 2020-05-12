@@ -7,7 +7,6 @@ import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
@@ -118,40 +117,58 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         keyUsages: Set<KeyUsage>
     ): CryptoKey {
         val alias = keyData.kid ?: ""
-        return if (keyData.d != null) { // import d as the private key handle
-            CryptoKey(
-                type = KeyType.Private,
-                extractable = extractable,
-                algorithm = algorithm,
-                usages = keyUsages.toList(),
-                handle = Secp256k1Handle(
-                    alias,
-                    Base64.decode(
-                        stringToByteArray(keyData.d!!),
-                        Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+        return when {
+            keyData.d != null -> { // import d as the private key handle
+                CryptoKey(
+                    type = KeyType.Private,
+                    extractable = extractable,
+                    algorithm = algorithm,
+                    usages = keyUsages.toList(),
+                    handle = Secp256k1Handle(
+                        alias,
+                        Base64.decode(
+                            stringToByteArray(keyData.d!!),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        )
                     )
                 )
-            )
-        } else {// public key
-            val x =
-                Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-            val y =
-                Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-            val xyData = ByteArray(65)
-            xyData[0] = secp256k1Tag.uncompressed.byte
-            x.forEachIndexed { index, byte ->
-                xyData[index + 1] = byte
             }
-            y.forEachIndexed { index, byte ->
-                xyData[index + 33] = byte
+            keyData.k != null -> { // import k as the secret key handle
+                CryptoKey(
+                    type = KeyType.Secret,
+                    extractable = extractable,
+                    algorithm = algorithm,
+                    usages = keyUsages.toList(),
+                    handle = Secp256k1Handle(
+                        alias,
+                        Base64.decode(
+                            stringToByteArray(keyData.k!!),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        )
+                    )
+                )
             }
-            CryptoKey(
-                type = KeyType.Public,
-                extractable = extractable,
-                algorithm = algorithm,
-                usages = keyUsages.toList(),
-                handle = Secp256k1Handle(alias, xyData)
-            )
+            else -> {// public key
+                val x =
+                    Base64.decode(stringToByteArray(keyData.x!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+                val y =
+                    Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
+                val xyData = ByteArray(65)
+                xyData[0] = secp256k1Tag.uncompressed.byte
+                x.forEachIndexed { index, byte ->
+                    xyData[index + 1] = byte
+                }
+                y.forEachIndexed { index, byte ->
+                    xyData[index + 33] = byte
+                }
+                CryptoKey(
+                    type = KeyType.Public,
+                    extractable = extractable,
+                    algorithm = algorithm,
+                    usages = keyUsages.toList(),
+                    handle = Secp256k1Handle(alias, xyData)
+                )
+            }
         }
     }
 

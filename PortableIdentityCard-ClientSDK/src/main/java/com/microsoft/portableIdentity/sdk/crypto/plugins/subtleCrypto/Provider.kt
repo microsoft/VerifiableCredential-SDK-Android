@@ -4,6 +4,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
 import java.util.*
 
 abstract class Provider {
@@ -100,7 +101,7 @@ abstract class Provider {
     public fun importKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
         if (format == KeyFormat.Jwk) {
-            throw SdkLog.error("KeyData does not match format")
+            throw KeyFormatException("KeyData does not match format")
         }
         checkImportKey(format, algorithm, extractable, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
@@ -108,7 +109,7 @@ abstract class Provider {
     public fun importKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
         if (format != KeyFormat.Jwk) {
-            throw SdkLog.error("KeyData does not match format")
+            throw KeyFormatException("KeyData does not match format")
         }
         checkImportKey(format, algorithm, extractable, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)

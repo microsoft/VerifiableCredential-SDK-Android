@@ -4,22 +4,26 @@ import android.annotation.TargetApi
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
-import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.AndroidKeyHandle
+import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.AndroidKeyConverter
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import java.math.BigInteger
 import java.security.*
-import java.security.spec.*
+import java.security.spec.RSAPublicKeySpec
 import javax.crypto.KeyGenerator
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,6 +38,15 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
     }
 
     override fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+        //HMAC - Keyed Hash performed using key and algorithm passed
+        if (key.type == KeyType.Secret) {
+            val handle = cryptoKeyToSecretKey(key)
+            return Mac.getInstance(signAlgorithmToAndroid(algorithm, key)).run {
+                init(handle)
+                update(data)
+                doFinal()
+            }
+        }
         // verify we're signing with a private key
         if (key.type != KeyType.Private) {
             throw SignatureException("Sign must use a private key")
@@ -187,6 +200,16 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
             com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.EllipticCurve.value -> {
                 TODO("Standard Elliptic Curves are not currently supported.")
             }
+            com.microsoft.portableIdentity.sdk.crypto.keys.KeyType.Octets.value -> {
+                val entry = AndroidKeyHandle(keyData.kid ?: "", keyData.k)
+                return CryptoKey(
+                    KeyType.Secret,
+                    extractable,
+                    JwaCryptoConverter.jwaAlgToWebCrypto(keyData.alg!!),
+                    keyUsages,
+                    entry
+                )
+            }
             else -> throw KeyException("Cannot import JWK key type ${keyData.kty}")
         }
     }
@@ -245,6 +268,12 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
             ?: throw KeyException("Software private keys are not supported by the native Subtle.")
     }
 
+    private fun cryptoKeyToSecretKey(key: CryptoKey): SecretKeySpec {
+        val internalHandle = key.handle as? AndroidKeyHandle
+            ?: throw KeyFormatException("Unknown format for CryptoKey passed")
+        internalHandle.key ?: throw KeyStoreException("Secret key not present in keystore")
+        return SecretKeySpec(Base64Url.decode(internalHandle.key.toString()), AndroidConstants.Aes.value)
+    }
 
     private fun signAlgorithmToAndroid(algorithm: Algorithm, cryptoKey: CryptoKey): String {
         return when (algorithm.name) {
@@ -271,6 +300,8 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
                     else -> throw AlgorithmException("Unsupported RSA hash algorithm: ${keyAlgorithm.hash.name}")
                 }
             }
+            W3cCryptoApiConstants.HmacSha256.value -> AndroidConstants.HmacSha256.value
+            W3cCryptoApiConstants.HmacSha512.value -> AndroidConstants.HmacSha512.value
             else -> throw AlgorithmException("Unsupported algorithm: ${algorithm.name}")
         }
     }
@@ -286,15 +317,17 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
     private fun keyPairUsageToAndroid(usages: List<KeyUsage>): Int {
         var flags = 0
         usages.forEach { usage ->
-            flags = flags.or(when (usage) {
-                KeyUsage.Decrypt -> KeyProperties.PURPOSE_DECRYPT
-                KeyUsage.Encrypt -> KeyProperties.PURPOSE_ENCRYPT
-                KeyUsage.Sign -> KeyProperties.PURPOSE_SIGN
-                KeyUsage.Verify -> KeyProperties.PURPOSE_VERIFY
-                KeyUsage.WrapKey -> KeyProperties.PURPOSE_ENCRYPT
-                KeyUsage.UnwrapKey -> KeyProperties.PURPOSE_DECRYPT
-                else -> 0
-            })
+            flags = flags.or(
+                when (usage) {
+                    KeyUsage.Decrypt -> KeyProperties.PURPOSE_DECRYPT
+                    KeyUsage.Encrypt -> KeyProperties.PURPOSE_ENCRYPT
+                    KeyUsage.Sign -> KeyProperties.PURPOSE_SIGN
+                    KeyUsage.Verify -> KeyProperties.PURPOSE_VERIFY
+                    KeyUsage.WrapKey -> KeyProperties.PURPOSE_ENCRYPT
+                    KeyUsage.UnwrapKey -> KeyProperties.PURPOSE_DECRYPT
+                    else -> 0
+                }
+            )
         }
         return flags
     }

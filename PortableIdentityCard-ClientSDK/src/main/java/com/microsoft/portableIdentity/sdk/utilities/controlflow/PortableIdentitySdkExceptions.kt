@@ -21,6 +21,8 @@ class SignatureException(message: String? = null, cause: Throwable? = null) : Cr
 
 class EncodingException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 
+class PairwiseKeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
 class IdentifierCreatorException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 
 open class AuthenticationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)

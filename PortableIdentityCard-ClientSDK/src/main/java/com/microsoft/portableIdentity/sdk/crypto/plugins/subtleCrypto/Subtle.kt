@@ -6,6 +6,7 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
 import java.util.*
 
 /**
@@ -153,7 +154,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
             } catch (error: Throwable) {
-                throw KeyException("wrappedKey is not a JSON web key")
+                throw KeyFormatException("wrappedKey is not a JSON web key")
             }
         }
 
