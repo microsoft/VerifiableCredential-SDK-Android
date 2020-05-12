@@ -5,6 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk
 
+import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
@@ -14,8 +15,10 @@ import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.portableIdentity.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.Success
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.runResultTry
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import kotlinx.coroutines.*
@@ -35,14 +38,16 @@ class IdentifierManager @Inject constructor(
     private val identifierCreator: IdentifierCreator
 ) {
 
-    suspend fun getIdentifier(): Result<Identifier> {
-        return withContext(Dispatchers.IO) { initLongFormIdentifier() }
+    suspend fun getMasterIdentifier(): Result<Identifier> {
+        return withContext(Dispatchers.IO) { getOrCreateMasterIdentifier() }
     }
 
-    private suspend fun initLongFormIdentifier(): Result<Identifier> {
-        return when (val identifier = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)) {
-            null -> createMasterIdentifier()
-            else -> Result.Success(identifier)
+    private suspend fun getOrCreateMasterIdentifier(): Result<Identifier> {
+        val identifier = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
+        return if (identifier != null) {
+            Result.Success(identifier)
+        } else {
+            createMasterIdentifier()
         }
     }
 
@@ -52,22 +57,23 @@ class IdentifierManager @Inject constructor(
             //TODO(seed is needed for pairwise key generation)
             cryptoOperations.generateAndStoreSeed()
             // peer id for master Identifier will be method name for now.
-            val registeredIdentifier = identifierCreator.create(METHOD_NAME).abortOnError()
-            saveIdentifier(registeredIdentifier)
+            val identifier = identifierCreator.create(METHOD_NAME).abortOnError()
+            SdkLog.i("Creating Identifier: $identifier")
+            saveIdentifier(identifier)
         }
     }
 
-    // TODO(create pairwise Identifier based off new key generation algorithm).
     suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
-        return runResultTry {
-            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
-                null -> {
-                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
-                    saveIdentifier(registeredIdentifier)
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
+                    null -> {
+                        val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
+                        saveIdentifier(registeredIdentifier)
+                    }
+                    else -> Result.Success(pairwiseIdentifier)
                 }
-                else -> Result.Success(pairwiseIdentifier)
             }
-
         }
     }
 
@@ -83,5 +89,9 @@ class IdentifierManager @Inject constructor(
         } catch (exception: Exception) {
             throw RepositoryException("Unable to save identifier in repository", exception)
         }
+    }
+
+    fun getIdentifierByName(name: String): Identifier? {
+        return identifierRepository.queryByName(name)
     }
 }

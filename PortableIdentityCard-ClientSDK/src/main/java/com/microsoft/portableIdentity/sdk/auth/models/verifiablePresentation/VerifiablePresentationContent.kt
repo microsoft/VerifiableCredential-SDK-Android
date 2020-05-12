@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.portableIdentity.sdk.cards.verifiableCredential
+package com.microsoft.portableIdentity.sdk.auth.models.verifiablePresentation
 
 import kotlinx.serialization.Serializable
 

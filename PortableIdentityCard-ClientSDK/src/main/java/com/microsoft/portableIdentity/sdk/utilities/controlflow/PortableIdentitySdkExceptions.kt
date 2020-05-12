@@ -19,7 +19,9 @@ open class AuthenticationException(message: String? = null, cause: Throwable? = 
 
 class PresentationException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
-class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+open class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+
+class PairwiseIssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
 class ValidatorException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 

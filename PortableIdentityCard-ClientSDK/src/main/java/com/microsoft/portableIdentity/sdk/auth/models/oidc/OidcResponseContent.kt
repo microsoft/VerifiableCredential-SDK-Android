@@ -5,8 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.oidc
 
-import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_NAMES
-import com.microsoft.portableIdentity.sdk.utilities.Constants.CLAIM_SOURCES
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SELF_ISSUED
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SUB_JWK
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
@@ -50,20 +48,18 @@ data class OidcResponseContent(
     // time the token expires.
     val exp: Long,
 
-    // aggregated claims
-    @SerialName(CLAIM_NAMES)
-    val claimNames: Map<String, String>? = null,
-    @SerialName(CLAIM_SOURCES)
-    val claimSources: Map<String, List<Map<String, String>>>? = null,
-
     // PICS specific
     // response contains claims that fulfills this contract.
     val contract: String? = null,
-    // claims that were being requested.
-    // TODO (val attestations)
+
     //id of the response
     val jti: String? = null,
 
-    // attestations that were asked for in Request.
-    val attestations: AttestationResponse? = null
+    // attestations that were asked for in request.
+    val attestations: AttestationClaimModel? = null,
+
+    // vc needed for Revocation or Exchange PIC API
+    val vc: String? = null,
+    // recipient of VC for Exchange PIC API
+    val recipient: String? = null
 )

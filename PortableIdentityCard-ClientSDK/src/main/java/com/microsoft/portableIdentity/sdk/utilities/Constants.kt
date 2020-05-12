@@ -15,8 +15,7 @@ object Constants {
     const val MAX_AGE = "max_age"
     const val SELF_ISSUED = "https://self-issued.me"
     const val SUB_JWK = "sub_jwk"
-    const val CLAIM_NAMES = "_claim_names"
-    const val CLAIM_SOURCES = "_claim_sources"
+
     // OIDC Registration Constants
     const val CLIENT_NAME = "client_name"
     const val CLIENT_PURPOSE = "client_purpose"
@@ -31,6 +30,7 @@ object Constants {
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000
     const val SECONDS_IN_A_MINUTE = 60
+    const val DEFAULT_EXPIRATION_IN_MINUTES = 3000
     const val RESPONSE_EXPIRATION_IN_MINUTES = 600
     const val HASHING_ALGORITHM_FOR_ID = "MD5"
 
