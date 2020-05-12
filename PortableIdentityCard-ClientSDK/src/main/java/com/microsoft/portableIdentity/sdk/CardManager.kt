@@ -176,19 +176,6 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card that was saved to Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-<<<<<<< HEAD
-=======
-    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard> {
-        return try {
-            val card = createCard(signedVerifiableCredential, response.request.contract)
-            picRepository.insert(card)
-            Result.Success(card)
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
-        }
-    }
-
->>>>>>> master
     suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
