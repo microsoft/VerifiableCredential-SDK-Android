@@ -25,8 +25,6 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.registrars.Registrar
 import com.microsoft.portableIdentity.sdk.registrars.SidetreeRegistrar
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
-import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
-import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient

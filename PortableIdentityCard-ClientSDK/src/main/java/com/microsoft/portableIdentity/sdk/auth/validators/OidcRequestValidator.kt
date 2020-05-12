@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.auth.validators
 
+import android.net.Uri
 import com.microsoft.portableIdentity.sdk.utilities.Constants.CLIENT_ID
 import com.microsoft.portableIdentity.sdk.utilities.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUTE
@@ -30,7 +31,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
         val token = JwsToken.deserialize(request.serializedToken, serializer)
         return when (val validationResult = jwsValidator.verifySignature(token)) {
             is Result.Success -> {
-                val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.oidcParameters)
+                val isValid = validationResult.payload && hasTokenExpired(request.content.exp) && hasMatchingParams(request.content, request.uri)
                 Result.Success(isValid)
             }
             is Result.Failure -> validationResult
@@ -46,7 +47,7 @@ class OidcRequestValidator @Inject constructor(private val jwsValidator: JwsVali
         return currentTimeInSeconds + SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
     }
 
-    private fun hasMatchingParams(requestContents: OidcRequestContent, params: Map<String, List<String>>): Boolean {
-        return params[CLIENT_ID]?.first() == requestContents.clientId
+    private fun hasMatchingParams(requestContents: OidcRequestContent, uri: Uri): Boolean {
+        return uri.getQueryParameter(CLIENT_ID) == requestContents.clientId
     }
 }
