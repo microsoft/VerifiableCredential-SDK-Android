@@ -8,6 +8,9 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import com.microsoft.portableIdentity.sdk.utilities.printBytes
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
@@ -74,11 +77,11 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
-        val keyGenParams = algorithm as? EcKeyGenParams ?: throw SdkLog.error("EcKeyGenParams expected as algorithm")
+        val keyGenParams = algorithm as? EcKeyGenParams ?: throw AlgorithmException("EcKeyGenParams expected as algorithm")
         if (keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.value.toUpperCase(Locale.ROOT) &&
             keyGenParams.namedCurve.toUpperCase(Locale.ROOT) != W3cCryptoApiConstants.Secp256k1.name.toUpperCase(Locale.ROOT)
         ) {
-            throw SdkLog.error("The curve ${keyGenParams.namedCurve} is not supported by Secp256k1Provider")
+            throw AlgorithmException("The curve ${keyGenParams.namedCurve} is not supported by Secp256k1Provider")
         }
     }
 
@@ -87,7 +90,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
-            throw SdkLog.error("Data must be 32 bytes")
+            throw SignatureException("Data must be 32 bytes")
         }
         return NativeSecp256k1.sign(hashedData, keyData)
     }
@@ -97,7 +100,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
-            throw SdkLog.error("Data must be 32 bytes")
+            throw SignatureException("Data must be 32 bytes")
         }
 
         print("KEY DATA: ")
@@ -185,7 +188,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         if (key.type == KeyType.Private) {
             val keyData = (key.handle as Secp256k1Handle).data
             if (!NativeSecp256k1.secKeyVerify(keyData)) {
-                throw SdkLog.error("Private key invalid")
+                throw KeyException("Private key invalid")
             }
         }
     }
@@ -215,7 +218,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
             )
         } else {
-            throw SdkLog.error("Public key improperly formatted")
+            throw KeyException("Public key improperly formatted")
         }
     }
 

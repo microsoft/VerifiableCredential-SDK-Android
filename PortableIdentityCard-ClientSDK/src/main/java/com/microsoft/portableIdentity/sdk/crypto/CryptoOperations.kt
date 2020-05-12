@@ -13,6 +13,8 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import java.security.SecureRandom
 
 /**
@@ -34,7 +36,7 @@ class CryptoOperations (
     fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
         SdkLog.d("Signing with $signingKeyReference")
         val privateKey = keyStore.getPrivateKey(signingKeyReference)
-        val alg = algorithm ?: privateKey.alg ?: throw SdkLog.error("No Algorithm specified for key $signingKeyReference")
+        val alg = algorithm ?: privateKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Private)
         val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
         return subtle.sign(alg, key, payload)
@@ -47,11 +49,11 @@ class CryptoOperations (
         SdkLog.d("Verifying with $signingKeyReference")
         val publicKey = keyStore.getPublicKey(signingKeyReference)
         val alg =
-            algorithm ?: publicKey.alg ?: throw SdkLog.error("No Algorithm specified for key $signingKeyReference")
+            algorithm ?: publicKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.Public)
         val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
         if (!subtle.verify(alg, key, signature, payload)) {
-            throw SdkLog.error("Signature invalid")
+            throw SignatureException("Signature invalid")
         }
     }
 
@@ -77,7 +79,7 @@ class CryptoOperations (
     fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
         SdkLog.d("Generating new key pair $keyReference of type ${keyType.value}")
         when (keyType) {
-            KeyType.Octets -> throw SdkLog.error("Cannot generate a symmetric key")
+            KeyType.Octets -> throw KeyException("Cannot generate a symmetric key")
             KeyType.RSA -> {
                 val subtle = subtleCryptoFactory.getSharedKeyEncrypter(
                     W3cCryptoApiConstants.RsaSsaPkcs1V15.value,

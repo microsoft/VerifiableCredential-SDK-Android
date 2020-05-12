@@ -2,9 +2,11 @@ package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import java.util.*
 
-abstract class Provider() {
+abstract class Provider {
     abstract val name: String
     abstract val privateKeyUsage: Set<KeyUsage>?
     abstract val publicKeyUsage: Set<KeyUsage>?
@@ -158,7 +160,7 @@ abstract class Provider() {
     }
     private fun checkExportKey(format: KeyFormat, key: CryptoKey) {
         if (!key.extractable) {
-            throw SdkLog.error("Key is not extractable")
+            throw KeyException("Key is not extractable")
         }
     }
     private fun checkImportKey(format: KeyFormat, algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
@@ -180,7 +182,7 @@ abstract class Provider() {
 
     protected open fun checkAlgorithmName(algorithm: Algorithm) {
         if (algorithm.name.toLowerCase(Locale.ENGLISH) != this.name.toLowerCase(Locale.ENGLISH)) {
-            throw SdkLog.error("Unrecognized Algorithm ${algorithm.name}")
+            throw AlgorithmException("Unrecognized Algorithm ${algorithm.name}")
         }
     }
 
@@ -191,14 +193,14 @@ abstract class Provider() {
     protected fun checkKeyUsages(usages: Set<KeyUsage>, allowed: Set<KeyUsage>) {
         val forbiddenUsages = usages - allowed
         if (forbiddenUsages.isNotEmpty()) {
-            throw SdkLog.error("Key Usages contains forbidden Key Usage: ${forbiddenUsages.joinToString { use -> use.value }}")
+            throw KeyException("Key Usages contains forbidden Key Usage: ${forbiddenUsages.joinToString { use -> use.value }}")
         }
     }
 
     public open fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
         checkAlgorithmName(key.algorithm)
         if (!key.usages.contains(keyUsage)) {
-            throw SdkLog.error("Key does not allow ${keyUsage.name}")
+            throw KeyException("Key does not allow ${keyUsage.name}")
         }
     }
 

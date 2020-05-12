@@ -4,6 +4,8 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import java.util.*
 
 /**
@@ -15,7 +17,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
     }.toMap()
 
     private fun getProvider(algorithm: String): Provider {
-        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw SdkLog.error("Unknown algorithm $algorithm")
+        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw AlgorithmException("Unknown algorithm $algorithm")
     }
 
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -62,7 +64,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         // check derivedKeyType
         val importProvider = this.getProvider(derivedKeyType.name);
         importProvider.checkDerivedKeyParams(derivedKeyType)
-        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw SdkLog.error("DerivedKeyType must include a length parameter"))
+        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw KeyException("DerivedKeyType must include a length parameter"))
 
         // derive bits
         val provider = this.getProvider(algorithm.name);
@@ -151,7 +153,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
             } catch (error: Throwable) {
-                throw SdkLog.error("wrappedKey is not a JSON web key")
+                throw KeyException("wrappedKey is not a JSON web key")
             }
         }
 

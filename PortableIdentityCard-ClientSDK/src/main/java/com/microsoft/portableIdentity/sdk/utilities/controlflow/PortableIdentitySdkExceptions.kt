@@ -9,6 +9,18 @@ open class PortableIdentitySdkException(message: String? = null, cause: Throwabl
 
 open class CryptoException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
+class KeyStoreException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class KeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class KeyFormatException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class AlgorithmException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class SignatureException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class EncodingException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
 class IdentifierCreatorException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 
 open class AuthenticationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)

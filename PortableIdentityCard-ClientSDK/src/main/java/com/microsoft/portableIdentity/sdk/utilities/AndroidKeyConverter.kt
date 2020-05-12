@@ -11,6 +11,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import java.security.KeyStore
 import java.security.interfaces.ECPublicKey
 import java.security.interfaces.RSAPublicKey
@@ -44,7 +45,7 @@ object AndroidKeyConverter {
                     )
                 )
             }
-            else -> throw SdkLog.error("Cannot convert key type.")
+            else -> throw KeyException("Cannot convert key type.")
         }
     }
 
@@ -84,7 +85,7 @@ object AndroidKeyConverter {
                     )
                 )
             }
-            else -> throw SdkLog.error("Cannot convert key type.")
+            else -> throw KeyException("Cannot convert key type.")
         }
     }
 
@@ -92,7 +93,7 @@ object AndroidKeyConverter {
         return when (publicKey) {
             is RSAPublicKey -> KeyType.RSA
             is ECPublicKey -> KeyType.EllipticCurve
-            else -> throw SdkLog.error("Unknown Key Type")
+            else -> throw KeyException("Unknown Key Type")
         }
     }
 }

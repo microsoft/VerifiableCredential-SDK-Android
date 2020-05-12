@@ -4,6 +4,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.*
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 
 class InMemoryKeyStore(): KeyStore() {
     private val secretKeys: MutableMap<String, KeyContainer<SecretKey>> = mutableMapOf()
@@ -11,18 +12,18 @@ class InMemoryKeyStore(): KeyStore() {
     private val publicKeys: MutableMap<String, KeyContainer<PublicKey>> = mutableMapOf()
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
-        return secretKeys[keyReference]?: throw SdkLog.error("key $keyReference does not exist.")
+        return secretKeys[keyReference]?: throw KeyStoreException("key $keyReference does not exist.")
     }
 
     override fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey> {
-        return privateKeys[keyReference]?: throw SdkLog.error("key $keyReference does not exist.")
+        return privateKeys[keyReference]?: throw KeyStoreException("key $keyReference does not exist.")
     }
 
     override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
         return if (publicKeys.containsKey(keyReference)) {
             publicKeys[keyReference]!!
         } else {
-            val keyContainer = privateKeys[keyReference] ?: throw SdkLog.error("key $keyReference does not exist.")
+            val keyContainer = privateKeys[keyReference] ?: throw KeyStoreException("key $keyReference does not exist.")
             KeyContainer(
                 keyContainer.kty,
                 keyContainer.keys.map { it.getPublicKey() },

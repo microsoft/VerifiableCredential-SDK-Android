@@ -5,6 +5,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurv
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import kotlinx.serialization.Serializable
 
 /**
@@ -42,13 +43,13 @@ data class IdentifierDocumentPublicKey(
                 return EllipticCurvePublicKey(this.publicKeyJwk)
             }
             in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
-                throw SdkLog.error("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
+                throw KeyException("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
             }
             in LinkedDataKeySpecification.Ed25519Signature2018.values -> {
-                throw SdkLog.error("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
+                throw KeyException("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
             }
             else -> {
-                throw SdkLog.error("Unknown key type: $type")
+                throw KeyException("Unknown key type: $type")
             }
         }
     }
