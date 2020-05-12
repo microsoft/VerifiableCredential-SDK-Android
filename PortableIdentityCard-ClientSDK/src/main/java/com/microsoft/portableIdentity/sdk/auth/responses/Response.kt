@@ -10,6 +10,7 @@ import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.Request
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
+import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 
 /**
  * OIDC Response formed from a Request.
@@ -68,14 +69,12 @@ sealed class Response(open val request: Request, val audience: String) {
 
     private fun createPresentationReceipt(cardId: String, entityDid: String, entityName: String): Receipt {
         val date = System.currentTimeMillis()
-        return Receipt(cardId = cardId,
+        return Receipt(
+            action = ReceiptAction.Presentation,
+            cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,
             entityName = entityName)
-    }
-
-    private fun areNoCollectedClaims(): Boolean {
-        return (collectedCards.isEmpty() && collectedTokens.isEmpty() && collectedSelfIssued.isEmpty())
     }
 }
 
