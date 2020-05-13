@@ -33,8 +33,6 @@ abstract class BaseNetworkOperation<S, T> {
     }
 
     open fun onSuccess(response: Response<S>): Result<T> {
-        // TODO("how do we want to handle null bodies")
-        // TODO("how to not suppress this warning")
         @Suppress("UNCHECKED_CAST")
         val transformedPayload = (response.body() ?: throw NetworkException("Body of Response is null.")) as T
         return Result.Success(transformedPayload)

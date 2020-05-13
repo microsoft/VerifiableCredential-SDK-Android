@@ -148,10 +148,7 @@ class CardRepository @Inject constructor(
             audience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
-            requestedSelfIssuedClaims = emptyMap(),
-            requestedIdTokens = emptyMap(),
-            requestedVcs = emptyMap()
+            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
         )
         val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             pairwiseRequest.audience,

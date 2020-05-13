@@ -13,7 +13,7 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
  */
 sealed class PicActionRequest(val audience: String)
 
-class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) : PicActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?:"")
+class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) : PicActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?:"https://portableidentitycards.azure-api.net/v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/card/issue")
 class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) : PicActionRequest(verifiableCredential.contents.vc.revokeService?.id ?:"")
 class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) : PicActionRequest(verifiableCredential.contents.vc.credentialStatus?.id ?:"")
 
