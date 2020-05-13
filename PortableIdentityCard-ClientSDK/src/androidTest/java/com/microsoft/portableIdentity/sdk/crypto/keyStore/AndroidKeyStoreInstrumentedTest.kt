@@ -122,7 +122,12 @@ class AndroidKeyStoreInstrumentedTest {
 
     @Test
     fun saveAndGetSecretKeyTest() {
-        val secretKey = SecretKey(stringToByteArray("testsecretkey1"))
+        val secretKey = SecretKey(
+            JsonWebKey(
+                kty = KeyType.Octets.value,
+                kid = "#$keyRef.1"
+            )
+        )
         keyStore.save(keyRef, secretKey)
         val actualSecretKey = keyStore.getSecretKey(keyRef)
         assertThat(actualSecretKey.keys.firstOrNull()).isEqualToComparingFieldByFieldRecursively(secretKey)
@@ -130,7 +135,12 @@ class AndroidKeyStoreInstrumentedTest {
 
     @Test
     fun getSecretKeyByIdTest() {
-        val secretKey = SecretKey(stringToByteArray("testsecretkey2"))
+        val secretKey = SecretKey(
+            JsonWebKey(
+                kty = KeyType.Octets.value,
+                kid = "#secret.2"
+            )
+        )
         keyStore.save("secret", secretKey)
         val actualSecretKey = keyStore.getSecretKeyById(secretKey.kid)
         assertThat(actualSecretKey).isEqualToComparingFieldByFieldRecursively(secretKey)
