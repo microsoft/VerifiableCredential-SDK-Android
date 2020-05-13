@@ -111,13 +111,13 @@ class AndroidKeyStoreInstrumentedTest {
     fun checkOrCreateKidTest() {
         keyStore.save(keyRef, actualPrivateKey)
         val kid = keyStore.checkOrCreateKeyId(keyRef, null)
-        assertThat(kid).startsWith("#$keyRef.")
+        assertThat(kid).startsWith("#${keyRef}_")
     }
 
     @Test
     fun checkOrCreateKidFirstKeyTest() {
         val kid = keyStore.checkOrCreateKeyId(keyRef, null)
-        assertThat(kid).startsWith("#$keyRef.1")
+        assertThat(kid).startsWith("#${keyRef}_1")
     }
 
     @Test
@@ -125,7 +125,7 @@ class AndroidKeyStoreInstrumentedTest {
         val secretKey = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
-                kid = "#$keyRef.1"
+                kid = "#${keyRef}_1"
             )
         )
         keyStore.save(keyRef, secretKey)
@@ -138,7 +138,7 @@ class AndroidKeyStoreInstrumentedTest {
         val secretKey = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
-                kid = "#secret.2"
+                kid = "#secret_2"
             )
         )
         keyStore.save("secret", secretKey)

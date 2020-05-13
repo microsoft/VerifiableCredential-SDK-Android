@@ -20,6 +20,7 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.PairwiseKeyException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import java.security.SecureRandom
 
@@ -138,7 +139,7 @@ class CryptoOperations (
 
         return when (val keyType = KeyTypeFactory.createViaWebCrypto(algorithm)) {
             KeyType.EllipticCurve -> ellipticCurvePairwiseKey.generate(this, masterKey, algorithm, peerId)
-            else -> error("Pairwise key for type '${keyType.value}' is not supported.")
+            else -> throw PairwiseKeyException("Pairwise key for type '${keyType.value}' is not supported.")
         }
     }
 

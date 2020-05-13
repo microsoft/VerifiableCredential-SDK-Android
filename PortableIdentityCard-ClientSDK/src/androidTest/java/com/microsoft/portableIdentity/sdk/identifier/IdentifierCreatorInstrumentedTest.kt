@@ -83,7 +83,7 @@ class IdentifierCreatorInstrumentedTest {
         var signKey = ""
         runBlocking {
             signKey =
-                when (val id = PortableIdentitySdk.identifierManager.getIdentifier()) {
+                when (val id = PortableIdentitySdk.identifierManager.getMasterIdentifier()) {
                     is Result.Success -> id.payload.signatureKeyReference
                     else -> ""
                 }
