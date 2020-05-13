@@ -4,6 +4,7 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.assertj.core.api.Assertions
@@ -45,6 +46,6 @@ class PublicKeyTest {
     @Test
     fun `failing rsa public key creation with wrong key type`() {
         actualJwk = mockk(relaxed = true)
-        Assertions.assertThatThrownBy { RsaPublicKey(actualJwk) }.isInstanceOf(RuntimeException::class.java)
+        Assertions.assertThatThrownBy { RsaPublicKey(actualJwk) }.isInstanceOf(KeyException::class.java)
     }
 }

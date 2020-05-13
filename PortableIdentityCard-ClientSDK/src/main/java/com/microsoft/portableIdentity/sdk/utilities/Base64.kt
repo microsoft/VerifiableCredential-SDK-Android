@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.utilities
 
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.EncodingException
 import kotlin.math.max
 import kotlin.math.min
 
@@ -46,7 +47,7 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
 
         fun fromString(data: String, dictionary: List<String>, padding: Char? = null): ByteGroup {
             if (data.length > 4) {
-                throw SdkLog.error("Invalid base64 byte group length")
+                throw EncodingException("Invalid base64 byte group length")
             }
             val minimalIr = data.filter {
                 padding == null || it != padding
@@ -64,9 +65,9 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
                     ByteGroup(minimalIr, 3)
                 }
                 0, 1 -> {
-                    throw SdkLog.error("Invalid base64 encoding")
+                    throw EncodingException("Invalid base64 encoding")
                 }
-                else -> throw SdkLog.error("Invalid base64 encoding")
+                else -> throw EncodingException("Invalid base64 encoding")
             }
         }
 

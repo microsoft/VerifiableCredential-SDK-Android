@@ -6,6 +6,8 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
@@ -51,12 +53,12 @@ class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.val
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         val datagram = Datagram.deserialize(signature)
         if (key.handle != datagram.keyId) {
-            throw SdkLog.error("Incorrect key used")
+            throw KeyException("Incorrect key used")
         }
         datagram.getData().forEachIndexed {
                 index, byte ->
             if (data[index] != byte) {
-                throw SdkLog.error("Signed data differs at byte $index")
+                throw SignatureException("Signed data differs at byte $index")
             }
         }
         return true

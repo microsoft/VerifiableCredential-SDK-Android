@@ -1,10 +1,17 @@
 package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKeyPair
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyFormat
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import java.util.*
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
+import java.util.Locale
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
@@ -15,7 +22,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
     }.toMap()
 
     private fun getProvider(algorithm: String): Provider {
-        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw SdkLog.error("Unknown algorithm $algorithm")
+        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw AlgorithmException("Unknown algorithm $algorithm")
     }
 
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -62,7 +69,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         // check derivedKeyType
         val importProvider = this.getProvider(derivedKeyType.name);
         importProvider.checkDerivedKeyParams(derivedKeyType)
-        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw SdkLog.error("DerivedKeyType must include a length parameter"))
+        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw KeyException("DerivedKeyType must include a length parameter"))
 
         // derive bits
         val provider = this.getProvider(algorithm.name);
@@ -151,7 +158,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
             } catch (error: Throwable) {
-                throw SdkLog.error("wrappedKey is not a JSON web key")
+                throw KeyFormatException("wrappedKey is not a JSON web key")
             }
         }
 

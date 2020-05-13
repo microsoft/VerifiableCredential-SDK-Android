@@ -1,6 +1,6 @@
 package com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi
 
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 
 /**
  * A type of operation that may be performed using a key.
@@ -26,6 +26,6 @@ fun toKeyUsage(key_ops: String): KeyUsage {
         KeyUsage.DeriveKey.value -> KeyUsage.DeriveKey
         KeyUsage.WrapKey.value -> KeyUsage.WrapKey
         KeyUsage.UnwrapKey.value -> KeyUsage.UnwrapKey
-        else -> throw SdkLog.error("Unknown key_op $key_ops")
+        else -> throw KeyException("Unknown key_op $key_ops")
     }
 }

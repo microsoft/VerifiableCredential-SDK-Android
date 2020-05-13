@@ -7,9 +7,21 @@ package com.microsoft.portableIdentity.sdk.utilities.controlflow
 
 open class PortableIdentitySdkException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
 
+class UnSupportedOperationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
+
 open class CryptoException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
+class KeyStoreException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
 class KeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class KeyFormatException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class AlgorithmException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class SignatureException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class EncodingException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 
 class PairwiseKeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 

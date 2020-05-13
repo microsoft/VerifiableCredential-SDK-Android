@@ -167,6 +167,6 @@ class PairwiseKeyInstrumentedTest {
         val alg = Algorithm(invalidAlgorithmName)
         val persona = "did:persona"
         val peer = "did:peer"
-        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(RuntimeException::class.java)
+        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(PairwiseKeyException::class.java)
     }
 }

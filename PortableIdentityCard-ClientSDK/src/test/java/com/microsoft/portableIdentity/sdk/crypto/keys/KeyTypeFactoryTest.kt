@@ -1,6 +1,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -52,6 +53,6 @@ class KeyTypeFactoryTest {
     @Test
     fun `failing with invalid algorithm while finding key type`() {
         val nonExistingAlgorithmName = "Test"
-        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName) }.isInstanceOf(IllegalStateException::class.java)
+        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName) }.isInstanceOf(AlgorithmException::class.java)
     }
 }
