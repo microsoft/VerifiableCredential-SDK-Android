@@ -2,7 +2,6 @@ package com.microsoft.portableIdentity.sdk.crypto.models
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 
 

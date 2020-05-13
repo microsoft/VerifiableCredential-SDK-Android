@@ -1,13 +1,17 @@
 package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKeyPair
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyFormat
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
-import java.util.*
+import java.util.Locale
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts

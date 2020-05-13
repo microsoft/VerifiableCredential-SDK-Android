@@ -1,9 +1,12 @@
 package com.microsoft.portableIdentity.sdk.crypto.keyStore
 
-import com.microsoft.portableIdentity.sdk.crypto.keys.*
+import com.microsoft.portableIdentity.sdk.crypto.keys.IKeyStoreItem
+import com.microsoft.portableIdentity.sdk.crypto.keys.KeyContainer
+import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.KeyUse
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 
 class InMemoryKeyStore(): KeyStore() {

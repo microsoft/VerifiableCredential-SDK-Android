@@ -1,6 +1,5 @@
 package com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi
 
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 
 /**
