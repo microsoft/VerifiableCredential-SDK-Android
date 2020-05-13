@@ -9,20 +9,19 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.portableIdentity.sdk.auth.protectors.Formatter
 import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
+import com.microsoft.portableIdentity.sdk.auth.responses.Response
 import com.microsoft.portableIdentity.sdk.auth.validators.Validator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
-import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.*
 import kotlinx.coroutines.Dispatchers
@@ -38,8 +37,7 @@ import javax.inject.Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
     private val serializer: Serializer,
-    private val validator: Validator,
-    private val formatter: Formatter
+    private val validator: Validator
 ) {
 
     /**
@@ -125,34 +123,17 @@ class CardManager @Inject constructor(
      * @param response IssuanceResponse to be formed, signed, and sent.
      * @param responder Identifier to be used to sign response.
      *
-     * @return Result.Success: TODO("Support Error cases better (ex. 404)").
+     * @return Result.Success:
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<Pair<PortableIdentityCard, List<Receipt>>> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
-                SdkLog.i(formattedResponse)
-                val verifiableCredential = picRepository.sendIssuanceResponse(response.audience, formattedResponse).abortOnError()
-                val card = createCard(verifiableCredential.raw, response.request.contract)
-                val receipts = response.createReceiptsForPresentedCredentials(
-                    entityDid = response.request.contract.input.issuer,
-                    entityHostName = response.audience,
-                    entityName = response.request.entityName,
-                    requestToken = formattedResponse
-                ).toMutableList()
-                receipts.add(
-                    response.createReceipt(
-                        ReceiptAction.Issuance,
-                        card.id,
-                        card.verifiableCredential.contents.iss,
-                        response.audience,
-                        response.request.entityName,
-                        formattedResponse
-                    )
-                )
-                receipts.forEach { saveReceipt(it).abortOnError() }
-                Result.Success(Pair(card, receipts))
+                val verifiableCredential = picRepository.sendIssuanceResponse(response, responder).abortOnError()
+                picRepository.insert(verifiableCredential)
+                val card = createCard(verifiableCredential.raw, responder, response.request.contract)
+                createAndSaveReceipt(response)
+                Result.Success(card)
             }
         }
     }
@@ -163,22 +144,29 @@ class CardManager @Inject constructor(
      * @param response PresentationResponse to be formed, signed, and sent.
      * @param responder Identifier to be used to sign response.
      *
-     * @return Result.Success: TODO("Support Error cases better (ex. 404)").
+     * @return Result.Success: Unit
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<List<Receipt>> {
-        return runResultTry {
-            val formattedResponse = formatter.formAndSignResponse(response, responder).abortOnError()
-            picRepository.sendPresentationResponse(response.audience, formattedResponse)
-            val receipts = response.createReceiptsForPresentedCredentials(
-                entityDid = response.request.content.iss,
-                entityHostName = response.request.entityIdentifier,
-                entityName = response.request.entityName,
-                requestToken = formattedResponse
-            )
-            receipts.forEach { saveReceipt(it).abortOnError() }
-            Result.Success(receipts)
+    suspend fun sendPresentationResponse(
+        response: PresentationResponse,
+        responder: Identifier,
+        expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_MINUTES
+    ): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                picRepository.sendPresentationResponse(response, responder)
+                createAndSaveReceipt(response)
+                Result.Success(Unit)
+            }
         }
+    }
+
+    private suspend fun createAndSaveReceipt(response: Response) {
+        val receipts = response.createReceiptsForPresentedCredentials(
+            entityDid = response.request.entityIdentifier,
+            entityName = response.request.entityName
+        )
+        receipts.forEach { saveReceipt(it) }
     }
 
     /**
@@ -190,16 +178,6 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card that was saved to Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun saveCard(signedVerifiableCredential: String, response: IssuanceResponse): Result<PortableIdentityCard> {
-        return try {
-            val card = createCard(signedVerifiableCredential, response.request.contract)
-            picRepository.insert(card)
-            Result.Success(card)
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to insert card in repository.", exception))
-        }
-    }
-
     suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -209,15 +187,10 @@ class CardManager @Inject constructor(
         }
     }
 
-    private fun createCard(signedVerifiableCredential: String, contract: PicContract): PortableIdentityCard {
-        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential)
-        val verifiableCredential = VerifiableCredential(signedVerifiableCredential, contents)
-        return PortableIdentityCard(contents.jti, verifiableCredential, contract.display)
-    }
-
-    private fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String): VerifiableCredentialContent {
-        val token = JwsToken.deserialize(signedVerifiableCredential, serializer)
-        return serializer.parse(VerifiableCredentialContent.serializer(), token.content())
+    private fun createCard(signedVerifiableCredential: String, owner: Identifier, contract: PicContract): PortableIdentityCard {
+        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
+        val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
+        return PortableIdentityCard(contents.jti, verifiableCredential, owner, contract.display)
     }
 
     /**
@@ -262,7 +235,7 @@ class CardManager @Inject constructor(
         }
     }
 
-     /** Get A Portable Identity Card by card id from storage
+    /** Get A Portable Identity Card by card id from storage
      * @param  id: card id of requested card
      * @return Result.Success: Portable Identity Card corresponding to id passed
      *         Result.Failure: Exception explaining the problem

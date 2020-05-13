@@ -102,12 +102,13 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
 
     private fun generateAndSaveKey(algorithm: Algorithm, target: String, kid: String, keyReference: String?, personaId: String, keyUsage: String) : PublicKey {
         val privateKeyJwk = cryptoOperations.generatePairwise(algorithm, AndroidConstants.masterSeed.value, personaId, target)
-        privateKeyJwk.kid = kid
+        privateKeyJwk.kid = "#${kid}"
         privateKeyJwk.use = toKeyUse(keyUsage)
         val publicKeyJwk = privateKeyJwk.getPublicKey()
-        publicKeyJwk.kid = kid
+        publicKeyJwk.kid = "#${kid}"
         val pairwiseKeyReference = keyReference ?: generateKeyReferenceId(personaId, target, algorithm.name, KeyUse.Signature.value)
         cryptoOperations.keyStore.save(pairwiseKeyReference, privateKeyJwk)
+        cryptoOperations.keyStore.getPrivateKey(pairwiseKeyReference)
         return publicKeyJwk
     }
 

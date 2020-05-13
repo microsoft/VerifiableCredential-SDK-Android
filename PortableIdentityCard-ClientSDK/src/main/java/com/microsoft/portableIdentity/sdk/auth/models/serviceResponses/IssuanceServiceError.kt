@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.portableIdentity.sdk.auth.responses
+package com.microsoft.portableIdentity.sdk.auth.models.serviceResponses
 
 import kotlinx.serialization.Serializable
 
