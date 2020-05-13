@@ -12,7 +12,6 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreExceptio
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
-import java.lang.RuntimeException
 
 class InMemoryKeyStoreTest {
     private val inMemoryKeyStore = InMemoryKeyStore()

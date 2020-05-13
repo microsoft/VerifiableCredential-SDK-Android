@@ -19,7 +19,6 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaHashedKe
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
-import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
