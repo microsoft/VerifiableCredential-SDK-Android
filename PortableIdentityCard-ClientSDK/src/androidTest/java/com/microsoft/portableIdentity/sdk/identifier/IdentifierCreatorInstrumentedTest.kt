@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.PortableIdentitySdk
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
@@ -29,6 +30,7 @@ class IdentifierCreatorInstrumentedTest {
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
     private val identifierCreator: IdentifierCreator
+    private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -37,7 +39,8 @@ class IdentifierCreatorInstrumentedTest {
         val keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
         ecSubtle = EllipticCurveSubtleCrypto(androidSubtle, serializer)
-        cryptoOperations = CryptoOperations(androidSubtle, keyStore)
+        ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
+        cryptoOperations = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
         val sidetreePayloadProcessor = SidetreePayloadProcessor(serializer)
         identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(

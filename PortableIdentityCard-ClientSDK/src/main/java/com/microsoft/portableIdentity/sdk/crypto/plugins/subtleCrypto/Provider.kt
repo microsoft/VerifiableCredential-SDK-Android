@@ -5,6 +5,7 @@ import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.UnSupportedOperationException
 import java.util.*
 
 abstract class Provider {
@@ -14,91 +15,91 @@ abstract class Provider {
     abstract val symmetricKeyUsage: Set<KeyUsage>?
 
     protected open fun onDigest(algorithm: Algorithm, data: ByteArray): ByteArray {
-        throw SdkLog.error("Digest not supported.")
+        throw UnSupportedOperationException("Digest not supported.")
     }
     protected open fun onGenerateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        throw SdkLog.error("GenerateKey not supported.")
+        throw UnSupportedOperationException("GenerateKey not supported.")
     }
     protected open fun onGenerateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
-        throw SdkLog.error("GenerateKeyPair not supported.")
+        throw UnSupportedOperationException("GenerateKeyPair not supported.")
     }
     protected open fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        throw SdkLog.error("Sign not supported.")
+        throw UnSupportedOperationException("Sign not supported.")
     }
     protected open fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        throw SdkLog.error("Verify not supported.")
+        throw UnSupportedOperationException("Verify not supported.")
     }
     protected open fun onEncrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        throw SdkLog.error("Encrypt not supported.")
+        throw UnSupportedOperationException("Encrypt not supported.")
     }
     protected open fun onDecrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        throw SdkLog.error("Decrypt not supported.")
+        throw UnSupportedOperationException("Decrypt not supported.")
     }
     protected open fun onDeriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
-        throw SdkLog.error("DeriveBits not supported.")
+        throw UnSupportedOperationException("DeriveBits not supported.")
     }
     protected open fun onExportKey(format: KeyFormat, key: CryptoKey): ByteArray {
-        throw SdkLog.error("ExportKey not supported.")
+        throw UnSupportedOperationException("ExportKey not supported.")
     }
     protected open fun onExportKeyJwk(key: CryptoKey): JsonWebKey {
-        throw SdkLog.error("ExportKeyJwk not supported.")
+        throw UnSupportedOperationException("ExportKeyJwk not supported.")
     }
     protected open fun onImportKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm,
                               extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        throw SdkLog.error("ImportKey not supported.")
+        throw UnSupportedOperationException("ImportKey not supported.")
     }
     protected open fun onImportKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm,
                                    extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        throw SdkLog.error("ImportKey not supported.")
+        throw UnSupportedOperationException("ImportKey not supported.")
     }
     protected open fun checkGenerateKeyParams(algorithm: Algorithm) {
-        throw SdkLog.error("GenerateKey params check not implemented")
+        throw UnSupportedOperationException("GenerateKey params check not implemented")
     }
-    public open fun checkDerivedKeyParams(algorithm: Algorithm) {
-        throw SdkLog.error("DerivedKey params check not implemented")
+    open fun checkDerivedKeyParams(algorithm: Algorithm) {
+        throw UnSupportedOperationException("DerivedKey params check not implemented")
     }
 
-    public fun digest(algorithm: Algorithm, data: ByteArray): ByteArray {
+    fun digest(algorithm: Algorithm, data: ByteArray): ByteArray {
         checkDigest(algorithm)
         return this.onDigest(algorithm, data)
     }
-    public fun generateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
+    fun generateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
         checkGenerateKey(algorithm, extractable, keyUsages)
         return onGenerateKey(algorithm, extractable, keyUsages)
     }
-    public fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
+    fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
         checkGenerateKey(algorithm, extractable, keyUsages)
         return onGenerateKeyPair(algorithm, extractable, keyUsages)
     }
-    public fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+    fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         checkSign(algorithm, key)
         return onSign(algorithm, key, data)
     }
-    public fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
+    fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         checkVerify(algorithm, key)
         return onVerify(algorithm, key, signature, data)
     }
-    public fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+    fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         checkEncrypt(algorithm, key)
         return onEncrypt(algorithm, key, data)
     }
-    public fun decrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+    fun decrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         checkDecrypt(algorithm, key)
         return onDecrypt(algorithm, key, data)
     }
-    public fun deriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
+    fun deriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
         checkDeriveBits(algorithm, baseKey, length)
         return  onDeriveBits(algorithm, baseKey, length)
     }
-    public fun exportKey(format: KeyFormat, key: CryptoKey): ByteArray {
+    fun exportKey(format: KeyFormat, key: CryptoKey): ByteArray {
         checkExportKey(format, key)
         return onExportKey(format, key)
     }
-    public fun exportKeyJwk(key: CryptoKey): JsonWebKey {
+    fun exportKeyJwk(key: CryptoKey): JsonWebKey {
         checkExportKey(KeyFormat.Jwk, key)
         return onExportKeyJwk(key)
     }
-    public fun importKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm, extractable: Boolean,
+    fun importKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
         if (format == KeyFormat.Jwk) {
             throw KeyFormatException("KeyData does not match format")
@@ -106,7 +107,7 @@ abstract class Provider {
         checkImportKey(format, algorithm, extractable, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
     }
-    public fun importKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm, extractable: Boolean,
+    fun importKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm, extractable: Boolean,
                          keyUsages: Set<KeyUsage>): CryptoKey {
         if (format != KeyFormat.Jwk) {
             throw KeyFormatException("KeyData does not match format")
@@ -198,7 +199,7 @@ abstract class Provider {
         }
     }
 
-    public open fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
+    open fun checkCryptoKey(key: CryptoKey, keyUsage: KeyUsage) {
         checkAlgorithmName(key.algorithm)
         if (!key.usages.contains(keyUsage)) {
             throw KeyException("Key does not allow ${keyUsage.name}")

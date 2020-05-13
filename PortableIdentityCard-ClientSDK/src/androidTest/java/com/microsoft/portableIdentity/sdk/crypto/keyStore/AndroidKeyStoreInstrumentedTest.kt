@@ -18,6 +18,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaHashedKeyAlgorithm
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -76,7 +77,7 @@ class AndroidKeyStoreInstrumentedTest {
     @Test
     fun invalidKeyReferenceTest() {
         val nonExistingPublicKeyRef = "kid1"
-        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(RuntimeException::class.java)
+        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(KeyStoreException::class.java)
     }
 
     @Test
@@ -122,7 +123,12 @@ class AndroidKeyStoreInstrumentedTest {
 
     @Test
     fun saveAndGetSecretKeyTest() {
-        val secretKey = SecretKey(stringToByteArray("testsecretkey1"))
+        val secretKey = SecretKey(
+            JsonWebKey(
+                kty = KeyType.Octets.value,
+                kid = "#$keyRef.1"
+            )
+        )
         keyStore.save(keyRef, secretKey)
         val actualSecretKey = keyStore.getSecretKey(keyRef)
         assertThat(actualSecretKey.keys.firstOrNull()).isEqualToComparingFieldByFieldRecursively(secretKey)
@@ -130,7 +136,12 @@ class AndroidKeyStoreInstrumentedTest {
 
     @Test
     fun getSecretKeyByIdTest() {
-        val secretKey = SecretKey(stringToByteArray("testsecretkey2"))
+        val secretKey = SecretKey(
+            JsonWebKey(
+                kty = KeyType.Octets.value,
+                kid = "#secret.2"
+            )
+        )
         keyStore.save("secret", secretKey)
         val actualSecretKey = keyStore.getSecretKeyById(secretKey.kid)
         assertThat(actualSecretKey).isEqualToComparingFieldByFieldRecursively(secretKey)
