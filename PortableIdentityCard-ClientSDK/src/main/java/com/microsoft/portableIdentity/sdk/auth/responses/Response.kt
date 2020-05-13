@@ -33,40 +33,48 @@ sealed class Response(open val request: Request, val audience: String) {
         collectedSelfIssued[field] = claim
     }
 
-    fun getIdTokenBindings(): Map<String, String> {
-        return collectedTokens
-    }
-
-    fun getSelfIssuedClaimBindings(): Map<String, String> {
-        return collectedSelfIssued
-    }
-
     fun addCard(card: PortableIdentityCard, type: String) {
         collectedCards[type] = card
     }
 
-    fun getCardBindings(): Map<String, PortableIdentityCard> {
+    fun getCollectedIdTokens(): Map<String, String>? {
+        if (collectedTokens.isEmpty()) {
+            return null
+        }
+        return collectedTokens
+    }
+
+    fun getCollectedSelfIssuedClaims(): Map<String, String>? {
+        if (collectedSelfIssued.isEmpty()) {
+            return null
+        }
+        return collectedSelfIssued
+    }
+
+    fun getCollectedCards(): Map<String, PortableIdentityCard>? {
+        if (collectedCards.isEmpty()) {
+            return null
+        }
         return collectedCards
     }
 
-    fun createReceiptsForPresentedCredentials(requestToken: String, entityDid: String, entityHostName: String, entityName: String): List<Receipt> {
+    fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().id, entityDid, entityHostName, entityName, requestToken)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityHostName: String, entityName: String, requestToken: String): Receipt {
+    private fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String): Receipt {
         val date = System.currentTimeMillis()
-        return Receipt(action = action,
+        return Receipt(
+            action = action,
             cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,
-            entityHostName = entityHostName,
-            entityName = entityName,
-            token = requestToken)
+            entityName = entityName)
     }
 }
 

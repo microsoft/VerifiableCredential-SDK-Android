@@ -6,7 +6,6 @@
 package com.microsoft.portableIdentity.sdk.auth.models.contracts.display
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 /**

@@ -9,13 +9,19 @@ open class PortableIdentitySdkException(message: String? = null, cause: Throwabl
 
 open class CryptoException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
+class KeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
+class PairwiseKeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+
 class IdentifierCreatorException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
 
 open class AuthenticationException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 
 class PresentationException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
-class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+open class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+
+class PairwiseIssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
 class ValidatorException(message: String? = null, cause: Throwable? = null) : PortableIdentitySdkException(message, cause)
 

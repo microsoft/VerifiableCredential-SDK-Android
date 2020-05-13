@@ -8,7 +8,7 @@ package com.microsoft.portableIdentity.sdk.auth.models.oidc
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AttestationResponse(
+data class AttestationClaimModel(
         val selfIssued: Map<String, String>? = null,
 
         val idTokens: Map<String, String>? = null,
