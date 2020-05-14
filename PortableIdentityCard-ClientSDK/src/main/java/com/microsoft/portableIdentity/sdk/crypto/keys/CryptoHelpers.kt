@@ -7,6 +7,7 @@ package com.microsoft.portableIdentity.sdk.crypto.keys
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import java.util.*
 
 object CryptoHelpers {
@@ -89,7 +90,7 @@ object CryptoHelpers {
                     "format" to "DER"
                 )
             )
-            else -> error("Algorithm $jwa is not supported")
+            else -> throw AlgorithmException("Algorithm $jwa is not supported")
         }
     }
 

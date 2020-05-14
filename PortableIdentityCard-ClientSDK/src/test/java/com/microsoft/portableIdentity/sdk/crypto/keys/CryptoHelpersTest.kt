@@ -1,5 +1,6 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -35,7 +36,7 @@ class CryptoHelpersTest {
         val actualAlgorithmName = "SHA-888"
         assertThatThrownBy {
             CryptoHelpers.jwaToWebCrypto(actualAlgorithmName).name
-        }.isInstanceOf(IllegalStateException::class.java)
+        }.isInstanceOf(AlgorithmException::class.java)
     }
 
     //TODO: Check for AesGcm128 or AesGcm192 or AesGcm256

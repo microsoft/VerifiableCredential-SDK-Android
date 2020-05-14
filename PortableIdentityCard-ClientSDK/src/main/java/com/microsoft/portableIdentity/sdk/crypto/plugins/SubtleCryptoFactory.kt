@@ -1,7 +1,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.plugins
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.CryptoException
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
@@ -218,6 +218,6 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
                 return closeEnoughScope.first().subtleCrypto
             }
         }
-        throw SdkLog.error("Could not find SubtleCrypto of appropriate scope")
+        throw CryptoException("Could not find SubtleCrypto of appropriate scope")
     }
 }
