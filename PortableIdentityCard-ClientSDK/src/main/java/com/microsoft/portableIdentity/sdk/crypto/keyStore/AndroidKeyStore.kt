@@ -300,6 +300,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         editor.apply()
     }
 
+    @TargetApi(23)
     private fun getSharedPreferences(): SharedPreferences {
         val masterKeyAlias = getSecretVaultMasterKey()
         return EncryptedSharedPreferences.create(
