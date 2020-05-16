@@ -18,7 +18,7 @@ data class Identifier (
     val signatureKeyReference: String,
     val encryptionKeyReference: String,
     val recoveryKeyReference: String,
-    val nextUpdateCommitmentHash: String,
-    val nextRecoveryCommitmentHash: String,
+    val nextUpdateReveal: String,
+    val nextRecoveryReveal: String,
     val name: String
 )
