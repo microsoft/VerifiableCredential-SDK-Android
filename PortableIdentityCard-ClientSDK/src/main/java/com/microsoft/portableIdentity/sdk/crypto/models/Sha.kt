@@ -2,7 +2,7 @@ package com.microsoft.portableIdentity.sdk.crypto.models
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 
 
 // convenience class for SHA algorithms
@@ -30,7 +30,7 @@ class Sha(algorithm: Algorithm) {
                 256 -> Sha256
                 384 -> Sha384
                 512 -> Sha512
-                else -> throw SdkLog.error("No SHA at this length.")
+                else -> throw AlgorithmException("No SHA at this length.")
             }
         }
     }

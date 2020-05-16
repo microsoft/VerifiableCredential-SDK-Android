@@ -5,8 +5,8 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
-import java.util.*
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
+import java.util.Locale
 
 /**
  * Factory class to create @enum KeyType objects
@@ -21,7 +21,7 @@ object KeyTypeFactory {
             "hmac" -> KeyType.Octets
             "ecdsa", "ecdh" -> KeyType.EllipticCurve;
             "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA;
-            else -> error("The algorithm '${algorithm.name}' is not supported");
+            else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported");
         }
     }
 
@@ -31,6 +31,6 @@ object KeyTypeFactory {
      */
     fun createViaJwa (algorithm: String): KeyType {
         val alg = CryptoHelpers.jwaToWebCrypto(algorithm);
-        return KeyTypeFactory.createViaWebCrypto(alg);
+        return createViaWebCrypto(alg);
     }
 }

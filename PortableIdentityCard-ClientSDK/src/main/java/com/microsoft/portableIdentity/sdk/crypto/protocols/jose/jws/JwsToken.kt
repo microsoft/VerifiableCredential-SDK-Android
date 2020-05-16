@@ -8,6 +8,8 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.*
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureException
 import java.util.*
 import kotlin.collections.Map
 
@@ -25,43 +27,48 @@ class JwsToken private constructor(private val payload: String,
         fun deserialize(jws: String, serializer: Serializer): JwsToken {
             val compactRegex = Regex("([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)")
             val compactMatches = compactRegex.matchEntire(jws.trim())
-            if (compactMatches != null) {
-                // compact JWS format
-                println("Compact format detected")
-                val protected = compactMatches.groupValues[1]
-                val payload = compactMatches.groupValues[2]
-                val signature = compactMatches.groupValues[3]
-                val jwsSignatureObject = JwsSignature(
-                    protected = protected,
-                    header =  null,
-                    signature = signature
-                )
-                return JwsToken(payload, listOf(jwsSignatureObject), serializer)
-            } else if (jws.toLowerCase(Locale.ENGLISH).contains("\"signatures\"")) { // check for signature or signatures
-                // GENERAL
-                println("General format detected")
-                val token = serializer.parse(JwsGeneralJson.serializer(), jws)
-                return JwsToken(
-                    payload = token.payload,
-                    signatures = token.signatures,
-                    serializer = serializer
-                )
-            } else if (jws.toLowerCase(Locale.ENGLISH).contains("\"signature\"")) {
-                // Flat
-                println("Flat format detected")
-                val token = serializer.parse(JwsFlatJson.serializer(), jws)
-                return JwsToken(
-                    payload = token.payload,
-                    signatures = listOf(JwsSignature(
-                        protected = token.protected,
-                        header = token.header,
-                        signature = token.signature
-                    )),
-                    serializer = serializer
-                )
-            } else {
-                // Unidentifiable garbage
-                throw SdkLog.error("Unable to parse JWS token.")
+            when {
+                compactMatches != null -> {
+                    // compact JWS format
+                    println("Compact format detected")
+                    val protected = compactMatches.groupValues[1]
+                    val payload = compactMatches.groupValues[2]
+                    val signature = compactMatches.groupValues[3]
+                    val jwsSignatureObject = JwsSignature(
+                        protected = protected,
+                        header =  null,
+                        signature = signature
+                    )
+                    return JwsToken(payload, listOf(jwsSignatureObject), serializer)
+                }
+                jws.toLowerCase(Locale.ENGLISH).contains("\"signatures\"") -> { // check for signature or signatures
+                    // GENERAL
+                    println("General format detected")
+                    val token = serializer.parse(JwsGeneralJson.serializer(), jws)
+                    return JwsToken(
+                        payload = token.payload,
+                        signatures = token.signatures,
+                        serializer = serializer
+                    )
+                }
+                jws.toLowerCase(Locale.ENGLISH).contains("\"signature\"") -> {
+                    // Flat
+                    println("Flat format detected")
+                    val token = serializer.parse(JwsFlatJson.serializer(), jws)
+                    return JwsToken(
+                        payload = token.payload,
+                        signatures = listOf(JwsSignature(
+                            protected = token.protected,
+                            header = token.header,
+                            signature = token.signature
+                        )),
+                        serializer = serializer
+                    )
+                }
+                else -> {
+                    // Unidentifiable garbage
+                    throw SignatureException("Unable to parse JWS token.")
+                }
             }
         }
     }
@@ -87,7 +94,7 @@ class JwsToken private constructor(private val payload: String,
                 serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
             else -> {
-                throw SdkLog.error("Unknown JWS format: $format")
+                throw SignatureException("Unknown JWS format: $format")
             }
         }
     }
@@ -111,7 +118,7 @@ class JwsToken private constructor(private val payload: String,
     }
 
     private fun intermediateFlatJsonSerialize(): JwsFlatJson {
-        val signature = this.signatures.firstOrNull() ?: throw SdkLog.error("This JWS token contains no signatures")
+        val signature = this.signatures.firstOrNull() ?: throw SignatureException("This JWS token contains no signatures")
         return JwsFlatJson(
             protected = signature.protected,
             header = signature.header,
@@ -122,7 +129,7 @@ class JwsToken private constructor(private val payload: String,
 
     private fun intermediateGeneralJsonSerialize(): JwsGeneralJson {
         if (this.signatures.count() == 0) {
-            throw SdkLog.error("This JWS token contains no signatures")
+            throw SignatureException("This JWS token contains no signatures")
         }
         return JwsGeneralJson(
             payload = this.payload,
@@ -151,7 +158,7 @@ class JwsToken private constructor(private val payload: String,
                 algorithmName = signingKey.alg!!
                 protected[JoseConstants.Alg.value] = algorithmName
             } else {
-                throw SdkLog.error("No algorithm defined for key $signingKeyReference")
+                throw KeyException("No algorithm defined for key $signingKeyReference")
             }
         } else {
             algorithmName = headers[JoseConstants.Alg.value]!!
@@ -233,7 +240,7 @@ class JwsToken private constructor(private val payload: String,
     }
 
     private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
-        val alg = signature.getAlg(serializer) ?: throw SdkLog.error("This signature contains no algorithm.")
+        val alg = signature.getAlg(serializer) ?: throw SignatureException("This signature contains no algorithm.")
         val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg)
         val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.Public)
         val cryptoKey = subtle.importKey(KeyFormat.Jwk, key.toJWK(), subtleAlg,

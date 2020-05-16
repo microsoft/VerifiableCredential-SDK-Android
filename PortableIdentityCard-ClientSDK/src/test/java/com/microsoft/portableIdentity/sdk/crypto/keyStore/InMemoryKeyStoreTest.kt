@@ -8,10 +8,10 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaOaepPara
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
-import java.lang.RuntimeException
 
 class InMemoryKeyStoreTest {
     private val inMemoryKeyStore = InMemoryKeyStore()
@@ -108,7 +108,7 @@ class InMemoryKeyStoreTest {
     @Test
     fun `fail retrieve public key`() {
         val nonExistingPublicKeyRef = "kid1"
-        assertThatThrownBy { inMemoryKeyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(RuntimeException::class.java)
+        assertThatThrownBy { inMemoryKeyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(KeyStoreException::class.java)
     }
 
     @Test

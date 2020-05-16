@@ -18,7 +18,7 @@ import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaHashedKeyAlgorithm
 import com.microsoft.portableIdentity.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
-import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -76,7 +76,7 @@ class AndroidKeyStoreInstrumentedTest {
     @Test
     fun invalidKeyReferenceTest() {
         val nonExistingPublicKeyRef = "kid1"
-        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(RuntimeException::class.java)
+        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(KeyStoreException::class.java)
     }
 
     @Test
@@ -111,13 +111,13 @@ class AndroidKeyStoreInstrumentedTest {
     fun checkOrCreateKidTest() {
         keyStore.save(keyRef, actualPrivateKey)
         val kid = keyStore.checkOrCreateKeyId(keyRef, null)
-        assertThat(kid).startsWith("#$keyRef.")
+        assertThat(kid).startsWith("#${keyRef}_")
     }
 
     @Test
     fun checkOrCreateKidFirstKeyTest() {
         val kid = keyStore.checkOrCreateKeyId(keyRef, null)
-        assertThat(kid).startsWith("#$keyRef.1")
+        assertThat(kid).startsWith("#${keyRef}_1")
     }
 
     @Test
@@ -125,7 +125,7 @@ class AndroidKeyStoreInstrumentedTest {
         val secretKey = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
-                kid = "#$keyRef.1"
+                kid = "#${keyRef}_1"
             )
         )
         keyStore.save(keyRef, secretKey)
@@ -138,7 +138,7 @@ class AndroidKeyStoreInstrumentedTest {
         val secretKey = SecretKey(
             JsonWebKey(
                 kty = KeyType.Octets.value,
-                kid = "#secret.2"
+                kid = "#secret_2"
             )
         )
         keyStore.save("secret", secretKey)

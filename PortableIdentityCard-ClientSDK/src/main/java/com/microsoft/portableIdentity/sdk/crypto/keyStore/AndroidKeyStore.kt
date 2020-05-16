@@ -14,6 +14,8 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurv
 import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.utilities.*
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject
@@ -32,15 +34,15 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
         val softwareKeys = listSecureData()
-        val key = softwareKeys[keyReference] ?: throw SdkLog.error("Key $keyReference not found")
+        val key = softwareKeys[keyReference] ?: throw KeyStoreException("Key $keyReference not found")
         if (key.kty != KeyType.Octets) {
-            throw SdkLog.error("Key $keyReference (type ${key.kty.value}) is not a secret.")
+            throw KeyException("Key $keyReference (type ${key.kty.value}) is not a secret.")
         }
 
         return KeyContainer(
             kty = key.kty,
             keys = key.kids.map{
-                getSecureSecretkey(it)!!
+                getSecureSecretKey(it)!!
             }
         )
     }
@@ -66,7 +68,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 }
             )
         }
-        throw SdkLog.error("Key $keyReference not found")
+        throw KeyStoreException("Key $keyReference not found")
     }
 
     override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
@@ -77,7 +79,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 kty = key.kty,
                 keys = key.kids.map {
                     val entry = keyStore.getCertificate(it).publicKey
-                        ?: throw SdkLog.error("Key $it is not a private key.")
+                        ?: throw KeyException("Key $it is not a private key.")
                     AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry)
                 }
             )
@@ -92,7 +94,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 }
             )
         }
-        throw SdkLog.error("Key $keyReference not found")
+        throw KeyStoreException("Key $keyReference not found")
     }
 
     override fun getSecretKeyById(keyId: String): SecretKey? {
@@ -122,7 +124,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val nativeKeys = listNativeKeys()
         var keyRef = findReferenceInList(nativeKeys, keyId)
         if (!keyRef.isNullOrBlank()) { // This keyID exists within the android keystore
-            val entry = keyStore.getCertificate(keyId).publicKey ?: throw SdkLog.error("Key $keyId is not a private key.")
+            val entry = keyStore.getCertificate(keyId).publicKey ?: throw KeyException("Key $keyId is not a private key.")
             return AndroidKeyConverter.androidPublicKeyToPublicKey(keyId, entry)
         }
         val softwareKeys = listSecureData()
@@ -137,7 +139,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val nativeKeys = listNativeKeys()
         var keyRef = findReferenceInList(nativeKeys, keyId)
         if (!keyRef.isNullOrBlank()) {
-            AndroidKeyStore.keyStore.deleteEntry(keyId)
+            keyStore.deleteEntry(keyId)
             return
         }
         val softwareKeys = listSecureData()
@@ -184,7 +186,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
             // do nothing, the key is already there.
             return
         }
-        throw SdkLog.error("Why are you even saving a public key; this makes no sense. Rethink your life.")
+        throw KeyException("Why are you even saving a public key; this makes no sense. Rethink your life.")
     }
 
     override fun list(): Map<String, KeyStoreListItem> {
@@ -211,7 +213,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 if (output.containsKey(values[1])) {
                     val listItem = output[values[1]]!!
                     if (listItem.kty != kty) {
-                        throw SdkLog.error("Key Container ${values[1]} contains keys of two different " +
+                        throw KeyStoreException("Key Container ${values[1]} contains keys of two different " +
                                 "types (${listItem.kty.value}, ${kty.value})")
                     }
                     listItem.kids.add(alias)
@@ -242,7 +244,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 } else {
                     val listItem = keyMap[keyRef]!!
                     if (keyType != listItem.kty) {
-                        throw SdkLog.error("Key $keyRef has two different key types (${keyType.value}, ${listItem.kty.value})")
+                        throw KeyStoreException("Key $keyRef has two different key types (${keyType.value}, ${listItem.kty.value})")
                     }
                     listItem.kids.add(it)
                     keyMap[keyRef] = listItem
@@ -264,15 +266,15 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         } else if (jwk.kty == KeyType.EllipticCurve.value) {
             return EllipticCurvePrivateKey(jwk)
         } else {
-            throw SdkLog.error("Unknown key type ${jwk.kty}")
+            throw KeyException("Unknown key type ${jwk.kty}")
         }
     }
 
-    private fun getSecureSecretkey(alias: String): SecretKey? {
+    private fun getSecureSecretKey(alias: String): SecretKey? {
         val data = getSecureData(alias) ?: return null
         val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty != KeyType.Octets.value) {
-            throw SdkLog.error("$alias is not a secret key.")
+            throw KeyException("$alias is not a secret key.")
         }
         return SecretKey(jwk)
     }
@@ -334,7 +336,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     //TODO: Modify kid derived from key reference to not use . and not begin with #. It should be Base64url charset for sidetree registration to work with these as ids
     fun checkOrCreateKeyId(keyReference: String, kid: String?): String {
         if (!kid.isNullOrBlank() && !kid.startsWith(keyReference) && !kid.startsWith("#$keyReference")) {
-            throw SdkLog.error("Key ID must begin with key reference")
+            throw KeyStoreException("Key ID must begin with key reference")
             // This could be relaxed later if we flush keys and use a format of
             // KEYREFERENCE.KEYID and ensure KEYID does not contain the dot delimiter
         }
@@ -368,5 +370,4 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
             }
         }
     }
-
 }

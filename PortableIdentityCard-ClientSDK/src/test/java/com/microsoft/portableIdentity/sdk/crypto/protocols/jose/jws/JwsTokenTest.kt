@@ -4,6 +4,7 @@ import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.InMemoryKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keys.MockPrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.MockPublicKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
@@ -24,11 +25,12 @@ class JwsTokenTest {
  "http://example.com/is_root":true}"""
 
     private val serializer = Serializer()
+    private val ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
 
     init {
         /* This is the payload used for all the operations below */
         subtle = Subtle(setOf(MockProvider()), serializer)
-        crypto = CryptoOperations(subtle, keyStore)
+        crypto = CryptoOperations(subtle, keyStore, ellipticCurvePairwiseKey)
         keyRef = Base64Url.encode(Random.nextBytes(8))
         val keyPair = subtle.generateKeyPair(
             RsaOaepParams(),
