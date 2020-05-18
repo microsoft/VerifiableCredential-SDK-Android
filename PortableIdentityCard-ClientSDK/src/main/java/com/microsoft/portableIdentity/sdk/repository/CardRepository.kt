@@ -114,8 +114,9 @@ class CardRepository @Inject constructor(
 
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<Unit> {
 
-        val request = RevocationRequest(response.getCollectedCards()?.entries?.first()?.value?.verifiableCredential, "reason", listOf("did:ion:test", "did:ion:relyingparty2"))
-        val formatted = sendRevocationRequest(request, responder)
+        val collectedCard = response.getCollectedCards()?.entries?.first()?.value
+        val request = RevocationRequest(collectedCard?.verifiableCredential, "reason", listOf("did:ion:test", "did:ion:relyingparty2"))
+        val formatted = sendRevocationRequest(request, collectedCard!!.owner)
 
         val formattedResponse = formatter.format(
             responder = responder,
