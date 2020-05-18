@@ -17,8 +17,8 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcRequestPresentationRequestValidator @Inject constructor(private val jwsValidator: JwsValidator,
-                                                                  private val serializer: Serializer) : PresentationRequestValidator {
+class OidcPresentationRequestValidator @Inject constructor(private val jwsValidator: JwsValidator,
+                                                           private val serializer: Serializer) : PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
         val token = JwsToken.deserialize(request.serializedToken, serializer)
