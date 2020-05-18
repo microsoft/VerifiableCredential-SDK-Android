@@ -5,9 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.models.attestations
 
-import com.microsoft.portableIdentity.sdk.utilities.Constants.CLIENT_ID
-import com.microsoft.portableIdentity.sdk.utilities.Constants.REDIRECT_URL
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
