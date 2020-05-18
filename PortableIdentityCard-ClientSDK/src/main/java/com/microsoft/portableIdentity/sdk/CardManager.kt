@@ -13,11 +13,10 @@ import com.microsoft.portableIdentity.sdk.auth.requests.*
 import com.microsoft.portableIdentity.sdk.auth.responses.IssuanceResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.responses.Response
-import com.microsoft.portableIdentity.sdk.auth.validators.Validator
+import com.microsoft.portableIdentity.sdk.auth.validators.PresentationRequestValidator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.CardRepository
@@ -37,7 +36,7 @@ import javax.inject.Singleton
 class CardManager @Inject constructor(
     private val picRepository: CardRepository,
     private val serializer: Serializer,
-    private val validator: Validator
+    private val presentationRequestValidator: PresentationRequestValidator
 ) {
 
     /**
@@ -102,11 +101,14 @@ class CardManager @Inject constructor(
      *
      * @param request to be validated.
      *
-     * @return Result.Success true, if request is valid, false if it is not valid.
+     * @return Result.Success unit, if no validation exceptions were thrown.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun isValid(request: PresentationRequest): Result<Boolean> {
-        return validator.validate(request)
+    suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
+        return runResultTry {
+            presentationRequestValidator.validate(request)
+            Result.Success(Unit)
+        }
     }
 
     fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
@@ -154,7 +156,7 @@ class CardManager @Inject constructor(
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                picRepository.sendPresentationResponse(response, responder)
+                picRepository.sendPresentationResponse(response, responder, expiresInMinutes)
                 createAndSaveReceipt(response)
                 Result.Success(Unit)
             }

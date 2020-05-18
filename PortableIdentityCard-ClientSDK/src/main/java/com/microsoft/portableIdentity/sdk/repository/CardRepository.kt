@@ -110,7 +110,7 @@ class CardRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier): Result<Unit> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int): Result<Unit> {
         val formattedResponse = formatter.format(
             responder = responder,
             audience = response.audience,
@@ -119,7 +119,7 @@ class CardRepository @Inject constructor(
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             nonce = response.request.content.nonce,
             state = response.request.content.state,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+            expiresIn = expiresInMinutes
         )
         return SendPresentationResponseNetworkOperation(
             response.audience,
@@ -148,18 +148,15 @@ class CardRepository @Inject constructor(
             audience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
-            requestedSelfIssuedClaims = emptyMap(),
-            requestedIdTokens = emptyMap(),
-            requestedVcs = emptyMap()
-        )
+            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES)
+
         val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             pairwiseRequest.audience,
             formattedPairwiseRequest,
             apiProvider,
             serializer
         ).fire()
-        // we can't return a result here, so need to unwrap
+        // we can't return a result here, so need to unwrap Result
         // TODO(should we allow retries here?)
         return when (pairwiseVerifiableCredentialResult) {
             is Result.Success -> formVerifiableCredential(pairwiseVerifiableCredentialResult.payload, pairwiseRequest.verifiableCredential.picId)

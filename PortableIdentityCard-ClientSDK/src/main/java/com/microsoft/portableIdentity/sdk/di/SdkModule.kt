@@ -8,8 +8,8 @@ package com.microsoft.portableIdentity.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestValidator
-import com.microsoft.portableIdentity.sdk.auth.validators.Validator
+import com.microsoft.portableIdentity.sdk.auth.validators.OidcRequestPresentationRequestValidator
+import com.microsoft.portableIdentity.sdk.auth.validators.PresentationRequestValidator
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.KeyStore
@@ -117,7 +117,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultValidator(validator: OidcRequestValidator): Validator {
+    fun defaultValidator(validator: OidcRequestPresentationRequestValidator): PresentationRequestValidator {
         return validator
     }
 }
