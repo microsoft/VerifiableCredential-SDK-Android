@@ -62,7 +62,8 @@ class IdentifierManager @Inject constructor(
 
     // TODO(create pairwise Identifier based off new key generation algorithm).
     suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
-        return runResultTry {
+        return withContext(Dispatchers.IO) {
+        runResultTry {
             when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
                 null -> {
                     val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
@@ -70,6 +71,7 @@ class IdentifierManager @Inject constructor(
                 }
                 else -> Result.Success(pairwiseIdentifier)
             }
+        }
 
         }
     }
