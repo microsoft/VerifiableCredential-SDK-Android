@@ -44,18 +44,20 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             val alias = Base64Url.encode(Random.nextBytes(2))
             val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
             val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
-            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey)
+            val updateRevealValue = generateCommitmentValue()
+            val recoveryRevealValue = generateCommitmentValue()
+            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(
-                    payloadProcessor,
-                    registrationPayload,
                     identifierLongForm,
                     alias,
                     signatureKeyReference,
                     recoveryKeyReference,
-                    IDENTIFIER_SECRET_KEY_NAME
+                    IDENTIFIER_SECRET_KEY_NAME,
+                    updateRevealValue,
+                    recoveryRevealValue
                 )
             )
         } catch (exception: Exception) {
@@ -81,18 +83,20 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             val recoveryKeyIdForPairwiseKey = "${recoveryKeyReference}_1"
             val signingPublicKey = generateAndSaveKey(alg, peerId, "${alias}_$signingKeyIdForPairwiseKey","${alias}_$signatureKeyReference", personaId, KeyUse.Signature.value)
             val recoveryPublicKey = generateAndSaveKey(alg, peerId, "${alias}_$recoveryKeyIdForPairwiseKey","${alias}_$recoveryKeyReference", personaId, "")
-            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey)
+            val updateRevealValue = generateCommitmentValue()
+            val recoveryRevealValue = generateCommitmentValue()
+            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(
-                    payloadProcessor,
-                    registrationPayload,
                     identifierLongForm,
                     alias,
                     signatureKeyReference,
                     recoveryKeyReference,
-                    pairwiseIdentifierName(peerId)
+                    pairwiseIdentifierName(peerId),
+                    updateRevealValue,
+                    recoveryRevealValue
                 )
             )
         } catch (exception: Exception) {
@@ -131,16 +135,14 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
     }
 
     private fun transformIdentifierDocumentToIdentifier(
-        payloadProcessor: SidetreePayloadProcessor,
-        registrationPayload: RegistrationPayload,
         identifierLongForm: String,
         alias: String,
         signatureKeyReference: String,
         recoveryKeyReference: String,
-        name: String
+        name: String,
+        updateRevealValue: String,
+        recoveryRevealValue: String
     ): Identifier {
-        val nextUpdateCommitmentHash = payloadProcessor.extractNextUpdateCommitmentHash(registrationPayload)
-        val nextRecoveryCommitmentHash = payloadProcessor.extractNextRecoveryCommitmentHash(registrationPayload)
 
         val personaSigKeyRef = "${alias}_$signatureKeyReference"
         val personaRecKeyRef = "${alias}_$recoveryKeyReference"
@@ -151,8 +153,8 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             personaSigKeyRef,
             "",
             personaRecKeyRef,
-            nextUpdateCommitmentHash,
-            nextRecoveryCommitmentHash,
+            updateRevealValue,
+            recoveryRevealValue,
             name
         )
     }
@@ -160,5 +162,9 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
+    }
+
+    private fun generateCommitmentValue(): String {
+        return Base64Url.encode(Random.Default.nextBytes(32))
     }
 }
