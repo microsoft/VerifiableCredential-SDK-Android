@@ -7,6 +7,7 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.SECONDS_IN_A_MINUT
 import com.microsoft.portableIdentity.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
 import java.util.*
@@ -22,8 +23,11 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwsValida
 
     override suspend fun validate(request: PresentationRequest) {
         val token = JwsToken.deserialize(request.serializedToken, serializer)
-        jwsValidator.verifySignature(token)
-        checkTokenExpiration(request.content.exp)
+        if (!jwsValidator.verifySignature(token)) {
+            throw ValidatorException("Signature is not Valid.")
+        }
+        // TODO(check token expiration when implemented in sdk)
+        // checkTokenExpiration(request.content.exp)
         checkRequestParameters(request.content, request.uri)
     }
 

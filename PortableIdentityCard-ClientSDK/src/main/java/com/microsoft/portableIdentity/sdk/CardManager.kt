@@ -48,12 +48,16 @@ class CardManager @Inject constructor(
      *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
-        return runResultTry {
-            val uri = verifyUri(stringUri)
-            val requestToken = getPresentationRequestToken(uri).abortOnError()
-            val tokenContents = serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
-            val request = PresentationRequest(uri, requestToken, tokenContents)
-            Result.Success(request)
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                val uri = verifyUri(stringUri)
+                val requestToken = getPresentationRequestToken(uri).abortOnError()
+                val tokenContents =
+                    serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
+                val request = PresentationRequest(uri, requestToken, tokenContents)
+                isRequestValid(request).abortOnError()
+                Result.Success(request)
+            }
         }
     }
 

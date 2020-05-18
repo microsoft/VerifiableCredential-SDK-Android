@@ -13,6 +13,8 @@ import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,12 +45,12 @@ class JwsValidator @Inject constructor(
     }
 
     private suspend fun resolvePublicKeys(did: String): List<PublicKey> {
-        return when (val requesterDidDocument = resolver.resolve(did)) {
-            is Result.Success -> {
-                val publicKeys = requesterDidDocument.payload.publicKey.map { it.toPublicKey() }
-                publicKeys
+            return when (val requesterDidDocument = resolver.resolve(did)) {
+                is Result.Success -> {
+                    val publicKeys = requesterDidDocument.payload.publicKey.map { it.toPublicKey() }
+                    publicKeys
+                }
+                is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
             }
-            is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
-        }
     }
 }
