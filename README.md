@@ -1,5 +1,4 @@
-[![Build status](https://dev.azure.com/decentralized-identity/Core/_apis/build/status/PICS-client-sdk-android)](https://dev.azure.com/decentralized-identity/Core/_build/latest?definitionId=29)
-
+[![Build Status](https://dev.azure.com/decentralized-identity/Core/_apis/build/status/VerifiableCredential-Android-SDK?branchName=master&jobName=Build)](https://dev.azure.com/decentralized-identity/Core/_build/latest?definitionId=29&branchName=master)
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
