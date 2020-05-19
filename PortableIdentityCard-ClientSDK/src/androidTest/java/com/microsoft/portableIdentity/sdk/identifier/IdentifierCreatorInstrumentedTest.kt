@@ -8,6 +8,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.portableIdentity.sdk.PortableIdentitySdk
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
@@ -99,7 +100,12 @@ class IdentifierCreatorInstrumentedTest {
         val token = JwsToken(testPayload, serializer)
         token.sign(signKey, cryptoOperations)
         assertThat(token.signatures).isNotNull
-        val matched = token.verify(cryptoOperations)
+        val publicKeys: List<PublicKey> =
+        when(val publicKey = cryptoOperations.keyStore.getPublicKeyById("#${signKey}_1")) {
+            null -> emptyList()
+            else -> listOf(publicKey)
+        }
+        val matched = token.verify(cryptoOperations, publicKeys)
         assertThat(matched).isTrue()
     }
 }
