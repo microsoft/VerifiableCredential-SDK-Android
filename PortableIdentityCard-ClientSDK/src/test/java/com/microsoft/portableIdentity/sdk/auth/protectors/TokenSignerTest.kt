@@ -71,7 +71,7 @@ class TokenSignerTest {
     }
 
     @Test
-    fun `Sign Payload`() {
+    fun `sign payload`() {
         val signerSpy = spy(signer)
         doReturn(mockedJwsToken).whenever(signerSpy).makeJwsToken(ArgumentMatchers.anyString())
         `when`<Unit>(mockedJwsToken.sign(ArgumentMatchers.anyString(), eq(mockedCryptoOperations), ArgumentMatchers.anyMap()))
