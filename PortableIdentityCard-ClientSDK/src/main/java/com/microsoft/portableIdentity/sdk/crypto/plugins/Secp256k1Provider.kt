@@ -14,18 +14,10 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureExcepti
 import com.microsoft.portableIdentity.sdk.utilities.printBytes
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
-import org.bitcoin.Secp256k1Context
 import java.security.SecureRandom
 import java.util.*
 
 class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
-    companion object {
-        init {
-            if (!Secp256k1Context.isEnabled()) {
-                System.loadLibrary("secp256k1")
-            }
-        }
-    }
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
