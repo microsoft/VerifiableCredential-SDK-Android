@@ -62,7 +62,7 @@ class OidcResponseFormatterTest {
         randomizeStaticParams()
         setUpGetPublicKey(signingKeyRef, thumbprint)
         setUpIdentifier(signingKeyRef, did)
-        `when`<String>(mockedTokenSigner.signWithIdentifier(ArgumentMatchers.anyString(), com.nhaarman.mockitokotlin2.eq(mockedIdentifier))).thenAnswer { it.arguments[0] }
+        `when`<String>(mockedTokenSigner.signWithIdentifier(ArgumentMatchers.anyString(), eq(mockedIdentifier))).thenAnswer { it.arguments[0] }
     }
 
     private fun randomizeStaticParams() {
