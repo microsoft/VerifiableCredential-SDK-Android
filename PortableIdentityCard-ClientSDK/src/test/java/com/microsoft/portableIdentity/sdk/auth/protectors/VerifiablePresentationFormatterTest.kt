@@ -42,7 +42,6 @@ class VerifiablePresentationFormatterTest {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         formatter = VerifiablePresentationFormatter(serializer, mockedTokenSigner)
-        // setUpIdentifier(signingKeyRef, did)
         `when`<String>(mockedTokenSigner.signWithIdentifier(ArgumentMatchers.anyString(), eq(mockedIdentifier))).thenAnswer { it.arguments[0] }
         `when`<String>(mockedVerifiableCredential.raw).thenReturn(mockedRawVc)
     }

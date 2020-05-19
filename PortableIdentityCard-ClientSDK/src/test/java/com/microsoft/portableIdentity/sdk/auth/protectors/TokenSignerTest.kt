@@ -19,7 +19,7 @@ import kotlin.test.assertEquals
 
 class TokenSignerTest {
 
-    // MOCKS FOR RETRIEVING KID
+    // mocks for retrieving kid.
     @Mock
     lateinit var mockedCryptoOperations: CryptoOperations
     @Mock
@@ -28,8 +28,6 @@ class TokenSignerTest {
     lateinit var mockedKeyContainer: KeyContainer<PrivateKey>
     @Mock
     lateinit var mockedPrivateKey: PrivateKey
-    @Mock
-    lateinit var mockedBase64Url: Base64Url
 
     @Mock
     lateinit var mockedIdentifier: Identifier
