@@ -17,15 +17,11 @@ import org.bitcoin.NativeSecp256k1
 import org.bitcoin.Secp256k1Context
 import java.security.SecureRandom
 import java.util.*
+import org.bouncycastle.util.encoders.Hex
+import org.web3j.crypto.*
+import java.math.BigInteger
 
 class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
-    companion object {
-        init {
-            if (!Secp256k1Context.isEnabled()) {
-                System.loadLibrary("secp256k1")
-            }
-        }
-    }
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
@@ -47,7 +43,9 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val secret = ByteArray(32)
         random.nextBytes(secret)
 
-        val publicKey = NativeSecp256k1.computePubkey(secret)
+//        val publicKey = NativeSecp256k1.computePubkey(secret)
+        val privKey = BigInteger(1, secret.copyOfRange(0, secret.size))
+        val publicKey = Sign.publicKeyFromPrivate(privKey)
 
         val signAlgorithm = EcdsaParams(
             hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.Sha256,
@@ -69,7 +67,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 true,
                 signAlgorithm,
                 publicKeyUsage.toList(),
-                Secp256k1Handle("", publicKey)
+                Secp256k1Handle("", publicKey.toByteArray())
             )
         )
 
