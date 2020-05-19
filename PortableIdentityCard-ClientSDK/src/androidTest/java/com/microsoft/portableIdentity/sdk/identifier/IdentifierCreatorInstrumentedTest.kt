@@ -16,12 +16,17 @@ import com.microsoft.portableIdentity.sdk.crypto.plugins.EllipticCurveSubtleCryp
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
+import com.microsoft.portableIdentity.sdk.utilities.Constants
+import com.microsoft.portableIdentity.sdk.utilities.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.security.MessageDigest
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class IdentifierCreatorInstrumentedTest {
@@ -54,7 +59,7 @@ class IdentifierCreatorInstrumentedTest {
         runBlocking {
             val id = identifierCreator.create("ION")
             if (id is Result.Success)
-                assertThat(id.payload).isNotNull()
+                assertThat(id.payload.name).isEqualTo(Constants.IDENTIFIER_SECRET_KEY_NAME)
         }
     }
 
@@ -70,8 +75,10 @@ class IdentifierCreatorInstrumentedTest {
             val peerId =
                 "did:ion:EiBiTB61bYBPooTMNwhP__A6IiBG1CQ77Cxv-xCL6_ewlg?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlBZkp2c25ZbHoyMHMzMm5yNFRQcGd4WE40LXl4aUJtQ1JGRVFoUEpwTWhMdyIsInJlY292ZXJ5X2tleSI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJhZG1iSE1jMWxSTlFFelIyd0FwVGh4djRjdFdpUnp2eW5YSGNFMWlLUjhFIiwieSI6IjNaSmRZclNBNEpqQ3F5cWphTGQ0Q3d4a0xnN3R5UUgwSWNucXdOenQ4NDgifSwicmVjb3ZlcnlfY29tbWl0bWVudCI6IkVpQkNhazJnV2tiaFVSVXdDM05aWWxMQjZHa2xyUFRON29sOWVVdHRHd1o5V0EifQ.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpRFZnUm01VU1oSVpIdmlVOW55Z3hiUFRQajJFUGhOcHhrTTB1Z1dDQTU3QUEiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJseHNfc2lnbl9JT05fMSIsInR5cGUiOiJFY2RzYVNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkiLCJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoidC1TRXVLd2dlWEh0c0ZBTkE0TTRZSlhtajZXdVUwX1NNbXdxZ1VwaHFxbyIsInkiOiJHR19lMlRqMkhpNUJ2cHk3NVpDX2ZQQlFBMllDdmJxeWNNRVRTMjZhTEJ3In0sInVzYWdlIjpbIm9wcyIsImF1dGgiLCJnZW5lcmFsIl19XX19XX0"
             val pairwiseId = identifierCreator.createPairwiseId(personaId, peerId)
+            val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
+            val expectedPairwiseDidName = Base64Url.encode(digest.digest(stringToByteArray(peerId)))
             if (pairwiseId is Result.Success)
-                assertThat(pairwiseId.payload.id).isNotNull()
+                assertThat(pairwiseId.payload.name).isEqualTo(expectedPairwiseDidName)
         }
     }
 
