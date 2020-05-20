@@ -9,6 +9,7 @@ import android.content.Context
 import com.microsoft.portableIdentity.sdk.di.DaggerSdkComponent
 import com.microsoft.portableIdentity.sdk.utilities.DefaultLogConsumerBridge
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
+import org.bitcoin.Secp256k1Context
 
 /**
  * This class initializes the PortableIdentitySdk. The `init` method has to be called before the members can be accessed.
@@ -51,5 +52,9 @@ object PortableIdentitySdk {
         cardManager = sdkComponent.cardManager()
 
         SdkLog.addConsumer(logConsumerBridge)
+    }
+
+    fun isDeviceModelSupported(): Boolean {
+        return Secp256k1Context.isEnabled()
     }
 }
