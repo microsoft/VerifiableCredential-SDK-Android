@@ -6,7 +6,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.4"
+    toolVersion = "0.8.5"
 }
 
 android {
@@ -21,7 +21,7 @@ android {
     }
     buildTypes {
         debug {
-            testCoverageEnabled (project.hasProperty('coverage'))
+            testCoverageEnabled = project.hasProperty('coverage')
         }
         release {
             minifyEnabled false
@@ -137,7 +137,7 @@ dependencies {
 /**
  * Task that starts all test tasks and merges reports from them into one report.
  */
-task jacocoCoverageReport(type: JacocoReport, dependsOn: ['createDebugCoverageReport', 'test']) {
+task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
     reports {
         xml.enabled = true
         html.enabled = true
@@ -148,11 +148,11 @@ task jacocoCoverageReport(type: JacocoReport, dependsOn: ['createDebugCoverageRe
                             '**/*Subcomponent$Builder.class', '**/*Module_*Factory.class']
     final def debugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
     final def kotlinClasses = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-    final def mainSrc = "src/main/java"
+    final def mainSrc = "$buildDir/src/main/java"
 
-    sourceDirectories = files([mainSrc])
-    classDirectories = files([debugTree, kotlinClasses])
-    executionData = fileTree(dir: "$buildDir", includes: [
-            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/**/*coverage.ec'
-    ])
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree, kotlinClasses]))
+    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+            '**/*.exec', '**/*.ec'
+    ]))
 }
