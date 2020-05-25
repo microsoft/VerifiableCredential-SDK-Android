@@ -2,11 +2,14 @@ package com.microsoft.portableIdentity.sdk.crypto.keyStore
 
 import com.microsoft.portableIdentity.sdk.crypto.keys.MockPrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.MockPublicKey
+import com.microsoft.portableIdentity.sdk.crypto.keys.SecretKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKeyPair
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.RsaOaepParams
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Subtle
+import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
@@ -20,6 +23,7 @@ class InMemoryKeyStoreTest {
     private var keyPair: CryptoKeyPair
     private var actualPublicKey: MockPublicKey
     private var actualPrivateKey: MockPrivateKey
+    private var actualSecretKey: SecretKey
 
     init {
         keyPair = subtle.generateKeyPair(
@@ -29,6 +33,7 @@ class InMemoryKeyStoreTest {
         )
         actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
         actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
+        actualSecretKey = SecretKey(JsonWebKey(k="TestSecretKey1"))
     }
 
     @Test
@@ -47,6 +52,15 @@ class InMemoryKeyStoreTest {
         assertThat(actualPublicKey).isEqualTo(expectedPublicKeyById)
         val expectedPublicByKeyRef = inMemoryKeyStore.getPublicKey(keyRef)
         assertThat(actualPublicKey).isEqualTo(expectedPublicByKeyRef.keys[0])
+    }
+
+    @Test
+    fun `save and retrieve secret key`() {
+        inMemoryKeyStore.save(keyRef, actualSecretKey)
+        val expectedSecretKeyById = inMemoryKeyStore.getSecretKeyById(actualSecretKey.kid)
+        assertThat(actualSecretKey).isEqualTo(expectedSecretKeyById)
+        val expectedSecretByKeyRef = inMemoryKeyStore.getSecretKey(keyRef)
+        assertThat(actualSecretKey).isEqualTo(expectedSecretByKeyRef.keys[0])
     }
 
     @Test
@@ -106,6 +120,18 @@ class InMemoryKeyStoreTest {
     }
 
     @Test
+    fun `save two sets of secret keys with same key reference and retrieve them`() {
+        inMemoryKeyStore.save(keyRef, actualSecretKey)
+
+        actualSecretKey = SecretKey(JsonWebKey(k="TestSecretKeys2"))
+
+        inMemoryKeyStore.save(keyRef, actualSecretKey)
+
+        val expectedSecretKeyByRef = inMemoryKeyStore.getSecretKey(keyRef)
+        assertThat(expectedSecretKeyByRef.keys).contains(actualSecretKey)
+    }
+
+    @Test
     fun `fail retrieve public key`() {
         val nonExistingPublicKeyRef = "kid1"
         assertThatThrownBy { inMemoryKeyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(KeyStoreException::class.java)
@@ -139,5 +165,17 @@ class InMemoryKeyStoreTest {
         assertThat(actualPrivateKey).isEqualTo(expectedPrivateKey)
     }
 
-    //TODO: Add tests for secret key
+    @Test
+    fun `retrieve secret key using key reference`() {
+        inMemoryKeyStore.save(keyRef, actualSecretKey)
+        val expectedSecretKey = inMemoryKeyStore.getSecretKey(keyRef)
+        assertThat(actualSecretKey.k).isEqualTo(expectedSecretKey.keys[0].k)
+    }
+
+    @Test
+    fun `retrieve secret key using key id`() {
+        inMemoryKeyStore.save(keyRef, actualSecretKey)
+        val expectedSecretKey = inMemoryKeyStore.getSecretKeyById(actualSecretKey.kid)
+        assertThat(actualSecretKey).isEqualTo(expectedSecretKey)
+    }
 }
