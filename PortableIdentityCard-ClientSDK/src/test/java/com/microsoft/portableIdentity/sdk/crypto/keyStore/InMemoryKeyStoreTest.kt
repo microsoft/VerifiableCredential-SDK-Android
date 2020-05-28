@@ -122,11 +122,8 @@ class InMemoryKeyStoreTest {
     @Test
     fun `save two sets of secret keys with same key reference and retrieve them`() {
         inMemoryKeyStore.save(keyRef, actualSecretKey)
-
         actualSecretKey = SecretKey(JsonWebKey(k="TestSecretKeys2"))
-
         inMemoryKeyStore.save(keyRef, actualSecretKey)
-
         val expectedSecretKeyByRef = inMemoryKeyStore.getSecretKey(keyRef)
         assertThat(expectedSecretKeyByRef.keys).contains(actualSecretKey)
     }
