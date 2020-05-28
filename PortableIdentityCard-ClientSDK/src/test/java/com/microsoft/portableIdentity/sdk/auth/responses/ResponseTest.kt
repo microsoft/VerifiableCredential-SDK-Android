@@ -10,16 +10,13 @@ import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import io.mockk.every
-import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.junit.Test
 
 class ResponseTest {
     var response: IssuanceResponse
     var request: IssuanceRequest
-    @MockK
-    val attestations: CredentialAttestations = mockk()
-    @MockK
+    private val attestations: CredentialAttestations = mockk()
     var picContract: PicContract = mockk()
     private val entityName = "testEntityName"
     private val entityDid = "testEntityDid"
