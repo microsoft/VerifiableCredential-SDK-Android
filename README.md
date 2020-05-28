@@ -23,7 +23,7 @@ init(
         context: Context, // App Context.
         logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(), // Bridge for logging.
         registrationUrl: String = "", // Registration url for registering Identifier (not needed for MVP)
-        resolverUrl: String = "https://dev.discover.did.msidentity.com/1.0/identifiers" // Resolver url for resolving Identifiers.
+        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers" // Resolver url for resolving Identifiers.
     )
 ```
 

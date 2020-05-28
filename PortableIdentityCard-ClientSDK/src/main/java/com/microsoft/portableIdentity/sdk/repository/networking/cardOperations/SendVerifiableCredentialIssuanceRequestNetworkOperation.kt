@@ -24,10 +24,4 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(url: String, seria
         val rawVerifiableCredential = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
         return Result.Success(rawVerifiableCredential)
     }
-
-    override fun onFailure(response: Response<IssuanceServiceResponse>): Result<Nothing> {
-        val serializedBody = response.errorBody()?.string() ?: throw IssuanceException("Error Body is null")
-        val serviceError = serializer.parse(IssuanceServiceError.serializer(), serializedBody)
-        return Result.Failure(IssuanceException("Server Error: ${serviceError.code} with status code ${serviceError.httpStatusCode}"))
-    }
 }

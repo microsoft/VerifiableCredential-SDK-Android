@@ -6,7 +6,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'jacoco'
 
 jacoco {
-    toolVersion = "0.8.4"
+    toolVersion = "0.8.5"
 }
 
 android {
@@ -21,7 +21,7 @@ android {
     }
     buildTypes {
         debug {
-            testCoverageEnabled (project.hasProperty('coverage'))
+            testCoverageEnabled = project.hasProperty('coverage')
         }
         release {
             minifyEnabled false
@@ -110,6 +110,7 @@ dependencies {
 
     //other
     implementation "androidx.security:security-crypto:1.0.0-beta01" //TODO(downgraded lib until the add google tink bug fix)
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     api 'com.google.guava:guava:28.1-android' // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
     implementation files('libs/org.bitcoin.jar')
@@ -122,10 +123,13 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
 
+    def mockito_version = "3.2.4"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "io.mockk:mockk:1.9.3"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "org.mockito:mockito-inline:$mockito_version"
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:3.11.1"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
@@ -135,7 +139,7 @@ dependencies {
 /**
  * Task that starts all test tasks and merges reports from them into one report.
  */
-task jacocoCoverageReport(type: JacocoReport, dependsOn: ['createDebugCoverageReport', 'test']) {
+task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
     reports {
         xml.enabled = true
         html.enabled = true
@@ -146,11 +150,11 @@ task jacocoCoverageReport(type: JacocoReport, dependsOn: ['createDebugCoverageRe
                             '**/*Subcomponent$Builder.class', '**/*Module_*Factory.class']
     final def debugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
     final def kotlinClasses = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
-    final def mainSrc = "src/main/java"
+    final def mainSrc = "$buildDir/src/main/java"
 
-    sourceDirectories = files([mainSrc])
-    classDirectories = files([debugTree, kotlinClasses])
-    executionData = fileTree(dir: "$buildDir", includes: [
-            'jacoco/testDebugUnitTest.exec', 'outputs/code-coverage/connected/**/*coverage.ec'
-    ])
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree, kotlinClasses]))
+    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+            '**/*.exec', '**/*.ec'
+    ]))
 }

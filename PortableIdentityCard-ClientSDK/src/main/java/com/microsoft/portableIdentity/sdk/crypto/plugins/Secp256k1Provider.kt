@@ -14,7 +14,6 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureExcepti
 import com.microsoft.portableIdentity.sdk.utilities.printBytes
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
-import org.bitcoin.Secp256k1Context
 import java.security.SecureRandom
 import java.util.*
 import org.bouncycastle.util.encoders.Hex
@@ -212,19 +211,16 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     // mapped from secp256k1_eckey_pubkey_parse
     private fun publicToXY(keyData: ByteArray): Pair<String, String> {
         if (keyData.size == 33 && (
-                    keyData[0] == secp256k1Tag.even.byte ||
-                            keyData[0] == secp256k1Tag.odd.byte)
+                keyData[0] == secp256k1Tag.even.byte ||
+                    keyData[0] == secp256k1Tag.odd.byte)
         ) {
             // compressed form
-            return Pair(
-                "",
-                ""
-            )
+            throw KeyFormatException("Compressed Hex format is not supported.")
         } else if (keyData.size == 65 && (
-                    keyData[0] == secp256k1Tag.uncompressed.byte ||
-                            keyData[0] == secp256k1Tag.hybridEven.byte ||
-                            keyData[0] == secp256k1Tag.hybridOdd.byte
-                    )
+                keyData[0] == secp256k1Tag.uncompressed.byte ||
+                    keyData[0] == secp256k1Tag.hybridEven.byte ||
+                    keyData[0] == secp256k1Tag.hybridOdd.byte
+                )
         ) {
             // uncompressed, bytes 1-32, and 33-end are x and y
             val x = keyData.sliceArray(1..32)
