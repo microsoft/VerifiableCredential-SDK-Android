@@ -50,7 +50,16 @@ To get master Identifier
 val identifier = identifierManager.getIdentifier()
 ```
 
-> note: Personas and Pairwise Identifiers to come.
+> note: Personas Identifiers to come.
+
+#### Pairwise Identifiers
+Pairwise Identifier are Identifiers created from four things:
+* An Identifier (in our case, the Master Identifier)
+* A target string (in our case, the relying party DID)
+* The algorithm of the keys that will be generated for the Identifier
+* The key type of the keys that will be generated for the Identifier
+
+Pairwise Identifiers are created for every interaction with a relying party to prevent to Relying Parties from correlating users based off of Identifiers. 
 
 ### Card Manager
 `CardManager` - this class deals with any logic related to Portable Identity Cards such as requesting a card through the Issuance service, presenting Verifiable Credentials back to relying parties, and saving cards.
@@ -60,27 +69,36 @@ Issuance Flow Example:
 // to get a new issuance request from a contract url
 val request = cardManager.getIssuanceRequest(url)
 
-// create and send issuance response.
+// create issuance response.
 val response = cardManager.createIssuanceResponse(request)
-response.addSelfIssuedClaim(claim_field, value)
-response.addIdToken(id_token_configuration_url, collected_idtoken)
-response.addCard(card_type, collected_portable_identity_card)
-val issuedCard = cardManager.sendIssuanceResponse(response, identifier) // identifier to sign response with
-cardManager.saveCard(issuedCard)
+// add requested verifiable credentials to response.
+addCollectedRequirementsToResponse(response, requirementList)
+// get Master Identifier.
+val identifier = identifierManager.getMasterIdentifier()
+// create a pairwise identifier for connection from master identifier and requester's identifier.
+val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
+// send issuance response in order to get a verifiable credential, signed by pairwise identifier. 
+val card = cardManager.sendIssuanceResponse(response, pairwiseIdentifier)
+// save card to database.
+cardManager.saveCard(card)
 ```
 
 Presentation Flow Example:
 ```kotlin
 // to get a new presentation request from a openid:// scanned through QRCode or deeplink
 val request = cardManager.getPresentationRequest(url)
-if (cardManager.isValid(request)) {
-    // create and send presentation response.
-    val response = cardManager.createPresentationResponse(request)
-    response.addSelfIssuedClaim(claim_field, value)
-    response.addCard(card_type, collected_portable_identity_card)
-    cardManager.sendPresentationResponse(response, identifier) // identifier to sign response with
-    cardManager.saveCard(issuedCard)
-}
+
+// create and send presentation response.
+val response = cardManager.createPresentationResponse(request)
+// add requested verifiable credentials to response.
+addCollectedRequirementsToResponse(response, requirementList)
+// get Master Identifier.
+val identifier = identifierManager.getMasterIdentifier()
+// create a pairwise identifier for connection from master identifier and requester's identifier.
+val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
+// send response to relying party the initiated request, signed by pairwise identifier.
+// if successful, create and store receipts of interaction with the relying party for each verifiable credential that was presented.
+cardManager.sendPresentationResponse(response, pairwiseIdentifier)
 ```
 
 Get all saved Portable Identity Cards
@@ -90,23 +108,18 @@ val cards = cardManager.getCards()
 
 > note: Every method is wrapped in a Result object. Unwrapping these returns is not included in these examples to simplify things a bit. (see [Result Class Section](#Result-Class) for more details)
 
-### Formatters and Validators
+### Validator
 
-#### Formatter
-A `Formatter` object takes in a `Response` and creates a token payload based on protocol defined in the `Response`. Then signs the payload with the keys owned by the responder `Identifier`.
-```kotlin
-interface Formatter {
-    fun formAndSignResponse(response: Response, responder: Identifier, expiresIn: Int): Result<String>
-}
-```
+#### OIDC Response Formatter
+A `OidcResponseFormatter` object creates a token payload based on the OpenID Connect Protocol (Self-Issued token) with an addition of a `attestations` claim that is not yet standard. This `attestations` claim contains all verifiable credentials, id-tokens, or self-attested claims that the initial request asked for. Then the payload is signed with the keys owned by the responder `Identifier`.
 
 > note: [OIDC Self-Issued Protocol](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued) is the only protocol we support as of now in the `OidcResponseFormatter` class.
 
-#### Validator 
-`Validator` object takes in a `Request` and validates the request based on protocol.
+#### Presentation Request Validator 
+`PresentationRequestValidator` object takes in a `PresentationRequest` and validates the request based on protocol.
 ```kotlin
-interface Validator {
-    suspend fun validate(request: Request): Result<Unit>
+interface PresentationRequestValidator {
+    suspend fun validate(request: PresentationRequest)
 }
 ```
 
@@ -114,7 +127,7 @@ interface Validator {
 
 
 ### Portable Identity Card Data Model
-Portable Identity Cards are comprised of:
+Portable Identity Cards are simply a container for verifiable credentials and are comprised of:
 * A unique ID
 * A [Verifiable Credential](https://www.w3.org/TR/vc-data-model/)
 * Display information in order to render cards inside of the app.
@@ -133,7 +146,7 @@ data class PortableIdentityCard (
 > note: this data model will change when pairwise feature is implemented.
 
 ### Receipts
-A `Receipt` is created for every card that is presented in a Presentation Flow. The purpose of a `Receipt` is to keep track of when a Portable Identity Card was presented and who that card was presented to.
+A `Receipt` is created for every verifiable credential that is presented. The purpose of a `Receipt` is to keep track of when a verifiable credential was presented and who that vc was presented to.
 
 ```kotlin
 data class Receipt (
@@ -142,16 +155,11 @@ data class Receipt (
     // Issuance or Presentation
     val action: ReceiptAction,
 
-    val token: String,
-
     // did of the verifier/issuer
     val entityIdentifier: String,
 
     // date action occurred
     val activityDate: Long,
-
-    // Host name of verifier/issuer
-    val entityHostName: String,
 
     //Name of the verifier/issuer
     val entityName: String,
