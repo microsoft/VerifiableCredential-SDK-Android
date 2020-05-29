@@ -1,18 +1,12 @@
 [![Build status](https://dev.azure.com/decentralized-identity/Core/_apis/build/status/PICS-client-sdk-android)](https://dev.azure.com/decentralized-identity/Core/_build/latest?definitionId=29)
 
-# Contributing
-
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
-
-When you submit a pull request, a CLA bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and DIDs on the [ION network.](https://github.com/decentralized-identity/ion)
+ 
+# Verifiable Credentials 
+ 
+Verifiable credentials are a [W3C standard format](https://www.w3.org/TR/vc-data-model/) that can be used to validate information about people, organizations, and more. Verifiable credentials put people in control of their personal information, enabling more trustworthy digital experiences while respecting people's privacy. 
+ 
+To learn more about verifiable credentials, please review our [documentation.](https://didproject.azurewebsites.net/docs/verifiable-credentials.html)
 
 # How to use SDK
 
@@ -214,4 +208,16 @@ sealed class Result<out S> {
 If the method was successful, `Result.Success(ReturnType)` is returned.
 If an exception occurred, `Result.Failure(PortableIdentityCardException)` is returned.
 
+# Contributing
 
+This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.
+
+When you submit a pull request, a CLA bot will automatically determine whether you need to provide
+a CLA and decorate the PR appropriately (e.g., status check, comment). Simply follow the instructions
+provided by the bot. You will only need to do this once across all repos using our CLA.
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
+contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
