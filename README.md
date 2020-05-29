@@ -108,7 +108,7 @@ val cards = cardManager.getCards()
 
 > note: Every method is wrapped in a Result object. Unwrapping these returns is not included in these examples to simplify things a bit. (see [Result Class Section](#Result-Class) for more details)
 
-### Validator
+### OIDC Formatter and Validator
 
 #### OIDC Response Formatter
 A `OidcResponseFormatter` object creates a token payload based on the OpenID Connect Protocol (Self-Issued token) with an addition of a `attestations` claim that is not yet standard. This `attestations` claim contains all verifiable credentials, id-tokens, or self-attested claims that the initial request asked for. Then the payload is signed with the keys owned by the responder `Identifier`.
