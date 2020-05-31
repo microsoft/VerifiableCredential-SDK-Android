@@ -33,7 +33,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class IdentifierManager @Inject constructor(
-    private val identifierRepository: IdentifierRepository,
+    val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
     private val identifierCreator: IdentifierCreator
 ) {
