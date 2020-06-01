@@ -32,21 +32,22 @@ class ResponseTest {
         request = IssuanceRequest(picContract, "testContractUrl")
         every { request.contract.input.credentialIssuer } returns credentialIssuer
         response = IssuanceResponse(request)
-        val piCard: PortableIdentityCard = mockk()
-        response.addCard(piCard, "testCard1")
-        every { piCard.cardId } returns cardId
     }
 
     @Test
     fun `test add and get card`() {
-        val suppliedPortableIdentityCard: PortableIdentityCard = mockk()
-        val suppliedCardType = "testCard2"
-        response.addCard(suppliedPortableIdentityCard, suppliedCardType)
+        val suppliedPortableIdentityCard1: PortableIdentityCard = mockk()
+        val suppliedCardType1 = "testCard1"
+        response.addCard(suppliedPortableIdentityCard1, "testCard1")
+        val suppliedPortableIdentityCard2: PortableIdentityCard = mockk()
+        val suppliedCardType2 = "testCard2"
+        response.addCard(suppliedPortableIdentityCard2, suppliedCardType2)
         val actualCollectedCards = response.getCollectedCards()
         val expectedCardCount = 2
         assertThat(actualCollectedCards).isNotNull()
         assertThat(actualCollectedCards?.size).isEqualTo(expectedCardCount)
-        assertThat(actualCollectedCards?.get(suppliedCardType)).isNotNull()
+        assertThat(actualCollectedCards?.get(suppliedCardType2)).isEqualTo(suppliedPortableIdentityCard2)
+        assertThat(actualCollectedCards?.get(suppliedCardType1)).isEqualTo(suppliedPortableIdentityCard1)
     }
 
     @Test
@@ -58,7 +59,7 @@ class ResponseTest {
         val expectedTokenCount = 1
         assertThat(actualCollectedTokens).isNotNull()
         assertThat(actualCollectedTokens?.size).isEqualTo(expectedTokenCount)
-        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)).isNotNull()
+        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)).isEqualTo(suppliedIdToken)
     }
 
     @Test
@@ -70,11 +71,14 @@ class ResponseTest {
         val expectedSelfIssuedClaimCount = 1
         assertThat(actualSelfIssuedClaims).isNotNull()
         assertThat(actualSelfIssuedClaims?.size).isEqualTo(expectedSelfIssuedClaimCount)
-        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)).isNotNull()
+        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)).isEqualTo(suppliedSelfIssuedClaim)
     }
 
     @Test
     fun `test create receipt`() {
+        val piCard: PortableIdentityCard = mockk()
+        response.addCard(piCard, "testCard1")
+        every { piCard.cardId } returns cardId
         val receipts = response.createReceiptsForPresentedCredentials(entityDid, entityName)
         val expectedReceiptCount = 1
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
