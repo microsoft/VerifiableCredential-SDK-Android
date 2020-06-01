@@ -34,7 +34,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class CardManager @Inject constructor(
-    private val picRepository: CardRepository,
+    val picRepository: CardRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator
 ) {

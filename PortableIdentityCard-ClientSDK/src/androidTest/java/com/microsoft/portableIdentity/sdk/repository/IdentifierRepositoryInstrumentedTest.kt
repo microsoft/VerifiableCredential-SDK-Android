@@ -8,6 +8,7 @@ import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
@@ -38,7 +39,7 @@ class IdentifierRepositoryInstrumentedTest {
         every { identifierRepository.insert(identifier) } returns Unit
         every { identifierRepository.queryByIdentifier(identifier.id) } returns identifier
         every { identifierRepository.queryByName("testIdentifierName") } returns identifier
-        every { runBlocking { identifierRepository.resolveIdentifier(any(), any()) } } returns Result.Success(expectedIdentifierDocument)
+        coEvery { identifierRepository.resolveIdentifier(any(), any()) } returns Result.Success(expectedIdentifierDocument)
     }
 
     @Test
