@@ -5,7 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.repository.networking.apis
 
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.PresentationServiceResponse
 import retrofit2.Response
 import retrofit2.http.*
 

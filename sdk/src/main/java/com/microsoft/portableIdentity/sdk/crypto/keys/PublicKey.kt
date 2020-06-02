@@ -7,7 +7,6 @@ import com.microsoft.portableIdentity.sdk.crypto.models.toKeyUse
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.portableIdentity.sdk.utilities.Base64Url
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 
 /**

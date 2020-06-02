@@ -1,7 +1,6 @@
 package com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyFormatException

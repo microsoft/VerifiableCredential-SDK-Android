@@ -1,7 +1,6 @@
 package com.microsoft.portableIdentity.sdk.crypto.keys
 
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 
 abstract class PrivateKey(key: JsonWebKey): PublicKey(key) {
     /**

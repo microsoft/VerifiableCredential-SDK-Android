@@ -5,7 +5,6 @@
 
 package com.microsoft.portableIdentity.sdk.repository
 
-import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.repository.networking.identifierOperations.ResolveIdentifierNetworkOperation

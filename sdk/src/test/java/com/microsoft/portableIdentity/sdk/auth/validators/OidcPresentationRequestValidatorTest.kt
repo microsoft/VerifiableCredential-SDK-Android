@@ -9,7 +9,6 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import org.junit.Before
-import org.junit.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.`when`

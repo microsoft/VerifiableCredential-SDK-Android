@@ -21,7 +21,6 @@ import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.random.Random
 
 @Singleton
 class SidetreePayloadProcessor @Inject constructor(private val serializer: Serializer) {

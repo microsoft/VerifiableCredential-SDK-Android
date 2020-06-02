@@ -11,7 +11,6 @@ import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**

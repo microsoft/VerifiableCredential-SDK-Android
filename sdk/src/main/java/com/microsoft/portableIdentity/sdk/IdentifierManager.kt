@@ -5,9 +5,7 @@
 
 package com.microsoft.portableIdentity.sdk
 
-import androidx.lifecycle.LiveData
 import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.identifier.IdentifierCreator
 import com.microsoft.portableIdentity.sdk.repository.IdentifierRepository
@@ -18,7 +16,6 @@ import com.microsoft.portableIdentity.sdk.utilities.Constants.METHOD_NAME
 import com.microsoft.portableIdentity.sdk.utilities.SdkLog
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.RepositoryException
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.Success
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.runResultTry
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import kotlinx.coroutines.*

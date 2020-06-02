@@ -7,7 +7,6 @@ import com.microsoft.portableIdentity.sdk.crypto.keys.PrivateKey
 import com.microsoft.portableIdentity.sdk.crypto.keys.PublicKey
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
-import com.microsoft.portableIdentity.sdk.utilities.Base64Url
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.whenever

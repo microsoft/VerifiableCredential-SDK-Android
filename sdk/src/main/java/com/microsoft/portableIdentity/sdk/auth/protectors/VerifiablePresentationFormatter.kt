@@ -2,10 +2,7 @@ package com.microsoft.portableIdentity.sdk.auth.protectors
 
 import com.microsoft.portableIdentity.sdk.auth.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.portableIdentity.sdk.auth.models.verifiablePresentation.VerifiablePresentationDescriptor
-import com.microsoft.portableIdentity.sdk.auth.responses.Response
-import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
-import com.microsoft.portableIdentity.sdk.crypto.CryptoOperations
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.utilities.Constants
 import com.microsoft.portableIdentity.sdk.utilities.Serializer

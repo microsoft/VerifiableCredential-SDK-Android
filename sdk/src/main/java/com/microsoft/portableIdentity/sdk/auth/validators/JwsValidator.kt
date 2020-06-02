@@ -13,8 +13,6 @@ import com.microsoft.portableIdentity.sdk.resolvers.Resolver
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ValidatorException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 

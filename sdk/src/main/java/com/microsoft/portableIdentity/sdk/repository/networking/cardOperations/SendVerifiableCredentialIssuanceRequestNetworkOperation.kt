@@ -6,10 +6,6 @@
 package com.microsoft.portableIdentity.sdk.repository.networking.cardOperations
 
 import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceResponse
-import com.microsoft.portableIdentity.sdk.auth.models.serviceResponses.IssuanceServiceError
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredential
-import com.microsoft.portableIdentity.sdk.cards.verifiableCredential.VerifiableCredentialContent
-import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.portableIdentity.sdk.repository.networking.PostNetworkOperation
 import com.microsoft.portableIdentity.sdk.repository.networking.apis.ApiProvider
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
