@@ -23,6 +23,7 @@ sealed class Response(open val request: Request, val audience: String) {
 
     private val collectedTokens: MutableMap<String, String> = mutableMapOf()
 
+    // EXPERIMENTAL
     private val collectedSelfIssued: MutableMap<String, String> = mutableMapOf()
 
     fun addIdToken(configuration: String, token: String) {
