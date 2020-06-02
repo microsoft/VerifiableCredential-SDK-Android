@@ -4,7 +4,6 @@ package com.microsoft.portableIdentity.sdk
 
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
 import com.microsoft.portableIdentity.sdk.auth.requests.PresentationRequest
-import com.microsoft.portableIdentity.sdk.auth.responses.PresentationResponse
 import com.microsoft.portableIdentity.sdk.auth.validators.PresentationRequestValidator
 import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.Receipt
@@ -21,7 +20,7 @@ class CardManagerTest {
     private val cardRepository: CardRepository = mockk()
     private val serializer = Serializer()
     private val presentationRequestValidator: PresentationRequestValidator = mockk()
-    private val cardManager = spyk(CardManager(cardRepository, serializer, presentationRequestValidator), recordPrivateCalls=true)
+    private val cardManager = spyk(CardManager(cardRepository, serializer, presentationRequestValidator))
     private val issuanceRequest: IssuanceRequest = mockk()
     private val portableIdentityCard: PortableIdentityCard = mockk()
     private val responseAudience = "testEndpointToSendIssuanceRequest"
@@ -74,14 +73,12 @@ class CardManagerTest {
             cardManager.createPresentationResponse(presentationRequest)
             cardManager.sendPresentationResponse(any(), any(), any())
             cardRepository.sendPresentationResponse(any(), any(), any())
-            cardManager["createAndSaveReceipt"](allAny<PresentationResponse>())
             presentationResponse.createReceiptsForPresentedCredentials(testEntityDid, testEntityName)
         }
         presentationResponse.getCollectedCards()?.size?.let {
-            coVerify(atMost = it) {
-                cardManager["saveReceipt"](allAny<Receipt>())
+            coVerify(exactly = it) {
+                cardRepository.insert(any<Receipt>())
             }
         }
-        confirmVerified(cardManager)
     }
 }

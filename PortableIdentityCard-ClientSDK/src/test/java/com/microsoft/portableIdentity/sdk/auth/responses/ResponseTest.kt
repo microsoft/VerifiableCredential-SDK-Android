@@ -2,10 +2,6 @@
 
 package com.microsoft.portableIdentity.sdk.auth.responses
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isLessThanOrEqualTo
-import assertk.assertions.isNotNull
 import com.microsoft.portableIdentity.sdk.auth.models.attestations.CredentialAttestations
 import com.microsoft.portableIdentity.sdk.auth.models.contracts.PicContract
 import com.microsoft.portableIdentity.sdk.auth.requests.IssuanceRequest
@@ -13,13 +9,14 @@ import com.microsoft.portableIdentity.sdk.cards.PortableIdentityCard
 import com.microsoft.portableIdentity.sdk.cards.receipts.ReceiptAction
 import io.mockk.every
 import io.mockk.mockk
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ResponseTest {
     var response: IssuanceResponse
     var request: IssuanceRequest
     private val attestations: CredentialAttestations = mockk()
-    var picContract: PicContract = mockk()
+    private var picContract: PicContract = mockk()
     private val entityName = "testEntityName"
     private val entityDid = "testEntityDid"
     private val issuedBy = "testIssuer"
@@ -45,7 +42,7 @@ class ResponseTest {
         response.addCard(suppliedPortableIdentityCard2, suppliedCardType2)
         val actualCollectedCards = response.getCollectedCards()
         val expectedCardCount = 2
-        assertThat(actualCollectedCards).isNotNull()
+        assertThat(actualCollectedCards).isNotNull
         assertThat(actualCollectedCards?.size).isEqualTo(expectedCardCount)
         assertThat(actualCollectedCards?.get(suppliedCardType2)).isEqualTo(suppliedPortableIdentityCard2)
         assertThat(actualCollectedCards?.get(suppliedCardType1)).isEqualTo(suppliedPortableIdentityCard1)
@@ -58,7 +55,7 @@ class ResponseTest {
         response.addIdToken(suppliedIdTokenConfiguration, suppliedIdToken)
         val actualCollectedTokens = response.getCollectedIdTokens()
         val expectedTokenCount = 1
-        assertThat(actualCollectedTokens).isNotNull()
+        assertThat(actualCollectedTokens).isNotNull
         assertThat(actualCollectedTokens?.size).isEqualTo(expectedTokenCount)
         assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)).isEqualTo(suppliedIdToken)
     }
@@ -70,7 +67,7 @@ class ResponseTest {
         response.addSelfIssuedClaim(suppliedSelfIssuedClaimField, suppliedSelfIssuedClaim)
         val actualSelfIssuedClaims = response.getCollectedSelfIssuedClaims()
         val expectedSelfIssuedClaimCount = 1
-        assertThat(actualSelfIssuedClaims).isNotNull()
+        assertThat(actualSelfIssuedClaims).isNotNull
         assertThat(actualSelfIssuedClaims?.size).isEqualTo(expectedSelfIssuedClaimCount)
         assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)).isEqualTo(suppliedSelfIssuedClaim)
     }
@@ -78,6 +75,7 @@ class ResponseTest {
     @Test
     fun `test create receipt by adding empty card id`() {
         val piCard: PortableIdentityCard = mockk()
+        val receiptCreationStartTime = System.currentTimeMillis()
         response.addCard(piCard, "testCard1")
         val cardId = ""
         every { piCard.cardId } returns cardId
@@ -89,11 +87,13 @@ class ResponseTest {
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
         assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
     @Test
     fun `test create receipt by adding 1 card`() {
         val piCard: PortableIdentityCard = mockk()
+        val receiptCreationStartTime = System.currentTimeMillis()
         response.addCard(piCard, "testCard1")
         val cardId = "testCardId"
         every { piCard.cardId } returns cardId
@@ -105,6 +105,7 @@ class ResponseTest {
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
         assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
     @Test
@@ -124,6 +125,7 @@ class ResponseTest {
         response.addCard(piCard2, "testCard1")
         val cardId2 = "testCardId2"
         every { piCard2.cardId } returns cardId2
+        val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedCredentials(entityDid, entityName)
         val expectedReceiptCount = 1
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
@@ -132,6 +134,7 @@ class ResponseTest {
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
         assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
     @Test
@@ -144,6 +147,7 @@ class ResponseTest {
         response.addCard(piCard2, "testCard2")
         val cardId2 = "testCardId2"
         every { piCard2.cardId } returns cardId2
+        val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedCredentials(entityDid, entityName)
         val expectedReceiptCount = 2
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
@@ -158,6 +162,7 @@ class ResponseTest {
         assertThat(receipt2.entityIdentifier).isEqualTo(entityDid)
         assertThat(receipt2.action).isEqualTo(ReceiptAction.Presentation)
         assertThat(receipt1.activityDate).isLessThanOrEqualTo(receipt2.activityDate)
+        assertThat(receipt1.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
     @Test
@@ -166,6 +171,7 @@ class ResponseTest {
         response.addCard(piCard, "testCard1")
         val cardId = "testCardId"
         every { piCard.cardId } returns cardId
+        val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedCredentials("", "")
         val expectedReceiptCount = 1
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
@@ -174,5 +180,6 @@ class ResponseTest {
         assertThat(receipt.entityName).isEqualTo("")
         assertThat(receipt.entityIdentifier).isEqualTo("")
         assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 }
