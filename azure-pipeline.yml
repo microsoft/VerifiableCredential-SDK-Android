@@ -1,3 +1,6 @@
+trigger:
+- master
+
 pool:
   name: Azure Pipelines
   demands: java
