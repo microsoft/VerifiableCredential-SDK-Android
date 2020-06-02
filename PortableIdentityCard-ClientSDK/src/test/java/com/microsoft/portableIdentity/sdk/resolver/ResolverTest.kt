@@ -23,25 +23,27 @@ class ResolverTest {
     private val expectedIdentifier = expectedIdentifierResponse.didDocument.id
     private val invalidIdentifier = "invalid-did"
 
-    init {
-        coEvery { identifierRepository.resolveIdentifier(any(), expectedIdentifier) } returns Result.Success(expectedIdentifierResponse)
-        coEvery { identifierRepository.resolveIdentifier(any(), invalidIdentifier) } returns Result.Failure(ResolverException("Unable to resolve identifier"))
-    }
-
     @Test
     fun successfulResolutionTest() {
+        coEvery { identifierRepository.resolveIdentifier(any(), expectedIdentifier) } returns Result.Success(expectedIdentifierResponse)
         runBlocking {
             val actualIdentifierDocument = resolver.resolve(expectedIdentifier)
-            Assertions.assertThat(actualIdentifierDocument is Result.Success).isTrue()
+            Assertions.assertThat(actualIdentifierDocument).isInstanceOf(Result.Success::class.java)
             Assertions.assertThat((actualIdentifierDocument as Result.Success).payload.id).isEqualTo(expectedIdentifier)
         }
     }
 
     @Test
     fun failedResolutionTest() {
+        coEvery {
+            identifierRepository.resolveIdentifier(
+                any(),
+                invalidIdentifier
+            )
+        } returns Result.Failure(ResolverException("Unable to resolve identifier"))
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
-            Assertions.assertThat(actualResult is Result.Failure).isTrue()
+            Assertions.assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
         }
     }
 }

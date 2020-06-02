@@ -12,7 +12,7 @@ import org.junit.After
 import org.junit.Test
 
 class IdentifierDaoInstrumentedTest {
-    var identifierDao: IdentifierDao
+    private var identifierDao: IdentifierDao
     var sdkDatabase: SdkDatabase
 
     init {

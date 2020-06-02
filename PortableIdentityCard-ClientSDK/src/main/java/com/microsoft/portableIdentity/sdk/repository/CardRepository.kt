@@ -71,7 +71,7 @@ class CardRepository @Inject constructor(
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    private suspend fun getAllVerifiableCredentialsByCardId(primaryVcId: String) = verifiableCredentialDao.getVerifiableCredentialByCardId(primaryVcId)
+    suspend fun getAllVerifiableCredentialsByCardId(primaryVcId: String) = verifiableCredentialDao.getVerifiableCredentialByCardId(primaryVcId)
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
 
