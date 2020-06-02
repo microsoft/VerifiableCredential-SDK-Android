@@ -10,6 +10,7 @@ import com.microsoft.portableIdentity.sdk.repository.dao.IdentifierDao
 import com.microsoft.portableIdentity.sdk.repository.networking.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.portableIdentity.sdk.utilities.Serializer
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.ServiceErrorException
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -87,6 +88,27 @@ class IdentifierRepositoryInstrumentedTest {
             val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", identifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Success::class.java)
             assertThat((actualIdentifierDocument as Result.Success).payload.didDocument.id).isEqualTo(expectedIdentifier)
+        }
+    }
+
+    @Test
+    fun resolveInvalidIdentifierTest() {
+        val identifier = Identifier(
+            "did:ion:test:testId",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        mockkConstructor(ResolveIdentifierNetworkOperation::class)
+        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(ServiceErrorException("Not found"))
+        runBlocking {
+            val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", identifier.id)
+            assertThat(actualIdentifierDocument).isInstanceOf(Result.Failure::class.java)
+            assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(ServiceErrorException::class.java)
         }
     }
 }

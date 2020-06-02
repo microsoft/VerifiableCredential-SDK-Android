@@ -5,8 +5,11 @@ package com.microsoft.portableIdentity.sdk.repository.dao
 import android.content.Context
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
+import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
 import org.junit.Test
@@ -39,6 +42,59 @@ class IdentifierDaoInstrumentedTest {
     }
 
     @Test
+    fun insertIdentifierWithEmptyIdTest() {
+        val suppliedIdentifier = Identifier(
+            "",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        identifierDao.insert(suppliedIdentifier)
+        val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier.id)
+        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+    }
+
+    @Test
+    fun retrieveIdentifierByNonExistingIdTest() {
+        val nonExistingId = "nonExistingId"
+        val actualIdentifier = identifierDao.queryByIdentifier(nonExistingId)
+        assertThat(actualIdentifier).isNull()
+    }
+
+    @Test
+    fun insertIdentifiersWithSameIdsFailingForSecondInsertTest() {
+        val suppliedIdentifier1 = Identifier(
+            "did:ion:test:testId",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        val suppliedIdentifier2 = Identifier(
+            "did:ion:test:testId",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        identifierDao.insert(suppliedIdentifier1)
+        Assertions.assertThatThrownBy { identifierDao.insert(suppliedIdentifier2) }
+            .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
+        val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier1.id)
+        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
+    }
+
+    @Test
     fun insertAndRetrieveIdentifierByNameTest() {
         val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
@@ -54,6 +110,13 @@ class IdentifierDaoInstrumentedTest {
         val actualIdentifierName = "testIdentifierName"
         val actualIdentifier = identifierDao.queryByName(actualIdentifierName)
         assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+    }
+
+    @Test
+    fun retrieveIdentifierByNonExistingNameTest() {
+        val nonExistingName = "nonExistingName"
+        val actualIdentifier = identifierDao.queryByName(nonExistingName)
+        assertThat(actualIdentifier).isNull()
     }
 
     @After
