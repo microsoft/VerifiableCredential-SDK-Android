@@ -1,0 +1,47 @@
+pool:
+  name: Azure Pipelines
+  demands: java
+
+#Your build pipeline references an undefined variable named ‘getprop sys.boot_completed | tr -d '\r'’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
+
+steps:
+- task: Gradle@2
+  displayName: 'gradlew build'
+
+- bash: |
+   #!/usr/bin/env bash
+   
+   # Install AVD files
+   echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
+   
+   # Create emulator
+   echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n xamarin_android_emulator -k 'system-images;android-27;google_apis;x86' --force
+   
+   $ANDROID_HOME/emulator/emulator -list-avds
+   
+   echo "Starting emulator"
+   
+   # Start emulator in background
+   nohup $ANDROID_HOME/emulator/emulator -avd xamarin_android_emulator -no-snapshot > /dev/null 2>&1 &
+   $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
+   
+   $ANDROID_HOME/platform-tools/adb devices
+   
+   echo "Emulator started"
+  displayName: 'Starting emulator'
+
+- task: Gradle@2
+  displayName: 'gradlew -Pcoverage jacocoCoverageReport'
+  inputs:
+    tasks: '-Pcoverage jacocoCoverageReport'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: 'PortableIdentityCard-ClientSDK/build/outputs/aar/'
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/PortableIdentityCard-ClientSDK/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
+  inputs:
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/PortableIdentityCard-ClientSDK/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/PortableIdentityCard-ClientSDK/build/reports/jacoco/jacocoCoverageReport/html'
