@@ -13,6 +13,7 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.Result
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.ServiceErrorException
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -27,12 +28,12 @@ class IdentifierRepositoryInstrumentedTest {
     init {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         PortableIdentitySdk.init(context)
-        identifierRepository = spyk(PortableIdentitySdk.identifierManager.identifierRepository)
+        identifierRepository = PortableIdentitySdk.identifierManager.identifierRepository
     }
 
     @Test
-    fun insertAndRetrieveIdentifierTest() {
-        val identifier = Identifier(
+    fun insertAndRetrieveIdentifierByIdTest() {
+        val expectedIdentifier = Identifier(
             "did:ion:test:testId1",
             "testAlias",
             "testSigningKeyReference",
@@ -43,16 +44,68 @@ class IdentifierRepositoryInstrumentedTest {
             "testIdentifierName1"
         )
         val identifierDao: IdentifierDao = mockk()
-        justRun { identifierDao.insert(identifier) }
-        identifierRepository.insert(identifier)
-        every { identifierDao.queryByIdentifier(identifier.id) } returns identifier
-        val actualIdentifier = identifierRepository.queryByIdentifier(identifier.id)
-        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(identifier)
+        justRun { identifierDao.insert(expectedIdentifier) }
+        identifierRepository.insert(expectedIdentifier)
+        every { identifierDao.queryByIdentifier(expectedIdentifier.id) } returns expectedIdentifier
+        val actualIdentifier = identifierRepository.queryByIdentifier(expectedIdentifier.id)
+        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(expectedIdentifier)
+    }
+
+    @Test
+    fun insertIdentifierWithEmptyIdTest() {
+        val suppliedIdentifier = Identifier(
+            "",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        val identifierDao: IdentifierDao = mockk()
+        justRun { identifierDao.insert(suppliedIdentifier) }
+        identifierRepository.insert(suppliedIdentifier)
+        every { identifierDao.queryByIdentifier(suppliedIdentifier.id) } returns suppliedIdentifier
+        val actualIdentifier = identifierRepository.queryByIdentifier(suppliedIdentifier.id)
+        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(suppliedIdentifier)
+    }
+
+    @Test
+    fun insertIdentifiersWithSameIdsFailingForSecondInsertTest() {
+        val suppliedIdentifier1 = Identifier(
+            "did:ion:test:testId",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        val suppliedIdentifier2 = Identifier(
+            "did:ion:test:testId",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        val identifierDao: IdentifierDao = mockk()
+        justRun { identifierDao.insert(suppliedIdentifier1) }
+        justRun { identifierDao.insert(suppliedIdentifier2) }
+        identifierRepository.insert(suppliedIdentifier1)
+        Assertions.assertThatThrownBy { identifierRepository.insert(suppliedIdentifier2) }
+            .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
+        val actualIdentifier = identifierRepository.queryByIdentifier(suppliedIdentifier1.id)
+        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(suppliedIdentifier1)
     }
 
     @Test
     fun insertAndRetrieveIdentifierByNameTest() {
-        val identifier = Identifier(
+        val expectedIdentifier = Identifier(
             "did:ion:test:testId2",
             "testAlias",
             "testSigningKeyReference",
@@ -63,16 +116,16 @@ class IdentifierRepositoryInstrumentedTest {
             "testIdentifierName2"
         )
         val identifierDao: IdentifierDao = mockk()
-        justRun { identifierDao.insert(identifier) }
-        identifierRepository.insert(identifier)
-        every { identifierDao.queryByName("testIdentifierName2") } returns identifier
+        justRun { identifierDao.insert(expectedIdentifier) }
+        identifierRepository.insert(expectedIdentifier)
+        every { identifierDao.queryByName("testIdentifierName2") } returns expectedIdentifier
         val actualIdentifier = identifierRepository.queryByName("testIdentifierName2")
-        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(identifier)
+        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(expectedIdentifier)
     }
 
     @Test
     fun resolveIdentifierTest() {
-        val identifier = Identifier(
+        val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
             "testAlias",
             "testSigningKeyReference",
@@ -85,15 +138,18 @@ class IdentifierRepositoryInstrumentedTest {
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
         coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Success(expectedIdentifierDocument)
         runBlocking {
-            val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", identifier.id)
+            val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Success::class.java)
             assertThat((actualIdentifierDocument as Result.Success).payload.didDocument.id).isEqualTo(expectedIdentifier)
+        }
+        coVerify(exactly = 1) {
+            anyConstructed<ResolveIdentifierNetworkOperation>().fire()
         }
     }
 
     @Test
     fun resolveInvalidIdentifierTest() {
-        val identifier = Identifier(
+        val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
             "testAlias",
             "testSigningKeyReference",
@@ -106,9 +162,14 @@ class IdentifierRepositoryInstrumentedTest {
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
         coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(ServiceErrorException("Not found"))
         runBlocking {
-            val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", identifier.id)
+            val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Failure::class.java)
             assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(ServiceErrorException::class.java)
         }
+        coVerify(exactly = 1) {
+            anyConstructed<ResolveIdentifierNetworkOperation>().fire()
+        }
     }
+
+    //TODO: Add more failure test cases for resolution
 }

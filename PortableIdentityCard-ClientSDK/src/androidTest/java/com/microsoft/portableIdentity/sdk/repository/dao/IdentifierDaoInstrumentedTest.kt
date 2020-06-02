@@ -5,10 +5,8 @@ package com.microsoft.portableIdentity.sdk.repository.dao
 import android.content.Context
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.portableIdentity.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.portableIdentity.sdk.identifier.Identifier
 import com.microsoft.portableIdentity.sdk.repository.SdkDatabase
-import com.microsoft.portableIdentity.sdk.utilities.controlflow.KeyException
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -117,6 +115,37 @@ class IdentifierDaoInstrumentedTest {
         val nonExistingName = "nonExistingName"
         val actualIdentifier = identifierDao.queryByName(nonExistingName)
         assertThat(actualIdentifier).isNull()
+    }
+
+    @Test
+    fun insertTwoIdentifiersWithSameNameAndRetrieveTest() {
+        val suppliedIdentifier1 = Identifier(
+            "did:ion:test:testId1",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        val suppliedIdentifier2 = Identifier(
+            "did:ion:test:testId2",
+            "testAlias",
+            "testSigningKeyReference",
+            "testEncryptionKeyReference",
+            "testRecoveryKeyReference",
+            "testUpdateRevealValue",
+            "testRecoveryRevealValue",
+            "testIdentifierName"
+        )
+        identifierDao.insert(suppliedIdentifier1)
+        identifierDao.insert(suppliedIdentifier2)
+        val actualIdentifierName = "testIdentifierName"
+        var actualIdentifier = identifierDao.queryByName(actualIdentifierName)
+        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
+        actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier2.id)
+        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier2)
     }
 
     @After
