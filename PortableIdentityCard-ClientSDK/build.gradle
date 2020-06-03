@@ -114,7 +114,7 @@ dependencies {
 
     api 'com.google.guava:guava:28.1-android' // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
     implementation files('libs/org.bitcoin.jar')
-    implementation "org.web3j:crypto:3.3.1"
+    /*implementation "org.web3j:crypto:3.3.1"*/
 
     // test dependencies
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

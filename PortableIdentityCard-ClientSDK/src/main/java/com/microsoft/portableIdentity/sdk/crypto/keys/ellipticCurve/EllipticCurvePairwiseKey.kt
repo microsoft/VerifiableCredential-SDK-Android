@@ -32,7 +32,7 @@ class EllipticCurvePairwiseKey @Inject constructor() {
 
     fun generate(crypto: CryptoOperations, masterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
         //TODO: Verify the list of supported curves. Is K-256 supported?
-        val supportedCurves = listOf("K-256", "P-256K")
+        val supportedCurves = listOf("P-256K")
 
         val subtleCrypto: SubtleCrypto =
             crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);

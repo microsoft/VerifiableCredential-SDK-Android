@@ -3,6 +3,7 @@
 package com.microsoft.portableIdentity.sdk.crypto.plugins
 
 import android.util.Base64
+import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
 import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Provider
@@ -16,9 +17,16 @@ import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
 import java.util.*
-import org.bouncycastle.util.encoders.Hex
-import org.web3j.crypto.*
+//import org.web3j.crypto.*
 import java.math.BigInteger
+import java.security.KeyFactory
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.Signature
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.PKCS8EncodedKeySpec
 
 class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
 
@@ -37,14 +45,16 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val seed = ByteArray(32)
         val random = SecureRandom()
         random.nextBytes(seed)
-        NativeSecp256k1.randomize(seed)
+//        NativeSecp256k1.randomize(seed)
 
         val secret = ByteArray(32)
         random.nextBytes(secret)
 
 //        val publicKey = NativeSecp256k1.computePubkey(secret)
-        val privKey = BigInteger(1, secret.copyOfRange(0, secret.size))
-        val publicKey = Sign.publicKeyFromPrivate(privKey)
+/*        val privateKey = BigInteger(1, secret.copyOfRange(0, secret.size))
+        val publicKey = Sign.publicKeyFromPrivate(privateKey)*/
+
+        val ecKeyPair = generateECKeyPair(random)
 
         val signAlgorithm = EcdsaParams(
             hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.Sha256,
@@ -59,18 +69,25 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 extractable,
                 signAlgorithm,
                 keyUsages.toList(),
-                Secp256k1Handle("", secret)
+                Secp256k1Handle("", ecKeyPair.private.encoded)
             ),
             publicKey = CryptoKey(
                 KeyType.Public,
                 true,
                 signAlgorithm,
                 publicKeyUsage.toList(),
-                Secp256k1Handle("", publicKey.toByteArray())
+                Secp256k1Handle("", ecKeyPair.public.encoded)
             )
         )
 
-        return return keyPair
+        return keyPair
+    }
+
+    private fun generateECKeyPair(random: SecureRandom): KeyPair {
+        val keyPair = KeyPairGenerator.getInstance(AndroidConstants.Ec.value, "BC")
+        //TODO: Verify if algorithm name is Secp256k1 or P-256K
+        keyPair.initialize(ECGenParameterSpec("P-256K"), random)
+        return keyPair.generateKeyPair()
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
@@ -83,13 +100,47 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     override fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        val keyData = (key.handle as Secp256k1Handle).data
+//        val keyData = (key.handle as Secp256k1Handle).data
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
             throw SignatureException("Data must be 32 bytes")
         }
-        return NativeSecp256k1.sign(hashedData, keyData)
+//        return NativeSecp256k1.sign(hashedData, keyData)
+        val privateKey = generatePrivateKeyFromCryptoKey(key)
+        return sign(privateKey, hashedData)
+    }
+
+    private fun generatePrivateKeyFromCryptoKey(key: CryptoKey): PrivateKey {
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+        val privateKeySpec = PKCS8EncodedKeySpec((key.handle as Secp256k1Handle).data)
+        return keyFactory.generatePrivate(privateKeySpec)
+    }
+
+    private fun generatePublicKeyFromPrivateCryptoKey(privateKey: ByteArray): PublicKey {
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+        val privateKeySpec = PKCS8EncodedKeySpec(privateKey)
+        return keyFactory.generatePublic(privateKeySpec)
+    }
+
+    private fun generatePublicKeyFromCryptoKey(key: CryptoKey): PublicKey {
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+        val publicKeySpec = PKCS8EncodedKeySpec((key.handle as Secp256k1Handle).data)
+        return keyFactory.generatePublic(publicKeySpec)
+    }
+
+    private fun sign(privateKey: PrivateKey, payload: ByteArray): ByteArray {
+        val signature = Signature.getInstance("SHA256withECDSA", "BC")
+        signature.initSign(privateKey)
+        signature.update(payload)
+        return signature.sign()
+    }
+
+    private fun verify(publicKey: PublicKey, payload: ByteArray, sign: ByteArray): Boolean {
+        val signature = Signature.getInstance("SHA256withECDSA", "BC")
+        signature.initVerify(publicKey)
+        signature.update(payload)
+        return signature.verify(sign)
     }
 
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
@@ -103,7 +154,9 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         print("KEY DATA: ")
         printBytes(keyData)
 
-        return NativeSecp256k1.verify(hashedData, signature, keyData)
+//        return NativeSecp256k1.verify(hashedData, signature, keyData)
+        val publicKey = generatePublicKeyFromCryptoKey(key)
+        return verify(publicKey, hashedData, signature)
     }
 
     override fun onImportKey(
@@ -177,7 +230,8 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val publicKey: ByteArray
         val handle = key.handle as Secp256k1Handle
         val d: String? = if (key.type == KeyType.Private) {
-            publicKey = NativeSecp256k1.computePubkey(handle.data)
+            //publicKey = NativeSecp256k1.computePubkey(handle.data)
+            publicKey = generatePublicKeyFromPrivateCryptoKey(handle.data).encoded
             Base64.encodeToString(handle.data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
         } else {
             publicKey = handle.data
