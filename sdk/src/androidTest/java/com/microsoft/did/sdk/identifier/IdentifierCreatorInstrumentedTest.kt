@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.identifier
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.PortableIdentitySdk
+import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.PublicKey
@@ -40,7 +40,7 @@ class IdentifierCreatorInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        PortableIdentitySdk.init(context)
+        VerifiableCredentialSdk.init(context)
         val serializer = Serializer()
         val keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
@@ -91,7 +91,7 @@ class IdentifierCreatorInstrumentedTest {
         var signKey = ""
         runBlocking {
             signKey =
-                when (val id = PortableIdentitySdk.identifierManager.getMasterIdentifier()) {
+                when (val id = VerifiableCredentialSdk.identifierManager.getMasterIdentifier()) {
                     is Result.Success -> id.payload.signatureKeyReference
                     else -> ""
                 }
