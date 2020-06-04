@@ -97,7 +97,7 @@ class ReceiptDaoInstrumentedTest {
     }
 
     @Test
-    fun insertMultipleReceiptsWithSameIdTest() {
+    fun insertMultipleReceiptsWithSameIdFailingTest() {
         val suppliedReceipt1 = Receipt(
             id = 1,
             action = ReceiptAction.Presentation,
@@ -146,17 +146,8 @@ class ReceiptDaoInstrumentedTest {
     }
 
     @Test
-    fun insertAndRetrieveReceiptByNonExistingCardIdTest() {
-        val suppliedReceipt = Receipt(
-            id = 1,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
+    fun retrieveReceiptByNonExistingCardIdTest() {
         runBlocking {
-            receiptDao.insert(suppliedReceipt)
             val actualCardId = "nonExistingId"
             val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId)
             actualReceipts.observeForever { assertThat(actualReceipts.value?.size).isEqualTo(0) }
