@@ -88,6 +88,29 @@ class VerifiableCredentialDaoInstrumentedTest {
     }
 
     @Test
+    fun insertVCWithDifferentNestedIdTest() {
+        val suppliedVc = VerifiableCredential(
+            "jti1",
+            "raw",
+            VerifiableCredentialContent(
+                "jti2",
+                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
+                "",
+                "",
+                123456L,
+                200000L
+            ),
+            "picId1"
+        )
+        runBlocking {
+            verifiableCredentialDao.insert(suppliedVc)
+            val actualPicId = "picId1"
+            val actualVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
+            assertThat(actualVc).contains(suppliedVc)
+        }
+    }
+
+    @Test
     fun insertMultipleVcsWithSameIdFailingTest() {
         val suppliedVc1 = VerifiableCredential(
             "jti1",
@@ -178,6 +201,95 @@ class VerifiableCredentialDaoInstrumentedTest {
             val actualPicId = ""
             val actualVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
             assertThat(actualVc).contains(suppliedVc)
+        }
+    }
+
+    @Test
+    fun deleteVcTest() {
+        val suppliedVc = VerifiableCredential(
+            "jti1",
+            "raw",
+            VerifiableCredentialContent(
+                "jti1",
+                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
+                "",
+                "",
+                123456L,
+                200000L
+            ),
+            "picId1"
+        )
+        runBlocking {
+            verifiableCredentialDao.insert(suppliedVc)
+            val actualPicId = "picId1"
+            val actualVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
+            assertThat(actualVc).contains(suppliedVc)
+            verifiableCredentialDao.delete(suppliedVc)
+            val deletedVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
+            assertThat(deletedVc.size).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun deleteNonExistingVcTest() {
+        val suppliedVc = VerifiableCredential(
+            "jti1",
+            "raw",
+            VerifiableCredentialContent(
+                "jti1",
+                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
+                "",
+                "",
+                123456L,
+                200000L
+            ),
+            "picId1"
+        )
+        runBlocking {
+            verifiableCredentialDao.delete(suppliedVc)
+            val actualPicId = "picId"
+            val actualVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
+            assertThat(actualVc.size).isEqualTo(0)
+        }
+    }
+
+    @Test
+    fun deleteVcWithOnlyMatchingIdTest() {
+        val suppliedVc = VerifiableCredential(
+            "jti1",
+            "raw",
+            VerifiableCredentialContent(
+                "jti1",
+                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
+                "",
+                "",
+                123456L,
+                200000L
+            ),
+            "picId1"
+        )
+        val vcToBeDeleted = VerifiableCredential(
+            "jti1",
+            "raw1",
+            VerifiableCredentialContent(
+                "jti2",
+                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
+                "",
+                "",
+                123456L,
+                200000L
+            ),
+            "picId2"
+        )
+        runBlocking {
+            verifiableCredentialDao.insert(suppliedVc)
+            val actualPicId = "picId1"
+            val actualVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
+            assertThat(actualVc.size).isEqualTo(1)
+            assertThat(actualVc).contains(suppliedVc)
+            verifiableCredentialDao.delete(vcToBeDeleted)
+            val deletedVc = verifiableCredentialDao.getVerifiableCredentialByCardId(actualPicId)
+            assertThat(deletedVc.size).isEqualTo(0)
         }
     }
 
