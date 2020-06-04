@@ -23,7 +23,7 @@ init(
 
 Example of SDK initialization within app:
 ```kotlin
-val piSdk = PortableIdentitySdk.init(getApplicationContext(), new PortableIdentitySdkLogConsumerBridge());
+val piSdk = VerifiableCredentialSdk.init(getApplicationContext(), new PortableIdentitySdkLogConsumerBridge());
 ```
 
 > note: Dependency Injection is configured through [Dagger](https://github.com/google/dagger) in our SDK.
