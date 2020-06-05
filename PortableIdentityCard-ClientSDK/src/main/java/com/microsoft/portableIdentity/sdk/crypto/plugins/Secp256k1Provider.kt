@@ -2,10 +2,21 @@
 
 package com.microsoft.portableIdentity.sdk.crypto.plugins
 
+//import org.web3j.crypto.*
 import android.util.Base64
 import com.microsoft.portableIdentity.sdk.crypto.models.AndroidConstants
 import com.microsoft.portableIdentity.sdk.crypto.models.Sha
-import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.CryptoKeyPair
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.EcKeyGenParams
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.EcdsaParams
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyFormat
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyType
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.portableIdentity.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.portableIdentity.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.portableIdentity.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.portableIdentity.sdk.utilities.controlflow.AlgorithmException
@@ -15,18 +26,22 @@ import com.microsoft.portableIdentity.sdk.utilities.controlflow.SignatureExcepti
 import com.microsoft.portableIdentity.sdk.utilities.printBytes
 import com.microsoft.portableIdentity.sdk.utilities.stringToByteArray
 import org.bitcoin.NativeSecp256k1
-import java.security.SecureRandom
-import java.util.*
-//import org.web3j.crypto.*
-import java.math.BigInteger
+import org.spongycastle.jce.provider.BouncyCastleProvider
+import org.spongycastle.jce.spec.ECNamedCurveGenParameterSpec
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.SecureRandom
 import java.security.Signature
+import java.security.Security
 import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECPublicKeySpec
 import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
+import java.util.Locale
+
 
 class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
 
@@ -36,6 +51,10 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     override val privateKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Sign)
     override val publicKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Verify)
     override val symmetricKeyUsage: Set<KeyUsage>? = null
+    init {
+            Security.addProvider(BouncyCastleProvider())
+    }
+
 
     override fun onGenerateKeyPair(
         algorithm: Algorithm,
@@ -84,10 +103,18 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     private fun generateECKeyPair(random: SecureRandom): KeyPair {
-        val keyPair = KeyPairGenerator.getInstance(AndroidConstants.Ec.value, "BC")
+//        val keyPair = KeyPairGenerator.getInstance(AndroidConstants.Ec.value, "BC")
+/*        val keyPair = KeyPairGenerator.getInstance(AndroidConstants.Ec.value)
         //TODO: Verify if algorithm name is Secp256k1 or P-256K
-        keyPair.initialize(ECGenParameterSpec("P-256K"), random)
-        return keyPair.generateKeyPair()
+        val ecs = ECGenParameterSpec("secp256k1")
+        keyPair.initialize(ecs, SecureRandom())
+        return keyPair.generateKeyPair()*/
+//        Security.addProvider(BouncyCastleProvider())
+        val keyGen = KeyPairGenerator.getInstance("EC", BouncyCastleProvider())
+        val ecs = ECNamedCurveGenParameterSpec("secp256k1")
+        keyGen.initialize(ecs, SecureRandom())
+        val pair = keyGen.genKeyPair()
+        return pair
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
@@ -112,32 +139,39 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     private fun generatePrivateKeyFromCryptoKey(key: CryptoKey): PrivateKey {
-        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+//        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val privateKeySpec = PKCS8EncodedKeySpec((key.handle as Secp256k1Handle).data)
         return keyFactory.generatePrivate(privateKeySpec)
     }
 
     private fun generatePublicKeyFromPrivateCryptoKey(privateKey: ByteArray): PublicKey {
-        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
-        val privateKeySpec = PKCS8EncodedKeySpec(privateKey)
+//        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
+/*        val privateKeySpec = PKCS8EncodedKeySpec(privateKey)
+        return keyFactory.generatePublic(privateKeySpec)*/
+        val privateKeySpec = X509EncodedKeySpec(privateKey)
         return keyFactory.generatePublic(privateKeySpec)
     }
 
     private fun generatePublicKeyFromCryptoKey(key: CryptoKey): PublicKey {
-        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
-        val publicKeySpec = PKCS8EncodedKeySpec((key.handle as Secp256k1Handle).data)
+//        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value, "BC")
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
+        val publicKeySpec = X509EncodedKeySpec((key.handle as Secp256k1Handle).data)
         return keyFactory.generatePublic(publicKeySpec)
     }
 
     private fun sign(privateKey: PrivateKey, payload: ByteArray): ByteArray {
-        val signature = Signature.getInstance("SHA256withECDSA", "BC")
+//        val signature = Signature.getInstance("SHA256withECDSA", "BC")
+        val signature = Signature.getInstance("SHA256withECDSA")
         signature.initSign(privateKey)
         signature.update(payload)
         return signature.sign()
     }
 
     private fun verify(publicKey: PublicKey, payload: ByteArray, sign: ByteArray): Boolean {
-        val signature = Signature.getInstance("SHA256withECDSA", "BC")
+//        val signature = Signature.getInstance("SHA256withECDSA", "BC")
+        val signature = Signature.getInstance("SHA256withECDSA")
         signature.initVerify(publicKey)
         signature.update(payload)
         return signature.verify(sign)
