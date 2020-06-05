@@ -11,7 +11,7 @@ typealias Success = Boolean
 
 sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
-    class Failure(val payload: PortableIdentitySdkException) : Result<Nothing>()
+    class Failure(val payload: VcSdkException) : Result<Nothing>()
 }
 
 fun <U, T> Result<T>.map(transform: (T) -> U): Result<U> =
@@ -20,7 +20,7 @@ fun <U, T> Result<T>.map(transform: (T) -> U): Result<U> =
         is Result.Failure -> this
     }
 
-fun <T> Result<T>.mapError(transform: (PortableIdentitySdkException) -> PortableIdentitySdkException): Result<T> =
+fun <T> Result<T>.mapError(transform: (VcSdkException) -> VcSdkException): Result<T> =
     when (this) {
         is Result.Success -> this
         is Result.Failure -> Result.Failure(transform(payload))
@@ -36,13 +36,13 @@ suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>)
     try {
         RunResultTryContext().block()
     } catch (ex: RunResultTryAbortion) {
-        Result.Failure(ex.error as PortableIdentitySdkException)
-    } catch (ex: PortableIdentitySdkException) {
+        Result.Failure(ex.error as VcSdkException)
+    } catch (ex: VcSdkException) {
         SdkLog.w("Internal Sdk Exception", ex)
         Result.Failure(ex)
     } catch (ex: Exception) {
         SdkLog.e("Unhandled Sdk Exception", ex)
-        Result.Failure(PortableIdentitySdkException("Unhandled Exception", ex))
+        Result.Failure(VcSdkException("Unhandled Exception", ex))
     }
 
 class RunResultTryContext {
@@ -53,4 +53,4 @@ class RunResultTryContext {
         }
 }
 
-private class RunResultTryAbortion(val error: Any) : PortableIdentitySdkException()
+private class RunResultTryAbortion(val error: Any) : VcSdkException()

@@ -22,13 +22,13 @@ suspend fun <S> awaitCallback(block: (AwaitCallback<S>) -> Unit) : S =
 
 interface AwaitResultCallback<S> {
     fun onSuccess(payload: S)
-    fun onFailure(payload: PortableIdentitySdkException)
+    fun onFailure(payload: VcSdkException)
 }
 
 suspend fun <S> awaitResultCallback(block: (AwaitResultCallback<S>) -> Unit) : Result<S> =
     suspendCoroutine { cont ->
         block(object : AwaitResultCallback<S> {
             override fun onSuccess(payload: S) = cont.resume(Result.Success(payload))
-            override fun onFailure(payload: PortableIdentitySdkException) = cont.resume(Result.Failure(payload))
+            override fun onFailure(payload: VcSdkException) = cont.resume(Result.Failure(payload))
         })
     }
