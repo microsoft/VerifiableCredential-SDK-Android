@@ -28,19 +28,7 @@ class VerifiableCredentialDaoInstrumentedTest {
 
     @Test
     fun insertVCAndRetrieveTest() {
-        val suppliedVc = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
+        val suppliedVc = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc)
             val actualPicId = "picId1"
@@ -51,30 +39,11 @@ class VerifiableCredentialDaoInstrumentedTest {
 
     @Test
     fun insertMultipleVcWithSamePicId() {
-        val suppliedVc1 = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
+        val suppliedVc1 = createVerifiableCredential(1)
         val suppliedVc2 = VerifiableCredential(
             "jti2",
             "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
+            createVerifiableCredentialContent(1),
             "picId1"
         )
         runBlocking {
@@ -92,14 +61,7 @@ class VerifiableCredentialDaoInstrumentedTest {
         val suppliedVc = VerifiableCredential(
             "jti1",
             "raw",
-            VerifiableCredentialContent(
-                "jti2",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
+            createVerifiableCredentialContent(2),
             "picId1"
         )
         runBlocking {
@@ -112,32 +74,8 @@ class VerifiableCredentialDaoInstrumentedTest {
 
     @Test
     fun insertMultipleVcsWithSameIdFailingTest() {
-        val suppliedVc1 = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
-        val suppliedVc2 = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
+        val suppliedVc1 = createVerifiableCredential(1)
+        val suppliedVc2 = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc1)
             Assertions.assertThatThrownBy { runBlocking { verifiableCredentialDao.insert(suppliedVc2) } }
@@ -154,14 +92,7 @@ class VerifiableCredentialDaoInstrumentedTest {
         val suppliedVc = VerifiableCredential(
             "jti1",
             "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
+            createVerifiableCredentialContent(1),
             ""
         )
         runBlocking {
@@ -206,19 +137,7 @@ class VerifiableCredentialDaoInstrumentedTest {
 
     @Test
     fun deleteVcTest() {
-        val suppliedVc = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
+        val suppliedVc = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc)
             val actualPicId = "picId1"
@@ -232,19 +151,7 @@ class VerifiableCredentialDaoInstrumentedTest {
 
     @Test
     fun deleteNonExistingVcTest() {
-        val suppliedVc = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
+        val suppliedVc = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.delete(suppliedVc)
             val actualPicId = "picId"
@@ -254,31 +161,12 @@ class VerifiableCredentialDaoInstrumentedTest {
     }
 
     @Test
-    fun deleteVcWithOnlyMatchingIdTest() {
-        val suppliedVc = VerifiableCredential(
-            "jti1",
-            "raw",
-            VerifiableCredentialContent(
-                "jti1",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
-            "picId1"
-        )
+    fun deleteVcWithMatchingJtiButDifferentPicIdTest() {
+        val suppliedVc = createVerifiableCredential(1)
         val vcToBeDeleted = VerifiableCredential(
             "jti1",
             "raw1",
-            VerifiableCredentialContent(
-                "jti2",
-                VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
-                "",
-                "",
-                123456L,
-                200000L
-            ),
+            createVerifiableCredentialContent(2),
             "picId2"
         )
         runBlocking {
@@ -296,5 +184,25 @@ class VerifiableCredentialDaoInstrumentedTest {
     @After
     fun tearDown() {
         sdkDatabase.close()
+    }
+
+    private fun createVerifiableCredential(id: Int): VerifiableCredential {
+        return VerifiableCredential(
+            "jti$id",
+            "raw",
+            createVerifiableCredentialContent(id),
+            "picId$id"
+        )
+    }
+
+    private fun createVerifiableCredentialContent(id: Int): VerifiableCredentialContent {
+        return VerifiableCredentialContent(
+            "jti$id",
+            VerifiableCredentialDescriptor(emptyList(), emptyList(), emptyMap()),
+            "",
+            "",
+            123456L,
+            200000L
+        )
     }
 }

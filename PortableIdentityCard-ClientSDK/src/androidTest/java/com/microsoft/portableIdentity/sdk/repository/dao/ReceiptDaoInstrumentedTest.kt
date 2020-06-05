@@ -32,32 +32,18 @@ class ReceiptDaoInstrumentedTest {
 
     @Test
     fun insertAndRetrieveReceiptByCardIdTest() {
-        val suppliedReceipt = Receipt(
-            id = 1,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
+        val suppliedReceipt = createReceipt(1)
         runBlocking {
             receiptDao.insert(suppliedReceipt)
-            val actualCardId = "urn:pic:testCardId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId).getOrAwaitValue()
+            val suppliedCardId = "urn:pic:testCardId"
+            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
             assertThat(actualReceipts.contains(suppliedReceipt)).isTrue()
         }
     }
 
     @Test
     fun insertAndRetrieveAllReceiptsTest() {
-        val suppliedReceipt = Receipt(
-            id = 2,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
+        val suppliedReceipt = createReceipt(2)
         runBlocking {
             receiptDao.insert(suppliedReceipt)
             val actualReceipts = receiptDao.getAllReceipts().getOrAwaitValue()
@@ -66,28 +52,14 @@ class ReceiptDaoInstrumentedTest {
     }
 
     @Test
-    fun insertMultipleReceiptsForSameCardTest() {
-        val suppliedReceipt1 = Receipt(
-            id = 1,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
-        val suppliedReceipt2 = Receipt(
-            id = 2,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
+    fun insertMultipleReceiptsForSameCardIdTest() {
+        val suppliedReceipt1 = createReceipt(1)
+        val suppliedReceipt2 = createReceipt(2)
         runBlocking {
             receiptDao.insert(suppliedReceipt1)
             receiptDao.insert(suppliedReceipt2)
-            val actualCardId = "urn:pic:testCardId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId).getOrAwaitValue()
+            val suppliedCardId = "urn:pic:testCardId"
+            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
             assertThat(actualReceipts.size).isEqualTo(2)
             assertThat(actualReceipts.contains(suppliedReceipt1)).isTrue()
             assertThat(actualReceipts.contains(suppliedReceipt2)).isTrue()
@@ -96,28 +68,14 @@ class ReceiptDaoInstrumentedTest {
 
     @Test
     fun insertMultipleReceiptsWithSameIdFailingTest() {
-        val suppliedReceipt1 = Receipt(
-            id = 1,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
-        val suppliedReceipt2 = Receipt(
-            id = 1,
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
+        val suppliedReceipt1 = createReceipt(1)
+        val suppliedReceipt2 = createReceipt(1)
         runBlocking {
             receiptDao.insert(suppliedReceipt1)
             Assertions.assertThatThrownBy { runBlocking { receiptDao.insert(suppliedReceipt2) } }
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-            val actualCardId = "urn:pic:testCardId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId).getOrAwaitValue()
+            val suppliedCardId = "urn:pic:testCardId"
+            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
             assertThat(actualReceipts.size).isEqualTo(1)
             assertThat(actualReceipts.contains(suppliedReceipt1)).isTrue()
         }
@@ -135,8 +93,8 @@ class ReceiptDaoInstrumentedTest {
         )
         runBlocking {
             receiptDao.insert(suppliedReceipt)
-            val actualCardId = ""
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId).getOrAwaitValue()
+            val suppliedCardId = ""
+            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
             assertThat(actualReceipts.contains(suppliedReceipt)).isTrue()
         }
     }
@@ -144,8 +102,8 @@ class ReceiptDaoInstrumentedTest {
     @Test
     fun retrieveReceiptByNonExistingCardIdTest() {
         runBlocking {
-            val actualCardId = "nonExistingId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId).getOrAwaitValue()
+            val suppliedCardId = "nonExistingId"
+            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
             assertThat(actualReceipts.size).isEqualTo(0)
         }
     }
@@ -162,21 +120,15 @@ class ReceiptDaoInstrumentedTest {
         )
         runBlocking {
             receiptDao.insert(suppliedReceipt)
-            val actualCardId = ""
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(actualCardId).getOrAwaitValue()
+            val suppliedCardId = ""
+            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
             assertThat(actualReceipts.first()).isEqualTo(suppliedReceipt)
         }
     }
 
     @Test
     fun insertReceiptWithNoIdAndVerifyAutoGenerationOfIdTest() {
-        val suppliedReceipt = Receipt(
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid",
-            activityDate = 123445,
-            entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
-        )
+        val suppliedReceipt = createReceiptWithNoId(1)
         runBlocking {
             receiptDao.insert(suppliedReceipt)
             val actualReceipts = receiptDao.getAllReceipts().getOrAwaitValue()
@@ -193,20 +145,8 @@ class ReceiptDaoInstrumentedTest {
 
     @Test
     fun insertMultipleReceiptsAndVerifyAutoGenerationOfIdTest() {
-        val suppliedReceipt1 = Receipt(
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid1",
-            activityDate = 123445,
-            entityName = "testEntityName1",
-            cardId = "urn:pic:testCardId1"
-        )
-        val suppliedReceipt2 = Receipt(
-            action = ReceiptAction.Presentation,
-            entityIdentifier = "did:ion:test:testEntityDid2",
-            activityDate = 123445,
-            entityName = "testEntityName2",
-            cardId = "urn:pic:testCardId2"
-        )
+        val suppliedReceipt1 = createReceiptWithNoId(1)
+        val suppliedReceipt2 = createReceiptWithNoId(2)
         runBlocking {
             receiptDao.insert(suppliedReceipt1)
             receiptDao.insert(suppliedReceipt2)
@@ -232,5 +172,26 @@ class ReceiptDaoInstrumentedTest {
     @After
     fun tearDown() {
         sdkDatabase.close()
+    }
+
+    private fun createReceipt(id: Int): Receipt {
+        return Receipt(
+            id = id,
+            action = ReceiptAction.Presentation,
+            entityIdentifier = "did:ion:test:testEntityDid",
+            activityDate = 123445,
+            entityName = "testEntityName",
+            cardId = "urn:pic:testCardId"
+        )
+    }
+
+    private fun createReceiptWithNoId(id:Int): Receipt {
+        return Receipt(
+            action = ReceiptAction.Presentation,
+            entityIdentifier = "did:ion:test:testEntityDid$id",
+            activityDate = 123445,
+            entityName = "testEntityName$id",
+            cardId = "urn:pic:testCardId$id"
+        )
     }
 }
