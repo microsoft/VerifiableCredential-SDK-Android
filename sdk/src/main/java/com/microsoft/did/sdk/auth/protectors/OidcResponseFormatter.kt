@@ -47,7 +47,7 @@ class OidcResponseFormatter @Inject constructor(
         val attestationResponse = this.createAttestationClaimModel(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims, audience, responder, expiresIn)
 
         val contents = OidcResponseContent(
-            sub = key.getThumbprint(cryptoOperations, Sha.Sha256),
+            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
             aud = audience,
             nonce = nonce,
             did = did,

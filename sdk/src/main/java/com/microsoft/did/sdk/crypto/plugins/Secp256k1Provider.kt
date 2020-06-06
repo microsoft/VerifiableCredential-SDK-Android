@@ -45,7 +45,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val publicKey = NativeSecp256k1.computePubkey(secret)
 
         val signAlgorithm = EcdsaParams(
-            hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.Sha256,
+            hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.SHA256.algorithm,
             additionalParams = mapOf(
                 "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
             )

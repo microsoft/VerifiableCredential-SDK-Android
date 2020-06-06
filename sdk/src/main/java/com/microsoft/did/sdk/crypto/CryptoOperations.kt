@@ -100,7 +100,7 @@ class CryptoOperations (
                     RsaHashedKeyAlgorithm(
                         modulusLength = 4096UL,
                         publicExponent = 65537UL,
-                        hash = Sha.Sha256,
+                        hash = Sha.SHA256.algorithm,
                         additionalParams = mapOf("KeyReference" to keyReference)
                     ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
                 )
@@ -114,7 +114,7 @@ class CryptoOperations (
                     EcKeyGenParams(
                         namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                         additionalParams = mapOf(
-                            "hash" to Sha.Sha256,
+                            "hash" to Sha.SHA256.algorithm,
                             "KeyReference" to keyReference
                         )
                     ), true, listOf(KeyUsage.Sign, KeyUsage.Verify)

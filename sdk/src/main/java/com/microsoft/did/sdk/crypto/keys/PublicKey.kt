@@ -46,7 +46,7 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
      * @param jwk JSON object representation of a JWK
      * @see https://tools.ietf.org/html/rfc7638
      */
-    fun getThumbprint (crypto: CryptoOperations, sha: Algorithm = Sha.Sha512): String {
+    fun getThumbprint (crypto: CryptoOperations, sha: Algorithm = Sha.SHA512.algorithm): String {
         // construct a JSON object with only required fields
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)

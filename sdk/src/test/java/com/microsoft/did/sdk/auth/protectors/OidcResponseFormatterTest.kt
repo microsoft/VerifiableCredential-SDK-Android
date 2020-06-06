@@ -75,7 +75,7 @@ class OidcResponseFormatterTest {
         `when`<KeyStore>(mockedCryptoOperations.keyStore).thenReturn(mockedKeyStore)
         `when`<KeyContainer<PublicKey>>(mockedKeyStore.getPublicKey(signingKeyRef)).thenReturn(mockedKeyContainer)
         `when`<PublicKey>(mockedKeyContainer.getKey()).thenReturn(mockedPublicKey)
-        `when`<String>(mockedPublicKey.getThumbprint(mockedCryptoOperations, Sha.Sha256)).thenReturn(thumbprint)
+        `when`<String>(mockedPublicKey.getThumbprint(mockedCryptoOperations, Sha.SHA256.algorithm)).thenReturn(thumbprint)
         `when`<JsonWebKey>(mockedPublicKey.toJWK()).thenReturn(mockedJsonWebKey)
     }
 

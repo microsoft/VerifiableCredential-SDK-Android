@@ -68,7 +68,7 @@ object CryptoHelpers {
             JoseConstants.RsaOaep.value, // According to the spec, this should point to SHA-1
             JoseConstants.RsaOaep256.value -> RsaOaepParams(
                 additionalParams = mapOf(
-                    "hash" to Sha.Sha256
+                    "hash" to Sha.SHA256.algorithm
                 )
             )
             JoseConstants.AesGcm128.value,
@@ -88,7 +88,7 @@ object CryptoHelpers {
                 )
             }
             JoseConstants.Es256K.value -> EcdsaParams(
-                hash =  Sha.Sha256,
+                hash =  Sha.SHA256.algorithm,
                 additionalParams = mapOf(
                     "namedCurve" to "P-256K",
                     "format" to "DER"

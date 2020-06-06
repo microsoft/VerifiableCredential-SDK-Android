@@ -34,7 +34,7 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
             EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                 additionalParams = mapOf(
-                    "hash" to Sha.Sha256,
+                    "hash" to Sha.SHA256.algorithm,
                     "KeyReference" to keyReference
                 )
             ), true, listOf(KeyUsage.Sign)

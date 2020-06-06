@@ -75,7 +75,7 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             val alg = EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                 additionalParams = mapOf(
-                    "hash" to Sha.Sha256
+                    "hash" to Sha.SHA256.algorithm
                 )
             )
             //TODO: Update the last section to append incremented version number instead of 1

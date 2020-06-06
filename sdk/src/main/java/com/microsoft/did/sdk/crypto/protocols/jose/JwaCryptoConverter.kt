@@ -80,17 +80,17 @@ object JwaCryptoConverter {
                 when (algorithm.additionalParams["namedCurve"]) {
                     W3cCryptoApiConstants.Secp256k1.value -> {
                         when (algorithm.hash.name) {
-                            Sha.Sha256.name -> "ES256K"
-                            Sha.Sha384.name -> "ES384K"
-                            Sha.Sha512.name -> "ES512K"
+                            Sha.SHA256.algorithm.name -> "ES256K"
+                            Sha.SHA384.algorithm.name -> "ES384K"
+                            Sha.SHA512.algorithm.name -> "ES512K"
                             else -> "ES256K"
                         }
                     }
                     else -> {
                         when (algorithm.hash.name) {
-                            Sha.Sha256.name -> "ES256"
-                            Sha.Sha384.name -> "ES384"
-                            Sha.Sha512.name -> "ES512"
+                            Sha.SHA256.algorithm.name -> "ES256"
+                            Sha.SHA384.algorithm.name -> "ES384"
+                            Sha.SHA512.algorithm.name -> "ES512"
                             else -> "ES256"
                         }
                     }

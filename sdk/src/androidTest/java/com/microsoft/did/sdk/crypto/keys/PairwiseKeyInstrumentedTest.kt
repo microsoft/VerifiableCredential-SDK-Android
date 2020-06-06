@@ -78,7 +78,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona"
@@ -110,7 +110,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona:1"
@@ -138,7 +138,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona:1"
@@ -156,7 +156,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256r1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona"

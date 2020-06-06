@@ -41,7 +41,7 @@ class AndroidKeyStoreInstrumentedTest {
             RsaHashedKeyAlgorithm(
                 modulusLength = 4096UL,
                 publicExponent = 65537UL,
-                hash = Sha.Sha256,
+                hash = Sha.SHA256.algorithm,
                 additionalParams = mapOf("KeyReference" to keyRef)
             ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
         )
