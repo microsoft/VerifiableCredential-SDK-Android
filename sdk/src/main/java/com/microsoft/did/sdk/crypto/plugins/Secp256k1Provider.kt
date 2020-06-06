@@ -20,7 +20,7 @@ import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
 import java.util.*
 
-class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
+class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
@@ -51,7 +51,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
             )
         )
 
-        val keyPair = CryptoKeyPair(
+        return CryptoKeyPair(
             privateKey = CryptoKey(
                 KeyType.Private,
                 extractable,
@@ -67,8 +67,6 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 Secp256k1Handle("", publicKey)
             )
         )
-
-        return return keyPair
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
@@ -149,7 +147,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 val y =
                     Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val xyData = ByteArray(65)
-                xyData[0] = secp256k1Tag.uncompressed.byte
+                xyData[0] = Secp256k1Tag.UNCOMPRESSED.byte
                 x.forEachIndexed { index, byte ->
                     xyData[index + 1] = byte
                 }
@@ -209,15 +207,15 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     // mapped from secp256k1_eckey_pubkey_parse
     private fun publicToXY(keyData: ByteArray): Pair<String, String> {
         if (keyData.size == 33 && (
-                keyData[0] == secp256k1Tag.even.byte ||
-                    keyData[0] == secp256k1Tag.odd.byte)
+                keyData[0] == Secp256k1Tag.EVEN.byte ||
+                    keyData[0] == Secp256k1Tag.ODD.byte)
         ) {
             // compressed form
             throw KeyFormatException("Compressed Hex format is not supported.")
         } else if (keyData.size == 65 && (
-                keyData[0] == secp256k1Tag.uncompressed.byte ||
-                    keyData[0] == secp256k1Tag.hybridEven.byte ||
-                    keyData[0] == secp256k1Tag.hybridOdd.byte
+                keyData[0] == Secp256k1Tag.UNCOMPRESSED.byte ||
+                    keyData[0] == Secp256k1Tag.HYBRIDEVEN.byte ||
+                    keyData[0] == Secp256k1Tag.HYBRIDODD.byte
                 )
         ) {
             // uncompressed, bytes 1-32, and 33-end are x and y
@@ -232,11 +230,11 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         }
     }
 
-    enum class secp256k1Tag(val byte: Byte) {
-        even(0x02),
-        odd(0x03),
-        uncompressed(0x04),
-        hybridEven(0x06),
-        hybridOdd(0x07)
+    enum class Secp256k1Tag(val byte: Byte) {
+        EVEN(0x02),
+        ODD(0x03),
+        UNCOMPRESSED(0x04),
+        HYBRIDEVEN(0x06),
+        HYBRIDODD(0x07)
     }
 }
