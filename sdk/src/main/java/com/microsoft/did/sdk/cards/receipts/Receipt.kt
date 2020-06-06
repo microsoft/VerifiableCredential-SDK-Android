@@ -3,9 +3,9 @@ package com.microsoft.did.sdk.cards.receipts
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-enum class ReceiptAction(action: String) {
-    Issuance("issuance"),
-    Presentation("presentation")
+enum class ReceiptAction {
+    Issuance,
+    Presentation
 }
 
 @Entity

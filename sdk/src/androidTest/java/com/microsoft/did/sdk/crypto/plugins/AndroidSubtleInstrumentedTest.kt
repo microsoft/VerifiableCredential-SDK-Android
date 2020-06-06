@@ -11,7 +11,10 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.Serializer
 import com.microsoft.did.sdk.utilities.stringToByteArray
@@ -76,7 +79,8 @@ class AndroidSubtleInstrumentedTest {
     @Test
     fun signAndVerifySignatureTest() {
         val keyReference = "KeyReference4"
-        cryptoKeyPair = androidSubtle.generateKeyPair(EcdsaParams(
+        cryptoKeyPair = androidSubtle.generateKeyPair(
+            EcdsaParams(
             hash =  Sha.Sha256,
             additionalParams = mapOf(
                 "namedCurve" to "P-256K",

@@ -1,5 +1,7 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
 
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+
 interface SubtleCrypto {
     fun encrypt(algorithm: Algorithm,
                 key: CryptoKey,
@@ -19,7 +21,7 @@ interface SubtleCrypto {
                data: ByteArray): Boolean
 
     fun digest(algorithm: Algorithm,
-    data: ByteArray): ByteArray
+               data: ByteArray): ByteArray
 
     fun generateKey(algorithm: Algorithm,
                     extractable: Boolean,
@@ -58,7 +60,8 @@ interface SubtleCrypto {
     fun wrapKey(format: KeyFormat,
                 key: CryptoKey,
                 wrappingKey: CryptoKey,
-                wrapAlgorithm: Algorithm): ByteArray
+                wrapAlgorithm: Algorithm
+    ): ByteArray
 
     fun unwrapKey(format: KeyFormat,
                   wrappedKey: ByteArray,

@@ -8,7 +8,10 @@ import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.AndroidKeyHandle
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.AndroidKeyConverter
 import com.microsoft.did.sdk.utilities.Base64Url

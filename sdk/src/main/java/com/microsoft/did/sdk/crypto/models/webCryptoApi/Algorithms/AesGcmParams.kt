@@ -1,4 +1,6 @@
-package com.microsoft.did.sdk.crypto.models.webCryptoApi
+package com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms
+
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 
 /**
  * @see https://www.w3.org/TR/WebCryptoAPI/#dfn-AesGcmParams

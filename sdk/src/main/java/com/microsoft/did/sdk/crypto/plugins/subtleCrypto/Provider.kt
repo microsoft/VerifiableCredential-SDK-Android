@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
@@ -44,7 +45,7 @@ abstract class Provider {
         throw UnSupportedOperationException("ExportKeyJwk not supported.")
     }
     protected open fun onImportKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm,
-                              extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
+                                   extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
         throw UnSupportedOperationException("ImportKey not supported.")
     }
     protected open fun onImportKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm,
@@ -99,7 +100,7 @@ abstract class Provider {
         return onExportKeyJwk(key)
     }
     fun importKey(format: KeyFormat, keyData: ByteArray, algorithm: Algorithm, extractable: Boolean,
-                         keyUsages: Set<KeyUsage>): CryptoKey {
+                  keyUsages: Set<KeyUsage>): CryptoKey {
         if (format == KeyFormat.Jwk) {
             throw KeyFormatException("KeyData does not match format")
         }
@@ -107,7 +108,7 @@ abstract class Provider {
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
     }
     fun importKey(format: KeyFormat, keyData: JsonWebKey, algorithm: Algorithm, extractable: Boolean,
-                         keyUsages: Set<KeyUsage>): CryptoKey {
+                  keyUsages: Set<KeyUsage>): CryptoKey {
         if (format != KeyFormat.Jwk) {
             throw KeyFormatException("KeyData does not match format")
         }

@@ -1,6 +1,6 @@
 package com.microsoft.did.sdk.crypto.models
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
 
