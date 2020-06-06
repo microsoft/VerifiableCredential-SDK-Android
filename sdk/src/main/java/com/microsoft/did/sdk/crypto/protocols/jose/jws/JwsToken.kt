@@ -93,9 +93,6 @@ class JwsToken private constructor(private val payload: String,
                 val jws = intermediateGeneralJsonSerialize()
                 serializer.stringify(JwsGeneralJson.serializer(), jws)
             }
-            else -> {
-                throw SignatureException("Unknown JWS format: $format")
-            }
         }
     }
 

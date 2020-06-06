@@ -119,13 +119,14 @@ abstract class Provider {
     private fun checkDigest(algorithm: Algorithm) {
         checkAlgorithmName(algorithm)
     }
+
     private fun checkGenerateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
         checkAlgorithmName(algorithm)
         checkGenerateKeyParams(algorithm)
         if (keyUsages.count() == 0) {
             throw KeyException("Usages cannot be empty when creating a key.")
         }
-        var allowedUsages: Set<KeyUsage> = if (this.symmetricKeyUsage != null) {
+        val allowedUsages: Set<KeyUsage> = if (this.symmetricKeyUsage != null) {
             this.symmetricKeyUsage!!
         } else {
             this.privateKeyUsage!! union this.publicKeyUsage!!

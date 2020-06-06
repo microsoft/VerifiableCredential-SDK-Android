@@ -123,7 +123,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         wrappingKey: CryptoKey,
         wrapAlgorithm: Algorithm
     ): ByteArray {
-        var keyData: ByteArray
+        val keyData: ByteArray
         if (format == KeyFormat.Jwk) {
             val keyJwk = this.exportKeyJwk(key)
             val jwkSequence = serializer.stringify(JsonWebKey.serializer(), keyJwk).asSequence()
