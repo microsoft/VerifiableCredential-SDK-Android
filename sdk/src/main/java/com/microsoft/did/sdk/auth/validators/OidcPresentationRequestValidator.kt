@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.utilities.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.did.sdk.auth.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.auth.requests.PresentationRequest
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.ValidatorException
 import java.util.*
 import javax.inject.Inject

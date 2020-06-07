@@ -21,7 +21,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.repository.CardRepository
 import com.microsoft.did.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.*
 import com.microsoft.did.sdk.utilities.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers

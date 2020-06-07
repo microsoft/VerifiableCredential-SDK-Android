@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

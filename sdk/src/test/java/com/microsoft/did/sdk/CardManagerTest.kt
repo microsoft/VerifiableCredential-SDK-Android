@@ -9,7 +9,7 @@ import com.microsoft.did.sdk.cards.PortableIdentityCard
 import com.microsoft.did.sdk.cards.receipts.Receipt
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.repository.CardRepository
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.Result
 import io.mockk.*
 import kotlinx.coroutines.runBlocking

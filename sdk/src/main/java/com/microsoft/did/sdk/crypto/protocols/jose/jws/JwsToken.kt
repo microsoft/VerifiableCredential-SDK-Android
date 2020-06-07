@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.*
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.SignatureException
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import java.util.*
 import kotlin.collections.Map
 

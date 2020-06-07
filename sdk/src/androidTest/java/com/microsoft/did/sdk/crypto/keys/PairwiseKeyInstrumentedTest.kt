@@ -20,7 +20,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import org.assertj.core.api.Assertions

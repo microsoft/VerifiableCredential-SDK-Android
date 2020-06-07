@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.utilities.Constants.SIDETREE_CURVE_NAME_FOR_EC
 import com.microsoft.did.sdk.utilities.Constants.SIDETREE_MULTIHASH_CODE
 import com.microsoft.did.sdk.utilities.Constants.SIDETREE_MULTIHASH_LENGTH
 import com.microsoft.did.sdk.utilities.Constants.SIDETREE_PATCH_ACTION
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.stringToByteArray
 import java.security.MessageDigest
 import javax.inject.Inject

@@ -17,6 +17,7 @@ import com.microsoft.did.sdk.utilities.*
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
 import com.microsoft.did.sdk.utilities.log.SdkLog
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject
@@ -192,9 +193,10 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     override fun list(): Map<String, KeyStoreListItem> {
-        val nativeList = listNativeKeys()
-        val softwareList = listSecureData()
-        return com.microsoft.did.sdk.utilities.Map.join(softwareList, nativeList)
+        val result = mutableMapOf<String, KeyStoreListItem>()
+        result.putAll(listSecureData())
+        result.putAll(listNativeKeys())
+        return result
     }
 
     private fun listNativeKeys(): Map<String, KeyStoreListItem> {

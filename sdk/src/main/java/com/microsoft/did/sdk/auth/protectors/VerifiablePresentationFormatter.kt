@@ -5,7 +5,7 @@ import com.microsoft.did.sdk.auth.models.verifiablePresentation.VerifiablePresen
 import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.utilities.Constants
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton

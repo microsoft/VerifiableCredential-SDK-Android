@@ -10,11 +10,12 @@ import com.microsoft.did.sdk.auth.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.cards.receipts.ReceiptAction
 import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 
 object RoomConverters {
 
-    private val serializer: Serializer = Serializer()
+    private val serializer: Serializer =
+        Serializer()
 
     @TypeConverter
     @JvmStatic

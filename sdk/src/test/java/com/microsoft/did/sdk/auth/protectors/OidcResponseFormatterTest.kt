@@ -9,7 +9,7 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.nhaarman.mockitokotlin2.eq
 import org.junit.Before
 import org.mockito.Mock
@@ -46,7 +46,8 @@ class OidcResponseFormatterTest {
     private val audience: String = "audience2432"
     private val thumbprint: String = "thumbprint534233"
     private val expiresIn: Int = 42
-    private val serializer: Serializer = Serializer()
+    private val serializer: Serializer =
+        Serializer()
     private val mockedJsonWebKey = JsonWebKey()
     private val mockedIdentifier = Identifier(did,
         "",

@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.utilities
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 

@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.auth.models.verifiablePresentation.VerifiablePresen
 import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.did.sdk.identifier.Identifier
 import com.microsoft.did.sdk.utilities.Constants
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.nhaarman.mockitokotlin2.eq
 import org.junit.Before
 import org.junit.Test
@@ -28,7 +28,8 @@ class VerifiablePresentationFormatterTest {
     private val audience: String = "audience2432"
     private val mockedRawVc: String = "raw24237"
     private val expiresIn: Int = 42
-    private val serializer: Serializer = Serializer()
+    private val serializer: Serializer =
+        Serializer()
     private val mockedIdentifier = Identifier(did,
         "",
         signingKeyRef,

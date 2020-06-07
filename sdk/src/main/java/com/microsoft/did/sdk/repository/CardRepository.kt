@@ -22,7 +22,7 @@ import com.microsoft.did.sdk.repository.networking.cardOperations.SendVerifiable
 import com.microsoft.did.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.utilities.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.PairwiseIssuanceException
 import com.microsoft.did.sdk.utilities.controlflow.Result
 import javax.inject.Inject

@@ -8,6 +8,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.SignatureException
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 

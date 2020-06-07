@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.repository.networking.cardOperations
 import com.microsoft.did.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.repository.networking.PostNetworkOperation
 import com.microsoft.did.sdk.repository.networking.apis.ApiProvider
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.IssuanceException
 import com.microsoft.did.sdk.utilities.controlflow.Result
 import retrofit2.Response

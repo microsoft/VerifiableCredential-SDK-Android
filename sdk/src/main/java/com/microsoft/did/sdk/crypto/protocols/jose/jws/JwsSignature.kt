@@ -2,6 +2,7 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.utilities.*
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import kotlinx.serialization.Serializable
 
 /**

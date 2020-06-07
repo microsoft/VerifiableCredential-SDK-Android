@@ -4,7 +4,7 @@ package com.microsoft.did.sdk.utilities
 
 import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 
 fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String, serializer: Serializer): VerifiableCredentialContent {
     val token = JwsToken.deserialize(signedVerifiableCredential, serializer)

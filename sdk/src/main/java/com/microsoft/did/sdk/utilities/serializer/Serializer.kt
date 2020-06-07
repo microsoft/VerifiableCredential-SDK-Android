@@ -1,4 +1,6 @@
-package com.microsoft.did.sdk.utilities
+// Copyright (c) Microsoft Corporation. All rights reserved
+
+package com.microsoft.did.sdk.utilities.serializer
 
 import com.microsoft.did.sdk.auth.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.auth.models.serviceResponses.PresentationServiceResponse

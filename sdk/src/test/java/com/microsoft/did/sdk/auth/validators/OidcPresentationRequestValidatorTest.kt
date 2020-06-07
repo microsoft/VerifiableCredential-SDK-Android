@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.utilities.serializer.Serializer
 import org.junit.Before
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
@@ -36,7 +36,8 @@ class OidcPresentationRequestValidatorTest {
     private val audience: String = "audience2432"
     private val mockedSerializedToken: String = "token2364302"
     private val clientId: String = "clientId12453"
-    private val serializer: Serializer = Serializer()
+    private val serializer: Serializer =
+        Serializer()
     private val mockedIdentifier = Identifier(did,
         "",
         signingKeyRef,

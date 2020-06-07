@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved
+
 package com.microsoft.did.sdk.utilities
 
 import android.util.Base64
