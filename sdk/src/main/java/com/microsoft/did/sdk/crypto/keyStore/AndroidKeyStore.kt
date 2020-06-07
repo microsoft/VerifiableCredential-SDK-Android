@@ -158,7 +158,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
-        var jwk = key.toJWK();
+        val jwk = key.toJWK();
         jwk.kid = alias;
         val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
@@ -173,7 +173,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
             return
         }
         // This key is not natively supported
-        var jwk = key.toJWK();
+        val jwk = key.toJWK();
         jwk.kid = alias;
         val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
