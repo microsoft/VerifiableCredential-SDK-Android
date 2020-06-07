@@ -102,7 +102,6 @@ object JwaCryptoConverter {
         }
     }
 
-    @ExperimentalUnsignedTypes
     fun jwkAlgToKeyGenWebCrypto(algorithm: String): Algorithm {
         return when (algorithm.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {

@@ -62,9 +62,12 @@ android {
     }
 
     lintOptions {
-        // TODO: fix lint warnings
         abortOnError false
         warningsAsErrors false
+        textReport true
+        textOutput "stdout"
+        explainIssues true
+        showAll true
     }
 }
 
