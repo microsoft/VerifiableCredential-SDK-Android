@@ -14,14 +14,20 @@ import javax.inject.Singleton
 class VerifiablePresentationFormatter @Inject constructor(
     private val serializer: Serializer,
     private val signer: TokenSigner
-)  {
+) {
 
     // only support one VC per VP
-    fun createPresentation(verifiableCredentials: List<VerifiableCredential>, audience: String, responder: Identifier, expiresIn: Int): String {
+    fun createPresentation(
+        verifiableCredentials: List<VerifiableCredential>,
+        audience: String,
+        responder: Identifier,
+        expiresIn: Int
+    ): String {
         val vp = VerifiablePresentationDescriptor(
-                verifiableCredential = verifiableCredentials.map { it.raw },
-                context = listOf(Constants.VP_CONTEXT_URL),
-                type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE))
+            verifiableCredential = verifiableCredentials.map { it.raw },
+            context = listOf(Constants.VP_CONTEXT_URL),
+            type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
+        )
 
         val (iat, exp) = createIatAndExp(expiresIn)
         val jti = UUID.randomUUID().toString()

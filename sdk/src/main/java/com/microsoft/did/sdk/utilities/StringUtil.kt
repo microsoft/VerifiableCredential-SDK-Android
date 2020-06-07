@@ -10,8 +10,7 @@ fun byteArrayToString(array: ByteArray): String {
 
 fun printBytes(array: ByteArray) {
     print("[")
-    array.forEachIndexed{
-        index, it ->
+    array.forEachIndexed { index, it ->
         if (it < 0) {
             print(it + 256)
         } else {

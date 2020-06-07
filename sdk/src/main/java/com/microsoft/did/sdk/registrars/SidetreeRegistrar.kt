@@ -18,7 +18,8 @@ import javax.inject.Named
  * @implements Registrar
  */
 class SidetreeRegistrar @Inject constructor(
-    @Named("registrationUrl") private val baseUrl: String) : Registrar() {
+    @Named("registrationUrl") private val baseUrl: String
+) : Registrar() {
 
     /**
      * Registers Identifier that is passed in.

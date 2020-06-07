@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.utilities.stringToByteArray
  * @class
  * @abstract
  */
-abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
+abstract class PublicKey(val key: JsonWebKey) : IKeyStoreItem {
     /**
      * Key type
      */
@@ -34,7 +34,7 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key
@@ -46,7 +46,7 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
      * @param jwk JSON object representation of a JWK
      * @see https://tools.ietf.org/html/rfc7638
      */
-    fun getThumbprint (crypto: CryptoOperations, sha: Algorithm = Sha.SHA512.algorithm): String {
+    fun getThumbprint(crypto: CryptoOperations, sha: Algorithm = Sha.SHA512.algorithm): String {
         // construct a JSON object with only required fields
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)

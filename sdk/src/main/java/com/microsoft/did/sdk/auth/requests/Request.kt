@@ -32,5 +32,8 @@ sealed class Request(val attestations: CredentialAttestations?, val entityName: 
 }
 
 // Request can be either an Issuance or Presentation Request only.
-class IssuanceRequest(val contract: PicContract, val contractUrl: String): Request(contract.input.attestations, contract.display.card.issuedBy, contract.input.issuer)
-class PresentationRequest(val uri: Uri, val serializedToken: String, val content: OidcRequestContent) : Request(content.attestations, content.registration?.clientName ?: "", content.iss)
+class IssuanceRequest(val contract: PicContract, val contractUrl: String) :
+    Request(contract.input.attestations, contract.display.card.issuedBy, contract.input.issuer)
+
+class PresentationRequest(val uri: Uri, val serializedToken: String, val content: OidcRequestContent) :
+    Request(content.attestations, content.registration?.clientName ?: "", content.iss)

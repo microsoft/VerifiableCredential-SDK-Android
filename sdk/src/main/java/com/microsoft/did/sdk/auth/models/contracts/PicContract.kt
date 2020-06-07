@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * schema, display, and input.
  */
 @Serializable
-data class PicContract (
+data class PicContract(
     // unique identifier of the contract
     val id: String,
 

@@ -13,7 +13,12 @@ import com.microsoft.did.sdk.utilities.controlflow.IssuanceException
 import com.microsoft.did.sdk.utilities.controlflow.Result
 import retrofit2.Response
 
-class SendVerifiableCredentialIssuanceRequestNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider, private val serializer: Serializer): PostNetworkOperation<IssuanceServiceResponse, String>() {
+class SendVerifiableCredentialIssuanceRequestNetworkOperation(
+    url: String,
+    serializedResponse: String,
+    apiProvider: ApiProvider,
+    private val serializer: Serializer
+) : PostNetworkOperation<IssuanceServiceResponse, String>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
 
     override fun onSuccess(response: Response<IssuanceServiceResponse>): Result<String> {

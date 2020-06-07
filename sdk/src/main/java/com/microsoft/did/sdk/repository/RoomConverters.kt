@@ -26,7 +26,8 @@ object RoomConverters {
 
     @TypeConverter
     @JvmStatic
-    fun vcContentsToString(verifiableCredentialContent: VerifiableCredentialContent) = serializer.stringify(VerifiableCredentialContent.serializer(), verifiableCredentialContent)
+    fun vcContentsToString(verifiableCredentialContent: VerifiableCredentialContent) =
+        serializer.stringify(VerifiableCredentialContent.serializer(), verifiableCredentialContent)
 
     @TypeConverter
     @JvmStatic

@@ -8,6 +8,6 @@ package com.microsoft.did.sdk.auth.models.serviceResponses
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class IssuanceServiceResponse (
+data class IssuanceServiceResponse(
     val vc: String
-): ServiceResponse
+) : ServiceResponse

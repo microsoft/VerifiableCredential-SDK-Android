@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 @SuppressWarnings(RoomWarnings.PRIMARY_KEY_FROM_EMBEDDED_IS_DROPPED)
-data class PortableIdentityCard (
+data class PortableIdentityCard(
 
     // id of the prime Verifiable Credential
     @PrimaryKey

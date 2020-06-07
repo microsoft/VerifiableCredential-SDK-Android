@@ -14,6 +14,7 @@ object Base64 {
     fun encode(data: ByteArray): String {
         return encode(data, dictionary, padding)
     }
+
     fun decode(base64: String): ByteArray {
         return decode(base64, dictionary, padding)
     }
@@ -21,19 +22,21 @@ object Base64 {
 
 object Base64Url {
     private val dictionary = listOf(
-    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W",
-    "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
-    "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "_"
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W",
+        "X", "Y", "Z", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+        "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "-", "_"
     )
+
     fun encode(data: ByteArray): String {
         return encode(data, dictionary, null)
     }
+
     fun decode(base64url: String): ByteArray {
         return decode(base64url, dictionary, null)
     }
 }
 
-private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) {
+private class ByteGroup private constructor(val ir: List<Int>, val bytes: Int) {
 
     companion object {
         fun uInt(byte: Byte): Int {
@@ -79,8 +82,16 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
 //        +--1.index--+--2.index--+--3.index--+--4.index--+
             // bit shifting is only available in Int and Long. Int is 32, capable of holding all bytes.
             var inputGroupInt = uInt(data[0]).shl(16)
-            inputGroupInt = inputGroupInt or if (data.size > 1) { uInt(data[1]).shl(8) } else { 0 }
-            inputGroupInt = inputGroupInt or if (data.size > 2) { uInt(data[2]) } else { 0 }
+            inputGroupInt = inputGroupInt or if (data.size > 1) {
+                uInt(data[1]).shl(8)
+            } else {
+                0
+            }
+            inputGroupInt = inputGroupInt or if (data.size > 2) {
+                uInt(data[2])
+            } else {
+                0
+            }
             val index1 = inputGroupInt.and(0x00fc0000).shr(18)
             val index2 = inputGroupInt.and(0x0003f000).shr(12)
             val index3 = inputGroupInt.and(0x00000fc0).shr(6)
@@ -96,12 +107,12 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
         output += if (bytes > 1) {
             dictionary[ir[2]]
         } else {
-            padding?: ""
+            padding ?: ""
         }
         output += if (bytes > 2) {
             dictionary[ir[3]]
         } else {
-            padding?: ""
+            padding ?: ""
         }
         return output
     }
@@ -131,13 +142,12 @@ private class ByteGroup private constructor (val ir: List<Int>, val bytes: Int) 
 private fun decode(data: String, dictionary: List<String>, padding: Char?): ByteArray {
     val outputs = mutableListOf<ByteArray>()
     for (index in data.indices step 4) {
-        val slice = data.slice(index..min(index+3, data.length-1))
+        val slice = data.slice(index..min(index + 3, data.length - 1))
         outputs.add(ByteGroup.fromString(slice, dictionary, padding).toBytes())
     }
     var outputSize = max(0, outputs.size - 1) * 3 + (outputs.lastOrNull()?.size ?: 0)
     val output = ByteArray(outputSize)
-    outputs.forEachIndexed {
-        index, bytes ->
+    outputs.forEachIndexed { index, bytes ->
         bytes.copyInto(output, index * 3)
     }
     return output
@@ -146,7 +156,7 @@ private fun decode(data: String, dictionary: List<String>, padding: Char?): Byte
 private fun encode(data: ByteArray, dictionary: List<String>, padding: Char?): String {
     var output = ""
     for (index in data.indices step 3) {
-        val slice = data.sliceArray(index..min(index+2, data.size-1))
+        val slice = data.sliceArray(index..min(index + 2, data.size - 1))
         output += ByteGroup.fromByteArray(slice).toString(dictionary, padding)
     }
     return output

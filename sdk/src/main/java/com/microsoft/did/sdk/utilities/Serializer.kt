@@ -12,7 +12,7 @@ import kotlin.reflect.KClass
 import kotlin.collections.Map
 
 @Singleton
-class Serializer @Inject constructor(): ISerializer {
+class Serializer @Inject constructor() : ISerializer {
     private val serviceResponseSerializer = SerializersModule {
         polymorphic(ServiceResponse::class) {
             IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()

@@ -13,7 +13,12 @@ import com.microsoft.did.sdk.identifier.Identifier
  */
 sealed class PicActionRequest(val audience: String)
 
-class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) : PicActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?:"")
-class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) : PicActionRequest(verifiableCredential.contents.vc.revokeService?.id ?:"")
-class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) : PicActionRequest(verifiableCredential.contents.vc.credentialStatus?.id ?:"")
+class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) :
+    PicActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
+
+class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :
+    PicActionRequest(verifiableCredential.contents.vc.revokeService?.id ?: "")
+
+class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :
+    PicActionRequest(verifiableCredential.contents.vc.credentialStatus?.id ?: "")
 

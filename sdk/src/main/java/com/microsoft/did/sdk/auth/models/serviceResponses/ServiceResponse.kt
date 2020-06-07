@@ -5,5 +5,4 @@
 
 package com.microsoft.did.sdk.auth.models.serviceResponses
 
-interface ServiceResponse {
-}
+interface ServiceResponse

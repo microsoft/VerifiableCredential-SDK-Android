@@ -27,8 +27,14 @@ object AndroidKeyConverter {
                         alg = publicKey.algorithm,
                         key_ops = listOf(KeyUsage.Encrypt.value),
                         use = KeyUse.Encryption.value,
-                        n = Base64.encodeToString((publicKey as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim(),
-                        e = Base64.encodeToString(publicKey.publicExponent.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim()
+                        n = Base64.encodeToString(
+                            (publicKey as RSAPublicKey).modulus.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        ).trim(),
+                        e = Base64.encodeToString(
+                            publicKey.publicExponent.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        ).trim()
                     )
                 )
             }
@@ -40,8 +46,14 @@ object AndroidKeyConverter {
                         alg = publicKey.algorithm,
                         key_ops = listOf(KeyUsage.Verify.value),
                         use = KeyUse.Signature.value,
-                        x = Base64.encodeToString((publicKey as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim(),
-                        y = Base64.encodeToString(publicKey.w.affineY.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP).trim()
+                        x = Base64.encodeToString(
+                            (publicKey as ECPublicKey).w.affineX.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        ).trim(),
+                        y = Base64.encodeToString(
+                            publicKey.w.affineY.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        ).trim()
                     )
                 )
             }
@@ -53,14 +65,17 @@ object AndroidKeyConverter {
         val key = keyStore.getCertificate(alias).publicKey
         return when (whatKeyTypeIs(key)) {
             KeyType.RSA -> {
-                RsaPrivateKey (
+                RsaPrivateKey(
                     JsonWebKey(
                         kty = KeyType.RSA.value,
                         kid = alias,
                         alg = key.algorithm,
                         key_ops = listOf(KeyUsage.Decrypt.value),
                         use = KeyUse.Encryption.value,
-                        n = Base64.encodeToString((key as RSAPublicKey).modulus.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                        n = Base64.encodeToString(
+                            (key as RSAPublicKey).modulus.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        ),
                         e = Base64.encodeToString(key.publicExponent.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                         d = "0",
                         p = "0",
@@ -72,14 +87,17 @@ object AndroidKeyConverter {
                 )
             }
             KeyType.EllipticCurve -> {
-                EllipticCurvePrivateKey (
+                EllipticCurvePrivateKey(
                     JsonWebKey(
                         kty = KeyType.EllipticCurve.value,
                         kid = alias,
                         alg = key.algorithm,
                         key_ops = listOf(KeyUsage.Sign.value),
                         use = KeyUse.Signature.value,
-                        x = Base64.encodeToString((key as ECPublicKey).w.affineX.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                        x = Base64.encodeToString(
+                            (key as ECPublicKey).w.affineX.toByteArray(),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        ),
                         y = Base64.encodeToString(key.w.affineY.toByteArray(), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                         d = "0"
                     )

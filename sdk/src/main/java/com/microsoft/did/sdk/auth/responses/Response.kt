@@ -75,9 +75,10 @@ sealed class Response(open val request: Request, val audience: String) {
             cardId = cardId,
             activityDate = date,
             entityIdentifier = entityDid,
-            entityName = entityName)
+            entityName = entityName
+        )
     }
 }
 
-class IssuanceResponse(override val request: IssuanceRequest): Response(request, request.contract.input.credentialIssuer)
-class PresentationResponse(override val request: PresentationRequest): Response(request, request.content.redirectUrl)
+class IssuanceResponse(override val request: IssuanceRequest) : Response(request, request.contract.input.credentialIssuer)
+class PresentationResponse(override val request: PresentationRequest) : Response(request, request.content.redirectUrl)

@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 
-class RsaPublicKey(jwk: JsonWebKey): PublicKey(jwk) {
+class RsaPublicKey(jwk: JsonWebKey) : PublicKey(jwk) {
     override fun minimumAlphabeticJwk(): String {
         return "{\"e\":\"${e}\",\"kty\":\"${kty.value}\",\"n\":\"${n}\"}"
     }

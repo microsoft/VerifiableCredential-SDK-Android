@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * Properties to render a user-specific claim.
  */
 @Serializable
-data class ClaimDescriptor (
+data class ClaimDescriptor(
 
     // What data type the claim is (ex. "Date")
     val type: String? = null,

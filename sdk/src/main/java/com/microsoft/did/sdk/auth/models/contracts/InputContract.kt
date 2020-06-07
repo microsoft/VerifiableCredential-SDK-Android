@@ -16,7 +16,7 @@ const val INPUT = "input"
  * where to obtain the inputs and the endpoint to call to obtain a Verifiable Credential.
  */
 @Serializable
-data class InputContract (
+data class InputContract(
 
     // Value should be set to "input".
     val id: String = INPUT,

@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  */
 @Entity
 @Serializable
-data class VerifiableCredentialContent (
+data class VerifiableCredentialContent(
 
     // ID of the Verifiable Credential.
     val jti: String,

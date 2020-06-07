@@ -7,4 +7,5 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class EllipticCurveSubtleCrypto @Inject constructor(default: SubtleCrypto, serializer: Serializer): Subtle(setOf(Secp256k1Provider(default)), serializer)
+class EllipticCurveSubtleCrypto @Inject constructor(default: SubtleCrypto, serializer: Serializer) :
+    Subtle(setOf(Secp256k1Provider(default)), serializer)

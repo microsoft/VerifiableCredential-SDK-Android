@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
  * @see [Verifiable Credential Spec](https://www.w3.org/TR/vc-data-model/#basic-concepts)
  */
 @Serializable
-data class VerifiablePresentationContent (
+data class VerifiablePresentationContent(
 
     // ID of the Verifiable Credential.
     val jti: String,

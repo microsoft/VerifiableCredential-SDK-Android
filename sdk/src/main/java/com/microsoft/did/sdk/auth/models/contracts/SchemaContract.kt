@@ -8,11 +8,12 @@ package com.microsoft.did.sdk.auth.models.contracts
 import kotlinx.serialization.Serializable
 
 const val SCHEMA = "schema"
+
 /**
  * A structured data model used to describe the set of claims in a Verifiable Credential.
  */
 @Serializable
-data class SchemaContract (
+data class SchemaContract(
 
     // Should be set to "schema".
     val id: String = SCHEMA

@@ -9,9 +9,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AttestationClaimModel(
-        val selfIssued: Map<String, String>? = null,
+    val selfIssued: Map<String, String>? = null,
 
-        val idTokens: Map<String, String>? = null,
+    val idTokens: Map<String, String>? = null,
 
-        val presentations: Map<String, String>? = null
+    val presentations: Map<String, String>? = null
 )

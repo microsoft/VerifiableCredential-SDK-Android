@@ -13,11 +13,13 @@ object JwaCryptoConverter {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
         val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
         return if (matches != null) {
-            Pair( if (matches.groupValues[1].isNotBlank()) {
-                matches.groupValues[1]
-            } else {
-                null
-            }, matches.groupValues[2])
+            Pair(
+                if (matches.groupValues[1].isNotBlank()) {
+                    matches.groupValues[1]
+                } else {
+                    null
+                }, matches.groupValues[2]
+            )
         } else {
             Pair(null, keyId)
         }

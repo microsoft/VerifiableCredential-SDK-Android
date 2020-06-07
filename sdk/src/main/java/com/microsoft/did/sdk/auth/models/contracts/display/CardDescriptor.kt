@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  * These properties are not user-specific, but used to render a generic representation of the card.
  */
 @Serializable
-data class CardDescriptor (
+data class CardDescriptor(
 
     // Title of the Card.
     val title: String,

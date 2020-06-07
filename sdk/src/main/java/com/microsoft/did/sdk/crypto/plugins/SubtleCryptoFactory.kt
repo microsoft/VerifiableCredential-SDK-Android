@@ -23,27 +23,32 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
     /**
      * The shared key encryptors
      */
-    var sharedKeyEncrypters: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
+    var sharedKeyEncrypters: MutableMap<String, MutableList<SubtleCryptoMapItem>> =
+        mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The symmetric content encryptors
      */
-    var symmetricEncrypter: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
+    var symmetricEncrypter: MutableMap<String, MutableList<SubtleCryptoMapItem>> =
+        mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The message signer
      */
-    var messageSigners: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
+    var messageSigners: MutableMap<String, MutableList<SubtleCryptoMapItem>> =
+        mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The hmac operations
      */
-    var messageAuthenticationCodeSigners: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
+    var messageAuthenticationCodeSigners: MutableMap<String, MutableList<SubtleCryptoMapItem>> =
+        mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * The digest operations
      */
-    var messageDigests: MutableMap<String, MutableList<SubtleCryptoMapItem>> = mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
+    var messageDigests: MutableMap<String, MutableList<SubtleCryptoMapItem>> =
+        mutableMapOf("*" to mutableListOf(defaultSubtleCryptoMapItem))
 
     /**
      * Label for default algorithm
@@ -55,7 +60,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
      */
-    fun addKeyEncrypter (name: String, subtleCrypto: SubtleCryptoMapItem ) {
+    fun addKeyEncrypter(name: String, subtleCrypto: SubtleCryptoMapItem) {
         addOrCreateListFor(keyEncrypters, name, subtleCrypto)
     }
 
@@ -64,7 +69,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getKeyEncrypter (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getKeyEncrypter(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         return getSubtleCryptoFrom(keyEncrypters, name, scope)
     }
 
@@ -74,7 +79,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
      */
-    fun addSharedKeyEncrypter (name: String, subtleCrypto: SubtleCryptoMapItem) {
+    fun addSharedKeyEncrypter(name: String, subtleCrypto: SubtleCryptoMapItem) {
         addOrCreateListFor(sharedKeyEncrypters, name, subtleCrypto)
     }
 
@@ -84,7 +89,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getSharedKeyEncrypter (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getSharedKeyEncrypter(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         return getSubtleCryptoFrom(sharedKeyEncrypters, name, scope)
     }
 
@@ -93,7 +98,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
      */
-    fun addSymmetricEncrypter (name: String, subtleCrypto: SubtleCryptoMapItem) {
+    fun addSymmetricEncrypter(name: String, subtleCrypto: SubtleCryptoMapItem) {
         addOrCreateListFor(symmetricEncrypter, name, subtleCrypto)
     }
 
@@ -102,7 +107,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getSymmetricEncrypter (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getSymmetricEncrypter(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         return getSubtleCryptoFrom(symmetricEncrypter, name, scope)
     }
 
@@ -111,7 +116,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
      */
-    fun addMessageSigner (name: String, subtleCrypto: SubtleCryptoMapItem) {
+    fun addMessageSigner(name: String, subtleCrypto: SubtleCryptoMapItem) {
         addOrCreateListFor(messageSigners, name, subtleCrypto)
     }
 
@@ -121,7 +126,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getMessageSigner (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getMessageSigner(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         return getSubtleCryptoFrom(messageSigners, name, scope)
     }
 
@@ -130,7 +135,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
      */
-    fun addMessageAuthenticationCodeSigner (name: String, subtleCrypto: SubtleCryptoMapItem) {
+    fun addMessageAuthenticationCodeSigner(name: String, subtleCrypto: SubtleCryptoMapItem) {
         addOrCreateListFor(messageAuthenticationCodeSigners, name, subtleCrypto)
     }
 
@@ -139,7 +144,7 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getMessageAuthenticationCodeSigners (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getMessageAuthenticationCodeSigners(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         return getSubtleCryptoFrom(messageAuthenticationCodeSigners, name, scope)
     }
 
@@ -148,19 +153,20 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
      * @param name The name of the algorithm
      * @param cryptoSuiteMapItem Array containing subtle crypto API's and their scope
      */
-    fun addMessageDigest (name: String, subtleCrypto: SubtleCryptoMapItem) {
+    fun addMessageDigest(name: String, subtleCrypto: SubtleCryptoMapItem) {
         addOrCreateListFor(messageDigests, name, subtleCrypto)
     }
+
     /**
      * Gets the message digest object given the digest algorithm's name
      * @param name The name of the algorithm
      * @returns The corresponding crypto API
      */
-    fun getMessageDigest (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getMessageDigest(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         return getSubtleCryptoFrom(messageDigests, name, scope)
     }
 
-    fun getBestMatch (name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    fun getBestMatch(name: String, scope: SubtleCryptoScope): SubtleCrypto {
         fun findMatch(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, scope: SubtleCryptoScope): SubtleCrypto? {
             val list = map[name]
             if (list != null) {
@@ -173,7 +179,8 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
             return null
         }
         // look in the order of:
-        val searchSequence = listOf(keyEncrypters, messageSigners, symmetricEncrypter, messageDigests, sharedKeyEncrypters, messageAuthenticationCodeSigners)
+        val searchSequence =
+            listOf(keyEncrypters, messageSigners, symmetricEncrypter, messageDigests, sharedKeyEncrypters, messageAuthenticationCodeSigners)
 
         searchSequence.forEach {
             val match = findMatch(it, name, scope)
@@ -182,10 +189,14 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
             }
         }
 
-        return defaultSubtleCryptoMapItem.subtleCrypto;
+        return defaultSubtleCryptoMapItem.subtleCrypto
     }
 
-    private fun addOrCreateListFor(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, subtleCrypto: SubtleCryptoMapItem) {
+    private fun addOrCreateListFor(
+        map: MutableMap<String, MutableList<SubtleCryptoMapItem>>,
+        name: String,
+        subtleCrypto: SubtleCryptoMapItem
+    ) {
         val list = map[name]
         if (list != null) {
             list.add(subtleCrypto)
@@ -195,7 +206,11 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
         }
     }
 
-    private fun getSubtleCryptoFrom(map: MutableMap<String, MutableList<SubtleCryptoMapItem>>, name: String, scope: SubtleCryptoScope): SubtleCrypto {
+    private fun getSubtleCryptoFrom(
+        map: MutableMap<String, MutableList<SubtleCryptoMapItem>>,
+        name: String,
+        scope: SubtleCryptoScope
+    ): SubtleCrypto {
         val list = map[name]
         // check for the specified scope
         if (list != null) {

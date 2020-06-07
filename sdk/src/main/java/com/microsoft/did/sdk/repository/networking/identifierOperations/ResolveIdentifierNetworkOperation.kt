@@ -11,8 +11,8 @@ import com.microsoft.did.sdk.repository.networking.apis.ApiProvider
 import retrofit2.Response
 import javax.inject.Inject
 
-class ResolveIdentifierNetworkOperation @Inject constructor(apiProvider: ApiProvider, url: String, val identifier: String):
+class ResolveIdentifierNetworkOperation @Inject constructor(apiProvider: ApiProvider, url: String, val identifier: String) :
     GetNetworkOperation<IdentifierResponse, IdentifierResponse>() {
 
-    override val call: suspend() -> Response<IdentifierResponse> = {apiProvider.identifierApi.resolveIdentifier("$url/$identifier")}
+    override val call: suspend () -> Response<IdentifierResponse> = { apiProvider.identifierApi.resolveIdentifier("$url/$identifier") }
 }

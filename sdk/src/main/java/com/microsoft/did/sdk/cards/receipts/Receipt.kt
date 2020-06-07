@@ -9,7 +9,7 @@ enum class ReceiptAction {
 }
 
 @Entity
-data class Receipt (
+data class Receipt(
 
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

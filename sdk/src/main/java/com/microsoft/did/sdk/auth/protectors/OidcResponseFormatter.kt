@@ -44,7 +44,8 @@ class OidcResponseFormatter @Inject constructor(
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
         val did = responder.id
-        val attestationResponse = this.createAttestationClaimModel(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims, audience, responder, expiresIn)
+        val attestationResponse =
+            this.createAttestationClaimModel(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims, audience, responder, expiresIn)
 
         val contents = OidcResponseContent(
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
@@ -69,7 +70,14 @@ class OidcResponseFormatter @Inject constructor(
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
-    private fun createAttestationClaimModel(requestedVcs: Map<String, VerifiableCredential>?, requestedIdTokens: Map<String, String>?, requestedSelfIssuedClaims: Map<String, String>?, audience: String, responder: Identifier, expiresIn: Int): AttestationClaimModel? {
+    private fun createAttestationClaimModel(
+        requestedVcs: Map<String, VerifiableCredential>?,
+        requestedIdTokens: Map<String, String>?,
+        requestedSelfIssuedClaims: Map<String, String>?,
+        audience: String,
+        responder: Identifier,
+        expiresIn: Int
+    ): AttestationClaimModel? {
         if (areNoCollectedClaims(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims)) {
             return null
         }
@@ -77,15 +85,25 @@ class OidcResponseFormatter @Inject constructor(
         return AttestationClaimModel(requestedSelfIssuedClaims, requestedIdTokens, presentationAttestations)
     }
 
-    private fun createPresentations(requestedVcs: Map<String, VerifiableCredential>?, audience: String, responder: Identifier, expiresIn: Int): Map<String, String>? {
-        val presentations = requestedVcs?.mapValues { verifiablePresentationFormatter.createPresentation(listOf(it.value), audience, responder, expiresIn) }
+    private fun createPresentations(
+        requestedVcs: Map<String, VerifiableCredential>?,
+        audience: String,
+        responder: Identifier,
+        expiresIn: Int
+    ): Map<String, String>? {
+        val presentations =
+            requestedVcs?.mapValues { verifiablePresentationFormatter.createPresentation(listOf(it.value), audience, responder, expiresIn) }
         if (presentations.isNullOrEmpty()) {
             return null
         }
         return presentations
     }
 
-    private fun areNoCollectedClaims(requestedVcs: Map<String, VerifiableCredential>?, requestedIdTokens: Map<String, String>?, requestedSelfIssuedClaims: Map<String, String>?): Boolean {
+    private fun areNoCollectedClaims(
+        requestedVcs: Map<String, VerifiableCredential>?,
+        requestedIdTokens: Map<String, String>?,
+        requestedSelfIssuedClaims: Map<String, String>?
+    ): Boolean {
         return (requestedVcs.isNullOrEmpty() && requestedIdTokens.isNullOrEmpty() && requestedSelfIssuedClaims.isNullOrEmpty())
     }
 }

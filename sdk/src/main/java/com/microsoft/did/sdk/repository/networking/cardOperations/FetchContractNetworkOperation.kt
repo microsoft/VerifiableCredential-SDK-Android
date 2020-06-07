@@ -10,6 +10,6 @@ import com.microsoft.did.sdk.repository.networking.GetNetworkOperation
 import com.microsoft.did.sdk.repository.networking.apis.ApiProvider
 import retrofit2.Response
 
-class FetchContractNetworkOperation(val url: String, apiProvider: ApiProvider): GetNetworkOperation<PicContract, PicContract>() {
+class FetchContractNetworkOperation(val url: String, apiProvider: ApiProvider) : GetNetworkOperation<PicContract, PicContract>() {
     override val call: suspend () -> Response<PicContract> = { apiProvider.issuanceApis.getContract(url) }
 }

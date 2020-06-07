@@ -71,7 +71,8 @@ class CardRepository @Inject constructor(
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    private suspend fun getAllVerifiableCredentialsByCardId(primaryVcId: String) = verifiableCredentialDao.getVerifiableCredentialByCardId(primaryVcId)
+    private suspend fun getAllVerifiableCredentialsByCardId(primaryVcId: String) =
+        verifiableCredentialDao.getVerifiableCredentialByCardId(primaryVcId)
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
 
@@ -81,7 +82,7 @@ class CardRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredential>  {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
             audience = response.audience,
@@ -148,7 +149,8 @@ class CardRepository @Inject constructor(
             audience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES)
+            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+        )
 
         val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             pairwiseRequest.audience,
@@ -159,8 +161,14 @@ class CardRepository @Inject constructor(
         // we can't return a result here, so need to unwrap Result
         // TODO(should we allow retries here?)
         return when (pairwiseVerifiableCredentialResult) {
-            is Result.Success -> formVerifiableCredential(pairwiseVerifiableCredentialResult.payload, pairwiseRequest.verifiableCredential.picId)
-            is Result.Failure -> throw PairwiseIssuanceException("Unable to reissue Pairwise Verifiable Credential.", pairwiseVerifiableCredentialResult.payload)
+            is Result.Success -> formVerifiableCredential(
+                pairwiseVerifiableCredentialResult.payload,
+                pairwiseRequest.verifiableCredential.picId
+            )
+            is Result.Failure -> throw PairwiseIssuanceException(
+                "Unable to reissue Pairwise Verifiable Credential.",
+                pairwiseVerifiableCredentialResult.payload
+            )
         }
     }
 

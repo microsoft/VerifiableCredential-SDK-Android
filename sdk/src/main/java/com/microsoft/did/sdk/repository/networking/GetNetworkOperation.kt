@@ -5,4 +5,4 @@
 
 package com.microsoft.did.sdk.repository.networking
 
-abstract class GetNetworkOperation<S, T>: BaseNetworkOperation<S, T>()
+abstract class GetNetworkOperation<S, T> : BaseNetworkOperation<S, T>()

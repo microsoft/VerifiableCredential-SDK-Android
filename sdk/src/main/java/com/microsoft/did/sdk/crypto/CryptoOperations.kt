@@ -32,7 +32,7 @@ import java.security.SecureRandom
  * @param subtleCrypto primitives for operations.
  * @param keyStore specific keyStore that securely holds keys.
  */
-class CryptoOperations (
+class CryptoOperations(
     subtleCrypto: SubtleCrypto,
     val keyStore: KeyStore,
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
@@ -153,7 +153,7 @@ class CryptoOperations (
     fun generateAndStoreSeed() {
         val randomNumberGenerator = SecureRandom()
         val seed = randomNumberGenerator.generateSeed(16)
-        val secretKey = SecretKey(JsonWebKey(k=Base64Url.encode(seed)))
+        val secretKey = SecretKey(JsonWebKey(k = Base64Url.encode(seed)))
         keyStore.save(AndroidConstants.masterSeed.value, secretKey)
     }
 
@@ -163,7 +163,7 @@ class CryptoOperations (
      * @param userDid  The owner DID
      * @returns the master key for the user
      */
-    fun generatePersonaMasterKey (seedReference: String, userDid: String): ByteArray {
+    fun generatePersonaMasterKey(seedReference: String, userDid: String): ByteArray {
         // Set of master keys for the different persona's
         var masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
 
@@ -181,7 +181,8 @@ class CryptoOperations (
 
     private fun generateMasterKeyFromSeed(jwk: KeyContainer<SecretKey>, userDid: String): ByteArray {
         // Get the subtle crypto
-        val crypto: SubtleCrypto = subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private)
+        val crypto: SubtleCrypto =
+            subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private)
 
         // Generate the master key
         val alg =
@@ -195,7 +196,9 @@ class CryptoOperations (
         )
         val key = crypto.importKey(
             KeyFormat.Jwk, masterJwk, alg, false, listOf(
-                KeyUsage.Sign))
+                KeyUsage.Sign
+            )
+        )
         return crypto.sign(alg, key, userDid.map { it.toByte() }.toByteArray())
     }
 }

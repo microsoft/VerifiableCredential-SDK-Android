@@ -19,7 +19,7 @@ interface PortableIdentityCardDao {
     fun getAllCards(): LiveData<List<PortableIdentityCard>>
 
     @Query("SELECT * FROM PortableIdentityCard where picId = :id")
-    fun getCardById(id:String): LiveData<PortableIdentityCard>
+    fun getCardById(id: String): LiveData<PortableIdentityCard>
 
     @Insert
     suspend fun insert(portableIdentityCard: PortableIdentityCard)

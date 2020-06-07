@@ -69,7 +69,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient() : OkHttpClient {
+    fun defaultOkHttpClient(): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { println(it) }
         return OkHttpClient()
             .newBuilder()
@@ -79,7 +79,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultRetrofit(okHttpClient: OkHttpClient) : Retrofit {
+    fun defaultRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://TODO.me")
             .client(okHttpClient)

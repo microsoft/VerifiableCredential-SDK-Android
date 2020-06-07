@@ -10,7 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-data class Identifier (
+data class Identifier(
 
     @PrimaryKey
     val id: String,

@@ -16,12 +16,12 @@ object KeyTypeFactory {
      * Create the key type according to the selected algorithm.
      * @param algorithm Web crypto compliant algorithm object
      */
-    fun createViaWebCrypto (algorithm: Algorithm): KeyType {
+    fun createViaWebCrypto(algorithm: Algorithm): KeyType {
         return when (algorithm.name.toLowerCase(Locale.ENGLISH)) {
             "hmac" -> KeyType.Octets
-            "ecdsa", "ecdh" -> KeyType.EllipticCurve;
-            "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA;
-            else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported");
+            "ecdsa", "ecdh" -> KeyType.EllipticCurve
+            "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA
+            else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported")
         }
     }
 }

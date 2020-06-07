@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
  * Properties to be used in the user consent prompt
  */
 @Serializable
-data class ConsentDescriptor (
+data class ConsentDescriptor(
     // Title that will be display on prompt page.
     val title: String,
 

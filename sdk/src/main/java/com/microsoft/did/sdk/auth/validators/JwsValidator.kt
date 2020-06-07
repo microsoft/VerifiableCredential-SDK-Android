@@ -24,7 +24,7 @@ class JwsValidator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val resolver: Resolver,
     private val serializer: Serializer
-    ) {
+) {
 
     /**
      * Verify the signature on the JwsToken.
@@ -43,12 +43,12 @@ class JwsValidator @Inject constructor(
     }
 
     private suspend fun resolvePublicKeys(did: String): List<PublicKey> {
-            return when (val requesterDidDocument = resolver.resolve(did)) {
-                is Result.Success -> {
-                    val publicKeys = requesterDidDocument.payload.publicKey.map { it.toPublicKey() }
-                    publicKeys
-                }
-                is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
+        return when (val requesterDidDocument = resolver.resolve(did)) {
+            is Result.Success -> {
+                val publicKeys = requesterDidDocument.payload.publicKey.map { it.toPublicKey() }
+                publicKeys
             }
+            is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
+        }
     }
 }

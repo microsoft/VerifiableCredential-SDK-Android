@@ -61,7 +61,7 @@ object SdkLog {
         ReplaceWith("this.e(message, tag)")
     )
     fun error(message: String, tag: String = implicitTag()): RuntimeException {
-        log(Level.ERROR, message,null, tag)
+        log(Level.ERROR, message, null, tag)
         return RuntimeException(message)
     }
 
@@ -73,7 +73,7 @@ object SdkLog {
     @Suppress("SameParameterValue")
     private fun getCallerElement(stackTrace: Array<StackTraceElement>, index: Int): StackTraceElement? {
         if (stackTrace.size <= index) {
-            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", null,"SdkLog.implicitTag")
+            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", null, "SdkLog.implicitTag")
             return null
         }
         // Calls from Java into Kotlin's @JvmStatic methods have an extra anonymous method. We have to skip it.
