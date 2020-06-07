@@ -23,13 +23,14 @@ import com.microsoft.did.sdk.repository.CardRepository
 import com.microsoft.did.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.did.sdk.utilities.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.*
+import com.microsoft.did.sdk.utilities.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * This class manages all functionality for managing, getting/creating, presenting, and storing Portable Identity Cards.
+ * This class manages all functionality for managing, getting/creating, presenting, and storing Verifiable Credentials.
  * We only support OpenId Connect Protocol in order to get and present Portable Identity Cards.
  */
 @Singleton
@@ -195,7 +196,8 @@ class CardManager @Inject constructor(
     }
 
     private fun createCard(signedVerifiableCredential: String, owner: Identifier, contract: PicContract): PortableIdentityCard {
-        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
+        val contents =
+            unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
         return PortableIdentityCard(contents.jti, verifiableCredential, owner, contract.display)
     }

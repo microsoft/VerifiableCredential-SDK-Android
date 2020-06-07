@@ -138,14 +138,13 @@ private class ByteGroup private constructor(val ir: List<Int>, val bytes: Int) {
     }
 }
 
-
 private fun decode(data: String, dictionary: List<String>, padding: Char?): ByteArray {
     val outputs = mutableListOf<ByteArray>()
     for (index in data.indices step 4) {
         val slice = data.slice(index..min(index + 3, data.length - 1))
         outputs.add(ByteGroup.fromString(slice, dictionary, padding).toBytes())
     }
-    var outputSize = max(0, outputs.size - 1) * 3 + (outputs.lastOrNull()?.size ?: 0)
+    val outputSize = max(0, outputs.size - 1) * 3 + (outputs.lastOrNull()?.size ?: 0)
     val output = ByteArray(outputSize)
     outputs.forEachIndexed { index, bytes ->
         bytes.copyInto(output, index * 3)

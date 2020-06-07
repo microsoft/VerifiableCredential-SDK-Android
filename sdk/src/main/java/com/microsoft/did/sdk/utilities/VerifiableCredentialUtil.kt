@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk
+package com.microsoft.did.sdk.utilities
 
 import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken

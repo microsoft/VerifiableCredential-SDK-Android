@@ -20,7 +20,7 @@ import com.microsoft.did.sdk.repository.networking.cardOperations.FetchContractN
 import com.microsoft.did.sdk.repository.networking.cardOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.repository.networking.cardOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.repository.networking.cardOperations.SendPresentationResponseNetworkOperation
-import com.microsoft.did.sdk.unwrapSignedVerifiableCredential
+import com.microsoft.did.sdk.utilities.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.did.sdk.utilities.Serializer
 import com.microsoft.did.sdk.utilities.controlflow.PairwiseIssuanceException

@@ -9,16 +9,16 @@ import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredential
 import com.microsoft.did.sdk.identifier.Identifier
 
 /**
- * Sealed Class for Requests to the Portable Identity Card Service to do a certain action on a Verifiable Credential.
+ * Sealed Class for Requests to the Verifiable Credential Service to do a certain action on a Verifiable Credential.
  */
-sealed class PicActionRequest(val audience: String)
+sealed class VcServiceActionRequest(val audience: String)
 
 class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) :
-    PicActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
+    VcServiceActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
 
 class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :
-    PicActionRequest(verifiableCredential.contents.vc.revokeService?.id ?: "")
+    VcServiceActionRequest(verifiableCredential.contents.vc.revokeService?.id ?: "")
 
 class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :
-    PicActionRequest(verifiableCredential.contents.vc.credentialStatus?.id ?: "")
+    VcServiceActionRequest(verifiableCredential.contents.vc.credentialStatus?.id ?: "")
 

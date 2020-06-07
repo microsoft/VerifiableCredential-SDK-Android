@@ -1,4 +1,6 @@
-package com.microsoft.did.sdk.utilities
+// Copyright (c) Microsoft Corporation. All rights reserved
+
+package com.microsoft.did.sdk.utilities.log
 
 import java.lang.RuntimeException
 import java.util.regex.Pattern
@@ -26,27 +28,57 @@ object SdkLog {
     fun addConsumer(consumer: Consumer) = CONSUMERS.add(consumer)
 
     fun v(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(Level.VERBOSE, message, throwable, tag)
+        log(
+            Level.VERBOSE,
+            message,
+            throwable,
+            tag
+        )
     }
 
     fun d(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(Level.DEBUG, message, throwable, tag)
+        log(
+            Level.DEBUG,
+            message,
+            throwable,
+            tag
+        )
     }
 
     fun i(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(Level.INFO, message, throwable, tag)
+        log(
+            Level.INFO,
+            message,
+            throwable,
+            tag
+        )
     }
 
     fun w(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(Level.WARN, message, throwable, tag)
+        log(
+            Level.WARN,
+            message,
+            throwable,
+            tag
+        )
     }
 
     fun e(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(Level.ERROR, message, throwable, tag)
+        log(
+            Level.ERROR,
+            message,
+            throwable,
+            tag
+        )
     }
 
     fun f(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(Level.FAILURE, message, throwable, tag)
+        log(
+            Level.FAILURE,
+            message,
+            throwable,
+            tag
+        )
     }
 
     private fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String) {
@@ -54,26 +86,39 @@ object SdkLog {
     }
 
     @Deprecated("Use short form.", ReplaceWith("this.d(message, tag)"))
-    fun debug(message: String, tag: String = implicitTag()) = d(message, null, tag)
+    fun debug(message: String, tag: String = implicitTag()) =
+        d(message, null, tag)
 
     @Deprecated(
         "Legacy error log function that returns an Exception. Remove all references, then delete this method.",
         ReplaceWith("this.e(message, tag)")
     )
     fun error(message: String, tag: String = implicitTag()): RuntimeException {
-        log(Level.ERROR, message, null, tag)
+        log(
+            Level.ERROR,
+            message,
+            null,
+            tag
+        )
         return RuntimeException(message)
     }
 
     private fun implicitTag(): String {
-        val stackElement = getCallerElement(Throwable().stackTrace, ORIGINAL_CALLER_STACK_INDEX)
+        val stackElement = getCallerElement(
+            Throwable().stackTrace,
+            ORIGINAL_CALLER_STACK_INDEX
+        )
         return if (stackElement != null) createStackElementTag(stackElement) else "INVALID_TAG"
     }
 
     @Suppress("SameParameterValue")
     private fun getCallerElement(stackTrace: Array<StackTraceElement>, index: Int): StackTraceElement? {
         if (stackTrace.size <= index) {
-            w("Synthetic stacktrace didn't have enough elements: are you using proguard?", null, "SdkLog.implicitTag")
+            w(
+                "Synthetic stacktrace didn't have enough elements: are you using proguard?",
+                null,
+                "SdkLog.implicitTag"
+            )
             return null
         }
         // Calls from Java into Kotlin's @JvmStatic methods have an extra anonymous method. We have to skip it.

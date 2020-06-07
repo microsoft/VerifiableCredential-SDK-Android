@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyA
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.AndroidKeyConverter
 import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.SdkLog
+import com.microsoft.did.sdk.utilities.log.SdkLog
 import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException

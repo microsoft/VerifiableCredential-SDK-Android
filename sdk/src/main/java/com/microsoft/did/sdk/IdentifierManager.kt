@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.utilities.Base64Url
 import com.microsoft.did.sdk.utilities.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.did.sdk.utilities.Constants.METHOD_NAME
-import com.microsoft.did.sdk.utilities.SdkLog
+import com.microsoft.did.sdk.utilities.log.SdkLog
 import com.microsoft.did.sdk.utilities.controlflow.Result
 import com.microsoft.did.sdk.utilities.controlflow.RepositoryException
 import com.microsoft.did.sdk.utilities.controlflow.runResultTry

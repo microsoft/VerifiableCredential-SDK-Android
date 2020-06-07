@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk.utilities.controlflow
 
-import com.microsoft.did.sdk.utilities.SdkLog
+import com.microsoft.did.sdk.utilities.log.SdkLog
 
 typealias Success = Boolean
 

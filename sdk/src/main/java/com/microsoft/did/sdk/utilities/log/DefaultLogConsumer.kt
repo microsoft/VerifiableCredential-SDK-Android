@@ -1,4 +1,6 @@
-package com.microsoft.did.sdk.utilities
+// Copyright (c) Microsoft Corporation. All rights reserved
+
+package com.microsoft.did.sdk.utilities.log
 
 import android.util.Log
 

@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.utilities.*
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
+import com.microsoft.did.sdk.utilities.log.SdkLog
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject
@@ -195,7 +196,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val softwareList = listSecureData()
         return com.microsoft.did.sdk.utilities.Map.join(softwareList, nativeList)
     }
-
 
     private fun listNativeKeys(): Map<String, KeyStoreListItem> {
         val output = emptyMap<String, KeyStoreListItem>().toMutableMap()

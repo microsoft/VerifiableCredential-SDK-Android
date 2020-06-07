@@ -21,7 +21,7 @@ import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.SdkLog
+import com.microsoft.did.sdk.utilities.log.SdkLog
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.utilities.controlflow.SignatureException
