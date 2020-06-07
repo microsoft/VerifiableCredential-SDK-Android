@@ -14,8 +14,9 @@ import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
 import com.microsoft.did.sdk.utilities.controlflow.SignatureException
-import com.microsoft.did.sdk.utilities.printBytes
+import com.microsoft.did.sdk.utilities.log.SdkLog
 import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.utilities.toReadableString
 import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
 import java.util.*
@@ -96,9 +97,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
             throw SignatureException("Data must be 32 bytes")
         }
 
-        print("KEY DATA: ")
-        printBytes(keyData)
-
+        SdkLog.d("Key data: " + keyData.toReadableString())
         return NativeSecp256k1.verify(hashedData, signature, keyData)
     }
 
@@ -214,8 +213,8 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
             throw KeyFormatException("Compressed Hex format is not supported.")
         } else if (keyData.size == 65 && (
                 keyData[0] == Secp256k1Tag.UNCOMPRESSED.byte ||
-                    keyData[0] == Secp256k1Tag.HYBRIDEVEN.byte ||
-                    keyData[0] == Secp256k1Tag.HYBRIDODD.byte
+                    keyData[0] == Secp256k1Tag.HYBRID_EVEN.byte ||
+                    keyData[0] == Secp256k1Tag.HYBRID_ODD.byte
                 )
         ) {
             // uncompressed, bytes 1-32, and 33-end are x and y
@@ -234,7 +233,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         EVEN(0x02),
         ODD(0x03),
         UNCOMPRESSED(0x04),
-        HYBRIDEVEN(0x06),
-        HYBRIDODD(0x07)
+        HYBRID_EVEN(0x06),
+        HYBRID_ODD(0x07)
     }
 }

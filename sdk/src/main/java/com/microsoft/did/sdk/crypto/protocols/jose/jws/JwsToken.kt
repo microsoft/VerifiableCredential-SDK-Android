@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.utilities.*
 import com.microsoft.did.sdk.utilities.controlflow.KeyException
 import com.microsoft.did.sdk.utilities.controlflow.SignatureException
+import com.microsoft.did.sdk.utilities.log.SdkLog
 import com.microsoft.did.sdk.utilities.serializer.Serializer
 import java.util.*
 import kotlin.collections.Map
@@ -248,8 +249,7 @@ class JwsToken private constructor(
         )
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
-        print("DATA ")
-        printBytes(rawData)
+        SdkLog.d("Raw data: " + rawData.toReadableString())
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 

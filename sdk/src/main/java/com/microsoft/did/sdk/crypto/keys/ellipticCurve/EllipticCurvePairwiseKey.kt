@@ -115,8 +115,8 @@ class EllipticCurvePairwiseKey @Inject constructor() {
 
     private fun isPublicKeyUncompressedOrHybridHex(keyData: ByteArray): Boolean {
         return keyData.size == 65 && (keyData[0] == Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte ||
-            keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRIDEVEN.byte ||
-            keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRIDODD.byte
+            keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_EVEN.byte ||
+            keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_ODD.byte
             )
     }
 

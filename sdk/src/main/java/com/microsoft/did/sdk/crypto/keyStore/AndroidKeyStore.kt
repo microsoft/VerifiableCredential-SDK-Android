@@ -158,7 +158,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         }.entries.firstOrNull()?.key
     }
 
-    @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         val jwk = key.toJWK()
@@ -168,7 +167,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         saveSecureData(alias, keyValue)
     }
 
-    @TargetApi(23)
     override fun save(keyReference: String, key: PrivateKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         if (keyStore.containsAlias(alias)) {
@@ -307,7 +305,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         editor.apply()
     }
 
-    @TargetApi(23)
     private fun getSharedPreferences(): SharedPreferences {
         val masterKeyAlias = getSecretVaultMasterKey()
         return EncryptedSharedPreferences.create(
@@ -319,7 +316,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         )
     }
 
-    @TargetApi(23)
     private fun getSecretVaultMasterKey(): String {
         val alias = "ms-useragent-secret-masterkey"
 

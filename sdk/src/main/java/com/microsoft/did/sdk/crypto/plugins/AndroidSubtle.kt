@@ -97,7 +97,6 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) :
         )
     }
 
-    @TargetApi(23)
     override fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKeyPair {
         if (!algorithm.additionalParams.containsKey(AndroidConstants.KeyReference.value)) {
             throw AlgorithmException("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
