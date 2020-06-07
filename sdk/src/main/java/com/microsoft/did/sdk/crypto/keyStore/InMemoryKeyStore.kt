@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 
 class InMemoryKeyStore : KeyStore() {
     private val secretKeys: MutableMap<String, KeyContainer<SecretKey>> = mutableMapOf()

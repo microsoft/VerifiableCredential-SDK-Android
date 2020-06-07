@@ -1,9 +1,7 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class KeyTypeFactoryTest {

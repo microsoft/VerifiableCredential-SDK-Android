@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.crypto.plugins
 
-import android.annotation.TargetApi
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -13,14 +12,14 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.AndroidKeyConverter
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.log.SdkLog
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
-import com.microsoft.did.sdk.utilities.controlflow.SignatureException
+import com.microsoft.did.sdk.util.AndroidKeyConverter
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.controlflow.SignatureException
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.RSAPublicKeySpec

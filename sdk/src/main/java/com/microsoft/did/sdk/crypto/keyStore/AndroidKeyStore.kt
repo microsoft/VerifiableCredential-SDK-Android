@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.crypto.keyStore
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
@@ -13,11 +12,11 @@ import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.utilities.*
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
-import com.microsoft.did.sdk.utilities.log.SdkLog
-import com.microsoft.did.sdk.utilities.serializer.Serializer
+import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.serializer.Serializer
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject

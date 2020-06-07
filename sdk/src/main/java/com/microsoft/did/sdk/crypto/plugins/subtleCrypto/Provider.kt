@@ -2,10 +2,10 @@ package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
-import com.microsoft.did.sdk.utilities.controlflow.UnSupportedOperationException
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.UnSupportedOperationException
 import java.util.*
 
 abstract class Provider {

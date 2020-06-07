@@ -6,7 +6,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
-import com.microsoft.did.sdk.utilities.controlflow.CryptoException
+import com.microsoft.did.sdk.util.controlflow.CryptoException
 import java.util.*
 
 object JwaCryptoConverter {

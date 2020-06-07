@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.crypto.plugins
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.did.sdk.utilities.controlflow.CryptoException
+import com.microsoft.did.sdk.util.controlflow.CryptoException
 
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.

@@ -7,11 +7,11 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.*
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.SignatureException
-import com.microsoft.did.sdk.utilities.log.SdkLog
-import com.microsoft.did.sdk.utilities.serializer.Serializer
+import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.serializer.Serializer
 import java.util.*
 import kotlin.collections.Map
 

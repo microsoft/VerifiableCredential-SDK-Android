@@ -5,7 +5,7 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import java.util.Locale
 
 /**

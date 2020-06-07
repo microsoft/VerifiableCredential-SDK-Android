@@ -8,8 +8,8 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.microsoft.did.sdk.auth.validators.OidcPresentationRequestValidator
-import com.microsoft.did.sdk.auth.validators.PresentationRequestValidator
+import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
+import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
@@ -20,9 +20,9 @@ import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.registrars.Registrar
-import com.microsoft.did.sdk.registrars.SidetreeRegistrar
-import com.microsoft.did.sdk.repository.SdkDatabase
+import com.microsoft.did.sdk.identifier.registrars.Registrar
+import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
+import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient

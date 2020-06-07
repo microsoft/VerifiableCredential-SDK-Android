@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
-import com.microsoft.did.sdk.utilities.serializer.Serializer
+import com.microsoft.did.sdk.util.serializer.Serializer
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.assertj.core.api.Assertions.assertThat

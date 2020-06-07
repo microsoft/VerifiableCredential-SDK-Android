@@ -20,9 +20,9 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.plugins.Secp256k1Provider
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
-import com.microsoft.did.sdk.utilities.controlflow.PairwiseKeyException
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import org.bitcoin.NativeSecp256k1
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

@@ -7,23 +7,24 @@ package com.microsoft.did.sdk
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
-import com.microsoft.did.sdk.auth.models.contracts.PicContract
-import com.microsoft.did.sdk.auth.models.oidc.OidcRequestContent
-import com.microsoft.did.sdk.auth.requests.*
-import com.microsoft.did.sdk.auth.responses.IssuanceResponse
-import com.microsoft.did.sdk.auth.responses.PresentationResponse
-import com.microsoft.did.sdk.auth.responses.Response
-import com.microsoft.did.sdk.auth.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.cards.PortableIdentityCard
-import com.microsoft.did.sdk.cards.receipts.Receipt
-import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.did.sdk.credential.service.models.contracts.PicContract
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
+import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.Response
+import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
+import com.microsoft.did.sdk.credential.models.PortableIdentityCard
+import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.repository.CardRepository
-import com.microsoft.did.sdk.utilities.Constants.DEFAULT_EXPIRATION_IN_MINUTES
-import com.microsoft.did.sdk.utilities.serializer.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.*
-import com.microsoft.did.sdk.utilities.unwrapSignedVerifiableCredential
+import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.datasource.repository.CardRepository
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.*
+import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -199,7 +200,12 @@ class CardManager @Inject constructor(
         val contents =
             unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
-        return PortableIdentityCard(contents.jti, verifiableCredential, owner, contract.display)
+        return PortableIdentityCard(
+            contents.jti,
+            verifiableCredential,
+            owner,
+            contract.display
+        )
     }
 
     /**

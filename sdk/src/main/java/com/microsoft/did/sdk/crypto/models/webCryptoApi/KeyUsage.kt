@@ -1,6 +1,6 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
 
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyException
 
 /**
  * A type of operation that may be performed using a key.

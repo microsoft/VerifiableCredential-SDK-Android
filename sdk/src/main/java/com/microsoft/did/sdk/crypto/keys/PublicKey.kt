@@ -7,8 +7,8 @@ import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.stringToByteArray
 
 /**
  * Represents a Public Key in JWK format.

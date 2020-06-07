@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyException
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import org.assertj.core.api.Assertions
