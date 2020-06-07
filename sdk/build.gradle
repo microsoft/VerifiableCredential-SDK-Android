@@ -12,6 +12,8 @@ jacoco {
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
+    ndkVersion ndk_version
+
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 29
