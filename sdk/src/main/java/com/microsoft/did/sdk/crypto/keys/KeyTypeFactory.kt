@@ -24,13 +24,4 @@ object KeyTypeFactory {
             else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported");
         }
     }
-
-    /**
-     * Create the key use according to the selected algorithm.
-     * @param algorithm JWA algorithm constant
-     */
-    fun createViaJwa (algorithm: String): KeyType {
-        val alg = CryptoHelpers.jwaToWebCrypto(algorithm);
-        return createViaWebCrypto(alg);
-    }
 }

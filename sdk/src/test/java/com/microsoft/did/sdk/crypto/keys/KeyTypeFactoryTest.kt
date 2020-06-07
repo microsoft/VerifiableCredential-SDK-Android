@@ -49,10 +49,4 @@ class KeyTypeFactoryTest {
         val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.RSA)
     }
-
-    @Test
-    fun `failing with invalid algorithm while finding key type`() {
-        val nonExistingAlgorithmName = "Test"
-        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName) }.isInstanceOf(AlgorithmException::class.java)
-    }
 }
