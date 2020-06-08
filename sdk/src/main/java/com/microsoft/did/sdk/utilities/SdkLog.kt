@@ -4,7 +4,7 @@ import java.lang.RuntimeException
 import java.util.regex.Pattern
 
 object SdkLog {
-    interface ConsumerBridge {
+    interface Consumer {
         fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String)
     }
 
@@ -21,9 +21,9 @@ object SdkLog {
 
     private const val ORIGINAL_CALLER_STACK_INDEX = 2
     private val ANONYMOUS_CLASS = Pattern.compile("(\\$\\d+)+$")
-    private val CONSUMERS: MutableList<ConsumerBridge> = ArrayList()
+    private val CONSUMERS: MutableList<Consumer> = ArrayList()
 
-    fun addConsumer(consumerBridge: ConsumerBridge) = CONSUMERS.add(consumerBridge)
+    fun addConsumer(consumer: Consumer) = CONSUMERS.add(consumer)
 
     fun v(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
         log(Level.VERBOSE, message, throwable, tag)

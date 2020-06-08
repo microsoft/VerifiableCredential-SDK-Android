@@ -7,7 +7,7 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
-import com.microsoft.did.sdk.utilities.DefaultLogConsumerBridge
+import com.microsoft.did.sdk.utilities.DefaultLogConsumer
 import com.microsoft.did.sdk.utilities.SdkLog
 import org.bitcoin.Secp256k1Context
 
@@ -38,7 +38,7 @@ object VerifiableCredentialSdk {
     @JvmStatic
     fun init(
         context: Context,
-        logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(),
+        logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         registrationUrl: String = "",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
     ) {
@@ -51,7 +51,7 @@ object VerifiableCredentialSdk {
         identifierManager = sdkComponent.identifierManager()
         cardManager = sdkComponent.cardManager()
 
-        SdkLog.addConsumer(logConsumerBridge)
+        SdkLog.addConsumer(logConsumer)
     }
 
     fun isDeviceModelSupported(): Boolean {
