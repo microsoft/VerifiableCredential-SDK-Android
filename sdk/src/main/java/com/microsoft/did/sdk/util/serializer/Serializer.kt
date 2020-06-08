@@ -22,6 +22,7 @@ class Serializer @Inject constructor() : ISerializer {
         }
     }
 
+    @Suppress("EXPERIMENTAL_API_USAGE")
     val json: Json = Json(
         context = serviceResponseSerializer,
         configuration = JsonConfiguration(

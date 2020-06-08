@@ -82,12 +82,12 @@ abstract class Provider {
     }
 
     fun generateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKey {
-        checkGenerateKey(algorithm, extractable, keyUsages)
+        checkGenerateKey(algorithm, keyUsages)
         return onGenerateKey(algorithm, extractable, keyUsages)
     }
 
     fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>): CryptoKeyPair {
-        checkGenerateKey(algorithm, extractable, keyUsages)
+        checkGenerateKey(algorithm, keyUsages)
         return onGenerateKeyPair(algorithm, extractable, keyUsages)
     }
 
@@ -117,12 +117,12 @@ abstract class Provider {
     }
 
     fun exportKey(format: KeyFormat, key: CryptoKey): ByteArray {
-        checkExportKey(format, key)
+        checkExportKey(key)
         return onExportKey(format, key)
     }
 
     fun exportKeyJwk(key: CryptoKey): JsonWebKey {
-        checkExportKey(KeyFormat.Jwk, key)
+        checkExportKey(key)
         return onExportKeyJwk(key)
     }
 
@@ -133,7 +133,7 @@ abstract class Provider {
         if (format == KeyFormat.Jwk) {
             throw KeyFormatException("KeyData does not match format")
         }
-        checkImportKey(format, algorithm, extractable, keyUsages)
+        checkImportKey(algorithm, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
     }
 
@@ -144,7 +144,7 @@ abstract class Provider {
         if (format != KeyFormat.Jwk) {
             throw KeyFormatException("KeyData does not match format")
         }
-        checkImportKey(format, algorithm, extractable, keyUsages)
+        checkImportKey(algorithm, keyUsages)
         return onImportKey(format, keyData, algorithm, extractable, keyUsages)
     }
 
@@ -152,7 +152,7 @@ abstract class Provider {
         checkAlgorithmName(algorithm)
     }
 
-    private fun checkGenerateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
+    private fun checkGenerateKey(algorithm: Algorithm, keyUsages: Set<KeyUsage>) {
         checkAlgorithmName(algorithm)
         checkGenerateKeyParams(algorithm)
         if (keyUsages.count() == 0) {
@@ -199,13 +199,13 @@ abstract class Provider {
         }
     }
 
-    private fun checkExportKey(format: KeyFormat, key: CryptoKey) {
+    private fun checkExportKey(key: CryptoKey) {
         if (!key.extractable) {
             throw KeyException("Key is not extractable")
         }
     }
 
-    private fun checkImportKey(format: KeyFormat, algorithm: Algorithm, extractable: Boolean, keyUsages: Set<KeyUsage>) {
+    private fun checkImportKey(algorithm: Algorithm, keyUsages: Set<KeyUsage>) {
         checkAlgorithmName(algorithm)
         checkAlgorithmParams(algorithm)
         checkImportParams(algorithm)
