@@ -58,11 +58,11 @@ internal class SdkModule {
         val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore, ecPairwiseKey)
         defaultCryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
-            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
+            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.ALL)
         )
         defaultCryptoOperations.subtleCryptoFactory.addMessageAuthenticationCodeSigner(
             name = W3cCryptoApiConstants.Hmac.value,
-            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.All)
+            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.ALL)
         )
         return defaultCryptoOperations
     }

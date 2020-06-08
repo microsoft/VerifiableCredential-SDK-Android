@@ -242,7 +242,7 @@ class JwsToken private constructor(
     private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
         val alg = signature.getAlg(serializer) ?: throw SignatureException("This signature contains no algorithm.")
         val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg)
-        val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.Public)
+        val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.PUBLIC)
         val cryptoKey = subtle.importKey(
             KeyFormat.Jwk, key.toJWK(), subtleAlg,
             true, key.key_ops ?: listOf(KeyUsage.Verify)

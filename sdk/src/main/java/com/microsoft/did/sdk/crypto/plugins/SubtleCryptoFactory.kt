@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.util.controlflow.CryptoException
  */
 class SubtleCryptoFactory(default: SubtleCrypto) {
 
-    private val defaultSubtleCryptoMapItem = SubtleCryptoMapItem(default, SubtleCryptoScope.All)
+    private val defaultSubtleCryptoMapItem = SubtleCryptoMapItem(default, SubtleCryptoScope.ALL)
 
     /**
      * The key encryptors
@@ -227,8 +227,8 @@ class SubtleCryptoFactory(default: SubtleCrypto) {
         val exactScope = list.filter { it.scope == scope }
         if (exactScope.isNotEmpty()) {
             return exactScope.first().subtleCrypto
-        } else if (scope != SubtleCryptoScope.All) {
-            val closeEnoughScope = list.filter { it.scope == SubtleCryptoScope.All }
+        } else if (scope != SubtleCryptoScope.ALL) {
+            val closeEnoughScope = list.filter { it.scope == SubtleCryptoScope.ALL }
             if (closeEnoughScope.isNotEmpty()) {
                 return closeEnoughScope.first().subtleCrypto
             }

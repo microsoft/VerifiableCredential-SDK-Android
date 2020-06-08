@@ -35,7 +35,7 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         val supportedCurves = listOf("K-256", "P-256K")
 
         val subtleCrypto: SubtleCrypto =
-            crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private)
+            crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.PRIVATE)
 
         val pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
 

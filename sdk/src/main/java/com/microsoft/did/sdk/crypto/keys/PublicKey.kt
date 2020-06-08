@@ -50,7 +50,7 @@ abstract class PublicKey(val key: JsonWebKey) : IKeyStoreItem {
         // construct a JSON object with only required fields
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)
-        val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.Public)
+        val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.PUBLIC)
         val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
         return Base64Url.encode(hash)

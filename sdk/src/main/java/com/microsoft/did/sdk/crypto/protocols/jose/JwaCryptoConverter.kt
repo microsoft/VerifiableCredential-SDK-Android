@@ -110,7 +110,7 @@ object JwaCryptoConverter {
                 RsaHashedKeyAlgorithm(
                     hash = Sha.get(hashSize.toInt()),
                     publicExponent = 65537UL,
-                    modulusLength = 4096UL// KEY SIZE
+                    modulusLength = 4096UL // KEY SIZE
                 )
             }
             JoseConstants.RsaOaep.value, JoseConstants.RsaOaep256.value -> {

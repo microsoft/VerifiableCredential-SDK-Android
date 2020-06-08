@@ -51,7 +51,7 @@ class IdentifierCreatorInstrumentedTest {
         identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
-            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
+            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.ALL)
         )
     }
 
