@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk.datasource.network.apis
 
-import com.microsoft.did.sdk.credential.service.models.contracts.PicContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VcContract
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import retrofit2.Response
 import retrofit2.http.Body
@@ -16,7 +16,7 @@ import retrofit2.http.Url
 interface IssuanceApis {
 
     @GET
-    suspend fun getContract(@Url overrideUrl: String): Response<PicContract>
+    suspend fun getContract(@Url overrideUrl: String): Response<VcContract>
 
     @POST
     suspend fun sendResponse(@Url overrideUrl: String, @Body body: String): Response<IssuanceServiceResponse>

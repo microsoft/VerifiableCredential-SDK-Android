@@ -8,15 +8,15 @@ package com.microsoft.did.sdk
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.models.contracts.PicContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VcContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.Response
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContainer
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -35,7 +35,7 @@ import javax.inject.Singleton
  * We only support OpenId Connect Protocol in order to get and present Portable Identity Cards.
  */
 @Singleton
-class CardManager @Inject constructor(
+class VerifiableCredentialManager @Inject constructor(
     private val picRepository: CardRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator
@@ -135,7 +135,7 @@ class CardManager @Inject constructor(
      * @return Result.Success:
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredentialContainer> {
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val verifiableCredential = picRepository.sendIssuanceResponse(response, responder).abortOnError()
@@ -187,20 +187,20 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card that was saved to Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Unit> {
+    suspend fun saveCard(verifiableCredentialContainer: VerifiableCredentialContainer): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                picRepository.insert(portableIdentityCard)
+                picRepository.insert(verifiableCredentialContainer)
                 Result.Success(Unit)
             }
         }
     }
 
-    private fun createCard(signedVerifiableCredential: String, owner: Identifier, contract: PicContract): PortableIdentityCard {
+    private fun createCard(signedVerifiableCredential: String, owner: Identifier, contract: VcContract): VerifiableCredentialContainer {
         val contents =
             unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
-        return PortableIdentityCard(
+        return VerifiableCredentialContainer(
             contents.jti,
             verifiableCredential,
             owner,
@@ -214,7 +214,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCards(): LiveData<List<PortableIdentityCard>> {
+    fun getCards(): LiveData<List<VerifiableCredentialContainer>> {
         return picRepository.getAllCards()
     }
 
@@ -224,7 +224,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: Filtered List of Portable Identity Card from Storage.
      *         Result.Failure: Exception explaining what went wrong.
      */
-    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+    fun getCardsByType(type: String): LiveData<List<VerifiableCredentialContainer>> {
         return picRepository.getCardsByType(type)
     }
 
@@ -255,7 +255,7 @@ class CardManager @Inject constructor(
      * @return Result.Success: Portable Identity Card corresponding to id passed
      *         Result.Failure: Exception explaining the problem
      */
-    fun getCardById(id: String): LiveData<PortableIdentityCard> {
+    fun getCardById(id: String): LiveData<VerifiableCredentialContainer> {
         return picRepository.getCardById(id)
     }
 }

@@ -9,12 +9,12 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.Display
 import kotlinx.serialization.Serializable
 
 /**
- * A logical grouping of documents created by an issuer to enable the creation of a Portable Identity Card.
- * In the Portable Identity Card Service, there are four files that make up a contract:
+ * A logical grouping of documents created by an issuer to enable the creation of a Verifiable Credential and meta-data.
+ * In the Verifiable Credential Service, there are four files that make up a contract:
  * schema, display, and input.
  */
 @Serializable
-data class PicContract(
+data class VcContract(
     // unique identifier of the contract
     val id: String,
 

@@ -2,9 +2,9 @@
 
 package com.microsoft.did.sdk.credential.service
 
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
-import com.microsoft.did.sdk.credential.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContainer
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 
 /**
  * OIDC Response formed from a Request.
@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.credential.receipts.ReceiptAction
  */
 sealed class Response(open val request: Request, val audience: String) {
 
-    private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
+    private val collectedCards: MutableMap<String, VerifiableCredentialContainer> = mutableMapOf()
 
     private val collectedTokens: MutableMap<String, String> = mutableMapOf()
 
@@ -28,7 +28,7 @@ sealed class Response(open val request: Request, val audience: String) {
         collectedSelfIssued[field] = claim
     }
 
-    fun addCard(card: PortableIdentityCard, type: String) {
+    fun addCard(card: VerifiableCredentialContainer, type: String) {
         collectedCards[type] = card
     }
 
@@ -46,7 +46,7 @@ sealed class Response(open val request: Request, val audience: String) {
         return collectedSelfIssued
     }
 
-    fun getCollectedCards(): Map<String, PortableIdentityCard>? {
+    fun getCollectedCards(): Map<String, VerifiableCredentialContainer>? {
         if (collectedCards.isEmpty()) {
             return null
         }

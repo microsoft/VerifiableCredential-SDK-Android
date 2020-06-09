@@ -4,10 +4,10 @@ package com.microsoft.did.sdk.credential.service.responses
 
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
-import com.microsoft.did.sdk.credential.service.models.contracts.PicContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VcContract
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContainer
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
@@ -17,7 +17,7 @@ class ResponseTest {
     var response: IssuanceResponse
     var request: IssuanceRequest
     private val attestations: CredentialAttestations = mockk()
-    private var picContract: PicContract = mockk()
+    private var vcContract: VcContract = mockk()
     private val entityName = "testEntityName"
     private val entityDid = "testEntityDid"
     private val issuedBy = "testIssuer"
@@ -25,28 +25,28 @@ class ResponseTest {
     private val credentialIssuer = "issuanceEndpoint"
 
     init {
-        every { picContract.input.attestations } returns attestations
-        every { picContract.display.card.issuedBy } returns issuedBy
-        every { picContract.input.issuer } returns issuer
-        request = IssuanceRequest(picContract, "testContractUrl")
+        every { vcContract.input.attestations } returns attestations
+        every { vcContract.display.card.issuedBy } returns issuedBy
+        every { vcContract.input.issuer } returns issuer
+        request = IssuanceRequest(vcContract, "testContractUrl")
         every { request.contract.input.credentialIssuer } returns credentialIssuer
         response = IssuanceResponse(request)
     }
 
     @Test
     fun `test add and get card`() {
-        val suppliedPortableIdentityCard1: PortableIdentityCard = mockk()
+        val suppliedVerifiableCredentialContainer1: VerifiableCredentialContainer = mockk()
         val suppliedCardType1 = "testCard1"
-        response.addCard(suppliedPortableIdentityCard1, "testCard1")
-        val suppliedPortableIdentityCard2: PortableIdentityCard = mockk()
+        response.addCard(suppliedVerifiableCredentialContainer1, "testCard1")
+        val suppliedVerifiableCredentialContainer2: VerifiableCredentialContainer = mockk()
         val suppliedCardType2 = "testCard2"
-        response.addCard(suppliedPortableIdentityCard2, suppliedCardType2)
+        response.addCard(suppliedVerifiableCredentialContainer2, suppliedCardType2)
         val actualCollectedCards = response.getCollectedCards()
         val expectedCardCount = 2
         assertThat(actualCollectedCards).isNotNull
         assertThat(actualCollectedCards?.size).isEqualTo(expectedCardCount)
-        assertThat(actualCollectedCards?.get(suppliedCardType2)).isEqualTo(suppliedPortableIdentityCard2)
-        assertThat(actualCollectedCards?.get(suppliedCardType1)).isEqualTo(suppliedPortableIdentityCard1)
+        assertThat(actualCollectedCards?.get(suppliedCardType2)).isEqualTo(suppliedVerifiableCredentialContainer2)
+        assertThat(actualCollectedCards?.get(suppliedCardType1)).isEqualTo(suppliedVerifiableCredentialContainer1)
     }
 
     @Test
@@ -75,7 +75,7 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding empty card id`() {
-        val piCard: PortableIdentityCard = mockk()
+        val piCard: VerifiableCredentialContainer = mockk()
         val receiptCreationStartTime = System.currentTimeMillis()
         response.addCard(piCard, "testCard1")
         val cardId = ""
@@ -93,7 +93,7 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding 1 card`() {
-        val piCard: PortableIdentityCard = mockk()
+        val piCard: VerifiableCredentialContainer = mockk()
         val receiptCreationStartTime = System.currentTimeMillis()
         response.addCard(piCard, "testCard1")
         val cardId = "testCardId"
@@ -118,11 +118,11 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding multiple cards with same type`() {
-        val piCard1: PortableIdentityCard = mockk()
+        val piCard1: VerifiableCredentialContainer = mockk()
         response.addCard(piCard1, "testCard1")
         val cardId1 = "testCardId1"
         every { piCard1.cardId } returns cardId1
-        val piCard2: PortableIdentityCard = mockk()
+        val piCard2: VerifiableCredentialContainer = mockk()
         response.addCard(piCard2, "testCard1")
         val cardId2 = "testCardId2"
         every { piCard2.cardId } returns cardId2
@@ -140,11 +140,11 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding multiple cards with different types`() {
-        val piCard1: PortableIdentityCard = mockk()
+        val piCard1: VerifiableCredentialContainer = mockk()
         response.addCard(piCard1, "testCard1")
         val cardId1 = "testCardId1"
         every { piCard1.cardId } returns cardId1
-        val piCard2: PortableIdentityCard = mockk()
+        val piCard2: VerifiableCredentialContainer = mockk()
         response.addCard(piCard2, "testCard2")
         val cardId2 = "testCardId2"
         every { piCard2.cardId } returns cardId2
@@ -168,7 +168,7 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding empty entity information`() {
-        val piCard: PortableIdentityCard = mockk()
+        val piCard: VerifiableCredentialContainer = mockk()
         response.addCard(piCard, "testCard1")
         val cardId = "testCardId"
         every { piCard.cardId } returns cardId

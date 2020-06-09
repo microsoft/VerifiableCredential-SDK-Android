@@ -5,8 +5,8 @@ package com.microsoft.did.sdk
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContainer
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.CardRepository
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -16,13 +16,13 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class CardManagerTest {
+class VerifiableCredentialManagerTest {
     private val cardRepository: CardRepository = mockk()
     private val serializer = Serializer()
     private val presentationRequestValidator: PresentationRequestValidator = mockk()
-    private val cardManager = spyk(CardManager(cardRepository, serializer, presentationRequestValidator))
+    private val cardManager = spyk(VerifiableCredentialManager(cardRepository, serializer, presentationRequestValidator))
     private val issuanceRequest: IssuanceRequest = mockk()
-    private val portableIdentityCard: PortableIdentityCard = mockk()
+    private val verifiableCredentialContainer: VerifiableCredentialContainer = mockk()
     private val responseAudience = "testEndpointToSendIssuanceRequest"
     private val presentationRequest: PresentationRequest = mockk()
     private val testEntityName = "testEntityName"
@@ -48,9 +48,9 @@ class CardManagerTest {
 
     @Test
     fun `test to save card`() {
-        coEvery { cardRepository.insert(portableIdentityCard) } returns Unit
+        coEvery { cardRepository.insert(verifiableCredentialContainer) } returns Unit
         runBlocking {
-            val actualResult = cardManager.saveCard(portableIdentityCard)
+            val actualResult = cardManager.saveCard(verifiableCredentialContainer)
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
         }
     }

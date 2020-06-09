@@ -11,8 +11,8 @@ import com.microsoft.did.sdk.credential.service.models.PairwiseIssuanceRequest
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContainer
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -50,21 +50,21 @@ class CardRepository @Inject constructor(
     private val verifiableCredentialDao = database.verifiableCredentialDao()
 
     // Portable Identity Card Methods
-    suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
+    suspend fun insert(verifiableCredentialContainer: VerifiableCredentialContainer) = cardDao.insert(verifiableCredentialContainer)
 
-    suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
+    suspend fun delete(verifiableCredentialContainer: VerifiableCredentialContainer) = cardDao.delete(verifiableCredentialContainer)
 
-    fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
+    fun getAllCards(): LiveData<List<VerifiableCredentialContainer>> = cardDao.getAllCards()
 
-    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
+    fun getCardsByType(type: String): LiveData<List<VerifiableCredentialContainer>> {
         return getAllCards().map { cardList -> filterCardsByType(cardList, type) }
     }
 
-    private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
+    private fun filterCardsByType(cardList: List<VerifiableCredentialContainer>, type: String): List<VerifiableCredentialContainer> {
         return cardList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
     }
 
-    fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
+    fun getCardById(id: String): LiveData<VerifiableCredentialContainer> = cardDao.getCardById(id)
 
     // Receipt Methods
     fun getAllReceiptsByCardId(cardId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByCardId(cardId)
@@ -130,7 +130,7 @@ class CardRepository @Inject constructor(
         ).fire()
     }
 
-    private suspend fun getPairwiseVerifiableCredential(card: PortableIdentityCard, pairwiseIdentifier: Identifier): VerifiableCredential {
+    private suspend fun getPairwiseVerifiableCredential(card: VerifiableCredentialContainer, pairwiseIdentifier: Identifier): VerifiableCredential {
         val verifiableCredentials = this.getAllVerifiableCredentialsByCardId(card.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {

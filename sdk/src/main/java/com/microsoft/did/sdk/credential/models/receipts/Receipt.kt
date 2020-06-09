@@ -1,4 +1,4 @@
-package com.microsoft.did.sdk.credential.receipts
+package com.microsoft.did.sdk.credential.models.receipts
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

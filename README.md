@@ -26,9 +26,9 @@ Example of SDK initialization within app (call in your `Application` `onCreate()
 VerifiableCredentialSdk.init(getApplicationContext(), new VerifiableCredentialSdkLogConsumer());
 ```
 
-After initialization you can access `identifierManager` and `cardManager` from this singleton directly, but it you may want to access it through your dependency injection framework (like dagger).
+After initialization you can access `identifierManager` and `verifiableCredentialManager` from this singleton directly, but it you may want to access it through your dependency injection framework (like dagger).
 ```kotlin
-VerifiableCredentialSdk.cardManager
+VerifiableCredentialSdk.verifiableCredentialManager
 VerifiableCredentialSdk.identifierManager
 ```
 
@@ -65,10 +65,10 @@ Pairwise Identifiers are created for every interaction with a relying party to p
 Issuance Flow Example:
 ```kotlin
 // to get a new issuance request from a contract url
-val request = cardManager.getIssuanceRequest(url)
+val request = verifiableCredentialManager.getIssuanceRequest(url)
 
 // create issuance response.
-val response = cardManager.createIssuanceResponse(request)
+val response = verifiableCredentialManager.createIssuanceResponse(request)
 // add requested verifiable credentials to response.
 addCollectedRequirementsToResponse(response, requirementList)
 // get Master Identifier.
@@ -76,18 +76,18 @@ val identifier = identifierManager.getMasterIdentifier()
 // create a pairwise identifier for connection from master identifier and requester's identifier.
 val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
 // send issuance response in order to get a verifiable credential, signed by pairwise identifier. 
-val card = cardManager.sendIssuanceResponse(response, pairwiseIdentifier)
+val card = verifiableCredentialManager.sendIssuanceResponse(response, pairwiseIdentifier)
 // save card to database.
-cardManager.saveCard(card)
+verifiableCredentialManager.saveCard(card)
 ```
 
 Presentation Flow Example:
 ```kotlin
 // to get a new presentation request from a openid:// scanned through QRCode or deeplink
-val request = cardManager.getPresentationRequest(url)
+val request = verifiableCredentialManager.getPresentationRequest(url)
 
 // create and send presentation response.
-val response = cardManager.createPresentationResponse(request)
+val response = verifiableCredentialManager.createPresentationResponse(request)
 // add requested verifiable credentials to response.
 addCollectedRequirementsToResponse(response, requirementList)
 // get Master Identifier.
@@ -96,12 +96,12 @@ val identifier = identifierManager.getMasterIdentifier()
 val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
 // send response to relying party the initiated request, signed by pairwise identifier.
 // if successful, create and store receipts of interaction with the relying party for each verifiable credential that was presented.
-cardManager.sendPresentationResponse(response, pairwiseIdentifier)
+verifiableCredentialManager.sendPresentationResponse(response, pairwiseIdentifier)
 ```
 
 Get all saved Portable Identity Cards
 ```kotlin
-val cards = cardManager.getCards()
+val cards = verifiableCredentialManager.getCards()
 ```
 
 > note: Every method is wrapped in a Result object. Unwrapping these returns is not included in these examples to simplify things a bit. (see [Result Class Section](#Result-Class) for more details)
