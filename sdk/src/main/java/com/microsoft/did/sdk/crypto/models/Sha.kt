@@ -1,35 +1,24 @@
 package com.microsoft.did.sdk.crypto.models
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 
+enum class Sha(val algorithm: Algorithm) {
+    SHA1(Algorithm(W3cCryptoApiConstants.Sha1.value)),
+    SHA224(Algorithm(W3cCryptoApiConstants.Sha224.value)),
+    SHA256(Algorithm(W3cCryptoApiConstants.Sha256.value)),
+    SHA384(Algorithm(W3cCryptoApiConstants.Sha384.value)),
+    SHA512(Algorithm(W3cCryptoApiConstants.Sha512.value));
 
-// convenience class for SHA algorithms
-class Sha(algorithm: Algorithm) {
     companion object {
-        val Sha1 = Algorithm(
-            name = W3cCryptoApiConstants.Sha1.value
-        )
-        val Sha224 = Algorithm(
-            name = W3cCryptoApiConstants.Sha224.value
-        )
-        val Sha256 = Algorithm(
-            name = W3cCryptoApiConstants.Sha256.value
-        )
-        val Sha384 = Algorithm(
-            name = W3cCryptoApiConstants.Sha384.value
-        )
-        val Sha512 = Algorithm(
-            name = W3cCryptoApiConstants.Sha512.value
-        )
         fun get(length: Int): Algorithm {
             return when (length) {
-                1 -> Sha1
-                224 -> Sha224
-                256 -> Sha256
-                384 -> Sha384
-                512 -> Sha512
+                1 -> SHA1.algorithm
+                224 -> SHA224.algorithm
+                256 -> SHA256.algorithm
+                384 -> SHA384.algorithm
+                512 -> SHA512.algorithm
                 else -> throw AlgorithmException("No SHA at this length.")
             }
         }

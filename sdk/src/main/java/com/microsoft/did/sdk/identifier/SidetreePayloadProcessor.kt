@@ -11,13 +11,13 @@ import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentPayload
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentPublicKeyInput
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.Constants.SIDETREE_CURVE_NAME_FOR_EC
-import com.microsoft.did.sdk.utilities.Constants.SIDETREE_MULTIHASH_CODE
-import com.microsoft.did.sdk.utilities.Constants.SIDETREE_MULTIHASH_LENGTH
-import com.microsoft.did.sdk.utilities.Constants.SIDETREE_PATCH_ACTION
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.Constants.SIDETREE_CURVE_NAME_FOR_EC
+import com.microsoft.did.sdk.util.Constants.SIDETREE_MULTIHASH_CODE
+import com.microsoft.did.sdk.util.Constants.SIDETREE_MULTIHASH_LENGTH
+import com.microsoft.did.sdk.util.Constants.SIDETREE_PATCH_ACTION
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.stringToByteArray
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +29,12 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
      * In unpublished resolution or long form it is same as the initial-state portion of the identifier which can be used
      * to resolve portable identifier
      */
-    fun generateCreatePayload(signingPublicKey: PublicKey, recoveryPublicKey: PublicKey, updateCommitmentValue: String, recoveryCommitmentValue: String): RegistrationPayload {
+    fun generateCreatePayload(
+        signingPublicKey: PublicKey,
+        recoveryPublicKey: PublicKey,
+        updateCommitmentValue: String,
+        recoveryCommitmentValue: String
+    ): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
         val signingKeyJWK = signingPublicKey.toJWK()
         val recoveryKeyJWK = recoveryPublicKey.toJWK()
@@ -46,7 +51,12 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
         return Base64Url.encode(suffixDataHash)
     }
 
-    private fun generateRegistrationPayload(signingKeyJWK: JsonWebKey, recoveryKeyJWK: JsonWebKey, updateCommitmentValue: String, recoveryCommitmentValue: String): RegistrationPayload {
+    private fun generateRegistrationPayload(
+        signingKeyJWK: JsonWebKey,
+        recoveryKeyJWK: JsonWebKey,
+        updateCommitmentValue: String,
+        recoveryCommitmentValue: String
+    ): RegistrationPayload {
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingKeyJWK)
         val patchData = createPatchData(identifierDocumentPatch, updateCommitmentValue)
         val patchDataEncoded = encodePatchData(patchData)

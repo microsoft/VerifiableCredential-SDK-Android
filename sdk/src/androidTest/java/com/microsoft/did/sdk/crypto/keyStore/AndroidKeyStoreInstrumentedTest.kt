@@ -15,10 +15,10 @@ import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.RsaHashedKeyAlgorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -41,7 +41,7 @@ class AndroidKeyStoreInstrumentedTest {
             RsaHashedKeyAlgorithm(
                 modulusLength = 4096UL,
                 publicExponent = 65537UL,
-                hash = Sha.Sha256,
+                hash = Sha.SHA256.algorithm,
                 additionalParams = mapOf("KeyReference" to keyRef)
             ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
         )

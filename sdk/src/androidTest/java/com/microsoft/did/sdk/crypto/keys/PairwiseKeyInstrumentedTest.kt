@@ -14,12 +14,15 @@ import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.PairwiseKeyException
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
+import com.microsoft.did.sdk.util.stringToByteArray
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -75,7 +78,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona"
@@ -107,7 +110,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona:1"
@@ -135,7 +138,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona:1"
@@ -153,7 +156,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256r1.value,
             additionalParams = mapOf(
-                "hash" to Sha.Sha256
+                "hash" to Sha.SHA256.algorithm
             )
         )
         val persona = "did:persona"

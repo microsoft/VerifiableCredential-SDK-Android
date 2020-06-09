@@ -11,19 +11,20 @@ import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.toKeyUse
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.EcKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.Constants
-import com.microsoft.did.sdk.utilities.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.utilities.Constants.IDENTIFIER_SECRET_KEY_NAME
-import com.microsoft.did.sdk.utilities.Constants.RECOVERY_KEYREFERENCE
-import com.microsoft.did.sdk.utilities.Constants.SIGNATURE_KEYREFERENCE
-import com.microsoft.did.sdk.utilities.controlflow.IdentifierCreatorException
-import com.microsoft.did.sdk.utilities.controlflow.Result
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
+import com.microsoft.did.sdk.util.Constants.IDENTIFIER_SECRET_KEY_NAME
+import com.microsoft.did.sdk.util.Constants.RECOVERY_KEYREFERENCE
+import com.microsoft.did.sdk.util.Constants.SIGNATURE_KEYREFERENCE
+import com.microsoft.did.sdk.util.controlflow.IdentifierCreatorException
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.stringToByteArray
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,8 +35,10 @@ import kotlin.random.Random
  * @class
  */
 @Singleton
-class IdentifierCreator @Inject constructor(private val cryptoOperations: CryptoOperations,
-                                            private val payloadProcessor: SidetreePayloadProcessor) {
+class IdentifierCreator @Inject constructor(
+    private val cryptoOperations: CryptoOperations,
+    private val payloadProcessor: SidetreePayloadProcessor
+) {
 
     fun create(methodName: String): Result<Identifier> {
         val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$methodName"
@@ -46,7 +49,8 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
             val updateRevealValue = generateCommitmentValue()
             val recoveryRevealValue = generateCommitmentValue()
-            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
+            val registrationPayload =
+                payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
@@ -65,9 +69,9 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
         }
     }
 
-    fun createPairwiseId(personaId:String, peerId: String): Result<Identifier> {
+    fun createPairwiseId(personaId: String, peerId: String): Result<Identifier> {
         //TODO: Add a utility class/method to hash all the details identifying a pairwise id's key and use the hash as the key reference/kid
-        val randomValueForKeyReference = Base64Url.encode( Random.nextBytes(6))
+        val randomValueForKeyReference = Base64Url.encode(Random.nextBytes(6))
         val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$randomValueForKeyReference"
         val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$randomValueForKeyReference"
         return try {
@@ -75,17 +79,26 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
             val alg = EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                 additionalParams = mapOf(
-                    "hash" to Sha.Sha256
+                    "hash" to Sha.SHA256.algorithm
                 )
             )
             //TODO: Update the last section to append incremented version number instead of 1
             val signingKeyIdForPairwiseKey = "${signatureKeyReference}_1"
             val recoveryKeyIdForPairwiseKey = "${recoveryKeyReference}_1"
-            val signingPublicKey = generateAndSaveKey(alg, peerId, "${alias}_$signingKeyIdForPairwiseKey","${alias}_$signatureKeyReference", personaId, KeyUse.Signature.value)
-            val recoveryPublicKey = generateAndSaveKey(alg, peerId, "${alias}_$recoveryKeyIdForPairwiseKey","${alias}_$recoveryKeyReference", personaId, "")
+            val signingPublicKey = generateAndSaveKey(
+                alg,
+                peerId,
+                "${alias}_$signingKeyIdForPairwiseKey",
+                "${alias}_$signatureKeyReference",
+                personaId,
+                KeyUse.Signature.value
+            )
+            val recoveryPublicKey =
+                generateAndSaveKey(alg, peerId, "${alias}_$recoveryKeyIdForPairwiseKey", "${alias}_$recoveryKeyReference", personaId, "")
             val updateRevealValue = generateCommitmentValue()
             val recoveryRevealValue = generateCommitmentValue()
-            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
+            val registrationPayload =
+                payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
@@ -104,7 +117,14 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
         }
     }
 
-    private fun generateAndSaveKey(algorithm: Algorithm, target: String, kid: String, keyReference: String?, personaId: String, keyUsage: String) : PublicKey {
+    private fun generateAndSaveKey(
+        algorithm: Algorithm,
+        target: String,
+        kid: String,
+        keyReference: String?,
+        personaId: String,
+        keyUsage: String
+    ): PublicKey {
         val privateKeyJwk = cryptoOperations.generatePairwise(algorithm, AndroidConstants.masterSeed.value, personaId, target)
         privateKeyJwk.kid = "#${kid}"
         privateKeyJwk.use = toKeyUse(keyUsage)
@@ -116,7 +136,7 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
         return publicKeyJwk
     }
 
-    private fun generateKeyReferenceId(personaId: String, target: String, algorithm: String, keyType: String) : String {
+    private fun generateKeyReferenceId(personaId: String, target: String, algorithm: String, keyType: String): String {
         return "$personaId-$target-$algorithm-$keyType"
     }
 
@@ -129,7 +149,7 @@ class IdentifierCreator @Inject constructor(private val cryptoOperations: Crypto
         payloadProcessor: SidetreePayloadProcessor,
         registrationPayload: RegistrationPayload
     ): String {
-        val registrationPayloadEncoded = registrationPayload.suffixData+"."+registrationPayload.patchData
+        val registrationPayloadEncoded = registrationPayload.suffixData + "." + registrationPayload.patchData
         val identifierShortForm = computeUniqueSuffix(payloadProcessor, registrationPayload)
         return "$identifierShortForm?${Constants.INITIAL_STATE_LONGFORM}=$registrationPayloadEncoded"
     }

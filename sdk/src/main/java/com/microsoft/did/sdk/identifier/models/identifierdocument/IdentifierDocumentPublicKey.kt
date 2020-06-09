@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyException
 import kotlinx.serialization.Serializable
 
 /**

@@ -7,8 +7,8 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
-import com.microsoft.did.sdk.utilities.DefaultLogConsumer
-import com.microsoft.did.sdk.utilities.SdkLog
+import com.microsoft.did.sdk.util.log.DefaultLogConsumer
+import com.microsoft.did.sdk.util.log.SdkLog
 import org.bitcoin.Secp256k1Context
 
 /**

@@ -5,7 +5,7 @@ import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 
-class EllipticCurvePrivateKey (key: JsonWebKey): PrivateKey(key) {
+class EllipticCurvePrivateKey(key: JsonWebKey) : PrivateKey(key) {
     var crv = key.crv
     var x = key.x
     var y = key.y

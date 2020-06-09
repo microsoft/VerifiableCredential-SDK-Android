@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  */
 
 @Serializable
-data class RegistrationPayload (
+data class RegistrationPayload(
     @SerialName("suffix_data")
     val suffixData: String,
     @SerialName("delta")

@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
  * JWS compact format.
  */
 @Serializable
-data class JwsCompact (
+data class JwsCompact(
     /**
      * The application-specific payload.
      */

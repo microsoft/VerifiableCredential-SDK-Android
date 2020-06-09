@@ -5,7 +5,7 @@ import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 
-class RsaPrivateKey(jwk: JsonWebKey): PrivateKey(jwk) {
+class RsaPrivateKey(jwk: JsonWebKey) : PrivateKey(jwk) {
     override var kty = KeyType.RSA
     override var alg: String? = if (key.alg != null) key.alg!! else "RS256"
 

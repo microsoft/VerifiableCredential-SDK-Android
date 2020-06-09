@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.crypto.keyStore
 
-import android.annotation.TargetApi
 import android.content.Context
 import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
@@ -13,16 +12,19 @@ import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.utilities.*
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.serializer.Serializer
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Serializer): com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
+class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Serializer) :
+    com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
 
     companion object {
         const val provider = "AndroidKeyStore"
@@ -41,7 +43,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
         return KeyContainer(
             kty = key.kty,
-            keys = key.kids.map{
+            keys = key.kids.map {
                 getSecureSecretKey(it)!!
             }
         )
@@ -53,7 +55,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         if (key != null) {
             return KeyContainer(
                 kty = key.kty,
-                keys = key.kids.map{
+                keys = key.kids.map {
                     AndroidKeyConverter.androidPrivateKeyToPrivateKey(it, keyStore)
                 }
             )
@@ -63,7 +65,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         if (key != null) {
             return KeyContainer(
                 kty = key.kty,
-                keys = key.kids.map{
+                keys = key.kids.map {
                     getSecurePrivateKey(it)!!
                 }
             )
@@ -89,7 +91,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         if (key != null) {
             return KeyContainer(
                 kty = key.kty,
-                keys = key.kids.map{
+                keys = key.kids.map {
                     getSecurePublicKey(it)!!
                 }
             )
@@ -135,7 +137,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         return null
     }
 
-    public fun deletePrivateKey(keyId: String) {
+    fun deletePrivateKey(keyId: String) {
         val nativeKeys = listNativeKeys()
         var keyRef = findReferenceInList(nativeKeys, keyId)
         if (!keyRef.isNullOrBlank()) {
@@ -150,22 +152,20 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     private fun findReferenceInList(list: Map<String, KeyStoreListItem>, keyId: String): String? {
-        return list.filter  {
+        return list.filter {
             it.value.kids.contains(keyId)
         }.entries.firstOrNull()?.key
     }
 
-    @TargetApi(23)
     override fun save(keyReference: String, key: SecretKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
-        var jwk = key.toJWK();
-        jwk.kid = alias;
+        val jwk = key.toJWK()
+        jwk.kid = alias
         val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
 
-    @TargetApi(23)
     override fun save(keyReference: String, key: PrivateKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         if (keyStore.containsAlias(alias)) {
@@ -173,8 +173,8 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
             return
         }
         // This key is not natively supported
-        var jwk = key.toJWK();
-        jwk.kid = alias;
+        val jwk = key.toJWK()
+        jwk.kid = alias
         val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
@@ -190,11 +190,11 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     override fun list(): Map<String, KeyStoreListItem> {
-        val nativeList = listNativeKeys()
-        val softwareList = listSecureData()
-        return com.microsoft.did.sdk.utilities.Map.join(softwareList, nativeList)
+        val result = mutableMapOf<String, KeyStoreListItem>()
+        result.putAll(listSecureData())
+        result.putAll(listNativeKeys())
+        return result
     }
-
 
     private fun listNativeKeys(): Map<String, KeyStoreListItem> {
         val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
@@ -213,8 +213,10 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 if (output.containsKey(values[1])) {
                     val listItem = output[values[1]]!!
                     if (listItem.kty != kty) {
-                        throw KeyStoreException("Key Container ${values[1]} contains keys of two different " +
-                                "types (${listItem.kty.value}, ${kty.value})")
+                        throw KeyStoreException(
+                            "Key Container ${values[1]} contains keys of two different " +
+                                "types (${listItem.kty.value}, ${kty.value})"
+                        )
                     }
                     listItem.kids.add(alias)
                 } else {
@@ -226,15 +228,15 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     private fun listSecureData(): Map<String, KeyStoreListItem> {
-        val sharedPreferences = getSharedPreferences();
-        val keys = sharedPreferences.all.keys;
+        val sharedPreferences = getSharedPreferences()
+        val keys = sharedPreferences.all.keys
         // all stored keys should be in JWT format
         val keyMap = mutableMapOf<String, KeyStoreListItem>()
-        keys.forEach{
+        keys.forEach {
             // verify that it matches the regex and grab the key reference
             val keyReferenceMatch = AndroidKeyStore.regexForKeyReference.matchEntire(it)
             if (keyReferenceMatch != null) {
-                val keyRef = keyReferenceMatch.groupValues[1];
+                val keyRef = keyReferenceMatch.groupValues[1]
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val key = serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
@@ -280,7 +282,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     private fun getSecureData(alias: String): ByteArray? {
-        val sharedPreferences = getSharedPreferences();
+        val sharedPreferences = getSharedPreferences()
         val base64UrlEncodedData = sharedPreferences.getString(alias, null)
         if (base64UrlEncodedData != null) {
             return Base64.decode(base64UrlEncodedData, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
@@ -296,13 +298,12 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     private fun saveSecureData(alias: String, data: ByteArray) {
-        val sharedPreferences = getSharedPreferences();
-        val editor = sharedPreferences.edit();
-        editor.putString(alias, Base64.encodeToString(data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP));
+        val sharedPreferences = getSharedPreferences()
+        val editor = sharedPreferences.edit()
+        editor.putString(alias, Base64.encodeToString(data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
         editor.apply()
     }
 
-    @TargetApi(23)
     private fun getSharedPreferences(): SharedPreferences {
         val masterKeyAlias = getSecretVaultMasterKey()
         return EncryptedSharedPreferences.create(
@@ -314,21 +315,22 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         )
     }
 
-    @TargetApi(23)
     private fun getSecretVaultMasterKey(): String {
         val alias = "ms-useragent-secret-masterkey"
 
         if (!keyStore.containsAlias(alias)) {
             // Generate the master key
             val generator = KeyGenerator.getInstance("AES", provider)
-            generator.init(KeyGenParameterSpec.Builder(
-                alias,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setKeySize(256)
-                .build())
-            generator.generateKey();
+            generator.init(
+                KeyGenParameterSpec.Builder(
+                    alias,
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setKeySize(256)
+                    .build()
+            )
+            generator.generateKey()
         }
 
         return alias
@@ -352,8 +354,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 "#${keyReference}_1"
             } else {
                 // heuristic, find the last digit and count up
-                var latestVersion = listItem.kids.reduce {
-                        acc: String, current: String ->
+                var latestVersion = listItem.kids.reduce { acc: String, current: String ->
                     val currentValue = regexForKeyIndex.matchEntire(current)?.groupValues?.get(1)?.toInt()
                     val accValue = acc.toIntOrNull()
                     if (currentValue != null && accValue == null) {
