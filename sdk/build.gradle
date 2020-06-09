@@ -123,9 +123,7 @@ dependencies {
 
     //other
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    
-    //noinspection GradleDependency // TODO(downgraded lib until the add google tink bug fix)
-    implementation "androidx.security:security-crypto:1.0.0-beta01"
+    implementation "androidx.security:security-crypto:1.0.0-rc02"
 
     api 'com.google.guava:guava:28.1-android' // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
     implementation files('libs/org.bitcoin.jar')
