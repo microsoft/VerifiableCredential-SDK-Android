@@ -1,2 +1,2 @@
-include ':PortableIdentityCard-ClientSDK'
-rootProject.name='PortableIdentityCard-ClientSDK-Android'
+include ':SDK'
+rootProject.name='VerifiableCredential-SDK'
