@@ -11,7 +11,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.utilities.Serializer
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
+import com.microsoft.did.sdk.util.serializer.Serializer
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.assertj.core.api.Assertions.assertThat
@@ -33,7 +34,7 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
             EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                 additionalParams = mapOf(
-                    "hash" to Sha.Sha256,
+                    "hash" to Sha.SHA256.algorithm,
                     "KeyReference" to keyReference
                 )
             ), true, listOf(KeyUsage.Sign)

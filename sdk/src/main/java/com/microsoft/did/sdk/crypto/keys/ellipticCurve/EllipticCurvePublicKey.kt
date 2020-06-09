@@ -4,15 +4,15 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
 
-class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
+class EllipticCurvePublicKey(key: JsonWebKey) : PublicKey(key) {
     override fun minimumAlphabeticJwk(): String {
         return "{\"crv\":\"$crv\",\"kty\":\"${kty.value}\",\"x\":\"$x\",\"y\":\"$y\"}"
     }
 
-     var crv = key.crv
-     var x = key.x
-     var y = key.y
-     override var kty = KeyType.EllipticCurve
+    var crv = key.crv
+    var x = key.x
+    var y = key.y
+    override var kty = KeyType.EllipticCurve
     override var key_ops: List<KeyUsage>? = listOf(KeyUsage.Verify)
 
     override fun toJWK(): JsonWebKey {
@@ -27,4 +27,4 @@ class EllipticCurvePublicKey(key: JsonWebKey): PublicKey(key) {
             y = y
         )
     }
- }
+}

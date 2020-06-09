@@ -1,6 +1,6 @@
 package com.microsoft.did.sdk.crypto.keys
 
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyException
 
 enum class KeyType(val value: String) {
     EllipticCurve("EC"),

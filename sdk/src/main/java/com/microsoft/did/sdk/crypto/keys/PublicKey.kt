@@ -5,16 +5,17 @@ import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.stringToByteArray
 
 /**
  * Represents a Public Key in JWK format.
  * @class
  * @abstract
  */
-abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
+abstract class PublicKey(val key: JsonWebKey) : IKeyStoreItem {
     /**
      * Key type
      */
@@ -33,7 +34,7 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
     /**
      * Valid key operations (key_ops)
      */
-    open var key_ops: List<KeyUsage>? = key.key_ops?.map {  toKeyUsage(it) }
+    open var key_ops: List<KeyUsage>? = key.key_ops?.map { toKeyUsage(it) }
 
     /**
      * Algorithm intended for use with this key
@@ -45,11 +46,11 @@ abstract class PublicKey (val key: JsonWebKey): IKeyStoreItem {
      * @param jwk JSON object representation of a JWK
      * @see https://tools.ietf.org/html/rfc7638
      */
-    fun getThumbprint (crypto: CryptoOperations, sha: Algorithm = Sha.Sha512): String {
+    fun getThumbprint(crypto: CryptoOperations, sha: Algorithm = Sha.SHA512.algorithm): String {
         // construct a JSON object with only required fields
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)
-        val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.Public)
+        val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.PUBLIC)
         val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
         return Base64Url.encode(hash)

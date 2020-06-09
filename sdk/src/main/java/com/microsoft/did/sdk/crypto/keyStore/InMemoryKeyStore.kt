@@ -7,19 +7,19 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 
-class InMemoryKeyStore(): KeyStore() {
+class InMemoryKeyStore : KeyStore() {
     private val secretKeys: MutableMap<String, KeyContainer<SecretKey>> = mutableMapOf()
     private val privateKeys: MutableMap<String, KeyContainer<PrivateKey>> = mutableMapOf()
     private val publicKeys: MutableMap<String, KeyContainer<PublicKey>> = mutableMapOf()
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
-        return secretKeys[keyReference]?: throw KeyStoreException("key $keyReference does not exist.")
+        return secretKeys[keyReference] ?: throw KeyStoreException("key $keyReference does not exist.")
     }
 
     override fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey> {
-        return privateKeys[keyReference]?: throw KeyStoreException("key $keyReference does not exist.")
+        return privateKeys[keyReference] ?: throw KeyStoreException("key $keyReference does not exist.")
     }
 
     override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
@@ -45,20 +45,12 @@ class InMemoryKeyStore(): KeyStore() {
     }
 
     override fun getPublicKeyById(keyId: String): PublicKey? {
-        return findKeyMatchingIdIn(publicKeys, keyId) ?:
-                findKeyMatchingIdIn(privateKeys, keyId)?.getPublicKey()
+        return findKeyMatchingIdIn(publicKeys, keyId) ?: findKeyMatchingIdIn(privateKeys, keyId)?.getPublicKey()
     }
 
-    private fun <T: IKeyStoreItem> findKeyMatchingIdIn(map: Map<String, KeyContainer<T>>, keyId: String): T? {
+    private fun <T : IKeyStoreItem> findKeyMatchingIdIn(map: Map<String, KeyContainer<T>>, keyId: String): T? {
         return map.map {
-            val key = it.value.keys.firstOrNull {
-                it.kid == keyId
-            }
-            if (key != null) {
-                key
-            } else {
-                null
-            }
+            it.value.keys.firstOrNull { key -> key.kid == keyId }
         }.firstOrNull {
             it != null
         }
@@ -76,10 +68,11 @@ class InMemoryKeyStore(): KeyStore() {
                 keyContainer.alg
             )
         } else {
-            secretKeys[keyReference] = KeyContainer<SecretKey>(
+            secretKeys[keyReference] = KeyContainer(
                 key.kty,
                 listOf(key),
-                KeyUse.Secret)
+                KeyUse.Secret
+            )
         }
     }
 
@@ -95,7 +88,7 @@ class InMemoryKeyStore(): KeyStore() {
                 keyContainer.alg
             )
         } else {
-            privateKeys[keyReference] = KeyContainer<PrivateKey>(
+            privateKeys[keyReference] = KeyContainer(
                 key.kty,
                 listOf(key),
                 key.use,
@@ -116,7 +109,7 @@ class InMemoryKeyStore(): KeyStore() {
                 keyContainer.alg
             )
         } else {
-            publicKeys[keyReference] = KeyContainer<PublicKey>(
+            publicKeys[keyReference] = KeyContainer(
                 key.kty,
                 listOf(key),
                 key.use,
@@ -130,19 +123,19 @@ class InMemoryKeyStore(): KeyStore() {
         secretKeys.forEach {
             result[it.key] = KeyStoreListItem(
                 it.value.kty,
-                it.value.keys.filter { it.kid != null }.map { it.kid!! }.toMutableList()
+                it.value.keys.map { key -> key.kid }.toMutableList()
             )
         }
         privateKeys.forEach {
             result[it.key] = KeyStoreListItem(
                 it.value.kty,
-                it.value.keys.filter { it.kid != null }.map { it.kid!! }.toMutableList()
+                it.value.keys.map { key -> key.kid }.toMutableList()
             )
         }
         publicKeys.forEach {
             result[it.key] = KeyStoreListItem(
                 it.value.kty,
-                it.value.keys.filter { it.kid != null }.map { it.kid!! }.toMutableList()
+                it.value.keys.map { key -> key.kid }.toMutableList()
             )
         }
 

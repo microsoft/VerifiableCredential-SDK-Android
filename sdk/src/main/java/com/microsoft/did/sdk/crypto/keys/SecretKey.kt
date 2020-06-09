@@ -1,4 +1,5 @@
 package com.microsoft.did.sdk.crypto.keys
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -14,7 +15,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.toKeyUsage
  * @class
  * @extends JsonWebKey
  */
-open class SecretKey(key: JsonWebKey): IKeyStoreItem {
+open class SecretKey(key: JsonWebKey) : IKeyStoreItem {
     /**
      * Set the Oct key type
      */

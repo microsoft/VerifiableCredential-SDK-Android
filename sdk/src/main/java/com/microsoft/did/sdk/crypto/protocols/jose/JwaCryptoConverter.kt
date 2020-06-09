@@ -2,18 +2,24 @@ package com.microsoft.did.sdk.crypto.protocols.jose
 
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.utilities.controlflow.CryptoException
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
+import com.microsoft.did.sdk.util.controlflow.CryptoException
 import java.util.*
 
 object JwaCryptoConverter {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
         val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
         return if (matches != null) {
-            Pair( if (matches.groupValues[1].isNotBlank()) {
-                matches.groupValues[1]
-            } else {
-                null
-            }, matches.groupValues[2])
+            Pair(
+                if (matches.groupValues[1].isNotBlank()) {
+                    matches.groupValues[1]
+                } else {
+                    null
+                }, matches.groupValues[2]
+            )
         } else {
             Pair(null, keyId)
         }
@@ -76,17 +82,17 @@ object JwaCryptoConverter {
                 when (algorithm.additionalParams["namedCurve"]) {
                     W3cCryptoApiConstants.Secp256k1.value -> {
                         when (algorithm.hash.name) {
-                            Sha.Sha256.name -> "ES256K"
-                            Sha.Sha384.name -> "ES384K"
-                            Sha.Sha512.name -> "ES512K"
+                            Sha.SHA256.algorithm.name -> "ES256K"
+                            Sha.SHA384.algorithm.name -> "ES384K"
+                            Sha.SHA512.algorithm.name -> "ES512K"
                             else -> "ES256K"
                         }
                     }
                     else -> {
                         when (algorithm.hash.name) {
-                            Sha.Sha256.name -> "ES256"
-                            Sha.Sha384.name -> "ES384"
-                            Sha.Sha512.name -> "ES512"
+                            Sha.SHA256.algorithm.name -> "ES256"
+                            Sha.SHA384.algorithm.name -> "ES384"
+                            Sha.SHA512.algorithm.name -> "ES512"
                             else -> "ES256"
                         }
                     }
@@ -96,7 +102,6 @@ object JwaCryptoConverter {
         }
     }
 
-    @ExperimentalUnsignedTypes
     fun jwkAlgToKeyGenWebCrypto(algorithm: String): Algorithm {
         return when (algorithm.toUpperCase(Locale.ENGLISH)) {
             JoseConstants.Rs256.value, JoseConstants.Rs384.value, JoseConstants.Rs512.value -> {
@@ -105,7 +110,7 @@ object JwaCryptoConverter {
                 RsaHashedKeyAlgorithm(
                     hash = Sha.get(hashSize.toInt()),
                     publicExponent = 65537UL,
-                    modulusLength = 4096UL// KEY SIZE
+                    modulusLength = 4096UL // KEY SIZE
                 )
             }
             JoseConstants.RsaOaep.value, JoseConstants.RsaOaep256.value -> {

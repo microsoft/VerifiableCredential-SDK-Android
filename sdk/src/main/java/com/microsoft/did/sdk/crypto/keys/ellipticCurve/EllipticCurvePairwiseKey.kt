@@ -9,9 +9,9 @@ import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.EcKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.EcdsaParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
@@ -20,9 +20,9 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.plugins.Secp256k1Provider
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
-import com.microsoft.did.sdk.utilities.controlflow.PairwiseKeyException
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import org.bitcoin.NativeSecp256k1
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -35,7 +35,7 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         val supportedCurves = listOf("P-256K")
 
         val subtleCrypto: SubtleCrypto =
-            crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.Private);
+            crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.PRIVATE)
 
         val pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
 
@@ -114,16 +114,16 @@ class EllipticCurvePairwiseKey @Inject constructor() {
     }
 
     private fun isPublicKeyUncompressedOrHybridHex(keyData: ByteArray): Boolean {
-        return keyData.size == 65 && (keyData[0] == Secp256k1Provider.secp256k1Tag.uncompressed.byte ||
-            keyData[0] == Secp256k1Provider.secp256k1Tag.hybridEven.byte ||
-            keyData[0] == Secp256k1Provider.secp256k1Tag.hybridOdd.byte
+        return keyData.size == 65 && (keyData[0] == Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte ||
+            keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_EVEN.byte ||
+            keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_ODD.byte
             )
     }
 
     private fun isPublicKeyCompressedHex(keyData: ByteArray): Boolean {
         return (keyData.size == 33 && (
-            keyData[0] == Secp256k1Provider.secp256k1Tag.even.byte ||
-                keyData[0] == Secp256k1Provider.secp256k1Tag.odd.byte)
+            keyData[0] == Secp256k1Provider.Secp256k1Tag.EVEN.byte ||
+                keyData[0] == Secp256k1Provider.Secp256k1Tag.ODD.byte)
             )
     }
 
