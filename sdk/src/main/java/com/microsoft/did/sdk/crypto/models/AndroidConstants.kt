@@ -23,8 +23,6 @@ enum class AndroidConstants(val value: String) {
     HmacSha512("HmacSHA512"),
 
 
-
-
     //////////////////////
     // Custom Constants //
     //////////////////////

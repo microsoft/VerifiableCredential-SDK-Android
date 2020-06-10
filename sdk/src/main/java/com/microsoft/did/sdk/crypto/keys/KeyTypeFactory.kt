@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 package com.microsoft.did.sdk.crypto.keys
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import java.util.Locale
 
 /**
@@ -16,21 +16,12 @@ object KeyTypeFactory {
      * Create the key type according to the selected algorithm.
      * @param algorithm Web crypto compliant algorithm object
      */
-    fun createViaWebCrypto (algorithm: Algorithm): KeyType {
+    fun createViaWebCrypto(algorithm: Algorithm): KeyType {
         return when (algorithm.name.toLowerCase(Locale.ENGLISH)) {
             "hmac" -> KeyType.Octets
-            "ecdsa", "ecdh" -> KeyType.EllipticCurve;
-            "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA;
-            else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported");
+            "ecdsa", "ecdh" -> KeyType.EllipticCurve
+            "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA
+            else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported")
         }
-    }
-
-    /**
-     * Create the key use according to the selected algorithm.
-     * @param algorithm JWA algorithm constant
-     */
-    fun createViaJwa (algorithm: String): KeyType {
-        val alg = CryptoHelpers.jwaToWebCrypto(algorithm);
-        return createViaWebCrypto(alg);
     }
 }

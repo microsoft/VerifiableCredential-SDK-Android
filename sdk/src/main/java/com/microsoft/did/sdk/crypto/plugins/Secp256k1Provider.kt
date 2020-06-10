@@ -5,19 +5,23 @@ package com.microsoft.did.sdk.crypto.plugins
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
-import com.microsoft.did.sdk.utilities.controlflow.SignatureException
-import com.microsoft.did.sdk.utilities.printBytes
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.stringToByteArray
+import com.microsoft.did.sdk.util.toReadableString
 import org.bitcoin.NativeSecp256k1
 import java.security.SecureRandom
 import java.util.*
 
-class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
+class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
@@ -42,13 +46,13 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val publicKey = NativeSecp256k1.computePubkey(secret)
 
         val signAlgorithm = EcdsaParams(
-            hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.Sha256,
+            hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.SHA256.algorithm,
             additionalParams = mapOf(
                 "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
             )
         )
 
-        val keyPair = CryptoKeyPair(
+        return CryptoKeyPair(
             privateKey = CryptoKey(
                 KeyType.Private,
                 extractable,
@@ -64,8 +68,6 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 Secp256k1Handle("", publicKey)
             )
         )
-
-        return return keyPair
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
@@ -95,9 +97,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
             throw SignatureException("Data must be 32 bytes")
         }
 
-        print("KEY DATA: ")
-        printBytes(keyData)
-
+        SdkLog.d("Key data: " + keyData.toReadableString())
         return NativeSecp256k1.verify(hashedData, signature, keyData)
     }
 
@@ -146,7 +146,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 val y =
                     Base64.decode(stringToByteArray(keyData.y!!), Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val xyData = ByteArray(65)
-                xyData[0] = secp256k1Tag.uncompressed.byte
+                xyData[0] = Secp256k1Tag.UNCOMPRESSED.byte
                 x.forEachIndexed { index, byte ->
                     xyData[index + 1] = byte
                 }
@@ -206,15 +206,15 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     // mapped from secp256k1_eckey_pubkey_parse
     private fun publicToXY(keyData: ByteArray): Pair<String, String> {
         if (keyData.size == 33 && (
-                keyData[0] == secp256k1Tag.even.byte ||
-                    keyData[0] == secp256k1Tag.odd.byte)
+                keyData[0] == Secp256k1Tag.EVEN.byte ||
+                    keyData[0] == Secp256k1Tag.ODD.byte)
         ) {
             // compressed form
             throw KeyFormatException("Compressed Hex format is not supported.")
         } else if (keyData.size == 65 && (
-                keyData[0] == secp256k1Tag.uncompressed.byte ||
-                    keyData[0] == secp256k1Tag.hybridEven.byte ||
-                    keyData[0] == secp256k1Tag.hybridOdd.byte
+                keyData[0] == Secp256k1Tag.UNCOMPRESSED.byte ||
+                    keyData[0] == Secp256k1Tag.HYBRID_EVEN.byte ||
+                    keyData[0] == Secp256k1Tag.HYBRID_ODD.byte
                 )
         ) {
             // uncompressed, bytes 1-32, and 33-end are x and y
@@ -229,11 +229,11 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         }
     }
 
-    enum class secp256k1Tag(val byte: Byte) {
-        even(0x02),
-        odd(0x03),
-        uncompressed(0x04),
-        hybridEven(0x06),
-        hybridOdd(0x07)
+    enum class Secp256k1Tag(val byte: Byte) {
+        EVEN(0x02),
+        ODD(0x03),
+        UNCOMPRESSED(0x04),
+        HYBRID_EVEN(0x06),
+        HYBRID_ODD(0x07)
     }
 }

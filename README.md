@@ -11,22 +11,26 @@ To learn more about verifiable credentials, please review our [documentation.](h
 # How to use SDK
 
 ## Initializing SDK
-`PortableIdentitySdk` - this class is used to initialize the SDK inside of the app with these init method parameters:
+`VerifiableCredentialSdk` - this class is used to initialize the SDK inside of the app with these init method parameters:
 ```kotlin
-init(
-        context: Context, // App Context.
-        logConsumerBridge: SdkLog.ConsumerBridge = DefaultLogConsumerBridge(), // Bridge for logging.
-        registrationUrl: String = "", // Registration url for registering Identifier (not needed for MVP)
-        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers" // Resolver url for resolving Identifiers.
-    )
+fun init(
+    context: Context,
+    logConsumer: SdkLog.Consumer = DefaultLogConsumer(), // Optional: Provide your app logger
+    registrationUrl: String = "", // Not supported in MVP
+    resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers" // Optional: Provide identifier resolution service
+)
 ```
 
-Example of SDK initialization within app:
+Example of SDK initialization within app (call in your `Application` `onCreate()`):
 ```kotlin
-val piSdk = PortableIdentitySdk.init(getApplicationContext(), new PortableIdentitySdkLogConsumerBridge());
+VerifiableCredentialSdk.init(getApplicationContext(), new VerifiableCredentialSdkLogConsumer());
 ```
 
-> note: Dependency Injection is configured through [Dagger](https://github.com/google/dagger) in our SDK.
+After initialization you can access `identifierManager` and `cardManager` from this singleton directly, but it you may want to access it through your dependency injection framework (like dagger).
+```kotlin
+VerifiableCredentialSdk.cardManager
+VerifiableCredentialSdk.identifierManager
+```
 
 ## External facing APIs
 There two classes that are external to our SDK.

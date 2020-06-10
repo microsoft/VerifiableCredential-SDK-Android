@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
  * JWS flattened JSON format.
  */
 @Serializable
-data class JwsFlatJson (
+data class JwsFlatJson(
     /**
      * The application-specific payload.
      */

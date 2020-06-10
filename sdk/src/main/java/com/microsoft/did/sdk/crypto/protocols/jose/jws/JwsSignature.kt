@@ -1,14 +1,15 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
-import com.microsoft.did.sdk.utilities.*
+import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.serializer.Serializer
 import kotlinx.serialization.Serializable
 
 /**
  * JWS signature used by the general JSON
  */
 @Serializable
-data class JwsSignature (
+data class JwsSignature(
     /**
      * The protected (signed) header.
      */
@@ -27,11 +28,11 @@ data class JwsSignature (
     fun getKid(serializer: Serializer): String? {
         return getMember(JoseConstants.Kid.value, serializer)
     }
-    
+
     fun getAlg(serializer: Serializer): String? {
         return getMember(JoseConstants.Alg.value, serializer)
     }
-    
+
     private fun getMember(member: String, serializer: Serializer): String? {
         if (protected.isNotEmpty()) {
             val jsonProtected = Base64Url.decode(protected)

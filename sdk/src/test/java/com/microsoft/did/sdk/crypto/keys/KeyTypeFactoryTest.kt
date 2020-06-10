@@ -1,9 +1,7 @@
 package com.microsoft.did.sdk.crypto.keys
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class KeyTypeFactoryTest {
@@ -48,11 +46,5 @@ class KeyTypeFactoryTest {
         val algorithmName = "rsassa-pkcs1-v1_5"
         val actualKeyType = KeyTypeFactory.createViaWebCrypto(Algorithm(algorithmName))
         assertThat(actualKeyType).isEqualTo(KeyType.RSA)
-    }
-
-    @Test
-    fun `failing with invalid algorithm while finding key type`() {
-        val nonExistingAlgorithmName = "Test"
-        assertThatThrownBy { KeyTypeFactory.createViaJwa(nonExistingAlgorithmName) }.isInstanceOf(AlgorithmException::class.java)
     }
 }

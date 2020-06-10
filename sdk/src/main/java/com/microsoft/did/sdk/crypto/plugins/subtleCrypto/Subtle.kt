@@ -1,22 +1,22 @@
 package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import java.util.Locale
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
-open class Subtle(providers: Set<Provider> = emptySet(), private val serializer: Serializer): SubtleCrypto {
+open class Subtle(providers: Set<Provider> = emptySet(), private val serializer: Serializer) : SubtleCrypto {
     val provider = providers.map {
         Pair(it.name.toLowerCase(Locale.ENGLISH), it)
     }.toMap()
@@ -54,6 +54,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         val provider = getProvider(algorithm.name)
         return provider.generateKey(algorithm, extractable, keyUsages.toSet())
     }
+
     override fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKeyPair {
         val provider = getProvider(algorithm.name)
         return provider.generateKeyPair(algorithm, extractable, keyUsages.toSet())
@@ -67,17 +68,18 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         keyUsages: List<KeyUsage>
     ): CryptoKey {
         // check derivedKeyType
-        val importProvider = this.getProvider(derivedKeyType.name);
+        val importProvider = this.getProvider(derivedKeyType.name)
         importProvider.checkDerivedKeyParams(derivedKeyType)
-        val deriveKeyLength = (derivedKeyType.additionalParams["length"] as ULong? ?: throw KeyException("DerivedKeyType must include a length parameter"))
+        val deriveKeyLength =
+            (derivedKeyType.additionalParams["length"] as ULong? ?: throw KeyException("DerivedKeyType must include a length parameter"))
 
         // derive bits
-        val provider = this.getProvider(algorithm.name);
-        provider.checkCryptoKey(baseKey, KeyUsage.DeriveKey);
+        val provider = this.getProvider(algorithm.name)
+        provider.checkCryptoKey(baseKey, KeyUsage.DeriveKey)
         val derivedBits = provider.deriveBits(algorithm, baseKey, deriveKeyLength)
 
         // import derived key
-        return this.importKey(KeyFormat.Raw, derivedBits, derivedKeyType, extractable, keyUsages);
+        return this.importKey(KeyFormat.Raw, derivedBits, derivedKeyType, extractable, keyUsages)
     }
 
     override fun deriveBits(algorithm: Algorithm, baseKey: CryptoKey, length: ULong): ByteArray {
@@ -123,7 +125,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         wrappingKey: CryptoKey,
         wrapAlgorithm: Algorithm
     ): ByteArray {
-        var keyData: ByteArray
+        val keyData: ByteArray
         if (format == KeyFormat.Jwk) {
             val keyJwk = this.exportKeyJwk(key)
             val jwkSequence = serializer.stringify(JsonWebKey.serializer(), keyJwk).asSequence()
@@ -132,12 +134,12 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
                 keyData[index] = character.toByte()
             }
         } else {
-            keyData = this.exportKey(format, key);
+            keyData = this.exportKey(format, key)
         }
 
         // encrypt key data
-        val provider = this.getProvider(wrapAlgorithm.name);
-        return provider.encrypt(wrapAlgorithm, wrappingKey, keyData);
+        val provider = this.getProvider(wrapAlgorithm.name)
+        return provider.encrypt(wrapAlgorithm, wrappingKey, keyData)
     }
 
     override fun unwrapKey(
@@ -150,11 +152,11 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         keyUsages: List<KeyUsage>
     ): CryptoKey {
         // decrypt wrapped key
-        val provider = this.getProvider(unwrapAlgorithm.name);
-        val keyData = provider.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey);
+        val provider = this.getProvider(unwrapAlgorithm.name)
+        val keyData = provider.decrypt(unwrapAlgorithm, unwrappingKey, wrappedKey)
         if (format == KeyFormat.Jwk) {
             try {
-                val jwk = JsonWebKey(keyData.toList().joinToString());
+                val jwk = JsonWebKey(keyData.toList().joinToString())
                 // import key
                 return this.importKey(format, jwk, unwrappedKeyAlgorithm, extractable, keyUsages)
             } catch (error: Throwable) {

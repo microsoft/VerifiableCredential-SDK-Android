@@ -1,4 +1,5 @@
 package com.microsoft.did.sdk.crypto.models.webCryptoApi
+
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,5 +31,5 @@ data class JsonWebKey(
 ) {
     /** The following fields are defined in Section 6.3.2.7 of JSON Web Algorithms */
     @Serializable
-    data class RsaOtherPrimesInfo (val r: String, val d: String, val t: String)
+    data class RsaOtherPrimesInfo(val r: String, val d: String, val t: String)
 }

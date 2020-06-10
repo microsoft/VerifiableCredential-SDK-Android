@@ -8,8 +8,8 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.microsoft.did.sdk.auth.validators.OidcPresentationRequestValidator
-import com.microsoft.did.sdk.auth.validators.PresentationRequestValidator
+import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
+import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
@@ -20,9 +20,9 @@ import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.registrars.Registrar
-import com.microsoft.did.sdk.registrars.SidetreeRegistrar
-import com.microsoft.did.sdk.repository.SdkDatabase
+import com.microsoft.did.sdk.identifier.registrars.Registrar
+import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
+import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -58,18 +58,18 @@ internal class SdkModule {
         val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore, ecPairwiseKey)
         defaultCryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
-            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.All)
+            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.ALL)
         )
         defaultCryptoOperations.subtleCryptoFactory.addMessageAuthenticationCodeSigner(
             name = W3cCryptoApiConstants.Hmac.value,
-            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.All)
+            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.ALL)
         )
         return defaultCryptoOperations
     }
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient() : OkHttpClient {
+    fun defaultOkHttpClient(): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { println(it) }
         return OkHttpClient()
             .newBuilder()
@@ -79,7 +79,7 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultRetrofit(okHttpClient: OkHttpClient) : Retrofit {
+    fun defaultRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
             .baseUrl("http://TODO.me")
             .client(okHttpClient)
@@ -110,7 +110,7 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
-        return Room.databaseBuilder(context, SdkDatabase::class.java, "PortableIdentity-db")
+        return Room.databaseBuilder(context, SdkDatabase::class.java, "VerifiableCredential-db")
             .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
             .build()
     }
