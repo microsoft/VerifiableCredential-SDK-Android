@@ -3,13 +3,13 @@
 package com.microsoft.did.sdk.resolver
 
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import com.microsoft.did.sdk.repository.IdentifierRepository
-import com.microsoft.did.sdk.resolvers.Resolver
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.NetworkException
-import com.microsoft.did.sdk.utilities.controlflow.ResolverException
-import com.microsoft.did.sdk.utilities.controlflow.Result
-import com.microsoft.did.sdk.utilities.controlflow.ServiceErrorException
+import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.NetworkException
+import com.microsoft.did.sdk.util.controlflow.ResolverException
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking

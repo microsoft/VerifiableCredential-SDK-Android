@@ -4,10 +4,11 @@ package com.microsoft.did.sdk.repository.networking.identifierOperations
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
+import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
-import com.microsoft.did.sdk.repository.IdentifierRepository
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.Result
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.Result
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

@@ -5,8 +5,9 @@ package com.microsoft.did.sdk.repository.dao
 import android.content.Context
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.repository.SdkDatabase
+import com.microsoft.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.did.sdk.datasource.db.dao.IdentifierDao
+import com.microsoft.did.sdk.identifier.models.Identifier
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -14,7 +15,7 @@ import org.junit.Test
 
 class IdentifierDaoInstrumentedTest {
     private var identifierDao: IdentifierDao
-    var sdkDatabase: SdkDatabase
+    private var sdkDatabase: SdkDatabase
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
