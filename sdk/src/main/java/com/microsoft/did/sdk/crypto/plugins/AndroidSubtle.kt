@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.crypto.plugins
 
-import android.annotation.TargetApi
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -8,16 +7,19 @@ import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.AndroidKeyHandle
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.AndroidKeyConverter
-import com.microsoft.did.sdk.utilities.Base64Url
-import com.microsoft.did.sdk.utilities.SdkLog
-import com.microsoft.did.sdk.utilities.controlflow.AlgorithmException
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.KeyFormatException
-import com.microsoft.did.sdk.utilities.controlflow.KeyStoreException
-import com.microsoft.did.sdk.utilities.controlflow.SignatureException
+import com.microsoft.did.sdk.util.AndroidKeyConverter
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.controlflow.SignatureException
 import java.math.BigInteger
 import java.security.*
 import java.security.spec.RSAPublicKeySpec
@@ -28,7 +30,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): SubtleCrypto {
+class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) : SubtleCrypto {
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
@@ -75,7 +77,7 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
     }
 
     override fun generateKey(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKey {
-        val secret = when(algorithm.name) {
+        val secret = when (algorithm.name) {
             W3cCryptoApiConstants.AesCbc.value, W3cCryptoApiConstants.AesCtr.value,
             W3cCryptoApiConstants.AesGcm.value, W3cCryptoApiConstants.AesKw.value -> {
                 val generator = KeyGenerator.getInstance(AndroidConstants.Aes.value)
@@ -94,9 +96,8 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
         )
     }
 
-    @TargetApi(23)
     override fun generateKeyPair(algorithm: Algorithm, extractable: Boolean, keyUsages: List<KeyUsage>): CryptoKeyPair {
-        if (!algorithm.additionalParams.containsKey(AndroidConstants.KeyReference.value)){
+        if (!algorithm.additionalParams.containsKey(AndroidConstants.KeyReference.value)) {
             throw AlgorithmException("Algorithm must contain an additional parameter \"${AndroidConstants.KeyReference.value}\"")
         }
         val alias = keyStore.checkOrCreateKeyId(algorithm.additionalParams[AndroidConstants.KeyReference.value] as String, null)
@@ -183,10 +184,12 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
                         entry
                     )
                 } else { // Public RSA key being imported
-                    val key = keyFactory.generatePublic(RSAPublicKeySpec(
-                        BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)),
-                        BigInteger(1, Base64.decode(keyData.e, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
-                    ))
+                    val key = keyFactory.generatePublic(
+                        RSAPublicKeySpec(
+                            BigInteger(1, Base64.decode(keyData.n, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)),
+                            BigInteger(1, Base64.decode(keyData.e, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
+                        )
+                    )
                     val entry = AndroidKeyHandle(keyData.kid ?: "", key)
                     return CryptoKey(
                         KeyType.Public,
@@ -290,7 +293,8 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore): 
             }
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> {
                 // The hash is indicated by the key's "algorithm" slot.
-                val keyAlgorithm = cryptoKey.algorithm as? RsaHashedKeyAlgorithm ?: throw AlgorithmException("Unsupported RSA key algorithm: ${cryptoKey.algorithm.name}")
+                val keyAlgorithm = cryptoKey.algorithm as? RsaHashedKeyAlgorithm
+                    ?: throw AlgorithmException("Unsupported RSA key algorithm: ${cryptoKey.algorithm.name}")
                 when (keyAlgorithm.hash.name) {
                     W3cCryptoApiConstants.Sha1.value -> AndroidConstants.RsSha1.value
                     W3cCryptoApiConstants.Sha224.value -> AndroidConstants.RsSha224.value

@@ -12,12 +12,21 @@ jacoco {
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
+    ndkVersion ndk_version
+
     defaultConfig {
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        kapt {
+            arguments {
+                arg("room.schemaLocation", "$projectDir/schemas")
+                arg("room.incremental", "true")
+            }
+        }
     }
     buildTypes {
         debug {
@@ -49,12 +58,16 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
     }
 
     lintOptions {
-        // TODO: fix lint warnings
         abortOnError false
         warningsAsErrors false
+        textReport true
+        textOutput "stdout"
+        explainIssues true
+        showAll true
     }
 }
 
@@ -106,11 +119,11 @@ dependencies {
 
     // KTX
     implementation "androidx.collection:collection-ktx:1.1.0"
-    implementation "androidx.core:core-ktx:1.2.0"
+    implementation "androidx.core:core-ktx:1.3.0"
 
     //other
-    implementation "androidx.security:security-crypto:1.0.0-beta01" //TODO(downgraded lib until the add google tink bug fix)
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation "androidx.security:security-crypto:1.0.0-rc02"
 
     api 'com.google.guava:guava:28.1-android' // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
     implementation files('libs/org.bitcoin.jar')

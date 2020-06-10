@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
  * JWS general JSON format.
  */
 @Serializable
-data class JwsGeneralJson (
+data class JwsGeneralJson(
     /**
      * The application-specific non-encoded payload.
      */

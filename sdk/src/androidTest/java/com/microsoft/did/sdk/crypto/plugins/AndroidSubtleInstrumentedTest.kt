@@ -11,10 +11,13 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.Algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.stringToByteArray
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,7 +38,7 @@ class AndroidSubtleInstrumentedTest {
             EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
                 additionalParams = mapOf(
-                    "hash" to Sha.Sha256,
+                    "hash" to Sha.SHA256.algorithm,
                     "KeyReference" to keyReference
                 )
             ), true, listOf(KeyUsage.Sign)
@@ -76,8 +79,9 @@ class AndroidSubtleInstrumentedTest {
     @Test
     fun signAndVerifySignatureTest() {
         val keyReference = "KeyReference4"
-        cryptoKeyPair = androidSubtle.generateKeyPair(EcdsaParams(
-            hash =  Sha.Sha256,
+        cryptoKeyPair = androidSubtle.generateKeyPair(
+            EcdsaParams(
+            hash =  Sha.SHA256.algorithm,
             additionalParams = mapOf(
                 "namedCurve" to "P-256K",
                 "format" to "DER",
@@ -104,7 +108,7 @@ class AndroidSubtleInstrumentedTest {
             RsaHashedKeyAlgorithm(
                 modulusLength = 4096UL,
                 publicExponent = 65537UL,
-                hash = Sha.Sha256,
+                hash = Sha.SHA256.algorithm,
                 additionalParams = mapOf("KeyReference" to keyReference)
             ), true, listOf(KeyUsage.Sign)
         )
@@ -127,7 +131,7 @@ class AndroidSubtleInstrumentedTest {
         val payload = stringToByteArray(testString)
         val expectedDigestHex =
             "DDAF35A193617ABACC417349AE20413112E6FA4E89A97EA20A9EEEE64B55D39A2192992A274FC1A836BA3C23A3FEEBBD454D4423643CE80E2A9AC94FA54CA49F"
-        val actualDigest = androidSubtle.digest(Sha.Sha512, payload)
+        val actualDigest = androidSubtle.digest(Sha.SHA512.algorithm, payload)
         var actualDigestHex = ""
         for (b in actualDigest) {
             val st = String.format("%02X", b)

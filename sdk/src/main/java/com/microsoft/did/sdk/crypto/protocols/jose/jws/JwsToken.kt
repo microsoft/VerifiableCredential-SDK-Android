@@ -7,9 +7,11 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.utilities.*
-import com.microsoft.did.sdk.utilities.controlflow.KeyException
-import com.microsoft.did.sdk.utilities.controlflow.SignatureException
+import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.serializer.Serializer
 import java.util.*
 import kotlin.collections.Map
 
@@ -17,9 +19,11 @@ import kotlin.collections.Map
  * Class for containing JWS token operations.
  * @class
  */
-class JwsToken private constructor(private val payload: String,
-                                   signatures: List<JwsSignature> = emptyList(),
-                                   private val serializer: Serializer) {
+class JwsToken private constructor(
+    private val payload: String,
+    signatures: List<JwsSignature> = emptyList(),
+    private val serializer: Serializer
+) {
 
     val signatures: MutableList<JwsSignature> = signatures.toMutableList()
 
@@ -36,7 +40,7 @@ class JwsToken private constructor(private val payload: String,
                     val signature = compactMatches.groupValues[3]
                     val jwsSignatureObject = JwsSignature(
                         protected = protected,
-                        header =  null,
+                        header = null,
                         signature = signature
                     )
                     return JwsToken(payload, listOf(jwsSignatureObject), serializer)
@@ -57,11 +61,13 @@ class JwsToken private constructor(private val payload: String,
                     val token = serializer.parse(JwsFlatJson.serializer(), jws)
                     return JwsToken(
                         payload = token.payload,
-                        signatures = listOf(JwsSignature(
-                            protected = token.protected,
-                            header = token.header,
-                            signature = token.signature
-                        )),
+                        signatures = listOf(
+                            JwsSignature(
+                                protected = token.protected,
+                                header = token.header,
+                                signature = token.signature
+                            )
+                        ),
                         serializer = serializer
                     )
                 }
@@ -73,15 +79,15 @@ class JwsToken private constructor(private val payload: String,
         }
     }
 
-    constructor(content: ByteArray, serializer: Serializer): this(Base64Url.encode(content), emptyList(), serializer)
+    constructor(content: ByteArray, serializer: Serializer) : this(Base64Url.encode(content), emptyList(), serializer)
 
-    constructor(content: String, serializer: Serializer): this(Base64Url.encode(stringToByteArray(content)), emptyList(), serializer)
+    constructor(content: String, serializer: Serializer) : this(Base64Url.encode(stringToByteArray(content)), emptyList(), serializer)
 
     /**
      * Serialize a JWS token object from token.
      */
-    fun serialize (serializer: Serializer, format: JwsFormat = JwsFormat.Compact): String {
-        return when(format) {
+    fun serialize(serializer: Serializer, format: JwsFormat = JwsFormat.Compact): String {
+        return when (format) {
             JwsFormat.Compact -> {
                 intermediateCompactSerialize()
             }
@@ -92,9 +98,6 @@ class JwsToken private constructor(private val payload: String,
             JwsFormat.GeneralJson -> {
                 val jws = intermediateGeneralJsonSerialize()
                 serializer.stringify(JwsGeneralJson.serializer(), jws)
-            }
-            else -> {
-                throw SignatureException("Unknown JWS format: $format")
             }
         }
     }
@@ -151,17 +154,11 @@ class JwsToken private constructor(private val payload: String,
         val headers = header.toMutableMap()
         val protected = mutableMapOf<String, String>()
 
-        var algorithmName = ""
-
-        if (!headers.containsKey(JoseConstants.Alg.value)) {
-            if (signingKey.alg != null) {
-                algorithmName = signingKey.alg!!
-                protected[JoseConstants.Alg.value] = algorithmName
-            } else {
-                throw KeyException("No algorithm defined for key $signingKeyReference")
-            }
+        val algorithmName = if (!headers.containsKey(JoseConstants.Alg.value)) {
+            signingKey.alg?.also { protected[JoseConstants.Alg.value] = it }
+                ?: throw KeyException("No algorithm defined for key $signingKeyReference")
         } else {
-            algorithmName = headers[JoseConstants.Alg.value]!!
+            headers[JoseConstants.Alg.value]!!
         }
 
         val kid = headers[JoseConstants.Kid.value]
@@ -182,7 +179,8 @@ class JwsToken private constructor(private val payload: String,
 
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
-            JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName))
+            JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName)
+        )
 
         val signatureBase64 = Base64Url.encode(signature)
 
@@ -191,7 +189,8 @@ class JwsToken private constructor(private val payload: String,
                 protected = encodedProtected,
                 header = headers,
                 signature = signatureBase64
-        ))
+            )
+        )
     }
 
     /**
@@ -230,25 +229,27 @@ class JwsToken private constructor(private val payload: String,
             }
         }
         return if (all) {
-                results.reduce{ result, valid -> result && valid
-                }
-            } else {
-                results.reduce {
-                    result, valid -> result || valid
-                }
+            results.reduce { result, valid ->
+                result && valid
             }
+        } else {
+            results.reduce { result, valid ->
+                result || valid
+            }
+        }
     }
 
     private fun verifyWithKey(crypto: CryptoOperations, data: String, signature: JwsSignature, key: PublicKey): Boolean {
         val alg = signature.getAlg(serializer) ?: throw SignatureException("This signature contains no algorithm.")
         val subtleAlg = JwaCryptoConverter.jwaAlgToWebCrypto(alg)
-        val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.Public)
-        val cryptoKey = subtle.importKey(KeyFormat.Jwk, key.toJWK(), subtleAlg,
-            true, key.key_ops ?: listOf(KeyUsage.Verify))
+        val subtle = crypto.subtleCryptoFactory.getMessageSigner(subtleAlg.name, SubtleCryptoScope.PUBLIC)
+        val cryptoKey = subtle.importKey(
+            KeyFormat.Jwk, key.toJWK(), subtleAlg,
+            true, key.key_ops ?: listOf(KeyUsage.Verify)
+        )
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
-        print("DATA ")
-        printBytes(rawData)
+        SdkLog.d("Raw data: " + rawData.toReadableString())
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 

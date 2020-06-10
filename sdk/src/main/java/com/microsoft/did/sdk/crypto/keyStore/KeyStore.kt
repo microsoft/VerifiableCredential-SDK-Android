@@ -14,7 +14,7 @@ import com.microsoft.did.sdk.crypto.keys.SecretKey
  * Interface defining methods and properties to
  * be implemented by specific key stores.
  */
-abstract class KeyStore() {
+abstract class KeyStore {
     /**
      * Returns the key associated with the specified
      * key reference.
@@ -31,6 +31,7 @@ abstract class KeyStore() {
      * @param keyIdentifier the key identifier to search for
      */
     abstract fun getSecretKeyById(keyId: String): SecretKey?
+
     abstract fun getPrivateKeyById(keyId: String): PrivateKey?
     abstract fun getPublicKeyById(keyId: String): PublicKey?
 
@@ -41,6 +42,7 @@ abstract class KeyStore() {
      * @param key being saved to the key store.
      */
     abstract fun save(keyReference: String, key: SecretKey): Unit
+
     abstract fun save(keyReference: String, key: PrivateKey): Unit
     abstract fun save(keyReference: String, key: PublicKey): Unit
 

@@ -2,15 +2,15 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.auth.requests.IssuanceRequest
-import com.microsoft.did.sdk.auth.requests.PresentationRequest
-import com.microsoft.did.sdk.auth.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.cards.PortableIdentityCard
-import com.microsoft.did.sdk.cards.receipts.Receipt
-import com.microsoft.did.sdk.identifier.Identifier
-import com.microsoft.did.sdk.repository.CardRepository
-import com.microsoft.did.sdk.utilities.Serializer
-import com.microsoft.did.sdk.utilities.controlflow.Result
+import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
+import com.microsoft.did.sdk.credential.models.PortableIdentityCard
+import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.datasource.repository.CardRepository
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
