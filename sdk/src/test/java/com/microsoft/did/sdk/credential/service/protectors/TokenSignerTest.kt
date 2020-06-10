@@ -66,15 +66,4 @@ class TokenSignerTest {
         `when`<String>(mockedIdentifier.signatureKeyReference).thenReturn(signingKeyRef)
         `when`<String>(mockedIdentifier.id).thenReturn(did)
     }
-
-    @Test
-    fun `sign payload`() {
-        val signerSpy = spy(signer)
-        doReturn(mockedJwsToken).whenever(signerSpy).makeJwsToken(ArgumentMatchers.anyString())
-        `when`<Unit>(mockedJwsToken.sign(ArgumentMatchers.anyString(), eq(mockedCryptoOperations), ArgumentMatchers.anyMap()))
-            .thenAnswer { assertEquals(expectedHeader, it.arguments[2]) }
-        `when`<String>(mockedJwsToken.serialize(serializer)).thenReturn(expectedSignedPayload)
-        val testSignedPayload = signerSpy.signWithIdentifier(payload, mockedIdentifier)
-        assertEquals(expectedSignedPayload, testSignedPayload)
-    }
 }
