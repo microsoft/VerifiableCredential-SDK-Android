@@ -5,10 +5,11 @@ package com.microsoft.did.sdk.repository.dao
 import android.content.Context
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredential
-import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredentialContent
-import com.microsoft.did.sdk.cards.verifiableCredential.VerifiableCredentialDescriptor
-import com.microsoft.did.sdk.repository.SdkDatabase
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialDao
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
