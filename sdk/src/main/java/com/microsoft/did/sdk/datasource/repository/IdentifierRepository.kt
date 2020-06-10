@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import javax.inject.Inject
 
-class IdentifierRepository @Inject constructor(database: SdkDatabase, private val apiProvider: ApiProvider) {
+class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiProvider: ApiProvider) {
     private val identifierDao = database.identifierDao()
 
     suspend fun resolveIdentifier(url: String, identifier: String) = ResolveIdentifierNetworkOperation(
