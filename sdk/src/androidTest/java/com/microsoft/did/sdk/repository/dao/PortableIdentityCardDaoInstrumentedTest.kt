@@ -56,10 +56,10 @@ class PortableIdentityCardDaoInstrumentedTest {
         runBlocking {
             portableIdentityCardDao.insert(portableIdentityCard)
             val actualCard = portableIdentityCardDao.getAllCards().getOrAwaitValue()
-            if (actualCard != null) {
+            assertThat(actualCard).isNotNull
+            if (actualCard != null)
                 assertThat(actualCard.size).isEqualTo(1)
-                assertThat(actualCard).contains(portableIdentityCard)
-            }
+            assertThat(actualCard).contains(portableIdentityCard)
         }
     }
 
@@ -75,11 +75,9 @@ class PortableIdentityCardDaoInstrumentedTest {
             portableIdentityCardDao.insert(portableIdentityCard1)
             portableIdentityCardDao.insert(portableIdentityCard2)
             val actualCard = portableIdentityCardDao.getAllCards().getOrAwaitValue()
-            if (actualCard != null) {
+            assertThat(actualCard).isNotNull
+            if (actualCard != null)
                 assertThat(actualCard.size).isEqualTo(2)
-            }
-            val test: List<PortableIdentityCard>? = null
-            assertThat(test).contains(portableIdentityCard1)
             assertThat(actualCard).contains(portableIdentityCard2)
         }
     }
@@ -93,10 +91,10 @@ class PortableIdentityCardDaoInstrumentedTest {
             Assertions.assertThatThrownBy { runBlocking { portableIdentityCardDao.insert(portableIdentityCard2) } }
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
             val actualCard = portableIdentityCardDao.getAllCards().getOrAwaitValue()
-            if(actualCard != null) {
+            assertThat(actualCard).isNotNull
+            if(actualCard != null)
                 assertThat(actualCard.size).isEqualTo(1)
-                assertThat(actualCard).contains(portableIdentityCard1)
-            }
+            assertThat(actualCard).contains(portableIdentityCard1)
         }
     }
 
