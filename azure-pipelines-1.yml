@@ -6,6 +6,7 @@
 trigger:
 - master
 
+dependsOn: Job_1
 pool:
   vmImage: 'macOS-10.14'
 
