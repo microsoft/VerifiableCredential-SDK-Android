@@ -6,7 +6,6 @@
 trigger:
 - master
 
-dependsOn: Job_1
 pool:
   vmImage: 'macOS-10.14'
 
@@ -52,7 +51,6 @@ steps:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
     reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
 
-dependsOn: Job_2
 pool:
   name: Azure Pipelines
 steps:
