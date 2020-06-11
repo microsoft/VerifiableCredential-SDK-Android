@@ -24,9 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Class for creating identifiers and
- * sending and parsing OIDC Requests and Responses.
- * @class
+ * This class provides methods to create, update and manage decentralized identifiers.
  */
 @Singleton
 class IdentifierManager @Inject constructor(

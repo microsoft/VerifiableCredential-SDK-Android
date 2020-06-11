@@ -25,5 +25,5 @@ data class Receipt(
     //Name of the verifier/issuer
     val entityName: String,
 
-    val cardId: String
+    val vcId: String
 )

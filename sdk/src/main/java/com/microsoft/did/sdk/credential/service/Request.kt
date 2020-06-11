@@ -5,13 +5,13 @@ package com.microsoft.did.sdk.credential.service
 import android.net.Uri
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.attestations.CardRequestBinding
+import com.microsoft.did.sdk.credential.service.models.attestations.PresentationRequestBinding
 import com.microsoft.did.sdk.credential.service.models.contracts.VcContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 
 sealed class Request(val attestations: CredentialAttestations?, val entityName: String = "", val entityIdentifier: String = "") {
 
-    private var presentationBinding: CardRequestBinding? = null
+    private var presentationBinding: PresentationRequestBinding? = null
 
     fun getCredentialAttestations(): CredentialAttestations? {
         return attestations
