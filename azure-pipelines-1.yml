@@ -43,11 +43,11 @@ steps:
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'
   inputs:
-    PathtoPublish: 'PortableIdentityCard-ClientSDK/build/outputs/aar/'
+    PathtoPublish: 'sdk/build/outputs/aar/'
 
 - task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/PortableIdentityCard-ClientSDK/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
+  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
   inputs:
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/PortableIdentityCard-ClientSDK/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
-    reportDirectory: '$(System.DefaultWorkingDirectory)/PortableIdentityCard-ClientSDK/build/reports/jacoco/jacocoCoverageReport/html'
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
 
