@@ -6,7 +6,6 @@
 trigger:
 - master
 
-job:
 name: build
 
 pool:
