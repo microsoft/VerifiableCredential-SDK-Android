@@ -86,7 +86,8 @@ class CardRepository @Inject constructor(
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
-            audience = response.audience,
+            responseAudience = response.audience,
+            presentationsAudience = response.request.entityIdentifier,
             requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
@@ -115,7 +116,8 @@ class CardRepository @Inject constructor(
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int): Result<Unit> {
         val formattedResponse = formatter.format(
             responder = responder,
-            audience = response.audience,
+            responseAudience = response.audience,
+            presentationsAudience = response.request.entityIdentifier,
             requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
@@ -151,7 +153,7 @@ class CardRepository @Inject constructor(
     private suspend fun sendPairwiseIssuanceRequest(pairwiseRequest: PairwiseIssuanceRequest, requester: Identifier): VerifiableCredential {
         val formattedPairwiseRequest = formatter.format(
             responder = requester,
-            audience = pairwiseRequest.audience,
+            responseAudience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
