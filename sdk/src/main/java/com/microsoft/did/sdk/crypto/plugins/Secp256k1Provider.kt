@@ -22,9 +22,12 @@ import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import org.bitcoin.NativeSecp256k1
+import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey
 import org.spongycastle.jce.ECNamedCurveTable
+import org.spongycastle.jce.interfaces.ECPrivateKey
+import org.spongycastle.jce.interfaces.ECPublicKey
+import org.spongycastle.jce.provider.BouncyCastleProvider
 import org.spongycastle.jce.spec.ECNamedCurveParameterSpec
-import org.spongycastle.jce.spec.ECNamedCurveSpec
 import org.spongycastle.jce.spec.ECPrivateKeySpec
 import org.spongycastle.jce.spec.ECPublicKeySpec
 import java.math.BigInteger
@@ -38,10 +41,7 @@ import java.security.SecureRandom
 import java.security.Security
 import java.security.Signature
 import java.security.spec.ECGenParameterSpec
-import java.security.spec.ECPoint
-import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
-import java.util.Arrays
 import java.util.Locale
 
 
@@ -122,7 +122,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     private fun generateECKeyPair(random: SecureRandom): KeyPair {
-        Security.insertProviderAt(org.spongycastle.jce.provider.BouncyCastleProvider(), 1)
+        Security.insertProviderAt(BouncyCastleProvider(), 1)
         val keyGen = KeyPairGenerator.getInstance("EC")
         val ecs = ECGenParameterSpec("secp256k1")
         keyGen.initialize(ecs, random)
@@ -176,7 +176,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     private fun generatePublicKeyFromPrivateCryptoKey(privateKey: Key): PublicKey {
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
-        val Q = ecSpec.g.multiply((privateKey as org.spongycastle.jce.interfaces.ECPrivateKey).d)
+        val Q = ecSpec.g.multiply((privateKey as ECPrivateKey).d)
         val pubKeySpec = ECPublicKeySpec(Q, ecSpec)
         val publicKey = keyFactory.generatePublic(pubKeySpec)
         return publicKey
@@ -292,7 +292,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
             //publicKey = NativeSecp256k1.computePubkey(handle.data)
             publicKey = generatePublicKeyFromPrivateCryptoKey(handle.data)
             Base64.encodeToString(
-                (handle.data as org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey).d.toByteArray(),
+                (handle.data as BCECPrivateKey).d.toByteArray(),
                 Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
             )
         } else {
@@ -326,7 +326,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
 
     // mapped from secp256k1_eckey_pubkey_parse
     private fun publicToXY(keyData: Key): Pair<String, String> {
-        val x: ByteArray = (keyData as org.spongycastle.jce.interfaces.ECPublicKey).q.affineXCoord.encoded
+        val x: ByteArray = (keyData as ECPublicKey).q.affineXCoord.encoded
         val y: ByteArray = keyData.q.affineYCoord.encoded
         return Pair(
             Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
