@@ -164,18 +164,21 @@ class CardManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 picRepository.sendPresentationResponse(response, responder, expiresInMinutes).abortOnError()
-                createAndSaveReceipt(response)
+                createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
             }
         }
     }
 
-    private suspend fun createAndSaveReceipt(response: Response) {
-        val receipts = response.createReceiptsForPresentedCredentials(
-            entityDid = response.request.entityIdentifier,
-            entityName = response.request.entityName
-        )
-        receipts.forEach { saveReceipt(it) }
+    private suspend fun createAndSaveReceipt(response: Response): Result<Unit> {
+        return runResultTry {
+            val receipts = response.createReceiptsForPresentedCredentials(
+                entityDid = response.request.entityIdentifier,
+                entityName = response.request.entityName
+            )
+            receipts.forEach { saveReceipt(it).abortOnError() }
+            Result.Success(Unit)
+        }
     }
 
     /**
