@@ -1,4 +1,5 @@
 [![Build status](https://dev.azure.com/decentralized-identity/Core/_apis/build/status/PICS-client-sdk-android)](https://dev.azure.com/decentralized-identity/Core/_build/latest?definitionId=29)
+![Test Results](https://img.shields.io/azure-devops/coverage/verifiable-credentials/VerifiableCredential/3)
 
 This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and DIDs on the [ION network.](https://github.com/decentralized-identity/ion)
  
@@ -57,7 +58,7 @@ Pairwise Identifier are Identifiers created from four things:
 * The algorithm of the keys that will be generated for the Identifier
 * The key type of the keys that will be generated for the Identifier
 
-Pairwise Identifiers are created for every interaction with a relying party to prevent to Relying Parties from correlating users based off of Identifiers. 
+Pairwise Identifiers are created for every interaction with a relying party to prevent two relying parties from correlating users based off of Identifiers.
 
 ### Card Manager
 `CardManager` - this class deals with any logic related to Portable Identity Cards such as requesting a card through the Issuance service, presenting Verifiable Credentials back to relying parties, and saving cards.
