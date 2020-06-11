@@ -163,7 +163,7 @@ class CardManager @Inject constructor(
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                picRepository.sendPresentationResponse(response, responder, expiresInMinutes)
+                picRepository.sendPresentationResponse(response, responder, expiresInMinutes).abortOnError()
                 createAndSaveReceipt(response)
                 Result.Success(Unit)
             }
