@@ -114,6 +114,7 @@ class CardRepository @Inject constructor(
     ).fire()
 
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int): Result<Unit> {
+        val state = response.request.content.state ?: ""
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
@@ -128,6 +129,7 @@ class CardRepository @Inject constructor(
         return SendPresentationResponseNetworkOperation(
             response.audience,
             formattedResponse,
+            state,
             apiProvider
         ).fire()
     }
