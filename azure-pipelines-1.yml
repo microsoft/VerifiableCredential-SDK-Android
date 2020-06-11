@@ -54,12 +54,6 @@ steps:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
     reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
 
-job:
-name: Scan
-
-pool:
-  name: Azure Pipelines
-steps:
 - task: DownloadBuildArtifacts@0
   displayName: 'Download Build Artifacts'
   inputs:
