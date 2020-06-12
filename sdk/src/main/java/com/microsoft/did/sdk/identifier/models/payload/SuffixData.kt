@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.identifier.models.payload
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -14,8 +13,6 @@ import kotlinx.serialization.Serializable
 data class SuffixData(
     @SerialName("delta_hash")
     val patchDataHash: String,
-/*    @SerialName("recovery_key")
-    val recoveryKey: JsonWebKey,*/
     @SerialName("recovery_commitment")
     val nextRecoveryCommitmentHash: String
 )
