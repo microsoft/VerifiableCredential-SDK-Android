@@ -5,6 +5,8 @@ package com.microsoft.did.sdk.credential.service
 import com.microsoft.did.sdk.credential.models.PortableIdentityCard
 import com.microsoft.did.sdk.credential.receipts.Receipt
 import com.microsoft.did.sdk.credential.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
+import com.microsoft.did.sdk.credential.service.models.holders.RequestedPresentationPicHolder
 
 /**
  * OIDC Response formed from a Request.
@@ -13,7 +15,7 @@ import com.microsoft.did.sdk.credential.receipts.ReceiptAction
  */
 sealed class Response(open val request: Request, val audience: String) {
 
-    private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
+    private val collectedCards: MutableMap<String, RequestedPresentationPicHolder> = mutableMapOf()
 
     private val collectedTokens: MutableMap<String, String> = mutableMapOf()
 
@@ -28,8 +30,8 @@ sealed class Response(open val request: Request, val audience: String) {
         collectedSelfIssued[field] = claim
     }
 
-    fun addCard(card: PortableIdentityCard, type: String) {
-        collectedCards[type] = card
+    fun addCard(card: PortableIdentityCard, presentationAttestation: PresentationAttestation) {
+        collectedCards[presentationAttestation.credentialType] = RequestedPresentationPicHolder(card, presentationAttestation)
     }
 
     fun getCollectedIdTokens(): Map<String, String>? {
@@ -46,7 +48,7 @@ sealed class Response(open val request: Request, val audience: String) {
         return collectedSelfIssued
     }
 
-    fun getCollectedCards(): Map<String, PortableIdentityCard>? {
+    fun getCollectedCards(): Map<String, RequestedPresentationPicHolder>? {
         if (collectedCards.isEmpty()) {
             return null
         }
@@ -56,7 +58,7 @@ sealed class Response(open val request: Request, val audience: String) {
     fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         collectedCards.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().portableIdentityCard.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
