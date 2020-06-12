@@ -40,7 +40,7 @@ object VerifiableCredentialSdk {
         context: Context,
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         registrationUrl: String = "",
-        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
+        resolverUrl: String = "https://dev.discover.did.msidentity.com/1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)

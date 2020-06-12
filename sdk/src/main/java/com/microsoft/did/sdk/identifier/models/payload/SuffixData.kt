@@ -14,8 +14,8 @@ import kotlinx.serialization.Serializable
 data class SuffixData(
     @SerialName("delta_hash")
     val patchDataHash: String,
-    @SerialName("recovery_key")
-    val recoveryKey: JsonWebKey,
+/*    @SerialName("recovery_key")
+    val recoveryKey: JsonWebKey,*/
     @SerialName("recovery_commitment")
     val nextRecoveryCommitmentHash: String
 )

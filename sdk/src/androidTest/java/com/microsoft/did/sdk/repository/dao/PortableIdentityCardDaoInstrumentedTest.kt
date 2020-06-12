@@ -171,7 +171,6 @@ class PortableIdentityCardDaoInstrumentedTest {
                 "",
                 "",
                 "",
-                "",
                 ""
             ),
             DisplayContract(
@@ -286,8 +285,7 @@ class PortableIdentityCardDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName$id"
         )
     }

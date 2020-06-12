@@ -45,4 +45,5 @@ object Constants {
     const val SIDETREE_CURVE_NAME_FOR_EC = "secp256k1"
     const val SIGNATURE_KEYREFERENCE = "sign"
     const val RECOVERY_KEYREFERENCE = "recover"
+    const val UPDATE_KEYREFERENCE = "update"
 }

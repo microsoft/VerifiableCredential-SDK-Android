@@ -11,5 +11,5 @@ import kotlinx.serialization.Serializable
 data class IdentifierDocumentService(
     val id: String,
     val type: String,
-    val serviceEndpoint: String
+    val endpoint: String
 )

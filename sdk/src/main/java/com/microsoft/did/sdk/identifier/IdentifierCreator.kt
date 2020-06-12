@@ -22,6 +22,7 @@ import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.Constants.IDENTIFIER_SECRET_KEY_NAME
 import com.microsoft.did.sdk.util.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.SIGNATURE_KEYREFERENCE
+import com.microsoft.did.sdk.util.Constants.UPDATE_KEYREFERENCE
 import com.microsoft.did.sdk.util.controlflow.IdentifierCreatorException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.stringToByteArray
@@ -43,14 +44,13 @@ class IdentifierCreator @Inject constructor(
     fun create(methodName: String): Result<Identifier> {
         val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$methodName"
         val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$methodName"
+        val updateKeyReference = "${UPDATE_KEYREFERENCE}_$methodName"
         return try {
             val alias = Base64Url.encode(Random.nextBytes(2))
             val signingPublicKey = cryptoOperations.generateKeyPair("${alias}_$signatureKeyReference", KeyType.EllipticCurve)
             val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
-            val updateRevealValue = generateCommitmentValue()
-            val recoveryRevealValue = generateCommitmentValue()
-            val registrationPayload =
-                payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
+            val updatePublicKey = cryptoOperations.generateKeyPair("${alias}_$updateKeyReference", KeyType.EllipticCurve)
+            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updatePublicKey)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
@@ -59,9 +59,8 @@ class IdentifierCreator @Inject constructor(
                     alias,
                     signatureKeyReference,
                     recoveryKeyReference,
-                    IDENTIFIER_SECRET_KEY_NAME,
-                    updateRevealValue,
-                    recoveryRevealValue
+                    updateKeyReference,
+                    IDENTIFIER_SECRET_KEY_NAME
                 )
             )
         } catch (exception: Exception) {
@@ -74,6 +73,7 @@ class IdentifierCreator @Inject constructor(
         val randomValueForKeyReference = Base64Url.encode(Random.nextBytes(6))
         val signatureKeyReference = "${SIGNATURE_KEYREFERENCE}_$randomValueForKeyReference"
         val recoveryKeyReference = "${RECOVERY_KEYREFERENCE}_$randomValueForKeyReference"
+        val updateKeyReference = "${UPDATE_KEYREFERENCE}_$randomValueForKeyReference"
         return try {
             val alias = Base64Url.encode(Random.nextBytes(2))
             val alg = EcKeyGenParams(
@@ -85,20 +85,21 @@ class IdentifierCreator @Inject constructor(
             //TODO: Update the last section to append incremented version number instead of 1
             val signingKeyIdForPairwiseKey = "${signatureKeyReference}_1"
             val recoveryKeyIdForPairwiseKey = "${recoveryKeyReference}_1"
-            val signingPublicKey = generateAndSaveKey(
-                alg,
-                peerId,
-                "${alias}_$signingKeyIdForPairwiseKey",
-                "${alias}_$signatureKeyReference",
-                personaId,
-                KeyUse.Signature.value
-            )
+            val updateKeyIdForPairwiseKey = "${updateKeyReference}_1"
+            val signingPublicKey =
+                generateAndSaveKey(
+                    alg,
+                    peerId,
+                    "${alias}_$signingKeyIdForPairwiseKey",
+                    "${alias}_$signatureKeyReference",
+                    personaId,
+                    KeyUse.Signature.value
+                )
             val recoveryPublicKey =
                 generateAndSaveKey(alg, peerId, "${alias}_$recoveryKeyIdForPairwiseKey", "${alias}_$recoveryKeyReference", personaId, "")
-            val updateRevealValue = generateCommitmentValue()
-            val recoveryRevealValue = generateCommitmentValue()
-            val registrationPayload =
-                payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updateRevealValue, recoveryRevealValue)
+            val updatePublicKey =
+                generateAndSaveKey(alg, peerId, "${alias}_$updateKeyIdForPairwiseKey", "${alias}_$updateKeyReference", personaId, "")
+            val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updatePublicKey)
             val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
 
             Result.Success(
@@ -107,9 +108,8 @@ class IdentifierCreator @Inject constructor(
                     alias,
                     signatureKeyReference,
                     recoveryKeyReference,
-                    pairwiseIdentifierName(peerId),
-                    updateRevealValue,
-                    recoveryRevealValue
+                    updateKeyReference,
+                    pairwiseIdentifierName(peerId)
                 )
             )
         } catch (exception: Exception) {
@@ -140,8 +140,14 @@ class IdentifierCreator @Inject constructor(
         return "$personaId-$target-$algorithm-$keyType"
     }
 
+    /**
+     * Computes unique suffix for did short form.
+     * In unpublished resolution or long form, id is generated in SDK.
+     */
     private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {
-        val uniqueSuffix = payloadProcessor.computeUniqueSuffix(registrationPayload.suffixData)
+        val suffixDataByteArray = Base64Url.decode(registrationPayload.suffixData)
+        val suffixDataHash = payloadProcessor.multiHash(suffixDataByteArray)
+        val uniqueSuffix = Base64Url.encode(suffixDataHash)
         return "did:${Constants.METHOD_NAME}:$uniqueSuffix"
     }
 
@@ -159,22 +165,21 @@ class IdentifierCreator @Inject constructor(
         alias: String,
         signatureKeyReference: String,
         recoveryKeyReference: String,
-        name: String,
-        updateRevealValue: String,
-        recoveryRevealValue: String
+        updateKeyReference: String,
+        name: String
     ): Identifier {
 
-        val personaSigKeyRef = "${alias}_$signatureKeyReference"
-        val personaRecKeyRef = "${alias}_$recoveryKeyReference"
+        val personaSigningKeyRef = "${alias}_$signatureKeyReference"
+        val personaRecoveryKeyRef = "${alias}_$recoveryKeyReference"
+        val personaUpdateKeyRef = "${alias}_$updateKeyReference"
 
         return Identifier(
             identifierLongForm,
             alias,
-            personaSigKeyRef,
+            personaSigningKeyRef,
             "",
-            personaRecKeyRef,
-            updateRevealValue,
-            recoveryRevealValue,
+            personaRecoveryKeyRef,
+            personaUpdateKeyRef,
             name
         )
     }
@@ -182,9 +187,5 @@ class IdentifierCreator @Inject constructor(
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
-    }
-
-    private fun generateCommitmentValue(): String {
-        return Base64Url.encode(Random.Default.nextBytes(32))
     }
 }
