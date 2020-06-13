@@ -35,7 +35,7 @@ object Constants {
     const val HASHING_ALGORITHM_FOR_ID = "MD5"
 
     //Identifier Constants
-    const val IDENTIFIER_SECRET_KEY_NAME = "did.identifier"
+    const val MASTER_IDENTIFIER_NAME = "did.identifier"
     const val METHOD_NAME = "ion"
     const val INITIAL_STATE_LONGFORM = "-$METHOD_NAME-initial-state"
     const val SIDETREE_OPERATION_TYPE = "create"

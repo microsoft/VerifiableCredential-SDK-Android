@@ -19,7 +19,7 @@ import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.util.Constants.IDENTIFIER_SECRET_KEY_NAME
+import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.UPDATE_KEYREFERENCE
@@ -60,7 +60,7 @@ class IdentifierCreator @Inject constructor(
                     signatureKeyReference,
                     recoveryKeyReference,
                     updateKeyReference,
-                    IDENTIFIER_SECRET_KEY_NAME
+                    MASTER_IDENTIFIER_NAME
                 )
             )
         } catch (exception: Exception) {
