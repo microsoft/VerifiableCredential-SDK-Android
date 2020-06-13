@@ -87,8 +87,4 @@ class IdentifierManager @Inject constructor(
             throw RepositoryException("Unable to save identifier in repository", exception)
         }
     }
-
-    fun getIdentifierByName(name: String): Identifier? {
-        return identifierRepository.queryByName(name)
-    }
 }
