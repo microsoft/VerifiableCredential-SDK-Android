@@ -59,8 +59,8 @@ Pairwise Identifier are Identifiers created from four things:
 
 Pairwise Identifiers are created for every interaction with a relying party to prevent to Relying Parties from correlating users based off of Identifiers. 
 
-### Card Manager
-`CardManager` - this class deals with any logic related to Portable Identity Cards such as requesting a card through the Issuance service, presenting Verifiable Credentials back to relying parties, and saving cards.
+### Verifiable Credential Manager
+`VerifiableCredentialManager` - this class deals with any logic related to Verifiable Credentials such as requesting vcs through the Issuance service, presenting vcs back to relying parties, and saving them.
 
 Issuance Flow Example:
 ```kotlin
@@ -76,9 +76,9 @@ val identifier = identifierManager.getMasterIdentifier()
 // create a pairwise identifier for connection from master identifier and requester's identifier.
 val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
 // send issuance response in order to get a verifiable credential, signed by pairwise identifier. 
-val card = verifiableCredentialManager.sendIssuanceResponse(response, pairwiseIdentifier)
-// save card to database.
-verifiableCredentialManager.saveCard(card)
+val vch = verifiableCredentialManager.sendIssuanceResponse(response, pairwiseIdentifier)
+// save vc to database.
+verifiableCredentialManager.saveVch(vch)
 ```
 
 Presentation Flow Example:
@@ -99,9 +99,9 @@ val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, 
 verifiableCredentialManager.sendPresentationResponse(response, pairwiseIdentifier)
 ```
 
-Get all saved Portable Identity Cards
+Get all saved VCs
 ```kotlin
-val cards = verifiableCredentialManager.getCards()
+val verifiableCredentials = verifiableCredentialManager.getVerifiableCredentials()
 ```
 
 > note: Every method is wrapped in a Result object. Unwrapping these returns is not included in these examples to simplify things a bit. (see [Result Class Section](#Result-Class) for more details)
@@ -124,14 +124,15 @@ interface PresentationRequestValidator {
 > note: [OIDC Self-Issued Protocol](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued) is the only protocol we support as of now in `OidcRequestValidator` class.
 
 
-### Portable Identity Card Data Model
-Portable Identity Cards are simply a container for verifiable credentials and are comprised of:
+### VerifiableCredential Data Model
+VerifiableCredentialHolder is container for verifiable credentials and are comprised of:
 * A unique ID
 * A [Verifiable Credential](https://www.w3.org/TR/vc-data-model/)
-* Display information in order to render cards inside of the app.
+* Display information in order to render the vc.
+* History and other meta data
 
 ```kotlin
-data class PortableIdentityCard (
+data class VerifiableCredentialHolder (
 
     val id: String,
 
@@ -162,14 +163,14 @@ data class Receipt (
     //Name of the verifier/issuer
     val entityName: String,
 
-    val cardId: String
+    val vcId: String
 )
 ```
 
 ### Repository Layer
 The repository is an abstraction layer that is consumed by business logic and abstracts away the various data sources that an app can have. There are two datasources in our SDK: network and database.
 
-`CardRepository` - this class saves Portable Identity Cards and Receipts to the database, retrieves cards and receipts from the database, `GET`s presentation and issuance requests, and `POST`s presentation and issuance responses.
+`VerifiableCredentialRepository` - this class saves Verifiable Credentials and Receipts to the database, retrieves vcs and receipts from the database, `GET`s presentation and issuance requests, and `POST`s presentation and issuance responses.
 
 `IdentifierRepository` - this class save Identifiers to database, retrieves Identifiers from database, and resolves Identifiers.
 
@@ -205,12 +206,12 @@ Every external method returns a `Result` for error handling simplicity.
 ```kotlin
 sealed class Result<out S> {
     class Success<out S>(val payload: S) : Result<S>()
-    class Failure(val payload: PortableIdentitySdkException) : Result<Nothing>()
+    class Failure(val payload: SdkException) : Result<Nothing>()
 }
 ```
 
 If the method was successful, `Result.Success(ReturnType)` is returned.
-If an exception occurred, `Result.Failure(PortableIdentityCardException)` is returned.
+If an exception occurred, `Result.Failure(SdkException)` is returned.
 
 # Contributing
 
