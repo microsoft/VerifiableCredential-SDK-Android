@@ -12,7 +12,7 @@ interface ReceiptDao {
     @Query("SELECT * FROM Receipt")
     fun getAllReceipts(): LiveData<List<Receipt>>
 
-    @Query("SELECT * FROM Receipt WHERE vcId = :cardId")
+    @Query("SELECT * FROM Receipt WHERE vcId = :vcId")
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>>
 
     @Insert
