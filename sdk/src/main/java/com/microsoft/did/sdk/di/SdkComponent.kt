@@ -6,7 +6,7 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
-import com.microsoft.did.sdk.CardManager
+import com.microsoft.did.sdk.VerifiableCredentialManager
 import com.microsoft.did.sdk.IdentifierManager
 import dagger.BindsInstance
 import dagger.Component
@@ -27,7 +27,7 @@ internal interface SdkComponent {
 
     fun identifierManager(): IdentifierManager
 
-    fun cardManager(): CardManager
+    fun verifiableCredentialManager(): VerifiableCredentialManager
 
     @Component.Builder
     interface Builder {
