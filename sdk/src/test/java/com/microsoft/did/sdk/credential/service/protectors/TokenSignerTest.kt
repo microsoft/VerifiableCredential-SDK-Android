@@ -4,66 +4,70 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.serializer.Serializer
-import com.nhaarman.mockitokotlin2.eq
-import com.nhaarman.mockitokotlin2.whenever
-import org.junit.Before
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.slot
 import org.junit.Test
-import org.mockito.*
-import org.mockito.Mockito.*
 import kotlin.test.assertEquals
 
 class TokenSignerTest {
 
     // mocks for retrieving kid.
-    @Mock
-    lateinit var mockedCryptoOperations: CryptoOperations
-    @Mock
-    lateinit var mockedKeyStore: KeyStore
-    @Mock
-    lateinit var mockedKeyContainer: KeyContainer<PrivateKey>
-    @Mock
-    lateinit var mockedPrivateKey: PrivateKey
+    private val mockedCryptoOperations: CryptoOperations = mockk()
+    private val mockedKeyStore: KeyStore = mockk()
+    private val mockedKeyContainer: KeyContainer<PrivateKey> = mockk()
+    private val mockedPrivateKey: PrivateKey = mockk()
 
-    @Mock
-    lateinit var mockedIdentifier: Identifier
+    private val mockedIdentifier: Identifier = mockk()
 
-    @Mock
-    lateinit var mockedJwsToken: JwsToken
+    private val slot = slot<Map<String, String>>()
 
-    lateinit var signer: TokenSigner
+    private val signer: TokenSigner
 
     // TODO random numbers for these strings.
     private val signingKeyRef = "sigKeyRef5237"
-    private val did = "did:test:567812"
-    private val kid = "#kid1426"
-    private val alg = "ES256K"
-    private val payload = "payload12423"
-    private val expectedHeader = mapOf("kid" to "$did$kid")
+    private val expectedDid = "did:test:567812"
+    private val expectedKid = "#kid1426"
+    private val expectedAlg = "ES256K"
+    private val expectedPayload = "payload12423"
+    private val expectedHeader = mapOf("kid" to "$expectedDid$expectedKid")
     private val serializer = Serializer()
     private val expectedSignedPayload = "signedPayload45236"
 
-    @Before
-    fun setUp() {
-        MockitoAnnotations.initMocks(this)
+    init {
         signer = TokenSigner(mockedCryptoOperations, serializer)
         setUpGetPrivateKey()
         setUpIdentifier()
+        mockkConstructor(JwsToken::class)
     }
 
     private fun setUpGetPrivateKey() {
-        `when`<KeyStore>(mockedCryptoOperations.keyStore).thenReturn(mockedKeyStore)
-        `when`<KeyContainer<PrivateKey>>(mockedKeyStore.getPrivateKey(signingKeyRef)).thenReturn(mockedKeyContainer)
-        `when`<PublicKey>(mockedKeyContainer.getKey()).thenReturn(mockedPrivateKey)
-        `when`<String>(mockedPrivateKey.kid).thenReturn(kid)
-        `when`<String>(mockedPrivateKey.alg).thenReturn(alg)
+        every { mockedCryptoOperations.keyStore } returns mockedKeyStore
+        every { mockedKeyStore.getPrivateKey(signingKeyRef) } returns mockedKeyContainer
+        every { mockedKeyContainer.getKey() } returns mockedPrivateKey
+        every { mockedPrivateKey.kid } returns expectedKid
+        every { mockedPrivateKey.alg } returns expectedAlg
     }
     //
     private fun setUpIdentifier() {
-        `when`<String>(mockedIdentifier.signatureKeyReference).thenReturn(signingKeyRef)
-        `when`<String>(mockedIdentifier.id).thenReturn(did)
+        every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
+        every { mockedIdentifier.id } returns expectedDid
+    }
+
+    @Test
+    fun signPayloadTest() {
+        every {
+            anyConstructed<JwsToken>().sign(signingKeyRef, mockedCryptoOperations, capture(slot))
+        } answers {
+            assertEquals(expectedHeader, slot.captured)
+        }
+        every { anyConstructed<JwsToken>().serialize(serializer) } returns expectedSignedPayload
+        val actualSignedPayload = signer.signWithIdentifier(expectedPayload, mockedIdentifier)
+        assertEquals(expectedSignedPayload, actualSignedPayload)
+
     }
 }

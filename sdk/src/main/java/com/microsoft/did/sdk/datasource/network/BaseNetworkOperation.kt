@@ -43,9 +43,9 @@ abstract class BaseNetworkOperation<S, T> {
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
         return when (response.code()) {
-            401 -> Result.Failure(UnauthorizedException(response.message()))
-            402, 403, 404 -> Result.Failure(ServiceErrorException(response.message()))
-            500, 501, 502, 503 -> Result.Failure(ServiceUnreachableException(response.message()))
+            401 -> Result.Failure(UnauthorizedException("${response.code()}: ${response.errorBody().toString()}"))
+            402, 403, 404 -> Result.Failure(ServiceErrorException("${response.code()}: ${response.errorBody().toString()}"))
+            500, 501, 502, 503 -> Result.Failure(ServiceUnreachableException("${response.code()}: ${response.errorBody().toString()}"))
             else -> Result.Failure(NetworkException("Unknown Status code ${response.code()}"))
         }
     }

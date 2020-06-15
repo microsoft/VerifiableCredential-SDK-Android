@@ -27,16 +27,12 @@ class TokenSigner @Inject constructor(
      * @return JwsToken
      */
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
-        val token = makeJwsToken(payload)
+        val token = JwsToken(payload, serializer)
         val kid = cryptoOperations.keyStore.getPrivateKey(identifier.signatureKeyReference).getKey().kid
         // adding kid value to header.
         val additionalHeaders = mutableMapOf<String, String>()
         additionalHeaders[JoseConstants.Kid.value] = "${identifier.id}${kid}"
         token.sign(identifier.signatureKeyReference, cryptoOperations, additionalHeaders)
         return token.serialize(serializer)
-    }
-
-    internal fun makeJwsToken(payload: String): JwsToken {
-        return JwsToken(payload, serializer)
     }
 }
