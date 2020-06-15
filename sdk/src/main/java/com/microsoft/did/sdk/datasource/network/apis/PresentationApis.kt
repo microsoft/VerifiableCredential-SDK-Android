@@ -15,5 +15,5 @@ interface PresentationApis {
 
     @FormUrlEncoded
     @POST
-    suspend fun sendResponse(@Url overrideUrl: String, @Field("id_token") token: String): Response<String>
+    suspend fun sendResponse(@Url overrideUrl: String, @Field("id_token") token: String, @Field("state") state: String): Response<String>
 }
