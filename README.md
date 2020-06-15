@@ -125,7 +125,7 @@ interface PresentationRequestValidator {
 
 
 ### VerifiableCredential Data Model
-VerifiableCredentialHolder is container for verifiable credentials and are comprised of:
+VerifiableCredentialHolder is comprised of:
 * A unique ID
 * A [Verifiable Credential](https://www.w3.org/TR/vc-data-model/)
 * Display information in order to render the vc.
