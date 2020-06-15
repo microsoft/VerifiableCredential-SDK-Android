@@ -10,20 +10,20 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 
 @Dao
-interface PortableIdentityCardDao {
+interface VerifiableCredentialHolderDao {
 
-    @Query("SELECT * FROM PortableIdentityCard")
-    fun getAllCards(): LiveData<List<PortableIdentityCard>>
+    @Query("SELECT * FROM VerifiableCredentialHolder")
+    fun getAllVcs(): LiveData<List<VerifiableCredentialHolder>>
 
-    @Query("SELECT * FROM PortableIdentityCard where picId = :id")
-    fun getCardById(id: String): LiveData<PortableIdentityCard>
+    @Query("SELECT * FROM VerifiableCredentialHolder where picId = :id")
+    fun getVcById(id: String): LiveData<VerifiableCredentialHolder>
 
     @Insert
-    suspend fun insert(portableIdentityCard: PortableIdentityCard)
+    suspend fun insert(verifiableCredentialHolder: VerifiableCredentialHolder)
 
     @Delete
-    suspend fun delete(portableIdentityCard: PortableIdentityCard)
+    suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder)
 }

@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 interface VerifiableCredentialDao {
 
     @Query("SELECT * FROM VerifiableCredential where picId = :id")
-    suspend fun getVerifiableCredentialByCardId(id: String): List<VerifiableCredential>
+    suspend fun getVerifiableCredentialById(id: String): List<VerifiableCredential>
 
     @Insert
     suspend fun insert(verifiableCredential: VerifiableCredential)

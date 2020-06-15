@@ -48,7 +48,7 @@ data class OidcResponseContent(
     // time the token expires.
     val exp: Long,
 
-    // PICS specific
+    // VC service specific
     // response contains claims that fulfills this contract.
     val contract: String? = null,
 
@@ -58,8 +58,8 @@ data class OidcResponseContent(
     // attestations that were asked for in request.
     val attestations: AttestationClaimModel? = null,
 
-    // vc needed for Revocation or Exchange PIC API
+    // vc needed for Revocation or Exchange API
     val vc: String? = null,
-    // recipient of VC for Exchange PIC API
+    // recipient of VC for Exchange API
     val recipient: String? = null
 )
