@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
  * schema, display, and input.
  */
 @Serializable
-data class VcContract(
+data class VerifiableCredentialContract(
     // unique identifier of the contract
     val id: String,
 

@@ -8,7 +8,7 @@ package com.microsoft.did.sdk
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.models.contracts.VcContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
@@ -175,7 +175,7 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    private fun createVch(signedVerifiableCredential: String, owner: Identifier, contract: VcContract): VerifiableCredentialHolder {
+    private fun createVch(signedVerifiableCredential: String, owner: Identifier, contract: VerifiableCredentialContract): VerifiableCredentialHolder {
         val contents =
             unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)

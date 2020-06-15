@@ -4,7 +4,7 @@ package com.microsoft.did.sdk.credential.service.responses
 
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
-import com.microsoft.did.sdk.credential.service.models.contracts.VcContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
@@ -17,7 +17,7 @@ class ResponseTest {
     var response: IssuanceResponse
     var request: IssuanceRequest
     private val attestations: CredentialAttestations = mockk()
-    private var vcContract: VcContract = mockk()
+    private var vcContract: VerifiableCredentialContract = mockk()
     private val entityName = "testEntityName"
     private val entityDid = "testEntityDid"
     private val issuedBy = "testIssuer"
