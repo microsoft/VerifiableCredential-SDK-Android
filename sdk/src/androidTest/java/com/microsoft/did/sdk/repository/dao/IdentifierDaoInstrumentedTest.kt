@@ -31,8 +31,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         identifierDao.insert(suppliedIdentifier)
@@ -48,8 +47,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         identifierDao.insert(suppliedIdentifier)
@@ -72,8 +70,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         val suppliedIdentifier2 = Identifier(
@@ -82,8 +79,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         identifierDao.insert(suppliedIdentifier1)
@@ -101,8 +97,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         identifierDao.insert(suppliedIdentifier)
@@ -126,8 +121,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         val suppliedIdentifier2 = Identifier(
@@ -136,8 +130,7 @@ class IdentifierDaoInstrumentedTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         identifierDao.insert(suppliedIdentifier1)

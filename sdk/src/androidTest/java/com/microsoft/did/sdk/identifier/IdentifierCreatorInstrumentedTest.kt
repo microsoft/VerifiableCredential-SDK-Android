@@ -60,7 +60,7 @@ class IdentifierCreatorInstrumentedTest {
         runBlocking {
             val id = identifierCreator.create("ION")
             if (id is Result.Success)
-                assertThat(id.payload.name).isEqualTo(Constants.IDENTIFIER_SECRET_KEY_NAME)
+                assertThat(id.payload.name).isEqualTo(Constants.MASTER_IDENTIFIER_NAME)
         }
     }
 
