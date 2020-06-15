@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "b4e9c4bc68c3a1f52b4e019f89741f93",
+    "identityHash": "7ea29699c796b2bc45b8f471fa2d79fb",
     "entities": [
       {
         "tableName": "VerifiableCredential",
@@ -43,7 +43,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "PortableIdentityCard",
+        "tableName": "VerifiableCredentialHolder",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardId` TEXT NOT NULL, `displayContract` TEXT NOT NULL, `jti` TEXT NOT NULL, `raw` TEXT NOT NULL, `contents` TEXT NOT NULL, `picId` TEXT NOT NULL, `id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`cardId`))",
         "fields": [
           {
@@ -192,7 +192,7 @@
       },
       {
         "tableName": "Receipt",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `action` TEXT NOT NULL, `entityIdentifier` TEXT NOT NULL, `activityDate` INTEGER NOT NULL, `entityName` TEXT NOT NULL, `cardId` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `action` TEXT NOT NULL, `entityIdentifier` TEXT NOT NULL, `activityDate` INTEGER NOT NULL, `entityName` TEXT NOT NULL, `vcId` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -225,8 +225,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "cardId",
-            "columnName": "cardId",
+            "fieldPath": "vcId",
+            "columnName": "vcId",
             "affinity": "TEXT",
             "notNull": true
           }
@@ -244,7 +244,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b4e9c4bc68c3a1f52b4e019f89741f93')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ea29699c796b2bc45b8f471fa2d79fb')"
     ]
   }
 }

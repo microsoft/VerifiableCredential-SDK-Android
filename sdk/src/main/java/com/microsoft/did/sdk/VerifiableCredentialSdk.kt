@@ -18,7 +18,7 @@ import org.bitcoin.Secp256k1Context
  *
  * VerifiableCredentialSdk.init(getApplicationContext());
  *
- * The `CardManager` and `IdentifierManager` can be accessed through this static reference, but ideally should be provided
+ * The `VerifiableCredentialManager` and `IdentifierManager` can be accessed through this static reference, but ideally should be provided
  * by your own dependency injection library. In the case of Dagger2 as such:
  *
  * @Provides
@@ -29,7 +29,7 @@ import org.bitcoin.Secp256k1Context
 object VerifiableCredentialSdk {
 
     @JvmStatic
-    lateinit var cardManager: CardManager
+    lateinit var verifiableCredentialManager: VerifiableCredentialManager
 
     @JvmStatic
     lateinit var identifierManager: IdentifierManager
@@ -49,7 +49,7 @@ object VerifiableCredentialSdk {
             .build()
 
         identifierManager = sdkComponent.identifierManager()
-        cardManager = sdkComponent.cardManager()
+        verifiableCredentialManager = sdkComponent.verifiableCredentialManager()
 
         SdkLog.addConsumer(logConsumer)
     }
