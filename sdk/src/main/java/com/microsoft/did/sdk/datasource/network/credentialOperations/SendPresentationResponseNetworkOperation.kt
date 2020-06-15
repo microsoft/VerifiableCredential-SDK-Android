@@ -10,9 +10,9 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.Result
 import retrofit2.Response
 
-class SendPresentationResponseNetworkOperation(url: String, serializedResponse: String, apiProvider: ApiProvider) :
+class SendPresentationResponseNetworkOperation(url: String, serializedResponse: String, state: String, apiProvider: ApiProvider) :
     PostNetworkOperation<String, Unit>() {
-    override val call: suspend () -> Response<String> = { apiProvider.presentationApis.sendResponse(url, serializedResponse) }
+    override val call: suspend () -> Response<String> = { apiProvider.presentationApis.sendResponse(url, serializedResponse, state) }
 
     override fun onSuccess(response: Response<String>): Result<Unit> {
         return Result.Success(Unit)
