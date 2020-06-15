@@ -130,7 +130,7 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
         return Base64Url.encode(patchDataByteArray)
     }
 
-    private fun canonicalizePublicKeyAsByteArray(publicKeyJwk: JsonWebKey): ByteArray {
+    fun canonicalizePublicKeyAsByteArray(publicKeyJwk: JsonWebKey): ByteArray {
         val commitmentValue = serializer.stringify(JsonWebKey.serializer(), publicKeyJwk)
         val jsonCanonicalizer = JsonCanonicalizer(commitmentValue)
         return jsonCanonicalizer.encodedUTF8
