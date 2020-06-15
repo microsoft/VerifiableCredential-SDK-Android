@@ -11,12 +11,12 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import kotlinx.serialization.Serializable
 
 /**
- * Data model to describe a Portable Identity Card.
+ * A VerifiableCredentialHolder holds a VerifiableCredential and additional meta-data like history and the display contract
  */
 @Entity
 @Serializable
 @SuppressWarnings(RoomWarnings.PRIMARY_KEY_FROM_EMBEDDED_IS_DROPPED)
-data class PortableIdentityCard(
+data class VerifiableCredentialHolder(
 
     // id of the prime Verifiable Credential
     @PrimaryKey

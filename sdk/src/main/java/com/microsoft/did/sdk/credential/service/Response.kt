@@ -2,9 +2,9 @@
 
 package com.microsoft.did.sdk.credential.service
 
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
-import com.microsoft.did.sdk.credential.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 
 /**
  * OIDC Response formed from a Request.
@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.credential.receipts.ReceiptAction
  */
 sealed class Response(open val request: Request, val audience: String) {
 
-    private val collectedCards: MutableMap<String, PortableIdentityCard> = mutableMapOf()
+    private val collectedVchs: MutableMap<String, VerifiableCredentialHolder> = mutableMapOf()
 
     private val collectedTokens: MutableMap<String, String> = mutableMapOf()
 
@@ -28,8 +28,8 @@ sealed class Response(open val request: Request, val audience: String) {
         collectedSelfIssued[field] = claim
     }
 
-    fun addCard(card: PortableIdentityCard, type: String) {
-        collectedCards[type] = card
+    fun addVerifiableCredential(vch: VerifiableCredentialHolder, type: String) {
+        collectedVchs[type] = vch
     }
 
     fun getCollectedIdTokens(): Map<String, String>? {
@@ -46,27 +46,27 @@ sealed class Response(open val request: Request, val audience: String) {
         return collectedSelfIssued
     }
 
-    fun getCollectedCards(): Map<String, PortableIdentityCard>? {
-        if (collectedCards.isEmpty()) {
+    fun getCollectedVchs(): Map<String, VerifiableCredentialHolder>? {
+        if (collectedVchs.isEmpty()) {
             return null
         }
-        return collectedCards
+        return collectedVchs
     }
 
     fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
-        collectedCards.forEach {
+        collectedVchs.forEach {
             val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    private fun createReceipt(action: ReceiptAction, cardId: String, entityDid: String, entityName: String): Receipt {
+    private fun createReceipt(action: ReceiptAction, vcId: String, entityDid: String, entityName: String): Receipt {
         val date = System.currentTimeMillis()
         return Receipt(
             action = action,
-            cardId = cardId,
+            vcId = vcId,
             activityDate = date,
             entityIdentifier = entityDid,
             entityName = entityName

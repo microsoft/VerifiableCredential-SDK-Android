@@ -8,19 +8,19 @@ package com.microsoft.did.sdk
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.models.contracts.PicContract
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.Response
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.datasource.repository.CardRepository
+import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.*
@@ -32,11 +32,11 @@ import javax.inject.Singleton
 
 /**
  * This class manages all functionality for managing, getting/creating, presenting, and storing Verifiable Credentials.
- * We only support OpenId Connect Protocol in order to get and present Portable Identity Cards.
+ * We only support OpenId Connect Protocol in order to get and present Verifiable Credentials.
  */
 @Singleton
-class CardManager @Inject constructor(
-    private val picRepository: CardRepository,
+class VerifiableCredentialManager @Inject constructor(
+    private val vchRepository: VerifiableCredentialHolderRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator
 ) {
@@ -45,9 +45,6 @@ class CardManager @Inject constructor(
      * Get Presentation Request.
      *
      * @param stringUri OpenID Connect Uri that points to the presentation request.
-     *
-     * @return Result.Success: PresentationRequest object that contains all attestations.
-     *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
         return withContext(Dispatchers.IO) {
@@ -82,7 +79,7 @@ class CardManager @Inject constructor(
             if (requestUri == null) {
                 Result.Failure(PresentationException("Request Uri does not exist."))
             } else {
-                picRepository.getRequest(requestUri)
+                vchRepository.getRequest(requestUri)
             }
         }
     }
@@ -91,13 +88,10 @@ class CardManager @Inject constructor(
      * Get Issuance Request from a contract.
      *
      * @param contractUrl url that the contract is fetched from
-     *
-     * @return Result.Success: IssuanceRequest object containing all metadata about what is needed to fulfill request including display information.
-     *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
-            val contract = picRepository.getContract(contractUrl).abortOnError()
+            val contract = vchRepository.getContract(contractUrl).abortOnError()
             val request = IssuanceRequest(contract, contractUrl)
             Result.Success(request)
         }
@@ -107,9 +101,6 @@ class CardManager @Inject constructor(
      * Validate an OpenID Connect Request with default Validator.
      *
      * @param request to be validated.
-     *
-     * @return Result.Success unit, if no validation exceptions were thrown.
-     *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
         return runResultTry {
@@ -131,18 +122,15 @@ class CardManager @Inject constructor(
      *
      * @param response IssuanceResponse to be formed, signed, and sent.
      * @param responder Identifier to be used to sign response.
-     *
-     * @return Result.Success:
-     *         Result.Failure: Exception explaining what went wrong.
      */
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<PortableIdentityCard> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredentialHolder> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val verifiableCredential = picRepository.sendIssuanceResponse(response, responder).abortOnError()
-                picRepository.insert(verifiableCredential)
-                val card = createCard(verifiableCredential.raw, responder, response.request.contract)
+                val verifiableCredential = vchRepository.sendIssuanceResponse(response, responder).abortOnError()
+                vchRepository.insert(verifiableCredential)
+                val vch = createVch(verifiableCredential.raw, responder, response.request.contract)
                 createAndSaveReceipt(response)
-                Result.Success(card)
+                Result.Success(vch)
             }
         }
     }
@@ -152,9 +140,6 @@ class CardManager @Inject constructor(
      *
      * @param response PresentationResponse to be formed, signed, and sent.
      * @param responder Identifier to be used to sign response.
-     *
-     * @return Result.Success: Unit
-     *         Result.Failure: Exception explaining what went wrong.
      */
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
@@ -163,7 +148,7 @@ class CardManager @Inject constructor(
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                picRepository.sendPresentationResponse(response, responder, expiresInMinutes).abortOnError()
+                vchRepository.sendPresentationResponse(response, responder, expiresInMinutes).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
             }
@@ -182,28 +167,22 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Puts together a Portable Identity Card and saves in repository.
-     *
-     * @param signedVerifiableCredential in Compact JWT form.
-     * @param response that was used to get the verifiable credential.
-     *
-     * @return Result.Success: Portable Identity Card that was saved to Storage.
-     *         Result.Failure: Exception explaining what went wrong.
+     * Saves a Verifiable Credential Holder to the database
      */
-    suspend fun saveCard(portableIdentityCard: PortableIdentityCard): Result<Unit> {
+    suspend fun saveVch(verifiableCredentialHolder: VerifiableCredentialHolder): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                picRepository.insert(portableIdentityCard)
+                vchRepository.insert(verifiableCredentialHolder)
                 Result.Success(Unit)
             }
         }
     }
 
-    private fun createCard(signedVerifiableCredential: String, owner: Identifier, contract: PicContract): PortableIdentityCard {
+    private fun createVch(signedVerifiableCredential: String, owner: Identifier, contract: VerifiableCredentialContract): VerifiableCredentialHolder {
         val contents =
             unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
-        return PortableIdentityCard(
+        return VerifiableCredentialHolder(
             contents.jti,
             verifiableCredential,
             owner,
@@ -212,53 +191,41 @@ class CardManager @Inject constructor(
     }
 
     /**
-     * Get All Portable Identity Cards from Storage.
-     *
-     * @return Result.Success: List of Portable Identity Card from Storage.
-     *         Result.Failure: Exception explaining what went wrong.
+     * Get all Verifiable Credentials Holders from the database.
      */
-    fun getCards(): LiveData<List<PortableIdentityCard>> {
-        return picRepository.getAllCards()
+    fun getVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
+        return vchRepository.getAllVchs()
     }
 
     /**
-     * Get All Portable Identity Cards from Storage by Credential Type.
-     *
-     * @return Result.Success: Filtered List of Portable Identity Card from Storage.
-     *         Result.Failure: Exception explaining what went wrong.
+     * Get all Verifiable Credentials Holders from the database by credential type.
      */
-    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
-        return picRepository.getCardsByType(type)
+    fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
+        return vchRepository.getVchsByType(type)
     }
 
     /**
-     * Get Receipts by Card Id from Storage.
-     *
-     * @return List of Receipts
+     * Get receipts by verifiable credential id from the database.
      */
-    fun getReceiptByCardId(cardId: String): LiveData<List<Receipt>> {
-        return picRepository.getAllReceiptsByCardId(cardId)
+    fun getReceiptByVcId(vcId: String): LiveData<List<Receipt>> {
+        return vchRepository.getAllReceiptsByVcId(vcId)
     }
 
     /**
-     * Get Receipts by Card Id from Storage.
-     *
-     * @return List of Receipts
+     * Get receipts by verifiable credential id from the database.
      */
     private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
         return try {
-            Result.Success(picRepository.insert(receipt))
+            Result.Success(vchRepository.insert(receipt))
         } catch (exception: Exception) {
             Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
         }
     }
 
-    /** Get A Portable Identity Card by card id from storage
-     * @param  id: card id of requested card
-     * @return Result.Success: Portable Identity Card corresponding to id passed
-     *         Result.Failure: Exception explaining the problem
+    /**
+     * Get a Verifiable Credential by id from the database.
      */
-    fun getCardById(id: String): LiveData<PortableIdentityCard> {
-        return picRepository.getCardById(id)
+    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> {
+        return vchRepository.getVchById(id)
     }
 }
