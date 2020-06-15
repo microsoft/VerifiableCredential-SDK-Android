@@ -21,17 +21,18 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.stringToByteArray
 import org.bitcoin.NativeSecp256k1
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey
+import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
+import org.spongycastle.jcajce.provider.asymmetric.util.EC5Util
 import org.spongycastle.jce.ECNamedCurveTable
-import org.spongycastle.jce.interfaces.ECPrivateKey
+import org.spongycastle.jce.ECPointUtil
 import org.spongycastle.jce.interfaces.ECPublicKey
 import org.spongycastle.jce.provider.BouncyCastleProvider
-import org.spongycastle.jce.spec.ECNamedCurveParameterSpec
-import org.spongycastle.jce.spec.ECPrivateKeySpec
+import org.spongycastle.jce.spec.ECNamedCurveSpec
 import org.spongycastle.jce.spec.ECPublicKeySpec
 import java.math.BigInteger
-import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -41,43 +42,21 @@ import java.security.SecureRandom
 import java.security.Security
 import java.security.Signature
 import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.EllipticCurve
 import java.security.spec.X509EncodedKeySpec
 import java.util.Locale
 
 
-class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
+class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
 
-    data class Secp256k1Handle(val alias: String, val data: Key)
+    data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
     override val name: String = "ECDSA"
     override val privateKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Sign)
     override val publicKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Verify)
     override val symmetricKeyUsage: Set<KeyUsage>? = null
-
-    fun initProvider(): java.security.Provider {
-        var provider = Security.getProvider("BC")
-        if (provider == null) {
-            provider = Security.getProvider("BCFIPS")
-        }
-
-        if (provider == null) {
-            try {
-                val cl = Class.forName("org.bouncycastle.jce.provider.BouncyCastleProvider")
-                provider = cl.newInstance() as java.security.Provider
-                Security.addProvider(provider)
-            } catch (ex: ClassNotFoundException) {
-                val cl = Class.forName("org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider")
-                provider = cl.newInstance() as java.security.Provider
-                Security.addProvider(provider)
-            }
-        }
-
-        if (provider == null) {
-            throw IllegalStateException("Could not find either BC or BCFIPS providers on classpath.")
-        }
-        return provider
-    }
-
 
     override fun onGenerateKeyPair(
         algorithm: Algorithm,
@@ -100,6 +79,11 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
             )
         )
+        val q = (ecKeyPair.public as BCECPublicKey).q.getEncoded(false)
+        val x = q.sliceArray(1..32)
+        val y = q.sliceArray(33..64)
+            /*(ecKeyPair.public as BCECPublicKey).q.yCoord.encoded*/
+        val publicKey = x + y
 
         val keyPair = CryptoKeyPair(
             privateKey = CryptoKey(
@@ -107,14 +91,14 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                 extractable,
                 signAlgorithm,
                 keyUsages.toList(),
-                Secp256k1Handle("", ecKeyPair.private)
+                Secp256k1Handle("", (ecKeyPair.private as BCECPrivateKey).d.toByteArray())
             ),
             publicKey = CryptoKey(
                 KeyType.Public,
                 true,
                 signAlgorithm,
                 publicKeyUsage.toList(),
-                Secp256k1Handle("", ecKeyPair.public)
+                Secp256k1Handle("", publicKey)
             )
         )
 
@@ -126,8 +110,7 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         val keyGen = KeyPairGenerator.getInstance("EC")
         val ecs = ECGenParameterSpec("secp256k1")
         keyGen.initialize(ecs, random)
-        val pair = keyGen.genKeyPair()
-        return pair
+        return keyGen.genKeyPair()
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
@@ -140,61 +123,57 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     override fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-//        val keyData = (key.handle as Secp256k1Handle).data
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
             throw SignatureException("Data must be 32 bytes")
         }
-//        return NativeSecp256k1.sign(hashedData, keyData)
         val privateKey = generatePrivateKeyFromCryptoKey(key)
         return sign(privateKey, hashedData)
     }
 
     private fun generatePrivateKeyFromCryptoKey(key: CryptoKey): PrivateKey {
-        val privateKey = (key.handle as Secp256k1Handle).data
-        return generatePrivateKeyFromByteArray(privateKey.encoded)
-    }
-
-    private fun generatePrivateKeyFromByteArray(key: ByteArray): PrivateKey {
+        val curveParams = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val curveSpec: java.security.spec.ECParameterSpec =
+            ECNamedCurveSpec("secp256k1", curveParams.curve, curveParams.g, curveParams.n, curveParams.h)
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
-
-        val spec: ECNamedCurveParameterSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
-
-        val ecPrivateKeySpec = ECPrivateKeySpec(BigInteger(1, key), spec)
-
-/*        val params = ECNamedCurveSpec("secp256k1", spec.getCurve(), spec.getG(), spec.getN())
-        val w = ECPoint(
-            BigInteger(1, key.copyOfRange(0, 24)),
-            BigInteger(1, key.copyOfRange(24, 48))
-        )*/
-        return keyFactory.generatePrivate(ecPrivateKeySpec)
-/*        val privateKeySpec = PKCS8EncodedKeySpec(key)
-        return keyFactory.generatePrivate(privateKeySpec)*/
+        val privateSpec = java.security.spec.ECPrivateKeySpec(BigInteger((key.handle as Secp256k1Handle).data), curveSpec)
+        return keyFactory.generatePrivate(privateSpec)
     }
 
-    private fun generatePublicKeyFromPrivateCryptoKey(privateKey: Key): PublicKey {
+    private fun generatePublicKeyFromPrivateCryptoKey(privateKey: ByteArray): ByteArray {
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
-        val Q = ecSpec.g.multiply((privateKey as ECPrivateKey).d)
+        val Q = ecSpec.g.multiply(BigInteger(privateKey))
         val pubKeySpec = ECPublicKeySpec(Q, ecSpec)
         val publicKey = keyFactory.generatePublic(pubKeySpec)
-        return publicKey
+        return (publicKey as BCECPublicKey).q.xCoord.encoded +
+            publicKey.q.yCoord.encoded
     }
 
     private fun generatePublicKeyFromCryptoKey(key: CryptoKey): PublicKey {
-        val publicKey = (key.handle as Secp256k1Handle).data
-        return generatePublicKeyFromByteArray(publicKey.encoded)
-    }
-
-    private fun generatePublicKeyFromByteArray(key: ByteArray): PublicKey {
+/*        val curveParams = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val curveSpec: java.security.spec.ECParameterSpec =
+            ECNamedCurveSpec("secp256k1", curveParams.curve, curveParams.g, curveParams.n, curveParams.h)
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
-        val publicKeySpec = X509EncodedKeySpec(key)
-        return keyFactory.generatePublic(publicKeySpec)
+        val x = (key.handle as Secp256k1Handle).data.sliceArray(0..31)
+        val y = key.handle.data.sliceArray(32..63)
+        val publicKeySpec = java.security.spec.ECPublicKeySpec(ECPoint(BigInteger(x), BigInteger(y)), curveSpec)
+        return keyFactory.generatePublic(publicKeySpec)*/
+        val params = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
+        val curve = params.curve
+        val ellipticCurve: EllipticCurve = EC5Util.convertCurve(curve, params.seed)
+        val x = (key.handle as Secp256k1Handle).data.sliceArray(0..31)
+        val y = key.handle.data.sliceArray(32..63)
+        val encoded = byteArrayOf(0x04)+x+y
+        val point: ECPoint = ECPointUtil.decodePoint(ellipticCurve, encoded)
+        val params2: ECParameterSpec = EC5Util.convertSpec(ellipticCurve, params)
+        val keySpec = java.security.spec.ECPublicKeySpec(point, params2)
+        return keyFactory.generatePublic(keySpec) as ECPublicKey
     }
 
     private fun sign(privateKey: PrivateKey, payload: ByteArray): ByteArray {
-//        val signature = Signature.getInstance("SHA256withECDSA", "BC")
         val signature = Signature.getInstance("SHA256withECDSA")
         signature.initSign(privateKey)
         signature.update(payload)
@@ -202,7 +181,6 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     private fun verify(publicKey: PublicKey, payload: ByteArray, sign: ByteArray): Boolean {
-//        val signature = Signature.getInstance("SHA256withECDSA", "BC")
         val signature = Signature.getInstance("SHA256withECDSA")
         signature.initVerify(publicKey)
         signature.update(payload)
@@ -210,17 +188,12 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
     }
 
     override fun onVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        val keyData = (key.handle as Secp256k1Handle).data
         val ecAlgorithm = algorithm as EcdsaParams
         val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
         if (hashedData.size != 32) {
             throw SignatureException("Data must be 32 bytes")
         }
 
-        print("KEY DATA: ")
-//        printBytes(keyData.encoded)
-
-//        return NativeSecp256k1.verify(hashedData, signature, keyData)
         val publicKey = generatePublicKeyFromCryptoKey(key)
         return verify(publicKey, hashedData, signature)
     }
@@ -242,8 +215,10 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                     usages = keyUsages.toList(),
                     handle = Secp256k1Handle(
                         alias,
-//                        generatePrivateKeyFromByteArray(Base64.decode(keyData.d!!, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
-                        generatePrivateKeyFromByteArray(keyData.d!!.toByteArray())
+                        Base64.decode(
+                            stringToByteArray(keyData.d!!),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        )
                     )
                 )
             }
@@ -255,27 +230,29 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
                     usages = keyUsages.toList(),
                     handle = Secp256k1Handle(
                         alias,
-                        generatePrivateKeyFromByteArray(Base64.decode(keyData.k!!, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
+                        Base64.decode(
+                            stringToByteArray(keyData.k!!),
+                            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
+                        )
                     )
                 )
             }
             else -> {// public key
                 val x = Base64.decode(keyData.x!!, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val y = Base64.decode(keyData.y!!, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-                val xyData = ByteArray(65)
-                xyData[0] = secp256k1Tag.uncompressed.byte
+                val xyData = ByteArray(64)
                 x.forEachIndexed { index, byte ->
-                    xyData[index + 1] = byte
+                    xyData[index] = byte
                 }
                 y.forEachIndexed { index, byte ->
-                    xyData[index + 33] = byte
+                    xyData[index + 32] = byte
                 }
                 CryptoKey(
                     type = KeyType.Public,
                     extractable = extractable,
                     algorithm = algorithm,
                     usages = keyUsages.toList(),
-                    handle = Secp256k1Handle(alias, generatePublicKeyFromByteArray(xyData))
+                    handle = Secp256k1Handle(alias, xyData)
                 )
             }
         }
@@ -286,13 +263,12 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         for (usage in key.usages) {
             keyOps.add(usage.value)
         }
-        val publicKey: Key
+        val publicKey: ByteArray
         val handle = key.handle as Secp256k1Handle
         val d: String? = if (key.type == KeyType.Private) {
-            //publicKey = NativeSecp256k1.computePubkey(handle.data)
             publicKey = generatePublicKeyFromPrivateCryptoKey(handle.data)
             Base64.encodeToString(
-                (handle.data as BCECPrivateKey).d.toByteArray(),
+                handle.data,
                 Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP
             )
         } else {
@@ -318,43 +294,21 @@ class Secp256k1Provider(val subtleCryptoSha: SubtleCrypto) : Provider() {
         super.checkCryptoKey(key, keyUsage)
         if (key.type == KeyType.Private) {
             val keyData = (key.handle as Secp256k1Handle).data
-            if (!NativeSecp256k1.secKeyVerify(keyData.encoded)) {
+            if (!NativeSecp256k1.secKeyVerify(keyData)) {
                 throw KeyException("Private key invalid")
             }
         }
     }
 
     // mapped from secp256k1_eckey_pubkey_parse
-    private fun publicToXY(keyData: Key): Pair<String, String> {
-        val x: ByteArray = (keyData as ECPublicKey).q.affineXCoord.encoded
-        val y: ByteArray = keyData.q.affineYCoord.encoded
+    private fun publicToXY(keyData: ByteArray): Pair<String, String> {
+        // uncompressed, bytes 1-32, and 33-end are x and y
+        val x = keyData.sliceArray(0..31)
+        val y = keyData.sliceArray(32..63)
         return Pair(
             Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
             Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
         )
-/*        val pubKey = x+y
-        if (pubKey.size == 33 && (
-                pubKey[0] == secp256k1Tag.even.byte ||
-                    pubKey[0] == secp256k1Tag.odd.byte)
-        ) {
-            // compressed form
-            throw KeyFormatException("Compressed Hex format is not supported.")
-        } else if (pubKey.size == 65 && (
-                pubKey[0] == secp256k1Tag.uncompressed.byte ||
-                    pubKey[0] == secp256k1Tag.hybridEven.byte ||
-                    pubKey[0] == secp256k1Tag.hybridOdd.byte
-                )
-        ) {
-            // uncompressed, bytes 1-32, and 33-end are x and y
-            val x = pubKey.sliceArray(1..32)
-            val y = pubKey.sliceArray(33..64)
-            return Pair(
-                Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
-                Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-            )
-        } else {
-            throw KeyFormatException("Public key improperly formatted")
-        }*/
     }
 
     enum class secp256k1Tag(val byte: Byte) {
