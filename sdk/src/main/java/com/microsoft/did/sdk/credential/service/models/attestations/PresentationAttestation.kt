@@ -24,5 +24,8 @@ data class PresentationAttestation(
     val issuers: List<AcceptedIssuer> = emptyList(),
 
     // A list of contracts if user does not have requested credential.
-    val contracts: List<String> = emptyList()
+    val contracts: List<String> = emptyList(),
+
+    // How long the requested Verifiable Presentation should be valid for.
+    val validityInterval: Int = 0
 )

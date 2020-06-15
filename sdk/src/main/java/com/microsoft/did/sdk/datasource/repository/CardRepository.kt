@@ -88,9 +88,9 @@ class CardRepository @Inject constructor(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
+            requestedVcs = response.getVerifiablePresentationContexts()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            requestedIdTokens = response.getIdTokenContexts(),
+            requestedSelfIssuedClaims = response.getSelfAttestedClaimContexts(),
             contract = response.request.contractUrl,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
         )
@@ -119,9 +119,9 @@ class CardRepository @Inject constructor(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
+            requestedVcs = response.getVerifiablePresentationContexts()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            requestedIdTokens = response.getIdTokenContexts(),
+            requestedSelfIssuedClaims = response.getSelfAttestedClaimContexts(),
             nonce = response.request.content.nonce,
             state = response.request.content.state,
             expiresIn = expiresInMinutes

@@ -172,7 +172,7 @@ class CardManager @Inject constructor(
 
     private suspend fun createAndSaveReceipt(response: Response): Result<Unit> {
         return runResultTry {
-            val receipts = response.createReceiptsForPresentedCredentials(
+            val receipts = response.createReceiptsForPresentedVerifiableCredentials(
                 entityDid = response.request.entityIdentifier,
                 entityName = response.request.entityName
             )

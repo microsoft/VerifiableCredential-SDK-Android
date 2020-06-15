@@ -5,59 +5,62 @@ package com.microsoft.did.sdk.credential.service
 import com.microsoft.did.sdk.credential.models.PortableIdentityCard
 import com.microsoft.did.sdk.credential.receipts.Receipt
 import com.microsoft.did.sdk.credential.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.holders.RequestedPresentationPicHolder
+import com.microsoft.did.sdk.credential.service.models.contexts.IdTokenContext
+import com.microsoft.did.sdk.credential.service.models.contexts.VerifiablePresentationContext
+import com.microsoft.did.sdk.credential.service.models.contexts.SelfAttestedClaimContext
 
 /**
- * OIDC Response formed from a Request.
+ * Response formed from a Request.
  *
  * @param audience entity to send the response to.
  */
 sealed class Response(open val request: Request, val audience: String) {
 
-    private val collectedCards: MutableMap<String, RequestedPresentationPicHolder> = mutableMapOf()
+    private val verifiablePresentationContexts: MutableMap<String, VerifiablePresentationContext> = mutableMapOf()
 
-    private val collectedTokens: MutableMap<String, String> = mutableMapOf()
+    private val idTokenContexts: MutableMap<String, IdTokenContext> = mutableMapOf()
 
     // EXPERIMENTAL
-    private val collectedSelfIssued: MutableMap<String, String> = mutableMapOf()
+    private val selfAttestedClaimContexts: MutableMap<String, SelfAttestedClaimContext> = mutableMapOf()
 
-    fun addIdToken(configuration: String, token: String) {
-        collectedTokens[configuration] = token
+    fun addIdTokenContext(idTokenAttestation: IdTokenAttestation, token: String) {
+        idTokenContexts[idTokenAttestation.configuration] = IdTokenContext(idTokenAttestation, token)
     }
 
-    fun addSelfIssuedClaim(field: String, claim: String) {
-        collectedSelfIssued[field] = claim
+    fun addSelfAttestedClaimContext(field: String, claim: String) {
+        selfAttestedClaimContexts[field] = SelfAttestedClaimContext(field, claim)
     }
 
-    fun addCard(card: PortableIdentityCard, presentationAttestation: PresentationAttestation) {
-        collectedCards[presentationAttestation.credentialType] = RequestedPresentationPicHolder(card, presentationAttestation)
+    fun addVerifiablePresentationContext(card: PortableIdentityCard, presentationAttestation: PresentationAttestation) {
+        verifiablePresentationContexts[presentationAttestation.credentialType] = VerifiablePresentationContext(card, presentationAttestation)
     }
 
-    fun getCollectedIdTokens(): Map<String, String>? {
-        if (collectedTokens.isEmpty()) {
+    fun getIdTokenContexts(): Map<String, IdTokenContext>? {
+        if (idTokenContexts.isEmpty()) {
             return null
         }
-        return collectedTokens
+        return idTokenContexts
     }
 
-    fun getCollectedSelfIssuedClaims(): Map<String, String>? {
-        if (collectedSelfIssued.isEmpty()) {
+    fun getSelfAttestedClaimContexts(): Map<String, SelfAttestedClaimContext>? {
+        if (selfAttestedClaimContexts.isEmpty()) {
             return null
         }
-        return collectedSelfIssued
+        return selfAttestedClaimContexts
     }
 
-    fun getCollectedCards(): Map<String, RequestedPresentationPicHolder>? {
-        if (collectedCards.isEmpty()) {
+    fun getVerifiablePresentationContexts(): Map<String, VerifiablePresentationContext>? {
+        if (verifiablePresentationContexts.isEmpty()) {
             return null
         }
-        return collectedCards
+        return verifiablePresentationContexts
     }
 
-    fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
+    fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
-        collectedCards.forEach {
+        verifiablePresentationContexts.forEach {
             val receipt = createReceipt(ReceiptAction.Presentation, it.component2().portableIdentityCard.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }

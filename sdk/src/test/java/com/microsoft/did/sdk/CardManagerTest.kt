@@ -73,9 +73,9 @@ class CardManagerTest {
             cardManager.createPresentationResponse(presentationRequest)
             cardManager.sendPresentationResponse(any(), any(), any())
             cardRepository.sendPresentationResponse(any(), any(), any())
-            presentationResponse.createReceiptsForPresentedCredentials(testEntityDid, testEntityName)
+            presentationResponse.createReceiptsForPresentedVerifiableCredentials(testEntityDid, testEntityName)
         }
-        presentationResponse.getCollectedCards()?.size?.let {
+        presentationResponse.getVerifiablePresentationContexts()?.size?.let {
             coVerify(exactly = it) {
                 cardRepository.insert(any<Receipt>())
             }
