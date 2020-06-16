@@ -76,11 +76,10 @@ class VerifiableCredentialManager @Inject constructor(
             return Result.Success(serializedToken)
         }
         val requestUri = uri.getQueryParameter("request_uri")
-        return if (requestUri == null) {
-            Result.Failure(PresentationException("Request Uri does not exist."))
-        } else {
-            vchRepository.getRequest(requestUri)
+        if (requestUri != null) {
+            return vchRepository.getRequest(requestUri)
         }
+        return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
     /**
