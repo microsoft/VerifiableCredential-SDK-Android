@@ -21,6 +21,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.*
@@ -63,7 +64,7 @@ class VerifiableCredentialManager @Inject constructor(
 
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
-        if (url.scheme != "openid") {
+        if (url.scheme != Constants.DEEP_LINK_SCHEME) {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
