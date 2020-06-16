@@ -18,7 +18,6 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -30,14 +29,15 @@ import org.spongycastle.asn1.ASN1Integer
 import org.spongycastle.asn1.DERInteger
 import org.spongycastle.asn1.DERSequenceGenerator
 import org.spongycastle.asn1.DLSequence
+import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.digests.SHA256Digest
+import org.spongycastle.crypto.generators.ECKeyPairGenerator
 import org.spongycastle.crypto.params.ECDomainParameters
+import org.spongycastle.crypto.params.ECKeyGenerationParameters
 import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.signers.ECDSASigner
 import org.spongycastle.crypto.signers.HMacDSAKCalculator
-import org.spongycastle.crypto.util.DEROtherInfo
-import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.spongycastle.jcajce.provider.asymmetric.util.EC5Util
 import org.spongycastle.jce.ECNamedCurveTable
@@ -50,14 +50,12 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.math.BigInteger
 import java.security.KeyFactory
-import java.security.KeyPair
-import java.security.KeyPairGenerator
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.security.Security
-import java.security.spec.ECGenParameterSpec
+import java.security.Signature
 import java.security.spec.ECParameterSpec
 import java.security.spec.ECPoint
 import java.security.spec.EllipticCurve
@@ -94,11 +92,17 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
                 "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
             )
         )
-        val q = (ecKeyPair.public as BCECPublicKey).q.getEncoded(false)
+/*        val q = (ecKeyPair.public as BCECPublicKey).q.getEncoded(false)
         val x = q.sliceArray(1..32)
         val y = q.sliceArray(33..64)
-        /*(ecKeyPair.public as BCECPublicKey).q.yCoord.encoded*/
+        *//*(ecKeyPair.public as BCECPublicKey).q.yCoord.encoded*//*
         val publicKey = x + y
+        val privateKey = (ecKeyPair.private as BCECPrivateKey).d.toByteArray()*/
+
+        val privateKey = (ecKeyPair.private as ECPrivateKeyParameters).d.toByteArray()
+        val x = (ecKeyPair.public as ECPublicKeyParameters).q.xCoord.encoded
+        val y = (ecKeyPair.public as ECPublicKeyParameters).q.yCoord.encoded
+        val publicKey = x+y
 
         val keyPair = CryptoKeyPair(
             privateKey = CryptoKey(
@@ -106,7 +110,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
                 extractable,
                 signAlgorithm,
                 keyUsages.toList(),
-                Secp256k1Handle("", (ecKeyPair.private as BCECPrivateKey).d.toByteArray())
+                Secp256k1Handle("", privateKey)
             ),
             publicKey = CryptoKey(
                 KeyType.Public,
@@ -120,12 +124,20 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         return keyPair
     }
 
-    private fun generateECKeyPair(random: SecureRandom): KeyPair {
+    private fun generateECKeyPair(random: SecureRandom): AsymmetricCipherKeyPair {
         Security.insertProviderAt(BouncyCastleProvider(), 1)
-        val keyGen = KeyPairGenerator.getInstance("EC")
+/*        val keyGen = KeyPairGenerator.getInstance("EC")
         val ecs = ECGenParameterSpec("secp256k1")
         keyGen.initialize(ecs, random)
-        return keyGen.genKeyPair()
+        return keyGen.genKeyPair()*/
+        val keyGen = ECKeyPairGenerator()
+        val random = SecureRandom()
+        val ecParams = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val ecDomainParameters = ECDomainParameters(ecParams.curve, ecParams.g, ecParams.n, ecParams.h)
+        val gParam = ECKeyGenerationParameters(ecDomainParameters, random)
+        keyGen.init(gParam)
+        val keyPair = keyGen.generateKeyPair()
+        return keyPair
     }
 
     override fun checkGenerateKeyParams(algorithm: Algorithm) {
@@ -144,7 +156,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
             throw SignatureException("Data must be 32 bytes")
         }
 //        val privateKey = generatePrivateKeyFromCryptoKey(key)
-        return sign((key.handle as Secp256k1Handle).data, hashedData)
+        return sign((key.handle as Secp256k1Handle).data, data)
     }
 
     override fun onNativeSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -163,6 +175,15 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
             ECNamedCurveSpec("secp256k1", curveParams.curve, curveParams.g, curveParams.n, curveParams.h)
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val privateSpec = java.security.spec.ECPrivateKeySpec(BigInteger((key.handle as Secp256k1Handle).data), curveSpec)
+        return keyFactory.generatePrivate(privateSpec)
+    }
+
+    private fun generatePrivateKeyFromByteArray(key: ByteArray): PrivateKey {
+        val curveParams = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val curveSpec: java.security.spec.ECParameterSpec =
+            ECNamedCurveSpec("secp256k1", curveParams.curve, curveParams.g, curveParams.n, curveParams.h)
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
+        val privateSpec = java.security.spec.ECPrivateKeySpec(BigInteger(key), curveSpec)
         return keyFactory.generatePrivate(privateSpec)
     }
 
@@ -200,18 +221,18 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
 
     private fun sign(privateKey: ByteArray, payload: ByteArray): ByteArray {
 /*        val signature = Signature.getInstance("SHA256withECDSA")
-        signature.initSign(privateKey)
+        signature.initSign(generatePrivateKeyFromByteArray(privateKey))
         signature.update(payload)
         return signature.sign()*/
         val ecParams = ECNamedCurveTable.getParameterSpec("secp256k1")
         val ecDomainParameters = ECDomainParameters(ecParams.curve, ecParams.g, ecParams.n, ecParams.h)
-//        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
-        val signer = ECDSASigner()
+        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
+//        val signer = ECDSASigner()
         val privateKeyParams = ECPrivateKeyParameters(BigInteger(privateKey), ecDomainParameters)
         signer.init(true, privateKeyParams)
         val digest = MessageDigest.getInstance(W3cCryptoApiConstants.Sha256.value)
          val hashedData = digest.digest(payload)
-        val components = signer.generateSignature(hashedData)
+        val components = signer.generateSignature(payload)
         return encodeToDer(components[0].toByteArray(), components[1].toByteArray())
     }
 

@@ -197,30 +197,26 @@ class ECBCInstrumentedTest {
             )
         )
         var verified = false
-        var testData = "this is a random test message for testing signing and verifying"
-        for (i in 0..10) {
-            val keyReference = "KeyReference$i"
-            cryptoKeyPair = ellipticCurveSubtleCrypto.generateKeyPair(
-                EcKeyGenParams(
-                    namedCurve = W3cCryptoApiConstants.Secp256k1.value,
-                    additionalParams = mapOf(
-                        "hash" to Sha.SHA256.algorithm,
-                        "KeyReference" to keyReference
-                    )
-                ), true, listOf(KeyUsage.Sign)
-            )
-            val private = cryptoKeyPair.privateKey
-            val public = cryptoKeyPair.publicKey
-            testData += i
-            var signature = ellipticCurveSubtleCrypto.sign(alg, private, stringToByteArray(testData))
-            val rs = decodeFromDER(signature)
-            val canonicalized = canonicalize(rs.first, rs.second)
-            signature = encodeToDer(canonicalized.first.toByteArray(), canonicalized.second.toByteArray())
+//        var testData = "this is a random test message for testing signing and verifying"
+        var testData = """eyJhbGciOiJFUzI1NksiLCJraWQiOiJkaWQ6aW9uOkVpQTJoSVIzZEhtQ1U5U1ZyckQyWDFqZU04NHo5RjBWRlVteU9XTElnWGs4WWc_LWlvbi1pbml0aWFsLXN0YXRlPWV5SmtaV3gwWVY5b1lYTm9Jam9pUldsRFVtVXlaSEJvYzBWM1duYzNkRVk1YzNGTmMxcHNVbnBLUVdvelEzWTBYMHBsV0ZkdlYxaDVjbGxDUVNJc0luSmxZMjkyWlhKNVgyTnZiVzFwZEcxbGJuUWlPaUpGYVVSemIwWnlaa1prWlMxZlJqUjBSR1ExUmxCSmEzSlVRVXRDTjNOM1RHZEJOMkZVZW5KWU1taElSMGxuSW4wLmV5SjFjR1JoZEdWZlkyOXRiV2wwYldWdWRDSTZJa1ZwUkhOdlJuSm1SbVJsTFY5R05IUkVaRFZHVUVscmNsUkJTMEkzYzNkTVowRTNZVlI2Y2xneWFFaEhTV2NpTENKd1lYUmphR1Z6SWpwYmV5SmhZM1JwYjI0aU9pSnlaWEJzWVdObElpd2laRzlqZFcxbGJuUWlPbnNpY0hWaWJHbGpYMnRsZVhNaU9sdDdJbWxrSWpvaWNpMXpYM05wWjI1ZmNXNTNiVGxJTm5OZk1TSXNJblI1Y0dVaU9pSkZZMlJ6WVZObFkzQXlOVFpyTVZabGNtbG1hV05oZEdsdmJrdGxlVEl3TVRraUxDSnFkMnNpT25zaWEzUjVJam9pUlVNaUxDSmpjbllpT2lKelpXTndNalUyYXpFaUxDSjRJam9pTTI1elYwdGpMWEZCTm10WU5tUXlSV2xmYVVKcVRVMVlXVEJWY1ZOblFYQjZlWGxOU25Sb1JWaEhaeUlzSW5raU9pSlRORXRQTTBsclZrUXpNMjFrWW04d2NGWmFVRVY1YzJzMlkzaHJXbmxKUTFsVFZWSkJZMk5TZFZGckluMHNJbkIxY25CdmMyVWlPbHNpWVhWMGFDSXNJbWRsYm1WeVlXd2lYWDFkZlgxZGZRI3Itc19zaWduX3Fud205SDZzXzEifQ.eyJpc3MiOiJodHRwczovL3NlbGYtaXNzdWVkLm1lIiwic3ViIjoiWEt5WkJvbFUzaXFuUHg5aEpSRUZGQTdOSUJ4SVJLbXlqRXlZSHpuNFhJTSIsImF1ZCI6Imh0dHBzOi8vcG9ydGFibGVpZGVudGl0eWNhcmRzLmF6dXJlLWFwaS5uZXQvZGV2LXYxLjAvNTM2Mjc5ZjYtMTVjYy00NWYyLWJlMmQtNjFlMzUyYjUxZWVmL3BvcnRhYmxlSWRlbnRpdGllcy9jYXJkL2lzc3VlIiwiZGlkIjoiZGlkOmlvbjpFaUEyaElSM2RIbUNVOVNWcnJEMlgxamVNODR6OUYwVkZVbXlPV0xJZ1hrOFlnPy1pb24taW5pdGlhbC1zdGF0ZT1leUprWld4MFlWOW9ZWE5vSWpvaVJXbERVbVV5WkhCb2MwVjNXbmMzZEVZNWMzRk5jMXBzVW5wS1FXb3pRM1kwWDBwbFdGZHZWMWg1Y2xsQ1FTSXNJbkpsWTI5MlpYSjVYMk52YlcxcGRHMWxiblFpT2lKRmFVUnpiMFp5Wmtaa1pTMWZSalIwUkdRMVJsQkphM0pVUVV0Q04zTjNUR2RCTjJGVWVuSllNbWhJUjBsbkluMC5leUoxY0dSaGRHVmZZMjl0YldsMGJXVnVkQ0k2SWtWcFJITnZSbkptUm1SbExWOUdOSFJFWkRWR1VFbHJjbFJCUzBJM2MzZE1aMEUzWVZSNmNsZ3lhRWhIU1djaUxDSndZWFJqYUdWeklqcGJleUpoWTNScGIyNGlPaUp5WlhCc1lXTmxJaXdpWkc5amRXMWxiblFpT25zaWNIVmliR2xqWDJ0bGVYTWlPbHQ3SW1sa0lqb2ljaTF6WDNOcFoyNWZjVzUzYlRsSU5uTmZNU0lzSW5SNWNHVWlPaUpGWTJSellWTmxZM0F5TlRack1WWmxjbWxtYVdOaGRHbHZia3RsZVRJd01Ua2lMQ0pxZDJzaU9uc2lhM1I1SWpvaVJVTWlMQ0pqY25ZaU9pSnpaV053TWpVMmF6RWlMQ0o0SWpvaU0yNXpWMHRqTFhGQk5tdFlObVF5UldsZmFVSnFUVTFZV1RCVmNWTm5RWEI2ZVhsTlNuUm9SVmhIWnlJc0lua2lPaUpUTkV0UE0wbHJWa1F6TTIxa1ltOHdjRlphVUVWNWMyczJZM2hyV25sSlExbFRWVkpCWTJOU2RWRnJJbjBzSW5CMWNuQnZjMlVpT2xzaVlYVjBhQ0lzSW1kbGJtVnlZV3dpWFgxZGZYMWRmUSIsInN1Yl9qd2siOnsia3R5IjoiRUMiLCJraWQiOiIjci1zX3NpZ25fcW53bTlINnNfMSIsInVzZSI6InNpZyIsImtleV9vcHMiOlsidmVyaWZ5Il0sImFsZyI6IkVTMjU2SyIsImNydiI6IlAtMjU2SyIsIngiOiIzbnNXS2MtcUE2a1g2ZDJFaV9pQmpNTVhZMFVxU2dBcHp5eU1KdGhFWEdnIiwieSI6IlM0S08zSWtWRDMzbWRibzBwVlpQRXlzazZjeGtaeUlDWVNVUkFjY1J1UWsifSwiaWF0IjoxNTkyMjk1Mjk2LCJleHAiOjE1OTI0NzUyNjQsImNvbnRyYWN0IjoiaHR0cHM6Ly9wb3J0YWJsZWlkZW50aXR5Y2FyZHMuYXp1cmUtYXBpLm5ldC9kZXYtdjEuMC81MzYyNzlmNi0xNWNjLTQ1ZjItYmUyZC02MWUzNTJiNTFlZWYvcG9ydGFibGVJZGVudGl0aWVzL2NvbnRyYWN0cy9JZGVudGl0eUNhcmQiLCJqdGkiOiI1MTFlMDM4ZS04YTJkLTQyZDEtYmVlYS1hMGY4OTIwMzVlZjQiLCJhdHRlc3RhdGlvbnMiOnsiaWRUb2tlbnMiOnsiaHR0cHM6Ly9jdXN0b21lcnNnbG9iYWxseS5iMmNsb2dpbi5jb20vY3VzdG9tZXJzZ2xvYmFsbHkub25taWNyb3NvZnQuY29tL3YyLjAvLndlbGwta25vd24vb3BlbmlkLWNvbmZpZ3VyYXRpb24_cD1CMkNfMV9kZWZhdWx0IjoiZXlKMGVYQWlPaUpLVjFRaUxDSmhiR2NpT2lKU1V6STFOaUlzSW10cFpDSTZJbGcxWlZock5IaDViMnBPUm5WdE1XdHNNbGwwZGpoa2JFNVFOQzFqTlRka1R6WlJSMVJXUW5kaFRtc2lmUS5leUpsZUhBaU9qRTFPVEl5T1RnNE16Z3NJbTVpWmlJNk1UVTVNakk1TlRJek9Dd2lkbVZ5SWpvaU1TNHdJaXdpYVhOeklqb2lhSFIwY0hNNkx5OWpkWE4wYjIxbGNuTm5iRzlpWVd4c2VTNWlNbU5zYjJkcGJpNWpiMjB2Tm1JMFltTXdZMkl0WWprNU55MDBNRFk1TFRsbE5qUXRaamsxTXpnMk5URTJNV0pqTDNZeUxqQXZJaXdpYzNWaUlqb2lOakF3Tm1VNFltRXRaak5oTWkwME9UbGpMVGcwWlRrdE1EVXdOak0wTVRjME9EazNJaXdpWVhWa0lqb2lOR0ZsTkRSbE5XWXRNMlZqTVMwME9XTXhMVGszWVdJdE5ERXdZV0poWVRjMU1HRmpJaXdpYm05dVkyVWlPaUl5TVRReE5UYzNOems0SWl3aWFXRjBJam94TlRreU1qazFNak00TENKaGRYUm9YM1JwYldVaU9qRTFPVEl5T1RVeU16Z3NJbVY0ZEdWdWMybHZibDlEVDFaSlJGOHhPVjlKYlcxMWJtVWlPblJ5ZFdVc0ltVjRkR1Z1YzJsdmJsOUJaMlVpT2lJek1pSXNJbU5wZEhraU9pSlRaV0YwZEd4bElpd2lZMjkxYm5SeWVTSTZJbFZ1YVhSbFpDQlRkR0YwWlhNaUxDSnVZVzFsSWpvaVFXeHBZMlVnVTIxcGRHZ2lMQ0puYVhabGJsOXVZVzFsSWpvaVFXeHBZMlVpTENKbGVIUmxibk5wYjI1ZlIzSmhaSFZoZEdsdmJsOVpaV0Z5SWpveU1ERXlMQ0pxYjJKVWFYUnNaU0k2SWtSdlkzUnZjaUlzSW1WNGRHVnVjMmx2Ymw5TllXcHZjaUk2SWtKcGIyeHZaM2tpTENKbGVIUmxibk5wYjI1ZlRVTkJWRjlUWTI5eVpTSTZJalV5TUNJc0luQnZjM1JoYkVOdlpHVWlPaUk1T0RFd09TSXNJbk4wWVhSbElqb2lWMEVpTENKemRISmxaWFJCWkdSeVpYTnpJam9pTVRJek5DQlVaWEp5ZVNCQmRtVWdUaUlzSW1aaGJXbHNlVjl1WVcxbElqb2lVMjFwZEdnaUxDSjBabkFpT2lKQ01rTmZNVjlrWldaaGRXeDBJbjAuVTVpUTJCbTk2Ym1yUUVOVW1ET2J4NmlGZ0YyYmNoeHdZSzlOQVJVV2ZXVnVxenNHY255UXhHd2g2UGJMbUxGdlFUVi1Fa1ZuQmQxdzJKQ0Z4a0FSSkdnUjVma0VYOXFuV05Kb3FycTY2QmRsUXlfVkluV1lLeDhLOS1FUXNORXdMQ255YWxEY3hQWWdSWTdkR2NHMjBKVElMcmdoRDlQdmx6cFFOQmpUeXA3M0lYZzlCeUJGZmhtR1cxTXN1VlF1bUFvaDBfcHA4MXJIMkNYbVE1YTBRVUlWUjkzeVVDOWZmTVd5LXhRb2JmZkFDVnJZYmpWTUZpVjBFSzdDMXljQlVjOFhTMElFaHkwejM0TzBNc2ktSmJoUWdUZTlkd1NjNHpQTkhzRTlSVENmSkIwNUU0NzRwREhCZ21LMlZrVlhQRTFtYkdFajBMVmpPYWw0ajd4SkxBIn19fQ"""
+        val keyReference = "KeyReference1"
+        cryptoKeyPair = ellipticCurveSubtleCrypto.generateKeyPair(
+            EcKeyGenParams(
+                namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+                additionalParams = mapOf(
+                    "hash" to Sha.SHA256.algorithm,
+                    "KeyReference" to keyReference
+                )
+            ), true, listOf(KeyUsage.Sign)
+        )
+        val private = cryptoKeyPair.privateKey
+        val public = cryptoKeyPair.publicKey
+        var signature = ellipticCurveSubtleCrypto.sign(alg, private, stringToByteArray(testData))
+        val rs = decodeFromDER(signature)
+        val canonicalized = canonicalize(rs.first, rs.second)
+        signature = encodeToDer(canonicalized.first.toByteArray(), canonicalized.second.toByteArray())
 
-            verified = ellipticCurveSubtleCrypto.nativeVerify(alg, public, signature, stringToByteArray(testData))
-            if (verified)
-                break
-        }
+        verified = ellipticCurveSubtleCrypto.nativeVerify(alg, public, signature, stringToByteArray(testData))
         assertThat(verified).isTrue()
     }
 
@@ -242,7 +238,7 @@ class ECBCInstrumentedTest {
 
     fun canonicalize(r: BigInteger, s: BigInteger): Pair<BigInteger, BigInteger> {
         val ecParams = ECNamedCurveTable.getParameterSpec("secp256k1")
-        return if(s > ecParams.n.shiftRight(1)) {
+        return if (s > ecParams.n.shiftRight(1)) {
             val ecParams = ECNamedCurveTable.getParameterSpec("secp256k1")
             val ecDomainParameters = ECDomainParameters(ecParams.curve, ecParams.g, ecParams.n, ecParams.h)
             Pair(r, ecDomainParameters.n.subtract(s))
