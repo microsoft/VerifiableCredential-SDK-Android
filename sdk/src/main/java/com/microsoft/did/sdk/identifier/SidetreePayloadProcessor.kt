@@ -18,7 +18,7 @@ import com.microsoft.did.sdk.util.Constants.SIDETREE_MULTIHASH_LENGTH
 import com.microsoft.did.sdk.util.Constants.SIDETREE_PATCH_ACTION
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
-import org.webpki.jcs.JsonCanonicalizer
+import org.erdtman.jcs.JsonCanonicalizer
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
