@@ -28,6 +28,13 @@ interface SubtleCrypto {
         data: ByteArray
     ): Boolean
 
+    fun nativeVerify(
+        algorithm: Algorithm,
+        key: CryptoKey,
+        signature: ByteArray,
+        data: ByteArray
+    ): Boolean
+
     fun digest(
         algorithm: Algorithm,
         data: ByteArray

@@ -71,6 +71,15 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) :
         return s.verify(signature)
     }
 
+    override fun nativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
+        val handle = cryptoKeyToPublicKey(key)
+        val s = Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).apply {
+            initVerify(handle)
+            update(data)
+        }
+        return s.verify(signature)
+    }
+
     override fun digest(algorithm: Algorithm, data: ByteArray): ByteArray {
         val digest = MessageDigest.getInstance(algorithm.name)
         return digest.digest(data)

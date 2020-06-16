@@ -34,6 +34,10 @@ abstract class Provider {
         throw UnSupportedOperationException("Verify not supported.")
     }
 
+    protected open fun onNativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
+        throw UnSupportedOperationException("Native Verify not supported.")
+    }
+
     protected open fun onEncrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         throw UnSupportedOperationException("Encrypt not supported.")
     }
@@ -99,6 +103,11 @@ abstract class Provider {
     fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         checkVerify(algorithm, key)
         return onVerify(algorithm, key, signature, data)
+    }
+
+    open fun nativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
+        checkVerify(algorithm, key)
+        return onNativeVerify(algorithm, key, signature, data)
     }
 
     fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {

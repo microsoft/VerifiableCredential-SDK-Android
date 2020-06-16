@@ -138,4 +138,34 @@ class ECBCInstrumentedTest {
         val keySpec = ECPublicKeySpec(point, params2)
         return keyFactory.generatePublic(keySpec) as ECPublicKey
     }
+
+    @Test
+    fun signAndVerifyTest() {
+        val keyReference = "KeyReference1"
+        cryptoKeyPair = ellipticCurveSubtleCrypto.generateKeyPair(
+            EcKeyGenParams(
+                namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+                additionalParams = mapOf(
+                    "hash" to Sha.SHA256.algorithm,
+                    "KeyReference" to keyReference
+                )
+            ), true, listOf(KeyUsage.Sign)
+        )
+        val private = cryptoKeyPair.privateKey
+        val public = cryptoKeyPair.publicKey
+
+        val alg = EcdsaParams(
+            hash = Algorithm(
+                name = W3cCryptoApiConstants.Sha256.value
+            ),
+            additionalParams = mapOf(
+                "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
+            )
+        )
+        val testData = "test message"
+        val signature = ellipticCurveSubtleCrypto.sign(alg, private, stringToByteArray(testData))
+
+        val verified = ellipticCurveSubtleCrypto.nativeVerify(alg, public, signature, stringToByteArray(testData))
+        assertThat(verified).isTrue()
+    }
 }

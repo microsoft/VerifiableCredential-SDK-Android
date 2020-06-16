@@ -21,7 +21,9 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
+import com.microsoft.did.sdk.util.toReadableString
 import org.bitcoin.NativeSecp256k1
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
@@ -132,6 +134,16 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         return sign(privateKey, hashedData)
     }
 
+    fun nativeSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+        val keyData = (key.handle as Secp256k1Handle).data
+        val ecAlgorithm = algorithm as EcdsaParams
+        val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
+        if (hashedData.size != 32) {
+            throw SignatureException("Data must be 32 bytes")
+        }
+        return NativeSecp256k1.sign(hashedData, keyData)
+    }
+
     private fun generatePrivateKeyFromCryptoKey(key: CryptoKey): PrivateKey {
         val curveParams = ECNamedCurveTable.getParameterSpec("secp256k1")
         val curveSpec: java.security.spec.ECParameterSpec =
@@ -196,6 +208,18 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
 
         val publicKey = generatePublicKeyFromCryptoKey(key)
         return verify(publicKey, hashedData, signature)
+    }
+
+    override fun nativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
+        val keyData = (key.handle as Secp256k1Handle).data
+        val ecAlgorithm = algorithm as EcdsaParams
+        val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
+        if (hashedData.size != 32) {
+            throw SignatureException("Data must be 32 bytes")
+        }
+
+        SdkLog.d("Key data: " + keyData.toReadableString())
+        return NativeSecp256k1.verify(hashedData, signature, keyData)
     }
 
     override fun onImportKey(
