@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.UnSupportedOperationException
+import java.math.BigInteger
 import java.util.*
 
 abstract class Provider {
@@ -98,6 +99,11 @@ abstract class Provider {
     fun sign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         checkSign(algorithm, key)
         return onSign(algorithm, key, data)
+    }
+
+    open fun onNativeSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
+        checkSign(algorithm, key)
+        return onNativeSign(algorithm, key, data)
     }
 
     fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
