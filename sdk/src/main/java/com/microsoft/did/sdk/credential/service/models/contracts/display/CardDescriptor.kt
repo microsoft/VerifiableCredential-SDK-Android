@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.credential.service.models.contracts.display
 import kotlinx.serialization.Serializable
 
 /**
- * Properties that are used to render a Portable Identity Card.
+ * Properties that are used to render a card.
  * These properties are not user-specific, but used to render a generic representation of the card.
  */
 @Serializable

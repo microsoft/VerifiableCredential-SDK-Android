@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.util.Constants.SIDETREE_MULTIHASH_LENGTH
 import com.microsoft.did.sdk.util.Constants.SIDETREE_PATCH_ACTION
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
+import org.erdtman.jcs.JsonCanonicalizer
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,36 +33,27 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
     fun generateCreatePayload(
         signingPublicKey: PublicKey,
         recoveryPublicKey: PublicKey,
-        updateCommitmentValue: String,
-        recoveryCommitmentValue: String
+        updatePublicKey: PublicKey
     ): RegistrationPayload {
         //Generates key pair for signing and encryption. Recovery key is required to recover portable identifier on Sidetree
         val signingKeyJWK = signingPublicKey.toJWK()
         val recoveryKeyJWK = recoveryPublicKey.toJWK()
+        val updateKeyJWK = updatePublicKey.toJWK()
 
-        return generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK, updateCommitmentValue, recoveryCommitmentValue)
-    }
-
-    /**
-     * Computes unique suffix for did short form.
-     * In unpublished resolution or long form, id is generated in SDK.
-     */
-    fun computeUniqueSuffix(suffixDataEncoded: String): String {
-        val suffixDataHash = hash(stringToByteArray(suffixDataEncoded))
-        return Base64Url.encode(suffixDataHash)
+        return generateRegistrationPayload(signingKeyJWK, recoveryKeyJWK, updateKeyJWK)
     }
 
     private fun generateRegistrationPayload(
         signingKeyJWK: JsonWebKey,
         recoveryKeyJWK: JsonWebKey,
-        updateCommitmentValue: String,
-        recoveryCommitmentValue: String
+        updateKeyJWK: JsonWebKey
     ): RegistrationPayload {
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingKeyJWK)
-        val patchData = createPatchData(identifierDocumentPatch, updateCommitmentValue)
+        val patchData = createPatchData(identifierDocumentPatch, generatePublicKeyJwk(updateKeyJWK))
         val patchDataEncoded = encodePatchData(patchData)
 
-        val suffixDataEncoded = createSuffixDataEncoded(patchData, generatePublicKeyJwk(recoveryKeyJWK), recoveryCommitmentValue)
+        val suffixData = createSuffixData(patchData, generatePublicKeyJwk(recoveryKeyJWK))
+        val suffixDataEncoded = encodeSuffixData(suffixData)
         return RegistrationPayload(suffixDataEncoded, patchDataEncoded)
     }
 
@@ -83,7 +75,7 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
                     id = signingKeyJWK.kid!!.substringAfter('#'),
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
                     jwk = generatePublicKeyJwk(signingKeyJWK),
-                    usage = listOf("ops", "auth", "general")
+                    purpose = listOf("auth", "general")
                 )
             )
         )
@@ -94,32 +86,33 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
         return IdentifierDocumentPatch(SIDETREE_PATCH_ACTION, identifierDocumentPayload)
     }
 
-    private fun createPatchData(identifierDocumentPatch: IdentifierDocumentPatch, updateCommitmentValue: String): PatchData {
+    private fun createPatchData(identifierDocumentPatch: IdentifierDocumentPatch, updateKeyJWK: JsonWebKey): PatchData {
         //Generates hash of commit-reveal value which would be used while requesting next update operation on Sidetree
-        val updateCommitmentHash = hash(stringToByteArray(updateCommitmentValue))
+        val updateCommitmentCanonicalized = canonicalizePublicKeyAsByteArray(updateKeyJWK)
+        val updateCommitmentHash = multiHash(updateCommitmentCanonicalized)
         val updateCommitmentHashEncoded = Base64Url.encode(updateCommitmentHash)
         return PatchData(updateCommitmentHashEncoded, listOf(identifierDocumentPatch))
     }
 
-    private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray, recoveryKeyJWK: JsonWebKey): SuffixData {
+    private fun createSuffixDataPayload(patchData: PatchData, recoveryCommitmentHash: ByteArray): SuffixData {
         val patchDataJson = serializer.stringify(PatchData.serializer(), patchData)
         val patchDataByteArray = stringToByteArray(patchDataJson)
-        val patchDataHash = hash(patchDataByteArray)
+        val patchDataHash = multiHash(patchDataByteArray)
         val patchDataHashEncoded = Base64Url.encode(patchDataHash)
 
         val recoveryCommitmentHashEncoded = Base64Url.encode(recoveryCommitmentHash)
 
-        return SuffixData(patchDataHashEncoded, recoveryKeyJWK, recoveryCommitmentHashEncoded)
+        return SuffixData(patchDataHashEncoded, recoveryCommitmentHashEncoded)
     }
 
-    private fun createSuffixDataEncoded(patchData: PatchData, recoveryKeyJWK: JsonWebKey, recoveryCommitmentValue: String): String {
+    private fun createSuffixData(patchData: PatchData, recoveryKeyJWK: JsonWebKey): SuffixData {
         //Generates hash of commit-reveal value which would be used while requesting recovery on Sidetree
-        val recoveryCommitmentHash = hash(stringToByteArray(recoveryCommitmentValue))
-        val suffixData = createSuffixDataPayload(patchData, recoveryCommitmentHash, recoveryKeyJWK)
-        return encodeSuffixData(suffixData)
+        val recoveryCommitmentCanonicalized = canonicalizePublicKeyAsByteArray(recoveryKeyJWK)
+        val recoveryCommitmentHash = multiHash(recoveryCommitmentCanonicalized)
+        return createSuffixDataPayload(patchData, recoveryCommitmentHash)
     }
 
-    private fun hash(bytes: ByteArray): ByteArray {
+    internal fun multiHash(bytes: ByteArray): ByteArray {
         val digest = MessageDigest.getInstance(W3cCryptoApiConstants.Sha256.value)
         //Prepend the hash value with hash algorithm code and digest length to be in multihash format as expected by Sidetree
         return byteArrayOf(SIDETREE_MULTIHASH_CODE.toByte(), SIDETREE_MULTIHASH_LENGTH.toByte()) + digest.digest(bytes)
@@ -127,12 +120,19 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
 
     private fun encodeSuffixData(suffixData: SuffixData): String {
         val suffixDataJson = serializer.stringify(SuffixData.serializer(), suffixData)
-        return Base64Url.encode(stringToByteArray(suffixDataJson))
+        val suffixDataByteArray = stringToByteArray(suffixDataJson)
+        return Base64Url.encode(suffixDataByteArray)
     }
 
     private fun encodePatchData(patchData: PatchData): String {
         val patchDataJson = serializer.stringify(PatchData.serializer(), patchData)
         val patchDataByteArray = stringToByteArray(patchDataJson)
         return Base64Url.encode(patchDataByteArray)
+    }
+
+    internal fun canonicalizePublicKeyAsByteArray(publicKeyJwk: JsonWebKey): ByteArray {
+        val commitmentValue = serializer.stringify(JsonWebKey.serializer(), publicKeyJwk)
+        val jsonCanonicalizer = JsonCanonicalizer(commitmentValue)
+        return jsonCanonicalizer.encodedUTF8
     }
 }

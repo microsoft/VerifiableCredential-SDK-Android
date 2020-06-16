@@ -113,7 +113,7 @@ class ECBCInstrumentedTest {
 
     private fun generatePrivateKeyFromCryptoKey(key: CryptoKey): PrivateKey {
         val curveParams = ECNamedCurveTable.getParameterSpec("secp256k1")
-        val curveSpec: java.security.spec.ECParameterSpec =
+        val curveSpec =
             ECNamedCurveSpec("secp256k1", curveParams.curve, curveParams.g, curveParams.n, curveParams.h)
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val privateSpec =

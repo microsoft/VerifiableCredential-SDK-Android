@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.controlflow.FormatterException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import java.util.*
 import javax.inject.Inject
@@ -29,7 +30,8 @@ class OidcResponseFormatter @Inject constructor(
 
     fun format(
         responder: Identifier,
-        audience: String,
+        responseAudience: String,
+        presentationsAudience: String? = null,
         expiresIn: Int,
         requestedVcs: Map<String, VerifiableCredential>? = null,
         requestedIdTokens: Map<String, String>? = null,
@@ -44,12 +46,17 @@ class OidcResponseFormatter @Inject constructor(
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
         val did = responder.id
-        val attestationResponse =
-            this.createAttestationClaimModel(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims, audience, responder, expiresIn)
+        val attestationResponse = this.createAttestationClaimModel(
+            requestedVcs,
+            requestedIdTokens,
+            requestedSelfIssuedClaims,
+            presentationsAudience,
+            responder,
+            expiresIn)
 
         val contents = OidcResponseContent(
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
-            aud = audience,
+            aud = responseAudience,
             nonce = nonce,
             did = did,
             subJwk = key.toJWK(),
@@ -74,29 +81,37 @@ class OidcResponseFormatter @Inject constructor(
         requestedVcs: Map<String, VerifiableCredential>?,
         requestedIdTokens: Map<String, String>?,
         requestedSelfIssuedClaims: Map<String, String>?,
-        audience: String,
+        presentationsAudience: String? = null,
         responder: Identifier,
         expiresIn: Int
     ): AttestationClaimModel? {
         if (areNoCollectedClaims(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims)) {
             return null
         }
-        val presentationAttestations = createPresentations(requestedVcs, audience, responder, expiresIn)
+        val presentationAttestations = createPresentations(requestedVcs, presentationsAudience, responder, expiresIn)
         return AttestationClaimModel(requestedSelfIssuedClaims, requestedIdTokens, presentationAttestations)
     }
 
     private fun createPresentations(
         requestedVcs: Map<String, VerifiableCredential>?,
-        audience: String,
+        audience: String? = null,
         responder: Identifier,
         expiresIn: Int
     ): Map<String, String>? {
-        val presentations =
-            requestedVcs?.mapValues { verifiablePresentationFormatter.createPresentation(listOf(it.value), audience, responder, expiresIn) }
-        if (presentations.isNullOrEmpty()) {
-            return null
+        return if (audience != null) {
+            requestedVcs?.mapValues {
+                verifiablePresentationFormatter.createPresentation(
+                    listOf(it.value),
+                    audience,
+                    responder,
+                    expiresIn
+                )
+            }
+        } else if (!requestedVcs.isNullOrEmpty()) {
+            throw FormatterException("No audience specified for presentations")
+        } else {
+            null
         }
-        return presentations
     }
 
     private fun areNoCollectedClaims(

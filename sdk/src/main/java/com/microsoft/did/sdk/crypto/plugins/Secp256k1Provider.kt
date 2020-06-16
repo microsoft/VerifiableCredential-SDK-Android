@@ -139,8 +139,8 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         if (hashedData.size != 32) {
             throw SignatureException("Data must be 32 bytes")
         }
-        val privateKey = generatePrivateKeyFromCryptoKey(key)
-        return sign(privateKey, hashedData)
+//        val privateKey = generatePrivateKeyFromCryptoKey(key)
+        return sign((key.handle as Secp256k1Handle).data, hashedData)
     }
 
     override fun onNativeSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -194,7 +194,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         return keyFactory.generatePublic(keySpec) as ECPublicKey
     }
 
-    private fun sign(privateKey: PrivateKey, payload: ByteArray): ByteArray {
+    private fun sign(privateKey: ByteArray, payload: ByteArray): ByteArray {
 /*        val signature = Signature.getInstance("SHA256withECDSA")
         signature.initSign(privateKey)
         signature.update(payload)
@@ -202,7 +202,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         val ecParams = ECNamedCurveTable.getParameterSpec("secp256k1")
         val ecDomainParameters = ECDomainParameters(ecParams.curve, ecParams.g, ecParams.n, ecParams.h)
         val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
-        val privateKeyParams = ECPrivateKeyParameters((privateKey as BCECPrivateKey).d, ecDomainParameters)
+        val privateKeyParams = ECPrivateKeyParameters(BigInteger(privateKey), ecDomainParameters)
         signer.init(true, privateKeyParams)
         val components = signer.generateSignature(payload)
         return encodeToDer(components[0].toByteArray(), components[1].toByteArray())

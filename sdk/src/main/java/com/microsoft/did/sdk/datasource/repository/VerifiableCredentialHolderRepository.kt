@@ -11,8 +11,8 @@ import com.microsoft.did.sdk.credential.service.models.PairwiseIssuanceRequest
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
-import com.microsoft.did.sdk.credential.models.PortableIdentityCard
-import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -36,46 +36,45 @@ import javax.inject.Singleton
  * ever care to get the object it wants.
  */
 @Singleton
-class CardRepository @Inject constructor(
+class VerifiableCredentialHolderRepository @Inject constructor(
     database: SdkDatabase,
     private val apiProvider: ApiProvider,
     private val formatter: OidcResponseFormatter,
     private val serializer: Serializer
 ) {
 
-    private val cardDao = database.cardDao()
+    private val vchDao = database.verifiableCredentialHolderDao()
 
     private val receiptDao = database.receiptDao()
 
-    private val verifiableCredentialDao = database.verifiableCredentialDao()
+    private val vcDao = database.verifiableCredentialDao()
 
-    // Portable Identity Card Methods
-    suspend fun insert(portableIdentityCard: PortableIdentityCard) = cardDao.insert(portableIdentityCard)
+    suspend fun insert(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.insert(verifiableCredentialHolder)
 
-    suspend fun delete(portableIdentityCard: PortableIdentityCard) = cardDao.delete(portableIdentityCard)
+    suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
 
-    fun getAllCards(): LiveData<List<PortableIdentityCard>> = cardDao.getAllCards()
+    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVcs()
 
-    fun getCardsByType(type: String): LiveData<List<PortableIdentityCard>> {
-        return getAllCards().map { cardList -> filterCardsByType(cardList, type) }
+    fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
+        return getAllVchs().map { cardList -> filterVcsByType(cardList, type) }
     }
 
-    private fun filterCardsByType(cardList: List<PortableIdentityCard>, type: String): List<PortableIdentityCard> {
-        return cardList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
+    private fun filterVcsByType(vcList: List<VerifiableCredentialHolder>, type: String): List<VerifiableCredentialHolder> {
+        return vcList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
     }
 
-    fun getCardById(id: String): LiveData<PortableIdentityCard> = cardDao.getCardById(id)
+    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVcById(id)
 
     // Receipt Methods
-    fun getAllReceiptsByCardId(cardId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByCardId(cardId)
+    fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
 
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    private suspend fun getAllVerifiableCredentialsByCardId(primaryVcId: String) =
-        verifiableCredentialDao.getVerifiableCredentialByCardId(primaryVcId)
+    private suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
+        vcDao.getVerifiableCredentialById(primaryVcId)
 
-    suspend fun insert(verifiableCredential: VerifiableCredential) = verifiableCredentialDao.insert(verifiableCredential)
+    suspend fun insert(verifiableCredential: VerifiableCredential) = vcDao.insert(verifiableCredential)
 
     // Card Issuance Methods.
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
@@ -86,8 +85,9 @@ class CardRepository @Inject constructor(
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
-            audience = response.audience,
-            requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            responseAudience = response.audience,
+            presentationsAudience = response.request.entityIdentifier,
+            requestedVcs = response.getCollectedVchs()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             contract = response.request.contractUrl,
@@ -113,10 +113,12 @@ class CardRepository @Inject constructor(
     ).fire()
 
     suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int): Result<Unit> {
+        val state = response.request.content.state ?: ""
         val formattedResponse = formatter.format(
             responder = responder,
-            audience = response.audience,
-            requestedVcs = response.getCollectedCards()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            responseAudience = response.audience,
+            presentationsAudience = response.request.entityIdentifier,
+            requestedVcs = response.getCollectedVchs()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
             requestedIdTokens = response.getCollectedIdTokens(),
             requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
             nonce = response.request.content.nonce,
@@ -126,12 +128,13 @@ class CardRepository @Inject constructor(
         return SendPresentationResponseNetworkOperation(
             response.audience,
             formattedResponse,
+            state,
             apiProvider
         ).fire()
     }
 
-    private suspend fun getPairwiseVerifiableCredential(card: PortableIdentityCard, pairwiseIdentifier: Identifier): VerifiableCredential {
-        val verifiableCredentials = this.getAllVerifiableCredentialsByCardId(card.cardId)
+    private suspend fun getPairwiseVerifiableCredential(vch: VerifiableCredentialHolder, pairwiseIdentifier: Identifier): VerifiableCredential {
+        val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
             if (it.contents.sub == pairwiseIdentifier.id) {
@@ -140,10 +143,10 @@ class CardRepository @Inject constructor(
         }
         val pairwiseRequest =
             PairwiseIssuanceRequest(
-                card.verifiableCredential,
+                vch.verifiableCredential,
                 pairwiseIdentifier.id
             )
-        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest, card.owner)
+        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest, vch.owner)
         this.insert(pairwiseVerifiableCredential)
         return pairwiseVerifiableCredential
     }
@@ -151,7 +154,7 @@ class CardRepository @Inject constructor(
     private suspend fun sendPairwiseIssuanceRequest(pairwiseRequest: PairwiseIssuanceRequest, requester: Identifier): VerifiableCredential {
         val formattedPairwiseRequest = formatter.format(
             responder = requester,
-            audience = pairwiseRequest.audience,
+            responseAudience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
@@ -177,8 +180,8 @@ class CardRepository @Inject constructor(
         }
     }
 
-    private fun formVerifiableCredential(rawToken: String, cardId: String? = null): VerifiableCredential {
+    private fun formVerifiableCredential(rawToken: String, vcId: String? = null): VerifiableCredential {
         val vcContents = unwrapSignedVerifiableCredential(rawToken, serializer)
-        return VerifiableCredential(vcContents.jti, rawToken, vcContents, cardId ?: vcContents.jti)
+        return VerifiableCredential(vcContents.jti, rawToken, vcContents, vcId ?: vcContents.jti)
     }
 }

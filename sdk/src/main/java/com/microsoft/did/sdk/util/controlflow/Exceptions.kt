@@ -37,6 +37,8 @@ class PairwiseIssuanceException(message: String? = null, cause: Throwable? = nul
 
 class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
+class FormatterException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+
 class ResolverException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
 class RegistrarException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
