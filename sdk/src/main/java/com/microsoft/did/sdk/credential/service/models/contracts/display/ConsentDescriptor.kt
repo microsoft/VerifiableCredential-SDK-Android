@@ -16,5 +16,5 @@ data class ConsentDescriptor(
     val title: String,
 
     // Instructions for what the user will have to do to get Card.
-    val instructions: String
+    val instructions: String = ""
 )
