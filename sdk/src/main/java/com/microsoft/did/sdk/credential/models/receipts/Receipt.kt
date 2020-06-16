@@ -1,4 +1,4 @@
-package com.microsoft.did.sdk.credential.receipts
+package com.microsoft.did.sdk.credential.models.receipts
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -25,5 +25,5 @@ data class Receipt(
     //Name of the verifier/issuer
     val entityName: String,
 
-    val cardId: String
+    val vcId: String
 )

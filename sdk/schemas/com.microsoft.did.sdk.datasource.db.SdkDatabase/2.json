@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 1,
-    "identityHash": "c35962ab6f7d4deda841ededbf80a217",
+    "version": 2,
+    "identityHash": "7ea29699c796b2bc45b8f471fa2d79fb",
     "entities": [
       {
         "tableName": "VerifiableCredential",
@@ -44,7 +44,7 @@
       },
       {
         "tableName": "VerifiableCredentialHolder",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardId` TEXT NOT NULL, `displayContract` TEXT NOT NULL, `jti` TEXT NOT NULL, `raw` TEXT NOT NULL, `contents` TEXT NOT NULL, `picId` TEXT NOT NULL, `id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `nextUpdateReveal` TEXT NOT NULL, `nextRecoveryReveal` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`cardId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardId` TEXT NOT NULL, `displayContract` TEXT NOT NULL, `jti` TEXT NOT NULL, `raw` TEXT NOT NULL, `contents` TEXT NOT NULL, `picId` TEXT NOT NULL, `id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`cardId`))",
         "fields": [
           {
             "fieldPath": "cardId",
@@ -113,14 +113,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "owner.nextUpdateReveal",
-            "columnName": "nextUpdateReveal",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "owner.nextRecoveryReveal",
-            "columnName": "nextRecoveryReveal",
+            "fieldPath": "owner.updateKeyReference",
+            "columnName": "updateKeyReference",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -142,7 +136,7 @@
       },
       {
         "tableName": "Identifier",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `nextUpdateReveal` TEXT NOT NULL, `nextRecoveryReveal` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -175,14 +169,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "nextUpdateReveal",
-            "columnName": "nextUpdateReveal",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "nextRecoveryReveal",
-            "columnName": "nextRecoveryReveal",
+            "fieldPath": "updateKeyReference",
+            "columnName": "updateKeyReference",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -256,7 +244,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c35962ab6f7d4deda841ededbf80a217')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ea29699c796b2bc45b8f471fa2d79fb')"
     ]
   }
 }

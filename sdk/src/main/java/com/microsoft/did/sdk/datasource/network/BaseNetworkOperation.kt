@@ -37,7 +37,7 @@ abstract class BaseNetworkOperation<S, T> {
         // TODO("how to not suppress this warning")
         @Suppress("UNCHECKED_CAST")
         val transformedPayload = (response.body() ?: throw NetworkException("Body of Response is null.")) as T
-        return Result.Success(transformedPayload)
+git         return Result.Success(transformedPayload)
     }
 
     // TODO("what do we want our base to look like")

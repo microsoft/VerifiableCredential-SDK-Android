@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.util.Constants.IDENTIFIER_SECRET_KEY_NAME
+import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.Constants.METHOD_NAME
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -24,9 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Class for creating identifiers and
- * sending and parsing OIDC Requests and Responses.
- * @class
+ * This class provides methods to create, update and manage decentralized identifiers.
  */
 @Singleton
 class IdentifierManager @Inject constructor(
@@ -40,7 +38,7 @@ class IdentifierManager @Inject constructor(
     }
 
     private suspend fun getOrCreateMasterIdentifier(): Result<Identifier> {
-        val identifier = identifierRepository.queryByName(IDENTIFIER_SECRET_KEY_NAME)
+        val identifier = identifierRepository.queryByName(MASTER_IDENTIFIER_NAME)
         return if (identifier != null) {
             Result.Success(identifier)
         } else {
@@ -86,9 +84,5 @@ class IdentifierManager @Inject constructor(
         } catch (exception: Exception) {
             throw RepositoryException("Unable to save identifier in repository", exception)
         }
-    }
-
-    fun getIdentifierByName(name: String): Identifier? {
-        return identifierRepository.queryByName(name)
     }
 }

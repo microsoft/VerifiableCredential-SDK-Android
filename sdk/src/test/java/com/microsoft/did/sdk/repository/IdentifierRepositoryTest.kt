@@ -41,8 +41,7 @@ class IdentifierRepositoryTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName1"
         )
         justRun { identifierDao.insert(expectedIdentifier) }
@@ -60,8 +59,7 @@ class IdentifierRepositoryTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName2"
         )
         justRun { identifierDao.insert(expectedIdentifier) }
@@ -79,8 +77,7 @@ class IdentifierRepositoryTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
@@ -103,8 +100,7 @@ class IdentifierRepositoryTest {
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
-            "testUpdateRevealValue",
-            "testRecoveryRevealValue",
+            "testUpdateKeyReference",
             "testIdentifierName"
         )
         mockkConstructor(ResolveIdentifierNetworkOperation::class)

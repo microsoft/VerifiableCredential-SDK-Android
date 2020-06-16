@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.microsoft.did.sdk.credential.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 
 @Dao
 interface ReceiptDao {
@@ -12,8 +12,8 @@ interface ReceiptDao {
     @Query("SELECT * FROM Receipt")
     fun getAllReceipts(): LiveData<List<Receipt>>
 
-    @Query("SELECT * FROM Receipt WHERE cardId = :cardId")
-    fun getAllReceiptsByCardId(cardId: String): LiveData<List<Receipt>>
+    @Query("SELECT * FROM Receipt WHERE vcId = :vcId")
+    fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>>
 
     @Insert
     suspend fun insert(receipt: Receipt)
