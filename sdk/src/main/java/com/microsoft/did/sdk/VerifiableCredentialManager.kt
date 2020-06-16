@@ -21,7 +21,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.*
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
@@ -144,7 +144,7 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
         responder: Identifier,
-        expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_MINUTES
+        expiresInMinutes: Int = DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {

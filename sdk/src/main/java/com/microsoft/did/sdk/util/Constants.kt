@@ -30,8 +30,8 @@ object Constants {
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000
     const val SECONDS_IN_A_MINUTE = 60
-    const val DEFAULT_EXPIRATION_IN_MINUTES = 3000
-    const val RESPONSE_EXPIRATION_IN_MINUTES = 600
+    const val DEFAULT_EXPIRATION_IN_SECONDS = 3000
+    const val DEFAULT_VP_EXPIRATION_IN_SECONDS = 300
     const val HASHING_ALGORITHM_FOR_ID = "MD5"
 
     //Identifier Constants

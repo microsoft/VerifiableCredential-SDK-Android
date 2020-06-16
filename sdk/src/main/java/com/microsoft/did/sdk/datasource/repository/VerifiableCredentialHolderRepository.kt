@@ -14,6 +14,7 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.models.contexts.VerifiablePresentationContext
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -22,7 +23,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresen
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.PairwiseIssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -87,17 +88,11 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-<<<<<<< HEAD:sdk/src/main/java/com/microsoft/did/sdk/datasource/repository/CardRepository.kt
-            requestedVcs = response.getVerifiablePresentationContexts()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getIdTokenContexts(),
-            requestedSelfIssuedClaims = response.getSelfAttestedClaimContexts(),
-=======
-            requestedVcs = response.getCollectedVchs()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
->>>>>>> master:sdk/src/main/java/com/microsoft/did/sdk/datasource/repository/VerifiableCredentialHolderRepository.kt
+            verifiablePresentationContexts = response.getVerifiablePresentationContexts()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            idTokenContexts = response.getIdTokenContexts(),
+            selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
             contract = response.request.contractUrl,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+            expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS
         )
         val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
@@ -118,24 +113,18 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int): Result<Unit> {
+    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiryInSeconds: Int): Result<Unit> {
         val state = response.request.content.state ?: ""
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-<<<<<<< HEAD:sdk/src/main/java/com/microsoft/did/sdk/datasource/repository/CardRepository.kt
-            requestedVcs = response.getVerifiablePresentationContexts()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getIdTokenContexts(),
-            requestedSelfIssuedClaims = response.getSelfAttestedClaimContexts(),
-=======
-            requestedVcs = response.getCollectedVchs()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
->>>>>>> master:sdk/src/main/java/com/microsoft/did/sdk/datasource/repository/VerifiableCredentialHolderRepository.kt
+            verifiablePresentationContexts = response.getVerifiablePresentationContexts()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
+            idTokenContexts = response.getIdTokenContexts(),
+            selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
             nonce = response.request.content.nonce,
             state = response.request.content.state,
-            expiresIn = expiresInMinutes
+            expiryInSeconds = expiryInSeconds
         )
         return SendPresentationResponseNetworkOperation(
             response.audience,
@@ -145,8 +134,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         ).fire()
     }
 
-    private suspend fun getPairwiseVerifiableCredential(vch: VerifiableCredentialHolder, pairwiseIdentifier: Identifier): VerifiableCredential {
-        val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
+    private suspend fun getPairwiseVerifiableCredential(vpContext: VerifiablePresentationContext, pairwiseIdentifier: Identifier): VerifiableCredential {
+        val verifiableCredentials = this.getAllVerifiableCredentialsById(vpContext.verifiablePresentationHolder.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
             if (it.contents.sub == pairwiseIdentifier.id) {
@@ -155,10 +144,10 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         }
         val pairwiseRequest =
             PairwiseIssuanceRequest(
-                vch.verifiableCredential,
+                vpContext.verifiablePresentationHolder.verifiableCredential,
                 pairwiseIdentifier.id
             )
-        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest, vch.owner)
+        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest, vpContext.verifiablePresentationHolder.owner)
         this.insert(pairwiseVerifiableCredential)
         return pairwiseVerifiableCredential
     }
@@ -169,7 +158,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responseAudience = pairwiseRequest.audience,
             transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
             recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+            expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS
         )
 
         val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
