@@ -70,17 +70,15 @@ class VerifiableCredentialManager @Inject constructor(
     }
 
     private suspend fun getPresentationRequestToken(uri: Uri): Result<String> {
-        return runResultTry {
-            val serializedToken = uri.getQueryParameter("request")
-            if (serializedToken != null) {
-                Result.Success(serializedToken)
-            }
-            val requestUri = uri.getQueryParameter("request_uri")
-            if (requestUri == null) {
-                Result.Failure(PresentationException("Request Uri does not exist."))
-            } else {
-                vchRepository.getRequest(requestUri)
-            }
+        val serializedToken = uri.getQueryParameter("request")
+        if (serializedToken != null) {
+            return Result.Success(serializedToken)
+        }
+        val requestUri = uri.getQueryParameter("request_uri")
+        return if (requestUri == null) {
+            Result.Failure(PresentationException("Request Uri does not exist."))
+        } else {
+            vchRepository.getRequest(requestUri)
         }
     }
 
