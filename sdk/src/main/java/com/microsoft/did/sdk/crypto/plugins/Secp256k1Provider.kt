@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -26,6 +27,7 @@ import com.microsoft.did.sdk.util.toReadableString
 import org.bitcoin.NativeSecp256k1
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1Integer
+import org.spongycastle.asn1.DERInteger
 import org.spongycastle.asn1.DERSequenceGenerator
 import org.spongycastle.asn1.DLSequence
 import org.spongycastle.crypto.digests.SHA256Digest
@@ -34,6 +36,7 @@ import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.signers.ECDSASigner
 import org.spongycastle.crypto.signers.HMacDSAKCalculator
+import org.spongycastle.crypto.util.DEROtherInfo
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.spongycastle.jcajce.provider.asymmetric.util.EC5Util
@@ -49,6 +52,7 @@ import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
+import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
@@ -201,18 +205,23 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         return signature.sign()*/
         val ecParams = ECNamedCurveTable.getParameterSpec("secp256k1")
         val ecDomainParameters = ECDomainParameters(ecParams.curve, ecParams.g, ecParams.n, ecParams.h)
-        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
+//        val signer = ECDSASigner(HMacDSAKCalculator(SHA256Digest()))
+        val signer = ECDSASigner()
         val privateKeyParams = ECPrivateKeyParameters(BigInteger(privateKey), ecDomainParameters)
         signer.init(true, privateKeyParams)
-        val components = signer.generateSignature(payload)
+        val digest = MessageDigest.getInstance(W3cCryptoApiConstants.Sha256.value)
+         val hashedData = digest.digest(payload)
+        val components = signer.generateSignature(hashedData)
         return encodeToDer(components[0].toByteArray(), components[1].toByteArray())
     }
 
     fun encodeToDer(r: ByteArray, s: ByteArray): ByteArray {
         val bos = ByteArrayOutputStream(72)
         val seq = DERSequenceGenerator(bos)
-        seq.addObject(ASN1Integer(r))
-        seq.addObject(ASN1Integer(s))
+/*        seq.addObject(ASN1Integer(r))
+        seq.addObject(ASN1Integer(s))*/
+        seq.addObject(DERInteger(BigInteger(r)))
+        seq.addObject(DERInteger(BigInteger(s)))
         seq.close()
         return bos.toByteArray()
     }
