@@ -9,7 +9,7 @@ import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
-import org.bitcoin.Secp256k1Context
+//import org.bitcoin.Secp256k1Context
 
 /**
  * This class initializes the VerifiableCredentialSdk. The `init` method has to be called before the members can be accessed.
@@ -55,6 +55,7 @@ object VerifiableCredentialSdk {
     }
 
     fun isDeviceModelSupported(): Boolean {
-        return Secp256k1Context.isEnabled()
+//        return Secp256k1Context.isEnabled()
+        return true
     }
 }
