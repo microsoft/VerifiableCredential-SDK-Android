@@ -40,19 +40,9 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         return provider.sign(algorithm, key, data)
     }
 
-    override fun onNativeSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        val provider = getProvider(algorithm.name)
-        return provider.onNativeSign(algorithm, key, data)
-    }
-
     override fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         val provider = getProvider(algorithm.name)
         return provider.verify(algorithm, key, signature, data)
-    }
-
-    override fun nativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        val provider = getProvider(algorithm.name)
-        return provider.nativeVerify(algorithm, key, signature, data)
     }
 
     override fun digest(algorithm: Algorithm, data: ByteArray): ByteArray {

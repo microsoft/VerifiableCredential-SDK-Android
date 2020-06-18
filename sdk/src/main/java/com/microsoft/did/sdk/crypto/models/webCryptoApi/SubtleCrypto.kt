@@ -21,20 +21,7 @@ interface SubtleCrypto {
         data: ByteArray
     ): ByteArray
 
-    fun onNativeSign(
-        algorithm: Algorithm,
-        key: CryptoKey,
-        data: ByteArray
-    ): ByteArray
-
     fun verify(
-        algorithm: Algorithm,
-        key: CryptoKey,
-        signature: ByteArray,
-        data: ByteArray
-    ): Boolean
-
-    fun nativeVerify(
         algorithm: Algorithm,
         key: CryptoKey,
         signature: ByteArray,

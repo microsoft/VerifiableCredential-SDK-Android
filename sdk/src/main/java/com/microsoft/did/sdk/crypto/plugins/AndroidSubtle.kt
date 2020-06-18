@@ -62,39 +62,7 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) :
         }
     }
 
-    override fun onNativeSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        //HMAC - Keyed Hash performed using key and algorithm passed
-        if (key.type == KeyType.Secret) {
-            val handle = cryptoKeyToSecretKey(key)
-            return Mac.getInstance(signAlgorithmToAndroid(algorithm, key)).run {
-                init(handle)
-                update(data)
-                doFinal()
-            }
-        }
-        // verify we're signing with a private key
-        if (key.type != KeyType.Private) {
-            throw SignatureException("Sign must use a private key")
-        }
-        // key's handle should be an Android keyStore key reference.
-        val handle = cryptoKeyToPrivateKey(key)
-        return Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).run {
-            initSign(handle)
-            update(data)
-            sign()
-        }
-    }
-
     override fun verify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        val handle = cryptoKeyToPublicKey(key)
-        val s = Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).apply {
-            initVerify(handle)
-            update(data)
-        }
-        return s.verify(signature)
-    }
-
-    override fun nativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
         val handle = cryptoKeyToPublicKey(key)
         val s = Signature.getInstance(signAlgorithmToAndroid(algorithm, key)).apply {
             initVerify(handle)

@@ -203,12 +203,6 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         )))
     }
 
-    override fun nativeVerify(algorithm: Algorithm, key: CryptoKey, signature: ByteArray, data: ByteArray): Boolean {
-        val digest = MessageDigest.getInstance(W3cCryptoApiConstants.Sha256.value)
-        val hashed = digest.digest(data)
-        return NativeSecp256k1.verify(hashed, signature, (key.handle as Secp256k1Handle).data)
-    }
-
     override fun onImportKey(
         format: KeyFormat,
         keyData: JsonWebKey,
