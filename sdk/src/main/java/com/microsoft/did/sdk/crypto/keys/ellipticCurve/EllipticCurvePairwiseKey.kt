@@ -9,6 +9,7 @@ import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
+import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
@@ -23,9 +24,13 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
-import org.bitcoin.NativeSecp256k1
+import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
+import org.spongycastle.jce.ECNamedCurveTable
+import org.spongycastle.jce.spec.ECPublicKeySpec
+import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.security.KeyFactory
 import javax.inject.Inject
 
 class EllipticCurvePairwiseKey @Inject constructor() {
@@ -42,12 +47,22 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve) == -1)
             throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
 
-        val pubKey = NativeSecp256k1.computePubkey(pairwiseKeySeed)
+        val pubKey = generatePublicKeyFromPrivateCryptoKey(pairwiseKeySeed)
         val xyData = publicToXY(pubKey)
 
         val pairwiseKeySeedInBigEndian = convertPairwiseSeedToBigEndian(pairwiseKeySeed)
 
         return createPairwiseKeyFromPairwiseSeed(algorithm, pairwiseKeySeedInBigEndian, xyData)
+    }
+
+    private fun generatePublicKeyFromPrivateCryptoKey(privateKey: ByteArray): ByteArray {
+        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
+        val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val Q = ecSpec.g.multiply(BigInteger(1, privateKey))
+        val pubKeySpec = ECPublicKeySpec(Q, ecSpec)
+        val publicKey = keyFactory.generatePublic(pubKeySpec)
+        return byteArrayOf(0x04)+(publicKey as BCECPublicKey).q.normalize().xCoord.encoded +
+            publicKey.q.normalize().yCoord.encoded
     }
 
     private fun generatePairwiseSeed(subtleCrypto: SubtleCrypto, masterKey: ByteArray, peerId: String): ByteArray {
@@ -91,9 +106,9 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         return EllipticCurvePrivateKey(pairwiseKey)
     }
 
-    // Converts the public key returned by NativeSecp256K1 library from byte array to x and y co-ordinates to be used in JWK
+    // Converts the public key returned by library from byte array to x and y co-ordinates to be used in JWK
     private fun publicToXY(keyData: ByteArray): Pair<String, String> {
-        //TODO: Confirm if we get back public key in compressed format from NativeSecp256k1
+        //TODO: Confirm if we get back public key in compressed format from library
         return when {
             // compressed hex format of Elliptic Curve public key
             isPublicKeyCompressedHex(keyData) -> throw KeyFormatException("Compressed Hex format is not supported.")

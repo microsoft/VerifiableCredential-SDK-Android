@@ -22,7 +22,6 @@ import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.stringToByteArray
-import org.bitcoin.NativeSecp256k1
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1Integer
 import org.spongycastle.asn1.DERSequenceGenerator
