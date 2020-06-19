@@ -13,16 +13,19 @@ import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.util.Base64Url
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
+import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
+import kotlinx.io.InputStream
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -36,10 +39,12 @@ class PairwiseKeyInstrumentedTest {
     private var crypto: CryptoOperations
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val seedReference = "masterSeed"
+    private val inputStream: InputStream
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         val serializer = Serializer()
+        inputStream = context.assets.open("Pairwise.EC.json")
         keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
@@ -163,6 +168,30 @@ class PairwiseKeyInstrumentedTest {
             val actualPairwiseKey = crypto.generatePairwise(alg, seedReference, persona, suppliedPeer)
             results[i] = (actualPairwiseKey as EllipticCurvePrivateKey).d
             assertThat(results.filter { value -> value == actualPairwiseKey.d }.size).isEqualTo(1)
+        }
+    }
+
+    @Test
+    fun generateSameKeysInFile() {
+        val countOfIds = 10
+        val alg = EcKeyGenParams(
+            namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+            additionalParams = mapOf(
+                "hash" to Sha.SHA256.algorithm
+            )
+        )
+        val testKeysJsonString = inputStream.bufferedReader().readText()
+        val serializer = Serializer()
+        var testPairwiseKeys = serializer.parse(TestKeys.serializer(), testKeysJsonString)
+        val seed = SecretKey(JsonWebKey(k = Base64Url.encode(stringToByteArray("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"))))
+        keyStore.save(seedReference, seed)
+        val seedReference = "masterkey"
+        keyStore.save(seedReference, seed)
+        for (index in 0 until countOfIds) {
+            val persona = "abcdef"
+            val pairwiseKey = crypto.generatePairwise(alg, seedReference, persona, index.toString())
+            assertThat(testPairwiseKeys.keys[index].key).isEqualTo((pairwiseKey as EllipticCurvePrivateKey).d)
+            assertThat(1).isEqualTo(testPairwiseKeys.keys.filter{ it.key == (pairwiseKey).d}.size)
         }
     }
 
