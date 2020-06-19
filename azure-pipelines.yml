@@ -6,6 +6,9 @@
 trigger:
 - master
 
+pr:
+- master
+
 pool:
   vmImage: 'macOS-10.14'
 
