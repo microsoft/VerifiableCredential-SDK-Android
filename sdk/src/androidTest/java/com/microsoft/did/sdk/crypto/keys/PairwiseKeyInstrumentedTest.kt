@@ -182,7 +182,7 @@ class PairwiseKeyInstrumentedTest {
         )
         val testKeysJsonString = inputStream.bufferedReader().readText()
         val serializer = Serializer()
-        var testPairwiseKeys = serializer.parse(TestKeys.serializer(), testKeysJsonString)
+        val testPairwiseKeys = serializer.parse(TestKeys.serializer(), testKeysJsonString)
         val seed = SecretKey(JsonWebKey(k = Base64Url.encode(stringToByteArray("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"))))
         keyStore.save(seedReference, seed)
         val seedReference = "masterkey"
