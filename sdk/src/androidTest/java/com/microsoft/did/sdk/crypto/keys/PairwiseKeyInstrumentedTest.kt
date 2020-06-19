@@ -56,6 +56,21 @@ class PairwiseKeyInstrumentedTest {
     }
 
     @Test
+    fun generateSamePairwiseKeyTest() {
+        val alg = EcKeyGenParams(
+            namedCurve = W3cCryptoApiConstants.Secp256k1.value,
+            additionalParams = mapOf(
+                "hash" to Sha.SHA256.algorithm
+            )
+        )
+        val persona = "did:persona:1"
+        val peer = "did:peer:1"
+        val pairwiseKey1 = crypto.generatePairwise(alg, seedReference, persona, peer)
+        val pairwiseKey2 = crypto.generatePairwise(alg, seedReference, persona, peer)
+        assertThat(pairwiseKey1.getPublicKey()).isEqualToComparingFieldByFieldRecursively(pairwiseKey2.getPublicKey())
+    }
+
+    @Test
     fun generatePersonaMasterKeyTest() {
         val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
         var persona = "persona"
@@ -106,7 +121,7 @@ class PairwiseKeyInstrumentedTest {
 
     @Test
     fun generateUniquePairwiseKeyUsingDifferentSeed() {
-        val results = Array<String?>(50){""}
+        val results = Array<String?>(50) { "" }
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
@@ -115,7 +130,7 @@ class PairwiseKeyInstrumentedTest {
         )
         val persona = "did:persona:1"
         val peer = "did:peer:1"
-        for(i in 0 .. 49) {
+        for (i in 0..49) {
             val keyReference = "key-$i"
             val keyValue = SecretKey(
                 JsonWebKey(
@@ -134,7 +149,7 @@ class PairwiseKeyInstrumentedTest {
 
     @Test
     fun generateUniquePairwiseKeyUsingDifferentPeer() {
-        val results = Array<String?>(50){""}
+        val results = Array<String?>(50) { "" }
         val alg = EcKeyGenParams(
             namedCurve = W3cCryptoApiConstants.Secp256k1.value,
             additionalParams = mapOf(
@@ -143,7 +158,7 @@ class PairwiseKeyInstrumentedTest {
         )
         val persona = "did:persona:1"
         val peer = "did:peer:1"
-        for(i in 0 .. 49) {
+        for (i in 0..49) {
             val suppliedPeer = "$peer-$i"
             val actualPairwiseKey = crypto.generatePairwise(alg, seedReference, persona, suppliedPeer)
             results[i] = (actualPairwiseKey as EllipticCurvePrivateKey).d
@@ -161,7 +176,8 @@ class PairwiseKeyInstrumentedTest {
         )
         val persona = "did:persona"
         val peer = "did:peer"
-        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(PairwiseKeyException::class.java)
+        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }
+            .isInstanceOf(PairwiseKeyException::class.java)
     }
 
     @Test
@@ -170,6 +186,7 @@ class PairwiseKeyInstrumentedTest {
         val alg = Algorithm(invalidAlgorithmName)
         val persona = "did:persona"
         val peer = "did:peer"
-        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }.isInstanceOf(PairwiseKeyException::class.java)
+        Assertions.assertThatThrownBy { crypto.generatePairwise(alg, seedReference, persona, peer) }
+            .isInstanceOf(PairwiseKeyException::class.java)
     }
 }
