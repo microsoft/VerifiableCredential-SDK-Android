@@ -78,6 +78,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(2)
+            assertThat(actualVerifiableCredentialHolder).contains(verifiableCredentialHolder1)
             assertThat(actualVerifiableCredentialHolder).contains(verifiableCredentialHolder2)
         }
     }
