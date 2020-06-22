@@ -41,5 +41,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun registrationUrl(@Named("registrationUrl") registrationUrl: String): Builder
+
+        @BindsInstance
+        fun encryptedSharedPreferencesFileName(@Named("encSPFileName") fileName: String): Builder
     }
 }

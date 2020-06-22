@@ -1,10 +1,14 @@
 package com.microsoft.did.sdk.util
 
+import com.google.gson.JsonArray
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
 import com.microsoft.did.sdk.util.serializer.Serializer
 import org.assertj.core.api.Assertions.assertThat
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Test
 
 class SerializationTest {
@@ -33,5 +37,14 @@ class SerializationTest {
         val expectedDocument = serializer.parse(IdentifierDocument.serializer(), serializedDocument)
         val serializedExpectedDocument = serializer.stringify(IdentifierDocument.serializer(), expectedDocument)
         assertThat(serializedDocument).isEqualTo(serializedExpectedDocument)
+    }
+
+    @Test
+    fun `serialize VC`() {
+        val serializer = Serializer()
+        val vcContent = VerifiableCredentialDescriptor(listOf("context"), listOf("type"), mapOf("key" to JSONObject("string")))
+        val serializedDocument = serializer.stringify(VerifiableCredentialDescriptor.serializer(),vcContent)
+        val expectedDocument = serializer.parse(VerifiableCredentialDescriptor.serializer(), serializedDocument)
+        print(expectedDocument)
     }
 }

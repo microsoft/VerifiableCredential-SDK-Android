@@ -6,8 +6,10 @@
 package com.microsoft.did.sdk.credential.models
 
 import com.microsoft.did.sdk.util.Constants.CONTEXT
+import kotlinx.serialization.ContextualSerialization
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.json.JSONObject
 
 /**
  * Data model to describe a Verifiable Credential.
@@ -19,7 +21,7 @@ data class VerifiableCredentialDescriptor(
 
     val type: List<String>,
 
-    val credentialSubject: Map<String, String>,
+    val credentialSubject: Map<String, @ContextualSerialization JSONObject>,
 
     val credentialStatus: ServiceDescriptor? = null,
 

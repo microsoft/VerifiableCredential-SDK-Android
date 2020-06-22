@@ -8,6 +8,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.microsoft.did.sdk.crypto.keys.*
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
@@ -20,10 +21,14 @@ import com.microsoft.did.sdk.util.serializer.Serializer
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Serializer) :
+class AndroidKeyStore @Inject constructor(
+    private val context: Context,
+    private val serializer: Serializer,
+    @Named("encSPFileName") private val encryptedFileName: String = Constants.SECRET_SHARED_PREFERENCES) :
     com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
 
     companion object {
@@ -305,14 +310,16 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     private fun getSharedPreferences(): SharedPreferences {
-        val masterKeyAlias = getSecretVaultMasterKey()
+        val alias = MasterKey.Builder(this.context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
         return EncryptedSharedPreferences.create(
-            "secret_shared_prefs",
-            masterKeyAlias,
             context,
+            this.encryptedFileName,
+            alias,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM)
     }
 
     private fun getSecretVaultMasterKey(): String {
@@ -332,7 +339,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
             )
             generator.generateKey()
         }
-
         return alias
     }
 

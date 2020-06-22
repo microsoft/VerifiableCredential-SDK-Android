@@ -33,6 +33,7 @@ object Constants {
     const val DEFAULT_EXPIRATION_IN_MINUTES = 3000
     const val RESPONSE_EXPIRATION_IN_MINUTES = 600
     const val HASHING_ALGORITHM_FOR_ID = "MD5"
+    const val SECRET_SHARED_PREFERENCES = "secret_shared_prefs"
 
     const val DEEP_LINK_SCHEME = "verifiablecredential"
 

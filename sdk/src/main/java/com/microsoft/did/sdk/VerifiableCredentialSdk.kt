@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
 import org.bitcoin.Secp256k1Context
@@ -40,12 +41,14 @@ object VerifiableCredentialSdk {
         context: Context,
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         registrationUrl: String = "",
-        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
+        resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers",
+        encryptedSharedPreferencesFileName: String = Constants.SECRET_SHARED_PREFERENCES
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
+            .encryptedSharedPreferencesFileName(encryptedSharedPreferencesFileName)
             .build()
 
         identifierManager = sdkComponent.identifierManager()
