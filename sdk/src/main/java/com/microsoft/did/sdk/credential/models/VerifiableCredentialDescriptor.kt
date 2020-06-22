@@ -21,7 +21,7 @@ data class VerifiableCredentialDescriptor(
 
     val type: List<String>,
 
-    val credentialSubject: Map<String, @ContextualSerialization JSONObject>,
+    val credentialSubject: Map<String, String>,
 
     val credentialStatus: ServiceDescriptor? = null,
 
