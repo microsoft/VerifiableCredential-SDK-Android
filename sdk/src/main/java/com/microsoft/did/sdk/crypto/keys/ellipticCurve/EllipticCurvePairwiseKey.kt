@@ -22,7 +22,7 @@ import com.microsoft.did.sdk.crypto.plugins.Secp256k1Provider
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
-import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.Constants.SECP256K1_CURVE_NAME_EC
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.spongycastle.jce.ECNamedCurveTable
@@ -47,7 +47,7 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve) == -1)
             throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
 
-        val pubKey = generatePublicKeyFromPrivateCryptoKey(pairwiseKeySeed)
+        val pubKey = generatePublicKeyFromPrivateKey(pairwiseKeySeed)
         val xyData = publicToXY(pubKey)
 
         val pairwiseKeySeedInBigEndian = convertPairwiseSeedToBigEndian(pairwiseKeySeed)
@@ -55,9 +55,9 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         return createPairwiseKeyFromPairwiseSeed(algorithm, pairwiseKeySeedInBigEndian, xyData)
     }
 
-    private fun generatePublicKeyFromPrivateCryptoKey(privateKey: ByteArray): ByteArray {
+    private fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
-        val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
+        val ecSpec = ECNamedCurveTable.getParameterSpec(SECP256K1_CURVE_NAME_EC)
         val Q = ecSpec.g.multiply(BigInteger(1, privateKey))
         val pubKeySpec = ECPublicKeySpec(Q, ecSpec)
         val publicKey = keyFactory.generatePublic(pubKeySpec)
@@ -108,10 +108,7 @@ class EllipticCurvePairwiseKey @Inject constructor() {
 
     // Converts the public key returned by library from byte array to x and y co-ordinates to be used in JWK
     private fun publicToXY(keyData: ByteArray): Pair<String, String> {
-        //TODO: Confirm if we get back public key in compressed format from library
         return when {
-            // compressed hex format of Elliptic Curve public key
-            isPublicKeyCompressedHex(keyData) -> throw KeyFormatException("Compressed Hex format is not supported.")
             // Convert uncompressed hex and hybrid hex formats of public key to x and y co-ordinates to be used in JWK format
             isPublicKeyUncompressedOrHybridHex(keyData) -> publicKeyToXYForUncompressedOrHybridHex(keyData)
             else -> throw PairwiseKeyException("Public key improperly formatted")
@@ -132,13 +129,6 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         return keyData.size == 65 && (keyData[0] == Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte ||
             keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_EVEN.byte ||
             keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_ODD.byte
-            )
-    }
-
-    private fun isPublicKeyCompressedHex(keyData: ByteArray): Boolean {
-        return (keyData.size == 33 && (
-            keyData[0] == Secp256k1Provider.Secp256k1Tag.EVEN.byte ||
-                keyData[0] == Secp256k1Provider.Secp256k1Tag.ODD.byte)
             )
     }
 

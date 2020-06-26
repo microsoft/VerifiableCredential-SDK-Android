@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentPayload
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentPublicKeyInput
 import com.microsoft.did.sdk.util.Base64Url
-import com.microsoft.did.sdk.util.Constants.SIDETREE_CURVE_NAME_FOR_EC
+import com.microsoft.did.sdk.util.Constants.SECP256K1_CURVE_NAME_EC
 import com.microsoft.did.sdk.util.Constants.SIDETREE_MULTIHASH_CODE
 import com.microsoft.did.sdk.util.Constants.SIDETREE_MULTIHASH_LENGTH
 import com.microsoft.did.sdk.util.Constants.SIDETREE_PATCH_ACTION
@@ -62,7 +62,7 @@ class SidetreePayloadProcessor @Inject constructor(private val serializer: Seria
             KeyType.RSA.value -> publicKeyJwk
             else -> {
                 //Sidetree api specifically checks for curve name for elliptic curve keys. Hence it is set here.
-                val curveName = SIDETREE_CURVE_NAME_FOR_EC
+                val curveName = SECP256K1_CURVE_NAME_EC
                 JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
             }
         }
