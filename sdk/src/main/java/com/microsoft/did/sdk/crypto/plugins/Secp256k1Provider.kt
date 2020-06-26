@@ -63,14 +63,14 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         extractable: Boolean,
         keyUsages: Set<KeyUsage>
     ): CryptoKeyPair {
-        val seed = ByteArray(32)
         val random = SecureRandom()
+        val seed = random.generateSeed(32)
         random.nextBytes(seed)
 
         val secret = ByteArray(32)
         random.nextBytes(secret)
 
-        val ecKeyPair = generateECKeyPair(random)
+//        val ecKeyPair = generateECKeyPair(random)
 
         val signAlgorithm = EcdsaParams(
             hash = algorithm.additionalParams["hash"] as? Algorithm ?: Sha.SHA256.algorithm,
@@ -79,10 +79,12 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
             )
         )
 
-        val privateKey = parseBigIntegerPositive((ecKeyPair.private as ECPrivateKeyParameters).d)
-        val x = (ecKeyPair.public as ECPublicKeyParameters).q.normalize().xCoord.encoded
-        val y = (ecKeyPair.public as ECPublicKeyParameters).q.normalize().yCoord.encoded
-        val publicKey = byteArrayOf(Secp256k1Tag.UNCOMPRESSED.byte)+x+y
+        val privateKey = secret
+//        val privateKey = parseBigIntegerPositive((ecKeyPair.private as ECPrivateKeyParameters).d)
+/*        val x = (ecKeyPair.public as ECPublicKeyParameters).q.normalize().xCoord.encoded
+        val y = (ecKeyPair.public as ECPublicKeyParameters).q.normalize().yCoord.encoded*/
+//        val publicKey = byteArrayOf(Secp256k1Tag.UNCOMPRESSED.byte)+x+y
+        val publicKey = generatePublicKeyFromPrivateCryptoKey(privateKey)
 
         return CryptoKeyPair(
             privateKey = CryptoKey(
@@ -151,7 +153,9 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1")
         val ecPoint = ecSpec.g.multiply(BigInteger(1, privateKey))
-        val pubKeySpec = ECPublicKeySpec(ecPoint, ecSpec)
+        val publicDerBytes = ecPoint.getEncoded(false)
+        val point = ecSpec.curve.decodePoint(publicDerBytes)
+        val pubKeySpec = ECPublicKeySpec(point, ecSpec)
         val publicKey = keyFactory.generatePublic(pubKeySpec)
         return byteArrayOf(Secp256k1Tag.UNCOMPRESSED.byte)+(publicKey as BCECPublicKey).q.xCoord.encoded +
             publicKey.q.yCoord.encoded
