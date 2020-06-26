@@ -6,7 +6,6 @@ import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.UnSupportedOperationException
-import java.math.BigInteger
 import java.util.*
 
 abstract class Provider {
