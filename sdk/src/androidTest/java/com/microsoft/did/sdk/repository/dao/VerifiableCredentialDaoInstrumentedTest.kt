@@ -32,7 +32,7 @@ class VerifiableCredentialDaoInstrumentedTest {
         val suppliedVc = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc)
-            val actualVchId = "vchId1"
+            val actualVchId = "vcId1"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc).contains(suppliedVc)
         }
@@ -45,12 +45,12 @@ class VerifiableCredentialDaoInstrumentedTest {
             "jti2",
             "raw",
             createVerifiableCredentialContent(1),
-            "vchId1"
+            "vcId1"
         )
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc1)
             verifiableCredentialDao.insert(suppliedVc2)
-            val actualVchId = "vchId1"
+            val actualVchId = "vcId1"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc).contains(suppliedVc1)
             assertThat(actualVc).contains(suppliedVc2)
@@ -63,11 +63,11 @@ class VerifiableCredentialDaoInstrumentedTest {
             "jti1",
             "raw",
             createVerifiableCredentialContent(2),
-            "vchId1"
+            "vcId1"
         )
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc)
-            val actualVchId = "vchId1"
+            val actualVchId = "vcId1"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc).contains(suppliedVc)
         }
@@ -81,7 +81,7 @@ class VerifiableCredentialDaoInstrumentedTest {
             verifiableCredentialDao.insert(suppliedVc1)
             Assertions.assertThatThrownBy { runBlocking { verifiableCredentialDao.insert(suppliedVc2) } }
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-            val actualVchId = "vchId1"
+            val actualVchId = "vcId1"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc.size).isEqualTo(1)
             assertThat(actualVc).contains(suppliedVc1)
@@ -141,7 +141,7 @@ class VerifiableCredentialDaoInstrumentedTest {
         val suppliedVc = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc)
-            val actualVchId = "vchId1"
+            val actualVchId = "vcId1"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc).contains(suppliedVc)
             verifiableCredentialDao.delete(suppliedVc)
@@ -155,7 +155,7 @@ class VerifiableCredentialDaoInstrumentedTest {
         val suppliedVc = createVerifiableCredential(1)
         runBlocking {
             verifiableCredentialDao.delete(suppliedVc)
-            val actualVchId = "vchId"
+            val actualVchId = "vcId"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc.size).isEqualTo(0)
         }
@@ -168,11 +168,11 @@ class VerifiableCredentialDaoInstrumentedTest {
             "jti1",
             "raw1",
             createVerifiableCredentialContent(2),
-            "vchId2"
+            "vcId2"
         )
         runBlocking {
             verifiableCredentialDao.insert(suppliedVc)
-            val actualVchId = "vchId1"
+            val actualVchId = "vcId1"
             val actualVc = verifiableCredentialDao.getVerifiableCredentialById(actualVchId)
             assertThat(actualVc.size).isEqualTo(1)
             assertThat(actualVc).contains(suppliedVc)
@@ -192,7 +192,7 @@ class VerifiableCredentialDaoInstrumentedTest {
             "jti$id",
             "raw",
             createVerifiableCredentialContent(id),
-            "vchId$id"
+            "vcId$id"
         )
     }
 

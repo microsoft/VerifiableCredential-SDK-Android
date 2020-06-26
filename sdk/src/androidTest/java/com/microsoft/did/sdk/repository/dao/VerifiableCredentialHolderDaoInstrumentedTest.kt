@@ -40,36 +40,36 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
     }
 
     @Test
-    fun insertAndRetrieveCardByIdTest() {
+    fun insertAndRetrieveVchByIdTest() {
         val verifiableCredentialHolder = createVerifiableCredentialHolder(1)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val suppliedPicId = verifiableCredentialHolder.verifiableCredential.picId
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
+            val suppliedVcId = verifiableCredentialHolder.verifiableCredential.picId
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
 
     @Test
-    fun insertAndRetrieveAllCardsTest() {
+    fun insertAndRetrieveAllVchsTest() {
         val verifiableCredentialHolder = createVerifiableCredentialHolder(1)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualCard = verifiableCredentialHolderDao.getAllVcs().getOrAwaitValue()
-            assertThat(actualCard).isNotNull
-            if (actualCard != null)
-                assertThat(actualCard.size).isEqualTo(1)
-            assertThat(actualCard).contains(verifiableCredentialHolder)
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVcs().getOrAwaitValue()
+            assertThat(actualVerifiableCredentialHolder).isNotNull
+            if (actualVerifiableCredentialHolder != null)
+                assertThat(actualVerifiableCredentialHolder.size).isEqualTo(1)
+            assertThat(actualVerifiableCredentialHolder).contains(verifiableCredentialHolder)
         }
     }
 
     @Test
-    fun insertMultipleCardsWithSamePicIdTest() {
+    fun insertMultipleVchsWithSameVcIdTest() {
         val verifiableCredentialHolder1 = createVerifiableCredentialHolder(1)
         val verifiableCredential = createVerifiableCredential(1)
         val identifier = createIdentifier(2)
         val displayContract = createDisplayContract()
-        val verifiableCredentialHolder2 = VerifiableCredentialHolder("urn:pic:testCardId2", verifiableCredential, identifier, displayContract)
+        val verifiableCredentialHolder2 = VerifiableCredentialHolder("urn:vc:testVchsId2", verifiableCredential, identifier, displayContract)
 
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
@@ -78,12 +78,13 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(2)
+            assertThat(actualVerifiableCredentialHolder).contains(verifiableCredentialHolder1)
             assertThat(actualVerifiableCredentialHolder).contains(verifiableCredentialHolder2)
         }
     }
 
     @Test
-    fun insertMultipleCardsWithSameCardIdFailingTest() {
+    fun insertMultipleVchsWithSameVchIdFailingTest() {
         val verifiableCredentialHolder1 = createVerifiableCredentialHolder(1)
         val verifiableCredentialHolder2 = createVerifiableCredentialHolder(1)
         runBlocking {
@@ -99,21 +100,21 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
     }
 
     @Test
-    fun insertCardWithEmptyCardIdTest() {
+    fun insertVchWithEmptyVchIdTest() {
         val verifiableCredential = createVerifiableCredential(1)
         val identifier = createIdentifier(1)
         val displayContract = createDisplayContract()
         val verifiableCredentialHolder = VerifiableCredentialHolder("", verifiableCredential, identifier, displayContract)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val suppliedPicId = verifiableCredentialHolder.verifiableCredential.picId
-            val actualCard = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
-            assertThat(actualCard).isEqualTo(verifiableCredentialHolder)
+            val suppliedVcId = verifiableCredentialHolder.verifiableCredential.picId
+            val actualverifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            assertThat(actualverifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
 
     @Test
-    fun insertCardWithEmptyPicIdTest() {
+    fun insertVchWithEmptyVcIdTest() {
         val verifiableCredential = VerifiableCredential(
             "jti1",
             "raw",
@@ -129,26 +130,26 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         )
         val identifier = createIdentifier(1)
         val displayContract = createDisplayContract()
-        val verifiableCredentialHolder = VerifiableCredentialHolder("urn:pic:testCardId1", verifiableCredential, identifier, displayContract)
+        val verifiableCredentialHolder = VerifiableCredentialHolder("urn:vc:testVchId1", verifiableCredential, identifier, displayContract)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val suppliedPicId = verifiableCredentialHolder.verifiableCredential.picId
-            val actualCard = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
-            assertThat(actualCard).isEqualTo(verifiableCredentialHolder)
+            val suppliedVcId = verifiableCredentialHolder.verifiableCredential.picId
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
 
     @Test
-    fun retrieveCardByNonExistingPicIdTest() {
+    fun retrieveVchByNonExistingVcIdTest() {
         runBlocking {
-            val suppliedCardId = "nonExistingId"
-            val actualReceipts = verifiableCredentialHolderDao.getVcById(suppliedCardId).getOrAwaitValue()
+            val suppliedVchId = "nonExistingId"
+            val actualReceipts = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
             assertThat(actualReceipts).isNull()
         }
     }
 
     @Test
-    fun insertCardWithEmptyValuesTest() {
+    fun insertVchWithEmptyValuesTest() {
         val verifiableCredentialHolder = VerifiableCredentialHolder(
             "",
             VerifiableCredential(
@@ -184,69 +185,69 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         )
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualCard = verifiableCredentialHolderDao.getVcById("").getOrAwaitValue()
-            assertThat(actualCard).isEqualTo(verifiableCredentialHolder)
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById("").getOrAwaitValue()
+            assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
 
     @Test
-    fun deleteCardTest() {
+    fun deleteVchTest() {
         val verifiableCredentialHolder = createVerifiableCredentialHolder(1)
         runBlocking {
-            val suppliedCardId = verifiableCredentialHolder.verifiableCredential.picId
+            val suppliedVchId = verifiableCredentialHolder.verifiableCredential.picId
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualCard = verifiableCredentialHolderDao.getVcById(suppliedCardId).getOrAwaitValue()
-            assertThat(actualCard).isEqualTo(verifiableCredentialHolder)
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder)
-            val deletedCard = verifiableCredentialHolderDao.getVcById(suppliedCardId).getOrAwaitValue()
-            assertThat(deletedCard).isNull()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            assertThat(deletedVerifiableCredentialHolder).isNull()
         }
     }
 
     @Test
-    fun deleteNonExistingCardTest() {
+    fun deleteNonExistingVchTest() {
         val verifiableCredentialHolder = createVerifiableCredentialHolder(1)
         runBlocking {
-            val suppliedCardId = verifiableCredentialHolder.verifiableCredential.picId
+            val suppliedVchId = verifiableCredentialHolder.verifiableCredential.picId
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder)
-            val deletedCard = verifiableCredentialHolderDao.getVcById(suppliedCardId).getOrAwaitValue()
-            assertThat(deletedCard).isNull()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            assertThat(deletedVerifiableCredentialHolder).isNull()
         }
     }
 
     @Test
-    fun deleteCardWithMatchingCardIdButDifferentPicIdTest() {
+    fun deleteVchWithMatchingVchIdButDifferentVcIdTest() {
         val verifiableCredential = createVerifiableCredential(1)
         val identifier = createIdentifier(1)
         val displayContract = createDisplayContract()
-        val verifiableCredentialHolder1 = VerifiableCredentialHolder("urn:pic:testCardId2", verifiableCredential, identifier, displayContract)
+        val verifiableCredentialHolder1 = VerifiableCredentialHolder("urn:vc:testVchId2", verifiableCredential, identifier, displayContract)
         val verifiableCredentialHolder2 = createVerifiableCredentialHolder(2)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
-            val suppliedPicId = verifiableCredentialHolder1.verifiableCredential.picId
-            val actualCard = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
-            assertThat(actualCard).isEqualTo(verifiableCredentialHolder1)
+            val suppliedVcId = verifiableCredentialHolder1.verifiableCredential.picId
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder1)
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder2)
-            val deletedCard = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
-            assertThat(deletedCard).isNull()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            assertThat(deletedVerifiableCredentialHolder).isNull()
         }
     }
 
     @Test
-    fun deleteCardWithMatchingPicIdButDifferentCardIdTest() {
+    fun deleteVchWithMatchingVcIdButDifferentVchIdTest() {
         val verifiableCredential = createVerifiableCredential(2)
         val identifier = createIdentifier(1)
         val displayContract = createDisplayContract()
-        val verifiableCredentialHolder1 = VerifiableCredentialHolder("urn:pic:testCardId1", verifiableCredential, identifier, displayContract)
+        val verifiableCredentialHolder1 = VerifiableCredentialHolder("urn:vc:testVchId1", verifiableCredential, identifier, displayContract)
         val verifiableCredentialHolder2 = createVerifiableCredentialHolder(2)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
-            val suppliedPicId = verifiableCredentialHolder1.verifiableCredential.picId
-            val actualCard = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
-            assertThat(actualCard).isEqualTo(verifiableCredentialHolder1)
+            val suppliedVcId = verifiableCredentialHolder1.verifiableCredential.picId
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder1)
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder2)
-            val deletedCard = verifiableCredentialHolderDao.getVcById(suppliedPicId).getOrAwaitValue()
-            assertThat(deletedCard).isEqualTo(verifiableCredentialHolder1)
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            assertThat(deletedVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder1)
         }
     }
 
@@ -259,7 +260,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         val verifiableCredential = createVerifiableCredential(id)
         val identifier = createIdentifier(id)
         val displayContract = createDisplayContract()
-        return VerifiableCredentialHolder("urn:pic:testCardId$id", verifiableCredential, identifier, displayContract)
+        return VerifiableCredentialHolder("urn:vc:testVchId$id", verifiableCredential, identifier, displayContract)
     }
 
     private fun createVerifiableCredential(id: Int): VerifiableCredential {
@@ -274,7 +275,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
                 123456L,
                 200000L
             ),
-            "picId$id"
+            "vcId$id"
         )
     }
 
