@@ -6,12 +6,14 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.serializer.Serializer
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Ignore
 import org.junit.Test
 
 class SidetreePayloadProcessorTest {
     val serializer = Serializer()
     val sidetreePayloadProcessor = SidetreePayloadProcessor(serializer)
 
+    @Ignore
     @Test
     fun canonicalizeTestUsingTestVector() {
         val testJwk = JsonWebKey(
