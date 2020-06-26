@@ -133,9 +133,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val ecSpec = ECNamedCurveTable.getParameterSpec(SECP256K1_CURVE_NAME_EC)
         val ecPoint = ecSpec.g.multiply(BigInteger(1, privateKey))
-        val publicDerBytes = ecPoint.getEncoded(false)
-        val point = ecSpec.curve.decodePoint(publicDerBytes)
-        val pubKeySpec = ECPublicKeySpec(point, ecSpec)
+        val pubKeySpec = ECPublicKeySpec(ecPoint, ecSpec)
         val publicKey = keyFactory.generatePublic(pubKeySpec)
         return byteArrayOf(Secp256k1Tag.UNCOMPRESSED.byte) + (publicKey as BCECPublicKey).q.xCoord.encoded +
             publicKey.q.yCoord.encoded

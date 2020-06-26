@@ -58,10 +58,10 @@ class EllipticCurvePairwiseKey @Inject constructor() {
     private fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
         val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
         val ecSpec = ECNamedCurveTable.getParameterSpec(SECP256K1_CURVE_NAME_EC)
-        val Q = ecSpec.g.multiply(BigInteger(1, privateKey))
-        val pubKeySpec = ECPublicKeySpec(Q, ecSpec)
+        val ecPoint = ecSpec.g.multiply(BigInteger(1, privateKey))
+        val pubKeySpec = ECPublicKeySpec(ecPoint, ecSpec)
         val publicKey = keyFactory.generatePublic(pubKeySpec)
-        return byteArrayOf(0x04)+(publicKey as BCECPublicKey).q.normalize().xCoord.encoded +
+        return byteArrayOf(Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte)+(publicKey as BCECPublicKey).q.normalize().xCoord.encoded +
             publicKey.q.normalize().yCoord.encoded
     }
 
