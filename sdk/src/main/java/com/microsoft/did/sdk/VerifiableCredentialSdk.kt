@@ -52,9 +52,4 @@ object VerifiableCredentialSdk {
 
         SdkLog.addConsumer(logConsumer)
     }
-
-    //TODO: Remove this telemetry as there is no exceptions based on architectures?
-    fun isDeviceModelSupported(): Boolean {
-        return true
-    }
 }
