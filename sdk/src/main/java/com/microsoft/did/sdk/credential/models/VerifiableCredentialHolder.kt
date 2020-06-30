@@ -29,5 +29,7 @@ data class VerifiableCredentialHolder(
     @Embedded
     val owner: Identifier,
 
-    val displayContract: DisplayContract
+    val displayContract: DisplayContract,
+
+    val credentialStatus: String
 )

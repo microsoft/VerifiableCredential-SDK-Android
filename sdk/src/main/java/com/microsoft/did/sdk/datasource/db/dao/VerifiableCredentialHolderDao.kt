@@ -10,6 +10,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 
 @Dao
@@ -26,4 +27,7 @@ interface VerifiableCredentialHolderDao {
 
     @Delete
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder)
+
+    @Query("UPDATE VerifiableCredentialHolder SET credentialStatus = :status")
+    suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder, status: String)
 }
