@@ -3,7 +3,6 @@
 package com.microsoft.did.sdk.crypto.plugins
 
 import android.util.Base64
-import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
@@ -20,8 +19,9 @@ import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.util.Constants.SECP256K1_CURVE_NAME_EC
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
-import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
+import com.microsoft.did.sdk.util.publicToXY
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1Integer
@@ -31,19 +31,18 @@ import org.spongycastle.crypto.params.ECDomainParameters
 import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.signers.ECDSASigner
-import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.spongycastle.jce.ECNamedCurveTable
 import org.spongycastle.jce.provider.BouncyCastleProvider
-import org.spongycastle.jce.spec.ECPublicKeySpec
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
-import java.security.KeyFactory
 import java.security.SecureRandom
 import java.security.Security
 import java.util.Locale
 
-
 class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
+    init {
+        Security.insertProviderAt(BouncyCastleProvider(), 1)
+    }
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
@@ -128,18 +127,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         return ECDomainParameters(ecParams.curve, ecParams.g, ecParams.n, ecParams.h)
     }
 
-    private fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
-        Security.insertProviderAt(BouncyCastleProvider(), 1)
-        val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
-        val ecSpec = ECNamedCurveTable.getParameterSpec(SECP256K1_CURVE_NAME_EC)
-        val ecPoint = ecSpec.g.multiply(BigInteger(1, privateKey))
-        val pubKeySpec = ECPublicKeySpec(ecPoint, ecSpec)
-        val publicKey = keyFactory.generatePublic(pubKeySpec)
-        return byteArrayOf(Secp256k1Tag.UNCOMPRESSED.byte) + (publicKey as BCECPublicKey).q.xCoord.encoded +
-            publicKey.q.yCoord.encoded
-    }
-
-    //TODO: Confirm if we want to support DER encoding
+    //TODO: Incorporate der encoding while adding support for interoperability
     fun encodeToDer(r: ByteArray, s: ByteArray): ByteArray {
         val bos = ByteArrayOutputStream(72)
         val seq = DERSequenceGenerator(bos)
@@ -262,32 +250,6 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
             x = xyData.first.trim(),
             y = xyData.second.trim()
         )
-    }
-
-    // Converts the public key returned by library from byte array to x and y co-ordinates to be used in JWK
-    private fun publicToXY(keyData: ByteArray): Pair<String, String> {
-        return when {
-            // Convert uncompressed hex and hybrid hex formats of public key to x and y co-ordinates to be used in JWK format
-            isPublicKeyUncompressedOrHybridHex(keyData) -> publicKeyToXYForUncompressedOrHybridHex(keyData)
-            else -> throw KeyFormatException("Public key improperly formatted")
-        }
-    }
-
-    private fun publicKeyToXYForUncompressedOrHybridHex(keyData: ByteArray): Pair<String, String> {
-        // uncompressed, bytes 1-32, and 33-end are x and y
-        val x = keyData.sliceArray(1..32)
-        val y = keyData.sliceArray(33..64)
-        return Pair(
-            Base64.encodeToString(x, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
-            Base64.encodeToString(y, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-        )
-    }
-
-    private fun isPublicKeyUncompressedOrHybridHex(keyData: ByteArray): Boolean {
-        return keyData.size == 65 && (keyData[0] == Secp256k1Tag.UNCOMPRESSED.byte ||
-            keyData[0] == Secp256k1Tag.HYBRID_EVEN.byte ||
-            keyData[0] == Secp256k1Tag.HYBRID_ODD.byte
-            )
     }
 
     enum class Secp256k1Tag(val byte: Byte) {
