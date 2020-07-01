@@ -45,7 +45,6 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
     }
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
-
     override val name: String = "ECDSA"
     override val privateKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Sign)
     override val publicKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Verify)
@@ -57,9 +56,6 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         keyUsages: Set<KeyUsage>
     ): CryptoKeyPair {
         val random = SecureRandom()
-        val seed = random.generateSeed(32)
-        random.setSeed(seed)
-
         val secret = ByteArray(32)
         random.nextBytes(secret)
 
@@ -113,6 +109,13 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         signingSigner.init(true, privateKeyParams)
 
         val signature = signingSigner.generateSignature(hashedData)
+        return convertSignatureToUnsignedByteArray(signature)
+    }
+
+    /**
+     * Signature is returned as array of BigIntegers for R and S. Converting them into unsigned byte array
+     */
+    private fun convertSignatureToUnsignedByteArray(signature: Array<BigInteger>): ByteArray {
         var r = signature[0].toByteArray()
         var s = signature[1].toByteArray()
         if (r.size > 32)

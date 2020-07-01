@@ -30,7 +30,6 @@ import javax.inject.Inject
 class EllipticCurvePairwiseKey @Inject constructor() {
 
     fun generate(crypto: CryptoOperations, masterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
-        //TODO: Verify the list of supported curves. Is K-256 supported?
         val supportedCurves = listOf("P-256K", "SECP256K1")
 
         val subtleCrypto: SubtleCrypto =

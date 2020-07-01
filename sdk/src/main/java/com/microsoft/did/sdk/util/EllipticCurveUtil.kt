@@ -14,7 +14,9 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.KeyFactory
 
-// Converts the public key returned by library from byte array to x and y co-ordinates to be used in JWK
+/**
+ *  Converts the public key returned by library from byte array to x and y co-ordinates to be used in JWK
+ */
 fun publicToXY(keyData: ByteArray): Pair<String, String> {
     return when {
         // Convert uncompressed hex and hybrid hex formats of public key to x and y co-ordinates to be used in JWK format
@@ -31,6 +33,9 @@ fun convertToBigEndian(keyBytes: ByteArray): ByteBuffer {
     return keyBytesInBigEndian
 }
 
+/**
+ * Return X and Y coordinates of public key in Big Endian form from uncompressed hex
+ */
 fun publicKeyToXYForUncompressedOrHybridHex(keyData: ByteArray): Pair<String, String> {
     // uncompressed, bytes 1-32, and 33-end are x and y
     val x = convertToBigEndian(keyData.sliceArray(1..32))
@@ -42,12 +47,15 @@ fun publicKeyToXYForUncompressedOrHybridHex(keyData: ByteArray): Pair<String, St
 }
 
 fun isPublicKeyUncompressedOrHybridHex(keyData: ByteArray): Boolean {
-    return keyData.size == 65 && (keyData[0] == Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte ||
-        keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_EVEN.byte ||
-        keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_ODD.byte
-        )
+    return keyData.size == 65
+        && (keyData[0] == Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte
+        || keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_EVEN.byte
+        || keyData[0] == Secp256k1Provider.Secp256k1Tag.HYBRID_ODD.byte)
 }
 
+/**
+ * Generate public key in uncompressed Hex format from private key
+ */
 fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
     val keyFactory = KeyFactory.getInstance(AndroidConstants.Ec.value)
     val ecSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
