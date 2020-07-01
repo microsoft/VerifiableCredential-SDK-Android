@@ -27,9 +27,7 @@ class OidcPresentationRequestValidator @Inject constructor(
         if (!jwsValidator.verifySignature(token)) {
             throw ValidatorException("Signature is not Valid.")
         }
-        // TODO(check token expiration when implemented in sdk)
-        // checkTokenExpiration(request.content.exp)
-        checkRequestParameters(request.content, request.uri)
+        checkTokenExpiration(request.content.exp)
     }
 
     private fun checkTokenExpiration(expiration: Long) {
@@ -43,13 +41,7 @@ class OidcPresentationRequestValidator @Inject constructor(
         return currentTimeInSeconds + SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
     }
 
-    private fun checkRequestParameters(requestContents: OidcRequestContent, uri: Uri) {
-        if (uri.getQueryParameter(CLIENT_ID) != requestContents.clientId) {
-            throw ValidatorException("Request content does not match url parameters.")
-        }
-    }
-
-    internal fun deserializeJwsToken(serializedToken: String): JwsToken {
+    private fun deserializeJwsToken(serializedToken: String): JwsToken {
         return JwsToken.deserialize(serializedToken, serializer)
     }
 }
