@@ -41,7 +41,7 @@ import java.util.Locale
 
 class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
     init {
-        Security.insertProviderAt(BouncyCastleProvider(), 1)
+        Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size+1)
     }
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
