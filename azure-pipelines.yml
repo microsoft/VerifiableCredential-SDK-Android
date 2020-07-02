@@ -6,11 +6,10 @@
 trigger:
 - master
 
-pr:
-- master
-
 pool:
   vmImage: 'macOS-10.14'
+  name: Azure Pipelines
+  demands: java
 
 steps:
 - task: Gradle@2
