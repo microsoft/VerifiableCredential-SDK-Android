@@ -60,7 +60,7 @@ class OidcPresentationRequestValidatorTest {
     }
 
     @Test
-    fun validatePresentationRequestTest() {
+    fun `validSignatureIsValidatedSuccessfully`() {
         setUpExpiration(86400)
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
@@ -70,7 +70,7 @@ class OidcPresentationRequestValidatorTest {
     }
 
     @Test
-    fun invalidSignatureFailureTest() {
+    fun `invalidSignatureFailsSuccessfully`() {
         setUpExpiration(86400)
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns false
@@ -85,7 +85,7 @@ class OidcPresentationRequestValidatorTest {
     }
 
     @Test
-    fun expiredExpirationTest() {
+    fun `throwsWhenTokenExpirationIsExpired`() {
         setUpExpiration(-86400)
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
