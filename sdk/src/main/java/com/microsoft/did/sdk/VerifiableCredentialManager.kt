@@ -18,15 +18,13 @@ import com.microsoft.did.sdk.credential.service.validators.PresentationRequestVa
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
+import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
-<<<<<<< HEAD
+import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
-=======
-import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
->>>>>>> master
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.*
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
@@ -67,7 +65,7 @@ class VerifiableCredentialManager @Inject constructor(
 
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
-        if (url.scheme != Constants.DEEP_LINK_SCHEME) {
+        if (url.scheme != DEEP_LINK_SCHEME) {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
@@ -103,7 +101,7 @@ class VerifiableCredentialManager @Inject constructor(
      *
      * @param request to be validated.
      */
-    suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
+    private suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
         return runResultTry {
             presentationRequestValidator.validate(request)
             Result.Success(Unit)
@@ -127,7 +125,11 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredentialHolder> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val verifiableCredential = vchRepository.sendIssuanceResponse(response, responder).abortOnError()
+                val contexts = response.getVerifiablePresentationContexts()?.mapValues {
+                    VerifiableCredentialContext(it.value.presentationAttestation,
+                        vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError())
+                }
+                val verifiableCredential = vchRepository.sendIssuanceResponse(response, contexts, responder).abortOnError()
                 vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, responder, response.request.contract)
                 createAndSaveReceipt(response)
@@ -149,7 +151,11 @@ class VerifiableCredentialManager @Inject constructor(
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                vchRepository.sendPresentationResponse(response, responder, expiresInMinutes).abortOnError()
+                val contexts = response.getVerifiablePresentationContexts()?.mapValues {
+                    VerifiableCredentialContext(it.value.presentationAttestation,
+                        vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError())
+                }
+                vchRepository.sendPresentationResponse(response, contexts, responder, expiresInMinutes).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
             }
@@ -165,6 +171,12 @@ class VerifiableCredentialManager @Inject constructor(
             receipts.forEach { saveReceipt(it).abortOnError() }
             Result.Success(Unit)
         }
+    }
+
+    private suspend fun sendExchangeRequest(
+        request: ExchangeRequest,
+        responder: Identifier
+    ) {
     }
 
     /**

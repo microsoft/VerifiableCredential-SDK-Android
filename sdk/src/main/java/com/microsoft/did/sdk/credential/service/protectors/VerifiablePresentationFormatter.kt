@@ -1,8 +1,8 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
+import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiablePresentationContext
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -18,17 +18,17 @@ class VerifiablePresentationFormatter @Inject constructor(
 
     // only support one VC per VP
     fun createPresentation(
-        verifiablePresentationContext: VerifiablePresentationContext,
+        verifiableCredentialContext: VerifiableCredentialContext,
         audience: String,
         responder: Identifier
     ): String {
         val vp = VerifiablePresentationDescriptor(
-            verifiableCredential = listOf(verifiablePresentationContext.verifiablePresentationHolder.verifiableCredential.raw),
+            verifiableCredential = listOf(verifiableCredentialContext.verifiableCredential.raw),
             context = listOf(Constants.VP_CONTEXT_URL),
             type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
         )
 
-        val (iat, exp: Long?) = createIatAndExp(verifiablePresentationContext.presentationAttestation.validityInterval)
+        val (iat, exp: Long?) = createIatAndExp(verifiableCredentialContext.presentationAttestation.validityInterval)
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val contents =

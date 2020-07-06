@@ -10,8 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.contexts.IdTokenContext
 import com.microsoft.did.sdk.credential.service.models.contexts.SelfAttestedClaimContext
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiablePresentationContext
-import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
+import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -37,7 +36,7 @@ class OidcResponseFormatter @Inject constructor(
         responseAudience: String,
         presentationsAudience: String? = null,
         expiryInSeconds: Int,
-        verifiablePresentationContexts: Map<String, VerifiablePresentationContext>? = null,
+        verifiableCredentialContexts: Map<String, VerifiableCredentialContext>? = null,
         idTokenContexts: Map<String, IdTokenContext>? = null,
         selfAttestedClaimContexts: Map<String, SelfAttestedClaimContext>? = null,
         contract: String? = null,
@@ -54,7 +53,7 @@ class OidcResponseFormatter @Inject constructor(
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val attestationResponse = this.createAttestationClaimModel(
-            verifiablePresentationContexts,
+            verifiableCredentialContexts,
             idTokenContexts,
             selfAttestedClaimContexts,
             presentationsAudience,
@@ -84,17 +83,17 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createAttestationClaimModel(
-        verifiablePresentationContexts: Map<String, VerifiablePresentationContext>? = null,
+        verifiableCredentialContexts: Map<String, VerifiableCredentialContext>? = null,
         idTokenContexts: Map<String, IdTokenContext>? = null,
         selfAttestedClaimContexts: Map<String, SelfAttestedClaimContext>? = null,
         presentationsAudience: String? = null,
         responder: Identifier
     ): AttestationClaimModel? {
-        if (areNoCollectedClaims(verifiablePresentationContexts, idTokenContexts, selfAttestedClaimContexts)) {
+        if (areNoCollectedClaims(verifiableCredentialContexts, idTokenContexts, selfAttestedClaimContexts)) {
             return null
         }
         val presentationAttestations = createPresentations(
-            verifiablePresentationContexts,
+            verifiableCredentialContexts,
             presentationsAudience,
             responder)
         val selfAttestedClaimMapping = selfAttestedClaimContexts?.mapValues { it.value.value }
@@ -103,19 +102,19 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createPresentations(
-        verifiablePresentationContexts: Map<String, VerifiablePresentationContext>?,
+        verifiableCredentialContexts: Map<String, VerifiableCredentialContext>?,
         audience: String? = null,
         responder: Identifier
     ): Map<String, String>? {
         return if (audience != null) {
-            verifiablePresentationContexts?.mapValues {
+            verifiableCredentialContexts?.mapValues {
                 verifiablePresentationFormatter.createPresentation(
                     it.value,
                     audience,
                     responder
                 )
             }
-        } else if (!verifiablePresentationContexts.isNullOrEmpty()) {
+        } else if (!verifiableCredentialContexts.isNullOrEmpty()) {
             throw FormatterException("No audience specified for presentations")
         } else {
             null
@@ -123,10 +122,10 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun areNoCollectedClaims(
-        verifiablePresentationContexts: Map<String, VerifiablePresentationContext>? = null,
+        verifiableCredentialContexts: Map<String, VerifiableCredentialContext>? = null,
         idTokenContexts: Map<String, IdTokenContext>? = null,
         selfAttestedClaimContexts: Map<String, SelfAttestedClaimContext>? = null
     ): Boolean {
-        return (verifiablePresentationContexts.isNullOrEmpty() && idTokenContexts.isNullOrEmpty() && selfAttestedClaimContexts.isNullOrEmpty())
+        return (verifiableCredentialContexts.isNullOrEmpty() && idTokenContexts.isNullOrEmpty() && selfAttestedClaimContexts.isNullOrEmpty())
     }
 }
