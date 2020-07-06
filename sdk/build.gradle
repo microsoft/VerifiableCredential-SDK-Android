@@ -121,7 +121,7 @@ dependencies {
     implementation "androidx.security:security-crypto:1.0.0-beta01"
 
     api 'com.google.guava:guava:28.1-android' // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
-    implementation files('libs/org.bitcoin.jar')
+    implementation "com.madgag.spongycastle:prov:1.58.0.0"
     //Used for Json Canonicalization performed for ION
     implementation "io.github.erdtman:java-json-canonicalization:1.1"
 
@@ -134,13 +134,9 @@ dependencies {
     androidTestImplementation "io.mockk:mockk-android:1.10.0"
     androidTestImplementation "android.arch.core:core-testing:1.1.1"
 
-    def mockito_version = "3.2.4"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0"
     testImplementation "io.mockk:mockk:1.10.0"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:3.11.1"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"

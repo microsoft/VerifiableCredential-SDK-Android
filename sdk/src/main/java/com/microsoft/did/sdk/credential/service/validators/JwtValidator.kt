@@ -20,7 +20,7 @@ import javax.inject.Singleton
  * Class that can be used to validate JwsTokens.
  */
 @Singleton
-class JwsValidator @Inject constructor(
+class JwtValidator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val resolver: Resolver,
     private val serializer: Serializer
@@ -37,7 +37,7 @@ class JwsValidator @Inject constructor(
     }
 
     private fun getKid(signature: JwsSignature): Pair<String, String> {
-        val kid = signature.getKid(serializer) ?: throw Exception("no kid specified in token")
+        val kid = signature.getKid(serializer) ?: throw ValidatorException("no kid specified in token")
         val parsedKid = kid.split("#")
         return Pair(parsedKid[0], parsedKid[1])
     }

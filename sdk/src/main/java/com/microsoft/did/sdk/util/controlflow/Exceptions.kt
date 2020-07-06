@@ -35,7 +35,11 @@ open class IssuanceException(message: String? = null, cause: Throwable? = null) 
 
 class PairwiseIssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
-class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+open class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+
+class InvalidSignatureException(message: String? = null, cause: Throwable? = null) : ValidatorException(message, cause)
+
+class ExpiredTokenExpirationException(message: String? = null, cause: Throwable? = null) : ValidatorException(message, cause)
 
 class FormatterException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
