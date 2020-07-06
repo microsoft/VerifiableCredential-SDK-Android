@@ -18,7 +18,6 @@ import com.microsoft.did.sdk.credential.service.validators.PresentationRequestVa
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -126,8 +125,10 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val contexts = response.getVerifiablePresentationContexts()?.mapValues {
-                    VerifiableCredentialContext(it.value.presentationAttestation,
-                        vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError())
+                    VerifiableCredentialContext(
+                        it.value.presentationAttestation,
+                        vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError()
+                    )
                 }
                 val verifiableCredential = vchRepository.sendIssuanceResponse(response, contexts, responder).abortOnError()
                 vchRepository.insert(verifiableCredential)
@@ -152,8 +153,10 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val contexts = response.getVerifiablePresentationContexts()?.mapValues {
-                    VerifiableCredentialContext(it.value.presentationAttestation,
-                        vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError())
+                    VerifiableCredentialContext(
+                        it.value.presentationAttestation,
+                        vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError()
+                    )
                 }
                 vchRepository.sendPresentationResponse(response, contexts, responder, expiresInMinutes).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
@@ -171,12 +174,6 @@ class VerifiableCredentialManager @Inject constructor(
             receipts.forEach { saveReceipt(it).abortOnError() }
             Result.Success(Unit)
         }
-    }
-
-    private suspend fun sendExchangeRequest(
-        request: ExchangeRequest,
-        responder: Identifier
-    ) {
     }
 
     /**

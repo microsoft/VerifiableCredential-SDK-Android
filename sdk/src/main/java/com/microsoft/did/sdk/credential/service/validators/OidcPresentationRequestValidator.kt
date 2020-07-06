@@ -36,6 +36,6 @@ class OidcPresentationRequestValidator @Inject constructor(
 
     private fun getExpirationDeadlineInSeconds(expirationCheckTimeOffsetInMinutes: Int = 5): Long {
         val currentTimeInSeconds = Date().time / MILLISECONDS_IN_A_SECOND
-        return currentTimeInSeconds + SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
+        return currentTimeInSeconds - SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
     }
 }
