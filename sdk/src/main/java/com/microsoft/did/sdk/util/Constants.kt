@@ -34,6 +34,8 @@ object Constants {
     const val DEFAULT_VP_EXPIRATION_IN_SECONDS = 300
     const val HASHING_ALGORITHM_FOR_ID = "MD5"
 
+    const val DEEP_LINK_SCHEME = "verifiablecredential"
+
     //Identifier Constants
     const val MASTER_IDENTIFIER_NAME = "did.identifier"
     const val METHOD_NAME = "ion"
@@ -42,7 +44,7 @@ object Constants {
     const val SIDETREE_PATCH_ACTION = "replace"
     const val SIDETREE_MULTIHASH_CODE = 18
     const val SIDETREE_MULTIHASH_LENGTH = 32
-    const val SIDETREE_CURVE_NAME_FOR_EC = "secp256k1"
+    const val SECP256K1_CURVE_NAME_EC = "secp256k1"
     const val SIGNATURE_KEYREFERENCE = "sign"
     const val RECOVERY_KEYREFERENCE = "recover"
     const val UPDATE_KEYREFERENCE = "update"

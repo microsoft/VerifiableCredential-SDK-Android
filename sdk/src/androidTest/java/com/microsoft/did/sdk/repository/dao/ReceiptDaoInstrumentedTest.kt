@@ -6,8 +6,8 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.credential.receipts.Receipt
-import com.microsoft.did.sdk.credential.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
 import com.microsoft.did.sdk.repository.getOrAwaitValue
@@ -32,12 +32,12 @@ class ReceiptDaoInstrumentedTest {
     }
 
     @Test
-    fun insertAndRetrieveReceiptByCardIdTest() {
+    fun insertAndRetrieveReceiptByVcIdTest() {
         val suppliedReceipt = createReceipt(1)
         runBlocking {
             receiptDao.insert(suppliedReceipt)
-            val suppliedCardId = "urn:pic:testCardId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
+            val suppliedVcId = "urn:vc:testVcId"
+            val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
             assertThat(actualReceipts).contains(suppliedReceipt)
         }
@@ -55,14 +55,14 @@ class ReceiptDaoInstrumentedTest {
     }
 
     @Test
-    fun insertMultipleReceiptsForSameCardIdTest() {
+    fun insertMultipleReceiptsForSameVcIdTest() {
         val suppliedReceipt1 = createReceipt(1)
         val suppliedReceipt2 = createReceipt(2)
         runBlocking {
             receiptDao.insert(suppliedReceipt1)
             receiptDao.insert(suppliedReceipt2)
-            val suppliedCardId = "urn:pic:testCardId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
+            val suppliedVcId = "urn:vc:testVcId"
+            val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
             if(actualReceipts != null)
                 assertThat(actualReceipts.size).isEqualTo(2)
@@ -79,8 +79,8 @@ class ReceiptDaoInstrumentedTest {
             receiptDao.insert(suppliedReceipt1)
             Assertions.assertThatThrownBy { runBlocking { receiptDao.insert(suppliedReceipt2) } }
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-            val suppliedCardId = "urn:pic:testCardId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
+            val suppliedVcId = "urn:vc:testVcId"
+            val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
             if(actualReceipts != null)
                 assertThat(actualReceipts.size).isEqualTo(1)
@@ -89,28 +89,28 @@ class ReceiptDaoInstrumentedTest {
     }
 
     @Test
-    fun insertReceiptWithEmptyCardIdTest() {
+    fun insertReceiptWithEmptyVcIdTest() {
         val suppliedReceipt = Receipt(
             id = 1,
             action = ReceiptAction.Presentation,
             entityIdentifier = "did:ion:test:testEntityDid",
             activityDate = 123445,
             entityName = "testEntityName",
-            cardId = ""
+            vcId = ""
         )
         runBlocking {
             receiptDao.insert(suppliedReceipt)
-            val suppliedCardId = ""
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
+            val suppliedVcId = ""
+            val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).contains(suppliedReceipt)
         }
     }
 
     @Test
-    fun retrieveReceiptByNonExistingCardIdTest() {
+    fun retrieveReceiptByNonExistingVcIdTest() {
         runBlocking {
-            val suppliedCardId = "nonExistingId"
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
+            val suppliedVcId = "nonExistingId"
+            val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
             if(actualReceipts != null)
                 assertThat(actualReceipts.size).isEqualTo(0)
@@ -125,12 +125,12 @@ class ReceiptDaoInstrumentedTest {
             entityIdentifier = "",
             activityDate = 0,
             entityName = "",
-            cardId = ""
+            vcId = ""
         )
         runBlocking {
             receiptDao.insert(suppliedReceipt)
-            val suppliedCardId = ""
-            val actualReceipts = receiptDao.getAllReceiptsByCardId(suppliedCardId).getOrAwaitValue()
+            val suppliedVcId = ""
+            val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
             if(actualReceipts != null)
                 assertThat(actualReceipts.first()).isEqualTo(suppliedReceipt)
@@ -152,7 +152,7 @@ class ReceiptDaoInstrumentedTest {
                 assertThat(actualReceipt.entityIdentifier).isEqualTo(suppliedReceipt.entityIdentifier)
                 assertThat(actualReceipt.entityName).isEqualTo(suppliedReceipt.entityName)
                 assertThat(actualReceipt.activityDate).isEqualTo(suppliedReceipt.activityDate)
-                assertThat(actualReceipt.cardId).isEqualTo(suppliedReceipt.cardId)
+                assertThat(actualReceipt.vcId).isEqualTo(suppliedReceipt.vcId)
             }
         }
     }
@@ -175,13 +175,13 @@ class ReceiptDaoInstrumentedTest {
                 assertThat(actualReceipt1.entityIdentifier).isEqualTo(suppliedReceipt1.entityIdentifier)
                 assertThat(actualReceipt1.entityName).isEqualTo(suppliedReceipt1.entityName)
                 assertThat(actualReceipt1.activityDate).isEqualTo(suppliedReceipt1.activityDate)
-                assertThat(actualReceipt1.cardId).isEqualTo(suppliedReceipt1.cardId)
+                assertThat(actualReceipt1.vcId).isEqualTo(suppliedReceipt1.vcId)
                 assertThat(actualReceipt2.id).isEqualTo(2)
                 assertThat(actualReceipt2.action).isEqualTo(suppliedReceipt2.action)
                 assertThat(actualReceipt2.entityIdentifier).isEqualTo(suppliedReceipt2.entityIdentifier)
                 assertThat(actualReceipt2.entityName).isEqualTo(suppliedReceipt2.entityName)
                 assertThat(actualReceipt2.activityDate).isEqualTo(suppliedReceipt2.activityDate)
-                assertThat(actualReceipt2.cardId).isEqualTo(suppliedReceipt2.cardId)
+                assertThat(actualReceipt2.vcId).isEqualTo(suppliedReceipt2.vcId)
             }
         }
     }
@@ -198,7 +198,7 @@ class ReceiptDaoInstrumentedTest {
             entityIdentifier = "did:ion:test:testEntityDid",
             activityDate = 123445,
             entityName = "testEntityName",
-            cardId = "urn:pic:testCardId"
+            vcId = "urn:vc:testVcId"
         )
     }
 
@@ -208,7 +208,7 @@ class ReceiptDaoInstrumentedTest {
             entityIdentifier = "did:ion:test:testEntityDid$id",
             activityDate = 123445,
             entityName = "testEntityName$id",
-            cardId = "urn:pic:testCardId$id"
+            vcId = "urn:vc:testVcId$id"
         )
     }
 }

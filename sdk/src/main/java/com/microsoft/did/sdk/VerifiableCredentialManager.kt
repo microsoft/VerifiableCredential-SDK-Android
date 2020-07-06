@@ -21,7 +21,12 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
+<<<<<<< HEAD
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
+=======
+import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
+>>>>>>> master
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.*
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
@@ -54,8 +59,7 @@ class VerifiableCredentialManager @Inject constructor(
                 val tokenContents =
                     serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
                 val request = PresentationRequest(uri, requestToken, tokenContents)
-                // TODO(Validate Presentation Requests)
-                // isRequestValid(request).abortOnError()
+                isRequestValid(request).abortOnError()
                 Result.Success(request)
             }
         }
@@ -63,25 +67,22 @@ class VerifiableCredentialManager @Inject constructor(
 
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
-        if (url.scheme != "openid") {
+        if (url.scheme != Constants.DEEP_LINK_SCHEME) {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
     }
 
     private suspend fun getPresentationRequestToken(uri: Uri): Result<String> {
-        return runResultTry {
-            val serializedToken = uri.getQueryParameter("request")
-            if (serializedToken != null) {
-                Result.Success(serializedToken)
-            }
-            val requestUri = uri.getQueryParameter("request_uri")
-            if (requestUri == null) {
-                Result.Failure(PresentationException("Request Uri does not exist."))
-            } else {
-                vchRepository.getRequest(requestUri)
-            }
+        val serializedToken = uri.getQueryParameter("request")
+        if (serializedToken != null) {
+            return Result.Success(serializedToken)
         }
+        val requestUri = uri.getQueryParameter("request_uri")
+        if (requestUri != null) {
+            return vchRepository.getRequest(requestUri)
+        }
+        return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
     /**

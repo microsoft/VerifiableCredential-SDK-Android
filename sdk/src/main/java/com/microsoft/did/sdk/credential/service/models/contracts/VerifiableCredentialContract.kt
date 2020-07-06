@@ -23,8 +23,5 @@ data class VerifiableCredentialContract(
     val input: InputContract,
 
     // A user experience data file that describes how information in a Verifiable Credential may be displayed.
-    val display: DisplayContract,
-
-    // An optional structured data model used to describe the set of claims in a Verifiable Credential.
-    val schema: SchemaContract? = null
+    val display: DisplayContract
 )
