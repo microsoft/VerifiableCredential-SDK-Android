@@ -8,14 +8,16 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class ResponseTest {
-    var response: IssuanceResponse
-    var request: IssuanceRequest
+    private var response: IssuanceResponse
+    private var request: IssuanceRequest
     private val attestations: CredentialAttestations = mockk()
     private var vcContract: VerifiableCredentialContract = mockk()
     private val entityName = "testEntityName"
@@ -23,6 +25,8 @@ class ResponseTest {
     private val issuedBy = "testIssuer"
     private val issuer = "testIssuerDid"
     private val credentialIssuer = "issuanceEndpoint"
+    private val expectedType1 = "type2354"
+    private val expectedType2 = "type4009"
 
     init {
         every { vcContract.input.attestations } returns attestations
@@ -36,37 +40,38 @@ class ResponseTest {
     @Test
     fun `test add and get card`() {
         val suppliedVerifiableCredentialHolder1: VerifiableCredentialHolder = mockk()
+        val suppliedPresentationAttestation1: PresentationAttestation = mockk()
         val suppliedCardType1 = "testCard1"
-<<<<<<< HEAD
-        response.addVerifiablePresentationContext(suppliedPortableIdentityCard1, "testCard1")
-        val suppliedPortableIdentityCard2: PortableIdentityCard = mockk()
-        val suppliedCardType2 = "testCard2"
-        response.addVerifiablePresentationContext(suppliedPortableIdentityCard2, suppliedCardType2)
-        val actualCollectedCards = response.getVerifiablePresentationContexts()
-=======
-        response.addVerifiableCredential(suppliedVerifiableCredentialHolder1, "testCard1")
+        every { suppliedPresentationAttestation1.credentialType } returns suppliedCardType1
+        response.addVerifiablePresentationContext(suppliedVerifiableCredentialHolder1, suppliedPresentationAttestation1)
         val suppliedVerifiableCredentialHolder2: VerifiableCredentialHolder = mockk()
+        val suppliedPresentationAttestation2: PresentationAttestation = mockk()
         val suppliedCardType2 = "testCard2"
-        response.addVerifiableCredential(suppliedVerifiableCredentialHolder2, suppliedCardType2)
-        val actualCollectedCards = response.getCollectedVchs()
->>>>>>> master
+        every { suppliedPresentationAttestation2.credentialType } returns suppliedCardType2
+        response.addVerifiablePresentationContext(suppliedVerifiableCredentialHolder2, suppliedPresentationAttestation2)
+        val actualCollectedCards = response.getVerifiablePresentationContexts()
         val expectedCardCount = 2
         assertThat(actualCollectedCards).isNotNull
         assertThat(actualCollectedCards?.size).isEqualTo(expectedCardCount)
-        assertThat(actualCollectedCards?.get(suppliedCardType2)).isEqualTo(suppliedVerifiableCredentialHolder2)
-        assertThat(actualCollectedCards?.get(suppliedCardType1)).isEqualTo(suppliedVerifiableCredentialHolder1)
+        assertThat(actualCollectedCards?.get(suppliedCardType2)?.verifiablePresentationHolder).isEqualTo(suppliedVerifiableCredentialHolder2)
+        assertThat(actualCollectedCards?.get(suppliedCardType2)?.presentationAttestation).isEqualTo(suppliedPresentationAttestation2)
+        assertThat(actualCollectedCards?.get(suppliedCardType1)?.verifiablePresentationHolder).isEqualTo(suppliedVerifiableCredentialHolder1)
+        assertThat(actualCollectedCards?.get(suppliedCardType1)?.presentationAttestation).isEqualTo(suppliedPresentationAttestation1)
     }
 
     @Test
     fun `test add and get Id Tokens`() {
-        val suppliedIdToken = "testIdToken"
-        val suppliedIdTokenConfiguration = "testIdTokenConfig"
-        response.addIdTokenContext(suppliedIdTokenConfiguration, suppliedIdToken)
+        val suppliedIdTokenAttestation: IdTokenAttestation = mockk()
+        val suppliedIdTokenConfiguration = "testIdTokenConfig253"
+        every { suppliedIdTokenAttestation.configuration } returns suppliedIdTokenConfiguration
+        val suppliedIdToken = "testIdToken423"
+        response.addIdTokenContext(suppliedIdTokenAttestation, suppliedIdToken)
         val actualCollectedTokens = response.getIdTokenContexts()
         val expectedTokenCount = 1
         assertThat(actualCollectedTokens).isNotNull
         assertThat(actualCollectedTokens?.size).isEqualTo(expectedTokenCount)
-        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)).isEqualTo(suppliedIdToken)
+        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)?.rawToken).isEqualTo(suppliedIdToken)
+        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)?.idTokenAttestation).isEqualTo(suppliedIdTokenAttestation)
     }
 
     @Test
@@ -78,20 +83,19 @@ class ResponseTest {
         val expectedSelfIssuedClaimCount = 1
         assertThat(actualSelfIssuedClaims).isNotNull
         assertThat(actualSelfIssuedClaims?.size).isEqualTo(expectedSelfIssuedClaimCount)
-        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)).isEqualTo(suppliedSelfIssuedClaim)
+        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)?.field).isEqualTo(suppliedSelfIssuedClaimField)
+        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)?.value).isEqualTo(suppliedSelfIssuedClaim)
     }
 
     @Test
     fun `test create receipt by adding empty card id`() {
-        val piCard: VerifiableCredentialHolder = mockk()
+        val vch: VerifiableCredentialHolder = mockk()
+        val presentationAttestation: PresentationAttestation = mockk()
+        every { presentationAttestation.credentialType } returns expectedType1
         val receiptCreationStartTime = System.currentTimeMillis()
-<<<<<<< HEAD
-        response.addVerifiablePresentationContext(piCard, "testCard1")
-=======
-        response.addVerifiableCredential(piCard, "testCard1")
->>>>>>> master
+        response.addVerifiablePresentationContext(vch, presentationAttestation)
         val cardId = ""
-        every { piCard.cardId } returns cardId
+        every { vch.cardId } returns cardId
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
         val expectedReceiptCount = 1
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
@@ -106,12 +110,10 @@ class ResponseTest {
     @Test
     fun `test create receipt by adding 1 card`() {
         val piCard: VerifiableCredentialHolder = mockk()
+        val presentationAttestation: PresentationAttestation = mockk()
+        every { presentationAttestation.credentialType } returns expectedType1
         val receiptCreationStartTime = System.currentTimeMillis()
-<<<<<<< HEAD
-        response.addVerifiablePresentationContext(piCard, "testCard1")
-=======
-        response.addVerifiableCredential(piCard, "testCard1")
->>>>>>> master
+        response.addVerifiablePresentationContext(piCard, presentationAttestation)
         val cardId = "testCardId"
         every { piCard.cardId } returns cardId
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
@@ -134,21 +136,16 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding multiple cards with same type`() {
-<<<<<<< HEAD
-        val piCard1: PortableIdentityCard = mockk()
-        response.addVerifiablePresentationContext(piCard1, "testCard1")
-        val cardId1 = "testCardId1"
-        every { piCard1.cardId } returns cardId1
-        val piCard2: PortableIdentityCard = mockk()
-        response.addVerifiablePresentationContext(piCard2, "testCard1")
-=======
         val piCard1: VerifiableCredentialHolder = mockk()
-        response.addVerifiableCredential(piCard1, "testCard1")
+        val suppliedPresentationAttestation1: PresentationAttestation = mockk()
+        every { suppliedPresentationAttestation1.credentialType } returns expectedType1
+        response.addVerifiablePresentationContext(piCard1, suppliedPresentationAttestation1)
         val cardId1 = "testCardId1"
         every { piCard1.cardId } returns cardId1
         val piCard2: VerifiableCredentialHolder = mockk()
-        response.addVerifiableCredential(piCard2, "testCard1")
->>>>>>> master
+        val suppliedPresentationAttestation2: PresentationAttestation = mockk()
+        every { suppliedPresentationAttestation2.credentialType } returns expectedType1
+        response.addVerifiablePresentationContext(piCard2, suppliedPresentationAttestation2)
         val cardId2 = "testCardId2"
         every { piCard2.cardId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
@@ -165,21 +162,16 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding multiple cards with different types`() {
-<<<<<<< HEAD
-        val piCard1: PortableIdentityCard = mockk()
-        response.addVerifiablePresentationContext(piCard1, "testCard1")
-        val cardId1 = "testCardId1"
-        every { piCard1.cardId } returns cardId1
-        val piCard2: PortableIdentityCard = mockk()
-        response.addVerifiablePresentationContext(piCard2, "testCard2")
-=======
         val piCard1: VerifiableCredentialHolder = mockk()
-        response.addVerifiableCredential(piCard1, "testCard1")
+        val suppliedPresentationAttestation1: PresentationAttestation = mockk()
+        every { suppliedPresentationAttestation1.credentialType } returns expectedType1
+        response.addVerifiablePresentationContext(piCard1, suppliedPresentationAttestation1)
         val cardId1 = "testCardId1"
         every { piCard1.cardId } returns cardId1
         val piCard2: VerifiableCredentialHolder = mockk()
-        response.addVerifiableCredential(piCard2, "testCard2")
->>>>>>> master
+        val suppliedPresentationAttestation2: PresentationAttestation = mockk()
+        every { suppliedPresentationAttestation2.credentialType } returns expectedType2
+        response.addVerifiablePresentationContext(piCard2, suppliedPresentationAttestation2)
         val cardId2 = "testCardId2"
         every { piCard2.cardId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
@@ -202,13 +194,10 @@ class ResponseTest {
 
     @Test
     fun `test create receipt by adding empty entity information`() {
-<<<<<<< HEAD
-        val piCard: PortableIdentityCard = mockk()
-        response.addVerifiablePresentationContext(piCard, "testCard1")
-=======
         val piCard: VerifiableCredentialHolder = mockk()
-        response.addVerifiableCredential(piCard, "testCard1")
->>>>>>> master
+        val suppliedPresentationAttestation1: PresentationAttestation = mockk()
+        every { suppliedPresentationAttestation1.credentialType } returns expectedType1
+        response.addVerifiablePresentationContext(piCard, suppliedPresentationAttestation1)
         val cardId = "testCardId"
         every { piCard.cardId } returns cardId
         val receiptCreationStartTime = System.currentTimeMillis()
