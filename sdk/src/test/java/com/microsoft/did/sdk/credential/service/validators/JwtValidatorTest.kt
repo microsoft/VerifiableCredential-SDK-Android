@@ -60,7 +60,7 @@ class JwtValidatorTest {
     }
 
     @Test
-    fun `validSignatureIsValidatedSuccessfully`() {
+    fun `valid signature is validated successfully`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsTokenSignature.getKid(serializer) } returns expectedKid
         every { mockedJwsToken.verify(mockedCryptoOperations, listOf(mockedPublicKey)) } returns true
@@ -71,7 +71,7 @@ class JwtValidatorTest {
     }
 
     @Test
-    fun `invalidSignatureFailsSuccessfully`() {
+    fun `invalid signature fails successfully`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsTokenSignature.getKid(serializer) } returns expectedKid
         every { mockedJwsToken.verify(mockedCryptoOperations, listOf(mockedPublicKey)) } returns false
@@ -82,7 +82,7 @@ class JwtValidatorTest {
     }
 
     @Test
-    fun `throwsWhenNoKeyIdSpecified`() {
+    fun `throws when no key id specified`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsTokenSignature.getKid(serializer) } returns null
         every { mockedJwsToken.verify(mockedCryptoOperations, listOf(mockedPublicKey)) } returns true
@@ -97,7 +97,7 @@ class JwtValidatorTest {
     }
 
     @Test
-    fun `throwsWhenUnableToResolveIdentifierDocument`() {
+    fun `throws when unable to resolve identifier document`() {
         val expectedException = ValidatorException("test")
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Failure(expectedException)
         every { mockedJwsTokenSignature.getKid(serializer) } returns expectedKid
