@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.repository.networking.identifierOperations
+package com.microsoft.did.sdk.datasource.repository.networking.identifierOperations
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.VerifiableCredentialSdk

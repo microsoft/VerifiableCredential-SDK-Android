@@ -16,8 +16,7 @@ import retrofit2.Response
 class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     url: String,
     serializedResponse: String,
-    apiProvider: ApiProvider,
-    private val serializer: Serializer
+    apiProvider: ApiProvider
 ) : PostNetworkOperation<IssuanceServiceResponse, String>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
 

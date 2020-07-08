@@ -99,8 +99,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
             formattedResponse,
-            apiProvider,
-            serializer
+            apiProvider
         ).fire()
 
         return when (rawVerifiableCredentialResult) {
@@ -168,8 +167,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         val result = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             request.audience,
             formattedPairwiseRequest,
-            apiProvider,
-            serializer
+            apiProvider
         ).fire()
 
         return when (result) {
