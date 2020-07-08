@@ -33,8 +33,6 @@ class PresentationException(message: String? = null, cause: Throwable? = null) :
 
 open class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
-class PairwiseIssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
-
 open class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
 class InvalidSignatureException(message: String? = null, cause: Throwable? = null) : ValidatorException(message, cause)
