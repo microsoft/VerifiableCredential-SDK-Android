@@ -34,7 +34,6 @@ class OidcResponseFormatterTest {
     private val mockedTokenSigner: TokenSigner = mockk()
     private val slot = slot<String>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
-    private val mockedVerifiableCredential: VerifiableCredential = mockk()
     private val mockedVerifiableCredentialContext: VerifiableCredentialContext = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val serializer: Serializer = Serializer()
@@ -52,9 +51,7 @@ class OidcResponseFormatterTest {
     private val expectedPresentationKey = "test543534"
     private val expectedVerifiablePresentation = "expectedPresentation"
     private val expectedSelfAttestedField = "testField3423442"
-    private val expectedSelfIssued = mapOf(expectedSelfAttestedField to "self-attested")
     private val expectedIdTokenConfig = "testIdTokenConfig234"
-    private val expectedIdTokens = mapOf(expectedIdTokenConfig to "idToken")
 
     init {
         formatter = OidcResponseFormatter(

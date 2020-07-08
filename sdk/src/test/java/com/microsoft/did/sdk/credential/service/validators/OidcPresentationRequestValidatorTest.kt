@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.credential.service.validators
 
-import android.net.Uri
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
