@@ -42,12 +42,13 @@ class VerifiableCredentialHolderRepositoryTest {
     private val mockedIdTokenContext: IdTokenContext = mockk()
     private val mockedSelfAttestedClaimContext: SelfAttestedClaimContext = mockk()
     private val mockedPrimeIdentifier: Identifier = mockk()
+    private val mockedPairwiseIdentifier: Identifier = mockk()
     private val mockedFormatter: OidcResponseFormatter = mockk()
     private val mockedPrimeVcContent: VerifiableCredentialContent = mockk()
     private val mockedVpContext: VerifiablePresentationContext = mockk()
     private val mockedVch: VerifiableCredentialHolder = mockk()
     private val mockedPrimeVc: VerifiableCredential = mockk()
-    private val mockedExchangedVc: VerifiableCredential = mockk()
+    private val mockedExchangedVcContent: VerifiableCredentialContent = mockk()
 
     private val repository: VerifiableCredentialHolderRepository
     private val serializer: Serializer = Serializer()
@@ -75,13 +76,15 @@ class VerifiableCredentialHolderRepositoryTest {
         setUpFormatter()
         setUpDatabase()
         every { mockedPrimeIdentifier.id } returns expectedPrimeDid
+        every { mockedPairwiseIdentifier.id } returns expectedPairwiseDid
         repository = VerifiableCredentialHolderRepository(database, apiProvider, mockedFormatter, serializer)
     }
 
     @Test
     fun `send issuance response successfully`() {
         setUpIssuanceResponse()
-        mockUnwrapSignedVcTopLevelFunction()
+        setUpMockedVcContents(mockedPrimeVcContent, expectedPrimeVcJti, expectedPrimeDid)
+        mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
         val expectedVcContexts = mapOf(expectedVcType to mockedVcContext)
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVcToken)
 
@@ -102,10 +105,9 @@ class VerifiableCredentialHolderRepositoryTest {
     @Test
     fun `send issuance response with failed response from service`() {
         setUpIssuanceResponse()
-        mockUnwrapSignedVcTopLevelFunction()
+        mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
         val expectedVcContexts = mapOf(expectedVcType to mockedVcContext)
         val expectedException = SdkException()
-        coEvery { repository.insert(mockedExchangedVc) } returns Unit
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(expectedException)
 
 
@@ -157,24 +159,62 @@ class VerifiableCredentialHolderRepositoryTest {
 
     @Test
     fun `send exchange response successfully`() {
-        mockUnwrapSignedVcTopLevelFunction()
+        setUpMockedVcContents(mockedExchangedVcContent, expectedExchangedVcJti, expectedPairwiseDid)
+        mockUnwrapSignedVcTopLevelFunction(mockedExchangedVcContent)
         setUpExchangeRequest()
         setUpVpContext()
-        coEvery { mockedVcDao.insert(mockedExchangedVc) } returns Unit
         coEvery { repository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns emptyList()
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVcToken)
 
         runBlocking {
             val actualResult = repository.getExchangedVerifiableCredential(
                 mockedVpContext,
-                mockedPrimeIdentifier
+                mockedPairwiseIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
             assertEquals((actualResult as Result.Success).payload.raw, expectedVcToken)
-            assertEquals((actualResult as Result.Success).payload.contents, mockedPrimeVcContent)
-            assertEquals((actualResult).payload.jti, expectedPrimeVcJti)
+            assertEquals((actualResult).payload.contents, mockedExchangedVcContent)
+            assertEquals((actualResult).payload.jti, expectedExchangedVcJti)
             assertEquals((actualResult).payload.primeId, expectedPrimeVcJti)
             assertEquals((actualResult).payload.raw, expectedVcToken)
+        }
+    }
+
+    @Test
+    fun `send exchange response with failed response from service`() {
+        setUpMockedVcContents(mockedExchangedVcContent, expectedExchangedVcJti, expectedPairwiseDid)
+        mockUnwrapSignedVcTopLevelFunction(mockedExchangedVcContent)
+        setUpExchangeRequest()
+        setUpVpContext()
+        coEvery { repository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns emptyList()
+        val expectedException = SdkException()
+        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(expectedException)
+
+        runBlocking {
+            val actualResult = repository.getExchangedVerifiableCredential(
+                mockedVpContext,
+                mockedPairwiseIdentifier
+            )
+            assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
+            assertEquals((actualResult as Result.Failure).payload, expectedException)
+        }
+    }
+
+    @Test
+    fun `get exchanged vc from database successfully`() {
+        setUpVpContext()
+        setUpMockedVcContents(mockedExchangedVcContent, expectedExchangedVcJti, expectedPairwiseDid)
+        val mockedExchangedVc: VerifiableCredential = mockk()
+        every { mockedExchangedVc.contents } returns mockedExchangedVcContent
+        coEvery { repository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns listOf(mockedExchangedVc)
+
+        runBlocking {
+            val actualResult = repository.getExchangedVerifiableCredential(
+                mockedVpContext,
+                mockedPairwiseIdentifier
+            )
+            assertThat(actualResult).isInstanceOf(Result.Success::class.java)
+            assertEquals((actualResult as Result.Success).payload.contents, mockedExchangedVcContent)
         }
     }
 
@@ -184,6 +224,7 @@ class VerifiableCredentialHolderRepositoryTest {
         every { database.verifiableCredentialHolderDao() } returns mockedVchDao
         every { database.receiptDao() } returns mockedReceiptDao
         every { database.verifiableCredentialDao() } returns mockedVcDao
+        coEvery { mockedVcDao.insert(any()) } returns Unit
     }
 
     private fun setUpFormatter() {
@@ -227,15 +268,16 @@ class VerifiableCredentialHolderRepositoryTest {
     private fun setUpExchangeRequest() {
         mockkConstructor(ExchangeRequest::class)
         every { anyConstructed<ExchangeRequest>().newOwnerDid } returns expectedPairwiseDid
-        every { anyConstructed<ExchangeRequest>().verifiableCredential } returns mockedExchangedVc
-        every { mockedExchangedVc.primeId } returns expectedPrimeVcJti
+        every { anyConstructed<ExchangeRequest>().verifiableCredential } returns mockedPrimeVc
+        every { mockedPrimeVc.primeId } returns expectedPrimeVcJti
+        every { mockedPrimeVc.contents } returns mockedExchangedVcContent
     }
 
     private fun setUpVpContext() {
         every { mockedVpContext.verifiablePresentationHolder } returns mockedVch
         setUpMockedVch()
         setUpMockedPrimeVc()
-        setUpMockedPrimeVcContents()
+        setUpMockedVcContents(mockedPrimeVcContent, expectedPrimeVcJti, expectedPrimeDid)
     }
 
     private fun setUpMockedVch() {
@@ -249,19 +291,20 @@ class VerifiableCredentialHolderRepositoryTest {
         every { mockedPrimeVc.primeId } returns expectedPrimeVcJti
     }
 
-    private fun setUpMockedPrimeVcContents() {
+    private fun setUpMockedVcContents(vcContent: VerifiableCredentialContent, jti: String, subjectDid: String) {
         val mockedVcDescriptor: VerifiableCredentialDescriptor = mockk()
         val mockedServiceDescriptor: ServiceDescriptor = mockk()
         val expectedExchangeUrl = "https://exchange.com/23948"
-        every { mockedPrimeVcContent.vc } returns mockedVcDescriptor
-        every { mockedPrimeVcContent.jti } returns expectedPrimeVcJti
+        every { vcContent.vc } returns mockedVcDescriptor
+        every { vcContent.jti } returns jti
+        every { vcContent.sub } returns subjectDid
         every { mockedVcDescriptor.exchangeService } returns mockedServiceDescriptor
         every { mockedServiceDescriptor.id } returns expectedExchangeUrl
     }
 
-    private fun mockUnwrapSignedVcTopLevelFunction() {
+    private fun mockUnwrapSignedVcTopLevelFunction(returnedVcContent: VerifiableCredentialContent) {
         mockkStatic("com.microsoft.did.sdk.util.VerifiableCredentialUtilKt")
-        every { unwrapSignedVerifiableCredential(any(), serializer) } returns mockedPrimeVcContent
+        every { unwrapSignedVerifiableCredential(any(), serializer) } returns returnedVcContent
     }
 
 
