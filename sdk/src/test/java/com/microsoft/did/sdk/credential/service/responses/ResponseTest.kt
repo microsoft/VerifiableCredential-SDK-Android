@@ -95,7 +95,7 @@ class ResponseTest {
         val receiptCreationStartTime = System.currentTimeMillis()
         response.addVerifiablePresentationContext(vch, presentationAttestation)
         val cardId = ""
-        every { vch.cardId } returns cardId
+        every { vch.primeVcId } returns cardId
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
         val expectedReceiptCount = 1
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
@@ -115,7 +115,7 @@ class ResponseTest {
         val receiptCreationStartTime = System.currentTimeMillis()
         response.addVerifiablePresentationContext(piCard, presentationAttestation)
         val cardId = "testCardId"
-        every { piCard.cardId } returns cardId
+        every { piCard.primeVcId } returns cardId
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
         val expectedReceiptCount = 1
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
@@ -141,13 +141,13 @@ class ResponseTest {
         every { suppliedPresentationAttestation1.credentialType } returns expectedType1
         response.addVerifiablePresentationContext(piCard1, suppliedPresentationAttestation1)
         val cardId1 = "testCardId1"
-        every { piCard1.cardId } returns cardId1
+        every { piCard1.primeVcId } returns cardId1
         val piCard2: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation2: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation2.credentialType } returns expectedType1
         response.addVerifiablePresentationContext(piCard2, suppliedPresentationAttestation2)
         val cardId2 = "testCardId2"
-        every { piCard2.cardId } returns cardId2
+        every { piCard2.primeVcId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
         val expectedReceiptCount = 1
@@ -167,13 +167,13 @@ class ResponseTest {
         every { suppliedPresentationAttestation1.credentialType } returns expectedType1
         response.addVerifiablePresentationContext(piCard1, suppliedPresentationAttestation1)
         val cardId1 = "testCardId1"
-        every { piCard1.cardId } returns cardId1
+        every { piCard1.primeVcId } returns cardId1
         val piCard2: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation2: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation2.credentialType } returns expectedType2
         response.addVerifiablePresentationContext(piCard2, suppliedPresentationAttestation2)
         val cardId2 = "testCardId2"
-        every { piCard2.cardId } returns cardId2
+        every { piCard2.primeVcId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
         val expectedReceiptCount = 2
@@ -199,7 +199,7 @@ class ResponseTest {
         every { suppliedPresentationAttestation1.credentialType } returns expectedType1
         response.addVerifiablePresentationContext(piCard, suppliedPresentationAttestation1)
         val cardId = "testCardId"
-        every { piCard.cardId } returns cardId
+        every { piCard.primeVcId } returns cardId
         val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedVerifiableCredentials("", "")
         val expectedReceiptCount = 1

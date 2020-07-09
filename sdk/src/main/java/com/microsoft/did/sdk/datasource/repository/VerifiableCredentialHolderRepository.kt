@@ -141,7 +141,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     }
 
     suspend fun getExchangedVerifiableCredential(vpContext: VerifiablePresentationContext, newOwner: Identifier): Result<VerifiableCredential> {
-        val verifiableCredentials = this.getAllVerifiableCredentialsById(vpContext.verifiablePresentationHolder.cardId)
+        val verifiableCredentials = this.getAllVerifiableCredentialsById(vpContext.verifiablePresentationHolder.primeVcId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
             if (it.contents.sub == newOwner.id) {
@@ -175,7 +175,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             is Result.Success -> {
                 val verifiableCredential = formVerifiableCredential(
                     result.payload,
-                    request.verifiableCredential.picId
+                    request.verifiableCredential.primeId
                 )
                 this.insert(verifiableCredential)
                 Result.Success(verifiableCredential)

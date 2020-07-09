@@ -9,7 +9,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 @Dao
 interface VerifiableCredentialDao {
 
-    @Query("SELECT * FROM VerifiableCredential where picId = :id")
+    @Query("SELECT * FROM VerifiableCredential where primeId = :id")
     suspend fun getVerifiableCredentialById(id: String): List<VerifiableCredential>
 
     @Insert

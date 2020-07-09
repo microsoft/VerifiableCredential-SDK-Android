@@ -20,7 +20,7 @@ data class VerifiableCredentialHolder(
 
     // id of the prime Verifiable Credential
     @PrimaryKey
-    val cardId: String,
+    val primeVcId: String,
 
     // verifiable credential tied to Pairwise Identifier for Issuer.
     @Embedded

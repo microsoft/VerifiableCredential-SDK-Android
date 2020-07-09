@@ -18,7 +18,7 @@ interface VerifiableCredentialHolderDao {
     @Query("SELECT * FROM VerifiableCredentialHolder")
     fun getAllVcs(): LiveData<List<VerifiableCredentialHolder>>
 
-    @Query("SELECT * FROM VerifiableCredentialHolder where picId = :id")
+    @Query("SELECT * FROM VerifiableCredentialHolder where primeId = :id")
     fun getVcById(id: String): LiveData<VerifiableCredentialHolder>
 
     @Insert
