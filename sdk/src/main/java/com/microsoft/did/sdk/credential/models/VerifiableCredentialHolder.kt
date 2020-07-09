@@ -31,5 +31,5 @@ data class VerifiableCredentialHolder(
 
     val displayContract: DisplayContract,
 
-    val credentialStatus: String
+    val credentialStatus: String? = null
 )

@@ -5,6 +5,7 @@ package com.microsoft.did.sdk.credential.service
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 
 /**
  * OIDC Response formed from a Request.

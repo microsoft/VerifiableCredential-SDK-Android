@@ -152,6 +152,19 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
+    suspend fun revokeVerifiablePresentation(
+        verifiableCredentialHolder: VerifiableCredentialHolder,
+        rpList: List<String>?,
+        reason: String?
+    ): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpList, reason).abortOnError()
+                Result.Success(Unit)
+            }
+        }
+    }
+
     private suspend fun createAndSaveReceipt(response: Response): Result<Unit> {
         return runResultTry {
             val receipts = response.createReceiptsForPresentedCredentials(
@@ -175,7 +188,11 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    private fun createVch(signedVerifiableCredential: String, owner: Identifier, contract: VerifiableCredentialContract): VerifiableCredentialHolder {
+    private fun createVch(
+        signedVerifiableCredential: String,
+        owner: Identifier,
+        contract: VerifiableCredentialContract
+    ): VerifiableCredentialHolder {
         val contents =
             unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)

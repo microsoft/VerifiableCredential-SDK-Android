@@ -13,7 +13,7 @@ sealed class VcServiceActionRequest(val audience: String)
 class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) :
     VcServiceActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
 
-class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :
+class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier, val rpList: List<String>?) :
     VcServiceActionRequest(verifiableCredential.contents.vc.revokeService?.id ?: "")
 
 class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :

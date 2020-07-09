@@ -28,6 +28,6 @@ interface VerifiableCredentialHolderDao {
     @Delete
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder)
 
-    @Query("UPDATE VerifiableCredentialHolder SET credentialStatus = :status")
-    suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder, status: String)
+    @Query("UPDATE VerifiableCredentialHolder SET credentialStatus = :status where jti = :picId")
+    suspend fun update(picId: String, status: String)
 }

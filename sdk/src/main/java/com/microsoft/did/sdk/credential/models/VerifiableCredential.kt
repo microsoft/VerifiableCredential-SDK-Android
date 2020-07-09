@@ -22,7 +22,7 @@ data class VerifiableCredential(
     // contents of the Verifiable Credential token.
     val contents: VerifiableCredentialContent,
 
-    // id of the Prime Verifiable Credential. (if prime VC, jti == cardId)
+    // id of the Prime Verifiable Credential. (if prime VC, jti == picId)
     val picId: String
 
 )

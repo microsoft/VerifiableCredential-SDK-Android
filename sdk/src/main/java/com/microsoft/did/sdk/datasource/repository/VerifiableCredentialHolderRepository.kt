@@ -14,6 +14,7 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -21,11 +22,13 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContra
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.PairwiseIssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.SdkException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,6 +67,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     }
 
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVcById(id)
+
+    suspend fun update(picId: String, credentialStatus: String) = vchDao.update(picId, credentialStatus)
 
     // Receipt Methods
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
@@ -133,7 +138,42 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         ).fire()
     }
 
-    private suspend fun getPairwiseVerifiableCredential(vch: VerifiableCredentialHolder, pairwiseIdentifier: Identifier): VerifiableCredential {
+    suspend fun revokeVerifiablePresentation(
+        verifiableCredentialHolder: VerifiableCredentialHolder,
+        rpList: List<String>?,
+        reason: String?
+    ): Result<Unit> {
+        val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, null)
+        val revocationStatus = sendRevocationRequest(revocationRequest, verifiableCredentialHolder.owner, rpList, reason)
+        this.update(verifiableCredentialHolder.verifiableCredential.jti, revocationStatus)
+        return Result.Success(Unit)
+    }
+
+    private suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, owner: Identifier, rpList: List<String>?, reason: String?): String {
+        val formattedRevocationRequest = formatter.format(
+            responder = owner,
+            responseAudience = revocationRequest.audience,
+            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
+            transformingVerifiableCredential = revocationRequest.verifiableCredential,
+            revocationRPs = rpList,
+            revocationReason = reason
+        )
+        val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
+            revocationRequest.audience,
+            formattedRevocationRequest,
+            apiProvider,
+            serializer
+        ).fire()
+        return when (revocationResult) {
+            is Result.Success -> revocationResult.payload
+            is Result.Failure -> throw SdkException("Unable to revoke VP")
+        }
+    }
+
+    private suspend fun getPairwiseVerifiableCredential(
+        vch: VerifiableCredentialHolder,
+        pairwiseIdentifier: Identifier
+    ): VerifiableCredential {
         val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
