@@ -72,7 +72,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    private suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
+    suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
         vcDao.getVerifiableCredentialById(primaryVcId)
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = vcDao.insert(verifiableCredential)
@@ -85,7 +85,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     suspend fun sendIssuanceResponse(response: IssuanceResponse,
                                      verifiableCredentialContexts: Map<String, VerifiableCredentialContext>?,
-                                     responder: Identifier): Result<VerifiableCredential> {
+                                     responder: Identifier,
+                                     expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
@@ -94,7 +95,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             idTokenContexts = response.getIdTokenContexts(),
             selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
             contract = response.request.contractUrl,
-            expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS
+            expiryInSeconds = expiryInSeconds
         )
         val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
@@ -117,9 +118,9 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     suspend fun sendPresentationResponse(response: PresentationResponse,
                                          verifiableCredentialContexts: Map<String, VerifiableCredentialContext>?,
                                          responder: Identifier,
-                                         expiryInSeconds: Int): Result<Unit> {
+                                         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<Unit> {
 
-        val state = response.request.content.state ?: ""
+        val state = response.request.content.state
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
@@ -128,7 +129,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             idTokenContexts = response.getIdTokenContexts(),
             selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
             nonce = response.request.content.nonce,
-            state = response.request.content.state,
+            state = state,
             expiryInSeconds = expiryInSeconds
         )
         return SendPresentationResponseNetworkOperation(
