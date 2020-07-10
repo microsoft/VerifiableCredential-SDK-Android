@@ -6,8 +6,8 @@
 package com.microsoft.did.sdk.datasource.network
 
 import com.microsoft.did.sdk.util.controlflow.*
-import kotlinx.io.IOException
 import retrofit2.Response
+import java.io.IOException
 
 /**
  * Base Network Operation class with default methods for all Network Operations.
