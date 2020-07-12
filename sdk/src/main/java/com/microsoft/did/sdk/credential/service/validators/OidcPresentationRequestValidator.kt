@@ -25,8 +25,7 @@ class OidcPresentationRequestValidator @Inject constructor(
         if (!jwtValidator.verifySignature(token)) {
             throw InvalidSignatureException("Signature is not Valid.")
         }
-        // TODO(check token expiration when implemented in sdk)
-        // checkTokenExpiration(request.content.exp)
+        checkTokenExpiration(request.content.exp)
     }
 
     private fun checkTokenExpiration(expiration: Long) {
