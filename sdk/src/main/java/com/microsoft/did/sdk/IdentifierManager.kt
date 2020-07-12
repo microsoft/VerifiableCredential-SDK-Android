@@ -6,19 +6,20 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.did.sdk.identifier.IdentifierCreator
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.Constants.METHOD_NAME
-import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
+import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton

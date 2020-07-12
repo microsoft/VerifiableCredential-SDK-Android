@@ -7,13 +7,15 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
-import java.util.*
-import kotlin.collections.Map
+import com.microsoft.did.sdk.util.stringToByteArray
+import com.microsoft.did.sdk.util.toReadableString
+import java.util.Locale
 
 /**
  * Class for containing JWS token operations.

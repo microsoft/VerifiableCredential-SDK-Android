@@ -6,7 +6,7 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
-import java.util.*
+import java.util.Date
 import kotlin.math.floor
 
 fun createIatAndExp(expiresIn: Int = DEFAULT_EXPIRATION_IN_MINUTES): Pair<Long, Long> {

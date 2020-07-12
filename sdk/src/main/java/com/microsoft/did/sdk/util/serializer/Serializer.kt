@@ -5,15 +5,18 @@ package com.microsoft.did.sdk.util.serializer
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.ServiceResponse
-import kotlinx.serialization.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.serializer
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import kotlin.collections.Map
 
 @Singleton
 class Serializer @Inject constructor() : ISerializer {

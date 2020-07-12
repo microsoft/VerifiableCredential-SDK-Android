@@ -2,13 +2,11 @@
 
 package com.microsoft.did.sdk.credential.service
 
-import android.net.Uri
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationRequestBinding
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
-import kotlinx.serialization.ContextualSerialization
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -35,8 +33,6 @@ sealed class Request(val attestations: CredentialAttestations?, val entityName: 
         return emptyList()
     }
 }
-
-// Request can be either an Issuance or Presentation Request only.
 
 @Serializable
 class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String) :
