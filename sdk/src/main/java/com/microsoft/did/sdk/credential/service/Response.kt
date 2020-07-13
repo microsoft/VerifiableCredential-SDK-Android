@@ -61,7 +61,7 @@ sealed class Response(open val request: Request, val audience: String) {
     fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         verifiablePresentationContexts.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().verifiablePresentationHolder.primeVcId, entityDid, entityName)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().verifiablePresentationHolder.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList

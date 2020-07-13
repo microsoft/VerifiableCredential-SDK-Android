@@ -101,7 +101,7 @@ class VerifiableCredentialHolderRepositoryTest {
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
             assertEquals((actualResult as Result.Success).payload.contents, mockedPrimeVcContent)
             assertEquals((actualResult).payload.jti, expectedPrimeVcJti)
-            assertEquals((actualResult).payload.primeId, expectedPrimeVcJti)
+            assertEquals((actualResult).payload.picId, expectedPrimeVcJti)
             assertEquals((actualResult).payload.raw, expectedVcToken)
         }
     }
@@ -178,7 +178,7 @@ class VerifiableCredentialHolderRepositoryTest {
             assertEquals((actualResult as Result.Success).payload.raw, expectedVcToken)
             assertEquals((actualResult).payload.contents, mockedExchangedVcContent)
             assertEquals((actualResult).payload.jti, expectedExchangedVcJti)
-            assertEquals((actualResult).payload.primeId, expectedPrimeVcJti)
+            assertEquals((actualResult).payload.picId, expectedPrimeVcJti)
             assertEquals((actualResult).payload.raw, expectedVcToken)
         }
     }
@@ -272,7 +272,7 @@ class VerifiableCredentialHolderRepositoryTest {
         mockkConstructor(ExchangeRequest::class)
         every { anyConstructed<ExchangeRequest>().newOwnerDid } returns expectedPairwiseDid
         every { anyConstructed<ExchangeRequest>().verifiableCredential } returns mockedPrimeVc
-        every { mockedPrimeVc.primeId } returns expectedPrimeVcJti
+        every { mockedPrimeVc.picId } returns expectedPrimeVcJti
         every { mockedPrimeVc.contents } returns mockedExchangedVcContent
     }
 
@@ -286,12 +286,12 @@ class VerifiableCredentialHolderRepositoryTest {
     private fun setUpMockedVch() {
         every { mockedVch.owner } returns mockedPrimeIdentifier
         every { mockedVch.verifiableCredential } returns mockedPrimeVc
-        every { mockedVch.primeVcId } returns expectedPrimeVcJti
+        every { mockedVch.cardId } returns expectedPrimeVcJti
     }
 
     private fun setUpMockedPrimeVc() {
         every { mockedPrimeVc.contents } returns mockedPrimeVcContent
-        every { mockedPrimeVc.primeId } returns expectedPrimeVcJti
+        every { mockedPrimeVc.picId } returns expectedPrimeVcJti
     }
 
     private fun setUpMockedVcContents(vcContent: VerifiableCredentialContent, jti: String, subjectDid: String) {

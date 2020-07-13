@@ -23,6 +23,6 @@ data class VerifiableCredential(
     val contents: VerifiableCredentialContent,
 
     // id of the Prime Verifiable Credential. (if prime VC, jti == cardId)
-    val primeId: String
+    val picId: String
 
 )
