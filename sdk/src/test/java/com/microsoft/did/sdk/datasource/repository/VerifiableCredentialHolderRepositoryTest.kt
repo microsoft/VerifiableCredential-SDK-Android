@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 package com.microsoft.did.sdk.datasource.repository
 
 import com.microsoft.did.sdk.credential.models.*
@@ -68,7 +73,6 @@ class VerifiableCredentialHolderRepositoryTest {
     private val expectedPrimeVcJti: String = "primeJti23723"
     private val expectedExchangedVcJti: String = "exchangeJti293859"
 
-
     init {
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
         mockkConstructor(SendPresentationResponseNetworkOperation::class)
@@ -109,7 +113,6 @@ class VerifiableCredentialHolderRepositoryTest {
         val expectedVcContexts = mapOf(expectedVcType to mockedVcContext)
         val expectedException = SdkException()
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(expectedException)
-
 
         runBlocking {
             val actualResult = repository.sendIssuanceResponse(
@@ -306,6 +309,4 @@ class VerifiableCredentialHolderRepositoryTest {
         mockkStatic("com.microsoft.did.sdk.util.VerifiableCredentialUtilKt")
         every { unwrapSignedVerifiableCredential(any(), serializer) } returns returnedVcContent
     }
-
-
 }
