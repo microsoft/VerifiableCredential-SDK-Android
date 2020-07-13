@@ -14,8 +14,8 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiablePresentationContext
+import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
+import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialHolderRequestMapping
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -84,14 +84,14 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     ).fire()
 
     suspend fun sendIssuanceResponse(response: IssuanceResponse,
-                                     verifiableCredentialContexts: Map<String, VerifiableCredentialContext>?,
+                                     verifiableCredentialRequestMapping: List<VerifiableCredentialRequestMapping>,
                                      responder: Identifier,
                                      expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            verifiableCredentialContexts = verifiableCredentialContexts,
+            verifiableCredentialContexts = verifiableCredentialRequestMapping,
             idTokenContexts = response.getIdTokenContexts(),
             selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
             contract = response.request.contractUrl,
@@ -116,7 +116,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     ).fire()
 
     suspend fun sendPresentationResponse(response: PresentationResponse,
-                                         verifiableCredentialContexts: Map<String, VerifiableCredentialContext>?,
+                                         verifiableCredentialRequestMapping: List<VerifiableCredentialRequestMapping>,
                                          responder: Identifier,
                                          expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<Unit> {
 
@@ -125,7 +125,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            verifiableCredentialContexts = verifiableCredentialContexts,
+            verifiableCredentialContexts = verifiableCredentialRequestMapping,
             idTokenContexts = response.getIdTokenContexts(),
             selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
             nonce = response.request.content.nonce,
@@ -140,7 +140,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         ).fire()
     }
 
-    suspend fun getExchangedVerifiableCredential(vpContext: VerifiablePresentationContext, pairwiseIdentifier: Identifier): Result<VerifiableCredential> {
+    suspend fun getExchangedVerifiableCredential(vpContext: VerifiableCredentialHolderRequestMapping, pairwiseIdentifier: Identifier): Result<VerifiableCredential> {
         val verifiableCredentials = this.getAllVerifiableCredentialsById(vpContext.verifiablePresentationHolder.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
@@ -148,11 +148,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
                 return Result.Success(it)
             }
         }
-        val exchangeRequest =
-            ExchangeRequest(
-                vpContext.verifiablePresentationHolder.verifiableCredential,
-                pairwiseIdentifier.id
-            )
+        val exchangeRequest = ExchangeRequest(vpContext.verifiablePresentationHolder.verifiableCredential, pairwiseIdentifier.id)
         return this.sendExchangeRequest(exchangeRequest, vpContext.verifiablePresentationHolder.owner)
     }
 

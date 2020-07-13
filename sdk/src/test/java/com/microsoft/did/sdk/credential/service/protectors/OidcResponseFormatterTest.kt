@@ -1,10 +1,7 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.contexts.IdTokenContext
-import com.microsoft.did.sdk.credential.service.models.contexts.SelfAttestedClaimContext
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
+import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
@@ -34,7 +31,7 @@ class OidcResponseFormatterTest {
     private val mockedTokenSigner: TokenSigner = mockk()
     private val slot = slot<String>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
-    private val mockedVerifiableCredentialContext: VerifiableCredentialContext = mockk()
+    private val mockedVerifiableCredentialRequestMapping: VerifiableCredentialRequestMapping = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val serializer: Serializer = Serializer()
 
@@ -64,7 +61,7 @@ class OidcResponseFormatterTest {
         setUpExpectedPresentations()
         every { mockedTokenSigner.signWithIdentifier(capture(slot), mockedIdentifier)} answers { slot.captured }
         every { mockedVerifiablePresentationFormatter.createPresentation(
-            mockedVerifiableCredentialContext,
+            mockedVerifiableCredentialRequestMapping,
             expectedPresentationAudience,
             mockedIdentifier
         ) } returns expectedVerifiablePresentation
@@ -83,7 +80,7 @@ class OidcResponseFormatterTest {
     private fun setUpExpectedPresentations() {
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
-                mockedVerifiableCredentialContext,
+                mockedVerifiableCredentialRequestMapping,
                 expectedPresentationAudience,
                 mockedIdentifier
             )
@@ -217,7 +214,7 @@ class OidcResponseFormatterTest {
             presentationsAudience = expectedPresentationAudience,
             contract = expectedContract,
             expiryInSeconds = expectedExpiry,
-            verifiableCredentialContexts = mapOf(expectedPresentationKey to mockedVerifiableCredentialContext)
+            verifiableCredentialContexts = mapOf(expectedPresentationKey to mockedVerifiableCredentialRequestMapping)
         )
         val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
@@ -236,14 +233,14 @@ class OidcResponseFormatterTest {
 
     @Test
     fun formatIssuanceResponseWithPresentationAttestationsAndNoPresentationAudienceTest() {
-        val verifiableCredentialContext: VerifiableCredentialContext = mockk()
+        val verifiableCredentialRequestMapping: VerifiableCredentialRequestMapping = mockk()
         try {
             formatter.format(
                 responder = mockedIdentifier,
                 responseAudience = expectedResponseAudience,
                 expiryInSeconds = expectedExpiry,
                 contract = expectedContract,
-                verifiableCredentialContexts = mapOf(expectedPresentationKey to verifiableCredentialContext)
+                verifiableCredentialContexts = mapOf(expectedPresentationKey to verifiableCredentialRequestMapping)
             )
             fail("Should throw Exception")
         } catch (exception: Exception) {
@@ -265,7 +262,7 @@ class OidcResponseFormatterTest {
             contract = expectedContract,
             presentationsAudience = expectedPresentationAudience,
             expiryInSeconds = expectedExpiry,
-            verifiableCredentialContexts = mapOf(expectedPresentationKey to mockedVerifiableCredentialContext),
+            verifiableCredentialContexts = mapOf(expectedPresentationKey to mockedVerifiableCredentialRequestMapping),
             selfAttestedClaimContexts = mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimContext),
             idTokenContexts = mapOf(expectedIdTokenConfig to expectedIdTokenContext)
         )

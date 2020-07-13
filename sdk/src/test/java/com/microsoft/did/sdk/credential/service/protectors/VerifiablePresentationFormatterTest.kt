@@ -3,7 +3,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
+import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -17,7 +17,7 @@ class VerifiablePresentationFormatterTest {
 
     private val mockedTokenSigner : TokenSigner = mockk()
     private val mockedVerifiableCredential: VerifiableCredential = mockk()
-    private val mockedVerifiableCredentialContext: VerifiableCredentialContext = mockk()
+    private val mockedVerifiableCredentialRequestMapping: VerifiableCredentialRequestMapping = mockk()
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val slot = slot<String>()
@@ -42,11 +42,11 @@ class VerifiablePresentationFormatterTest {
 
     @Test
     fun createPresentationTest() {
-        every { mockedVerifiableCredentialContext.verifiableCredential } returns mockedVerifiableCredential
-        every { mockedVerifiableCredentialContext.presentationAttestation } returns mockedPresentationAttestation
+        every { mockedVerifiableCredentialRequestMapping.verifiableCredential } returns mockedVerifiableCredential
+        every { mockedVerifiableCredentialRequestMapping.presentationAttestation } returns mockedPresentationAttestation
         val expectedValidityInterval = 2343
         every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
-        val results = formatter.createPresentation(mockedVerifiableCredentialContext, expectedAudience, mockedIdentifier)
+        val results = formatter.createPresentation(mockedVerifiableCredentialRequestMapping, expectedAudience, mockedIdentifier)
         val contents = serializer.parse(VerifiablePresentationContent.serializer(), results)
         assertEquals(expectedAudience, contents.aud)
         assertEquals(expectedDid, contents.iss)

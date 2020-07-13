@@ -18,7 +18,7 @@ import com.microsoft.did.sdk.credential.service.validators.PresentationRequestVa
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiableCredentialContext
+import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
@@ -125,7 +125,7 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val contexts = response.getVerifiablePresentationContexts()?.mapValues {
-                    VerifiableCredentialContext(
+                    VerifiableCredentialRequestMapping(
                         it.value.presentationAttestation,
                         vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError()
                     )
@@ -153,7 +153,7 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val contexts = response.getVerifiablePresentationContexts()?.mapValues {
-                    VerifiableCredentialContext(
+                    VerifiableCredentialRequestMapping(
                         it.value.presentationAttestation,
                         vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError()
                     )

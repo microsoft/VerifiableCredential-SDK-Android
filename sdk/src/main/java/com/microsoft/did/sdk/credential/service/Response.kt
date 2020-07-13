@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.contexts.IdTokenContext
-import com.microsoft.did.sdk.credential.service.models.contexts.VerifiablePresentationContext
-import com.microsoft.did.sdk.credential.service.models.contexts.SelfAttestedClaimContext
+import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialHolderRequestMapping
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
@@ -18,50 +19,41 @@ import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
  */
 sealed class Response(open val request: Request, val audience: String) {
     
-    private val verifiablePresentationContexts: MutableMap<String, VerifiablePresentationContext> = mutableMapOf()
+    private val verifiableCredentialHolderRequestMappings: MutableList<VerifiableCredentialHolderRequestMapping> = mutableListOf()
 
-    private val idTokenContexts: MutableMap<String, IdTokenContext> = mutableMapOf()
+    private val idTokenContexts: MutableMap<String, String> = mutableMapOf()
 
     // EXPERIMENTAL
-    private val selfAttestedClaimContexts: MutableMap<String, SelfAttestedClaimContext> = mutableMapOf()
+    private val selfAttestedClaimContexts: MutableMap<String, String> = mutableMapOf()
 
     fun addIdTokenContext(idTokenAttestation: IdTokenAttestation, token: String) {
-        idTokenContexts[idTokenAttestation.configuration] = IdTokenContext(idTokenAttestation, token)
+        idTokenContexts[idTokenAttestation.configuration] = token
     }
 
     fun addSelfAttestedClaimContext(field: String, claim: String) {
-        selfAttestedClaimContexts[field] = SelfAttestedClaimContext(field, claim)
+        selfAttestedClaimContexts[field] = claim
     }
 
     fun addVerifiablePresentationContext(card: VerifiableCredentialHolder, presentationAttestation: PresentationAttestation) {
-        verifiablePresentationContexts[presentationAttestation.credentialType] = VerifiablePresentationContext(card, presentationAttestation)
+        verifiableCredentialHolderRequestMappings.add(VerifiableCredentialHolderRequestMapping(card, presentationAttestation))
     }
 
-    fun getIdTokenContexts(): Map<String, IdTokenContext>? {
-        if (idTokenContexts.isEmpty()) {
-            return null
-        }
+    fun getIdTokenContexts(): MutableMap<String, String> {
         return idTokenContexts
     }
 
-    fun getSelfAttestedClaimContexts(): Map<String, SelfAttestedClaimContext>? {
-        if (selfAttestedClaimContexts.isEmpty()) {
-            return null
-        }
+    fun getSelfAttestedClaimContexts(): MutableMap<String, String> {
         return selfAttestedClaimContexts
     }
 
-    fun getVerifiablePresentationContexts(): Map<String, VerifiablePresentationContext>? {
-        if (verifiablePresentationContexts.isEmpty()) {
-            return null
-        }
-        return verifiablePresentationContexts
+    fun getVerifiablePresentationContexts(): List<VerifiableCredentialHolderRequestMapping> {
+        return verifiableCredentialHolderRequestMappings
     }
 
     fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
-        verifiablePresentationContexts.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().verifiablePresentationHolder.cardId, entityDid, entityName)
+        verifiableCredentialHolderRequestMappings.forEach {
+            val receipt = createReceipt(ReceiptAction.Presentation, it.verifiablePresentationHolder.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
