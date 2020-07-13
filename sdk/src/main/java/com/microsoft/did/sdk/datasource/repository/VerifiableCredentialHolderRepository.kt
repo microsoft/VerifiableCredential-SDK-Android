@@ -25,6 +25,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifia
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
+import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.Result
 import javax.inject.Inject
@@ -153,6 +154,9 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     }
 
     private suspend fun sendExchangeRequest(request: ExchangeRequest, requester: Identifier): Result<VerifiableCredential> {
+        if (request.audience == "") {
+            throw ExchangeException("Audience is an empty string.")
+        }
         val formattedPairwiseRequest = formatter.format(
             responder = requester,
             responseAudience = request.audience,

@@ -29,9 +29,11 @@ class IdentifierCreatorException(message: String? = null, cause: Throwable? = nu
 
 open class AuthenticationException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
-class PresentationException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+open class PresentationException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
 
 open class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+
+class ExchangeException(message: String? = null, cause: Throwable? = null) : PresentationException(message, cause)
 
 open class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
