@@ -35,8 +35,8 @@ class OidcResponseFormatter @Inject constructor(
         presentationsAudience: String = "",
         expiryInSeconds: Int,
         verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping> = emptyList(),
-        idTokenContexts: Map<String, String> = emptyMap(),
-        selfAttestedClaimContexts: Map<String, String> = emptyMap(),
+        idTokenRequestMapping: Map<String, String> = emptyMap(),
+        selfAttestedClaimRequestMapping: Map<String, String> = emptyMap(),
         contract: String? = null,
         nonce: String? = null,
         state: String? = null,
@@ -52,8 +52,8 @@ class OidcResponseFormatter @Inject constructor(
         val did = responder.id
         val attestationResponse = this.createAttestationClaimModel(
             verifiableCredentialRequestMappings,
-            idTokenContexts,
-            selfAttestedClaimContexts,
+            idTokenRequestMapping,
+            selfAttestedClaimRequestMapping,
             presentationsAudience,
             responder)
 
@@ -82,19 +82,19 @@ class OidcResponseFormatter @Inject constructor(
 
     private fun createAttestationClaimModel(
         verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping>,
-        idTokenContexts: Map<String, String>,
-        selfAttestedClaimContexts: Map<String, String>,
+        idTokenRequestMapping: Map<String, String>,
+        selfAttestedClaimRequestMapping: Map<String, String>,
         presentationsAudience: String,
         responder: Identifier
     ): AttestationClaimModel? {
-        if (areNoCollectedClaims(verifiableCredentialRequestMappings, idTokenContexts, selfAttestedClaimContexts)) {
+        if (areNoCollectedClaims(verifiableCredentialRequestMappings, idTokenRequestMapping, selfAttestedClaimRequestMapping)) {
             return null
         }
         val presentationAttestations = createPresentations(
             verifiableCredentialRequestMappings,
             presentationsAudience,
             responder)
-        return AttestationClaimModel(selfAttestedClaimContexts, idTokenContexts, presentationAttestations)
+        return AttestationClaimModel(selfAttestedClaimRequestMapping, idTokenRequestMapping, presentationAttestations)
     }
 
     private fun createPresentations(
@@ -115,9 +115,9 @@ class OidcResponseFormatter @Inject constructor(
 
     private fun areNoCollectedClaims(
         verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping>,
-        idTokenContexts: Map<String, String>,
-        selfAttestedClaimContexts: Map<String, String>
+        idTokenRequestMapping: Map<String, String>,
+        selfAttestedClaimRequestMapping: Map<String, String>
     ): Boolean {
-        return (verifiableCredentialRequestMappings.isNullOrEmpty() && idTokenContexts.isNullOrEmpty() && selfAttestedClaimContexts.isNullOrEmpty())
+        return (verifiableCredentialRequestMappings.isNullOrEmpty() && idTokenRequestMapping.isNullOrEmpty() && selfAttestedClaimRequestMapping.isNullOrEmpty())
     }
 }

@@ -26,27 +26,27 @@ sealed class Response(open val request: Request, val audience: String) {
     // EXPERIMENTAL
     private val selfAttestedClaimContexts: MutableMap<String, String> = mutableMapOf()
 
-    fun addIdTokenContext(idTokenAttestation: IdTokenAttestation, token: String) {
+    fun addIdTokenRequestMapping(idTokenAttestation: IdTokenAttestation, token: String) {
         idTokenContexts[idTokenAttestation.configuration] = token
     }
 
-    fun addSelfAttestedClaimContext(field: String, claim: String) {
+    fun addSelfAttestedClaimRequestMapping(field: String, claim: String) {
         selfAttestedClaimContexts[field] = claim
     }
 
-    fun addVerifiablePresentationContext(card: VerifiableCredentialHolder, presentationAttestation: PresentationAttestation) {
+    fun addVerifiableCredentialHolderRequestMapping(card: VerifiableCredentialHolder, presentationAttestation: PresentationAttestation) {
         verifiableCredentialHolderRequestMappings.add(VerifiableCredentialHolderRequestMapping(card, presentationAttestation))
     }
 
-    fun getIdTokenContexts(): MutableMap<String, String> {
+    fun getIdTokenRequestMapping(): MutableMap<String, String> {
         return idTokenContexts
     }
 
-    fun getSelfAttestedClaimContexts(): MutableMap<String, String> {
+    fun getSelfAttestedClaimRequestMapping(): MutableMap<String, String> {
         return selfAttestedClaimContexts
     }
 
-    fun getVerifiablePresentationContexts(): List<VerifiableCredentialHolderRequestMapping> {
+    fun getVerifiableCredentialHolderRequestMapping(): List<VerifiableCredentialHolderRequestMapping> {
         return verifiableCredentialHolderRequestMappings
     }
 

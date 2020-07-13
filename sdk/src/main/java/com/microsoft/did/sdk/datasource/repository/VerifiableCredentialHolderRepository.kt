@@ -91,9 +91,9 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            verifiableCredentialContexts = verifiableCredentialRequestMapping,
-            idTokenContexts = response.getIdTokenContexts(),
-            selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
+            verifiableCredentialRequestMappings = verifiableCredentialRequestMapping,
+            idTokenRequestMapping = response.getIdTokenRequestMapping(),
+            selfAttestedClaimRequestMapping = response.getSelfAttestedClaimRequestMapping(),
             contract = response.request.contractUrl,
             expiryInSeconds = expiryInSeconds
         )
@@ -125,9 +125,9 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            verifiableCredentialContexts = verifiableCredentialRequestMapping,
-            idTokenContexts = response.getIdTokenContexts(),
-            selfAttestedClaimContexts = response.getSelfAttestedClaimContexts(),
+            verifiableCredentialRequestMappings = verifiableCredentialRequestMapping,
+            idTokenRequestMapping = response.getIdTokenRequestMapping(),
+            selfAttestedClaimRequestMapping = response.getSelfAttestedClaimRequestMapping(),
             nonce = response.request.content.nonce,
             state = state,
             expiryInSeconds = expiryInSeconds

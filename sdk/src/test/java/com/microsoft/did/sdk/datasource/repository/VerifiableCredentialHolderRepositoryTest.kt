@@ -250,8 +250,8 @@ class VerifiableCredentialHolderRepositoryTest {
         every { mockedIssuanceResponse.request } returns mockedIssuanceRequest
         every { mockedIssuanceRequest.entityIdentifier } returns expectedRpDid
         every { mockedIssuanceRequest.contractUrl } returns expectedContractUrl
-        every { mockedIssuanceResponse.getIdTokenContexts() } returns expectedIdTokenContextMapping
-        every { mockedIssuanceResponse.getSelfAttestedClaimContexts() } returns expectedSelfAttestedClaimContext
+        every { mockedIssuanceResponse.getIdTokenRequestMapping() } returns expectedIdTokenContextMapping
+        every { mockedIssuanceResponse.getSelfAttestedClaimRequestMapping() } returns expectedSelfAttestedClaimContext
     }
 
     private fun setUpPresentationResponse() {
@@ -262,8 +262,8 @@ class VerifiableCredentialHolderRepositoryTest {
         every { mockedPresentationRequest.content } returns oidcRequestContent
         every { oidcRequestContent.nonce } returns ""
         every { oidcRequestContent.state } returns ""
-        every { mockedPresentationResponse.getIdTokenContexts() } returns expectedIdTokenContextMapping
-        every { mockedPresentationResponse.getSelfAttestedClaimContexts() } returns expectedSelfAttestedClaimContext
+        every { mockedPresentationResponse.getIdTokenRequestMapping() } returns expectedIdTokenContextMapping
+        every { mockedPresentationResponse.getSelfAttestedClaimRequestMapping() } returns expectedSelfAttestedClaimContext
     }
 
     private fun setUpExchangeRequest() {
