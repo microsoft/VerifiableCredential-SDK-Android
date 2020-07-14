@@ -76,4 +76,3 @@ class PresentationResponse(override val request: PresentationRequest) : Response
 typealias RequestedIdTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
 typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredentialHolder>
-typealias RequestedVchMapping = Pair<PresentationAttestation, VerifiableCredentialHolder>

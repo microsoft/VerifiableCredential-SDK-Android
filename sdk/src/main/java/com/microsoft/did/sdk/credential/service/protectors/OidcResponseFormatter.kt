@@ -108,7 +108,8 @@ class OidcResponseFormatter @Inject constructor(
     ): Map<String, String>? {
         val vpMap = requestedVchMap.map { (key, value) ->
             key.credentialType to verifiablePresentationFormatter.createPresentation(
-                Pair(key, value),
+                value.verifiableCredential,
+                key.validityInterval,
                 audience,
                 responder
             )

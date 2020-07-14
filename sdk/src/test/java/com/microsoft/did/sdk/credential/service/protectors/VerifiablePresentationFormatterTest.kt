@@ -3,7 +3,6 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.service.RequestedVchMapping
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -19,7 +18,6 @@ class VerifiablePresentationFormatterTest {
     private val mockedTokenSigner : TokenSigner = mockk()
     private val mockedVerifiableCredentialHolder: VerifiableCredentialHolder = mockk()
     private val mockedVerifiableCredential: VerifiableCredential = mockk()
-    private val mockedVchMapping: RequestedVchMapping = mockk()
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val slot = slot<String>()
@@ -45,11 +43,9 @@ class VerifiablePresentationFormatterTest {
 
     @Test
     fun `create presentation`() {
-        every { mockedVchMapping.second } returns mockedVerifiableCredentialHolder
-        every { mockedVchMapping.first } returns mockedPresentationAttestation
         val expectedValidityInterval = 2343
         every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
-        val results = formatter.createPresentation(mockedVchMapping, expectedAudience, mockedIdentifier)
+        val results = formatter.createPresentation(mockedVerifiableCredential, expectedValidityInterval, expectedAudience, mockedIdentifier)
         val contents = serializer.parse(VerifiablePresentationContent.serializer(), results)
         assertEquals(expectedAudience, contents.aud)
         assertEquals(expectedDid, contents.iss)

@@ -37,7 +37,6 @@ class VerifiableCredentialHolderRepositoryTest {
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedPresentationRequest: PresentationRequest = mockk()
     private val mockedRequestedVchMap: RequestedVchMap = mockk()
-    private val mockedRequestedVchMapping: RequestedVchMapping = mockk()
     private val mockedPrimeIdentifier: Identifier = mockk()
     private val mockedPairwiseIdentifier: Identifier = mockk()
     private val mockedFormatter: OidcResponseFormatter = mockk()
