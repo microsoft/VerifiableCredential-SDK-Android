@@ -8,7 +8,9 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
+import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
+import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
+import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -34,9 +36,9 @@ class OidcResponseFormatter @Inject constructor(
         responseAudience: String,
         presentationsAudience: String = "",
         expiryInSeconds: Int,
-        verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping> = emptyList(),
-        idTokenRequestMapping: Map<String, String> = emptyMap(),
-        selfAttestedClaimRequestMapping: Map<String, String> = emptyMap(),
+        requestedVchMap: RequestedVchMap = mutableMapOf(),
+        requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf(),
+        requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf(),
         contract: String? = null,
         nonce: String? = null,
         state: String? = null,
@@ -51,9 +53,9 @@ class OidcResponseFormatter @Inject constructor(
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val attestationResponse = this.createAttestationClaimModel(
-            verifiableCredentialRequestMappings,
-            idTokenRequestMapping,
-            selfAttestedClaimRequestMapping,
+            requestedVchMap,
+            requestedIdTokenMap,
+            requestedSelfAttestedClaimMap,
             presentationsAudience,
             responder)
 
@@ -81,49 +83,48 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createAttestationClaimModel(
-        verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping>,
-        idTokenRequestMapping: Map<String, String>,
-        selfAttestedClaimRequestMapping: Map<String, String>,
+        requestedVchMap: RequestedVchMap,
+        requestedIdTokenMap: RequestedIdTokenMap,
+        requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap,
         presentationsAudience: String,
         responder: Identifier
     ): AttestationClaimModel? {
-        if (areNoCollectedClaims(verifiableCredentialRequestMappings, idTokenRequestMapping, selfAttestedClaimRequestMapping)) {
+        if (areNoCollectedClaims(requestedVchMap, requestedIdTokenMap, requestedSelfAttestedClaimMap)) {
             return null
         }
         val presentationAttestations = createPresentations(
-            verifiableCredentialRequestMappings,
+            requestedVchMap,
             presentationsAudience,
             responder)
-        val nullableSelfAttestedClaimRequestMapping = if (selfAttestedClaimRequestMapping.isEmpty()) { null } else { selfAttestedClaimRequestMapping }
-        val nullableIdTokenRequestMapping = if (idTokenRequestMapping.isEmpty()) { null } else { idTokenRequestMapping }
+        val nullableSelfAttestedClaimRequestMapping = if (requestedSelfAttestedClaimMap.isEmpty()) { null } else { requestedSelfAttestedClaimMap }
+        val nullableIdTokenRequestMapping = if (requestedIdTokenMap.isEmpty()) { null } else { requestedIdTokenMap }
         return AttestationClaimModel(nullableSelfAttestedClaimRequestMapping, nullableIdTokenRequestMapping, presentationAttestations)
     }
 
     private fun createPresentations(
-        verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping>,
+        requestedVchMap: RequestedVchMap,
         audience: String,
         responder: Identifier
     ): Map<String, String>? {
-        val verifiablePresentationMapping = mutableMapOf<String, String>()
-        verifiableCredentialRequestMappings.forEach {
-            verifiablePresentationMapping[it.presentationAttestation.credentialType] = verifiablePresentationFormatter.createPresentation(
-                it,
+        val vpMap = requestedVchMap.map { (key, value) ->
+            key.credentialType to verifiablePresentationFormatter.createPresentation(
+                Pair(key, value),
                 audience,
                 responder
             )
-        }
-        return if (verifiablePresentationMapping.isEmpty()) {
+        }.toMap()
+        return if (vpMap.isEmpty()) {
             null
         } else {
-            verifiablePresentationMapping
+            vpMap
         }
     }
 
     private fun areNoCollectedClaims(
-        verifiableCredentialRequestMappings: List<VerifiableCredentialRequestMapping>,
-        idTokenRequestMapping: Map<String, String>,
-        selfAttestedClaimRequestMapping: Map<String, String>
+        requestedVchMap: RequestedVchMap,
+        requestedIdTokenMap: RequestedIdTokenMap,
+        requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap
     ): Boolean {
-        return (verifiableCredentialRequestMappings.isNullOrEmpty() && idTokenRequestMapping.isNullOrEmpty() && selfAttestedClaimRequestMapping.isNullOrEmpty())
+        return (requestedVchMap.isNullOrEmpty() && requestedIdTokenMap.isNullOrEmpty() && requestedSelfAttestedClaimMap.isNullOrEmpty())
     }
 }

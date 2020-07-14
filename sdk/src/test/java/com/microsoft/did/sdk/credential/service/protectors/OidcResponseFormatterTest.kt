@@ -1,8 +1,12 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
+import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
+import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.RequestedVchMapping
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
@@ -10,16 +14,13 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.FormatterException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.fail
 
 class OidcResponseFormatterTest {
 
@@ -32,7 +33,7 @@ class OidcResponseFormatterTest {
     private val mockedTokenSigner: TokenSigner = mockk()
     private val slot = slot<String>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
-    private val mockedVerifiableCredentialRequestMapping: VerifiableCredentialRequestMapping = mockk()
+    private val mockedRequestedVchMapping: RequestedVchMapping = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val serializer: Serializer = Serializer()
 
@@ -60,11 +61,11 @@ class OidcResponseFormatterTest {
         )
         setUpGetPublicKey()
         setUpExpectedPresentations()
-        setUpVcRequestMapping()
+        setUpRequestedVchMap()
         every { mockedTokenSigner.signWithIdentifier(capture(slot), mockedIdentifier) } answers { slot.captured }
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
-                mockedVerifiableCredentialRequestMapping,
+                mockedRequestedVchMapping,
                 expectedPresentationAudience,
                 mockedIdentifier
             )
@@ -84,17 +85,19 @@ class OidcResponseFormatterTest {
     private fun setUpExpectedPresentations() {
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
-                mockedVerifiableCredentialRequestMapping,
+                mockedRequestedVchMapping,
                 expectedPresentationAudience,
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
     }
 
-    private fun setUpVcRequestMapping() {
+    private fun setUpRequestedVchMap() {
         val mockedPresentationAttestation: PresentationAttestation = mockk()
-        every { mockedVerifiableCredentialRequestMapping.presentationAttestation } returns mockedPresentationAttestation
+        val mockedVch: VerifiableCredentialHolder = mockk()
+        every { mockedRequestedVchMapping.first } returns mockedPresentationAttestation
         every { mockedPresentationAttestation.credentialType } returns expectedCredentialType
+        every { mockedRequestedVchMapping.second } returns mockedVch
     }
 
     @Test
@@ -168,7 +171,7 @@ class OidcResponseFormatterTest {
             responseAudience = expectedResponseAudience,
             contract = expectedContract,
             expiryInSeconds = expectedExpiry,
-            idTokenRequestMapping = mapOf(expectedIdTokenConfig to expectedRawToken)
+            requestedIdTokenMap = mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
         )
         val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
@@ -194,7 +197,7 @@ class OidcResponseFormatterTest {
             responseAudience = expectedResponseAudience,
             contract = expectedContract,
             expiryInSeconds = expectedExpiry,
-            selfAttestedClaimRequestMapping = mapOf(expectedSelfAttestedField to claimValue)
+            requestedSelfAttestedClaimMap = mapOf(expectedSelfAttestedField to claimValue) as RequestedSelfAttestedClaimMap
         )
         val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
@@ -214,13 +217,14 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with presentation attestations`() {
+        val mockedRequestedVchMap: RequestedVchMap = mutableMapOf(mockedRequestedVchMapping.first to mockedRequestedVchMapping.second)
         val actualFormattedToken = formatter.format(
             responder = mockedIdentifier,
             responseAudience = expectedResponseAudience,
             presentationsAudience = expectedPresentationAudience,
             contract = expectedContract,
             expiryInSeconds = expectedExpiry,
-            verifiableCredentialRequestMappings = listOf(mockedVerifiableCredentialRequestMapping)
+            requestedVchMap = mockedRequestedVchMap
         )
         val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
@@ -241,15 +245,16 @@ class OidcResponseFormatterTest {
     fun `format issuance response with all attestations`() {
         val expectedSelfAttestedValue = "value42938"
         val expectedRawToken = "rawToken2343"
+        val mockedRequestedVchMap: RequestedVchMap = mutableMapOf(mockedRequestedVchMapping.first to mockedRequestedVchMapping.second)
         val results = formatter.format(
             responder = mockedIdentifier,
             responseAudience = expectedResponseAudience,
             contract = expectedContract,
             presentationsAudience = expectedPresentationAudience,
             expiryInSeconds = expectedExpiry,
-            verifiableCredentialRequestMappings = listOf(mockedVerifiableCredentialRequestMapping),
-            selfAttestedClaimRequestMapping = mapOf(expectedSelfAttestedField to expectedSelfAttestedValue),
-            idTokenRequestMapping = mapOf(expectedIdTokenConfig to expectedRawToken)
+            requestedVchMap = mockedRequestedVchMap,
+            requestedSelfAttestedClaimMap = mapOf(expectedSelfAttestedField to expectedSelfAttestedValue) as RequestedSelfAttestedClaimMap,
+            requestedIdTokenMap = mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
         )
         val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), results)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)

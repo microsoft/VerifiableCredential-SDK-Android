@@ -7,7 +7,6 @@ package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialHolderRequestMapping
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
@@ -19,41 +18,41 @@ import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
  */
 sealed class Response(open val request: Request, val audience: String) {
     
-    private val verifiableCredentialHolderRequestMappings: MutableList<VerifiableCredentialHolderRequestMapping> = mutableListOf()
+    private val requestedVchMap: RequestedVchMap = mutableMapOf()
 
-    private val idTokenContexts: MutableMap<String, String> = mutableMapOf()
+    private val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
 
     // EXPERIMENTAL
-    private val selfAttestedClaimContexts: MutableMap<String, String> = mutableMapOf()
+    private val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 
-    fun addIdTokenRequestMapping(idTokenAttestation: IdTokenAttestation, token: String) {
-        idTokenContexts[idTokenAttestation.configuration] = token
+    fun addRequestedIdToken(idTokenAttestation: IdTokenAttestation, rawToken: String) {
+        requestedIdTokenMap[idTokenAttestation.configuration] = rawToken
     }
 
-    fun addSelfAttestedClaimRequestMapping(field: String, claim: String) {
-        selfAttestedClaimContexts[field] = claim
+    fun addRequestedSelfAttestedClaim(field: String, claim: String) {
+        requestedSelfAttestedClaimMap[field] = claim
     }
 
-    fun addVerifiableCredentialHolderRequestMapping(card: VerifiableCredentialHolder, presentationAttestation: PresentationAttestation) {
-        verifiableCredentialHolderRequestMappings.add(VerifiableCredentialHolderRequestMapping(card, presentationAttestation))
+    fun addRequestedVch(presentationAttestation: PresentationAttestation, vch: VerifiableCredentialHolder) {
+        requestedVchMap[presentationAttestation] = vch
     }
 
-    fun getIdTokenRequestMapping(): MutableMap<String, String> {
-        return idTokenContexts
+    fun getRequestedIdTokens(): RequestedIdTokenMap {
+        return requestedIdTokenMap
     }
 
-    fun getSelfAttestedClaimRequestMapping(): MutableMap<String, String> {
-        return selfAttestedClaimContexts
+    fun getRequestedSelfAttestedClaims(): RequestedSelfAttestedClaimMap {
+        return requestedSelfAttestedClaimMap
     }
 
-    fun getVerifiableCredentialHolderRequestMapping(): List<VerifiableCredentialHolderRequestMapping> {
-        return verifiableCredentialHolderRequestMappings
+    fun getRequestedVchs(): RequestedVchMap {
+        return requestedVchMap
     }
 
     fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
-        verifiableCredentialHolderRequestMappings.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.verifiablePresentationHolder.cardId, entityDid, entityName)
+        requestedVchMap.forEach {
+            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
@@ -73,3 +72,8 @@ sealed class Response(open val request: Request, val audience: String) {
 
 class IssuanceResponse(override val request: IssuanceRequest) : Response(request, request.contract.input.credentialIssuer)
 class PresentationResponse(override val request: PresentationRequest) : Response(request, request.content.redirectUrl)
+
+typealias RequestedIdTokenMap = MutableMap<String, String>
+typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
+typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredentialHolder>
+typealias RequestedVchMapping = Pair<PresentationAttestation, VerifiableCredentialHolder>

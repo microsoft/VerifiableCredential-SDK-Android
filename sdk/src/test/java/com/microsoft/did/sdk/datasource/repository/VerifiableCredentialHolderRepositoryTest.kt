@@ -6,13 +6,8 @@
 package com.microsoft.did.sdk.datasource.repository
 
 import com.microsoft.did.sdk.credential.models.*
-import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.*
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialHolderRequestMapping
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
@@ -41,12 +36,12 @@ class VerifiableCredentialHolderRepositoryTest {
     private val mockedIssuanceRequest: IssuanceRequest = mockk()
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedPresentationRequest: PresentationRequest = mockk()
-    private val mockedVcRequestMapping: VerifiableCredentialRequestMapping = mockk()
+    private val mockedRequestedVchMap: RequestedVchMap = mockk()
+    private val mockedRequestedVchMapping: RequestedVchMapping = mockk()
     private val mockedPrimeIdentifier: Identifier = mockk()
     private val mockedPairwiseIdentifier: Identifier = mockk()
     private val mockedFormatter: OidcResponseFormatter = mockk()
     private val mockedPrimeVcContent: VerifiableCredentialContent = mockk()
-    private val mockedVpContext: VerifiableCredentialHolderRequestMapping = mockk()
     private val mockedVch: VerifiableCredentialHolder = mockk()
     private val mockedPrimeVc: VerifiableCredential = mockk()
     private val mockedExchangedVcContent: VerifiableCredentialContent = mockk()
@@ -84,13 +79,12 @@ class VerifiableCredentialHolderRepositoryTest {
         setUpIssuanceResponse()
         setUpMockedVcContents(mockedPrimeVcContent, expectedPrimeVcJti, expectedPrimeDid)
         mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
-        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVcToken)
 
         runBlocking {
             val actualResult = repository.sendIssuanceResponse(
                 mockedIssuanceResponse,
-                expectedVcRequestMapping,
+                mockedRequestedVchMap,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
@@ -105,7 +99,6 @@ class VerifiableCredentialHolderRepositoryTest {
     fun `send issuance response with failed response from service`() {
         setUpIssuanceResponse()
         mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
-        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         val expectedException = SdkException()
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(
             expectedException
@@ -114,7 +107,7 @@ class VerifiableCredentialHolderRepositoryTest {
         runBlocking {
             val actualResult = repository.sendIssuanceResponse(
                 mockedIssuanceResponse,
-                expectedVcRequestMapping,
+                mockedRequestedVchMap,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
@@ -125,13 +118,12 @@ class VerifiableCredentialHolderRepositoryTest {
     @Test
     fun `send presentation response successfully`() {
         setUpPresentationResponse()
-        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         coEvery { anyConstructed<SendPresentationResponseNetworkOperation>().fire() } returns Result.Success(Unit)
 
         runBlocking {
             val actualResult = repository.sendPresentationResponse(
                 mockedPresentationResponse,
-                expectedVcRequestMapping,
+                mockedRequestedVchMap,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
@@ -142,14 +134,13 @@ class VerifiableCredentialHolderRepositoryTest {
     @Test
     fun `send presentation response with failed response from service`() {
         setUpPresentationResponse()
-        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         val expectedException = SdkException()
         coEvery { anyConstructed<SendPresentationResponseNetworkOperation>().fire() } returns Result.Failure(expectedException)
 
         runBlocking {
             val actualResult = repository.sendPresentationResponse(
                 mockedPresentationResponse,
-                expectedVcRequestMapping,
+                mockedRequestedVchMap,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
@@ -168,7 +159,7 @@ class VerifiableCredentialHolderRepositoryTest {
 
         runBlocking {
             val actualResult = repository.getExchangedVerifiableCredential(
-                mockedVpContext,
+                mockedVch,
                 mockedPairwiseIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
@@ -194,7 +185,7 @@ class VerifiableCredentialHolderRepositoryTest {
 
         runBlocking {
             val actualResult = repository.getExchangedVerifiableCredential(
-                mockedVpContext,
+                mockedVch,
                 mockedPairwiseIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
@@ -212,7 +203,7 @@ class VerifiableCredentialHolderRepositoryTest {
 
         runBlocking {
             val actualResult = repository.getExchangedVerifiableCredential(
-                mockedVpContext,
+                mockedVch,
                 mockedPairwiseIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
@@ -253,8 +244,8 @@ class VerifiableCredentialHolderRepositoryTest {
         every { mockedIssuanceResponse.request } returns mockedIssuanceRequest
         every { mockedIssuanceRequest.entityIdentifier } returns expectedRpDid
         every { mockedIssuanceRequest.contractUrl } returns expectedContractUrl
-        every { mockedIssuanceResponse.getIdTokenRequestMapping() } returns expectedIdTokenContextMapping
-        every { mockedIssuanceResponse.getSelfAttestedClaimRequestMapping() } returns expectedSelfAttestedClaimContext
+        every { mockedIssuanceResponse.getRequestedIdTokens() } returns expectedIdTokenContextMapping
+        every { mockedIssuanceResponse.getRequestedSelfAttestedClaims() } returns expectedSelfAttestedClaimContext
     }
 
     private fun setUpPresentationResponse() {
@@ -265,8 +256,8 @@ class VerifiableCredentialHolderRepositoryTest {
         every { mockedPresentationRequest.content } returns oidcRequestContent
         every { oidcRequestContent.nonce } returns ""
         every { oidcRequestContent.state } returns ""
-        every { mockedPresentationResponse.getIdTokenRequestMapping() } returns expectedIdTokenContextMapping
-        every { mockedPresentationResponse.getSelfAttestedClaimRequestMapping() } returns expectedSelfAttestedClaimContext
+        every { mockedPresentationResponse.getRequestedIdTokens() } returns expectedIdTokenContextMapping
+        every { mockedPresentationResponse.getRequestedSelfAttestedClaims() } returns expectedSelfAttestedClaimContext
     }
 
     private fun setUpExchangeRequest() {
@@ -278,7 +269,6 @@ class VerifiableCredentialHolderRepositoryTest {
     }
 
     private fun setUpVpContext() {
-        every { mockedVpContext.verifiablePresentationHolder } returns mockedVch
         setUpMockedVch()
         setUpMockedPrimeVc()
         setUpMockedVcContents(mockedPrimeVcContent, expectedPrimeVcJti, expectedPrimeDid)

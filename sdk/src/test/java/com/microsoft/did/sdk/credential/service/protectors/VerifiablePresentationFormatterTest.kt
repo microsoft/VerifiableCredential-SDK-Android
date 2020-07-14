@@ -1,9 +1,10 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
-import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.service.RequestedVchMapping
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -16,8 +17,9 @@ import kotlin.test.assertEquals
 class VerifiablePresentationFormatterTest {
 
     private val mockedTokenSigner : TokenSigner = mockk()
+    private val mockedVerifiableCredentialHolder: VerifiableCredentialHolder = mockk()
     private val mockedVerifiableCredential: VerifiableCredential = mockk()
-    private val mockedVerifiableCredentialRequestMapping: VerifiableCredentialRequestMapping = mockk()
+    private val mockedVchMapping: RequestedVchMapping = mockk()
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val slot = slot<String>()
@@ -37,16 +39,17 @@ class VerifiablePresentationFormatterTest {
         every { mockedIdentifier.id } returns expectedDid
         every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
         every { mockedTokenSigner.signWithIdentifier(capture(slot), eq(mockedIdentifier)) } answers { slot.captured }
+        every { mockedVerifiableCredentialHolder.verifiableCredential } returns mockedVerifiableCredential
         every { mockedVerifiableCredential.raw } returns expectedRawVerifiableCredential
     }
 
     @Test
     fun createPresentationTest() {
-        every { mockedVerifiableCredentialRequestMapping.verifiableCredential } returns mockedVerifiableCredential
-        every { mockedVerifiableCredentialRequestMapping.presentationAttestation } returns mockedPresentationAttestation
+        every { mockedVchMapping.second } returns mockedVerifiableCredentialHolder
+        every { mockedVchMapping.first } returns mockedPresentationAttestation
         val expectedValidityInterval = 2343
         every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
-        val results = formatter.createPresentation(mockedVerifiableCredentialRequestMapping, expectedAudience, mockedIdentifier)
+        val results = formatter.createPresentation(mockedVchMapping, expectedAudience, mockedIdentifier)
         val contents = serializer.parse(VerifiablePresentationContent.serializer(), results)
         assertEquals(expectedAudience, contents.aud)
         assertEquals(expectedDid, contents.iss)

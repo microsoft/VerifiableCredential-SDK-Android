@@ -1,6 +1,6 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
-import com.microsoft.did.sdk.credential.service.models.requestMappings.VerifiableCredentialRequestMapping
+import com.microsoft.did.sdk.credential.service.RequestedVchMapping
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationContent
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -18,17 +18,17 @@ class VerifiablePresentationFormatter @Inject constructor(
 
     // only support one VC per VP
     fun createPresentation(
-        verifiableCredentialRequestMapping: VerifiableCredentialRequestMapping,
+        requestedVchMapping: RequestedVchMapping,
         audience: String,
         responder: Identifier
     ): String {
         val vp = VerifiablePresentationDescriptor(
-            verifiableCredential = listOf(verifiableCredentialRequestMapping.verifiableCredential.raw),
+            verifiableCredential = listOf(requestedVchMapping.second.verifiableCredential.raw),
             context = listOf(Constants.VP_CONTEXT_URL),
             type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
         )
 
-        val (iat, exp: Long?) = createIatAndExp(verifiableCredentialRequestMapping.presentationAttestation.validityInterval)
+        val (iat, exp: Long?) = createIatAndExp(requestedVchMapping.first.validityInterval)
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val contents =
