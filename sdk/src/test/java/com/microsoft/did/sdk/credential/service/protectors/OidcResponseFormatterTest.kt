@@ -25,7 +25,7 @@ class OidcResponseFormatterTest {
 
     // mocks for retrieving public key.
     private val mockedCryptoOperations: CryptoOperations = mockk()
-    private val mockedKeyStore: KeyStore  = mockk()
+    private val mockedKeyStore: KeyStore = mockk()
     private val mockedKeyContainer: KeyContainer<PublicKey> = mockk()
     private val mockedPublicKey: PublicKey = mockk()
 
@@ -61,12 +61,14 @@ class OidcResponseFormatterTest {
         setUpGetPublicKey()
         setUpExpectedPresentations()
         setUpVcRequestMapping()
-        every { mockedTokenSigner.signWithIdentifier(capture(slot), mockedIdentifier)} answers { slot.captured }
-        every { mockedVerifiablePresentationFormatter.createPresentation(
-            mockedVerifiableCredentialRequestMapping,
-            expectedPresentationAudience,
-            mockedIdentifier
-        ) } returns expectedVerifiablePresentation
+        every { mockedTokenSigner.signWithIdentifier(capture(slot), mockedIdentifier) } answers { slot.captured }
+        every {
+            mockedVerifiablePresentationFormatter.createPresentation(
+                mockedVerifiableCredentialRequestMapping,
+                expectedPresentationAudience,
+                mockedIdentifier
+            )
+        } returns expectedVerifiablePresentation
     }
 
     private fun setUpGetPublicKey() {

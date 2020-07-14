@@ -107,7 +107,9 @@ class VerifiableCredentialHolderRepositoryTest {
         mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
         val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         val expectedException = SdkException()
-        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(expectedException)
+        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(
+            expectedException
+        )
 
         runBlocking {
             val actualResult = repository.sendIssuanceResponse(
@@ -186,7 +188,9 @@ class VerifiableCredentialHolderRepositoryTest {
         setUpVpContext()
         coEvery { repository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns emptyList()
         val expectedException = SdkException()
-        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(expectedException)
+        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(
+            expectedException
+        )
 
         runBlocking {
             val actualResult = repository.getExchangedVerifiableCredential(
@@ -226,20 +230,22 @@ class VerifiableCredentialHolderRepositoryTest {
     }
 
     private fun setUpFormatter() {
-        every { mockedFormatter.format(
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any(),
-            any()
-        ) } returns expectedSignedResponseToken
+        every {
+            mockedFormatter.format(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns expectedSignedResponseToken
     }
 
     private fun setUpIssuanceResponse() {
