@@ -265,7 +265,7 @@ class VerifiableCredentialHolderRepositoryTest {
 
     private fun setUpExchangeRequest() {
         mockkConstructor(ExchangeRequest::class)
-        every { anyConstructed<ExchangeRequest>().newOwnerDid } returns expectedPairwiseDid
+        every { anyConstructed<ExchangeRequest>().pairwiseDid } returns expectedPairwiseDid
         every { anyConstructed<ExchangeRequest>().verifiableCredential } returns mockedPrimeVc
         every { mockedPrimeVc.picId } returns expectedPrimeVcJti
         every { mockedPrimeVc.contents } returns mockedExchangedVcContent

@@ -161,7 +161,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responder = requester,
             responseAudience = request.audience,
             transformingVerifiableCredential = request.verifiableCredential,
-            recipientIdentifier = request.newOwnerDid,
+            recipientIdentifier = request.pairwiseDid,
             expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS
         )
 
