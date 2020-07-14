@@ -44,7 +44,7 @@ class VerifiablePresentationFormatterTest {
     }
 
     @Test
-    fun createPresentationTest() {
+    fun `create presentation`() {
         every { mockedVchMapping.second } returns mockedVerifiableCredentialHolder
         every { mockedVchMapping.first } returns mockedPresentationAttestation
         val expectedValidityInterval = 2343

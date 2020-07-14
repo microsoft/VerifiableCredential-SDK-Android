@@ -101,7 +101,7 @@ class OidcResponseFormatterTest {
     }
 
     @Test
-    fun formatSimpleSiopResponseTest() {
+    fun `format simple siop response`() {
         val actualFormattedToken = formatter.format(
             responder = mockedIdentifier,
             responseAudience = expectedResponseAudience,
