@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.protectors
 
-import java.util.*
+import java.util.Date
 import kotlin.math.floor
 
 fun createIatAndExp(expiryInSeconds: Int): Pair<Long, Long?> {

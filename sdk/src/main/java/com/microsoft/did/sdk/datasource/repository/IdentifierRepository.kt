@@ -6,9 +6,9 @@
 package com.microsoft.did.sdk.datasource.repository
 
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
+import com.microsoft.did.sdk.identifier.models.Identifier
 import javax.inject.Inject
 
 class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiProvider: ApiProvider) {

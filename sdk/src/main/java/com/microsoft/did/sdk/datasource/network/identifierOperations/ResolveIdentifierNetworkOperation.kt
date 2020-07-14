@@ -5,9 +5,9 @@
 
 package com.microsoft.did.sdk.datasource.network.identifierOperations
 
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import retrofit2.Response
 import javax.inject.Inject
 
