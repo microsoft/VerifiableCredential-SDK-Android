@@ -66,7 +66,7 @@ class VerifiableCredentialManager @Inject constructor(
 
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
-        if (url.scheme != Constants.DEEP_LINK_SCHEME) {
+        if (url.scheme != Constants.DEEP_LINK_SCHEME && url.host != Constants.DEEP_LINK_HOST) {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
