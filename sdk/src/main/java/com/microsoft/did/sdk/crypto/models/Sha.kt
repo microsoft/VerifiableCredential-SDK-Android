@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.crypto.models
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 
 enum class Sha(val algorithm: Algorithm) {

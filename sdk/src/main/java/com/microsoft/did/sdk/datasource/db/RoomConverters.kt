@@ -3,9 +3,9 @@
 package com.microsoft.did.sdk.datasource.db
 
 import androidx.room.TypeConverter
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.util.serializer.Serializer
 

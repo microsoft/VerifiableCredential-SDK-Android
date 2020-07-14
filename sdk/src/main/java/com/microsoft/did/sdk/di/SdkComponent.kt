@@ -6,8 +6,8 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
-import com.microsoft.did.sdk.VerifiableCredentialManager
 import com.microsoft.did.sdk.IdentifierManager
+import com.microsoft.did.sdk.VerifiableCredentialManager
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named

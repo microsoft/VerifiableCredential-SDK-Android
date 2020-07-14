@@ -8,9 +8,9 @@ package com.microsoft.did.sdk.datasource.network.credentialOperations
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.serializer.Serializer
 import retrofit2.Response
 
 class SendVerifiableCredentialIssuanceRequestNetworkOperation(

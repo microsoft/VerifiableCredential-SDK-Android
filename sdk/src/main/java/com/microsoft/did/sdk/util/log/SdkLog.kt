@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.util.log
 
-import java.lang.RuntimeException
 import java.util.regex.Pattern
 
 object SdkLog {

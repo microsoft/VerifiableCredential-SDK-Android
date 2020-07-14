@@ -5,12 +5,12 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.util.Constants.CLIENT_ID
 import com.microsoft.did.sdk.util.Constants.MAX_AGE
 import com.microsoft.did.sdk.util.Constants.REDIRECT_URL
 import com.microsoft.did.sdk.util.Constants.RESPONSE_MODE
 import com.microsoft.did.sdk.util.Constants.RESPONSE_TYPE
-import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
