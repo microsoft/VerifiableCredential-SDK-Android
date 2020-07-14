@@ -42,8 +42,6 @@ class VerifiableCredentialHolderRepositoryTest {
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedPresentationRequest: PresentationRequest = mockk()
     private val mockedVcRequestMapping: VerifiableCredentialRequestMapping = mockk()
-    private val mockedIdTokenContext: IdTokenContext = mockk()
-    private val mockedSelfAttestedClaimContext: SelfAttestedClaimContext = mockk()
     private val mockedPrimeIdentifier: Identifier = mockk()
     private val mockedPairwiseIdentifier: Identifier = mockk()
     private val mockedFormatter: OidcResponseFormatter = mockk()
@@ -57,7 +55,6 @@ class VerifiableCredentialHolderRepositoryTest {
     private val serializer: Serializer = Serializer()
 
     private val expectedAudience: String = "audience23430"
-    private val expectedVcType: String = "type2309"
     private val expectedSignedResponseToken: String = "responseToken49235"
     private val expectedRpDid: String = "did:ion:rp53292"
     private val expectedPairwiseDid: String = "did:ion:pairwise238"
@@ -65,8 +62,8 @@ class VerifiableCredentialHolderRepositoryTest {
     private val expectedContractUrl: String = "https://contract.com/2434"
     private val expectedIdTokenContextField: String = "idTokenField48239"
     private val expectedSelfAttestedClaimKey: String = "selfAttestedClaim3454"
-    private val expectedIdTokenContextMapping = mapOf(expectedIdTokenContextField to mockedIdTokenContext)
-    private val expectedSelfAttestedClaimContext = mapOf(expectedSelfAttestedClaimKey to mockedSelfAttestedClaimContext)
+    private val expectedIdTokenContextMapping = mutableMapOf(expectedIdTokenContextField to "")
+    private val expectedSelfAttestedClaimContext = mutableMapOf(expectedSelfAttestedClaimKey to "")
     private val expectedVcToken: String = "vcToken523094"
     private val expectedPrimeVcJti: String = "primeJti23723"
     private val expectedExchangedVcJti: String = "exchangeJti293859"
@@ -87,13 +84,13 @@ class VerifiableCredentialHolderRepositoryTest {
         setUpIssuanceResponse()
         setUpMockedVcContents(mockedPrimeVcContent, expectedPrimeVcJti, expectedPrimeDid)
         mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
-        val expectedVcContexts = mapOf(expectedVcType to mockedVcRequestMapping)
+        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVcToken)
 
         runBlocking {
             val actualResult = repository.sendIssuanceResponse(
                 mockedIssuanceResponse,
-                expectedVcContexts,
+                expectedVcRequestMapping,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
@@ -108,14 +105,14 @@ class VerifiableCredentialHolderRepositoryTest {
     fun `send issuance response with failed response from service`() {
         setUpIssuanceResponse()
         mockUnwrapSignedVcTopLevelFunction(mockedPrimeVcContent)
-        val expectedVcContexts = mapOf(expectedVcType to mockedVcRequestMapping)
+        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         val expectedException = SdkException()
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(expectedException)
 
         runBlocking {
             val actualResult = repository.sendIssuanceResponse(
                 mockedIssuanceResponse,
-                expectedVcContexts,
+                expectedVcRequestMapping,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
@@ -126,13 +123,13 @@ class VerifiableCredentialHolderRepositoryTest {
     @Test
     fun `send presentation response successfully`() {
         setUpPresentationResponse()
-        val expectedVcContexts = mapOf(expectedVcType to mockedVcRequestMapping)
+        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         coEvery { anyConstructed<SendPresentationResponseNetworkOperation>().fire() } returns Result.Success(Unit)
 
         runBlocking {
             val actualResult = repository.sendPresentationResponse(
                 mockedPresentationResponse,
-                expectedVcContexts,
+                expectedVcRequestMapping,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
@@ -143,14 +140,14 @@ class VerifiableCredentialHolderRepositoryTest {
     @Test
     fun `send presentation response with failed response from service`() {
         setUpPresentationResponse()
-        val expectedVcContexts = mapOf(expectedVcType to mockedVcRequestMapping)
+        val expectedVcRequestMapping = listOf(mockedVcRequestMapping)
         val expectedException = SdkException()
         coEvery { anyConstructed<SendPresentationResponseNetworkOperation>().fire() } returns Result.Failure(expectedException)
 
         runBlocking {
             val actualResult = repository.sendPresentationResponse(
                 mockedPresentationResponse,
-                expectedVcContexts,
+                expectedVcRequestMapping,
                 mockedPrimeIdentifier
             )
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)

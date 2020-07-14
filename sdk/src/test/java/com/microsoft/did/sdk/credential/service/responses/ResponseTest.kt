@@ -52,11 +52,11 @@ class ResponseTest {
         val actualCollectedCards = response.getVerifiableCredentialHolderRequestMapping()
         val expectedCardCount = 2
         assertThat(actualCollectedCards).isNotNull
-        assertThat(actualCollectedCards?.size).isEqualTo(expectedCardCount)
-        assertThat(actualCollectedCards?.get(suppliedCardType2)?.verifiablePresentationHolder).isEqualTo(suppliedVerifiableCredentialHolder2)
-        assertThat(actualCollectedCards?.get(suppliedCardType2)?.presentationAttestation).isEqualTo(suppliedPresentationAttestation2)
-        assertThat(actualCollectedCards?.get(suppliedCardType1)?.verifiablePresentationHolder).isEqualTo(suppliedVerifiableCredentialHolder1)
-        assertThat(actualCollectedCards?.get(suppliedCardType1)?.presentationAttestation).isEqualTo(suppliedPresentationAttestation1)
+        assertThat(actualCollectedCards.size).isEqualTo(expectedCardCount)
+        assertThat(actualCollectedCards[1].verifiablePresentationHolder).isEqualTo(suppliedVerifiableCredentialHolder2)
+        assertThat(actualCollectedCards[1].presentationAttestation).isEqualTo(suppliedPresentationAttestation2)
+        assertThat(actualCollectedCards[0].verifiablePresentationHolder).isEqualTo(suppliedVerifiableCredentialHolder1)
+        assertThat(actualCollectedCards[0].presentationAttestation).isEqualTo(suppliedPresentationAttestation1)
     }
 
     @Test
@@ -69,9 +69,8 @@ class ResponseTest {
         val actualCollectedTokens = response.getIdTokenRequestMapping()
         val expectedTokenCount = 1
         assertThat(actualCollectedTokens).isNotNull
-        assertThat(actualCollectedTokens?.size).isEqualTo(expectedTokenCount)
-        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)?.rawToken).isEqualTo(suppliedIdToken)
-        assertThat(actualCollectedTokens?.get(suppliedIdTokenConfiguration)?.idTokenAttestation).isEqualTo(suppliedIdTokenAttestation)
+        assertThat(actualCollectedTokens.size).isEqualTo(expectedTokenCount)
+        assertThat(actualCollectedTokens[suppliedIdTokenConfiguration]).isEqualTo(suppliedIdToken)
     }
 
     @Test
@@ -82,9 +81,8 @@ class ResponseTest {
         val actualSelfIssuedClaims = response.getSelfAttestedClaimRequestMapping()
         val expectedSelfIssuedClaimCount = 1
         assertThat(actualSelfIssuedClaims).isNotNull
-        assertThat(actualSelfIssuedClaims?.size).isEqualTo(expectedSelfIssuedClaimCount)
-        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)?.field).isEqualTo(suppliedSelfIssuedClaimField)
-        assertThat(actualSelfIssuedClaims?.get(suppliedSelfIssuedClaimField)?.value).isEqualTo(suppliedSelfIssuedClaim)
+        assertThat(actualSelfIssuedClaims.size).isEqualTo(expectedSelfIssuedClaimCount)
+        assertThat(actualSelfIssuedClaims[suppliedSelfIssuedClaimField]).isEqualTo(suppliedSelfIssuedClaim)
     }
 
     @Test
@@ -150,10 +148,10 @@ class ResponseTest {
         every { piCard2.cardId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
         val receipts = response.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
-        val expectedReceiptCount = 1
+        val expectedReceiptCount = 2
         assertThat(receipts.size).isEqualTo(expectedReceiptCount)
         val receipt = receipts.first()
-        assertThat(receipt.vcId).isEqualTo(cardId2)
+        assertThat(receipt.vcId).isEqualTo(cardId1)
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
         assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)

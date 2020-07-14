@@ -94,7 +94,9 @@ class OidcResponseFormatter @Inject constructor(
             verifiableCredentialRequestMappings,
             presentationsAudience,
             responder)
-        return AttestationClaimModel(selfAttestedClaimRequestMapping, idTokenRequestMapping, presentationAttestations)
+        val nullableSelfAttestedClaimRequestMapping = if (selfAttestedClaimRequestMapping.isEmpty()) { null } else { selfAttestedClaimRequestMapping }
+        val nullableIdTokenRequestMapping = if (idTokenRequestMapping.isEmpty()) { null } else { idTokenRequestMapping }
+        return AttestationClaimModel(nullableSelfAttestedClaimRequestMapping, nullableIdTokenRequestMapping, presentationAttestations)
     }
 
     private fun createPresentations(
@@ -110,7 +112,11 @@ class OidcResponseFormatter @Inject constructor(
                 responder
             )
         }
-        return verifiablePresentationMapping
+        return if (verifiablePresentationMapping.isEmpty()) {
+            null
+        } else {
+            verifiablePresentationMapping
+        }
     }
 
     private fun areNoCollectedClaims(
