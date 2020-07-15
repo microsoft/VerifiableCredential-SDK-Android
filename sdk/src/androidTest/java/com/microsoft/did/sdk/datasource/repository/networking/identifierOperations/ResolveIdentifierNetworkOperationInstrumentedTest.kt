@@ -28,7 +28,7 @@ class ResolveIdentifierNetworkOperationInstrumentedTest {
         identifierRepository = VerifiableCredentialSdk.identifierManager.identifierRepository
     }
 
-    @Ignore
+    @Ignore("Calls the real service which currently is still flaky. Ignoring for now")
     @Test
     fun successfulResolutionTest() {
         runBlocking {
