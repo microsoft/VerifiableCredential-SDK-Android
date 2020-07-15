@@ -239,7 +239,6 @@ class JwsToken private constructor(
         )
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
-        SdkLog.d("Raw data: " + rawData.toReadableString())
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 
