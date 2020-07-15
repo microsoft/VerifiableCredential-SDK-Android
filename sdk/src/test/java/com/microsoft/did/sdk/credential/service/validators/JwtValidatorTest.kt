@@ -37,12 +37,9 @@ class JwtValidatorTest {
 
     private val mockedResolver: Resolver = mockk()
 
-    private val expectedSerializedToken: String = "token2364302"
-
     private val validator: JwtValidator
     private val serializer: Serializer = Serializer()
 
-    private val expectedSignature: String = "signature4234"
     private val expectedDid: String = "did:test:4235"
     private val expectedKid: String = "$expectedDid#kidTest2353"
 

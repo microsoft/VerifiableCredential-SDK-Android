@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.attestations
 
+import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
 import kotlinx.serialization.Serializable
 
 /**
@@ -24,5 +25,8 @@ data class PresentationAttestation(
     val issuers: List<AcceptedIssuer> = emptyList(),
 
     // A list of contracts if user does not have requested credential.
-    val contracts: List<String> = emptyList()
+    val contracts: List<String> = emptyList(),
+
+    // How long the requested Verifiable Presentation should be valid for.
+    val validityInterval: Int = DEFAULT_VP_EXPIRATION_IN_SECONDS
 )

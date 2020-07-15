@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.repository.dao
+package com.microsoft.did.sdk.datasource.repository.dao
 
 import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -18,7 +18,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialHolderDao
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.repository.getOrAwaitValue
+import com.microsoft.did.sdk.datasource.repository.getOrAwaitValue
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat

@@ -8,6 +8,9 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
+import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
+import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
+import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -31,28 +34,30 @@ class OidcResponseFormatter @Inject constructor(
     fun format(
         responder: Identifier,
         responseAudience: String,
-        presentationsAudience: String? = null,
-        expiresIn: Int,
-        requestedVcs: Map<String, VerifiableCredential>? = null,
-        requestedIdTokens: Map<String, String>? = null,
-        requestedSelfIssuedClaims: Map<String, String>? = null,
+        presentationsAudience: String = "",
+        expiryInSeconds: Int,
+        requestedVchMap: RequestedVchMap = mutableMapOf(),
+        requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf(),
+        requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf(),
         contract: String? = null,
         nonce: String? = null,
         state: String? = null,
         transformingVerifiableCredential: VerifiableCredential? = null,
         recipientIdentifier: String? = null
     ): String {
-        val (iat, exp) = createIatAndExp(expiresIn)
+        val (iat, exp) = createIatAndExp(expiryInSeconds)
+        if (exp == null) {
+            throw FormatterException("Expiry for OIDC Responses cannot be null")
+        }
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         val attestationResponse = this.createAttestationClaimModel(
-            requestedVcs,
-            requestedIdTokens,
-            requestedSelfIssuedClaims,
+            requestedVchMap,
+            requestedIdTokenMap,
+            requestedSelfAttestedClaimMap,
             presentationsAudience,
-            responder,
-            expiresIn)
+            responder)
 
         val contents = OidcResponseContent(
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
@@ -78,47 +83,49 @@ class OidcResponseFormatter @Inject constructor(
     }
 
     private fun createAttestationClaimModel(
-        requestedVcs: Map<String, VerifiableCredential>?,
-        requestedIdTokens: Map<String, String>?,
-        requestedSelfIssuedClaims: Map<String, String>?,
-        presentationsAudience: String? = null,
-        responder: Identifier,
-        expiresIn: Int
+        requestedVchMap: RequestedVchMap,
+        requestedIdTokenMap: RequestedIdTokenMap,
+        requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap,
+        presentationsAudience: String,
+        responder: Identifier
     ): AttestationClaimModel? {
-        if (areNoCollectedClaims(requestedVcs, requestedIdTokens, requestedSelfIssuedClaims)) {
+        if (areNoCollectedClaims(requestedVchMap, requestedIdTokenMap, requestedSelfAttestedClaimMap)) {
             return null
         }
-        val presentationAttestations = createPresentations(requestedVcs, presentationsAudience, responder, expiresIn)
-        return AttestationClaimModel(requestedSelfIssuedClaims, requestedIdTokens, presentationAttestations)
+        val presentationAttestations = createPresentations(
+            requestedVchMap,
+            presentationsAudience,
+            responder)
+        val nullableSelfAttestedClaimRequestMapping = if (requestedSelfAttestedClaimMap.isEmpty()) { null } else { requestedSelfAttestedClaimMap }
+        val nullableIdTokenRequestMapping = if (requestedIdTokenMap.isEmpty()) { null } else { requestedIdTokenMap }
+        return AttestationClaimModel(nullableSelfAttestedClaimRequestMapping, nullableIdTokenRequestMapping, presentationAttestations)
     }
 
     private fun createPresentations(
-        requestedVcs: Map<String, VerifiableCredential>?,
-        audience: String? = null,
-        responder: Identifier,
-        expiresIn: Int
+        requestedVchMap: RequestedVchMap,
+        audience: String,
+        responder: Identifier
     ): Map<String, String>? {
-        return if (audience != null) {
-            requestedVcs?.mapValues {
-                verifiablePresentationFormatter.createPresentation(
-                    listOf(it.value),
-                    audience,
-                    responder,
-                    expiresIn
-                )
-            }
-        } else if (!requestedVcs.isNullOrEmpty()) {
-            throw FormatterException("No audience specified for presentations")
-        } else {
+        val vpMap = requestedVchMap.map { (key, value) ->
+            key.credentialType to verifiablePresentationFormatter.createPresentation(
+                value.verifiableCredential,
+                key.validityInterval,
+                audience,
+                responder
+            )
+        }.toMap()
+        return if (vpMap.isEmpty()) {
             null
+        } else {
+            vpMap
         }
     }
 
     private fun areNoCollectedClaims(
-        requestedVcs: Map<String, VerifiableCredential>?,
-        requestedIdTokens: Map<String, String>?,
-        requestedSelfIssuedClaims: Map<String, String>?
+        requestedVchMap: RequestedVchMap,
+        requestedIdTokenMap: RequestedIdTokenMap,
+        requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap
     ): Boolean {
-        return (requestedVcs.isNullOrEmpty() && requestedIdTokens.isNullOrEmpty() && requestedSelfIssuedClaims.isNullOrEmpty())
+        return (requestedVchMap.isNullOrEmpty() && requestedIdTokenMap.isNullOrEmpty() && requestedSelfAttestedClaimMap.isNullOrEmpty())
     }
 }
