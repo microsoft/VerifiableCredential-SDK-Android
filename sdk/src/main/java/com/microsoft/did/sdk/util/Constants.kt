@@ -34,7 +34,8 @@ object Constants {
     const val DEFAULT_VP_EXPIRATION_IN_SECONDS = 3600
     const val HASHING_ALGORITHM_FOR_ID = "MD5"
 
-    const val DEEP_LINK_SCHEME = "verifiablecredential"
+    const val DEEP_LINK_SCHEME = "openid"
+    const val DEEP_LINK_HOST = "vc"
 
     //Identifier Constants
     const val MASTER_IDENTIFIER_NAME = "did.identifier"

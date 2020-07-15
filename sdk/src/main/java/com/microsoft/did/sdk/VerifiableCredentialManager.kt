@@ -20,6 +20,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.*
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
+import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
@@ -67,7 +68,7 @@ class VerifiableCredentialManager @Inject constructor(
 
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
-        if (url.scheme != DEEP_LINK_SCHEME) {
+        if (url.scheme != DEEP_LINK_SCHEME && url.host != DEEP_LINK_HOST) {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
