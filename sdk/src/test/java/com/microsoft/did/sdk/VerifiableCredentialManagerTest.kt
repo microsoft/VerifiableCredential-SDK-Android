@@ -61,7 +61,7 @@ class VerifiableCredentialManagerTest {
         val presentationResponse = cardManager.createPresentationResponse(presentationRequest)
         every { presentationResponse.request.entityIdentifier } returns testEntityDid
         every { presentationResponse.request.entityName } returns testEntityName
-        coEvery { verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any()) } returns Result.Success(Unit)
+        coEvery { verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any()) } returns Result.Success(Unit)
 
         runBlocking {
             val responder: Identifier = mockk()
@@ -72,10 +72,10 @@ class VerifiableCredentialManagerTest {
         coVerify(exactly = 1) {
             cardManager.createPresentationResponse(presentationRequest)
             cardManager.sendPresentationResponse(any(), any(), any())
-            verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any())
-            presentationResponse.createReceiptsForPresentedCredentials(testEntityDid, testEntityName)
+            verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any())
+            presentationResponse.createReceiptsForPresentedVerifiableCredentials(testEntityDid, testEntityName)
         }
-        presentationResponse.getCollectedVchs()?.size?.let {
+        presentationResponse.getRequestedVchs()?.size?.let {
             coVerify(exactly = it) {
                 verifiableCredentialHolderRepository.insert(any<Receipt>())
             }

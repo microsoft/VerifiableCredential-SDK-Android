@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.repository.dao
+package com.microsoft.did.sdk.datasource.repository.dao
 
 import android.content.Context
 import androidx.room.Room

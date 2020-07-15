@@ -30,7 +30,7 @@ data class VerifiablePresentationContent(
     val iat: Long,
 
     // When the token expires.
-    val exp: Long,
+    val exp: Long? = null,
 
     val nbf: Long? = null,
 
