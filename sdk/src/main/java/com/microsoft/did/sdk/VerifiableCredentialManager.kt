@@ -240,8 +240,12 @@ class VerifiableCredentialManager @Inject constructor(
     /**
      * Get all Verifiable Credentials Holders from the database.
      */
-    fun getVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
+    fun getAllVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
         return vchRepository.getAllVchs()
+    }
+
+    fun queryAllVerifiableCredentials(): List<VerifiableCredentialHolder> {
+        return vchRepository.queryAllVchs()
     }
 
     /**
