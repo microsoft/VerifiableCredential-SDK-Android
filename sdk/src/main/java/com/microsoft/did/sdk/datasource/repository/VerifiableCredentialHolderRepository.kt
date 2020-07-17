@@ -27,7 +27,6 @@ import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
-import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -56,6 +55,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
 
     fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVcs()
+
+    fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVcs()
 
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return getAllVchs().map { cardList -> filterVcsByType(cardList, type) }
