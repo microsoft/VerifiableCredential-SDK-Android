@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.repository
+package com.microsoft.did.sdk.datasource.repository
 
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.IdentifierDao
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
-import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.util.controlflow.ServiceErrorException

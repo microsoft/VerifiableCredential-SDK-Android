@@ -7,28 +7,30 @@ package com.microsoft.did.sdk.datasource.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
-import com.microsoft.did.sdk.credential.service.models.PairwiseIssuanceRequest
-import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.models.RevocationReceipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.models.PairwiseIssuanceRequest
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
+import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
-import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
-import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.PairwiseIssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.SdkException
+import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.unwrapReceipt
+import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -67,8 +69,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     }
 
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVcById(id)
-
-    suspend fun update(picId: String, credentialStatus: String) = vchDao.update(picId, credentialStatus)
 
     // Receipt Methods
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
@@ -142,22 +142,25 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         verifiableCredentialHolder: VerifiableCredentialHolder,
         rpList: List<String>?,
         reason: String?
-    ): Result<Unit> {
-        val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, null)
-        val revocationStatus = sendRevocationRequest(revocationRequest, verifiableCredentialHolder.owner, rpList, reason)
-        this.update(verifiableCredentialHolder.verifiableCredential.jti, revocationStatus)
-        return Result.Success(Unit)
+    ): Result<RevocationReceipt> {
+        val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, rpList, reason)
+        val formattedRevocationRequest = createRevocationRequest(revocationRequest, verifiableCredentialHolder.owner)
+        val revocationStatus = sendRevocationRequest(revocationRequest, formattedRevocationRequest)
+        return Result.Success(revocationStatus)
     }
 
-    private suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, owner: Identifier, rpList: List<String>?, reason: String?): String {
-        val formattedRevocationRequest = formatter.format(
+    private fun createRevocationRequest(revocationRequest: RevocationRequest, owner: Identifier): String {
+        return formatter.format(
             responder = owner,
             responseAudience = revocationRequest.audience,
             expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
             transformingVerifiableCredential = revocationRequest.verifiableCredential,
-            revocationRPs = rpList,
-            revocationReason = reason
+            revocationRPs = revocationRequest.rpList,
+            revocationReason = revocationRequest.reason
         )
+    }
+
+    suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): RevocationReceipt {
         val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
             revocationRequest.audience,
             formattedRevocationRequest,
@@ -165,7 +168,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             serializer
         ).fire()
         return when (revocationResult) {
-            is Result.Success -> revocationResult.payload
+            is Result.Success -> unwrapRevocationReceipt(revocationResult.payload)
             is Result.Failure -> throw SdkException("Unable to revoke VP")
         }
     }
@@ -223,5 +226,9 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     private fun formVerifiableCredential(rawToken: String, vcId: String? = null): VerifiableCredential {
         val vcContents = unwrapSignedVerifiableCredential(rawToken, serializer)
         return VerifiableCredential(vcContents.jti, rawToken, vcContents, vcId ?: vcContents.jti)
+    }
+
+    private fun unwrapRevocationReceipt(rawToken: String): RevocationReceipt {
+        return unwrapReceipt(rawToken, serializer)
     }
 }

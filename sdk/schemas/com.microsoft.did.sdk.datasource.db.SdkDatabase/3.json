@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "e358c70f2d33724d33c7a2e8ec18de38",
+    "identityHash": "7ea29699c796b2bc45b8f471fa2d79fb",
     "entities": [
       {
         "tableName": "VerifiableCredential",
@@ -44,7 +44,7 @@
       },
       {
         "tableName": "VerifiableCredentialHolder",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardId` TEXT NOT NULL, `displayContract` TEXT NOT NULL, `credentialStatus` TEXT, `jti` TEXT NOT NULL, `raw` TEXT NOT NULL, `contents` TEXT NOT NULL, `picId` TEXT NOT NULL, `id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`cardId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cardId` TEXT NOT NULL, `displayContract` TEXT NOT NULL, `jti` TEXT NOT NULL, `raw` TEXT NOT NULL, `contents` TEXT NOT NULL, `picId` TEXT NOT NULL, `id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`cardId`))",
         "fields": [
           {
             "fieldPath": "cardId",
@@ -57,12 +57,6 @@
             "columnName": "displayContract",
             "affinity": "TEXT",
             "notNull": true
-          },
-          {
-            "fieldPath": "credentialStatus",
-            "columnName": "credentialStatus",
-            "affinity": "TEXT",
-            "notNull": false
           },
           {
             "fieldPath": "verifiableCredential.jti",
@@ -250,7 +244,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e358c70f2d33724d33c7a2e8ec18de38')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ea29699c796b2bc45b8f471fa2d79fb')"
     ]
   }
 }

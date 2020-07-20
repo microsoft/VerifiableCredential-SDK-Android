@@ -24,7 +24,7 @@ import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialDao
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [VerifiableCredential::class, VerifiableCredentialHolder::class, Identifier::class, Receipt::class], version = 3)
+@Database(entities = [VerifiableCredential::class, VerifiableCredentialHolder::class, Identifier::class, Receipt::class], version = 2)
 @TypeConverters(RoomConverters::class)
 abstract class SdkDatabase : RoomDatabase() {
 

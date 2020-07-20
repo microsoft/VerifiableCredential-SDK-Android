@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.datasource.network.credentialOperations
 
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationResponse
+import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
 import com.microsoft.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -15,11 +15,12 @@ class SendVerifiablePresentationRevocationRequestNetworkOperation (
     serializedResponse: String,
     apiProvider: ApiProvider,
     private val serializer: Serializer
-) : PostNetworkOperation<RevocationResponse, String>() {
-    override val call: suspend () -> Response<RevocationResponse> = { apiProvider.revocationApis.sendResponse(url, serializedResponse) }
+) : PostNetworkOperation<RevocationServiceResponse, String>() {
+    override val call: suspend () -> Response<RevocationServiceResponse> = { apiProvider.revocationApis.sendResponse(url, serializedResponse) }
 
-    override fun onSuccess(response: Response<RevocationResponse>): Result<String> {
-        val credentialStatus = response.body()?.credentialStatus ?: throw SdkException("No Verifiable Credential in Body.")
-        return Result.Success(credentialStatus)
+    override fun onSuccess(serviceResponse: Response<RevocationServiceResponse>): Result<String> {
+        val receipts = serviceResponse.body()?.receipt?.entries
+        val serializedReceipt = receipts?.first()?.value ?: throw SdkException("No Receipt in response body.")
+        return Result.Success(serializedReceipt)
     }
 }

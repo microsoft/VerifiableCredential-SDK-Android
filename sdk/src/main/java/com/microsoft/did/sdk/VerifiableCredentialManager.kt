@@ -7,24 +7,28 @@ package com.microsoft.did.sdk
 
 import android.net.Uri
 import androidx.lifecycle.LiveData
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
-import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.Response
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
+import com.microsoft.did.sdk.util.controlflow.PresentationException
+import com.microsoft.did.sdk.util.controlflow.RepositoryException
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.serializer.Serializer
-import com.microsoft.did.sdk.util.controlflow.*
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -99,7 +103,7 @@ class VerifiableCredentialManager @Inject constructor(
      *
      * @param request to be validated.
      */
-    suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
+    private suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
         return runResultTry {
             presentationRequestValidator.validate(request)
             Result.Success(Unit)
@@ -154,15 +158,40 @@ class VerifiableCredentialManager @Inject constructor(
 
     suspend fun revokeVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rpList: List<String>?,
+        rpList: Map<String, String>?,
         reason: String?
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpList, reason).abortOnError()
+                val status = vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpList?.values?.toList(), reason).abortOnError()
+                createAndSaveRevocationReceipt(
+                    status.rp?.joinToString(",") ?: "",
+                    rpList?.keys?.toList()?.joinToString(",") ?: "",
+                    ReceiptAction.Revocation,
+                    verifiableCredentialHolder.cardId
+                )
                 Result.Success(Unit)
             }
         }
+    }
+
+    private suspend fun createAndSaveRevocationReceipt(entityDid: String, entityName: String, receiptAction: ReceiptAction, vcId: String): Result<Unit> {
+        return runResultTry {
+            val receipt = createReceiptsForRevokedCredentials(entityDid, entityName, receiptAction, vcId)
+            saveReceipt(receipt).abortOnError()
+            Result.Success(Unit)
+        }
+    }
+
+    fun createReceiptsForRevokedCredentials(entityDid: String, entityName: String, receiptAction: ReceiptAction, vcId: String): Receipt {
+        val date = System.currentTimeMillis()
+        return Receipt(
+            action = receiptAction,
+            vcId = vcId,
+            activityDate = date,
+            entityIdentifier = entityDid,
+            entityName = entityName
+        )
     }
 
     private suspend fun createAndSaveReceipt(response: Response): Result<Unit> {

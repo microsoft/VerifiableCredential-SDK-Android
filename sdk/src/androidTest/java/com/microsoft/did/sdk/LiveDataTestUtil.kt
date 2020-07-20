@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.repository
+package com.microsoft.did.sdk
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer

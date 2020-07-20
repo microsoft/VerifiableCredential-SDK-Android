@@ -5,7 +5,8 @@ import androidx.room.PrimaryKey
 
 enum class ReceiptAction {
     Issuance,
-    Presentation
+    Presentation,
+    Revocation
 }
 
 @Entity
