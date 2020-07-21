@@ -15,6 +15,7 @@ object Constants {
     const val MAX_AGE = "max_age"
     const val SELF_ISSUED = "https://self-issued.me"
     const val SUB_JWK = "sub_jwk"
+    const val PURE_ISSUANCE_FLOW_VALUE = "create"
 
     // OIDC Registration Constants
     const val CLIENT_NAME = "client_name"
