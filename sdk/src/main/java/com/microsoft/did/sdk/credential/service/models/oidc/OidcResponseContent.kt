@@ -5,9 +5,9 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.util.Constants.SELF_ISSUED
 import com.microsoft.did.sdk.util.Constants.SUB_JWK
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

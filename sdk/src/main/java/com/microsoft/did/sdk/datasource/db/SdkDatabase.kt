@@ -5,14 +5,14 @@ package com.microsoft.did.sdk.datasource.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialHolderDao
 import com.microsoft.did.sdk.datasource.db.dao.IdentifierDao
 import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
 import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialDao
+import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialHolderDao
+import com.microsoft.did.sdk.identifier.models.Identifier
 
 /**
  * Abstract description of the database interface that is supposed to be provided by Room. New entities have to be

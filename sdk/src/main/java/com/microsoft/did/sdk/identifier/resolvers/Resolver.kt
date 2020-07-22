@@ -5,8 +5,8 @@
 
 package com.microsoft.did.sdk.identifier.resolvers
 
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry

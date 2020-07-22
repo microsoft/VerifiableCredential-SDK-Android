@@ -1,13 +1,13 @@
 package com.microsoft.did.sdk.crypto.protocols.jose
 
 import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
 import com.microsoft.did.sdk.util.controlflow.CryptoException
-import java.util.*
+import java.util.Locale
 
 object JwaCryptoConverter {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
@@ -33,46 +33,28 @@ object JwaCryptoConverter {
                 val hashSize = Regex("[Rr][Ss](\\d+)").matchEntire(algorithm)!!.groupValues[0]
                 Algorithm(
                     name = W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
-                    additionalParams = mapOf(
-                        "hash" to Sha.get(hashSize.toInt())
-                    )
+                    additionalParams = mapOf("hash" to Sha.get(hashSize.toInt()))
                 )
             }
             JoseConstants.RsaOaep.value, JoseConstants.RsaOaep256.value -> {
                 RsaOaepParams(
-                    additionalParams = mapOf(
-                        "hash" to Algorithm(
-                            name = W3cCryptoApiConstants.Sha256.value
-                        )
-                    )
+                    additionalParams = mapOf("hash" to Algorithm(name = W3cCryptoApiConstants.Sha256.value))
                 )
             }
             JoseConstants.EcDsa.value, JoseConstants.Es256K.value -> {
                 EcdsaParams(
-                    hash = Algorithm(
-                        name = W3cCryptoApiConstants.Sha256.value
-                    ),
-                    additionalParams = mapOf(
-                        "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
+                    hash = Algorithm(name = W3cCryptoApiConstants.Sha256.value),
+                    additionalParams = mapOf("namedCurve" to W3cCryptoApiConstants.Secp256k1.value
                     )
                 )
             }
             JoseConstants.EdDsa.value -> {
                 EcdsaParams(
-                    hash = Algorithm(
-                        name = W3cCryptoApiConstants.Sha256.value
-                    ),
-                    additionalParams = mapOf(
-                        "namedCurve" to W3cCryptoApiConstants.Ed25519.value
-                    )
+                    hash = Algorithm(name = W3cCryptoApiConstants.Sha256.value),
+                    additionalParams = mapOf("namedCurve" to W3cCryptoApiConstants.Ed25519.value)
                 )
             }
-            else -> {
-                println("Unknown JOSE algorithm: $algorithm")
-                Algorithm(
-                    name = algorithm
-                )
-            }
+            else -> Algorithm(name = algorithm)
         }
     }
 

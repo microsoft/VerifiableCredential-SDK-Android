@@ -1,62 +1,58 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.did.sdk.credential.service
 
+import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 
 /**
- * OIDC Response formed from a Request.
+ * Response formed from a Request.
  *
  * @param audience entity to send the response to.
  */
 sealed class Response(open val request: Request, val audience: String) {
+    
+    private val requestedVchMap: RequestedVchMap = mutableMapOf()
 
-    private val collectedVchs: MutableMap<String, VerifiableCredentialHolder> = mutableMapOf()
-
-    private val collectedTokens: MutableMap<String, String> = mutableMapOf()
+    private val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
 
     // EXPERIMENTAL
-    private val collectedSelfIssued: MutableMap<String, String> = mutableMapOf()
+    private val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 
-    fun addIdToken(configuration: String, token: String) {
-        collectedTokens[configuration] = token
+    fun addRequestedIdToken(idTokenAttestation: IdTokenAttestation, rawToken: String) {
+        requestedIdTokenMap[idTokenAttestation.configuration] = rawToken
     }
 
-    fun addSelfIssuedClaim(field: String, claim: String) {
-        collectedSelfIssued[field] = claim
+    fun addRequestedSelfAttestedClaim(field: String, claim: String) {
+        requestedSelfAttestedClaimMap[field] = claim
     }
 
-    fun addVerifiableCredential(vch: VerifiableCredentialHolder, type: String) {
-        collectedVchs[type] = vch
+    fun addRequestedVch(presentationAttestation: PresentationAttestation, vch: VerifiableCredentialHolder) {
+        requestedVchMap[presentationAttestation] = vch
     }
 
-    fun getCollectedIdTokens(): Map<String, String>? {
-        if (collectedTokens.isEmpty()) {
-            return null
-        }
-        return collectedTokens
+    fun getRequestedIdTokens(): RequestedIdTokenMap {
+        return requestedIdTokenMap
     }
 
-    fun getCollectedSelfIssuedClaims(): Map<String, String>? {
-        if (collectedSelfIssued.isEmpty()) {
-            return null
-        }
-        return collectedSelfIssued
+    fun getRequestedSelfAttestedClaims(): RequestedSelfAttestedClaimMap {
+        return requestedSelfAttestedClaimMap
     }
 
-    fun getCollectedVchs(): Map<String, VerifiableCredentialHolder>? {
-        if (collectedVchs.isEmpty()) {
-            return null
-        }
-        return collectedVchs
+    fun getRequestedVchs(): RequestedVchMap {
+        return requestedVchMap
     }
 
-    fun createReceiptsForPresentedCredentials(entityDid: String, entityName: String): List<Receipt> {
+    fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
-        collectedVchs.forEach {
+        requestedVchMap.forEach {
             val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
@@ -77,3 +73,7 @@ sealed class Response(open val request: Request, val audience: String) {
 
 class IssuanceResponse(override val request: IssuanceRequest) : Response(request, request.contract.input.credentialIssuer)
 class PresentationResponse(override val request: PresentationRequest) : Response(request, request.content.redirectUrl)
+
+typealias RequestedIdTokenMap = MutableMap<String, String>
+typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
+typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredentialHolder>

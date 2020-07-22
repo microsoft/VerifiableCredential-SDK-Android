@@ -20,9 +20,10 @@ import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
-import com.microsoft.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.did.sdk.util.log.SdkLog
 import dagger.Module
 import dagger.Provides
 import okhttp3.OkHttpClient
@@ -70,7 +71,7 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun defaultOkHttpClient(): OkHttpClient {
-        val httpLoggingInterceptor = HttpLoggingInterceptor { println(it) }
+        val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)

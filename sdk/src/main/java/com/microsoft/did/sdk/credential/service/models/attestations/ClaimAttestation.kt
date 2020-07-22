@@ -16,5 +16,5 @@ data class ClaimAttestation(
     val required: Boolean = false,
 
     // type of object the claim should be.
-    val type: String = ""
+    val type: String? = ""
 )

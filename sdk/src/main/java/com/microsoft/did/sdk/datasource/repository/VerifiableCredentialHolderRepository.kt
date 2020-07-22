@@ -13,8 +13,9 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
-import com.microsoft.did.sdk.credential.service.models.PairwiseIssuanceRequest
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
+import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -24,13 +25,13 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresent
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_MINUTES
-import com.microsoft.did.sdk.util.controlflow.PairwiseIssuanceException
-import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.SdkException
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapReceipt
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
+import com.microsoft.did.sdk.util.controlflow.ExchangeException
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,6 +61,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVcs()
 
+    fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVcs()
+
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return getAllVchs().map { cardList -> filterVcsByType(cardList, type) }
     }
@@ -76,7 +79,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
-    private suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
+    suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
         vcDao.getVerifiableCredentialById(primaryVcId)
 
     suspend fun insert(verifiableCredential: VerifiableCredential) = vcDao.insert(verifiableCredential)
@@ -87,22 +90,24 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendIssuanceResponse(response: IssuanceResponse, responder: Identifier): Result<VerifiableCredential> {
+    suspend fun sendIssuanceResponse(response: IssuanceResponse,
+                                     requestedVchMap: RequestedVchMap,
+                                     responder: Identifier,
+                                     expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            requestedVcs = response.getCollectedVchs()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
+            requestedVchMap = requestedVchMap,
+            requestedIdTokenMap = response.getRequestedIdTokens(),
+            requestedSelfAttestedClaimMap = response.getRequestedSelfAttestedClaims(),
             contract = response.request.contractUrl,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+            expiryInSeconds = expiryInSeconds
         )
         val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
             formattedResponse,
-            apiProvider,
-            serializer
+            apiProvider
         ).fire()
 
         return when (rawVerifiableCredentialResult) {
@@ -117,18 +122,22 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendPresentationResponse(response: PresentationResponse, responder: Identifier, expiresInMinutes: Int): Result<Unit> {
-        val state = response.request.content.state ?: ""
+    suspend fun sendPresentationResponse(response: PresentationResponse,
+                                         requestedVchMap: RequestedVchMap,
+                                         responder: Identifier,
+                                         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<Unit> {
+
+        val state = response.request.content.state
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
-            requestedVcs = response.getCollectedVchs()?.mapValues { getPairwiseVerifiableCredential(it.value, responder) },
-            requestedIdTokens = response.getCollectedIdTokens(),
-            requestedSelfIssuedClaims = response.getCollectedSelfIssuedClaims(),
+            requestedVchMap = requestedVchMap,
+            requestedIdTokenMap = response.getRequestedIdTokens(),
+            requestedSelfAttestedClaimMap = response.getRequestedSelfAttestedClaims(),
             nonce = response.request.content.nonce,
-            state = response.request.content.state,
-            expiresIn = expiresInMinutes
+            state = state,
+            expiryInSeconds = expiryInSeconds
         )
         return SendPresentationResponseNetworkOperation(
             response.audience,
@@ -153,7 +162,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         return formatter.format(
             responder = owner,
             responseAudience = revocationRequest.audience,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES,
+            expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS,
             transformingVerifiableCredential = revocationRequest.verifiableCredential,
             revocationRPs = revocationRequest.rpList,
             revocationReason = revocationRequest.reason
@@ -173,53 +182,46 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         }
     }
 
-    private suspend fun getPairwiseVerifiableCredential(
-        vch: VerifiableCredentialHolder,
-        pairwiseIdentifier: Identifier
-    ): VerifiableCredential {
+    suspend fun getExchangedVerifiableCredential(vch: VerifiableCredentialHolder, pairwiseIdentifier: Identifier): Result<VerifiableCredential> {
         val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {
             if (it.contents.sub == pairwiseIdentifier.id) {
-                return it
+                return Result.Success(it)
             }
         }
-        val pairwiseRequest =
-            PairwiseIssuanceRequest(
-                vch.verifiableCredential,
-                pairwiseIdentifier.id
-            )
-        val pairwiseVerifiableCredential = this.sendPairwiseIssuanceRequest(pairwiseRequest, vch.owner)
-        this.insert(pairwiseVerifiableCredential)
-        return pairwiseVerifiableCredential
+        val exchangeRequest = ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id)
+        return this.sendExchangeRequest(exchangeRequest, vch.owner)
     }
 
-    private suspend fun sendPairwiseIssuanceRequest(pairwiseRequest: PairwiseIssuanceRequest, requester: Identifier): VerifiableCredential {
+    private suspend fun sendExchangeRequest(request: ExchangeRequest, requester: Identifier): Result<VerifiableCredential> {
+        if (request.audience == "") {
+            throw ExchangeException("Audience is an empty string.")
+        }
         val formattedPairwiseRequest = formatter.format(
             responder = requester,
-            responseAudience = pairwiseRequest.audience,
-            transformingVerifiableCredential = pairwiseRequest.verifiableCredential,
-            recipientIdentifier = pairwiseRequest.pairwiseIdentifier,
-            expiresIn = DEFAULT_EXPIRATION_IN_MINUTES
+            responseAudience = request.audience,
+            transformingVerifiableCredential = request.verifiableCredential,
+            recipientIdentifier = request.pairwiseDid,
+            expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS
         )
 
-        val pairwiseVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
-            pairwiseRequest.audience,
+        val result = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+            request.audience,
             formattedPairwiseRequest,
-            apiProvider,
-            serializer
+            apiProvider
         ).fire()
-        // we can't return a result here, so need to unwrap Result
-        // TODO(should we allow retries here?)
-        return when (pairwiseVerifiableCredentialResult) {
-            is Result.Success -> formVerifiableCredential(
-                pairwiseVerifiableCredentialResult.payload,
-                pairwiseRequest.verifiableCredential.picId
-            )
-            is Result.Failure -> throw PairwiseIssuanceException(
-                "Unable to reissue Pairwise Verifiable Credential.",
-                pairwiseVerifiableCredentialResult.payload
-            )
+
+        return when (result) {
+            is Result.Success -> {
+                val verifiableCredential = formVerifiableCredential(
+                    result.payload,
+                    request.verifiableCredential.picId
+                )
+                this.insert(verifiableCredential)
+                Result.Success(verifiableCredential)
+            }
+            is Result.Failure -> result
         }
     }
 

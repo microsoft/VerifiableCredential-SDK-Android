@@ -5,9 +5,13 @@
 
 package com.microsoft.did.sdk.datasource.network
 
-import com.microsoft.did.sdk.util.controlflow.*
-import kotlinx.io.IOException
+import com.microsoft.did.sdk.util.controlflow.NetworkException
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
+import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
+import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
 import retrofit2.Response
+import java.io.IOException
 
 /**
  * Base Network Operation class with default methods for all Network Operations.

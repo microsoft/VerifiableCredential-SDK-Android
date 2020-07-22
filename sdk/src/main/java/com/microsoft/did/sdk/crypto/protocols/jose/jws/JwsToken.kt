@@ -7,13 +7,15 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
-import com.microsoft.did.sdk.util.*
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
-import java.util.*
-import kotlin.collections.Map
+import com.microsoft.did.sdk.util.stringToByteArray
+import com.microsoft.did.sdk.util.toReadableString
+import java.util.Locale
 
 /**
  * Class for containing JWS token operations.
@@ -34,7 +36,6 @@ class JwsToken private constructor(
             when {
                 compactMatches != null -> {
                     // compact JWS format
-                    println("Compact format detected")
                     val protected = compactMatches.groupValues[1]
                     val payload = compactMatches.groupValues[2]
                     val signature = compactMatches.groupValues[3]
@@ -47,7 +48,6 @@ class JwsToken private constructor(
                 }
                 jws.toLowerCase(Locale.ENGLISH).contains("\"signatures\"") -> { // check for signature or signatures
                     // GENERAL
-                    println("General format detected")
                     val token = serializer.parse(JwsGeneralJson.serializer(), jws)
                     return JwsToken(
                         payload = token.payload,
@@ -57,7 +57,6 @@ class JwsToken private constructor(
                 }
                 jws.toLowerCase(Locale.ENGLISH).contains("\"signature\"") -> {
                     // Flat
-                    println("Flat format detected")
                     val token = serializer.parse(JwsFlatJson.serializer(), jws)
                     return JwsToken(
                         payload = token.payload,
@@ -164,7 +163,6 @@ class JwsToken private constructor(
         val kid = headers[JoseConstants.Kid.value]
         if (kid == null) {
             protected[JoseConstants.Kid.value] = signingKey.kid
-            println("Using key ${protected[JoseConstants.Kid.value]}")
         } else {
             protected[JoseConstants.Kid.value] = kid
         }
@@ -200,12 +198,9 @@ class JwsToken private constructor(
         val results = this.signatures.map {
             val fullyQuantifiedKid = it.getKid(serializer) ?: ""
             val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid).second
-            println("Finding matching key for \"$kid\"")
             val signatureInput = "${it.protected}.${this.payload}"
-            println("SDATA: $signatureInput")
             val publicKey = cryptoOperations.keyStore.getPublicKeyById(kid)
             if (publicKey != null) {
-                println("Internal key ${publicKey.kid} attempted")
                 verifyWithKey(cryptoOperations, signatureInput, it, publicKey)
             } else {
                 // use one of the provided public Keys
@@ -214,17 +209,12 @@ class JwsToken private constructor(
                 }
                 when {
                     key != null -> {
-                        println("key ${key.kid} attempted")
                         verifyWithKey(cryptoOperations, signatureInput, it, key)
                     }
                     publicKeys.isNotEmpty() -> {
-                        println("first publickey attempted")
                         verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
                     }
-                    else -> {
-                        println("No keys attempted")
-                        false
-                    }
+                    else -> false
                 }
             }
         }
@@ -249,7 +239,6 @@ class JwsToken private constructor(
         )
         val rawSignature = Base64Url.decode(signature.signature)
         val rawData = stringToByteArray(data)
-        SdkLog.d("Raw data: " + rawData.toReadableString())
         return subtle.verify(subtleAlg, cryptoKey, rawSignature, rawData)
     }
 

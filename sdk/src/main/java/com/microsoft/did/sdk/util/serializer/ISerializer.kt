@@ -12,7 +12,6 @@ package com.microsoft.did.sdk.util.serializer
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
-import kotlin.collections.Map
 import kotlin.reflect.KClass
 
 interface ISerializer {

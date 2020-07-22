@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.util.controlflow
 
-import java.lang.Exception
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine

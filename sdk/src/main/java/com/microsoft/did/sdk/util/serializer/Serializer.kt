@@ -6,13 +6,18 @@ import com.microsoft.did.sdk.credential.service.models.serviceResponses.Issuance
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.ServiceResponse
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ImplicitReflectionSerializer
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.serializer
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.reflect.KClass
-import kotlin.collections.Map
 
 @Singleton
 class Serializer @Inject constructor() : ISerializer {
@@ -29,7 +34,7 @@ class Serializer @Inject constructor() : ISerializer {
         context = serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
-            strictMode = false
+            ignoreUnknownKeys = true
         )
     )
 
@@ -46,7 +51,7 @@ class Serializer @Inject constructor() : ISerializer {
 
     @ImplicitReflectionSerializer
     override fun <K : Any, V : Any> stringifyImpl(obj: Map<K, V>, keyClass: KClass<K>, valClass: KClass<V>): String {
-        return json.stringify((keyClass.serializer() to valClass.serializer()).map, obj)
+        return json.stringify(MapSerializer(keyClass.serializer(), valClass.serializer()), obj)
     }
 
     fun <K : Any, V : Any> parseMap(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V> {
@@ -56,7 +61,7 @@ class Serializer @Inject constructor() : ISerializer {
 
     @ImplicitReflectionSerializer
     override fun <K : Any, V : Any> parseMapImpl(map: String, keyClass: KClass<K>, valClass: KClass<V>): Map<K, V> {
-        return parse((keyClass.serializer() to valClass.serializer()).map, map)
+        return parse(MapSerializer(keyClass.serializer(), valClass.serializer()), map)
     }
 
     fun <T : Any> stringify(objects: List<T>, keyClass: KClass<T>): String {

@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  */
 sealed class VcServiceActionRequest(val audience: String)
 
-class PairwiseIssuanceRequest(val verifiableCredential: VerifiableCredential, val pairwiseIdentifier: String) :
+class ExchangeRequest(val verifiableCredential: VerifiableCredential, val pairwiseDid: String) :
     VcServiceActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
 
 class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier, val rpList: List<String>?, val reason: String?) :
