@@ -34,7 +34,8 @@ class Serializer @Inject constructor() : ISerializer {
         context = serviceResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
-            ignoreUnknownKeys = true
+            ignoreUnknownKeys = true,
+            isLenient = true
         )
     )
 
