@@ -26,6 +26,7 @@ import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.io.InputStream
+import kotlinx.serialization.InternalSerializationApi
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -39,6 +40,7 @@ class PairwiseKeyInstrumentedTest {
     private var crypto: CryptoOperations
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val seedReference = "masterSeed"
+    @OptIn(InternalSerializationApi::class)
     private val inputStream: InputStream
 
     init {
