@@ -1,8 +1,5 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
-import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNull
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
@@ -23,6 +20,7 @@ import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -58,7 +56,12 @@ class OidcResponseFormatterTest {
     private val expectedSelfAttestedField = "testField3423442"
     private val expectedIdTokenConfig = "testIdTokenConfig234"
     private val expectedCredentialType: String = "type235"
+
+    private val revocationRequest: RevocationRequest = mockk()
+    private val mockedVcRaw = "testRawVc"
     private val expectedRevocationAudience = "audience1234"
+    private val expectedRevokedRps = listOf("did:ion:test")
+    private val expectedRevocationReason = "testing revocation"
 
     init {
         formatter = OidcResponseFormatter(
@@ -283,10 +286,6 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format revocation request with revoked RPs and reason for revocation`() {
-        val revocationRequest: RevocationRequest = mockk()
-        val expectedRevokedRps = listOf("did:ion:test")
-        val expectedRevocationReason = "testing revocation"
-        val mockedVcRaw = "testRawVc"
         every { revocationRequest.audience } returns expectedRevocationAudience
         every { revocationRequest.reason } returns expectedRevocationReason
         every { revocationRequest.rpList } returns expectedRevokedRps
@@ -310,8 +309,6 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format revocation request with no reason and RP list`() {
-        val revocationRequest: RevocationRequest = mockk()
-        val mockedVcRaw = "testRawVc"
         every { revocationRequest.audience } returns expectedRevocationAudience
         every { revocationRequest.verifiableCredential } returns mockedVc
         every { mockedVc.raw } returns mockedVcRaw
