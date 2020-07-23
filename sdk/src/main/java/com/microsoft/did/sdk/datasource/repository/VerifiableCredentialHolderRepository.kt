@@ -26,7 +26,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifia
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.SdkException
-import com.microsoft.did.sdk.util.unwrapReceipt
+import com.microsoft.did.sdk.util.unwrapRevocationReceipt
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
@@ -154,8 +154,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     ): Result<RevocationReceipt> {
         val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, rpList, reason)
         val formattedRevocationRequest = createRevocationRequest(revocationRequest, verifiableCredentialHolder.owner)
-        val revocationStatus = sendRevocationRequest(revocationRequest, formattedRevocationRequest)
-        return Result.Success(revocationStatus)
+        return sendRevocationRequest(revocationRequest, formattedRevocationRequest)
     }
 
     private fun createRevocationRequest(revocationRequest: RevocationRequest, owner: Identifier): String {
@@ -169,7 +168,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         )
     }
 
-    suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): RevocationReceipt {
+    suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): Result<RevocationReceipt> {
         val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
             revocationRequest.audience,
             formattedRevocationRequest,
@@ -177,8 +176,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             serializer
         ).fire()
         return when (revocationResult) {
-            is Result.Success -> unwrapRevocationReceipt(revocationResult.payload)
-            is Result.Failure -> throw SdkException("Unable to revoke VP")
+            is Result.Success -> Result.Success(unwrapRevocationReceipt(revocationResult.payload))
+            is Result.Failure -> Result.Failure(SdkException("Unable to revoke VP"))
         }
     }
 
@@ -231,6 +230,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     }
 
     private fun unwrapRevocationReceipt(rawToken: String): RevocationReceipt {
-        return unwrapReceipt(rawToken, serializer)
+        return unwrapRevocationReceipt(rawToken, serializer)
     }
 }

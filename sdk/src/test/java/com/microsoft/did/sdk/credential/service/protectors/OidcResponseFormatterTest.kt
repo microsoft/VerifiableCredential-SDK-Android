@@ -1,10 +1,14 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
+import assertk.assertThat
+import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -14,6 +18,7 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
@@ -53,6 +58,7 @@ class OidcResponseFormatterTest {
     private val expectedSelfAttestedField = "testField3423442"
     private val expectedIdTokenConfig = "testIdTokenConfig234"
     private val expectedCredentialType: String = "type235"
+    private val expectedRevocationAudience = "audience1234"
 
     init {
         formatter = OidcResponseFormatter(
@@ -273,5 +279,53 @@ class OidcResponseFormatterTest {
         assertNull(actualTokenContents.state)
         assertNull(actualTokenContents.vc)
         assertNull(actualTokenContents.recipient)
+    }
+
+    @Test
+    fun `format revocation request with revoked RPs and reason for revocation`() {
+        val revocationRequest: RevocationRequest = mockk()
+        val expectedRevokedRps = listOf("did:ion:test")
+        val expectedRevocationReason = "testing revocation"
+        val mockedVcRaw = "testRawVc"
+        every { revocationRequest.audience } returns expectedRevocationAudience
+        every { revocationRequest.reason } returns expectedRevocationReason
+        every { revocationRequest.rpList } returns expectedRevokedRps
+        every { revocationRequest.verifiableCredential } returns mockedVc
+        every { mockedVc.raw } returns mockedVcRaw
+        val results = formatter.format(
+            responder = mockedIdentifier,
+            responseAudience = revocationRequest.audience,
+            expiryInSeconds = Constants.DEFAULT_EXPIRATION_IN_SECONDS,
+            transformingVerifiableCredential = revocationRequest.verifiableCredential,
+            revocationRPs = revocationRequest.rpList,
+            revocationReason = revocationRequest.reason
+        )
+        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), results)
+        assertThat(actualTokenContents.did).isEqualTo(expectedDid)
+        assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
+        assertThat(actualTokenContents.aud).isEqualTo(expectedRevocationAudience)
+        assertThat(actualTokenContents.rp).isEqualTo(expectedRevokedRps)
+        assertThat(actualTokenContents.reason).isEqualTo(expectedRevocationReason)
+    }
+
+    @Test
+    fun `format revocation request with no reason and RP list`() {
+        val revocationRequest: RevocationRequest = mockk()
+        val mockedVcRaw = "testRawVc"
+        every { revocationRequest.audience } returns expectedRevocationAudience
+        every { revocationRequest.verifiableCredential } returns mockedVc
+        every { mockedVc.raw } returns mockedVcRaw
+        val results = formatter.format(
+            responder = mockedIdentifier,
+            responseAudience = revocationRequest.audience,
+            expiryInSeconds = Constants.DEFAULT_EXPIRATION_IN_SECONDS,
+            transformingVerifiableCredential = revocationRequest.verifiableCredential
+        )
+        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), results)
+        assertThat(actualTokenContents.did).isEqualTo(expectedDid)
+        assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
+        assertThat(actualTokenContents.aud).isEqualTo(expectedRevocationAudience)
+        assertThat(actualTokenContents.rp).isNull()
+        assertThat(actualTokenContents.reason).isNull()
     }
 }

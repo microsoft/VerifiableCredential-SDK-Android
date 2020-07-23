@@ -28,6 +28,7 @@ import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import io.mockk.*
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import kotlin.test.assertEquals
 
 class VerifiableCredentialHolderRepositoryTest {
@@ -218,18 +219,32 @@ class VerifiableCredentialHolderRepositoryTest {
     }
 
     @Test
-    fun `revoke Verifiable Presentation successfully`() {
+    fun `revoke verifiable presentation successfully`() {
         val expectedRevocationStatus = "revoked"
         val expectedRevocationReason = "testing revocation"
         mockRevocationRequest()
 
         runBlocking {
-            val actualRevocationReceipt = repository.sendRevocationRequest(revocationRequest, formattedRevocationRequest)
-            assertThat(actualRevocationReceipt.credentialStatus.status).isEqualTo(expectedRevocationStatus)
-            assertThat(actualRevocationReceipt.credentialStatus.reason).isEqualTo(expectedRevocationReason)
+            val revocationResult = repository.sendRevocationRequest(revocationRequest, formattedRevocationRequest)
+            assertThat(revocationResult).isInstanceOf(Result.Success::class.java)
+            assertThat((revocationResult as Result.Success).payload.credentialStatus.status).isEqualTo(expectedRevocationStatus)
+            assertThat(revocationResult.payload.credentialStatus.reason).isEqualTo(expectedRevocationReason)
         }
         coVerify(exactly = 1) {
             anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire()
+        }
+    }
+
+    @Test
+    fun `revoke verifiable presentation failed response` () {
+        val revokeException = SdkException("Unable to revoke VP")
+        coEvery { anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire() } returns Result.Failure(revokeException)
+        every { revocationRequest.audience } returns expectedAudience
+
+        runBlocking {
+            val revocationResult = repository.sendRevocationRequest(revocationRequest, formattedRevocationRequest)
+            assertThat(revocationResult).isInstanceOf(Result.Failure::class.java)
+            assertThat((revocationResult as Result.Failure).payload).isEqualToComparingFieldByFieldRecursively(revokeException)
         }
     }
 
