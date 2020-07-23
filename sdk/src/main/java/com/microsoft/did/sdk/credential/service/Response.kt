@@ -10,7 +10,6 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
-import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 
 /**
  * Response formed from a Request.

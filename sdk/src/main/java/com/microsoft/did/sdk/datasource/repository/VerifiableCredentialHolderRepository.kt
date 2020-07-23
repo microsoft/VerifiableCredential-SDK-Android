@@ -176,7 +176,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             serializer
         ).fire()
         return when (revocationResult) {
-            is Result.Success -> Result.Success(unwrapRevocationReceipt(revocationResult.payload))
+            is Result.Success -> Result.Success(unwrapRevocationReceipt(revocationResult.payload, serializer))
             is Result.Failure -> Result.Failure(SdkException("Unable to revoke VP"))
         }
     }
@@ -227,9 +227,5 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     private fun formVerifiableCredential(rawToken: String, vcId: String? = null): VerifiableCredential {
         val vcContents = unwrapSignedVerifiableCredential(rawToken, serializer)
         return VerifiableCredential(vcContents.jti, rawToken, vcContents, vcId ?: vcContents.jti)
-    }
-
-    private fun unwrapRevocationReceipt(rawToken: String): RevocationReceipt {
-        return unwrapRevocationReceipt(rawToken, serializer)
     }
 }

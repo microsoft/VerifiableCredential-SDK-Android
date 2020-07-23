@@ -15,6 +15,7 @@ fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String, seriali
     return serializer.parse(VerifiableCredentialContent.serializer(), token.content())
 }
 
+// TODO: Move it to separate utility class when improving receipts
 fun unwrapRevocationReceipt(signedReceipt: String, serializer: Serializer): RevocationReceipt {
     val token = JwsToken.deserialize(signedReceipt, serializer)
     return serializer.parse(RevocationReceipt.serializer(), token.content())
