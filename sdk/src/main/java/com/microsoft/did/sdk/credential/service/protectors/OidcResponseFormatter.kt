@@ -45,7 +45,7 @@ class OidcResponseFormatter @Inject constructor(
         transformingVerifiableCredential: VerifiableCredential? = null,
         recipientIdentifier: String? = null,
         revocationRPs: List<String>? = null,
-        revocationReason: String? = null
+        revocationReason: String = ""
     ): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         if (exp == null) {
@@ -75,7 +75,7 @@ class OidcResponseFormatter @Inject constructor(
             attestations = attestationResponse,
             vc = transformingVerifiableCredential?.raw,
             recipient = recipientIdentifier,
-            rp = revocationRPs,
+            rpList = revocationRPs,
             reason = revocationReason
         )
         return signContents(contents, responder)

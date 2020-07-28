@@ -35,6 +35,8 @@ open class IssuanceException(message: String? = null, cause: Throwable? = null) 
 
 class ExchangeException(message: String? = null, cause: Throwable? = null) : PresentationException(message, cause)
 
+open class RevocationException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+
 open class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
 class InvalidSignatureException(message: String? = null, cause: Throwable? = null) : ValidatorException(message, cause)

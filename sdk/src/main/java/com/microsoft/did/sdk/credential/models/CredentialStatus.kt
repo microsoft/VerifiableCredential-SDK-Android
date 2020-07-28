@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CredentialStatus(val id: String, val status: String) {
-    val reason: String? = null
+    var reason: String? = null
 }

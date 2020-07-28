@@ -5,11 +5,9 @@
 
 package com.microsoft.did.sdk.credential.service
 
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 
 /**
  * Response formed from a Request.
@@ -47,26 +45,6 @@ sealed class Response(open val request: Request, val audience: String) {
 
     fun getRequestedVchs(): RequestedVchMap {
         return requestedVchMap
-    }
-
-    fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
-        val receiptList = mutableListOf<Receipt>()
-        requestedVchMap.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
-            receiptList.add(receipt)
-        }
-        return receiptList
-    }
-
-    private fun createReceipt(action: ReceiptAction, vcId: String, entityDid: String, entityName: String): Receipt {
-        val date = System.currentTimeMillis()
-        return Receipt(
-            action = action,
-            vcId = vcId,
-            activityDate = date,
-            entityIdentifier = entityDid,
-            entityName = entityName
-        )
     }
 }
 

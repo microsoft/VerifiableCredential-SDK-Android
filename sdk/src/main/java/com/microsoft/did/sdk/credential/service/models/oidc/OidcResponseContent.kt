@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk.credential.service.models.oidc
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.util.Constants.RELYING_PARTY_LIST
 import com.microsoft.did.sdk.util.Constants.SELF_ISSUED
 import com.microsoft.did.sdk.util.Constants.SUB_JWK
 import kotlinx.serialization.Required
@@ -63,7 +64,8 @@ data class OidcResponseContent(
     // recipient of VC for Exchange API
     val recipient: String? = null,
 
-    val rp: List<String>? = null,
+    @SerialName(RELYING_PARTY_LIST)
+    val rpList: List<String>? = null,
 
-    val reason: String? = null
+    val reason: String
 )

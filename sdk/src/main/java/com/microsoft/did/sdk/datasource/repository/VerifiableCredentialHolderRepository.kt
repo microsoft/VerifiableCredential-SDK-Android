@@ -25,12 +25,11 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresent
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.SdkException
-import com.microsoft.did.sdk.util.unwrapRevocationReceipt
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -150,7 +149,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     suspend fun revokeVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
         rpList: List<String>?,
-        reason: String?
+        reason: String
     ): Result<RevocationReceipt> {
         val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, rpList, reason)
         val formattedRevocationRequest = createRevocationRequest(revocationRequest, verifiableCredentialHolder.owner)
@@ -176,8 +175,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             serializer
         ).fire()
         return when (revocationResult) {
-            is Result.Success -> Result.Success(unwrapRevocationReceipt(revocationResult.payload, serializer))
-            is Result.Failure -> Result.Failure(SdkException("Unable to revoke VP"))
+            is Result.Success -> revocationResult
+            is Result.Failure -> Result.Failure(RevocationException("Unable to revoke VP"))
         }
     }
 
