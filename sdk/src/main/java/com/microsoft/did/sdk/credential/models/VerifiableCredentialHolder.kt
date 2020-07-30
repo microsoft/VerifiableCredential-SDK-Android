@@ -37,6 +37,10 @@ data class VerifiableCredentialHolder(
      * Returns a ordered map containing a mapping of user readable claim label (not localized) to the formatted value.
      * e.g. the value of type date is formatted as a date instead of the raw timestamp.
      *
+     * The order is adhering to the order of the claims within the display contract.
+     *
+     * Claims that are present in the VC but not in the DisplayContract or vice versa will not be contained.
+     *
      * The display contract does not currently support localized claim labels.
      */
     fun getUserFormattedClaimMap(): LinkedHashMap<String, String> {
@@ -45,8 +49,11 @@ data class VerifiableCredentialHolder(
 
         val readableClaimMap = LinkedHashMap<String, String>()
         for ((claimIdentifier, claimDescriptor) in claimDescriptors) {
-            val truncatedClaimIdentifier = claimIdentifier.split(".").lastOrNull()
-            val formattedClaimValue = ClaimFormatter.formatClaimValue(claimDescriptor.type, claimValues[truncatedClaimIdentifier] ?: continue)
+            val truncatedClaimIdentifier = if (claimIdentifier.startsWith("vc.credentialSubject.")) {
+                claimIdentifier.removePrefix("vc.credentialSubject.")
+            } else continue
+            val claimValue = claimValues[truncatedClaimIdentifier] ?: continue
+            val formattedClaimValue = ClaimFormatter.formatClaimValue(claimDescriptor.type, claimValue)
             readableClaimMap[claimDescriptor.label] = formattedClaimValue
         }
         return readableClaimMap
