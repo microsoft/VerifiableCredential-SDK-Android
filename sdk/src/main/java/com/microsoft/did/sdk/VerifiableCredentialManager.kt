@@ -19,6 +19,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.*
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcPresentationRequestContent
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
@@ -58,7 +59,7 @@ class VerifiableCredentialManager @Inject constructor(
                 val uri = verifyUri(stringUri)
                 val requestToken = getPresentationRequestToken(uri).abortOnError()
                 val tokenContents =
-                    serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
+                    serializer.parse(OidcPresentationRequestContent.serializer(), JwsToken.deserialize(requestToken, serializer).content())
                 val request = PresentationRequest(requestToken, tokenContents)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)

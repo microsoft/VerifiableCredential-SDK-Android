@@ -9,11 +9,17 @@ import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAt
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationRequestBinding
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.CredentialPresentationDefinition
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcPresentationRequestContent
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(val attestations: CredentialAttestations?, val entityName: String = "", val entityIdentifier: String = "") {
+sealed class Request(
+    val attestations: CredentialAttestations?,
+    val credentialPresentationDefinition: CredentialPresentationDefinition?,
+    val entityName: String = "",
+    val entityIdentifier: String = ""
+) {
 
     private var presentationBinding: PresentationRequestBinding? = null
 
@@ -39,8 +45,8 @@ sealed class Request(val attestations: CredentialAttestations?, val entityName: 
 
 @Serializable
 class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String) :
-    Request(contract.input.attestations, contract.display.card.issuedBy, contract.input.issuer)
+    Request(contract.input.attestations, null, contract.display.card.issuedBy, contract.input.issuer)
 
 @Serializable
-class PresentationRequest(val serializedToken: String, val content: OidcRequestContent) :
-    Request(content.attestations, content.registration?.clientName ?: "", content.iss)
+class PresentationRequest(val serializedToken: String, val content: OidcPresentationRequestContent) :
+    Request(null, content.credentialPresentationDefinition, content.registration?.clientName ?: "", content.iss)
