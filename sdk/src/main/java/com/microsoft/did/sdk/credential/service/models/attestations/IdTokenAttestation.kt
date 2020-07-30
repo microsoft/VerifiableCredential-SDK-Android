@@ -16,7 +16,5 @@ data class IdTokenAttestation(
 
     val required: Boolean = false,
 
-    val client_id: String,
-
-    val redirect_uri: String
+    val client_id: String
 )
