@@ -25,22 +25,23 @@ class VerifiableCredentialHolderTest {
     @Test
     fun `map is matched, sorted and formatted properly`() {
         every { displayContract.claims } returns mapOf(
-            "vc.credentialSubject.claim2" to claimDescriptor2,
             "vc.credentialSubject.claim1" to claimDescriptor1,
+            "vc.credentialSubject.claim2" to claimDescriptor2,
             "vc.credentialSubject.claim3" to claimDescriptor3,
             "claim2" to claimDescriptor4,
             "no matching claim" to claimDescriptor4
         )
         every { vc.contents.vc.credentialSubject } returns mapOf(
-            "claim1" to "value1",
             "claim2" to "value2",
+            "claim1" to "value1",
             "claim3" to "1588655105000",
-            "not matching claim" to "value 4"
+            "noMatchingDisplayContract" to "value 4"
         )
         val expectedResult = mapOf(
             "name 2" to "?",
             "name 1" to "value1",
-            "name 3" to ClaimFormatter.formatDate(1588655105000)
+            "name 3" to ClaimFormatter.formatDate(1588655105000),
+            "? - noMatchingDisplayContract" to "value 4"
         )
         val actualResult = vch.getUserFormattedClaimMap()
         assertThat(actualResult).isEqualTo(expectedResult)
