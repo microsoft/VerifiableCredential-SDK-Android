@@ -6,18 +6,26 @@
 package com.microsoft.did.sdk.util
 
 import java.text.DateFormat
-import java.util.Locale
 
 object ClaimFormatter {
 
+    enum class ClaimType {
+        DATE,
+        TEXT
+    }
+
     fun formatClaimValue(type: String, claimValue: String): String {
-        return when(type.toLowerCase(Locale.ENGLISH)) {
-            "date" -> formatDate(claimValue.toLong())
-            else -> claimValue
+        return when (type.asEnumOrDefault(ClaimType.TEXT)) {
+            ClaimType.DATE -> formatDate(claimValue.toLongOrNull())
+            ClaimType.TEXT -> claimValue
         }
     }
 
-    fun formatDate(timestamp: Long): String {
+    fun formatDate(timestamp: Long?): String {
+        if (timestamp == null) return "?"
         return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp)
     }
 }
+
+inline fun <reified T : Enum<T>> String.asEnumOrDefault(defaultValue: T): T =
+    enumValues<T>().firstOrNull { it.name.equals(this, ignoreCase = true) } ?: defaultValue

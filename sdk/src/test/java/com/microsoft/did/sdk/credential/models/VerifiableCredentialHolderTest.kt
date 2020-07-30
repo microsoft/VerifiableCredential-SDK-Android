@@ -14,10 +14,10 @@ import org.junit.Test
 
 class VerifiableCredentialHolderTest {
 
-    private val claimDescriptor1 = ClaimDescriptor("text", "name 1", null)
-    private val claimDescriptor2 = ClaimDescriptor("text", "name 2", null)
-    private val claimDescriptor3 = ClaimDescriptor("date", "name 3", null)
-    private val claimDescriptor4 = ClaimDescriptor("date", "not matching name", null)
+    private val claimDescriptor1 = ClaimDescriptor(ClaimFormatter.ClaimType.TEXT.name, "name 1", null)
+    private val claimDescriptor2 = ClaimDescriptor(ClaimFormatter.ClaimType.TEXT.name, "name 2", null)
+    private val claimDescriptor3 = ClaimDescriptor(ClaimFormatter.ClaimType.DATE.name, "name 3", null)
+    private val claimDescriptor4 = ClaimDescriptor(ClaimFormatter.ClaimType.DATE.name, "not matching name", null)
     private val vc: VerifiableCredential = mockk()
     private val displayContract: DisplayContract = mockk()
     private val vch: VerifiableCredentialHolder = spyk(VerifiableCredentialHolder("", vc, mockk(), displayContract))
