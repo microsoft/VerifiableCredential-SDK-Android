@@ -51,10 +51,10 @@ class EllipticCurvePairwiseKey @Inject constructor() {
     private fun generatePairwiseSeed(subtleCrypto: SubtleCrypto, masterKey: ByteArray, peerId: String): ByteArray {
         // Generate the pairwise seed
         val alg =
-            Algorithm(name = W3cCryptoApiConstants.HmacSha256.value)
+            Algorithm(name = W3cCryptoApiConstants.HmacSha512.value)
         val signingKey = JsonWebKey(
             kty = KeyType.Octets.value,
-            alg = JoseConstants.Hs256.value,
+            alg = JoseConstants.Hs512.value,
             k = Base64Url.encode(masterKey)
         )
         val key = subtleCrypto.importKey(
