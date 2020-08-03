@@ -76,7 +76,7 @@ class ReceiptUtilTest {
         issuanceResponse.addRequestedVch(presentationAttestation, vch)
         val cardId = ""
         every { vch.cardId } returns cardId
-        val receipts = createReceipts(
+        val receipts = createReceiptsForVCs(
             testEntityDid,
             testEntityName,
             ReceiptAction.Presentation,
@@ -101,7 +101,7 @@ class ReceiptUtilTest {
         issuanceResponse.addRequestedVch(presentationAttestation, vch)
         val cardId = "testCardId"
         every { vch.cardId } returns cardId
-        val receipts = createReceipts(
+        val receipts = createReceiptsForVCs(
             testEntityDid,
             testEntityName,
             ReceiptAction.Presentation,
@@ -119,7 +119,7 @@ class ReceiptUtilTest {
 
     @Test
     fun `test create receipt without adding card`() {
-        createReceipts(
+        createReceiptsForVCs(
             issuanceResponse.request.entityIdentifier,
             issuanceResponse.request.entityName,
             ReceiptAction.Presentation,
@@ -145,7 +145,7 @@ class ReceiptUtilTest {
         val vchId2 = "vchId2"
         every { vch2.cardId } returns vchId2
         val receiptCreationStartTime = System.currentTimeMillis()
-        val receipts = createReceipts(
+        val receipts = createReceiptsForVCs(
             testEntityDid,
             testEntityName,
             ReceiptAction.Presentation,
@@ -176,7 +176,7 @@ class ReceiptUtilTest {
         val cardId2 = "testCardId2"
         every { vch2.cardId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
-        val receipts = createReceipts(
+        val receipts = createReceiptsForVCs(
             testEntityDid,
             testEntityName,
             ReceiptAction.Presentation,
@@ -207,7 +207,7 @@ class ReceiptUtilTest {
         val cardId = "testCardId"
         every { vch.cardId } returns cardId
         val receiptCreationStartTime = System.currentTimeMillis()
-        val receipts = createReceipts(
+        val receipts = createReceiptsForVCs(
             "",
             "",
             ReceiptAction.Presentation,

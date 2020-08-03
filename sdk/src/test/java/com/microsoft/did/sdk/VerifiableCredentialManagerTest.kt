@@ -97,7 +97,7 @@ class VerifiableCredentialManagerTest {
             cardManager.createPresentationResponse(presentationRequest)
             cardManager.sendPresentationResponse(any(), any(), any())
             verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any())
-            cardManager.createAndSaveReceipts(testEntityDid,
+            cardManager.createAndSaveReceiptsForVCs(testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
                 issuanceResponse.getRequestedVchs().values.map { it.cardId })

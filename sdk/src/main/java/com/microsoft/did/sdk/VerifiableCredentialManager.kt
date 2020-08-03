@@ -29,7 +29,8 @@ import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.createReceipts
+import com.microsoft.did.sdk.util.createReceipt
+import com.microsoft.did.sdk.util.createReceiptsForVCs
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers
@@ -143,7 +144,7 @@ class VerifiableCredentialManager @Inject constructor(
                     vchRepository.sendIssuanceResponse(response, requestedVchMap, responder, expiryInSeconds).abortOnError()
                 vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, responder, response.request.contract)
-                createAndSaveReceipts(
+                createAndSaveReceiptsForVCs(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
@@ -174,7 +175,7 @@ class VerifiableCredentialManager @Inject constructor(
                     responder
                 ).abortOnError()
                 vchRepository.sendPresentationResponse(response, vcRequestedMapping, responder, expiryInSeconds).abortOnError()
-                createAndSaveReceipts(
+                createAndSaveReceiptsForVCs(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
@@ -187,19 +188,19 @@ class VerifiableCredentialManager @Inject constructor(
 
     suspend fun revokeVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rpList: Map<String, String>?,
+        rpDidAndNameMap: Map<String, String>?,
         reason: String = ""
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val status =
-                    vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpList?.values?.toList(), reason).abortOnError()
-                createAndSaveReceipts(
-                    status.relyingPartyList?.joinToString(",") ?: "",
-                    rpList?.keys?.toList()?.joinToString(",") ?: "",
+                val vpRevocationReceipt = vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndNameMap?.keys?.toList(), reason).abortOnError()
+                rpDidAndNameMap?.forEach { relyingParty -> createAndSaveReceiptForVC(relyingParty.key, relyingParty.value, ReceiptAction.Revocation, verifiableCredentialHolder.cardId)}
+/*                createAndSaveReceiptsForVCs(
+                    rpDidAndNameMap?.keys?.joinToString(",") ?: "",
+                    rpDidAndNameMap?.values?.toList()?.joinToString(",") ?: "",
                     ReceiptAction.Revocation,
                     listOf(verifiableCredentialHolder.cardId)
-                )
+                )*/
                 Result.Success(Unit)
             }
         }
@@ -237,15 +238,28 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    suspend fun createAndSaveReceipts(
+    suspend fun createAndSaveReceiptsForVCs(
         entityDid: String,
         entityName: String,
         receiptAction: ReceiptAction,
         vcIds: List<String>
     ): Result<Unit> {
         return runResultTry {
-            val receiptList = createReceipts(entityDid, entityName, receiptAction, vcIds)
+            val receiptList = createReceiptsForVCs(entityDid, entityName, receiptAction, vcIds)
             receiptList.forEach { saveReceipt(it).abortOnError() }
+            Result.Success(Unit)
+        }
+    }
+
+    suspend fun createAndSaveReceiptForVC(
+        entityDid: String,
+        entityName: String,
+        receiptAction: ReceiptAction,
+        vcId: String
+    ): Result<Unit> {
+        return runResultTry {
+            val receipt = createReceipt(entityDid, entityName, receiptAction, vcId)
+            saveReceipt(receipt).abortOnError()
             Result.Success(Unit)
         }
     }
