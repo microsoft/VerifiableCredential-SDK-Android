@@ -65,3 +65,12 @@ fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
     return byteArrayOf(Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte) + (publicKey as BCECPublicKey).q.normalize().xCoord.encoded +
         publicKey.q.normalize().yCoord.encoded
 }
+
+fun getUnsignedModulus(keySeed: ByteArray): ByteArray {
+    val ecSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
+    var privateKey = BigInteger(1, keySeed).rem(ecSpec.n).toByteArray()
+
+    if (privateKey.size > 32)
+        privateKey = privateKey.sliceArray(1 until privateKey.size)
+    return privateKey
+}

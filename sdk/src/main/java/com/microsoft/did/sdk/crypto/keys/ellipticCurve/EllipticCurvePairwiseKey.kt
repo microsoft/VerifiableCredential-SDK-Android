@@ -22,6 +22,7 @@ import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.convertToBigEndian
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
+import com.microsoft.did.sdk.util.getUnsignedModulus
 import com.microsoft.did.sdk.util.publicToXY
 import java.nio.ByteBuffer
 import java.util.Locale
@@ -35,10 +36,12 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         val subtleCrypto: SubtleCrypto =
             crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.PRIVATE)
 
-        val pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
+        var pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
 
         if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve.toUpperCase(Locale.ROOT)) == -1)
             throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
+
+        pairwiseKeySeed = getUnsignedModulus(pairwiseKeySeed)
 
         val pubKey = generatePublicKeyFromPrivateKey(pairwiseKeySeed)
         val xyData = publicToXY(pubKey)
