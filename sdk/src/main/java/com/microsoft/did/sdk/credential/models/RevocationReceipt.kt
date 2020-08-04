@@ -5,21 +5,18 @@
 
 package com.microsoft.did.sdk.credential.models
 
-import com.microsoft.did.sdk.util.Constants.ISSUED_TIME
-import com.microsoft.did.sdk.util.Constants.ISSUER
-import com.microsoft.did.sdk.util.Constants.JWT_ID
 import com.microsoft.did.sdk.util.Constants.RELYING_PARTY_LIST
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RevocationReceipt(
-    @SerialName(JWT_ID)
+    @SerialName("jti")
     val jwtId: String,
-    @SerialName(ISSUER)
+    @SerialName("iss")
     val issuer: String,
     val credentialStatus: CredentialStatus,
-    @SerialName(ISSUED_TIME)
+    @SerialName("iat")
     val issuedTime: Long
 ) {
     @SerialName(RELYING_PARTY_LIST)

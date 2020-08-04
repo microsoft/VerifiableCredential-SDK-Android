@@ -25,7 +25,9 @@ class SendVerifiablePresentationRevocationRequestNetworkOperation (
 
     override fun onSuccess(response: Response<RevocationServiceResponse>): Result<RevocationReceipt> {
         val receipts = response.body()?.receipt?.entries
-        val serializedReceipt = receipts?.first()?.value ?: throw RevocationException("No Receipt in revocation response body")
+        if(receipts == null || receipts.isEmpty())
+            throw RevocationException("No Receipt in revocation response body")
+        val serializedReceipt = receipts.first().value
         val revocationReceipt = unwrapRevocationReceipt(serializedReceipt, serializer)
         return Result.Success(revocationReceipt)
     }

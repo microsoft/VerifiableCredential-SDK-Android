@@ -322,7 +322,7 @@ class OidcResponseFormatterTest {
         assertThat(actualTokenContents.did).isEqualTo(expectedDid)
         assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
         assertThat(actualTokenContents.aud).isEqualTo(expectedRevocationAudience)
-        assertThat(actualTokenContents.rpList).isNull()
+        assertThat(actualTokenContents.rpList).isEmpty()
         assertThat(actualTokenContents.reason).isEmpty()
     }
 }

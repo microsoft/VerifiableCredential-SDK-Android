@@ -148,7 +148,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     suspend fun revokeVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rpList: List<String>?,
+        rpList: List<String>,
         reason: String
     ): Result<RevocationReceipt> {
         val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, rpList, reason)

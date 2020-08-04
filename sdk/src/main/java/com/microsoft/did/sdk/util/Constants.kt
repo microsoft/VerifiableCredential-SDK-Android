@@ -38,12 +38,6 @@ object Constants {
     const val DEEP_LINK_SCHEME = "openid"
     const val DEEP_LINK_HOST = "vc"
 
-    const val ISSUER = "iss"
-
-    //JWT Constants
-    const val ISSUED_TIME = "iat"
-    const val JWT_ID = "jti"
-
     //Verifiable Presentation Revocation Constants
     const val RELYING_PARTY_LIST = "rp"
 

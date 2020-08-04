@@ -19,6 +19,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.*
+import com.microsoft.did.sdk.credential.service.models.RevokedRPNameAndDid
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
@@ -188,19 +189,16 @@ class VerifiableCredentialManager @Inject constructor(
 
     suspend fun revokeVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rpDidAndNameMap: Map<String, String>?,
+        rpDidAndNameMap: RevokedRPNameAndDid,
         reason: String = ""
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val vpRevocationReceipt = vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndNameMap?.keys?.toList(), reason).abortOnError()
-                rpDidAndNameMap?.forEach { relyingParty -> createAndSaveReceiptForVC(relyingParty.key, relyingParty.value, ReceiptAction.Revocation, verifiableCredentialHolder.cardId)}
-/*                createAndSaveReceiptsForVCs(
-                    rpDidAndNameMap?.keys?.joinToString(",") ?: "",
-                    rpDidAndNameMap?.values?.toList()?.joinToString(",") ?: "",
-                    ReceiptAction.Revocation,
-                    listOf(verifiableCredentialHolder.cardId)
-                )*/
+                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndNameMap.keys.toList(), reason).abortOnError()
+                if(rpDidAndNameMap.isEmpty())
+                    createAndSaveReceiptForVC("", "", ReceiptAction.Revocation, verifiableCredentialHolder.cardId)
+                else
+                    rpDidAndNameMap.forEach { relyingParty -> createAndSaveReceiptForVC(relyingParty.key, relyingParty.value, ReceiptAction.Revocation, verifiableCredentialHolder.cardId)}
                 Result.Success(Unit)
             }
         }

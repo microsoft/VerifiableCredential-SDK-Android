@@ -111,13 +111,14 @@ class VerifiableCredentialManagerTest {
 
     @Test
     fun `test revoke verifiable presentation successfully`() {
+        val revokeRPMap = mapOf("did:ion:test" to "test.com")
+        val revokeReason = "testing revoke"
+
         coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
             revocationReceipt
         )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        val revokeRPMap = mapOf("test.com" to "did:ion:test")
-        val revokeReason = "testing revoke"
 
         runBlocking {
             val status = cardManager.revokeVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, revokeReason)
@@ -127,7 +128,7 @@ class VerifiableCredentialManagerTest {
         coVerify(exactly = 1) {
             verifiableCredentialHolderRepository.revokeVerifiablePresentation(
                 verifiableCredentialHolder,
-                revokeRPMap.values.toList(),
+                revokeRPMap.keys.toList(),
                 revokeReason
             )
             verifiableCredentialHolderRepository.insert(any<Receipt>())
@@ -141,7 +142,7 @@ class VerifiableCredentialManagerTest {
         )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        val revokeRPMap = mapOf("test.com" to "did:ion:test")
+        val revokeRPMap = mapOf("did:ion:test" to "test.com")
 
         runBlocking {
             val status = cardManager.revokeVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, "")
@@ -149,7 +150,7 @@ class VerifiableCredentialManagerTest {
         }
 
         coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, revokeRPMap.values.toList(), "")
+            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, revokeRPMap.keys.toList(), "")
             verifiableCredentialHolderRepository.insert(any<Receipt>())
         }
     }
@@ -163,12 +164,12 @@ class VerifiableCredentialManagerTest {
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
 
         runBlocking {
-            val status = cardManager.revokeVerifiablePresentation(verifiableCredentialHolder, null, "")
+            val status = cardManager.revokeVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
             assertThat(status).isInstanceOf(Result.Success::class.java)
         }
 
         coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, null, "")
+            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
             verifiableCredentialHolderRepository.insert(any<Receipt>())
         }
     }
@@ -182,12 +183,12 @@ class VerifiableCredentialManagerTest {
         every { verifiableCredentialHolder.cardId } returns ""
 
         runBlocking {
-            val status = cardManager.revokeVerifiablePresentation(verifiableCredentialHolder, null, "")
+            val status = cardManager.revokeVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
             assertThat(status).isInstanceOf(Result.Success::class.java)
         }
 
         coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, null, "")
+            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
             verifiableCredentialHolderRepository.insert(any<Receipt>())
         }
     }

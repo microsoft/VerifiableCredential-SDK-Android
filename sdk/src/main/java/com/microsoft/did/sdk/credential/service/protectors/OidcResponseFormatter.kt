@@ -44,7 +44,7 @@ class OidcResponseFormatter @Inject constructor(
         state: String? = null,
         transformingVerifiableCredential: VerifiableCredential? = null,
         recipientIdentifier: String? = null,
-        revocationRPs: List<String>? = null,
+        revocationRPs: List<String> = listOf(),
         revocationReason: String = ""
     ): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)

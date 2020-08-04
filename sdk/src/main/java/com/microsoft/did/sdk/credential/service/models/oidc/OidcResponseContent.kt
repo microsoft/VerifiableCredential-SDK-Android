@@ -65,7 +65,7 @@ data class OidcResponseContent(
     val recipient: String? = null,
 
     @SerialName(RELYING_PARTY_LIST)
-    val rpList: List<String>? = null,
+    val rpList: List<String>,
 
     val reason: String
 )
