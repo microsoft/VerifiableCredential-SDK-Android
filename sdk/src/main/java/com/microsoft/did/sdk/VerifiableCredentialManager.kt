@@ -200,24 +200,7 @@ class VerifiableCredentialManager @Inject constructor(
         rpDidAndName: RevokedRPNameAndDid,
         reason: String = ""
     ): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndName.keys.toList(), reason).abortOnError()
-                if (rpDidAndName.isEmpty())
-                    createAndSaveReceiptsForVCs("", "", ReceiptAction.Revocation, listOf(verifiableCredentialHolder.cardId), vchRepository)
-                else
-                    rpDidAndName.forEach { relyingParty ->
-                        createAndSaveReceiptsForVCs(
-                            relyingParty.key,
-                            relyingParty.value,
-                            ReceiptAction.Revocation,
-                            listOf(verifiableCredentialHolder.cardId),
-                            vchRepository
-                        )
-                    }
-                Result.Success(Unit)
-            }
-        }
+        return RevocationManager(vchRepository).revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndName, reason)
     }
 
     private suspend fun getExchangedVcs(

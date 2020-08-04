@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.createAndSaveReceiptsForVCs
 import io.mockk.*
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -97,10 +98,13 @@ class VerifiableCredentialManagerTest {
             cardManager.createPresentationResponse(presentationRequest)
             cardManager.sendPresentationResponse(any(), any(), any())
             verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any())
-            cardManager.createAndSaveReceiptsForVCs(testEntityDid,
+            createAndSaveReceiptsForVCs(
+                testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId })
+                issuanceResponse.getRequestedVchs().values.map { it.cardId },
+                verifiableCredentialHolderRepository
+            )
         }
         presentationResponse.getRequestedVchs()?.size?.let {
             coVerify(exactly = it) {
