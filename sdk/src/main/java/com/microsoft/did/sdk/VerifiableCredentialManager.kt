@@ -187,18 +187,26 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
+    /**
+     * Revokes a verifiable presentation which revokes access for specific relying party/parties or all relying parties to do a status check on the Verifiable Credential
+     *
+     * @param verifiableCredentialHolder The VC for which access to check status is revoked
+     * @param rpDidAndName Map of DIDs and names of relying parties whose access is revoked
+     * @param reason Reason for revocation
+     */
+
     suspend fun revokeVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rpDidAndNameMap: RevokedRPNameAndDid,
+        rpDidAndName: RevokedRPNameAndDid,
         reason: String = ""
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndNameMap.keys.toList(), reason).abortOnError()
-                if (rpDidAndNameMap.isEmpty())
+                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndName.keys.toList(), reason).abortOnError()
+                if (rpDidAndName.isEmpty())
                     createAndSaveReceiptsForVCs("", "", ReceiptAction.Revocation, listOf(verifiableCredentialHolder.cardId), vchRepository)
                 else
-                    rpDidAndNameMap.forEach { relyingParty ->
+                    rpDidAndName.forEach { relyingParty ->
                         createAndSaveReceiptsForVCs(
                             relyingParty.key,
                             relyingParty.value,
