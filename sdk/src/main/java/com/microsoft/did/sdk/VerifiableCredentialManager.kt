@@ -15,23 +15,21 @@ import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.models.RevokedRPNameAndDid
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.credential.service.*
-import com.microsoft.did.sdk.credential.service.models.RevokedRPNameAndDid
-import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
-import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
+import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.PresentationException
-import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.createReceipt
-import com.microsoft.did.sdk.util.createReceiptsForVCs
+import com.microsoft.did.sdk.util.createAndSaveReceiptsForVCs
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers
@@ -149,7 +147,8 @@ class VerifiableCredentialManager @Inject constructor(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
-                    response.getRequestedVchs().values.map { it.cardId }
+                    response.getRequestedVchs().values.map { it.cardId },
+                    vchRepository
                 )
                 Result.Success(vch)
             }
@@ -180,7 +179,8 @@ class VerifiableCredentialManager @Inject constructor(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
-                    response.getRequestedVchs().values.map { it.cardId }
+                    response.getRequestedVchs().values.map { it.cardId },
+                    vchRepository
                 )
                 Result.Success(Unit)
             }
@@ -195,10 +195,18 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndNameMap.keys.toList(), reason).abortOnError()
-                if(rpDidAndNameMap.isEmpty())
-                    createAndSaveReceiptForVC("", "", ReceiptAction.Revocation, verifiableCredentialHolder.cardId)
+                if (rpDidAndNameMap.isEmpty())
+                    createAndSaveReceiptsForVCs("", "", ReceiptAction.Revocation, listOf(verifiableCredentialHolder.cardId), vchRepository)
                 else
-                    rpDidAndNameMap.forEach { relyingParty -> createAndSaveReceiptForVC(relyingParty.key, relyingParty.value, ReceiptAction.Revocation, verifiableCredentialHolder.cardId)}
+                    rpDidAndNameMap.forEach { relyingParty ->
+                        createAndSaveReceiptsForVCs(
+                            relyingParty.key,
+                            relyingParty.value,
+                            ReceiptAction.Revocation,
+                            listOf(verifiableCredentialHolder.cardId),
+                            vchRepository
+                        )
+                    }
                 Result.Success(Unit)
             }
         }
@@ -233,43 +241,6 @@ class VerifiableCredentialManager @Inject constructor(
                 )
             }
             Result.Success(exchangedVcMap as RequestedVchMap)
-        }
-    }
-
-    suspend fun createAndSaveReceiptsForVCs(
-        entityDid: String,
-        entityName: String,
-        receiptAction: ReceiptAction,
-        vcIds: List<String>
-    ): Result<Unit> {
-        return runResultTry {
-            val receiptList = createReceiptsForVCs(entityDid, entityName, receiptAction, vcIds)
-            receiptList.forEach { saveReceipt(it).abortOnError() }
-            Result.Success(Unit)
-        }
-    }
-
-    suspend fun createAndSaveReceiptForVC(
-        entityDid: String,
-        entityName: String,
-        receiptAction: ReceiptAction,
-        vcId: String
-    ): Result<Unit> {
-        return runResultTry {
-            val receipt = createReceipt(entityDid, entityName, receiptAction, vcId)
-            saveReceipt(receipt).abortOnError()
-            Result.Success(Unit)
-        }
-    }
-
-    /**
-     * Get receipts by verifiable credential id from the database.
-     */
-    private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
-        return try {
-            Result.Success(vchRepository.insert(receipt))
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
         }
     }
 
