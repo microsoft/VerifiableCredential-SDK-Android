@@ -32,7 +32,7 @@ class ResponseTest {
         every { vcContract.input.attestations } returns attestations
         every { vcContract.display.card.issuedBy } returns issuedBy
         every { vcContract.input.issuer } returns issuer
-        request = IssuanceRequest(vcContract, "testContractUrl")
+        request = IssuanceRequest(vcContract, "testContractUrl", vcContract.input.attestations)
         every { request.contract.input.credentialIssuer } returns credentialIssuer
         response = IssuanceResponse(request)
     }

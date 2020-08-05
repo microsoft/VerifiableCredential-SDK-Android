@@ -55,6 +55,9 @@ data class OidcResponseContent(
     //id of the response
     val jti: String? = null,
 
+    @SerialName("presentation_submission")
+    val presentationSubmission: CredentialPresentationSubmission? = null,
+
     // attestations that were asked for in request.
     val attestations: AttestationClaimModel? = null,
 

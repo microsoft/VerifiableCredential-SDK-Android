@@ -51,6 +51,10 @@ data class OidcRequestContent(
     // Claims that are being requested.
     val attestations: CredentialAttestations? = null,
 
+    // Claims that are being requested.
+    @SerialName("presentation_definition")
+    val credentialPresentationDefinition: CredentialPresentationDefinition? = null,
+
     // iat, nbf, and exp that need to be checked to see if token has expired
     val exp: Long = 0,
     val iat: Long = 0,

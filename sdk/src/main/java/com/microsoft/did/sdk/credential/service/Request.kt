@@ -6,22 +6,17 @@
 package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationRequestBinding
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.CredentialPresentationDefinition
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcPresentationRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class Request(
-    val attestations: CredentialAttestations?,
-    val credentialPresentationDefinition: CredentialPresentationDefinition?,
     val entityName: String = "",
     val entityIdentifier: String = ""
 ) {
-
-    private var presentationBinding: PresentationRequestBinding? = null
+/*    private var presentationBinding: PresentationRequestBinding? = null
 
     fun getCredentialAttestations(): CredentialAttestations? {
         return attestations
@@ -40,13 +35,13 @@ sealed class Request(
             return attestations
         }
         return emptyList()
-    }
+    }*/
 }
 
 @Serializable
-class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String) :
-    Request(contract.input.attestations, null, contract.display.card.issuedBy, contract.input.issuer)
+class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String, val attestations: CredentialAttestations?) :
+    Request(contract.display.card.issuedBy, contract.input.issuer)
 
 @Serializable
-class PresentationRequest(val serializedToken: String, val content: OidcPresentationRequestContent) :
-    Request(null, content.credentialPresentationDefinition, content.registration?.clientName ?: "", content.iss)
+class PresentationRequest(val serializedToken: String, val content: OidcRequestContent, val credentialPresentationDefinition: CredentialPresentationDefinition?) :
+    Request(content.registration?.clientName ?: "", content.iss)
