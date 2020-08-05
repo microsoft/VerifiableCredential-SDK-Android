@@ -66,7 +66,10 @@ fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
         publicKey.q.normalize().yCoord.encoded
 }
 
-fun getUnsignedModulus(keySeed: ByteArray): ByteArray {
+/**
+ * Reduce size of pairwise key seed generated using SHA512 to 256 bits
+ */
+fun reduceKeySeedSize(keySeed: ByteArray): ByteArray {
     val ecSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
     var privateKey = BigInteger(1, keySeed).rem(ecSpec.n).toByteArray()
 

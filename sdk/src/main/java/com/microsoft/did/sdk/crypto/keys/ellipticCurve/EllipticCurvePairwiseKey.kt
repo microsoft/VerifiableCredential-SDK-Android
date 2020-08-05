@@ -15,14 +15,13 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.convertToBigEndian
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
-import com.microsoft.did.sdk.util.getUnsignedModulus
+import com.microsoft.did.sdk.util.reduceKeySeedSize
 import com.microsoft.did.sdk.util.publicToXY
 import java.nio.ByteBuffer
 import java.util.Locale
@@ -33,15 +32,14 @@ class EllipticCurvePairwiseKey @Inject constructor() {
     fun generate(crypto: CryptoOperations, masterKey: ByteArray, algorithm: Algorithm, peerId: String): PrivateKey {
         val supportedCurves = listOf("P-256K", "SECP256K1")
 
+        if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve.toUpperCase(Locale.ROOT)) == -1)
+            throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
+
         val subtleCrypto: SubtleCrypto =
             crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.PRIVATE)
 
         var pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
-
-        if (supportedCurves.indexOf((algorithm as EcKeyGenParams).namedCurve.toUpperCase(Locale.ROOT)) == -1)
-            throw PairwiseKeyException("Curve ${algorithm.namedCurve} is not supported")
-
-        pairwiseKeySeed = getUnsignedModulus(pairwiseKeySeed)
+        pairwiseKeySeed = reduceKeySeedSize(pairwiseKeySeed)
 
         val pubKey = generatePublicKeyFromPrivateKey(pairwiseKeySeed)
         val xyData = publicToXY(pubKey)
@@ -77,14 +75,6 @@ class EllipticCurvePairwiseKey @Inject constructor() {
             JsonWebKey(
                 kty = KeyType.EllipticCurve.value,
                 crv = (algorithm as EcKeyGenParams).namedCurve,
-                alg = EcdsaParams(
-                    hash = Algorithm(
-                        name = W3cCryptoApiConstants.Sha256.value
-                    ),
-                    additionalParams = mapOf(
-                        "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
-                    )
-                ).name,
                 d = Base64Url.encode(pairwiseKeySeedInBigEndian.array()),
                 x = xyData.first.trim(),
                 y = xyData.second.trim()
