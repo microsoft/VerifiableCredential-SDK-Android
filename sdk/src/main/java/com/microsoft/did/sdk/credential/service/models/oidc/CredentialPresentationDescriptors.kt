@@ -5,11 +5,14 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class CredentialPresentationDescriptors(
     val id: String,
-    val schema: CredentialSchema,
-    val credentialIssuance: List<CredentialIssuanceMetadata>
-)
+    val schema: CredentialSchema
+) {
+    @SerialName("issuance")
+    val credentialIssuance: List<CredentialIssuanceMetadata> = emptyList()
+}

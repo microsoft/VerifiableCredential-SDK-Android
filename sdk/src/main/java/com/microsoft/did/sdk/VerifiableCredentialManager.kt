@@ -42,7 +42,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class VerifiableCredentialManager @Inject constructor(
-    private val vchRepository: VerifiableCredentialHolderRepository,
+    val vchRepository: VerifiableCredentialHolderRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator
 ) {
@@ -104,7 +104,7 @@ class VerifiableCredentialManager @Inject constructor(
      *
      * @param request to be validated.
      */
-    private suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
+    suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
         return runResultTry {
             presentationRequestValidator.validate(request)
             Result.Success(Unit)
