@@ -21,7 +21,7 @@ import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.convertToBigEndian
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
-import com.microsoft.did.sdk.util.reduceKeySeedSize
+import com.microsoft.did.sdk.util.reduceKeySeedSizeAndConvertToUnsigned
 import com.microsoft.did.sdk.util.publicToXY
 import java.nio.ByteBuffer
 import java.util.Locale
@@ -38,13 +38,13 @@ class EllipticCurvePairwiseKey @Inject constructor() {
         val subtleCrypto: SubtleCrypto =
             crypto.subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.PRIVATE)
 
-        var pairwiseKeySeed = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
-        pairwiseKeySeed = reduceKeySeedSize(pairwiseKeySeed)
+        val pairwiseKeySeedSigned = generatePairwiseSeed(subtleCrypto, masterKey, peerId)
+        val pairwiseKeySeedUnsigned = reduceKeySeedSizeAndConvertToUnsigned(pairwiseKeySeedSigned)
 
-        val pubKey = generatePublicKeyFromPrivateKey(pairwiseKeySeed)
+        val pubKey = generatePublicKeyFromPrivateKey(pairwiseKeySeedUnsigned)
         val xyData = publicToXY(pubKey)
 
-        val pairwiseKeySeedInBigEndian = convertToBigEndian(pairwiseKeySeed)
+        val pairwiseKeySeedInBigEndian = convertToBigEndian(pairwiseKeySeedUnsigned)
 
         return createPairwiseKeyFromPairwiseSeed(algorithm, pairwiseKeySeedInBigEndian, xyData)
     }
