@@ -17,12 +17,6 @@ object Constants {
     const val SUB_JWK = "sub_jwk"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
 
-    // OIDC Registration Constants
-    const val CLIENT_NAME = "client_name"
-    const val CLIENT_PURPOSE = "client_purpose"
-    const val TERMS_AND_SERVICES_URI = "tos_uri"
-    const val LOGO_URI = "logo_uri"
-
     //Verifiable Credential Constants
     const val CONTEXT = "@context"
     const val VP_CONTEXT_URL = "https://www.w3.org/2018/credentials/v1"
