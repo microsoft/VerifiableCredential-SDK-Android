@@ -20,6 +20,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.util.Constants.SECP256K1_CURVE_NAME_EC
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.convertSignedToUnsignedByteArray
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
 import com.microsoft.did.sdk.util.publicToXY
 import com.microsoft.did.sdk.util.stringToByteArray
@@ -113,15 +114,11 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
     }
 
     /**
-     * Signature is returned as array of BigIntegers for R and S. Converting them into unsigned byte array
+     * Signature is returned as array of BigIntegers for R and S. Converting them into unsigned byte array.
      */
     private fun convertSignatureToUnsignedByteArray(signature: Array<BigInteger>): ByteArray {
-        var r = signature[0].toByteArray()
-        var s = signature[1].toByteArray()
-        if (r.size > 32)
-            r = r.sliceArray(1 until r.size)
-        if (s.size > 32)
-            s = s.sliceArray(1 until s.size)
+        var r = convertSignedToUnsignedByteArray(signature[0].toByteArray())
+        var s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
         return r + s
     }
 
