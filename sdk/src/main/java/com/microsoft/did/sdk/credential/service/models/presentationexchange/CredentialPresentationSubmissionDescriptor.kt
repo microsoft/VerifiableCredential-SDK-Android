@@ -3,13 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credential.service.models.oidc
+package com.microsoft.did.sdk.credential.service.models.presentationexchange
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CredentialPresentationSubmission(
-    @SerialName("descriptor_map")
-    val credentialDescriptorPresentationSubmissionMap: List<CredentialDescriptorPresentationSubmission>
-)
+data class CredentialPresentationSubmissionDescriptor(
+    val id: String,
+    @SerialName("path")
+    val credentialPath: String
+) {
+    @SerialName("format")
+    var credentialFormat: String = ""
+    @SerialName("encoding")
+    var credentialEncoding: String = ""
+}

@@ -13,6 +13,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
@@ -26,6 +27,7 @@ import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -117,6 +119,24 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         apiProvider
     ).fire()
 
+    fun sendPresentationResponse(response: PresentationResponse,
+                                         responder: Identifier,
+                                         requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap): Result<String> {
+
+        val state = response.request.content.state
+        SdkLog.d("is requestedVchClaimMap empty: ${requestedVchPresentationSubmissionMap.isEmpty()}")
+        val formattedResponse = formatter.format(
+            responder = responder,
+            responseAudience = response.audience,
+            presentationsAudience = response.request.entityIdentifier,
+            requestedVchPresentationSubmissionMap = requestedVchPresentationSubmissionMap,
+            nonce = response.request.content.nonce,
+            state = state,
+            expiryInSeconds = 604800
+        )
+        return Result.Success(formattedResponse)
+    }
+
     suspend fun sendPresentationResponse(response: PresentationResponse,
                                          requestedVchMap: RequestedVchMap,
                                          responder: Identifier,
@@ -128,8 +148,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             responseAudience = response.audience,
             presentationsAudience = response.request.entityIdentifier,
             requestedVchMap = requestedVchMap,
-            requestedIdTokenMap = response.getRequestedIdTokens(),
-            requestedSelfAttestedClaimMap = response.getRequestedSelfAttestedClaims(),
             nonce = response.request.content.nonce,
             state = state,
             expiryInSeconds = expiryInSeconds

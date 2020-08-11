@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmission
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.util.Constants.SELF_ISSUED
 import com.microsoft.did.sdk.util.Constants.SUB_JWK

@@ -10,14 +10,16 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 
 /**
  * Response formed from a Request.
  *
  * @param audience entity to send the response to.
  */
-sealed class Response(open val request: Request, val audience: String) {
-    
+sealed class Response(open val request: Request, val audience: String)
+
+class IssuanceResponse(override val request: IssuanceRequest) : Response(request, request.contract.input.credentialIssuer) {
     private val requestedVchMap: RequestedVchMap = mutableMapOf()
 
     private val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
@@ -48,10 +50,21 @@ sealed class Response(open val request: Request, val audience: String) {
     fun getRequestedVchs(): RequestedVchMap {
         return requestedVchMap
     }
+}
+
+class PresentationResponse(override val request: PresentationRequest) : Response(request, request.content.redirectUrl) {
+    private val requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf()
+    fun addRequestedVchClaims(credentialPresentationInputDescriptors: CredentialPresentationInputDescriptors, vch: VerifiableCredentialHolder) {
+        requestedVchPresentationSubmissionMap[credentialPresentationInputDescriptors] = vch
+    }
+
+    fun getRequestedVchClaims(): RequestedVchPresentationSubmissionMap {
+        return requestedVchPresentationSubmissionMap
+    }
 
     fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
-        requestedVchMap.forEach {
+        requestedVchPresentationSubmissionMap.forEach {
             val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
@@ -68,11 +81,10 @@ sealed class Response(open val request: Request, val audience: String) {
             entityName = entityName
         )
     }
-}
 
-class IssuanceResponse(override val request: IssuanceRequest) : Response(request, request.contract.input.credentialIssuer)
-class PresentationResponse(override val request: PresentationRequest) : Response(request, request.content.redirectUrl)
+}
 
 typealias RequestedIdTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
 typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredentialHolder>
+typealias RequestedVchPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptors, VerifiableCredentialHolder>

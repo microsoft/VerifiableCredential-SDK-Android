@@ -55,7 +55,7 @@ class VerifiableCredentialManagerTest {
         }
     }
 
-    @Test
+/*    @Test
     fun `test send presentation response`() {
         every { presentationRequest.content.redirectUrl } returns responseAudience
         val presentationResponse = cardManager.createPresentationResponse(presentationRequest)
@@ -80,5 +80,5 @@ class VerifiableCredentialManagerTest {
                 verifiableCredentialHolderRepository.insert(any<Receipt>())
             }
         }
-    }
+    }*/
 }

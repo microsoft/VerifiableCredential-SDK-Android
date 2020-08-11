@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credential.service.models.oidc
+package com.microsoft.did.sdk.credential.service.models.presentationexchange
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -11,5 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CredentialPresentationDefinition(
     @SerialName("input_descriptors")
-    val credentialPresentationDescriptors: List<CredentialPresentationDescriptors>
+    val credentialPresentationInputDescriptors: List<CredentialPresentationInputDescriptors>
 )
