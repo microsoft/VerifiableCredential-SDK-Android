@@ -60,7 +60,7 @@ class OidcPresentationRequestValidatorTest {
     private fun setUpExpiration(offsetInSecond: Long) {
         val currentTimeInSeconds: Long = Date().time / Constants.MILLISECONDS_IN_A_SECOND
         val currentTimePlusOffsetInSeconds = currentTimeInSeconds + offsetInSecond
-        every { mockedOidcRequestContent.exp } returns currentTimePlusOffsetInSeconds
+        every { mockedOidcRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
     }
 
     @Test
