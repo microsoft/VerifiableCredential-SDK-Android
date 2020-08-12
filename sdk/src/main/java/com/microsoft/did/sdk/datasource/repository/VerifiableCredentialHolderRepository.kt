@@ -10,12 +10,11 @@ import androidx.lifecycle.map
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
-import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -25,12 +24,12 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresent
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,8 +48,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 ) {
 
     private val vchDao = database.verifiableCredentialHolderDao()
-
-    private val receiptDao = database.receiptDao()
 
     private val vcDao = database.verifiableCredentialDao()
 
@@ -71,11 +68,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     }
 
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVcById(id)
-
-    // Receipt Methods
-    fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
-
-    suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
     // Verifiable Credential Methods
     suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =

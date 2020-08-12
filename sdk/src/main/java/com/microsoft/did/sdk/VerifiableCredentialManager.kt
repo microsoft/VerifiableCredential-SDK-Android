@@ -16,11 +16,12 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
-import com.microsoft.did.sdk.credential.service.models.RevokedRPNameAndDid
+import com.microsoft.did.sdk.credential.service.models.RpDidToNameMap
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
@@ -29,7 +30,6 @@ import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.createAndSaveReceiptsForVCs
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import kotlinx.coroutines.Dispatchers
@@ -44,6 +44,7 @@ import javax.inject.Singleton
 @Singleton
 class VerifiableCredentialManager @Inject constructor(
     private val vchRepository: VerifiableCredentialHolderRepository,
+    private val receiptRepository: ReceiptRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator
 ) {
@@ -143,12 +144,11 @@ class VerifiableCredentialManager @Inject constructor(
                     vchRepository.sendIssuanceResponse(response, requestedVchMap, responder, expiryInSeconds).abortOnError()
                 vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, responder, response.request.contract)
-                createAndSaveReceiptsForVCs(
+                receiptRepository.createAndSaveReceiptsForVCs(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
-                    response.getRequestedVchs().values.map { it.cardId },
-                    vchRepository
+                    response.getRequestedVchs().values.map { it.cardId }
                 )
                 Result.Success(vch)
             }
@@ -175,13 +175,12 @@ class VerifiableCredentialManager @Inject constructor(
                     responder
                 ).abortOnError()
                 vchRepository.sendPresentationResponse(response, vcRequestedMapping, responder, expiryInSeconds).abortOnError()
-                createAndSaveReceiptsForVCs(
+                receiptRepository.createAndSaveReceiptsForVCs(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
-                    response.getRequestedVchs().values.map { it.cardId },
-                    vchRepository
-                )
+                    response.getRequestedVchs().values.map { it.cardId }
+                ).abortOnError()
                 Result.Success(Unit)
             }
         }
@@ -191,16 +190,19 @@ class VerifiableCredentialManager @Inject constructor(
      * Revokes a verifiable presentation which revokes access for specific relying party/parties or all relying parties to do a status check on the Verifiable Credential
      *
      * @param verifiableCredentialHolder The VC for which access to check status is revoked
-     * @param rpDidAndName Map of DIDs and names of relying parties whose access is revoked
+     * @param rPDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If map is empty, all verifiable presentations are revoked
      * @param reason Reason for revocation
      */
-
-    suspend fun revokeVerifiablePresentation(
+    suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rpDidAndName: RevokedRPNameAndDid,
+        rPDidToNameMap: RpDidToNameMap,
         reason: String = ""
     ): Result<Unit> {
-        return RevocationManager(vchRepository).revokeVerifiablePresentation(verifiableCredentialHolder, rpDidAndName, reason)
+        val revocationManager = RevocationManager(vchRepository, receiptRepository)
+        return if (rPDidToNameMap.isEmpty())
+            revocationManager.revokeAllVerifiablePresentations(verifiableCredentialHolder, reason)
+        else
+            revocationManager.revokeVerifiablePresentation(verifiableCredentialHolder, rPDidToNameMap, reason)
     }
 
     private suspend fun getExchangedVcs(
@@ -284,7 +286,7 @@ class VerifiableCredentialManager @Inject constructor(
      * Get receipts by verifiable credential id from the database.
      */
     fun getReceiptByVcId(vcId: String): LiveData<List<Receipt>> {
-        return vchRepository.getAllReceiptsByVcId(vcId)
+        return receiptRepository.getAllReceiptsByVcId(vcId)
     }
 
     /**

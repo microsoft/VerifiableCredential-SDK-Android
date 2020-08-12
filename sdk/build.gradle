@@ -43,6 +43,13 @@ android {
 
     sourceSets {
         main.jniLibs.srcDirs = ['libs']
+        String commonTestDir = 'src/commonTest/java'
+        test {
+            java.srcDir commonTestDir
+        }
+        androidTest {
+            java.srcDir commonTestDir
+        }
     }
 
     compileOptions {
@@ -137,6 +144,7 @@ dependencies {
     testImplementation "org.assertj:assertj-core:3.11.1"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "junit:junit:4.13"
+    testImplementation "android.arch.core:core-testing:1.1.1"
 }
 
 /**

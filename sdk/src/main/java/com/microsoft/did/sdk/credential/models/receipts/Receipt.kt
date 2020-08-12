@@ -21,7 +21,7 @@ data class Receipt(
     val entityIdentifier: String,
 
     // date action occurred
-    val activityDate: Long,
+    val activityDate: Long = System.currentTimeMillis(),
 
     //Name of the verifier/issuer
     val entityName: String,
