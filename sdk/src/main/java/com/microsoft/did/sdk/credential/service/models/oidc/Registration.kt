@@ -5,32 +5,29 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
-import com.microsoft.did.sdk.util.Constants.CLIENT_NAME
-import com.microsoft.did.sdk.util.Constants.CLIENT_PURPOSE
-import com.microsoft.did.sdk.util.Constants.LOGO_URI
-import com.microsoft.did.sdk.util.Constants.TERMS_AND_SERVICES_URI
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  * Object for relying parties to give user more details about themselves.
+ *
+ * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html)
  */
 @Serializable
 data class Registration(
 
-    // name of the relying party.
-    @SerialName(CLIENT_NAME)
+    @SerialName("client_name")
     val clientName: String = "",
 
-    // purpose of the presentation request.
-    @SerialName(CLIENT_PURPOSE)
+    @SerialName("client_purpose")
     val clientPurpose: String = "",
 
-    // terms of service url that a user can press on to see terms and service in WebView.
-    @SerialName(TERMS_AND_SERVICES_URI)
+    @SerialName("tos_uri")
     val termsOfServiceUrl: String = "",
 
-    // logo uri if relying party wants to display their logo in presentation prompt.
-    @SerialName(LOGO_URI)
-    val logoUri: String = ""
+    @SerialName("logo_uri")
+    val logoUri: String = "",
+
+    @SerialName("client_uri")
+    val clientUri: String = ""
 )

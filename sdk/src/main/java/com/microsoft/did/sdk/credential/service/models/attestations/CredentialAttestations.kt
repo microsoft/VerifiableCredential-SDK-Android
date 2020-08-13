@@ -19,5 +19,5 @@ data class CredentialAttestations(
     val presentations: List<PresentationAttestation> = emptyList(),
 
     // SelfIssued Claim Requests.
-    val selfIssued: SelfIssuedAttestation? = null
+    val selfIssued: SelfIssuedAttestation = SelfIssuedAttestation()
 )

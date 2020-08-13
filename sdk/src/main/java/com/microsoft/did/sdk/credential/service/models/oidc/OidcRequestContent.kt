@@ -6,11 +6,6 @@
 package com.microsoft.did.sdk.credential.service.models.oidc
 
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
-import com.microsoft.did.sdk.util.Constants.CLIENT_ID
-import com.microsoft.did.sdk.util.Constants.MAX_AGE
-import com.microsoft.did.sdk.util.Constants.REDIRECT_URL
-import com.microsoft.did.sdk.util.Constants.RESPONSE_MODE
-import com.microsoft.did.sdk.util.Constants.RESPONSE_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -22,48 +17,50 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class OidcRequestContent(
 
-    // what type of object the response should be (should be idtoken).
-    @SerialName(RESPONSE_TYPE)
+    // what type of object the response should be (should be idtoken). // TODO: validate
+    @SerialName("response_type")
     val responseType: String = "",
 
-    // what mode the response should be sent in (should always be form post).
-    @SerialName(RESPONSE_MODE)
+    // what mode the response should be sent in (should always be form post). // TODO: validate
+    @SerialName("response_mode")
     val responseMode: String = "",
 
     // did of the entity who sent the request.
-    @SerialName(CLIENT_ID)
+    @SerialName("client_id")
     val clientId: String = "",
 
     // where the SIOP provider should send response to.
-    @SerialName(REDIRECT_URL)
+    @SerialName("redirect_uri")
     val redirectUrl: String = "",
 
-    // did of the entity who sent the request.
+    @SerialName("iss")
     val iss: String = "",
 
-    // should contain "openid did_authn"
+    // should contain "openid did_authn" // TODO: validate
     val scope: String = "",
 
     // opaque values that should be passed back to the requester.
-    val state: String? = null,
+    val state: String = "",
     val nonce: String = "",
 
-    // Claims that are being requested.
-    val attestations: CredentialAttestations? = null,
+    @SerialName("exp")
+    val expirationTime: Long = 0,
 
-    // iat, nbf, and exp that need to be checked to see if token has expired
-    val exp: Long = 0,
-    val iat: Long = 0,
+    @SerialName("iat")
+    val idTokenCreationTime: Long = 0,
+
+    @SerialName("nbf")
     val nbf: Long = 0,
+
+    val aud: String = "",
 
     // if set to "create", request is just for issuance.
     val prompt: String = "",
 
-    // object for relying parties to give user more details about themselves.
-    val registration: Registration? = null,
+    @SerialName("max_age")
+    val maxAge: Int = 0,
 
-    // optional parameters
-    val aud: String = "",
-    @SerialName(MAX_AGE)
-    val maxAge: Int = 0
+    val attestations: CredentialAttestations = CredentialAttestations(),
+
+    val registration: Registration = Registration()
 )
