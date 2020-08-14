@@ -47,7 +47,7 @@ class ResolverException(message: String? = null, cause: Throwable? = null) : Sdk
 
 class RegistrarException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
-open class NetworkException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+open class NetworkException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause, true)
 
 class ServiceUnreachableException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
 
