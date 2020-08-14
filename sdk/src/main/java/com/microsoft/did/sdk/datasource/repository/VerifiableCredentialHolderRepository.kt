@@ -91,15 +91,16 @@ class VerifiableCredentialHolderRepository @Inject constructor(
                                      requestedVchMap: RequestedVchMap,
                                      responder: Identifier,
                                      expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<VerifiableCredential> {
-        val formattedResponse = formatter.format(
+        val formattedResponse = formatter.formatIssuanceResponse(
             responder = responder,
-            responseAudience = response.audience,
-            presentationsAudience = response.request.entityIdentifier,
+//            responseAudience = response.audience,
+//            presentationsAudience = response.request.entityIdentifier,
             requestedVchMap = requestedVchMap,
-            requestedIdTokenMap = response.getRequestedIdTokens(),
-            requestedSelfAttestedClaimMap = response.getRequestedSelfAttestedClaims(),
-            contract = response.request.contractUrl,
-            expiryInSeconds = expiryInSeconds
+//            requestedIdTokenMap = response.getRequestedIdTokens(),
+//            requestedSelfAttestedClaimMap = response.getRequestedSelfAttestedClaims(),
+//            contract = response.request.contractUrl,
+            expiryInSeconds = expiryInSeconds,
+            issuanceResponse = response
         )
         val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
@@ -120,8 +121,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     ).fire()
 
     fun sendPresentationResponse(response: PresentationResponse,
-                                         responder: Identifier,
-                                         requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap): Result<String> {
+                                 responder: Identifier,
+                                 requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap): Result<String> {
 
         val state = response.request.content.state
         SdkLog.d("is requestedVchClaimMap empty: ${requestedVchPresentationSubmissionMap.isEmpty()}")
@@ -137,7 +138,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         return Result.Success(formattedResponse)
     }
 
-    suspend fun sendPresentationResponse(response: PresentationResponse,
+/*    suspend fun sendPresentationResponse(response: PresentationResponse,
                                          requestedVchMap: RequestedVchMap,
                                          responder: Identifier,
                                          expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<Unit> {
@@ -158,7 +159,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
             state,
             apiProvider
         ).fire()
-    }
+    }*/
 
     suspend fun getExchangedVerifiableCredential(vch: VerifiableCredentialHolder, pairwiseIdentifier: Identifier): Result<VerifiableCredential> {
         val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)

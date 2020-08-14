@@ -50,9 +50,6 @@ data class OidcRequestContent(
     val nonce: String = "",
 
     // Claims that are being requested.
-    val attestations: CredentialAttestations? = null,
-
-    // Claims that are being requested.
     @SerialName("presentation_definition")
     val credentialPresentationDefinition: CredentialPresentationDefinition? = null,
 

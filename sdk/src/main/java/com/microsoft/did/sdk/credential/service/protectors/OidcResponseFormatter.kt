@@ -6,12 +6,16 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForIssuance
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForPresentation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmission
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
@@ -93,8 +97,89 @@ class OidcResponseFormatter @Inject constructor(
         return signContents(contents, responder)
     }
 
+    fun formatIssuanceResponse(
+        responder: Identifier,
+        expiryInSeconds: Int,
+        requestedVchMap: RequestedVchMap = mutableMapOf(),
+        issuanceResponse: IssuanceResponse
+    ): String {
+        val (iat, exp) = createIatAndExp(expiryInSeconds)
+        if (exp == null) {
+            throw FormatterException("Expiry for OIDC Responses cannot be null")
+        }
+        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val jti = UUID.randomUUID().toString()
+        val did = responder.id
+        var attestationResponse = this.createAttestationClaimModelForIssuance(
+                requestedVchMap,
+                issuanceResponse.getRequestedIdTokens(),
+                issuanceResponse.getRequestedSelfAttestedClaims(),
+                issuanceResponse.request.entityIdentifier,
+                responder
+            )
+        val contents = OidcResponseContentForIssuance(
+            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
+            aud = issuanceResponse.audience,
+            did = did,
+            subJwk = key.toJWK(),
+            iat = iat,
+            exp = exp,
+            jti = jti,
+            contract = issuanceResponse.request.contractUrl,
+            attestations = attestationResponse
+        )
+        return signContentsForIssuance(contents, responder)
+    }
+
     private fun signContents(contents: OidcResponseContent, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(OidcResponseContent.serializer(), contents)
+        SdkLog.d("serialized content is $serializedResponseContent")
+        return signer.signWithIdentifier(serializedResponseContent, responder)
+    }
+
+    private fun signContentsForIssuance(contents: OidcResponseContentForIssuance, responder: Identifier): String {
+        val serializedResponseContent = serializer.stringify(OidcResponseContentForIssuance.serializer(), contents)
+        SdkLog.d("serialized content is $serializedResponseContent")
+        return signer.signWithIdentifier(serializedResponseContent, responder)
+    }
+
+    fun formatPresentationResponse(
+        responder: Identifier,
+        expiryInSeconds: Int,
+        requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf(),
+        credentialPresentationSubmission: CredentialPresentationSubmission? = null,
+        presentationResponse: PresentationResponse
+    ): String {
+        val (iat, exp) = createIatAndExp(expiryInSeconds)
+        if (exp == null) {
+            throw FormatterException("Expiry for OIDC Responses cannot be null")
+        }
+        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val jti = UUID.randomUUID().toString()
+        val did = responder.id
+        var attestationResponse = this.createAttestationClaimModelForPresentation(
+                requestedVchPresentationSubmissionMap,
+                presentationResponse.request.entityIdentifier,
+                responder
+            )
+        val contents = OidcResponseContentForPresentation(
+            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
+            aud = presentationResponse.audience,
+            nonce = presentationResponse.request.content.nonce,
+            did = did,
+            subJwk = key.toJWK(),
+            iat = iat,
+            exp = exp,
+            state = presentationResponse.request.content.state,
+            jti = jti,
+            presentationSubmission = credentialPresentationSubmission,
+            attestations = attestationResponse
+        )
+        return signContentsForPresentation(contents, responder)
+    }
+
+    private fun signContentsForPresentation(contents: OidcResponseContentForPresentation, responder: Identifier): String {
+        val serializedResponseContent = serializer.stringify(OidcResponseContentForPresentation.serializer(), contents)
         SdkLog.d("serialized content is $serializedResponseContent")
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }

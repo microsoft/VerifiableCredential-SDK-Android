@@ -99,11 +99,14 @@ class PresentationExchangeTest {
 
             val vchResult = vcManager.sendIssuanceResponse(issuanceResponse, pairwiseIdentifier)
             var vch: VerifiableCredentialHolder = mockk()
-            val vc: VerifiableCredential = mockk()
+/*            val vc: VerifiableCredential = mockk()
             every { vch.verifiableCredential } returns vc
-            every { vc.raw } returns "testRaw"
-            if (vchResult is Result.Success)
+            every { vc.raw } returns "testRaw"*/
+            if (vchResult is Result.Success) {
                 vch = vchResult.payload
+                println("vc raw is ${vch.verifiableCredential.raw}")
+            } else if(vchResult is Result.Failure)
+                println("Issuance Failed with  ${vchResult.payload}")
 
             val presentationResponse = vcManager.createPresentationResponse(presentationRequest)
             presentationResponse.addRequestedVchClaims(
@@ -190,14 +193,12 @@ class PresentationExchangeTest {
         val formatter = OidcResponseFormatter(crypto, serializer, verifiablePresentationFormatter, tokenSigner)
         val presentationSubmission = mutableListOf<CredentialPresentationSubmissionDescriptor>()
         response.getRequestedVchClaims().forEach { presentationSubmission.add(transformReqToResp(it.component1())) }
-        return formatter.format(
+        return formatter.formatPresentationResponse(
             responder = responder,
-            responseAudience = response.audience,
-            presentationsAudience = response.request.entityIdentifier,
             credentialPresentationSubmission = CredentialPresentationSubmission(presentationSubmission),
             requestedVchPresentationSubmissionMap = response.getRequestedVchClaims(),
-            nonce = response.request.content.nonce,
-            expiryInSeconds = 604800
+            expiryInSeconds = 604800,
+            presentationResponse = response
         )
     }
 

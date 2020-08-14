@@ -130,7 +130,7 @@ class VerifiableCredentialManager @Inject constructor(
         response: IssuanceResponse,
         responder: Identifier,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS,
-        exchangeForPairwiseVerifiableCredential: Boolean = true
+        exchangeForPairwiseVerifiableCredential: Boolean = false
         ): Result<VerifiableCredentialHolder> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -165,7 +165,7 @@ class VerifiableCredentialManager @Inject constructor(
                     exchangeForPairwiseVerifiableCredential,
                     response.getRequestedVchClaims(),
                     responder).abortOnError()
-                vchRepository.sendPresentationResponse(response, responder, 604800, vcRequestedMapping).abortOnError()
+                vchRepository.sendPresentationResponse(response, responder, vcRequestedMapping).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
             }

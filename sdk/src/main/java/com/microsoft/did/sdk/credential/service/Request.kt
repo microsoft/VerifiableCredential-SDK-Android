@@ -15,28 +15,7 @@ import kotlinx.serialization.Serializable
 sealed class Request(
     val entityName: String = "",
     val entityIdentifier: String = ""
-) {
-/*    private var presentationBinding: PresentationRequestBinding? = null
-
-    fun getCredentialAttestations(): CredentialAttestations? {
-        return attestations
-    }
-
-    fun hasPresentationAttestations(): Boolean {
-        if (attestations?.presentations != null) {
-            return true
-        }
-        return false
-    }
-
-    fun getPresentationAttestations(): List<PresentationAttestation> {c
-        val attestations = attestations?.presentations
-        if (attestations != null) {
-            return attestations
-        }
-        return emptyList()
-    }*/
-}
+)
 
 @Serializable
 class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String, val attestations: CredentialAttestations?) :
