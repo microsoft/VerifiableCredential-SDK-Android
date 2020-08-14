@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk.util.controlflow
 
-open class SdkException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
+open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
 
 class UnSupportedOperationException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
