@@ -38,7 +38,7 @@ class ResolverTest {
     @Test
     fun failedResolutionInvalidIdTest() {
         val resolver = Resolver("", identifierRepository)
-        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(ServiceErrorException("Not Found"))
+        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(ServiceErrorException("123", "Not Found", true))
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
