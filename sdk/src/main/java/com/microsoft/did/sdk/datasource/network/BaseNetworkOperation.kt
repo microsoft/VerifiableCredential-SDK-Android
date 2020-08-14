@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.datasource.network
 
+import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.NetworkException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
@@ -32,7 +33,7 @@ abstract class BaseNetworkOperation<S, T> {
             }
             return onFailure(response)
         } catch (exception: IOException) {
-            return Result.Failure(NetworkException("Failed to send request.", exception))
+            return Result.Failure(LocalNetworkException("Failed to send request.", exception))
         }
     }
 
@@ -40,21 +41,22 @@ abstract class BaseNetworkOperation<S, T> {
         // TODO("how do we want to handle null bodies")
         // TODO("how to not suppress this warning")
         @Suppress("UNCHECKED_CAST")
-        val transformedPayload = (response.body() ?: throw NetworkException("Body of Response is null.")) as T
+        val transformedPayload = (response.body() ?: throw LocalNetworkException("Body of Response is null.")) as T
         return Result.Success(transformedPayload)
     }
 
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
+        val requestId = response.headers()["request-id"] ?: "?"
         return when (response.code()) {
-            401 -> Result.Failure(UnauthorizedException("${response.code()}: ${response.errorBody()?.string()}"))
-            402, 403, 404 -> Result.Failure(ServiceErrorException("${response.code()}: ${response.errorBody()?.string()}"))
-            500, 501, 502, 503 -> Result.Failure(ServiceUnreachableException("${response.code()}: ${response.errorBody()?.string()}"))
-            else -> Result.Failure(NetworkException("Unknown Status code ${response.code()}"))
+            401 -> Result.Failure(UnauthorizedException(requestId, "${response.code()}: ${response.errorBody()?.string()}", false))
+            402, 403, 404 -> Result.Failure(ServiceErrorException(requestId, "${response.code()}: ${response.errorBody()?.string()}", false))
+            500, 501, 502, 503 -> Result.Failure(ServiceUnreachableException(requestId, "${response.code()}: ${response.errorBody()?.string()}", true))
+            else -> Result.Failure(NetworkException(requestId, "Unknown Status code ${response.code()}", true))
         }
     }
 
     fun <S> onRetry(): Result<S> {
-        throw NetworkException("Retry Not Supported.")
+        throw LocalNetworkException("Retry Not Supported.")
     }
 }

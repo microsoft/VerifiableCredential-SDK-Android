@@ -47,12 +47,14 @@ class ResolverException(message: String? = null, cause: Throwable? = null) : Sdk
 
 class RegistrarException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
 
-open class NetworkException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause, true)
+open class LocalNetworkException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause, true)
 
-class ServiceUnreachableException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+open class NetworkException(val requestId: String, message: String, retryable: Boolean) : SdkException(message, null, retryable)
 
-class ServiceErrorException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+class ServiceUnreachableException(requestId: String, message: String, retryable: Boolean) : NetworkException(requestId, message, retryable)
 
-class UnauthorizedException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+class ServiceErrorException(requestId: String, message: String, retryable: Boolean) : NetworkException(requestId, message, retryable)
+
+class UnauthorizedException(requestId: String, message: String, retryable: Boolean) : NetworkException(requestId, message, retryable)
 
 class RepositoryException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)

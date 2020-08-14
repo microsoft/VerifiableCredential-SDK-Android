@@ -6,7 +6,7 @@ import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResp
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.serializer.Serializer
-import com.microsoft.did.sdk.util.controlflow.NetworkException
+import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
@@ -54,7 +54,7 @@ class ResolverTest {
                 "invalidUrl",
                 expectedIdentifier
             )
-        } returns Result.Failure(NetworkException("Failed to send request."))
+        } returns Result.Failure(LocalNetworkException("Failed to send request."))
         runBlocking {
             val actualResult = resolver.resolve(expectedIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
