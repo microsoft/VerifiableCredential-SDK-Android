@@ -17,6 +17,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
+import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -91,7 +92,7 @@ class VerifiableCredentialManagerTest {
         every { presentationResponse.request.entityIdentifier } returns testEntityDid
         every { presentationResponse.request.entityName } returns testEntityName
         coEvery { verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any()) } returns Result.Success(Unit)
-        coEvery { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())} returns Result.Success(Unit)
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
 
         runBlocking {
             val responder: Identifier = mockk()
@@ -125,7 +126,7 @@ class VerifiableCredentialManagerTest {
         coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coEvery { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())} returns Result.Success(Unit)
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, revokeReason)
@@ -147,7 +148,7 @@ class VerifiableCredentialManagerTest {
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
         val revokeRPMap = mapOf("did:ion:test" to "test.com")
-        coEvery { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())} returns Result.Success(Unit)
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, "")
@@ -164,7 +165,7 @@ class VerifiableCredentialManagerTest {
         coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coEvery { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())} returns Result.Success(Unit)
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
@@ -181,7 +182,7 @@ class VerifiableCredentialManagerTest {
         coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns ""
-        coEvery { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())} returns Result.Success(Unit)
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")

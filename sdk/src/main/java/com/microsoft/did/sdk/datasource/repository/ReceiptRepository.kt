@@ -20,7 +20,6 @@ class ReceiptRepository @Inject constructor(database: SdkDatabase) {
 
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
 
-    // Receipt Methods
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
 
     fun getAllReceipts(): LiveData<List<Receipt>> = receiptDao.getAllReceipts()
@@ -30,21 +29,20 @@ class ReceiptRepository @Inject constructor(database: SdkDatabase) {
         entityName: String,
         receiptAction: ReceiptAction,
         vcIds: List<String>
-    ): Result<Unit> {
+    ) {
         val receiptList = createReceiptsForVCs(entityDid, entityName, receiptAction, vcIds)
         receiptList.forEach { insert(it) }
-        return Result.Success(Unit)
     }
 
-    private fun createReceiptsForVCs(entityDid: String, entityName: String, receiptAction: ReceiptAction, vcIds: List<String>): List<Receipt> {
+    private fun createReceiptsForVCs(
+        entityDid: String,
+        entityName: String,
+        receiptAction: ReceiptAction,
+        vcIds: List<String>
+    ): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         vcIds.forEach {
-            val receipt = Receipt(
-                action = receiptAction,
-                vcId = it,
-                entityIdentifier = entityDid,
-                entityName = entityName
-            )
+            val receipt = Receipt(receiptAction, it, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList

@@ -65,12 +65,7 @@ class ReceiptRepositoryTest {
         val suppliedEntityName1 = "RP1"
         val suppliedEntityDid1 = "RPDID1"
         val currentTimeForReceipt1 = System.currentTimeMillis()
-        val receipt1 = Receipt(
-            entityIdentifier = suppliedEntityDid1,
-            entityName = suppliedEntityName1,
-            action = ReceiptAction.Revocation,
-            vcId = suppliedVCId
-        )
+        val receipt1 = Receipt(ReceiptAction.Revocation, suppliedEntityDid1, suppliedEntityName1, suppliedVCId)
         assertThat(receipt1.vcId).isEqualTo(suppliedVCId)
         assertThat(receipt1.entityName).isEqualTo(suppliedEntityName1)
         assertThat(receipt1.entityIdentifier).isEqualTo(suppliedEntityDid1)
@@ -79,12 +74,7 @@ class ReceiptRepositoryTest {
         val suppliedEntityName2 = "RP2"
         val suppliedEntityDid2 = "RPDID2"
         val currentTimeForReceipt2 = System.currentTimeMillis()
-        val receipt2 = Receipt(
-            entityIdentifier = suppliedEntityDid2,
-            entityName = suppliedEntityName2,
-            action = ReceiptAction.Revocation,
-            vcId = suppliedVCId
-        )
+        val receipt2 = Receipt(ReceiptAction.Revocation, suppliedEntityDid2, suppliedEntityName2, suppliedVCId)
         assertThat(receipt2.vcId).isEqualTo(suppliedVCId)
         assertThat(receipt2.entityName).isEqualTo(suppliedEntityName2)
         assertThat(receipt2.entityIdentifier).isEqualTo(suppliedEntityDid2)
@@ -103,24 +93,16 @@ class ReceiptRepositoryTest {
         every { vch.cardId } returns cardId
         coJustRun { mockedReceiptDao.insert(any()) }
         val expectedReceipt: LiveData<List<Receipt>> = MutableLiveData(
-            listOf(
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = cardId,
-                    entityIdentifier = testEntityDid,
-                    entityName = testEntityName
-                )
-            )
+            listOf(Receipt(ReceiptAction.Presentation, testEntityDid, testEntityName, cardId))
         )
         every { mockedReceiptDao.getAllReceiptsByVcId(cardId) } returns expectedReceipt
         runBlocking {
-            val receiptsResult = receiptRepository.createAndSaveReceiptsForVCs(
+            receiptRepository.createAndSaveReceiptsForVCs(
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
                 issuanceResponse.getRequestedVchs().values.map { it.cardId }
             )
-            assertThat(receiptsResult).isInstanceOf(Result.Success::class.java)
             val receipts = receiptRepository.getAllReceiptsByVcId(cardId).getOrAwaitValue()
             assertThat(receipts).isNotNull
             if (receipts != null) {
@@ -147,24 +129,16 @@ class ReceiptRepositoryTest {
         every { vch.cardId } returns cardId
         coJustRun { mockedReceiptDao.insert(any()) }
         val expectedReceipt: LiveData<List<Receipt>> = MutableLiveData(
-            listOf(
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = cardId,
-                    entityIdentifier = testEntityDid,
-                    entityName = testEntityName
-                )
-            )
+            listOf(Receipt(ReceiptAction.Presentation, testEntityDid, testEntityName, cardId))
         )
         every { mockedReceiptDao.getAllReceiptsByVcId(cardId) } returns expectedReceipt
         runBlocking {
-            val receiptsResult = receiptRepository.createAndSaveReceiptsForVCs(
+            receiptRepository.createAndSaveReceiptsForVCs(
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
                 issuanceResponse.getRequestedVchs().values.map { it.cardId }
             )
-            assertThat(receiptsResult).isInstanceOf(Result.Success::class.java)
             val receipts = receiptRepository.getAllReceiptsByVcId(cardId).getOrAwaitValue()
             assertThat(receipts).isNotNull
             if (receipts != null) {
@@ -213,29 +187,18 @@ class ReceiptRepositoryTest {
         val receiptCreationStartTime = System.currentTimeMillis()
         val expectedReceipts: LiveData<List<Receipt>> = MutableLiveData(
             listOf(
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = vchId1,
-                    entityIdentifier = testEntityDid,
-                    entityName = testEntityName
-                ),
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = vchId2,
-                    entityIdentifier = testEntityDid,
-                    entityName = testEntityName
-                )
+                Receipt(ReceiptAction.Presentation, testEntityDid, testEntityName, vchId1),
+                Receipt(ReceiptAction.Presentation, testEntityDid, testEntityName, vchId2)
             )
         )
         every { mockedReceiptDao.getAllReceipts() } returns expectedReceipts
         runBlocking {
-            val receiptsResult = receiptRepository.createAndSaveReceiptsForVCs(
+            receiptRepository.createAndSaveReceiptsForVCs(
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
                 issuanceResponse.getRequestedVchs().values.map { it.cardId }
             )
-            assertThat(receiptsResult).isInstanceOf(Result.Success::class.java)
             val receipts = receiptRepository.getAllReceipts().getOrAwaitValue()
             assertThat(receipts).isNotNull
             if (receipts != null) {
@@ -269,29 +232,18 @@ class ReceiptRepositoryTest {
         val receiptCreationStartTime = System.currentTimeMillis()
         val expectedReceipts: LiveData<List<Receipt>> = MutableLiveData(
             listOf(
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = cardId1,
-                    entityIdentifier = testEntityDid,
-                    entityName = testEntityName
-                ),
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = cardId2,
-                    entityIdentifier = testEntityDid,
-                    entityName = testEntityName
-                )
+                Receipt(ReceiptAction.Presentation, testEntityDid, testEntityName, cardId1),
+                Receipt(ReceiptAction.Presentation, testEntityDid, testEntityName, cardId2)
             )
         )
         every { mockedReceiptDao.getAllReceipts() } returns expectedReceipts
         runBlocking {
-            val receiptsResult = receiptRepository.createAndSaveReceiptsForVCs(
+            receiptRepository.createAndSaveReceiptsForVCs(
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
                 issuanceResponse.getRequestedVchs().values.map { it.cardId }
             )
-            assertThat(receiptsResult).isInstanceOf(Result.Success::class.java)
             val receipts = receiptRepository.getAllReceipts().getOrAwaitValue()
             assertThat(receipts).isNotNull
             if (receipts != null) {
@@ -324,24 +276,16 @@ class ReceiptRepositoryTest {
         coJustRun { mockedReceiptDao.insert(any()) }
         val receiptCreationStartTime = System.currentTimeMillis()
         val expectedReceipt: LiveData<List<Receipt>> = MutableLiveData(
-            listOf(
-                Receipt(
-                    action = ReceiptAction.Presentation,
-                    vcId = cardId,
-                    entityIdentifier = "",
-                    entityName = ""
-                )
-            )
+            listOf(Receipt(ReceiptAction.Presentation, "", "", cardId))
         )
         every { mockedReceiptDao.getAllReceiptsByVcId(cardId) } returns expectedReceipt
         runBlocking {
-            val receiptsResult = receiptRepository.createAndSaveReceiptsForVCs(
+            receiptRepository.createAndSaveReceiptsForVCs(
                 "",
                 "",
                 ReceiptAction.Presentation,
                 issuanceResponse.getRequestedVchs().values.map { it.cardId }
             )
-            assertThat(receiptsResult).isInstanceOf(Result.Success::class.java)
             val receipts = receiptRepository.getAllReceiptsByVcId(cardId).getOrAwaitValue()
             assertThat(receipts).isNotNull
             if (receipts != null) {

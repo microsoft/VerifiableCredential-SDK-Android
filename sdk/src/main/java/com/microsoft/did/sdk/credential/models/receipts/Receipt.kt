@@ -12,19 +12,19 @@ enum class ReceiptAction {
 @Entity
 data class Receipt(
 
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-
     val action: ReceiptAction,
 
     // did of the verifier/issuer
     val entityIdentifier: String,
 
-    // date action occurred
-    val activityDate: Long = System.currentTimeMillis(),
-
     //Name of the verifier/issuer
     val entityName: String,
 
-    val vcId: String
+    val vcId: String,
+
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
+
+    // date action occurred
+    val activityDate: Long = System.currentTimeMillis()
 )

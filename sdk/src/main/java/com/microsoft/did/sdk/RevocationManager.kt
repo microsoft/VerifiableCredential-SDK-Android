@@ -47,7 +47,7 @@ class RevocationManager @Inject constructor(
                         relyingParty.value,
                         ReceiptAction.Revocation,
                         listOf(verifiableCredentialHolder.cardId)
-                    ).abortOnError()
+                    )
                 }
                 Result.Success(Unit)
             }
@@ -68,7 +68,7 @@ class RevocationManager @Inject constructor(
             runResultTry {
                 vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), reason).abortOnError()
                 //TODO: While adding advanced receipts improve on receipts for revoking all VPs
-                receiptRepository.createAndSaveReceiptsForVCs("", "", ReceiptAction.Revocation, listOf(verifiableCredentialHolder.cardId)).abortOnError()
+                receiptRepository.createAndSaveReceiptsForVCs("", "", ReceiptAction.Revocation, listOf(verifiableCredentialHolder.cardId))
                 Result.Success(Unit)
             }
         }

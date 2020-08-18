@@ -180,7 +180,7 @@ class VerifiableCredentialManager @Inject constructor(
                     response.request.entityName,
                     ReceiptAction.Presentation,
                     response.getRequestedVchs().values.map { it.cardId }
-                ).abortOnError()
+                )
                 Result.Success(Unit)
             }
         }
@@ -190,19 +190,19 @@ class VerifiableCredentialManager @Inject constructor(
      * Revokes a verifiable presentation which revokes access for specific relying party/parties or all relying parties to do a status check on the Verifiable Credential
      *
      * @param verifiableCredentialHolder The VC for which access to check status is revoked
-     * @param rPDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If map is empty, all verifiable presentations are revoked
+     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If map is empty, all verifiable presentations are revoked
      * @param reason Reason for revocation
      */
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
-        rPDidToNameMap: RpDidToNameMap,
+        rpDidToNameMap: RpDidToNameMap,
         reason: String = ""
     ): Result<Unit> {
         val revocationManager = RevocationManager(vchRepository, receiptRepository)
-        return if (rPDidToNameMap.isEmpty())
+        return if (rpDidToNameMap.isEmpty())
             revocationManager.revokeAllVerifiablePresentations(verifiableCredentialHolder, reason)
         else
-            revocationManager.revokeVerifiablePresentation(verifiableCredentialHolder, rPDidToNameMap, reason)
+            revocationManager.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
     }
 
     private suspend fun getExchangedVcs(
