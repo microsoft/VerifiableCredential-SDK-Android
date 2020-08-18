@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentForPresentation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -45,7 +45,7 @@ class ResponseTest {
         issuanceResponse = IssuanceResponse(issuanceRequest)
         val serializer = Serializer()
         val oidcRequestContent =
-            serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
+            serializer.parse(OidcRequestContentForPresentation.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
         presentationRequest = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.credentialPresentationDefinition)
         presentationResponse = PresentationResponse(presentationRequest)
     }

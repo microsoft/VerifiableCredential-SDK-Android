@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentForPresentation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmissionDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
@@ -73,7 +73,7 @@ class PresentationExchangeTest {
     @Test
     fun testPresentationExchange() {
         val oidcRequestContent =
-            serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
+            serializer.parse(OidcRequestContentForPresentation.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
         var issuanceResponse: IssuanceResponse
         var issuancePairwiseIdentifier: Identifier
         var presentationPairwiseIdentifier: Identifier
@@ -130,7 +130,7 @@ class PresentationExchangeTest {
     fun validatePERequest() {
         val serializer = Serializer()
         val oidcRequestContent =
-            serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
+            serializer.parse(OidcRequestContentForPresentation.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
         val request = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.credentialPresentationDefinition)
         runBlocking {
             val validationResult = vcManager.isRequestValid(request)

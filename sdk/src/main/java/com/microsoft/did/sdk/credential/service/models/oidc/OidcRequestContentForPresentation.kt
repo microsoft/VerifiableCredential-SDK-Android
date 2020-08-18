@@ -6,11 +6,7 @@
 package com.microsoft.did.sdk.credential.service.models.oidc
 
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationDefinition
-import com.microsoft.did.sdk.util.Constants.CLIENT_ID
 import com.microsoft.did.sdk.util.Constants.MAX_AGE
-import com.microsoft.did.sdk.util.Constants.REDIRECT_URL
-import com.microsoft.did.sdk.util.Constants.RESPONSE_MODE
-import com.microsoft.did.sdk.util.Constants.RESPONSE_TYPE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,7 +16,7 @@ import kotlinx.serialization.Serializable
  * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
  */
 @Serializable
-data class OidcRequestContent(
+data class OidcRequestContentForPresentation(
 
     // what type of object the response should be (should be idtoken). // TODO: validate
     @SerialName("response_type")

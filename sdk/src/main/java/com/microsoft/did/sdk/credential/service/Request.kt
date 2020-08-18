@@ -7,8 +7,8 @@ package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentForPresentation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationDefinition
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -28,7 +28,7 @@ class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUr
 @Serializable
 class PresentationRequest(
     val serializedToken: String,
-    val content: OidcRequestContent,
+    val content: OidcRequestContentForPresentation,
     val credentialPresentationDefinition: CredentialPresentationDefinition?
 ) : Request(content.registration?.clientName ?: "", content.iss) {
     fun getCredentialPresentationDefinitions(): CredentialPresentationDefinition? {
