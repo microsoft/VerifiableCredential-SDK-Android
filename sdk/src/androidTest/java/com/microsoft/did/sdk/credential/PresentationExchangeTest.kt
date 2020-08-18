@@ -8,7 +8,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.IdentifierManager
 import com.microsoft.did.sdk.VerifiableCredentialManager
 import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
@@ -19,7 +18,6 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmissionDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmission
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.did.sdk.credential.service.protectors.VerifiablePresentationFormatter
@@ -77,7 +75,8 @@ class PresentationExchangeTest {
         val oidcRequestContent =
             serializer.parse(OidcRequestContent.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
         var issuanceResponse: IssuanceResponse
-        var pairwiseIdentifier: Identifier
+        var issuancePairwiseIdentifier: Identifier
+        var presentationPairwiseIdentifier: Identifier
 
         val presentationRequest =
             PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.credentialPresentationDefinition)
@@ -95,30 +94,34 @@ class PresentationExchangeTest {
             println("issuance response is $issuanceResponse")
 
             val identifier = getMasterIdentifier()
-            pairwiseIdentifier = getPairwiseIdentifier(identifier, issuanceRequest.entityIdentifier)
+            issuancePairwiseIdentifier = getPairwiseIdentifier(identifier, issuanceRequest.entityIdentifier)
 
-            val vchResult = vcManager.sendIssuanceResponse(issuanceResponse, pairwiseIdentifier)
+            val vchResult = vcManager.sendIssuanceResponse(issuanceResponse, issuancePairwiseIdentifier)
             var vch: VerifiableCredentialHolder = mockk()
-/*            val vc: VerifiableCredential = mockk()
-            every { vch.verifiableCredential } returns vc
-            every { vc.raw } returns "testRaw"*/
+            var pairwiseVC: VerifiableCredentialHolder = mockk()
             if (vchResult is Result.Success) {
                 vch = vchResult.payload
                 println("vc raw is ${vch.verifiableCredential.raw}")
             } else if(vchResult is Result.Failure)
                 println("Issuance Failed with  ${vchResult.payload}")
 
+            val credentialPresentationInputDescriptors = presentationRequest.credentialPresentationDefinition?.credentialPresentationInputDescriptors?.first()
+                ?: credentialPresentationInputDescriptorsMock
+            val requestedPairwiseVC = mutableMapOf(credentialPresentationInputDescriptors to vch)
+            presentationPairwiseIdentifier = getPairwiseIdentifier(identifier, presentationRequest.entityIdentifier)
+            val pairwiseResult = vcManager.getExchangedVcs(true, requestedPairwiseVC, presentationPairwiseIdentifier)
+            if(pairwiseResult is Result.Success) {
+                pairwiseVC = pairwiseResult.payload.values.first()
+                println("pairwise vc raw is ${pairwiseVC.verifiableCredential.raw}")
+            }
             val presentationResponse = vcManager.createPresentationResponse(presentationRequest)
-            presentationResponse.addRequestedVchClaims(
-                presentationRequest.credentialPresentationDefinition?.credentialPresentationInputDescriptors?.first()
-                    ?: credentialPresentationInputDescriptorsMock, vch
-            )
+            presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptors, pairwiseVC)
             println("PE response is $presentationResponse")
 /*            val formattedResponseResult = vcManager.sendPresentationResponse(presentationResponse, pairwiseIdentifier)
             if(formattedResponseResult is Result.Success)
                 println("formatted response - oidc is ${formattedResponseResult.payload}")*/
 
-            oidcPresentationResponse = createOidcResponseFromPresentationResponse(presentationResponse, pairwiseIdentifier)
+            oidcPresentationResponse = createOidcResponseFromPresentationResponse(presentationResponse, presentationPairwiseIdentifier)
             println("OIDC Response is $oidcPresentationResponse")
         }
     }
@@ -195,7 +198,7 @@ class PresentationExchangeTest {
         response.getRequestedVchClaims().forEach { presentationSubmission.add(transformReqToResp(it.component1())) }
         return formatter.formatPresentationResponse(
             responder = responder,
-            credentialPresentationSubmission = CredentialPresentationSubmission(presentationSubmission),
+//            credentialPresentationSubmission = CredentialPresentationSubmission(presentationSubmission),
             requestedVchPresentationSubmissionMap = response.getRequestedVchClaims(),
             expiryInSeconds = 604800,
             presentationResponse = response

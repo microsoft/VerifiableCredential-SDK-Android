@@ -130,7 +130,7 @@ class VerifiableCredentialManager @Inject constructor(
         response: IssuanceResponse,
         responder: Identifier,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS,
-        exchangeForPairwiseVerifiableCredential: Boolean = false
+        exchangeForPairwiseVerifiableCredential: Boolean = true
         ): Result<VerifiableCredentialHolder> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -157,7 +157,7 @@ class VerifiableCredentialManager @Inject constructor(
         response: PresentationResponse,
         responder: Identifier,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS,
-        exchangeForPairwiseVerifiableCredential: Boolean = false
+        exchangeForPairwiseVerifiableCredential: Boolean = true
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -216,13 +216,12 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    private suspend fun getExchangedVcs(
+    suspend fun getExchangedVcs(
         exchangeForPairwiseVerifiableCredential: Boolean,
         requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
         responder: Identifier
     ): Result<RequestedVchPresentationSubmissionMap> {
         return runResultTry {
-            SdkLog.d("is requestedVchClaimMap empty in manager: ${requestedVchPresentationSubmissionMap.isEmpty()}")
             val exchangedVchMap = if (exchangeForPairwiseVerifiableCredential) {
                 exchangeRequestedVerifiableCredentials(requestedVchPresentationSubmissionMap, responder).abortOnError()
             } else {

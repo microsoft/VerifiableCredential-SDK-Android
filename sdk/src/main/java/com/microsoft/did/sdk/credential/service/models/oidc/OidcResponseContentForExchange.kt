@@ -5,6 +5,10 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.util.Constants
+import kotlinx.serialization.Required
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -14,8 +18,34 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class OidcResponseContentForExchange(
+    @Required
+    val iss: String = Constants.SELF_ISSUED,
+
+    // thumbprint (sha-256) of the public key
+    val sub: String = "",
+
+    // url that is meant to receive the response.
+    val aud: String = "",
+
+    // did tied to the private key that signed response.
+    val did: String,
+
+    // the public key that can be used to verify signature.
+    @SerialName(Constants.SUB_JWK)
+    val subJwk: JsonWebKey,
+
+    // time the token was issued.
+    val iat: Long,
+
+    // time the token expires.
+    val exp: Long,
+
+    //id of the response
+    val jti: String,
+
     // vc needed for Revocation or Exchange API
-    val vc: String? = null,
+    val vc: String = "",
+
     // recipient of VC for Exchange API
-    val recipient: String? = null
-): OidcResponseContentNew()
+    val recipient: String = ""
+)

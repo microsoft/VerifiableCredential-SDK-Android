@@ -50,7 +50,7 @@ enum class W3cCryptoApiConstants(val value: String) {
     Secp256r1("P-256"),
     Secp384r1("P-384"),
     Secp521r1("P-521"),
-    Secp256k1("P-256K"),
+    Secp256k1("secp256k1"),
     Ed25519("ed25519"),
 
     AesCtr("AES-CTR"),

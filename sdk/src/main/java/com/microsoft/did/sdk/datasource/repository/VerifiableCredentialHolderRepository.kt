@@ -15,6 +15,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmission
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -93,12 +94,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
                                      expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<VerifiableCredential> {
         val formattedResponse = formatter.formatIssuanceResponse(
             responder = responder,
-//            responseAudience = response.audience,
-//            presentationsAudience = response.request.entityIdentifier,
             requestedVchMap = requestedVchMap,
-//            requestedIdTokenMap = response.getRequestedIdTokens(),
-//            requestedSelfAttestedClaimMap = response.getRequestedSelfAttestedClaims(),
-//            contract = response.request.contractUrl,
             expiryInSeconds = expiryInSeconds,
             issuanceResponse = response
         )
@@ -122,18 +118,16 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     fun sendPresentationResponse(response: PresentationResponse,
                                  responder: Identifier,
-                                 requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap): Result<String> {
+                                 requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
+                                 expiryInSeconds: Int = 604800): Result<String> {
 
         val state = response.request.content.state
         SdkLog.d("is requestedVchClaimMap empty: ${requestedVchPresentationSubmissionMap.isEmpty()}")
-        val formattedResponse = formatter.format(
+        val formattedResponse = formatter.formatPresentationResponse(
             responder = responder,
-            responseAudience = response.audience,
-            presentationsAudience = response.request.entityIdentifier,
             requestedVchPresentationSubmissionMap = requestedVchPresentationSubmissionMap,
-            nonce = response.request.content.nonce,
-            state = state,
-            expiryInSeconds = 604800
+            presentationResponse = response,
+            expiryInSeconds = expiryInSeconds
         )
         return Result.Success(formattedResponse)
     }
@@ -177,13 +171,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         if (request.audience == "") {
             throw ExchangeException("Audience is an empty string.")
         }
-        val formattedPairwiseRequest = formatter.format(
-            responder = requester,
-            responseAudience = request.audience,
-            transformingVerifiableCredential = request.verifiableCredential,
-            recipientIdentifier = request.pairwiseDid,
-            expiryInSeconds = DEFAULT_EXPIRATION_IN_SECONDS
-        )
+        val formattedPairwiseRequest = formatter.formatExchangeResponse(requester, DEFAULT_EXPIRATION_IN_SECONDS, request)
 
         val result = SendVerifiableCredentialIssuanceRequestNetworkOperation(
             request.audience,
