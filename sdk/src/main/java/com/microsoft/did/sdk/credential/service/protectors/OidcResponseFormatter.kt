@@ -23,6 +23,9 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PATH_IN_RESPONSE
+import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_ENCODING
+import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import java.util.UUID
@@ -51,12 +54,12 @@ class OidcResponseFormatter @Inject constructor(
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         var attestationResponse = this.createAttestationClaimModelForIssuance(
-                requestedVchMap,
-                issuanceResponse.getRequestedIdTokens(),
-                issuanceResponse.getRequestedSelfAttestedClaims(),
-                issuanceResponse.request.entityIdentifier,
-                responder
-            )
+            requestedVchMap,
+            issuanceResponse.getRequestedIdTokens(),
+            issuanceResponse.getRequestedSelfAttestedClaims(),
+            issuanceResponse.request.entityIdentifier,
+            responder
+        )
         val contents = OidcResponseContentForIssuance(
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
             aud = issuanceResponse.audience,
@@ -73,7 +76,6 @@ class OidcResponseFormatter @Inject constructor(
 
     private fun signContentsForIssuance(contents: OidcResponseContentForIssuance, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(OidcResponseContentForIssuance.serializer(), contents)
-        SdkLog.d("serialized content is $serializedResponseContent")
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
@@ -88,12 +90,13 @@ class OidcResponseFormatter @Inject constructor(
         val jti = UUID.randomUUID().toString()
         val did = responder.id
         var attestationResponse = this.createAttestationClaimModelForPresentation(
-                requestedVchPresentationSubmissionMap,
-                presentationResponse.request.entityIdentifier,
-                responder
-            )
+            requestedVchPresentationSubmissionMap,
+            presentationResponse.request.entityIdentifier,
+            responder
+        )
         val credentialPresentationSubmissionDescriptors = mutableListOf<CredentialPresentationSubmissionDescriptor>()
-        presentationResponse.getRequestedVchClaims().forEach { credentialPresentationSubmissionDescriptors.add(transformPresentationInputToSubmission(it.component1())) }
+        presentationResponse.getRequestedVchClaims()
+            .forEach { credentialPresentationSubmissionDescriptors.add(transformPresentationInputToSubmission(it.component1())) }
         val credentialPresentationSubmission = CredentialPresentationSubmission(credentialPresentationSubmissionDescriptors)
         val contents = OidcResponseContentForPresentation(
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
@@ -113,17 +116,16 @@ class OidcResponseFormatter @Inject constructor(
 
     private fun signContentsForPresentation(contents: OidcResponseContentForPresentation, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(OidcResponseContentForPresentation.serializer(), contents)
-        SdkLog.d("serialized content is $serializedResponseContent")
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
     private fun transformPresentationInputToSubmission(credentialPresentationInputDescriptor: CredentialPresentationInputDescriptors): CredentialPresentationSubmissionDescriptor {
         val credentialPresentationSubmissionDescriptor = CredentialPresentationSubmissionDescriptor(
             credentialPresentationInputDescriptor.id,
-            "$.attestations.presentations.${credentialPresentationInputDescriptor.id}"
+            "$CREDENTIAL_PATH_IN_RESPONSE.${credentialPresentationInputDescriptor.id}"
         )
-        credentialPresentationSubmissionDescriptor.credentialFormat = "jwt"
-        credentialPresentationSubmissionDescriptor.credentialEncoding = "base64Url"
+        credentialPresentationSubmissionDescriptor.credentialFormat = CREDENTIAL_PRESENTATION_FORMAT
+        credentialPresentationSubmissionDescriptor.credentialEncoding = CREDENTIAL_PRESENTATION_ENCODING
         return credentialPresentationSubmissionDescriptor
     }
 
@@ -152,7 +154,6 @@ class OidcResponseFormatter @Inject constructor(
 
     private fun signContentsForExchange(contents: OidcResponseContentForExchange, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(OidcResponseContentForExchange.serializer(), contents)
-        SdkLog.d("serialized content is $serializedResponseContent")
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
@@ -184,22 +185,6 @@ class OidcResponseFormatter @Inject constructor(
         return AttestationClaimModel(nullableSelfAttestedClaimRequestMapping, nullableIdTokenRequestMapping, presentationAttestations)
     }
 
-    private fun createAttestationClaimModelForPresentation(
-        requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
-        presentationsAudience: String,
-        responder: Identifier
-    ): AttestationClaimModel? {
-        if (requestedVchPresentationSubmissionMap.isNullOrEmpty()) {
-            return null
-        }
-        val presentationAttestations = createPresentationsForPresentation(
-            requestedVchPresentationSubmissionMap,
-            presentationsAudience,
-            responder
-        )
-        return AttestationClaimModel(null, null, presentationAttestations)
-    }
-
     private fun createPresentationsForIssuance(
         requestedVchMap: RequestedVchMap,
         audience: String,
@@ -218,6 +203,22 @@ class OidcResponseFormatter @Inject constructor(
         } else {
             vpMap
         }
+    }
+
+    private fun createAttestationClaimModelForPresentation(
+        requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
+        presentationsAudience: String,
+        responder: Identifier
+    ): AttestationClaimModel? {
+        if (requestedVchPresentationSubmissionMap.isNullOrEmpty()) {
+            return null
+        }
+        val presentationAttestations = createPresentationsForPresentation(
+            requestedVchPresentationSubmissionMap,
+            presentationsAudience,
+            responder
+        )
+        return AttestationClaimModel(null, null, presentationAttestations)
     }
 
     private fun createPresentationsForPresentation(

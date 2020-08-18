@@ -32,7 +32,7 @@ data class OidcResponseContentForPresentation(
     val nonce: String,
 
     // state from the request.
-    val state: String? = null,
+    val state: String,
 
     // did tied to the private key that signed response.
     val did: String,

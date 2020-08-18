@@ -23,6 +23,11 @@ object Constants {
     const val TERMS_AND_SERVICES_URI = "tos_uri"
     const val LOGO_URI = "logo_uri"
 
+    //Presentation Exchange Constants
+    const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"
+    const val CREDENTIAL_PRESENTATION_FORMAT = "jwt"
+    const val CREDENTIAL_PRESENTATION_ENCODING = "base64Url"
+
     //Verifiable Credential Constants
     const val CONTEXT = "@context"
     const val VP_CONTEXT_URL = "https://www.w3.org/2018/credentials/v1"

@@ -120,9 +120,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
                                  responder: Identifier,
                                  requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
                                  expiryInSeconds: Int = 604800): Result<String> {
-
-        val state = response.request.content.state
-        SdkLog.d("is requestedVchClaimMap empty: ${requestedVchPresentationSubmissionMap.isEmpty()}")
         val formattedResponse = formatter.formatPresentationResponse(
             responder = responder,
             requestedVchPresentationSubmissionMap = requestedVchPresentationSubmissionMap,
