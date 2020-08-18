@@ -7,5 +7,5 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SelfIssuedAttestation(
-    val claims: List<ClaimAttestation>
+    val claims: List<ClaimAttestation> = emptyList()
 )
