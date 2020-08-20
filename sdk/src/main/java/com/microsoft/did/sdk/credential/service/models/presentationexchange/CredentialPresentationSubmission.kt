@@ -8,5 +8,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CredentialPresentationSubmission(
     @SerialName("descriptor_map")
-    val credentialPresentationSubmissionDescriptors: List<CredentialPresentationSubmissionDescriptor>
+    val credentialPresentationSubmissionDescriptors: List<CredentialPresentationSubmissionDescriptor> = emptyList()
 )

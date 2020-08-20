@@ -151,7 +151,7 @@ class OidcResponseFormatterTest {
         assertEquals(mockedNonce, actualTokenContents.nonce)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertNull(actualTokenContents.attestations)
     }
 
@@ -169,7 +169,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertNull(actualTokenContents.attestations)
     }
 
@@ -187,7 +187,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(expectedRawToken, actualTokenContents.attestations?.idTokens?.entries?.first()?.value)
         assertEquals(expectedIdTokenConfig, actualTokenContents.attestations?.idTokens?.entries?.first()?.key)
         assertNull(actualTokenContents.attestations?.selfIssued)
@@ -208,7 +208,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(expectedSelfAttestedField, actualTokenContents.attestations?.selfIssued?.entries?.first()?.key)
         assertEquals(expectedSelfAttestedClaimValue, actualTokenContents.attestations?.selfIssued?.entries?.first()?.value)
         assertNull(actualTokenContents.attestations?.idTokens)
@@ -231,7 +231,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations?.presentations)
         assertNull(actualTokenContents.attestations?.idTokens)
         assertNull(actualTokenContents.attestations?.selfIssued)
@@ -255,7 +255,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations?.presentations)
         assertEquals(expectedSelfAttestedField, actualTokenContents.attestations?.selfIssued?.entries?.first()?.key)
         assertEquals(expectedSelfAttestedClaimValue, actualTokenContents.attestations?.selfIssued?.entries?.first()?.value)

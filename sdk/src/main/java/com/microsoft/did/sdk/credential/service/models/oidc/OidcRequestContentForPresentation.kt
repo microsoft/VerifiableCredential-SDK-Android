@@ -43,11 +43,12 @@ data class OidcRequestContentForPresentation(
 
     // opaque values that should be passed back to the requester.
     val state: String = "",
+
     val nonce: String = "",
 
     // Claims that are being requested.
     @SerialName("presentation_definition")
-    val credentialPresentationDefinition: CredentialPresentationDefinition? = null,
+    val credentialPresentationDefinition: CredentialPresentationDefinition = CredentialPresentationDefinition(),
 
     @SerialName("exp")
     val expirationTime: Long = 0,
@@ -61,11 +62,12 @@ data class OidcRequestContentForPresentation(
     // if set to "create", request is just for issuance.
     val prompt: String = "",
 
-    // object for relying parties to give user more details about themselves.
-    val registration: Registration? = null,
-
     // optional parameters
     val aud: String = "",
+
     @SerialName(MAX_AGE)
     val maxAge: Int = 0
-)
+) {
+    // object for relying parties to give user more details about themselves.
+    var registration: Registration = Registration()
+}

@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 data class CredentialSchema(
     //TODO: temporarily url in request but it should be uri
     @SerialName("url")
-    val credentialSchemaUris: List<String>
+    val credentialSchemaUris: List<String> = emptyList()
 ) {
     @SerialName("name")
     val credentialSchemaName: String = ""

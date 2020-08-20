@@ -12,10 +12,7 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Cred
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(
-    val entityName: String = "",
-    val entityIdentifier: String = ""
-)
+sealed class Request(val entityName: String = "", val entityIdentifier: String = "")
 
 @Serializable
 class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String, val attestations: CredentialAttestations?) :

@@ -10,12 +10,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CredentialPresentationSubmissionDescriptor(
-    val id: String,
+    @SerialName("id")
+    val idFromPresentationRequest: String = "",
+
     @SerialName("path")
-    val credentialPath: String
-) {
+    val credentialPath: String = "",
+
     @SerialName("format")
-    var credentialFormat: String = ""
+    val credentialFormat: String,
+
     @SerialName("encoding")
-    var credentialEncoding: String = ""
-}
+    val credentialEncoding: String = ""
+)

@@ -18,8 +18,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class OidcResponseContentForExchange(
-    @Required
-    val iss: String = Constants.SELF_ISSUED,
 
     // thumbprint (sha-256) of the public key
     val sub: String = "",
@@ -28,24 +26,26 @@ data class OidcResponseContentForExchange(
     val aud: String = "",
 
     // did tied to the private key that signed response.
-    val did: String,
+    val did: String = "",
 
     // the public key that can be used to verify signature.
-    @SerialName(Constants.SUB_JWK)
-    val subJwk: JsonWebKey,
+    @SerialName("sub_jwk")
+    val publicKeyJwk: JsonWebKey = JsonWebKey(),
 
-    // time the token was issued.
-    val iat: Long,
+    @SerialName("iat")
+    val responseCreationTime: Long = 0,
 
-    // time the token expires.
-    val exp: Long,
+    @SerialName("exp")
+    val expirationTime: Long = 0,
 
-    //id of the response
-    val jti: String,
+    @SerialName("jti")
+    val responseId: String = "",
 
-    // vc needed for Revocation or Exchange API
     val vc: String = "",
 
-    // recipient of VC for Exchange API
-    val recipient: String = ""
+    val recipient: String = "",
+
+    @Required
+    @SerialName("iss")
+    val issuer: String = Constants.SELF_ISSUED
 )
