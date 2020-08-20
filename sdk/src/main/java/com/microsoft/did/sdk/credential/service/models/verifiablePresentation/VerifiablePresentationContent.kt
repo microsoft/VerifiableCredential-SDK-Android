@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.verifiablePresentation
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -26,13 +27,14 @@ data class VerifiablePresentationContent(
     // Issuer of the VP (e.g. did owned by the user, SIOP.did = VP.iss)
     val iss: String,
 
-    // When the token was signed.
-    val iat: Long,
+    @SerialName("iat")
+    val tokenIssuedTime: Long = 0,
 
-    // When the token expires.
-    val exp: Long? = null,
+    @SerialName("exp")
+    val tokenExpiryTime: Long = 0,
 
-    val nbf: Long? = null,
+    @SerialName("nbf")
+    val tokenNotValidBefore: Long = 0,
 
     // audience of the request
     val aud: String,

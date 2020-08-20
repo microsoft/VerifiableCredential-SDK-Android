@@ -37,9 +37,9 @@ class VerifiablePresentationFormatter @Inject constructor(
                 jti = jti,
                 vp = vp,
                 iss = did,
-                iat = iat,
-                nbf = iat,
-                exp = exp,
+                tokenIssuedTime = iat,
+                tokenNotValidBefore = iat,
+                tokenExpiryTime = exp,
                 aud = audience
             )
         val serializedContents = serializer.stringify(VerifiablePresentationContent.serializer(), contents)
