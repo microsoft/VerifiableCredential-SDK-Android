@@ -31,7 +31,6 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
-
 /**
  * Class that forms Response Contents Properly.
  */
@@ -214,18 +213,7 @@ class OidcResponseFormatter @Inject constructor(
             presentationsAudience,
             responder
         )
-
-        val nullableSelfAttestedClaimRequestMapping = if (requestedSelfAttestedClaimMap.isEmpty()) {
-            null
-        } else {
-            requestedSelfAttestedClaimMap
-        }
-        val nullableIdTokenRequestMapping = if (requestedIdTokenMap.isEmpty()) {
-            null
-        } else {
-            requestedIdTokenMap
-        }
-        return AttestationClaimModel(nullableSelfAttestedClaimRequestMapping, nullableIdTokenRequestMapping, presentationAttestations)
+        return AttestationClaimModel(requestedSelfAttestedClaimMap, requestedIdTokenMap, presentationAttestations)
     }
 
     private fun createAttestationClaimModelForPresentation(
@@ -243,15 +231,15 @@ class OidcResponseFormatter @Inject constructor(
             presentationsAudience,
             responder
         )
-        return AttestationClaimModel(null, null, presentationAttestations)
+        return AttestationClaimModel(presentations = presentationAttestations)
     }
 
     private fun createPresentations(
         requestedVcIdToVchMap: RequestedVcIdToVchMap,
         audience: String,
         responder: Identifier
-    ): Map<String, String>? {
-        val vpMap = requestedVcIdToVchMap.map { (key, value) ->
+    ): Map<String, String> {
+        return requestedVcIdToVchMap.map { (key, value) ->
             key.first to verifiablePresentationFormatter.createPresentation(
                 value.verifiableCredential,
                 key.second,
@@ -259,10 +247,6 @@ class OidcResponseFormatter @Inject constructor(
                 responder
             )
         }.toMap()
-        return if (vpMap.isEmpty())
-            null
-        else
-            vpMap
     }
 
     private fun areNoCollectedClaims(
