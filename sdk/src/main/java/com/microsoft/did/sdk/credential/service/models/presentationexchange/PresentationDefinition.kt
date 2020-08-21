@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CredentialPresentationDefinition(
+data class PresentationDefinition(
     @SerialName("input_descriptors")
     val credentialPresentationInputDescriptors: List<CredentialPresentationInputDescriptors> = emptyList()
 )

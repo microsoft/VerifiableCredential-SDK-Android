@@ -59,7 +59,7 @@ class VerifiableCredentialManager @Inject constructor(
                 val requestToken = getPresentationRequestToken(uri).abortOnError()
                 val tokenContents =
                     serializer.parse(OidcRequestContentForPresentation.serializer(), JwsToken.deserialize(requestToken, serializer).content())
-                val request = PresentationRequest(requestToken, tokenContents, tokenContents.credentialPresentationDefinition)
+                val request = PresentationRequest(requestToken, tokenContents, tokenContents.presentationDefinition)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }

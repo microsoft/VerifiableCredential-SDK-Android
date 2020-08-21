@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentForPresentation
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmissionDescriptor
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.TokenSigner
@@ -82,12 +82,12 @@ class PresentationExchangeTest {
         var presentationPairwiseIdentifier: Identifier
 
         val presentationRequest =
-            PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.credentialPresentationDefinition)
+            PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.presentationDefinition)
         val credentialPresentationInputDescriptorsMock: CredentialPresentationInputDescriptors = mockk()
-        presentationRequest.credentialPresentationDefinition?.credentialPresentationInputDescriptors?.first()?.credentialIssuanceMetadataList?.first()?.issuerContract =
+        presentationRequest.presentationDefinition?.credentialPresentationInputDescriptors?.first()?.issuanceMetadataList?.first()?.issuerContract =
 //            "https://portableidentitycards.azure-api.net/dev-v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/IdentityCard"
             "https://portableidentitycards.azure-api.net/dev-v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/BusinessCard"
-        presentationRequest.credentialPresentationDefinition?.credentialPresentationInputDescriptors?.first()?.id = "business_card"
+        presentationRequest.presentationDefinition?.credentialPresentationInputDescriptors?.first()?.id = "business_card"
 
         var oidcPresentationResponse: String
 
@@ -114,7 +114,7 @@ class PresentationExchangeTest {
                 println("Issuance Failed with  ${vchResult.payload}")
 
             val credentialPresentationInputDescriptors =
-                presentationRequest.credentialPresentationDefinition?.credentialPresentationInputDescriptors?.first()
+                presentationRequest.presentationDefinition?.credentialPresentationInputDescriptors?.first()
                     ?: credentialPresentationInputDescriptorsMock
             val requestedPairwiseVC = mutableMapOf(credentialPresentationInputDescriptors to vch)
             presentationPairwiseIdentifier = getPairwiseIdentifier(identifier, presentationRequest.entityIdentifier)
@@ -143,7 +143,7 @@ class PresentationExchangeTest {
                 OidcRequestContentForPresentation.serializer(),
                 JwsToken.deserialize(suppliedRequestToken, serializer).content()
             )
-        val request = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.credentialPresentationDefinition)
+        val request = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.presentationDefinition)
         runBlocking {
             val validationResult = vcManager.isRequestValid(request)
             assertThat(validationResult).isInstanceOf(Result.Success::class.java)
@@ -206,7 +206,7 @@ class PresentationExchangeTest {
 
     private fun createOidcResponseFromPresentationResponse(response: PresentationResponse, responder: Identifier): String {
         val formatter = OidcResponseFormatter(crypto, serializer, verifiablePresentationFormatter, tokenSigner)
-        val presentationSubmission = mutableListOf<CredentialPresentationSubmissionDescriptor>()
+        val presentationSubmission = mutableListOf<PresentationSubmissionDescriptor>()
         response.getRequestedVchClaims().forEach { presentationSubmission.add(transformReqToResp(it.component1())) }
         return formatter.formatPresentationResponse(
             responder = responder,
@@ -216,8 +216,8 @@ class PresentationExchangeTest {
         )
     }
 
-    private fun transformReqToResp(credentialPresentationInputDescriptor: CredentialPresentationInputDescriptors): CredentialPresentationSubmissionDescriptor {
-        return CredentialPresentationSubmissionDescriptor(
+    private fun transformReqToResp(credentialPresentationInputDescriptor: CredentialPresentationInputDescriptors): PresentationSubmissionDescriptor {
+        return PresentationSubmissionDescriptor(
             credentialPresentationInputDescriptor.id,
             "$.attestations.presentations.${credentialPresentationInputDescriptor.id}",
             "jwt",

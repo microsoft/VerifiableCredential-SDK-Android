@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationDefinition
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import com.microsoft.did.sdk.util.Constants.MAX_AGE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -26,29 +26,24 @@ data class OidcRequestContentForPresentation(
     @SerialName("response_mode")
     val responseMode: String = "",
 
-    // did of the entity who sent the request.
     @SerialName("client_id")
     val clientId: String = "",
 
-    // where the SIOP provider should send response to.
     @SerialName("redirect_uri")
     val redirectUrl: String = "",
 
-    // did of the entity who sent the request.
     @SerialName("iss")
     val iss: String = "",
 
     // should contain "openid did_authn"
     val scope: String = "",
 
-    // opaque values that should be passed back to the requester.
     val state: String = "",
 
     val nonce: String = "",
 
-    // Claims that are being requested.
     @SerialName("presentation_definition")
-    val credentialPresentationDefinition: CredentialPresentationDefinition = CredentialPresentationDefinition(),
+    val presentationDefinition: PresentationDefinition = PresentationDefinition(),
 
     @SerialName("exp")
     val expirationTime: Long = 0,
@@ -62,12 +57,10 @@ data class OidcRequestContentForPresentation(
     // if set to "create", request is just for issuance.
     val prompt: String = "",
 
-    // optional parameters
     val aud: String = "",
 
     @SerialName(MAX_AGE)
     val maxAge: Int = 0
 ) {
-    // object for relying parties to give user more details about themselves.
     var registration: Registration = Registration()
 }

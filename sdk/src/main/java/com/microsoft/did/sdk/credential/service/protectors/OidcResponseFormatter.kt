@@ -17,8 +17,8 @@ import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimMode
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForExchange
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForIssuance
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForPresentation
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmission
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationSubmissionDescriptor
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -105,14 +105,14 @@ class OidcResponseFormatter @Inject constructor(
         )
         val credentialPresentationSubmissionDescriptors =
             presentationResponse.getRequestedVchClaims().map {
-                CredentialPresentationSubmissionDescriptor(
+                PresentationSubmissionDescriptor(
                     it.component1().id,
                     "$CREDENTIAL_PATH_IN_RESPONSE.${it.component1().id}",
                     CREDENTIAL_PRESENTATION_FORMAT,
                     CREDENTIAL_PRESENTATION_ENCODING
                 )
             }
-        val credentialPresentationSubmission = CredentialPresentationSubmission(credentialPresentationSubmissionDescriptors)
+        val credentialPresentationSubmission = PresentationSubmission(credentialPresentationSubmissionDescriptors)
         return createAndSignOidcResponseContentForPresentation(
             responder,
             presentationResponse,
@@ -133,7 +133,7 @@ class OidcResponseFormatter @Inject constructor(
         expiryTime: Long,
         responseId: String,
         attestationResponse: AttestationClaimModel,
-        credentialPresentationSubmission: CredentialPresentationSubmission
+        presentationSubmission: PresentationSubmission
     ): String {
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val contents = OidcResponseContentForPresentation(
@@ -146,7 +146,7 @@ class OidcResponseFormatter @Inject constructor(
             expirationTime = expiryTime,
             state = presentationResponse.request.content.state,
             responseId = responseId,
-            presentationSubmission = credentialPresentationSubmission,
+            presentationSubmission = presentationSubmission,
             attestations = attestationResponse
         )
         return signContentsForPresentation(contents, responder)

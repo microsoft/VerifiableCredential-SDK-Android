@@ -19,16 +19,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class OidcResponseContentForIssuance(
 
-    // thumbprint (sha-256) of the public key
     val sub: String = "",
 
-    // url that is meant to receive the response.
     val aud: String = "",
 
-    // did tied to the private key that signed response.
     val did: String = "",
 
-    // the public key that can be used to verify signature.
     @SerialName("sub_jwk")
     val publicKeyJwk: JsonWebKey = JsonWebKey(),
 
@@ -45,10 +41,7 @@ data class OidcResponseContentForIssuance(
     @SerialName("iss")
     val issuer: String = Constants.SELF_ISSUED
 ) {
-    // VC service specific
-    // response contains claims that fulfills this contract.
     var contract: String = ""
 
-    // attestations that were asked for in request.
     var attestations: AttestationClaimModel = AttestationClaimModel()
 }

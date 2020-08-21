@@ -46,7 +46,7 @@ class ResponseTest {
         val serializer = Serializer()
         val oidcRequestContent =
             serializer.parse(OidcRequestContentForPresentation.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
-        presentationRequest = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.credentialPresentationDefinition)
+        presentationRequest = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.presentationDefinition)
         presentationResponse = PresentationResponse(presentationRequest)
     }
 

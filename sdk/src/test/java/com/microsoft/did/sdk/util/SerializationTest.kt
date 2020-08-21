@@ -1,5 +1,8 @@
 package com.microsoft.did.sdk.util
 
+import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.models.oidc.Child1
+import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
@@ -33,5 +36,19 @@ class SerializationTest {
         val expectedDocument = serializer.parse(IdentifierDocument.serializer(), serializedDocument)
         val serializedExpectedDocument = serializer.stringify(IdentifierDocument.serializer(), expectedDocument)
         assertThat(serializedDocument).isEqualTo(serializedExpectedDocument)
+    }
+
+    @Test
+    fun `testing data class`() {
+        val serializer = Serializer()
+        val child1 = Child1("1")
+        child1.name = "name"
+        child1.std = "std1"
+        val serialized = serializer.stringify(Child1.serializer(), child1)
+        println("serialized is $serialized")
+
+        val issResponse = IssuanceServiceResponse("testvc")
+        val serialized1 = serializer.stringify(IssuanceServiceResponse.serializer(), issResponse)
+        println("serialized is $serialized1")
     }
 }

@@ -5,18 +5,12 @@
 
 package com.microsoft.did.sdk.credential.service.models.presentationexchange
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CredentialSchema(
-    //TODO: temporarily url in request but it should be uri
-    @SerialName("url")
-    val credentialSchemaUris: List<String> = emptyList()
-) {
-    @SerialName("name")
-    val credentialSchemaName: String = ""
-
-    @SerialName("purpose")
-    val credentialSchemaReason: String = ""
-}
+data class PresentationSubmissionDescriptor(
+    val idFromPresentationRequest: String = "",
+    val path: String = "",
+    val format: String,
+    val encoding: String = ""
+)

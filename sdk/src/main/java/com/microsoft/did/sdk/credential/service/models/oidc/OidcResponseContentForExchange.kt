@@ -19,16 +19,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class OidcResponseContentForExchange(
 
-    // thumbprint (sha-256) of the public key
     val sub: String = "",
 
-    // url that is meant to receive the response.
     val aud: String = "",
 
-    // did tied to the private key that signed response.
     val did: String = "",
 
-    // the public key that can be used to verify signature.
     @SerialName("sub_jwk")
     val publicKeyJwk: JsonWebKey = JsonWebKey(),
 

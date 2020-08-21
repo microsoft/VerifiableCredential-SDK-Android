@@ -9,16 +9,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CredentialPresentationSubmissionDescriptor(
-    @SerialName("id")
-    val idFromPresentationRequest: String = "",
-
-    @SerialName("path")
-    val credentialPath: String = "",
-
-    @SerialName("format")
-    val credentialFormat: String,
-
-    @SerialName("encoding")
-    val credentialEncoding: String = ""
-)
+data class Schema(
+    //TODO: temporarily url in request but it should be uri
+    @SerialName("url")
+    val uris: List<String> = emptyList()
+) {
+    val name: String = ""
+    val purpose: String = ""
+}

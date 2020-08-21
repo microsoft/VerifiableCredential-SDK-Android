@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CredentialPresentationSubmission(
+data class PresentationSubmission(
     @SerialName("descriptor_map")
-    val credentialPresentationSubmissionDescriptors: List<CredentialPresentationSubmissionDescriptor> = emptyList()
+    val presentationSubmissionDescriptors: List<PresentationSubmissionDescriptor> = emptyList()
 )

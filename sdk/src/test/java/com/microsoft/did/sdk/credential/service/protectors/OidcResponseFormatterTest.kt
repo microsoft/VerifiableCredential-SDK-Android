@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForIssuance
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForPresentation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialSchema
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
@@ -63,7 +63,7 @@ class OidcResponseFormatterTest {
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
     private val mockedState = "mockedState"
-    private val credentialSchema = CredentialSchema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
+    private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
     private val credentialPresentationInputDescriptors = CredentialPresentationInputDescriptors("mocked_presentation_Input1", credentialSchema)
     private val requestedVchPresentationSubmissionMap = mapOf(credentialPresentationInputDescriptors to mockedVch) as RequestedVchPresentationSubmissionMap
 

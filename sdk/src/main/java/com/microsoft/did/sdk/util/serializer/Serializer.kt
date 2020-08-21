@@ -2,6 +2,8 @@
 
 package com.microsoft.did.sdk.util.serializer
 
+import com.microsoft.did.sdk.credential.service.models.oidc.Child1
+import com.microsoft.did.sdk.credential.service.models.oidc.Parent
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.PresentationServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.ServiceResponse
@@ -13,6 +15,7 @@ import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.plus
 import kotlinx.serialization.serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,9 +30,15 @@ class Serializer @Inject constructor() : ISerializer {
         }
     }
 
+    private val testSerializer = SerializersModule {
+        polymorphic(Parent::class) {
+            Child1::class with Child1.serializer()
+        }
+    }
+
     @Suppress("EXPERIMENTAL_API_USAGE")
     val json: Json = Json(
-        context = serviceResponseSerializer,
+        context = serviceResponseSerializer + testSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             ignoreUnknownKeys = true,
