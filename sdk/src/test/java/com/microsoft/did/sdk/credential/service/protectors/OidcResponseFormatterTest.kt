@@ -9,8 +9,8 @@ import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForIssuance
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForPresentation
+import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
+import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -24,9 +24,9 @@ import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class OidcResponseFormatterTest {
 
@@ -145,14 +145,16 @@ class OidcResponseFormatterTest {
             expiryInSeconds = expectedExpiry,
             presentationResponse = mockedPresentationResponse
         )
-        val actualTokenContents = serializer.parse(OidcResponseContentForPresentation.serializer(), actualFormattedToken)
+        val actualTokenContents = serializer.parse(PresentationResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedPresentationAudience, actualTokenContents.aud)
         assertEquals(mockedState, actualTokenContents.state)
         assertEquals(mockedNonce, actualTokenContents.nonce)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
-        assertNull(actualTokenContents.attestations)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
     }
 
     @Test
@@ -164,13 +166,15 @@ class OidcResponseFormatterTest {
             expiryInSeconds = expectedExpiry,
             issuanceResponse = mockedIssuanceResponse
         )
-        val actualTokenContents = serializer.parse(OidcResponseContentForIssuance.serializer(), actualFormattedToken)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
-        assertNull(actualTokenContents.attestations)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
     }
 
     @Test
@@ -182,7 +186,7 @@ class OidcResponseFormatterTest {
             expiryInSeconds = expectedExpiry,
             issuanceResponse = mockedIssuanceResponse
         )
-        val actualTokenContents = serializer.parse(OidcResponseContentForIssuance.serializer(), actualFormattedToken)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -190,8 +194,8 @@ class OidcResponseFormatterTest {
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(expectedRawToken, actualTokenContents.attestations?.idTokens?.entries?.first()?.value)
         assertEquals(expectedIdTokenConfig, actualTokenContents.attestations?.idTokens?.entries?.first()?.key)
-        assertNull(actualTokenContents.attestations?.selfIssued)
-        assertNull(actualTokenContents.attestations?.presentations)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
     }
 
     @Test
@@ -203,7 +207,7 @@ class OidcResponseFormatterTest {
             expiryInSeconds = expectedExpiry,
             issuanceResponse = mockedIssuanceResponse
         )
-        val actualTokenContents = serializer.parse(OidcResponseContentForIssuance.serializer(), actualFormattedToken)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -211,8 +215,8 @@ class OidcResponseFormatterTest {
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(expectedSelfAttestedField, actualTokenContents.attestations?.selfIssued?.entries?.first()?.key)
         assertEquals(expectedSelfAttestedClaimValue, actualTokenContents.attestations?.selfIssued?.entries?.first()?.value)
-        assertNull(actualTokenContents.attestations?.idTokens)
-        assertNull(actualTokenContents.attestations?.presentations)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
     }
 
     @Test
@@ -226,15 +230,15 @@ class OidcResponseFormatterTest {
             mockedRequestedVchMap,
             mockedIssuanceResponse
         )
-        val actualTokenContents = serializer.parse(OidcResponseContentForIssuance.serializer(), actualFormattedToken)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
         assertEquals(expectedThumbprint, actualTokenContents.sub)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations?.presentations)
-        assertNull(actualTokenContents.attestations?.idTokens)
-        assertNull(actualTokenContents.attestations?.selfIssued)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
     }
 
     @Test
@@ -250,7 +254,7 @@ class OidcResponseFormatterTest {
             mockedRequestedVchMap,
             mockedIssuanceResponse
         )
-        val actualTokenContents = serializer.parse(OidcResponseContentForIssuance.serializer(), results)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), results)
         assertEquals(expectedResponseAudience, actualTokenContents.aud)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)

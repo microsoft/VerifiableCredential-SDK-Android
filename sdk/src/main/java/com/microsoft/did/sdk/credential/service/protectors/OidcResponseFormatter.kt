@@ -14,9 +14,9 @@ import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForExchange
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForIssuance
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContentForPresentation
+import com.microsoft.did.sdk.credential.service.models.oidc.ExchangeResponseClaims
+import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
+import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -49,7 +49,6 @@ class OidcResponseFormatter @Inject constructor(
     ): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         val jti = UUID.randomUUID().toString()
-        val did = responder.id
         val attestationResponse = this.createAttestationClaimModelForIssuance(
             requestedVchMap,
             issuanceResponse.getRequestedIdTokens(),
@@ -57,35 +56,35 @@ class OidcResponseFormatter @Inject constructor(
             issuanceResponse.request.entityIdentifier,
             responder
         )
-        return createAndSignOidcResponseContentForIssuance(responder, issuanceResponse, did, iat, exp, jti, attestationResponse)
+        return createAndSignOidcResponseContentForIssuance(responder, issuanceResponse, iat, exp, jti, attestationResponse)
     }
 
     private fun createAndSignOidcResponseContentForIssuance(
         responder: Identifier,
         issuanceResponse: IssuanceResponse,
-        did: String,
         issuedTime: Long,
         expiryTime: Long,
-        responseId: String,
+        jti: String,
         attestationResponse: AttestationClaimModel
     ): String {
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
-        val contents = OidcResponseContentForIssuance(
-            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
-            aud = issuanceResponse.audience,
-            did = did,
-            publicKeyJwk = key.toJWK(),
-            responseCreationTime = issuedTime,
-            expirationTime = expiryTime,
-            responseId = responseId
-        )
-        contents.contract = issuanceResponse.request.contractUrl
-        contents.attestations = attestationResponse
+        val contents = IssuanceResponseClaims(
+            issuanceResponse.request.contractUrl,
+            attestationResponse
+        ).apply {
+            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            aud = issuanceResponse.audience
+            did = responder.id
+            publicKeyJwk = key.toJWK()
+            responseCreationTime = issuedTime
+            expirationTime = expiryTime
+            responseId = jti
+        }
         return signContentsForIssuance(contents, responder)
     }
 
-    private fun signContentsForIssuance(contents: OidcResponseContentForIssuance, responder: Identifier): String {
-        val serializedResponseContent = serializer.stringify(OidcResponseContentForIssuance.serializer(), contents)
+    private fun signContentsForIssuance(contents: IssuanceResponseClaims, responder: Identifier): String {
+        val serializedResponseContent = serializer.stringify(IssuanceResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
@@ -97,7 +96,6 @@ class OidcResponseFormatter @Inject constructor(
     ): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         val jti = UUID.randomUUID().toString()
-        val did = responder.id
         val attestationResponse = this.createAttestationClaimModelForPresentation(
             requestedVchPresentationSubmissionMap,
             presentationResponse.request.entityIdentifier,
@@ -116,7 +114,6 @@ class OidcResponseFormatter @Inject constructor(
         return createAndSignOidcResponseContentForPresentation(
             responder,
             presentationResponse,
-            did,
             iat,
             exp,
             jti,
@@ -128,32 +125,32 @@ class OidcResponseFormatter @Inject constructor(
     private fun createAndSignOidcResponseContentForPresentation(
         responder: Identifier,
         presentationResponse: PresentationResponse,
-        did: String,
         issuedTime: Long,
         expiryTime: Long,
-        responseId: String,
+        jti: String,
         attestationResponse: AttestationClaimModel,
         presentationSubmission: PresentationSubmission
     ): String {
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
-        val contents = OidcResponseContentForPresentation(
-            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
-            aud = presentationResponse.audience,
-            nonce = presentationResponse.request.content.nonce,
-            did = did,
-            publicKeyJwk = key.toJWK(),
-            responseCreationTime = issuedTime,
-            expirationTime = expiryTime,
-            state = presentationResponse.request.content.state,
-            responseId = responseId,
+        val contents = PresentationResponseClaims(
             presentationSubmission = presentationSubmission,
             attestations = attestationResponse
-        )
+        ).apply {
+            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            aud = presentationResponse.audience
+            nonce = presentationResponse.request.content.nonce
+            did = responder.id
+            publicKeyJwk = key.toJWK()
+            responseCreationTime = issuedTime
+            expirationTime = expiryTime
+            state = presentationResponse.request.content.state
+            responseId = jti
+        }
         return signContentsForPresentation(contents, responder)
     }
 
-    private fun signContentsForPresentation(contents: OidcResponseContentForPresentation, responder: Identifier): String {
-        val serializedResponseContent = serializer.stringify(OidcResponseContentForPresentation.serializer(), contents)
+    private fun signContentsForPresentation(contents: PresentationResponseClaims, responder: Identifier): String {
+        val serializedResponseContent = serializer.stringify(PresentationResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
@@ -165,34 +162,34 @@ class OidcResponseFormatter @Inject constructor(
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         val jti = UUID.randomUUID().toString()
         val did = requester.id
-        return createAndSignOidcResponseContentForExchange(requester, exchangeRequest, did, iat, exp, jti)
+        return createAndSignOidcResponseContentForExchange(requester, exchangeRequest, iat, exp, jti)
     }
 
     private fun createAndSignOidcResponseContentForExchange(
         requester: Identifier,
         exchangeRequest: ExchangeRequest,
-        did: String,
         issuedTime: Long,
         expiryTime: Long,
-        responseId: String
+        jti: String
     ): String {
         val key = cryptoOperations.keyStore.getPublicKey(requester.signatureKeyReference).getKey()
-        val contents = OidcResponseContentForExchange(
-            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
-            aud = exchangeRequest.audience,
-            did = did,
-            publicKeyJwk = key.toJWK(),
-            responseCreationTime = issuedTime,
-            expirationTime = expiryTime,
-            responseId = responseId,
+        val contents = ExchangeResponseClaims(
             vc = exchangeRequest.verifiableCredential?.raw,
             recipient = exchangeRequest.pairwiseDid
-        )
+        ).apply {
+            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            aud = exchangeRequest.audience
+            did = requester.id
+            publicKeyJwk = key.toJWK()
+            responseCreationTime = issuedTime
+            expirationTime = expiryTime
+            responseId = jti
+        }
         return signContentsForExchange(contents, requester)
     }
 
-    private fun signContentsForExchange(contents: OidcResponseContentForExchange, responder: Identifier): String {
-        val serializedResponseContent = serializer.stringify(OidcResponseContentForExchange.serializer(), contents)
+    private fun signContentsForExchange(contents: ExchangeResponseClaims, responder: Identifier): String {
+        val serializedResponseContent = serializer.stringify(ExchangeResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 

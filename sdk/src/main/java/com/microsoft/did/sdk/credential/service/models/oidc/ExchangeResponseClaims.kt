@@ -3,16 +3,19 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credential.service.models.presentationexchange
+package com.microsoft.did.sdk.credential.service.models.oidc
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Contents of an OpenID Self-Issued Token Response.
+ *
+ * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
+ */
 @Serializable
-data class PresentationSubmissionDescriptor(
-    @SerialName("id")
-    val idFromPresentationRequest: String = "",
-    val path: String = "",
-    val format: String,
-    val encoding: String = ""
-)
+data class ExchangeResponseClaims(
+
+    val vc: String = "",
+
+    val recipient: String = ""
+): OidcResponseClaims()
