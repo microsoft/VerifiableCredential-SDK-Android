@@ -2,11 +2,9 @@
 
 package com.microsoft.did.sdk.util.serializer
 
-import com.microsoft.did.sdk.credential.service.models.oidc.Child1
 import com.microsoft.did.sdk.credential.service.models.oidc.ExchangeResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseClaims
-import com.microsoft.did.sdk.credential.service.models.oidc.Parent
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.PresentationServiceResponse
@@ -42,15 +40,9 @@ class Serializer @Inject constructor() : ISerializer {
         }
     }
 
-    private val testSerializer = SerializersModule {
-        polymorphic(Parent::class) {
-            Child1::class with Child1.serializer()
-        }
-    }
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     val json: Json = Json(
-        context = serviceResponseSerializer + oidcResponseSerializer + testSerializer,
+        context = serviceResponseSerializer + oidcResponseSerializer,
         configuration = JsonConfiguration(
             encodeDefaults = false,
             ignoreUnknownKeys = true,

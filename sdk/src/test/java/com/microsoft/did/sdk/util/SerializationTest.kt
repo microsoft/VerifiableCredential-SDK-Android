@@ -1,7 +1,5 @@
 package com.microsoft.did.sdk.util
 
-import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.models.oidc.Child1
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
@@ -39,16 +37,11 @@ class SerializationTest {
     }
 
     @Test
-    fun `testing data class`() {
+    fun `testing polymorphic serialization`() {
         val serializer = Serializer()
-        val child1 = Child1("1")
-        child1.name = "name"
-        child1.std = "std1"
-        val serialized = serializer.stringify(Child1.serializer(), child1)
-        println("serialized is $serialized")
-
         val issResponse = IssuanceServiceResponse("testvc")
-        val serialized1 = serializer.stringify(IssuanceServiceResponse.serializer(), issResponse)
-        println("serialized is $serialized1")
+        val expectedSerializedResult = """{"vc":"testvc"}"""
+        val serialized = serializer.stringify(IssuanceServiceResponse.serializer(), issResponse)
+        assertThat(serialized).isEqualTo(expectedSerializedResult)
     }
 }
