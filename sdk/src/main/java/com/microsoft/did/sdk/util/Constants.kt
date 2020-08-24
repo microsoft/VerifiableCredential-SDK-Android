@@ -7,21 +7,9 @@ package com.microsoft.did.sdk.util
 
 object Constants {
 
-    // OIDC Protocol Constants
-    const val RESPONSE_TYPE = "response_type"
-    const val RESPONSE_MODE = "response_mode"
-    const val CLIENT_ID = "client_id"
-    const val REDIRECT_URL = "redirect_uri"
     const val MAX_AGE = "max_age"
     const val SELF_ISSUED = "https://self-issued.me"
-    const val SUB_JWK = "sub_jwk"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
-
-    // OIDC Registration Constants
-    const val CLIENT_NAME = "client_name"
-    const val CLIENT_PURPOSE = "client_purpose"
-    const val TERMS_AND_SERVICES_URI = "tos_uri"
-    const val LOGO_URI = "logo_uri"
 
     //Presentation Exchange Constants
     const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"

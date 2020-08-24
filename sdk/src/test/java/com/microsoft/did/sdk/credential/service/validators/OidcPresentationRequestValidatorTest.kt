@@ -1,13 +1,13 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*//*
+ *--------------------------------------------------------------------------------------------*/
 
 
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentForPresentation
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -29,7 +29,7 @@ class OidcPresentationRequestValidatorTest {
 
     private val mockedJwtValidator: JwtValidator = mockk()
 
-    private val mockedOidcRequestContent: OidcRequestContent = mockk()
+    private val mockedOidcRequestContent: OidcRequestContentForPresentation = mockk()
 
     private val mockedIdentifier: Identifier = mockk()
 
@@ -61,7 +61,7 @@ class OidcPresentationRequestValidatorTest {
     private fun setUpExpiration(offsetInSecond: Long) {
         val currentTimeInSeconds: Long = Date().time / Constants.MILLISECONDS_IN_A_SECOND
         val currentTimePlusOffsetInSeconds = currentTimeInSeconds + offsetInSecond
-        every { mockedOidcRequestContent.exp } returns currentTimePlusOffsetInSeconds
+        every { mockedOidcRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
     }
 
     @Test
@@ -103,4 +103,4 @@ class OidcPresentationRequestValidatorTest {
             }
         }
     }
-}*/
+}
