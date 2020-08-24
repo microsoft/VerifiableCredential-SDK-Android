@@ -19,6 +19,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentFo
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
+import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.TokenSigner
 import com.microsoft.did.sdk.credential.service.protectors.VerifiablePresentationFormatter
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -95,16 +96,15 @@ class PresentationExchangeTest {
             val issuanceRequest =
 //                getIssuanceRequestFromContractUrl("https://portableidentitycards.azure-api.net/dev-v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/IdentityCard")
                 getIssuanceRequestFromContractUrl("https://portableidentitycards.azure-api.net/dev-v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/BusinessCard")
-            issuanceResponse = vcManager.createIssuanceResponse(issuanceRequest)
+            val identifier = getMasterIdentifier()
+            issuancePairwiseIdentifier = getPairwiseIdentifier(identifier, issuanceRequest.entityIdentifier)
+            issuanceResponse = vcManager.createIssuanceResponse(issuanceRequest, issuancePairwiseIdentifier)
             issuanceResponse.addRequestedSelfAttestedClaim("first_name", "n")
             issuanceResponse.addRequestedSelfAttestedClaim("last_name", "g")
             issuanceResponse.addRequestedSelfAttestedClaim("business", "ng")
             println("issuance response is $issuanceResponse")
 
-            val identifier = getMasterIdentifier()
-            issuancePairwiseIdentifier = getPairwiseIdentifier(identifier, issuanceRequest.entityIdentifier)
-
-            val vchResult = vcManager.sendIssuanceResponse(issuanceResponse, issuancePairwiseIdentifier)
+            val vchResult = vcManager.sendIssuanceResponse(issuanceResponse)
             var vch: VerifiableCredentialHolder = mockk()
             var pairwiseVC: VerifiableCredentialHolder = mockk()
             if (vchResult is Result.Success) {
@@ -123,10 +123,10 @@ class PresentationExchangeTest {
                 pairwiseVC = pairwiseResult.payload.values.first()
                 println("pairwise vc raw is ${pairwiseVC.verifiableCredential.raw}")
             }
-            val presentationResponse = vcManager.createPresentationResponse(presentationRequest)
+            val presentationResponse = vcManager.createPresentationResponse(presentationRequest, presentationPairwiseIdentifier)
             presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptors, pairwiseVC)
             println("PE response is $presentationResponse")
-/*            val formattedResponseResult = vcManager.sendPresentationResponse(presentationResponse, pairwiseIdentifier)
+/*            val formattedResponseResult = vcManager.sendPresentationResponse(presentationResponse)
             if(formattedResponseResult is Result.Success)
                 println("formatted response - oidc is ${formattedResponseResult.payload}")*/
 
@@ -205,11 +205,10 @@ class PresentationExchangeTest {
     }
 
     private fun createOidcResponseFromPresentationResponse(response: PresentationResponse, responder: Identifier): String {
-        val formatter = OidcResponseFormatter(crypto, serializer, verifiablePresentationFormatter, tokenSigner)
+        val formatter = PresentationResponseFormatter(crypto, serializer, verifiablePresentationFormatter, tokenSigner)
         val presentationSubmission = mutableListOf<PresentationSubmissionDescriptor>()
         response.getRequestedVchClaims().forEach { presentationSubmission.add(transformReqToResp(it.component1())) }
         return formatter.formatPresentationResponse(
-            responder = responder,
             requestedVchPresentationSubmissionMap = response.getRequestedVchClaims(),
             expiryInSeconds = 604800,
             presentationResponse = response

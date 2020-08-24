@@ -17,12 +17,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PresentationResponseClaims(
 
-    var state: String = "",
-
-    var nonce: String = "",
-
     @SerialName("presentation_submission")
     val presentationSubmission: PresentationSubmission = PresentationSubmission(),
 
-    val attestations: AttestationClaimModel = AttestationClaimModel()
+    val attestations: AttestationClaimModel = AttestationClaimModel(),
+
+    var state: String = "",
+
+    var nonce: String = ""
 ): OidcResponseClaims()

@@ -11,14 +11,15 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
+import com.microsoft.did.sdk.identifier.models.Identifier
 
 /**
  * Response formed from a Request.
  *
  * @param audience entity to send the response to.
  */
-sealed class Response(open val request: Request, val audience: String)
-class IssuanceResponse(override val request: IssuanceRequest) : Response(request, request.contract.input.credentialIssuer) {
+sealed class Response(open val request: Request, val audience: String, open val responder: Identifier)
+class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) : Response(request, request.contract.input.credentialIssuer, responder) {
     private var requestedVchMap: RequestedVchMap = mutableMapOf()
     private val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
     private val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
@@ -48,7 +49,7 @@ class IssuanceResponse(override val request: IssuanceRequest) : Response(request
     }
 }
 
-class PresentationResponse(override val request: PresentationRequest) : Response(request, request.content.redirectUrl) {
+class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.content.redirectUrl, responder) {
     private val requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf()
     fun addRequestedVchClaims(
         credentialPresentationInputDescriptors: CredentialPresentationInputDescriptors,

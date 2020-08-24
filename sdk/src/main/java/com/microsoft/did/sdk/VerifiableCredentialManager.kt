@@ -111,36 +111,36 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    fun createIssuanceResponse(request: IssuanceRequest): IssuanceResponse {
-        return IssuanceResponse(request)
+    fun createIssuanceResponse(request: IssuanceRequest, responder: Identifier): IssuanceResponse {
+        return IssuanceResponse(request, responder)
     }
 
-    fun createPresentationResponse(request: PresentationRequest): PresentationResponse {
-        return PresentationResponse(request)
+    fun createPresentationResponse(request: PresentationRequest, responder: Identifier): PresentationResponse {
+        return PresentationResponse(request, responder)
     }
 
     /**
      * Send an Issuance Response signed by a responder Identifier.
      *
      * @param response IssuanceResponse to be formed, signed, and sent.
-     * @param responder Identifier to be used to sign response.
+     * @param exchangeForPairwiseVerifiableCredential Configuration to turn on/off pairwise exchange. It is set to true by default
      */
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
-        responder: Identifier,
-        expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS,
         exchangeForPairwiseVerifiableCredential: Boolean = true
         ): Result<VerifiableCredentialHolder> {
         return withContext(Dispatchers.IO) {
             runResultTry {
+                val responder = response.responder
                 val requestedVchMap = getExchangedVcs(
                     exchangeForPairwiseVerifiableCredential,
                     responder,
                     response.getRequestedVchs()).abortOnError()
-                val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap, responder, expiryInSeconds).abortOnError()
+                response.getRequestedVchs().clear()
+                requestedVchMap.map { response.addRequestedVch(it.key, it.value) }
+                val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
                 vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, responder, response.request.contract)
-//                createAndSaveReceipt(response)
                 Result.Success(vch)
             }
         }
@@ -150,39 +150,25 @@ class VerifiableCredentialManager @Inject constructor(
      * Send a Presentation Response signed by a responder Identifier.
      *
      * @param response PresentationResponse to be formed, signed, and sent.
-     * @param responder Identifier to be used to sign response.
+     * @param exchangeForPairwiseVerifiableCredential Configuration to turn on/off pairwise exchange. It is set to true by default
      */
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
-        responder: Identifier,
-        expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS,
         exchangeForPairwiseVerifiableCredential: Boolean = true
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
+                val responder = response.responder
                 val vcRequestedMapping = getExchangedVcs(
                     exchangeForPairwiseVerifiableCredential,
                     response.getRequestedVchClaims(),
                     responder).abortOnError()
-                vchRepository.sendPresentationResponse(response, responder, vcRequestedMapping).abortOnError()
+                vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
             }
         }
     }
-
-/*    suspend fun sendPresentationResponse(
-        response: PresentationResponse,
-        responder: Identifier
-    ): Result<String> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                val vcRequestedMapping = response.getRequestedVchClaims()
-                val formattedResponse = vchRepository.sendPresentationResponse(response, responder, vcRequestedMapping).abortOnError()
-                Result.Success(formattedResponse)
-            }
-        }
-    }*/
 
     private suspend fun getExchangedVcs(
         exchangeForPairwiseVerifiableCredential: Boolean,
