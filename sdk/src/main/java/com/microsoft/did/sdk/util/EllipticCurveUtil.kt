@@ -65,3 +65,22 @@ fun generatePublicKeyFromPrivateKey(privateKey: ByteArray): ByteArray {
     return byteArrayOf(Secp256k1Provider.Secp256k1Tag.UNCOMPRESSED.byte) + (publicKey as BCECPublicKey).q.normalize().xCoord.encoded +
         publicKey.q.normalize().yCoord.encoded
 }
+
+/**
+ * Private key size is 32 bytes for Secp256k1. Since we use SHA512 to generate pairwise key it is 64 bytes.
+ * This method computes a modulus of generated pairwise key with order N of Secp256k1 curve to reduce its size to 32 bytes. It returns BigInteger of reduced pairwise key
+ * While converting BigInteger returned to byte array it is converted to signed byte array. Since we don't need the sign bit, it is truncated and converted to unsigned byte array
+ * @param keySeed byte array of pairwise key generated using SHA512 (64 bytes)
+ * @return unsigned byte array of pairwise key reduced to 32 bytes
+ */
+fun reduceKeySeedSizeAndConvertToUnsigned(keySeed: ByteArray): ByteArray {
+    val ecSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
+    return convertSignedToUnsignedByteArray(BigInteger(1, keySeed).rem(ecSpec.n).toByteArray())
+}
+
+fun convertSignedToUnsignedByteArray(signedByteArray: ByteArray): ByteArray {
+    var unsignedByteArray: ByteArray = signedByteArray
+    if (signedByteArray.size > 32)
+        unsignedByteArray = signedByteArray.sliceArray(1 until signedByteArray.size)
+    return unsignedByteArray
+}

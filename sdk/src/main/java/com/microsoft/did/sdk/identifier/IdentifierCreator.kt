@@ -77,10 +77,7 @@ class IdentifierCreator @Inject constructor(
         return try {
             val alias = Base64Url.encode(Random.nextBytes(2))
             val alg = EcKeyGenParams(
-                namedCurve = W3cCryptoApiConstants.Secp256k1.value,
-                additionalParams = mapOf(
-                    "hash" to Sha.SHA256.algorithm
-                )
+                namedCurve = W3cCryptoApiConstants.Secp256k1.value
             )
             //TODO: Update the last section to append incremented version number instead of 1
             val signingKeyIdForPairwiseKey = "${signatureKeyReference}_1"

@@ -6,7 +6,6 @@
 package com.microsoft.did.sdk.credential.service.models.oidc
 
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
-import com.microsoft.did.sdk.util.Constants.MAX_AGE
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -35,7 +34,7 @@ data class OidcRequestContentForPresentation(
     @SerialName("iss")
     val iss: String = "",
 
-    // should contain "openid did_authn"
+    // should contain "openid did_authn" // TODO: validate
     val scope: String = "",
 
     val state: String = "",
@@ -59,7 +58,7 @@ data class OidcRequestContentForPresentation(
 
     val aud: String = "",
 
-    @SerialName(MAX_AGE)
+    @SerialName("max_age")
     val maxAge: Int = 0
 ) {
     var registration: Registration = Registration()

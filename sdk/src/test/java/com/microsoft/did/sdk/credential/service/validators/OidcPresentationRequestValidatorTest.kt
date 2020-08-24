@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest

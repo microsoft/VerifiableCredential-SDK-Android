@@ -7,7 +7,7 @@ package com.microsoft.did.sdk.util
 
 object Constants {
 
-    const val MAX_AGE = "max_age"
+    // OIDC Protocol Constants
     const val SELF_ISSUED = "https://self-issued.me"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
 
