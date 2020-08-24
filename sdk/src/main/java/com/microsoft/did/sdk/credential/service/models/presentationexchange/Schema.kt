@@ -10,8 +10,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Schema(
-    //TODO: temporarily url in request but it should be uri
-    @SerialName("url")
+    @SerialName("uri")
     val uris: List<String> = emptyList()
 ) {
     val name: String = ""
