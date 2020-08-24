@@ -27,11 +27,12 @@ class VerifiableCredentialManagerTest {
     private val presentationRequest: PresentationRequest = mockk()
     private val testEntityName = "testEntityName"
     private val testEntityDid = "testEntityDID"
+    private val mockedPairwiseId: Identifier = mockk()
 
     @Test
     fun `test to create Issuance Response`() {
         every { issuanceRequest.contract.input.credentialIssuer } returns responseAudience
-        val issuanceResponse = cardManager.createIssuanceResponse(issuanceRequest)
+        val issuanceResponse = cardManager.createIssuanceResponse(issuanceRequest, mockedPairwiseId)
         val actualAudience = issuanceResponse.audience
         val expectedAudience = responseAudience
         assertThat(actualAudience).isEqualTo(expectedAudience)
@@ -40,7 +41,7 @@ class VerifiableCredentialManagerTest {
     @Test
     fun `test to create Presentation Response`() {
         every { presentationRequest.content.redirectUrl } returns responseAudience
-        val presentationResponse = cardManager.createPresentationResponse(presentationRequest)
+        val presentationResponse = cardManager.createPresentationResponse(presentationRequest, mockedPairwiseId)
         val actualAudience = presentationResponse.audience
         val expectedAudience = responseAudience
         assertThat(actualAudience).isEqualTo(expectedAudience)
@@ -55,30 +56,30 @@ class VerifiableCredentialManagerTest {
         }
     }
 
-/*    @Test
+    @Test
     fun `test send presentation response`() {
+        val responder: Identifier = mockk()
         every { presentationRequest.content.redirectUrl } returns responseAudience
-        val presentationResponse = cardManager.createPresentationResponse(presentationRequest)
+        val presentationResponse = cardManager.createPresentationResponse(presentationRequest, responder)
         every { presentationResponse.request.entityIdentifier } returns testEntityDid
         every { presentationResponse.request.entityName } returns testEntityName
-        coEvery { verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any()) } returns Result.Success(Unit)
+        coEvery { verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any()) } returns Result.Success(Unit)
 
         runBlocking {
-            val responder: Identifier = mockk()
-            val presentationResult = cardManager.sendPresentationResponse(presentationResponse, responder)
+            val presentationResult = cardManager.sendPresentationResponse(presentationResponse)
             assertThat(presentationResult).isInstanceOf(Result.Success::class.java)
         }
 
         coVerify(exactly = 1) {
-            cardManager.createPresentationResponse(presentationRequest)
-            cardManager.sendPresentationResponse(any(), any(), any())
-            verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any(), any())
+            cardManager.createPresentationResponse(presentationRequest, responder)
+            cardManager.sendPresentationResponse(any(), any())
+            verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any())
             presentationResponse.createReceiptsForPresentedVerifiableCredentials(testEntityDid, testEntityName)
         }
-        presentationResponse.getRequestedVchs()?.size?.let {
+        presentationResponse.getRequestedVchClaims().size.let {
             coVerify(exactly = it) {
                 verifiableCredentialHolderRepository.insert(any<Receipt>())
             }
         }
-    }*/
+    }
 }

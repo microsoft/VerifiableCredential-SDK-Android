@@ -26,6 +26,7 @@ class IssuanceResponseFormatter @Inject constructor(
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner
 ) : OidcResponseFormatter {
+
     fun formatIssuanceResponse(
         requestedVchMap: RequestedVchMap = mutableMapOf(),
         issuanceResponse: IssuanceResponse,
