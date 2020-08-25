@@ -13,7 +13,7 @@ object Constants {
 
     //Presentation Exchange Constants
     const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"
-    const val CREDENTIAL_PRESENTATION_FORMAT = "jwt"
+    const val CREDENTIAL_PRESENTATION_FORMAT = "JWT"
     const val CREDENTIAL_PRESENTATION_ENCODING = "base64Url"
 
     //Verifiable Credential Constants

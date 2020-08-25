@@ -8,6 +8,7 @@ import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
 import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
@@ -166,6 +167,10 @@ class JwsToken private constructor(
         } else {
             protected[JoseConstants.Kid.value] = kid
         }
+
+        val type = headers[JoseConstants.Type.value]
+        if (type != null)
+            protected[JoseConstants.Type.value] = CREDENTIAL_PRESENTATION_FORMAT
 
         var encodedProtected = ""
         if (protected.isNotEmpty()) {

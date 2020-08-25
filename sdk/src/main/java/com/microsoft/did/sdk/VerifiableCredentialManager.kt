@@ -62,7 +62,7 @@ class VerifiableCredentialManager @Inject constructor(
                         PresentationRequestContent.serializer(),
                         JwsToken.deserialize(requestToken, serializer).content()
                     )
-                val request = PresentationRequest(requestToken, tokenContents, tokenContents.presentationDefinition)
+                val request = PresentationRequest(requestToken, tokenContents)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }
@@ -97,7 +97,7 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = vchRepository.getContract(contractUrl).abortOnError()
-            val request = IssuanceRequest(contract, contractUrl, contract.input.attestations)
+            val request = IssuanceRequest(contract, contractUrl)
             Result.Success(request)
         }
     }

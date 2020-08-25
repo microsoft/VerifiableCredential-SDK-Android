@@ -9,6 +9,8 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,6 +34,7 @@ class TokenSigner @Inject constructor(
         // adding kid value to header.
         val additionalHeaders = mutableMapOf<String, String>()
         additionalHeaders[JoseConstants.Kid.value] = "${identifier.id}${kid}"
+        additionalHeaders[JoseConstants.Type.value] = CREDENTIAL_PRESENTATION_FORMAT
         token.sign(identifier.signatureKeyReference, cryptoOperations, additionalHeaders)
         return token.serialize(serializer)
     }

@@ -43,14 +43,14 @@ class ResponseTest {
         every { vcContract.input.attestations } returns attestations
         every { vcContract.display.card.issuedBy } returns issuedBy
         every { vcContract.input.issuer } returns issuer
-        issuanceRequest = IssuanceRequest(vcContract, "testContractUrl", vcContract.input.attestations)
+        issuanceRequest = IssuanceRequest(vcContract, "testContractUrl")
         every { issuanceRequest.contract.input.credentialIssuer } returns credentialIssuer
         issuanceResponse = IssuanceResponse(issuanceRequest, mockedPairwiseId)
         every { issuanceResponse.responder.id } returns mockedPairwiseDid
         val serializer = Serializer()
         val oidcRequestContent =
             serializer.parse(PresentationRequestContent.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
-        presentationRequest = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.presentationDefinition)
+        presentationRequest = PresentationRequest(suppliedRequestToken, oidcRequestContent)
         presentationResponse = PresentationResponse(presentationRequest, mockedPairwiseId)
     }
 
