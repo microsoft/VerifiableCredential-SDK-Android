@@ -138,8 +138,6 @@ class VerifiableCredentialManager @Inject constructor(
                     getExchangedVcs(response).abortOnError()
                 else
                     response.getRequestedVchs()
-/*                response.getRequestedVchs().clear()
-                requestedVchMap.map { response.addRequestedVch(it.key, it.value) }*/
                 //TODO: How to avoid this suppression
                 @Suppress("UNCHECKED_CAST")
                 val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap as RequestedVchMap).abortOnError()
