@@ -40,7 +40,7 @@ class VerifiableCredentialManagerTest {
 
     @Test
     fun `test to create Presentation Response`() {
-        every { presentationRequest.content.redirectUrl } returns responseAudience
+        every { presentationRequest.contentRequestContent.redirectUrl } returns responseAudience
         val presentationResponse = cardManager.createPresentationResponse(presentationRequest, mockedPairwiseId)
         val actualAudience = presentationResponse.audience
         val expectedAudience = responseAudience
@@ -59,7 +59,7 @@ class VerifiableCredentialManagerTest {
     @Test
     fun `test send presentation response`() {
         val responder: Identifier = mockk()
-        every { presentationRequest.content.redirectUrl } returns responseAudience
+        every { presentationRequest.contentRequestContent.redirectUrl } returns responseAudience
         val presentationResponse = cardManager.createPresentationResponse(presentationRequest, responder)
         every { presentationResponse.request.entityIdentifier } returns testEntityDid
         every { presentationResponse.request.entityName } returns testEntityName

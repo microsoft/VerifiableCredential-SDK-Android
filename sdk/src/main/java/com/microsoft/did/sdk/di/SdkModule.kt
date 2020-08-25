@@ -10,7 +10,6 @@ import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
-import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
@@ -125,26 +124,5 @@ internal class SdkModule {
     @Singleton
     fun defaultValidator(validator: OidcPresentationRequestValidator): PresentationRequestValidator {
         return validator
-    }
-
-    @Provides
-    @Singleton
-    @Named("issuanceResponseFormatter")
-    fun getIssuanceResponseFormatter(responseFormatter: IssuanceResponseFormatter): OidcResponseFormatter {
-        return responseFormatter
-    }
-
-    @Provides
-    @Singleton
-    @Named("presentationResponseFormatter")
-    fun getPresentationResponseFormatter(responseFormatter: PresentationResponseFormatter): OidcResponseFormatter {
-        return responseFormatter
-    }
-
-    @Provides
-    @Singleton
-    @Named("exchangeResponseFormatter")
-    fun getExchangeResponseFormatter(responseFormatter: ExchangeResponseFormatter): OidcResponseFormatter {
-        return responseFormatter
     }
 }

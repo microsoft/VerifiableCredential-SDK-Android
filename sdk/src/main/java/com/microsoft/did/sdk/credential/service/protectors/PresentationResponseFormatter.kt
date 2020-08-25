@@ -26,15 +26,15 @@ class PresentationResponseFormatter @Inject constructor(
     private val serializer: Serializer,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner
-) : OidcResponseFormatter {
-    fun formatPresentationResponse(
+) {
+    fun formatResponse(
         requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf(),
         presentationResponse: PresentationResponse,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         val jti = UUID.randomUUID().toString()
-        val attestationResponse = this.createAttestationClaimModelForPresentation(
+        val attestationResponse = this.createAttestationClaimModel(
             requestedVchPresentationSubmissionMap,
             presentationResponse.request.entityIdentifier,
             presentationResponse.responder
@@ -49,7 +49,7 @@ class PresentationResponseFormatter @Inject constructor(
                 )
             }
         val credentialPresentationSubmission = PresentationSubmission(credentialPresentationSubmissionDescriptors)
-        return createAndSignOidcResponseContentForPresentation(
+        return createAndSignOidcResponseContent(
             presentationResponse,
             iat,
             exp,
@@ -59,7 +59,7 @@ class PresentationResponseFormatter @Inject constructor(
         )
     }
 
-    private fun createAndSignOidcResponseContentForPresentation(
+    private fun createAndSignOidcResponseContent(
         presentationResponse: PresentationResponse,
         issuedTime: Long,
         expiryTime: Long,
@@ -72,23 +72,23 @@ class PresentationResponseFormatter @Inject constructor(
         val contents = PresentationResponseClaims(presentationSubmission, attestationResponse).apply {
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
             aud = presentationResponse.audience
-            nonce = presentationResponse.request.content.nonce
+            nonce = presentationResponse.request.contentRequestContent.nonce
             did = responder.id
             publicKeyJwk = key.toJWK()
             responseCreationTime = issuedTime
             expirationTime = expiryTime
-            state = presentationResponse.request.content.state
+            state = presentationResponse.request.contentRequestContent.state
             responseId = jti
         }
-        return signContentsForPresentation(contents, responder)
+        return signContents(contents, responder)
     }
 
-    private fun signContentsForPresentation(contents: PresentationResponseClaims, responder: Identifier): String {
+    private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(PresentationResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
-    private fun createAttestationClaimModelForPresentation(
+    private fun createAttestationClaimModel(
         requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
         presentationsAudience: String,
         responder: Identifier

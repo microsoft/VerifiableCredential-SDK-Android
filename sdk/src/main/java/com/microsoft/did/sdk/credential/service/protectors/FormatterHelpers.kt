@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.protectors
 
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.util.controlflow.FormatterException
 import java.util.Date
 import kotlin.math.floor
@@ -20,3 +21,5 @@ fun createIatAndExp(expiryInSeconds: Int): Pair<Long, Long> {
     val exp = floor(expiration / 1000f).toLong()
     return Pair(iat, exp)
 }
+
+typealias RequestedVcIdToVchMap = Map<Pair<String, Int>, VerifiableCredentialHolder>

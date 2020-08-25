@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.toKeyUsage
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.stringToByteArray
-import java.security.MessageDigest
 
 /**
  * Represents a Public Key in JWK format.
@@ -54,8 +53,7 @@ abstract class PublicKey(val key: JsonWebKey) : IKeyStoreItem {
         val json = this.minimumAlphabeticJwk()
         val jsonUtf8 = stringToByteArray(json)
         val digest = crypto.subtleCryptoFactory.getMessageDigest(sha.name, SubtleCryptoScope.PUBLIC)
-        val md = MessageDigest.getInstance(Sha.SHA256.name)
-        val hash = md.digest(jsonUtf8)
+        val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
         return Base64Url.encode(hash)
     }

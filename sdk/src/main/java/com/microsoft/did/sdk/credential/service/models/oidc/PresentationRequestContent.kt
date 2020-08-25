@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
  * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
  */
 @Serializable
-data class OidcRequestContentForPresentation(
+data class PresentationRequestContent(
 
     // what type of object the response should be (should be idtoken). // TODO: validate
     @SerialName("response_type")
@@ -51,7 +51,7 @@ data class OidcRequestContentForPresentation(
     val idTokenCreationTime: Long = 0,
 
     @SerialName("nbf")
-    val nbf: Long = 0,
+    val notValidBefore: Long = 0,
 
     // if set to "create", request is just for issuance.
     val prompt: String = "",

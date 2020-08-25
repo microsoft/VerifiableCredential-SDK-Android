@@ -25,26 +25,26 @@ class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Serializer,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner
-) : OidcResponseFormatter {
+) {
 
-    fun formatIssuanceResponse(
+    fun formatResponse(
         requestedVchMap: RequestedVchMap = mutableMapOf(),
         issuanceResponse: IssuanceResponse,
         expiryInSeconds: Int
     ): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         val jti = UUID.randomUUID().toString()
-        val attestationResponse = this.createAttestationClaimModelForIssuance(
+        val attestationResponse = this.createAttestationClaimModel(
             requestedVchMap,
             issuanceResponse.getRequestedIdTokens(),
             issuanceResponse.getRequestedSelfAttestedClaims(),
             issuanceResponse.request.entityIdentifier,
             issuanceResponse.responder
         )
-        return createAndSignOidcResponseContentForIssuance(issuanceResponse, iat, exp, jti, attestationResponse)
+        return createAndSignOidcResponseContent(issuanceResponse, iat, exp, jti, attestationResponse)
     }
 
-    private fun createAndSignOidcResponseContentForIssuance(
+    private fun createAndSignOidcResponseContent(
         issuanceResponse: IssuanceResponse,
         issuedTime: Long,
         expiryTime: Long,
@@ -62,15 +62,15 @@ class IssuanceResponseFormatter @Inject constructor(
             expirationTime = expiryTime
             responseId = jti
         }
-        return signContentsForIssuance(contents, responder)
+        return signContents(contents, responder)
     }
 
-    private fun signContentsForIssuance(contents: IssuanceResponseClaims, responder: Identifier): String {
+    private fun signContents(contents: IssuanceResponseClaims, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(IssuanceResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 
-    private fun createAttestationClaimModelForIssuance(
+    private fun createAttestationClaimModel(
         requestedVchMap: RequestedVchMap,
         requestedIdTokenMap: RequestedIdTokenMap,
         requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap,

@@ -20,14 +20,14 @@ class ExchangeResponseFormatter @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val serializer: Serializer,
     private val signer: TokenSigner
-) : OidcResponseFormatter {
-    fun formatExchangeResponse(exchangeRequest: ExchangeRequest, expiryInSeconds: Int): String {
+) {
+    fun formatResponse(exchangeRequest: ExchangeRequest, expiryInSeconds: Int): String {
         val (iat, exp) = createIatAndExp(expiryInSeconds)
         val jti = UUID.randomUUID().toString()
-        return createAndSignOidcResponseContentForExchange(exchangeRequest, iat, exp, jti)
+        return createAndSignOidcResponseContent(exchangeRequest, iat, exp, jti)
     }
 
-    private fun createAndSignOidcResponseContentForExchange(
+    private fun createAndSignOidcResponseContent(
         exchangeRequest: ExchangeRequest,
         issuedTime: Long,
         expiryTime: Long,
@@ -35,7 +35,7 @@ class ExchangeResponseFormatter @Inject constructor(
     ): String {
         val requester = exchangeRequest.requester
         val key = cryptoOperations.keyStore.getPublicKey(requester.signatureKeyReference).getKey()
-        val contents = ExchangeResponseClaims(exchangeRequest.verifiableCredential?.raw, exchangeRequest.pairwiseDid).apply {
+        val contents = ExchangeResponseClaims(exchangeRequest.verifiableCredential.raw, exchangeRequest.pairwiseDid).apply {
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
             aud = exchangeRequest.audience
             did = requester.id
@@ -44,10 +44,10 @@ class ExchangeResponseFormatter @Inject constructor(
             expirationTime = expiryTime
             responseId = jti
         }
-        return signContentsForExchange(contents, requester)
+        return signContents(contents, requester)
     }
 
-    private fun signContentsForExchange(contents: ExchangeResponseClaims, responder: Identifier): String {
+    private fun signContents(contents: ExchangeResponseClaims, responder: Identifier): String {
         val serializedResponseContent = serializer.stringify(ExchangeResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }

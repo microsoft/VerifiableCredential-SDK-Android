@@ -49,7 +49,7 @@ class IssuanceResponse(override val request: IssuanceRequest, override val respo
     }
 }
 
-class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.content.redirectUrl, responder) {
+class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.contentRequestContent.redirectUrl, responder) {
     private val requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf()
     fun addRequestedVchClaims(
         credentialPresentationInputDescriptors: CredentialPresentationInputDescriptors,

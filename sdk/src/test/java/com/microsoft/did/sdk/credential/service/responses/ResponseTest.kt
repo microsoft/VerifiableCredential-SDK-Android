@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContentForPresentation
+import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -49,7 +49,7 @@ class ResponseTest {
         every { issuanceResponse.responder.id } returns mockedPairwiseDid
         val serializer = Serializer()
         val oidcRequestContent =
-            serializer.parse(OidcRequestContentForPresentation.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
+            serializer.parse(PresentationRequestContent.serializer(), JwsToken.deserialize(suppliedRequestToken, serializer).content())
         presentationRequest = PresentationRequest(suppliedRequestToken, oidcRequestContent, oidcRequestContent.presentationDefinition)
         presentationResponse = PresentationResponse(presentationRequest, mockedPairwiseId)
     }
