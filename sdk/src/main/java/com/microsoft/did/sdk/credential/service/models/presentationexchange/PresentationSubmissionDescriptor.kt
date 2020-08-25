@@ -10,9 +10,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PresentationSubmissionDescriptor(
+
     @SerialName("id")
     val idFromPresentationRequest: String = "",
+
     val path: String = "",
-    val format: String,
+
+    val format: String = "",
+
     val encoding: String = ""
 )

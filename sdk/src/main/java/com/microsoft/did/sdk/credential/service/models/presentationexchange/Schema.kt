@@ -10,9 +10,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Schema(
+
     @SerialName("uri")
-    val uris: List<String> = emptyList()
-) {
-    val name: String = ""
+    val uris: List<String> = emptyList(),
+
+    val name: String = "",
+
     val purpose: String = ""
-}
+)

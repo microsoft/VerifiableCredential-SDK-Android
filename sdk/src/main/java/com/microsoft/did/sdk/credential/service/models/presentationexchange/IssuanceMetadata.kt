@@ -7,9 +7,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IssuanceMetadata(
+
     @SerialName("manifest")
-    var issuerContract: String = ""
-) {
+    var issuerContract: String = "",
+
     @SerialName("did")
     val issuerDid: String = ""
-}
+)

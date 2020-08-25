@@ -59,7 +59,7 @@ data class PresentationRequestContent(
     val aud: String = "",
 
     @SerialName("max_age")
-    val maxAge: Int = 0
-) {
+    val maxAge: Int = 0,
+
     var registration: Registration = Registration()
-}
+)
