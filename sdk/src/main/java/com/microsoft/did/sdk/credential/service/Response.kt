@@ -16,9 +16,12 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 /**
  * Response formed from a Request.
  *
+ * @param request request from which response is created
  * @param audience entity to send the response to.
+ * @param responder identifies who sent the response
  */
 sealed class Response(open val request: Request, val audience: String, open val responder: Identifier)
+
 class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) : Response(request, request.contract.input.credentialIssuer, responder) {
     private var requestedVchMap: RequestedVchMap = mutableMapOf()
     private val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
@@ -65,7 +68,7 @@ class PresentationResponse(override val request: PresentationRequest, override v
     fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         requestedVchPresentationSubmissionMap.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.component2().cardId, entityDid, entityName)
+            val receipt = createReceipt(ReceiptAction.Presentation, it.value.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList

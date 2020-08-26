@@ -16,7 +16,6 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
-import com.microsoft.did.sdk.credential.service.Response
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
@@ -135,12 +134,10 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val requestedVchMap = if (exchangeForPairwiseVerifiableCredential)
-                    getExchangedVcs(response).abortOnError()
+                    exchangeVcsInIssuanceRequest(response).abortOnError()
                 else
                     response.getRequestedVchs()
-                //TODO: How to avoid this suppression
-                @Suppress("UNCHECKED_CAST")
-                val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap as RequestedVchMap).abortOnError()
+                val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
                 vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, response.responder, response.request.contract)
                 Result.Success(vch)
@@ -161,53 +158,45 @@ class VerifiableCredentialManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val vcRequestedMapping = if (exchangeForPairwiseVerifiableCredential)
-                    getExchangedVcs(response).abortOnError()
+                    exchangeVcsInPresentationRequest(response).abortOnError()
                 else
                     response.getRequestedVchClaims()
-                //TODO: How to avoid this suppression
-                @Suppress("UNCHECKED_CAST")
-                vchRepository.sendPresentationResponse(response, vcRequestedMapping as RequestedVchPresentationSubmissionMap).abortOnError()
+                vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
             }
         }
     }
 
-    private suspend fun getExchangedVcs(response: Response): Result<MutableMap<out Any, VerifiableCredentialHolder>> {
+    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
         return runResultTry {
-            val exchangedVchMap = exchangeRequestedVerifiableCredentials(response).abortOnError()
-            Result.Success(exchangedVchMap)
+            val responder = response.responder
+            val verifiableCredentialHolderRequestMappings = response.getRequestedVchs()
+            val exchangedVcMap = verifiableCredentialHolderRequestMappings.mapValues {
+                VerifiableCredentialHolder(
+                    it.value.cardId,
+                    vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError(),
+                    it.value.owner,
+                    it.value.displayContract
+                )
+            }
+            Result.Success(exchangedVcMap as RequestedVchMap)
         }
     }
 
-    private suspend fun exchangeRequestedVerifiableCredentials(response: Response): Result<MutableMap<out Any, VerifiableCredentialHolder>> {
+    private suspend fun exchangeVcsInPresentationRequest(response: PresentationResponse): Result<RequestedVchPresentationSubmissionMap> {
         return runResultTry {
-            when (response) {
-                is IssuanceResponse -> {
-                    val verifiableCredentialHolderRequestMappings = response.getRequestedVchs()
-                    val exchangedVcMap = verifiableCredentialHolderRequestMappings.mapValues {
-                        VerifiableCredentialHolder(
-                            it.value.cardId,
-                            vchRepository.getExchangedVerifiableCredential(it.component2(), response.responder).abortOnError(),
-                            it.value.owner,
-                            it.value.displayContract
-                        )
-                    }
-                    Result.Success(exchangedVcMap as RequestedVchMap)
-                }
-                is PresentationResponse -> {
-                    val verifiableCredentialHolderRequestMappings = response.getRequestedVchClaims()
-                    val exchangedVcMap = verifiableCredentialHolderRequestMappings.mapValues {
-                        VerifiableCredentialHolder(
-                            it.value.cardId,
-                            vchRepository.getExchangedVerifiableCredential(it.component2(), response.responder).abortOnError(),
-                            it.value.owner,
-                            it.value.displayContract
-                        )
-                    }
-                    Result.Success(exchangedVcMap as RequestedVchPresentationSubmissionMap)
-                }
+            val responder = response.responder
+            val verifiableCredentialHolderRequestMappings = response.getRequestedVchClaims()
+            val exchangedVcMap = verifiableCredentialHolderRequestMappings.mapValues {
+                VerifiableCredentialHolder(
+                    it.value.cardId,
+                    vchRepository.getExchangedVerifiableCredential(it.value, responder).abortOnError(),
+                    it.value.owner,
+                    it.value.displayContract
+                )
             }
+            Result.Success(exchangedVcMap as RequestedVchPresentationSubmissionMap)
         }
     }
 
@@ -234,11 +223,7 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    private fun createVch(
-        signedVerifiableCredential: String,
-        owner: Identifier,
-        contract: VerifiableCredentialContract
-    ): VerifiableCredentialHolder {
+    private fun createVch(signedVerifiableCredential: String, owner: Identifier, contract: VerifiableCredentialContract): VerifiableCredentialHolder {
         val contents =
             unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)

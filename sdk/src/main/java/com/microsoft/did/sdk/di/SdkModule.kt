@@ -8,9 +8,6 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
-import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
-import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -34,7 +31,6 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import javax.inject.Named
 import javax.inject.Singleton
 
 /**

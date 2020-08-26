@@ -10,7 +10,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PresentationSubmissionDescriptor(
-
     @SerialName("id")
     val idFromPresentationRequest: String = "",
 

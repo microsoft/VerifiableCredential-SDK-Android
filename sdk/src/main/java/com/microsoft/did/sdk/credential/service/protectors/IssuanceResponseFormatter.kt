@@ -32,8 +32,8 @@ class IssuanceResponseFormatter @Inject constructor(
         issuanceResponse: IssuanceResponse,
         expiryInSeconds: Int
     ): String {
-        val (iat, exp) = createIatAndExp(expiryInSeconds)
-        val jti = UUID.randomUUID().toString()
+        val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
+        val responseId = UUID.randomUUID().toString()
         val attestationResponse = this.createAttestationClaimModel(
             requestedVchMap,
             issuanceResponse.getRequestedIdTokens(),
@@ -41,26 +41,26 @@ class IssuanceResponseFormatter @Inject constructor(
             issuanceResponse.request.entityIdentifier,
             issuanceResponse.responder
         )
-        return createAndSignOidcResponseContent(issuanceResponse, iat, exp, jti, attestationResponse)
+        return createAndSignOidcResponseContent(issuanceResponse, issuedTime, expiryTime, responseId, attestationResponse)
     }
 
     private fun createAndSignOidcResponseContent(
         issuanceResponse: IssuanceResponse,
         issuedTime: Long,
         expiryTime: Long,
-        jti: String,
+        responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
         val responder = issuanceResponse.responder
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
-            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
-            aud = issuanceResponse.audience
+            publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            audience = issuanceResponse.audience
             did = responder.id
             publicKeyJwk = key.toJWK()
             responseCreationTime = issuedTime
-            expirationTime = expiryTime
-            responseId = jti
+            responseExpirationTime = expiryTime
+            this.responseId = responseId
         }
         return signContents(contents, responder)
     }
@@ -80,25 +80,15 @@ class IssuanceResponseFormatter @Inject constructor(
         if (areNoCollectedClaims(requestedVchMap, requestedIdTokenMap, requestedSelfAttestedClaimMap)) {
             return AttestationClaimModel()
         }
-        val presentationAttestations = createPresentations(
-            requestedVchMap.map { (key, value) ->
-                Pair(key.credentialType, key.validityInterval) to value
-            }.toMap(),
-            presentationsAudience,
-            responder
-        )
+        val presentationAttestations = createPresentations(requestedVchMap, presentationsAudience, responder)
         return AttestationClaimModel(requestedSelfAttestedClaimMap, requestedIdTokenMap, presentationAttestations)
     }
 
-    private fun createPresentations(
-        requestedVcIdToVchMap: RequestedVcIdToVchMap,
-        audience: String,
-        responder: Identifier
-    ): Map<String, String> {
-        return requestedVcIdToVchMap.map { (key, value) ->
-            key.first to verifiablePresentationFormatter.createPresentation(
+    private fun createPresentations(requestedVchMap: RequestedVchMap, audience: String, responder: Identifier): Map<String, String> {
+        return requestedVchMap.map { (key, value) ->
+            key.credentialType to verifiablePresentationFormatter.createPresentation(
                 value.verifiableCredential,
-                key.second,
+                key.validityInterval,
                 audience,
                 responder
             )

@@ -10,9 +10,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 abstract class OidcResponseClaims {
-    var sub: String = ""
+    @SerialName("sub")
+    var publicKeyThumbPrint: String = ""
 
-    var aud: String = ""
+    @SerialName("aud")
+    var audience: String = ""
 
     var did: String = ""
 
@@ -23,7 +25,7 @@ abstract class OidcResponseClaims {
     var responseCreationTime: Long = 0
 
     @SerialName("exp")
-    var expirationTime: Long = 0
+    var responseExpirationTime: Long = 0
 
     @SerialName("jti")
     var responseId: String = ""

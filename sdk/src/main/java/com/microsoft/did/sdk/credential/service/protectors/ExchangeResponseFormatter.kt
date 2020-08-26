@@ -22,27 +22,27 @@ class ExchangeResponseFormatter @Inject constructor(
     private val signer: TokenSigner
 ) {
     fun formatResponse(exchangeRequest: ExchangeRequest, expiryInSeconds: Int): String {
-        val (iat, exp) = createIatAndExp(expiryInSeconds)
-        val jti = UUID.randomUUID().toString()
-        return createAndSignOidcResponseContent(exchangeRequest, iat, exp, jti)
+        val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
+        val responseId = UUID.randomUUID().toString()
+        return createAndSignOidcResponseContent(exchangeRequest, issuedTime, expiryTime, responseId)
     }
 
     private fun createAndSignOidcResponseContent(
         exchangeRequest: ExchangeRequest,
         issuedTime: Long,
         expiryTime: Long,
-        jti: String
+        responseId: String
     ): String {
         val requester = exchangeRequest.requester
         val key = cryptoOperations.keyStore.getPublicKey(requester.signatureKeyReference).getKey()
         val contents = ExchangeResponseClaims(exchangeRequest.verifiableCredential.raw, exchangeRequest.pairwiseDid).apply {
-            sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
-            aud = exchangeRequest.audience
+            publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            audience = exchangeRequest.audience
             did = requester.id
             publicKeyJwk = key.toJWK()
             responseCreationTime = issuedTime
-            expirationTime = expiryTime
-            responseId = jti
+            responseExpirationTime = expiryTime
+            this.responseId = responseId
         }
         return signContents(contents, requester)
     }

@@ -16,7 +16,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationResponseClaims(
-
     @SerialName("presentation_submission")
     val presentationSubmission: PresentationSubmission = PresentationSubmission(),
 

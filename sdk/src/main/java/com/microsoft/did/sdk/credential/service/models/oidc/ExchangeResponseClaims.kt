@@ -14,7 +14,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ExchangeResponseClaims(
-
     val vc: String = "",
 
     val recipient: String = ""

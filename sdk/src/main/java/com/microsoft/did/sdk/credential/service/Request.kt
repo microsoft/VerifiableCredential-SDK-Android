@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestC
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(val entityName: String = "", val entityIdentifier: String = "")
+sealed class Request(val entityName: String, val entityIdentifier: String)
 
 @Serializable
 class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String) :
@@ -20,6 +20,6 @@ class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUr
 
 @Serializable
 class PresentationRequest(val serializedToken: String, val content: PresentationRequestContent) :
-    Request(content.registration.clientName, content.iss) {
+    Request(content.registration.clientName, content.issuer) {
     val presentationDefinition = content.presentationDefinition
 }

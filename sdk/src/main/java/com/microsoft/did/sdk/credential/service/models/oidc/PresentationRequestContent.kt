@@ -16,7 +16,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationRequestContent(
-
     // what type of object the response should be (should be idtoken). // TODO: validate
     @SerialName("response_type")
     val responseType: String = "",
@@ -32,7 +31,7 @@ data class PresentationRequestContent(
     val redirectUrl: String = "",
 
     @SerialName("iss")
-    val iss: String = "",
+    val issuer: String = "",
 
     // should contain "openid did_authn" // TODO: validate
     val scope: String = "",
@@ -56,7 +55,8 @@ data class PresentationRequestContent(
     // if set to "create", request is just for issuance.
     val prompt: String = "",
 
-    val aud: String = "",
+    @SerialName("aud")
+    val audience: String = "",
 
     @SerialName("max_age")
     val maxAge: Int = 0,

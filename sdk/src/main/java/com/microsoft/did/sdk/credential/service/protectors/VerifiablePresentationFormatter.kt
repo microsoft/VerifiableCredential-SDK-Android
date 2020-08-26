@@ -23,24 +23,24 @@ class VerifiablePresentationFormatter @Inject constructor(
         audience: String,
         responder: Identifier
     ): String {
-        val vp = VerifiablePresentationDescriptor(
+        val verifiablePresentation = VerifiablePresentationDescriptor(
             verifiableCredential = listOf(verifiableCredential.raw),
             context = listOf(Constants.VP_CONTEXT_URL),
             type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
         )
 
-        val (iat, exp: Long?) = createIatAndExp(validityInterval)
-        val jti = UUID.randomUUID().toString()
-        val did = responder.id
+        val (issuedTime, expiryTime: Long) = createIssuedAndExpiryTime(validityInterval)
+        val vpId = UUID.randomUUID().toString()
+        val responderDid = responder.id
         val contents =
             VerifiablePresentationContent(
-                jti = jti,
-                vp = vp,
-                iss = did,
-                tokenIssuedTime = iat,
-                tokenNotValidBefore = iat,
-                tokenExpiryTime = exp,
-                aud = audience
+                vpId = vpId,
+                verifiablePresentation = verifiablePresentation,
+                issuerOfVp = responderDid,
+                tokenIssuedTime = issuedTime,
+                tokenNotValidBefore = issuedTime,
+                tokenExpiryTime = expiryTime,
+                audience = audience
             )
         val serializedContents = serializer.stringify(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)

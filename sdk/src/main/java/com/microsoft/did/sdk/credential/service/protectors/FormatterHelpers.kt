@@ -5,21 +5,18 @@
 
 package com.microsoft.did.sdk.credential.service.protectors
 
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.util.controlflow.FormatterException
 import java.util.Date
 import kotlin.math.floor
 
-fun createIatAndExp(expiryInSeconds: Int): Pair<Long, Long> {
+fun createIssuedAndExpiryTime(expiryInSeconds: Int): Pair<Long, Long> {
     val currentTime = Date().time
-    val iat = floor(currentTime / 1000f).toLong()
+    val issuedTime = floor(currentTime / 1000f).toLong()
     if (expiryInSeconds == -1) {
-        throw FormatterException("Expiry for OIDC Responses cannot be null")
+        throw FormatterException("Expiry for OIDC Responses cannot be negative")
     }
     val expiryInMilliseconds = 1000 * expiryInSeconds
     val expiration = currentTime + expiryInMilliseconds.toLong()
-    val exp = floor(expiration / 1000f).toLong()
-    return Pair(iat, exp)
+    val expiryTime = floor(expiration / 1000f).toLong()
+    return Pair(issuedTime, expiryTime)
 }
-
-typealias RequestedVcIdToVchMap = Map<Pair<String, Int>, VerifiableCredentialHolder>

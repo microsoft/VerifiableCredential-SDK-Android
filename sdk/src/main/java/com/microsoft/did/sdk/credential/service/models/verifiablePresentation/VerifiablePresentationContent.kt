@@ -16,16 +16,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VerifiablePresentationContent(
 
-    // ID of the Verifiable Credential.
-    val jti: String,
+    @SerialName("jti")
+    val vpId: String,
 
-    // purpose of presentation
     val purpose: String = "verify",
 
-    val vp: VerifiablePresentationDescriptor,
+    @SerialName("vp")
+    val verifiablePresentation: VerifiablePresentationDescriptor,
 
     // Issuer of the VP (e.g. did owned by the user, SIOP.did = VP.iss)
-    val iss: String,
+    @SerialName("iss")
+    val issuerOfVp: String,
 
     @SerialName("iat")
     val tokenIssuedTime: Long = 0,
@@ -36,9 +37,9 @@ data class VerifiablePresentationContent(
     @SerialName("nbf")
     val tokenNotValidBefore: Long = 0,
 
-    // audience of the request
-    val aud: String,
+    @SerialName("aud")
+    val audience: String,
 
-    // optional parameter.
-    val wrn: String = ""
+    @SerialName("wrn")
+    val warning: String = ""
 )
