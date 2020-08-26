@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -104,8 +104,8 @@ class ResponseTest {
     fun `test create receipt by adding empty card id`() {
         val vch: VerifiableCredentialHolder = mockk()
         val receiptCreationStartTime = System.currentTimeMillis()
-        val credentialPresentationInputDescriptorsMock: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock, vch)
+        val credentialPresentationInputDescriptorMock: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock, vch)
         val cardId = ""
         every { vch.cardId } returns cardId
         val receipts = presentationResponse.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
@@ -123,8 +123,8 @@ class ResponseTest {
     fun `test create receipt by adding 1 card`() {
         val vch: VerifiableCredentialHolder = mockk()
         val receiptCreationStartTime = System.currentTimeMillis()
-        val credentialPresentationInputDescriptorsMock: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock, vch)
+        val credentialPresentationInputDescriptorMock: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock, vch)
         val cardId = "testCardId"
         every { vch.cardId } returns cardId
         val receipts = presentationResponse.createReceiptsForPresentedVerifiableCredentials(entityDid, entityName)
@@ -148,13 +148,13 @@ class ResponseTest {
     @Test
     fun `test create receipt by adding multiple cards with same type`() {
         val vch1: VerifiableCredentialHolder = mockk()
-        val credentialPresentationInputDescriptorsMock1: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock1, vch1)
+        val credentialPresentationInputDescriptorMock1: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock1, vch1)
         val vchId1 = "vchId1"
         every { vch1.cardId } returns vchId1
         val vch2: VerifiableCredentialHolder = mockk()
-        val credentialPresentationInputDescriptorsMock2: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock2, vch2)
+        val credentialPresentationInputDescriptorMock2: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock2, vch2)
         val vchId2 = "vchId2"
         every { vch2.cardId } returns vchId2
         val receiptCreationStartTime = System.currentTimeMillis()
@@ -172,13 +172,13 @@ class ResponseTest {
     @Test
     fun `test create receipt by adding multiple cards with different types`() {
         val vch1: VerifiableCredentialHolder = mockk()
-        val credentialPresentationInputDescriptorsMock1: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock1, vch1)
+        val credentialPresentationInputDescriptorMock1: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock1, vch1)
         val cardId1 = "testCardId1"
         every { vch1.cardId } returns cardId1
         val vch2: VerifiableCredentialHolder = mockk()
-        val credentialPresentationInputDescriptorsMock2: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock2, vch2)
+        val credentialPresentationInputDescriptorMock2: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock2, vch2)
         val cardId2 = "testCardId2"
         every { vch2.cardId } returns cardId2
         val receiptCreationStartTime = System.currentTimeMillis()
@@ -202,8 +202,8 @@ class ResponseTest {
     @Test
     fun `test create receipt by adding empty entity information`() {
         val vch: VerifiableCredentialHolder = mockk()
-        val credentialPresentationInputDescriptorsMock: CredentialPresentationInputDescriptors = mockk()
-        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorsMock, vch)
+        val credentialPresentationInputDescriptorMock: CredentialPresentationInputDescriptor = mockk()
+        presentationResponse.addRequestedVchClaims(credentialPresentationInputDescriptorMock, vch)
         val cardId = "testCardId"
         every { vch.cardId } returns cardId
         val receiptCreationStartTime = System.currentTimeMillis()

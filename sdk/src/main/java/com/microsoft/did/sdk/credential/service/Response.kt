@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptors
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.identifier.models.Identifier
 
 /**
@@ -52,10 +52,10 @@ class IssuanceResponse(override val request: IssuanceRequest, override val respo
 class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.requestContent.redirectUrl, responder) {
     private val requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf()
     fun addRequestedVchClaims(
-        credentialPresentationInputDescriptors: CredentialPresentationInputDescriptors,
+        credentialPresentationInputDescriptor: CredentialPresentationInputDescriptor,
         vch: VerifiableCredentialHolder
     ) {
-        requestedVchPresentationSubmissionMap[credentialPresentationInputDescriptors] = vch
+        requestedVchPresentationSubmissionMap[credentialPresentationInputDescriptor] = vch
     }
 
     fun getRequestedVchClaims(): RequestedVchPresentationSubmissionMap {
@@ -86,4 +86,4 @@ class PresentationResponse(override val request: PresentationRequest, override v
 typealias RequestedIdTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
 typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredentialHolder>
-typealias RequestedVchPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptors, VerifiableCredentialHolder>
+typealias RequestedVchPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredentialHolder>
