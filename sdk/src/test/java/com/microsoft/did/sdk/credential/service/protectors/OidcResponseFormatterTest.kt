@@ -257,8 +257,8 @@ class OidcResponseFormatterTest {
     private fun mockPresentationResponse() {
         every { mockedPresentationResponse.request.entityIdentifier } returns expectedDid
         every { mockedPresentationResponse.audience } returns expectedPresentationAudience
-        every { mockedPresentationResponse.request.requestContent.nonce } returns mockedNonce
-        every { mockedPresentationResponse.request.requestContent.state } returns mockedState
+        every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
+        every { mockedPresentationResponse.request.content.state } returns mockedState
         every { mockedPresentationResponse.getRequestedVchClaims() } returns requestedVchPresentationSubmissionMap
         every { mockedPresentationResponse.responder } returns mockedIdentifier
     }

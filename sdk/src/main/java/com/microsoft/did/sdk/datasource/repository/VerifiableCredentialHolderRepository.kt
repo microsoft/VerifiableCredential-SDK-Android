@@ -128,7 +128,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         return SendPresentationResponseNetworkOperation(
             response.audience,
             formattedResponse,
-            response.request.requestContent.state,
+            response.request.content.state,
             apiProvider
         ).fire()
     }

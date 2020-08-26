@@ -49,7 +49,7 @@ class OidcPresentationRequestValidatorTest {
 
     private fun setUpPresentationRequest() {
         every { mockedPresentationRequest.serializedToken } returns expectedSerializedToken
-        every { mockedPresentationRequest.requestContent } returns mockedOidcRequestContentRequestContent
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContentRequestContent
     }
 
     private fun setUpIdentifier() {

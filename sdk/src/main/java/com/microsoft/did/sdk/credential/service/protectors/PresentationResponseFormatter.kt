@@ -72,12 +72,12 @@ class PresentationResponseFormatter @Inject constructor(
         val contents = PresentationResponseClaims(presentationSubmission, attestationResponse).apply {
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
             aud = presentationResponse.audience
-            nonce = presentationResponse.request.requestContent.nonce
+            nonce = presentationResponse.request.content.nonce
             did = responder.id
             publicKeyJwk = key.toJWK()
             responseCreationTime = issuedTime
             expirationTime = expiryTime
-            state = presentationResponse.request.requestContent.state
+            state = presentationResponse.request.content.state
             responseId = jti
         }
         return signContents(contents, responder)
