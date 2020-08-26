@@ -5,54 +5,56 @@
 
 package com.microsoft.did.sdk.util.controlflow
 
-open class SdkException(message: String? = null, cause: Throwable? = null) : Exception(message, cause)
+open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
 
-class UnSupportedOperationException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+class UnSupportedOperationException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
-open class CryptoException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+open class CryptoException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
-class KeyStoreException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class KeyStoreException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class KeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class KeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class KeyFormatException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class KeyFormatException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class AlgorithmException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class SignatureException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class SignatureException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class EncodingException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class EncodingException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class PairwiseKeyException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class PairwiseKeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class IdentifierCreatorException(message: String? = null, cause: Throwable? = null) : CryptoException(message, cause)
+class IdentifierCreatorException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-open class AuthenticationException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) : SdkException(message, cause, retryable)
 
-open class PresentationException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+open class PresentationException(message: String, cause: Throwable? = null, retryable: Boolean = true) : AuthenticationException(message, cause, retryable)
 
-open class IssuanceException(message: String? = null, cause: Throwable? = null) : AuthenticationException(message, cause)
+open class IssuanceException(message: String, cause: Throwable? = null, retryable: Boolean = true) : AuthenticationException(message, cause, retryable)
 
-class ExchangeException(message: String? = null, cause: Throwable? = null) : PresentationException(message, cause)
+class ExchangeException(message: String, cause: Throwable? = null) : PresentationException(message, cause)
 
-open class ValidatorException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
-class InvalidSignatureException(message: String? = null, cause: Throwable? = null) : ValidatorException(message, cause)
+class InvalidSignatureException(message: String) : ValidatorException(message)
 
-class ExpiredTokenExpirationException(message: String? = null, cause: Throwable? = null) : ValidatorException(message, cause)
+class ExpiredTokenExpirationException(message: String) : ValidatorException(message)
 
-class FormatterException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
-class ResolverException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
-class RegistrarException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+class RegistrarException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
-open class NetworkException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
 
-class ServiceUnreachableException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+open class NetworkException(val requestId: String, message: String, retryable: Boolean) : SdkException(message, null, retryable)
 
-class ServiceErrorException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+class ServiceUnreachableException(requestId: String, message: String, retryable: Boolean) : NetworkException(requestId, message, retryable)
 
-class UnauthorizedException(message: String? = null, cause: Throwable? = null) : NetworkException(message, cause)
+class ServiceErrorException(requestId: String, message: String, retryable: Boolean) : NetworkException(requestId, message, retryable)
 
-class RepositoryException(message: String? = null, cause: Throwable? = null) : SdkException(message, cause)
+class UnauthorizedException(requestId: String, message: String, retryable: Boolean) : NetworkException(requestId, message, retryable)
+
+class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
