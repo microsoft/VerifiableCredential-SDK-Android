@@ -285,4 +285,17 @@ class VerifiableCredentialManager @Inject constructor(
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> {
         return vchRepository.getVchById(id)
     }
+
+    suspend fun setIsArchived(vch: VerifiableCredentialHolder, isArchived: Boolean): Result<VerifiableCredentialHolder> {
+        val updatedVch = VerifiableCredentialHolder(vch.cardId, vch.verifiableCredential, vch.owner, vch.displayContract, isArchived)
+        withContext(Dispatchers.IO) {
+            vchRepository.update(updatedVch)
+        }
+        return Result.Success(updatedVch)
+    }
+
+    suspend fun deleteVch(vch: VerifiableCredentialHolder): Result<Unit> {
+        vchRepository.delete(vch)
+        return Result.Success(Unit)
+    }
 }

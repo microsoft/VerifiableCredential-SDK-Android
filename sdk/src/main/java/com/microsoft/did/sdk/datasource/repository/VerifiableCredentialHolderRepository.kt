@@ -52,6 +52,8 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
 
+    suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.update(verifiableCredentialHolder)
+
     fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVchs()
 
     fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVchs()

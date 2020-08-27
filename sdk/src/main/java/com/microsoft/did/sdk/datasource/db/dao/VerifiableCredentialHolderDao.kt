@@ -10,18 +10,19 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 
 @Dao
 interface VerifiableCredentialHolderDao {
 
-    @Query("SELECT * FROM VerifiableCredentialHolder")
+    @Query("SELECT * FROM VerifiableCredentialHolder WHERE isArchived = 0")
     fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>>
 
-    @Query("SELECT * FROM VerifiableCredentialHolder")
+    @Query("SELECT * FROM VerifiableCredentialHolder WHERE isArchived = 0")
     fun queryAllVchs(): List<VerifiableCredentialHolder>
 
-    @Query("SELECT * FROM VerifiableCredentialHolder where picId = :id")
+    @Query("SELECT * FROM VerifiableCredentialHolder WHERE picId = :id")
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder>
 
     @Insert
@@ -29,4 +30,7 @@ interface VerifiableCredentialHolderDao {
 
     @Delete
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder)
+
+    @Update
+    suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder)
 }
