@@ -54,12 +54,14 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.update(verifiableCredentialHolder)
 
-    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVchs()
+    fun getAllActiveVchs() = vchDao.getAllActiveVchs()
 
-    fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVchs()
+    fun queryAllActiveVchs() = vchDao.queryAllActiveVchs()
+
+    fun getArchivedVchs() = vchDao.getArchivedVchs()
 
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
-        return getAllVchs().map { cardList -> filterVcsByType(cardList, type) }
+        return getAllActiveVchs().map { cardList -> filterVcsByType(cardList, type) }
     }
 
     private fun filterVcsByType(vcList: List<VerifiableCredentialHolder>, type: String): List<VerifiableCredentialHolder> {

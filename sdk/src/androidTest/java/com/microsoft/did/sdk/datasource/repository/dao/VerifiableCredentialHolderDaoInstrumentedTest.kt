@@ -55,7 +55,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         val verifiableCredentialHolder = createVerifiableCredentialHolder(1)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVchs().getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(1)
@@ -74,7 +74,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder2)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVchs().getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(2)
@@ -91,7 +91,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
             Assertions.assertThatThrownBy { runBlocking { verifiableCredentialHolderDao.insert(verifiableCredentialHolder2) } }
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVchs().getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if(actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(1)

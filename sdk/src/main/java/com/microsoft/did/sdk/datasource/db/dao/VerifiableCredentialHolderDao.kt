@@ -17,10 +17,13 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 interface VerifiableCredentialHolderDao {
 
     @Query("SELECT * FROM VerifiableCredentialHolder WHERE isArchived = 0")
-    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>>
+    fun getAllActiveVchs(): LiveData<List<VerifiableCredentialHolder>>
 
     @Query("SELECT * FROM VerifiableCredentialHolder WHERE isArchived = 0")
-    fun queryAllVchs(): List<VerifiableCredentialHolder>
+    fun queryAllActiveVchs(): List<VerifiableCredentialHolder>
+
+    @Query("SELECT * FROM VerifiableCredentialHolder WHERE isArchived = 1")
+    fun getArchivedVchs(): LiveData<List<VerifiableCredentialHolder>>
 
     @Query("SELECT * FROM VerifiableCredentialHolder WHERE picId = :id")
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder>
