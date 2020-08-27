@@ -48,8 +48,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     private val receiptDao = database.receiptDao()
 
-    private val vcDao = database.verifiableCredentialDao()
-
     suspend fun insert(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.insert(verifiableCredentialHolder)
 
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
@@ -72,12 +70,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
 
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
-
-    // Verifiable Credential Methods
-    suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
-        vcDao.getVerifiableCredentialById(primaryVcId)
-
-    suspend fun insert(verifiableCredential: VerifiableCredential) = vcDao.insert(verifiableCredential)
 
     // Card Issuance Methods.
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
@@ -150,15 +142,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         vch: VerifiableCredentialHolder,
         pairwiseIdentifier: Identifier
     ): Result<VerifiableCredential> {
-        val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
-        // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
-        verifiableCredentials.forEach {
-            if (it.contents.sub == pairwiseIdentifier.id) {
-                return Result.Success(it)
-            }
-        }
-        val exchangeRequest = ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id)
-        return this.sendExchangeRequest(exchangeRequest, vch.owner)
+        return sendExchangeRequest(ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id), vch.owner)
     }
 
     private suspend fun sendExchangeRequest(request: ExchangeRequest, requester: Identifier): Result<VerifiableCredential> {
@@ -185,7 +169,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
                     result.payload,
                     request.verifiableCredential.picId
                 )
-                this.insert(verifiableCredential)
                 Result.Success(verifiableCredential)
             }
             is Result.Failure -> result

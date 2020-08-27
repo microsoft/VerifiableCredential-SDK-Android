@@ -26,7 +26,6 @@ import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.PresentationException
-import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.serializer.Serializer
@@ -140,7 +139,6 @@ class VerifiableCredentialManager @Inject constructor(
                 ).abortOnError()
                 val verifiableCredential =
                     vchRepository.sendIssuanceResponse(response, requestedVchMap, responder, expiryInSeconds).abortOnError()
-                vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, responder, response.request.contract)
                 createAndSaveReceipt(response)
                 Result.Success(vch)
@@ -234,8 +232,7 @@ class VerifiableCredentialManager @Inject constructor(
         owner: Identifier,
         contract: VerifiableCredentialContract
     ): VerifiableCredentialHolder {
-        val contents =
-            unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
+        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
         val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
         return VerifiableCredentialHolder(
             contents.jti,
@@ -274,10 +271,11 @@ class VerifiableCredentialManager @Inject constructor(
      * Get receipts by verifiable credential id from the database.
      */
     private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
-        return try {
-            Result.Success(vchRepository.insert(receipt))
-        } catch (exception: Exception) {
-            Result.Failure(RepositoryException("Unable to insert receipt in repository.", exception))
+        return withContext(Dispatchers.IO) {
+            runResultTry {
+                vchRepository.insert(receipt)
+                Result.Success(Unit)
+            }
         }
     }
 
