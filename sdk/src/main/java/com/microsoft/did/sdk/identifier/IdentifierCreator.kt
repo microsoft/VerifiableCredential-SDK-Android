@@ -9,7 +9,6 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.KeyUse
-import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm

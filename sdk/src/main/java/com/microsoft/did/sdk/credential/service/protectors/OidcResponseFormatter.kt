@@ -6,11 +6,11 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
+import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -57,7 +57,8 @@ class OidcResponseFormatter @Inject constructor(
             requestedIdTokenMap,
             requestedSelfAttestedClaimMap,
             presentationsAudience,
-            responder)
+            responder
+        )
 
         val contents = OidcResponseContent(
             sub = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm),
@@ -95,9 +96,18 @@ class OidcResponseFormatter @Inject constructor(
         val presentationAttestations = createPresentations(
             requestedVchMap,
             presentationsAudience,
-            responder)
-        val nullableSelfAttestedClaimRequestMapping = if (requestedSelfAttestedClaimMap.isEmpty()) { null } else { requestedSelfAttestedClaimMap }
-        val nullableIdTokenRequestMapping = if (requestedIdTokenMap.isEmpty()) { null } else { requestedIdTokenMap }
+            responder
+        )
+        val nullableSelfAttestedClaimRequestMapping = if (requestedSelfAttestedClaimMap.isEmpty()) {
+            null
+        } else {
+            requestedSelfAttestedClaimMap
+        }
+        val nullableIdTokenRequestMapping = if (requestedIdTokenMap.isEmpty()) {
+            null
+        } else {
+            requestedIdTokenMap
+        }
         return AttestationClaimModel(nullableSelfAttestedClaimRequestMapping, nullableIdTokenRequestMapping, presentationAttestations)
     }
 

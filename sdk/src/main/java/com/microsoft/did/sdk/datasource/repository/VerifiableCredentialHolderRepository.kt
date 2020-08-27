@@ -7,12 +7,12 @@ package com.microsoft.did.sdk.datasource.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.OidcResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
@@ -22,11 +22,11 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresen
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -54,9 +54,9 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
 
-    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVcs()
+    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVchs()
 
-    fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVcs()
+    fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVchs()
 
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return getAllVchs().map { cardList -> filterVcsByType(cardList, type) }
@@ -66,7 +66,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         return vcList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
     }
 
-    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVcById(id)
+    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVchById(id)
 
     // Receipt Methods
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
@@ -85,10 +85,12 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendIssuanceResponse(response: IssuanceResponse,
-                                     requestedVchMap: RequestedVchMap,
-                                     responder: Identifier,
-                                     expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<VerifiableCredential> {
+    suspend fun sendIssuanceResponse(
+        response: IssuanceResponse,
+        requestedVchMap: RequestedVchMap,
+        responder: Identifier,
+        expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
+    ): Result<VerifiableCredential> {
         val formattedResponse = formatter.format(
             responder = responder,
             responseAudience = response.audience,
@@ -117,10 +119,12 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         apiProvider
     ).fire()
 
-    suspend fun sendPresentationResponse(response: PresentationResponse,
-                                         requestedVchMap: RequestedVchMap,
-                                         responder: Identifier,
-                                         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS): Result<Unit> {
+    suspend fun sendPresentationResponse(
+        response: PresentationResponse,
+        requestedVchMap: RequestedVchMap,
+        responder: Identifier,
+        expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
+    ): Result<Unit> {
 
         val state = response.request.content.state
         val formattedResponse = formatter.format(
@@ -142,7 +146,10 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         ).fire()
     }
 
-    suspend fun getExchangedVerifiableCredential(vch: VerifiableCredentialHolder, pairwiseIdentifier: Identifier): Result<VerifiableCredential> {
+    suspend fun getExchangedVerifiableCredential(
+        vch: VerifiableCredentialHolder,
+        pairwiseIdentifier: Identifier
+    ): Result<VerifiableCredential> {
         val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
         // if there is already a saved verifiable credential owned by pairwiseIdentifier return.
         verifiableCredentials.forEach {

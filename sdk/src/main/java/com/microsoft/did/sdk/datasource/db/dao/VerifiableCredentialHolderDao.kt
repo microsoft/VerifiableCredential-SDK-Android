@@ -16,13 +16,13 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 interface VerifiableCredentialHolderDao {
 
     @Query("SELECT * FROM VerifiableCredentialHolder")
-    fun getAllVcs(): LiveData<List<VerifiableCredentialHolder>>
+    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>>
 
     @Query("SELECT * FROM VerifiableCredentialHolder")
-    fun queryAllVcs(): List<VerifiableCredentialHolder>
+    fun queryAllVchs(): List<VerifiableCredentialHolder>
 
     @Query("SELECT * FROM VerifiableCredentialHolder where picId = :id")
-    fun getVcById(id: String): LiveData<VerifiableCredentialHolder>
+    fun getVchById(id: String): LiveData<VerifiableCredentialHolder>
 
     @Insert
     suspend fun insert(verifiableCredentialHolder: VerifiableCredentialHolder)

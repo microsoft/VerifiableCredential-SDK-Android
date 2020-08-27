@@ -5,11 +5,11 @@
 
 package com.microsoft.did.sdk.credential.service
 
-import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 
 /**
  * Response formed from a Request.
@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
  * @param audience entity to send the response to.
  */
 sealed class Response(open val request: Request, val audience: String) {
-    
+
     private val requestedVchMap: RequestedVchMap = mutableMapOf()
 
     private val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()

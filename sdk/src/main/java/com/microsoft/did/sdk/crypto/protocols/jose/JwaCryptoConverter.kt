@@ -44,7 +44,8 @@ object JwaCryptoConverter {
             JoseConstants.EcDsa.value, JoseConstants.Es256K.value -> {
                 EcdsaParams(
                     hash = Algorithm(name = W3cCryptoApiConstants.Sha256.value),
-                    additionalParams = mapOf("namedCurve" to W3cCryptoApiConstants.Secp256k1.value
+                    additionalParams = mapOf(
+                        "namedCurve" to W3cCryptoApiConstants.Secp256k1.value
                     )
                 )
             }

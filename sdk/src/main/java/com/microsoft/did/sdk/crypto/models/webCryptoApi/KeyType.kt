@@ -6,6 +6,7 @@ package com.microsoft.did.sdk.crypto.models.webCryptoApi
 enum class KeyType(val value: String) {
     Public("public"),
     Private("private"),
+
     /** Opaque keying material, including that used for symmetric algorithms */
     Secret("secret")
 }

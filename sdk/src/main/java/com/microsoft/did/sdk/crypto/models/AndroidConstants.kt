@@ -6,6 +6,7 @@ enum class AndroidConstants(val value: String) {
     Ec("EC"),
     Aes("AES"),
     AesWrap("AESWRAP"),
+
     // Signature algorithm names from https://developer.android.com/training/articles/keystore.html#SupportedSignatures
     EcDsaSha1("SHA1withECDSA"),
     EcDsaSha224("SHA224withECDSA"),

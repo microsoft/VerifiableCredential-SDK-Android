@@ -50,8 +50,20 @@ abstract class BaseNetworkOperation<S, T> {
         val requestId = response.headers()["request-id"] ?: "?"
         return when (response.code()) {
             401 -> Result.Failure(UnauthorizedException(requestId, "${response.code()}: ${response.errorBody()?.string()}", false))
-            402, 403, 404 -> Result.Failure(ServiceErrorException(requestId, "${response.code()}: ${response.errorBody()?.string()}", false))
-            500, 501, 502, 503 -> Result.Failure(ServiceUnreachableException(requestId, "${response.code()}: ${response.errorBody()?.string()}", true))
+            402, 403, 404 -> Result.Failure(
+                ServiceErrorException(
+                    requestId,
+                    "${response.code()}: ${response.errorBody()?.string()}",
+                    false
+                )
+            )
+            500, 501, 502, 503 -> Result.Failure(
+                ServiceUnreachableException(
+                    requestId,
+                    "${response.code()}: ${response.errorBody()?.string()}",
+                    true
+                )
+            )
             else -> Result.Failure(NetworkException(requestId, "Unknown Status code ${response.code()}", true))
         }
     }

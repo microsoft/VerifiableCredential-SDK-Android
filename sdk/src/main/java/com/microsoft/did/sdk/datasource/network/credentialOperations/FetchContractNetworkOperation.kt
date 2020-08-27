@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import retrofit2.Response
 
-class FetchContractNetworkOperation(val url: String, apiProvider: ApiProvider) : GetNetworkOperation<VerifiableCredentialContract, VerifiableCredentialContract>() {
+class FetchContractNetworkOperation(val url: String, apiProvider: ApiProvider) :
+    GetNetworkOperation<VerifiableCredentialContract, VerifiableCredentialContract>() {
     override val call: suspend () -> Response<VerifiableCredentialContract> = { apiProvider.issuanceApis.getContract(url) }
 }
