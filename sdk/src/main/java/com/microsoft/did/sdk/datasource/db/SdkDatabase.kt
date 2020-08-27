@@ -22,7 +22,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [VerifiableCredentialHolder::class, Identifier::class, Receipt::class], version = 2)
+@Database(entities = [VerifiableCredentialHolder::class, Identifier::class, Receipt::class], version = 3)
 @TypeConverters(RoomConverters::class)
 abstract class SdkDatabase : RoomDatabase() {
 
