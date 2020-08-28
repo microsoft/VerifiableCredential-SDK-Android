@@ -9,12 +9,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ClaimAttestation(
-    // name of the claim.
     val claim: String,
 
-    // if claim is required
     val required: Boolean = false,
 
-    // type of object the claim should be.
-    val type: String? = ""
+    var type: String = ""
 )

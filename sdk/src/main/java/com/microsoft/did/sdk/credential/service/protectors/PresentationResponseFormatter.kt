@@ -35,6 +35,31 @@ class PresentationResponseFormatter @Inject constructor(
     ): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responseId = UUID.randomUUID().toString()
+        val (attestationResponse, credentialPresentationSubmission) = createAttestationsAndPresentationSubmission(
+            requestedVchPresentationSubmissionMap,
+            presentationResponse
+        )
+        val responder = presentationResponse.responder
+        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+
+        val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
+            publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            audience = presentationResponse.audience
+            nonce = presentationResponse.request.content.nonce
+            did = responder.id
+            publicKeyJwk = key.toJWK()
+            responseCreationTime = issuedTime
+            responseExpirationTime = expiryTime
+            state = presentationResponse.request.content.state
+            this.responseId = responseId
+        }
+        return signContents(oidcResponseClaims, responder)
+    }
+
+    private fun createAttestationsAndPresentationSubmission(
+        requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
+        presentationResponse: PresentationResponse
+    ): Pair<AttestationClaimModel, PresentationSubmission> {
         val attestationResponse = this.createAttestationClaimModel(
             requestedVchPresentationSubmissionMap,
             presentationResponse.request.entityIdentifier,
@@ -50,43 +75,7 @@ class PresentationResponseFormatter @Inject constructor(
                 )
             }
         val credentialPresentationSubmission = PresentationSubmission(credentialPresentationSubmissionDescriptors)
-        return createAndSignOidcResponseContent(
-            presentationResponse,
-            issuedTime,
-            expiryTime,
-            responseId,
-            attestationResponse,
-            credentialPresentationSubmission
-        )
-    }
-
-    private fun createAndSignOidcResponseContent(
-        presentationResponse: PresentationResponse,
-        issuedTime: Long,
-        expiryTime: Long,
-        responseId: String,
-        attestationResponse: AttestationClaimModel,
-        presentationSubmission: PresentationSubmission
-    ): String {
-        val responder = presentationResponse.responder
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
-        val contents = PresentationResponseClaims(presentationSubmission, attestationResponse).apply {
-            publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
-            audience = presentationResponse.audience
-            nonce = presentationResponse.request.content.nonce
-            did = responder.id
-            publicKeyJwk = key.toJWK()
-            responseCreationTime = issuedTime
-            responseExpirationTime = expiryTime
-            state = presentationResponse.request.content.state
-            this.responseId = responseId
-        }
-        return signContents(contents, responder)
-    }
-
-    private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
-        val serializedResponseContent = serializer.stringify(PresentationResponseClaims.serializer(), contents)
-        return signer.signWithIdentifier(serializedResponseContent, responder)
+        return Pair(attestationResponse, credentialPresentationSubmission)
     }
 
     private fun createAttestationClaimModel(
@@ -114,5 +103,10 @@ class PresentationResponseFormatter @Inject constructor(
                 responder
             )
         }.toMap()
+    }
+
+    private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
+        val serializedResponseContent = serializer.stringify(PresentationResponseClaims.serializer(), contents)
+        return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 }
