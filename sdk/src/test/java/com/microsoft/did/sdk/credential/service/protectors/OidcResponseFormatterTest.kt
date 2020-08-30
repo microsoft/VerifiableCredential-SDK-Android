@@ -148,8 +148,8 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with no attestations`() {
-        every { mockedIssuanceResponse.getRequestedIdTokens() } returns mutableMapOf()
-        every { mockedIssuanceResponse.getRequestedSelfAttestedClaims() } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -168,8 +168,8 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with id-token attestations`() {
-        every { mockedIssuanceResponse.getRequestedIdTokens() } returns requestedIdTokenMap
-        every { mockedIssuanceResponse.getRequestedSelfAttestedClaims() } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -189,8 +189,8 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with self attested attestations`() {
-        every { mockedIssuanceResponse.getRequestedSelfAttestedClaims() } returns requestedSelfAttestedClaimsMap
-        every { mockedIssuanceResponse.getRequestedIdTokens() } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -210,9 +210,9 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with presentation attestations`() {
-        every { mockedIssuanceResponse.getRequestedVchs() } returns mockedRequestedVchMap
-        every { mockedIssuanceResponse.getRequestedIdTokens() } returns mutableMapOf()
-        every { mockedIssuanceResponse.getRequestedSelfAttestedClaims() } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedVchMap } returns mockedRequestedVchMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mockedRequestedVchMap,
             mockedIssuanceResponse,
@@ -232,9 +232,9 @@ class OidcResponseFormatterTest {
     @Test
     fun `format issuance response with all attestations`() {
         val expectedRawToken = "rawToken2343"
-        every { mockedIssuanceResponse.getRequestedIdTokens() } returns requestedIdTokenMap
-        every { mockedIssuanceResponse.getRequestedSelfAttestedClaims() } returns requestedSelfAttestedClaimsMap
-        every { mockedIssuanceResponse.getRequestedVchs() } returns mockedRequestedVchMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
+        every { mockedIssuanceResponse.requestedVchMap } returns mockedRequestedVchMap
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedResponseAudience
         val results = issuanceResponseFormatter.formatResponse(
             mockedRequestedVchMap,
@@ -259,7 +259,7 @@ class OidcResponseFormatterTest {
         every { mockedPresentationResponse.audience } returns expectedPresentationAudience
         every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
         every { mockedPresentationResponse.request.content.state } returns mockedState
-        every { mockedPresentationResponse.getRequestedVchClaims() } returns requestedVchPresentationSubmissionMap
+        every { mockedPresentationResponse.requestedVchPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap
         every { mockedPresentationResponse.responder } returns mockedIdentifier
     }
 

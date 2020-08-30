@@ -136,7 +136,7 @@ class VerifiableCredentialManager @Inject constructor(
                 val requestedVchMap = if (exchangeForPairwiseVerifiableCredential)
                     exchangeVcsInIssuanceRequest(response).abortOnError()
                 else
-                    response.getRequestedVchs()
+                    response.requestedVchMap
                 val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
                 vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, response.responder, response.request.contract)
@@ -160,7 +160,7 @@ class VerifiableCredentialManager @Inject constructor(
                 val vcRequestedMapping = if (exchangeForPairwiseVerifiableCredential)
                     exchangeVcsInPresentationRequest(response).abortOnError()
                 else
-                    response.getRequestedVchClaims()
+                    response.requestedVchPresentationSubmissionMap
                 vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
                 createAndSaveReceipt(response).abortOnError()
                 Result.Success(Unit)
@@ -171,7 +171,7 @@ class VerifiableCredentialManager @Inject constructor(
     private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
         return runResultTry {
             val responder = response.responder
-            val verifiableCredentialHolderRequestMappings = response.getRequestedVchs()
+            val verifiableCredentialHolderRequestMappings = response.requestedVchMap
             val exchangedVcMap = verifiableCredentialHolderRequestMappings.mapValues {
                 VerifiableCredentialHolder(
                     it.value.cardId,
@@ -187,7 +187,7 @@ class VerifiableCredentialManager @Inject constructor(
     private suspend fun exchangeVcsInPresentationRequest(response: PresentationResponse): Result<RequestedVchPresentationSubmissionMap> {
         return runResultTry {
             val responder = response.responder
-            val verifiableCredentialHolderRequestMappings = response.getRequestedVchClaims()
+            val verifiableCredentialHolderRequestMappings = response.requestedVchPresentationSubmissionMap
             val exchangedVcMap = verifiableCredentialHolderRequestMappings.mapValues {
                 VerifiableCredentialHolder(
                     it.value.cardId,

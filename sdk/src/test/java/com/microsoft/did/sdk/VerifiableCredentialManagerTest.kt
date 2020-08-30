@@ -76,7 +76,7 @@ class VerifiableCredentialManagerTest {
             verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any())
             presentationResponse.createReceiptsForPresentedVerifiableCredentials(testEntityDid, testEntityName)
         }
-        presentationResponse.getRequestedVchClaims().size.let {
+        presentationResponse.requestedVchPresentationSubmissionMap.size.let {
             coVerify(exactly = it) {
                 verifiableCredentialHolderRepository.insert(any<Receipt>())
             }

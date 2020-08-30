@@ -66,7 +66,7 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse.responder
         )
         val credentialPresentationSubmissionDescriptors =
-            presentationResponse.getRequestedVchClaims().map {
+            presentationResponse.requestedVchPresentationSubmissionMap.map {
                 PresentationSubmissionDescriptor(
                     it.key.id,
                     "${Constants.CREDENTIAL_PATH_IN_RESPONSE}.${it.key.id}",

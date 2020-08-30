@@ -36,8 +36,8 @@ class IssuanceResponseFormatter @Inject constructor(
         val responseId = UUID.randomUUID().toString()
         val attestationResponse = this.createAttestationClaimModel(
             requestedVchMap,
-            issuanceResponse.getRequestedIdTokens(),
-            issuanceResponse.getRequestedSelfAttestedClaims(),
+            issuanceResponse.requestedIdTokenMap,
+            issuanceResponse.requestedSelfAttestedClaimMap,
             issuanceResponse.request.entityIdentifier,
             issuanceResponse.responder
         )
