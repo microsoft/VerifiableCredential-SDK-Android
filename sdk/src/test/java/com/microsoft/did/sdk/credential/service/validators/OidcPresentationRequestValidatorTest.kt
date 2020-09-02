@@ -6,7 +6,7 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -28,7 +28,7 @@ class OidcPresentationRequestValidatorTest {
 
     private val mockedJwtValidator: JwtValidator = mockk()
 
-    private val mockedOidcRequestContent: OidcRequestContent = mockk()
+    private val mockedOidcRequestContentRequestContent: PresentationRequestContent = mockk()
 
     private val mockedIdentifier: Identifier = mockk()
 
@@ -49,7 +49,7 @@ class OidcPresentationRequestValidatorTest {
 
     private fun setUpPresentationRequest() {
         every { mockedPresentationRequest.serializedToken } returns expectedSerializedToken
-        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContentRequestContent
     }
 
     private fun setUpIdentifier() {
@@ -60,7 +60,7 @@ class OidcPresentationRequestValidatorTest {
     private fun setUpExpiration(offsetInSecond: Long) {
         val currentTimeInSeconds: Long = Date().time / Constants.MILLISECONDS_IN_A_SECOND
         val currentTimePlusOffsetInSeconds = currentTimeInSeconds + offsetInSecond
-        every { mockedOidcRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
+        every { mockedOidcRequestContentRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
     }
 
     @Test

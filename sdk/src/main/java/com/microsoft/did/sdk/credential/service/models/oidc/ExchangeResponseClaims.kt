@@ -3,15 +3,18 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credential.service.models.attestations
+package com.microsoft.did.sdk.credential.service.models.oidc
 
 import kotlinx.serialization.Serializable
 
+/**
+ * Contents of an OpenID Self-Issued Token Response.
+ *
+ * @see [OpenID Spec](https://openid.net/specs/openid-connect-core-1_0.html#JWTRequests)
+ */
 @Serializable
-data class ClaimAttestation(
-    val claim: String,
+data class ExchangeResponseClaims(
+    val vc: String = "",
 
-    val required: Boolean = false,
-
-    var type: String = ""
-)
+    val recipient: String = ""
+): OidcResponseClaims()

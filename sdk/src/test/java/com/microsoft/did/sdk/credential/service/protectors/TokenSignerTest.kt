@@ -34,7 +34,8 @@ class TokenSignerTest {
     private val expectedKid = "#kid1426"
     private val expectedAlg = "ES256K"
     private val expectedPayload = "payload12423"
-    private val expectedHeader = mapOf("kid" to "$expectedDid$expectedKid")
+    private val expectedTypeInJwtHeader = "JWT"
+    private val expectedHeader = mapOf("kid" to "$expectedDid$expectedKid", "typ" to expectedTypeInJwtHeader)
     private val serializer = Serializer()
     private val expectedSignedPayload = "signedPayload45236"
 

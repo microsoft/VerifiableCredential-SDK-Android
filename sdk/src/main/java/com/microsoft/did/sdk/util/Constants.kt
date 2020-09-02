@@ -9,8 +9,12 @@ object Constants {
 
     // OIDC Protocol Constants
     const val SELF_ISSUED = "https://self-issued.me"
-    const val SUB_JWK = "sub_jwk"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
+
+    //Presentation Exchange Constants
+    const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"
+    const val CREDENTIAL_PRESENTATION_FORMAT = "JWT"
+    const val CREDENTIAL_PRESENTATION_ENCODING = "base64Url"
 
     //Verifiable Credential Constants
     const val CONTEXT = "@context"

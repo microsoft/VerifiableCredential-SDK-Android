@@ -2,11 +2,17 @@ package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
-import com.microsoft.did.sdk.credential.service.models.oidc.OidcResponseContent
+import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
+import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
@@ -18,9 +24,9 @@ import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNull
 
 class OidcResponseFormatterTest {
 
@@ -38,7 +44,8 @@ class OidcResponseFormatterTest {
     private val mockedIdentifier: Identifier = mockk()
     private val serializer: Serializer = Serializer()
 
-    private var formatter: OidcResponseFormatter
+    private val issuanceResponseFormatter: IssuanceResponseFormatter
+    private val presentationResponseFormatter: PresentationResponseFormatter
 
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
@@ -54,8 +61,29 @@ class OidcResponseFormatterTest {
     private val expectedIdTokenConfig = "testIdTokenConfig234"
     private val expectedCredentialType: String = "type235"
 
+    private val mockedPresentationResponse: PresentationResponse = mockk()
+    private val mockedNonce = "123456789876"
+    private val mockedState = "mockedState"
+    private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
+    private val credentialPresentationInputDescriptors = CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
+    private val requestedVchPresentationSubmissionMap = mapOf(credentialPresentationInputDescriptors to mockedVch) as RequestedVchPresentationSubmissionMap
+
+    private val mockedIssuanceResponse: IssuanceResponse = mockk()
+    private val expectedRawToken = "rawToken2343"
+    private val requestedIdTokenMap =  mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
+    private val expectedSelfAttestedClaimValue = "value5234"
+    private val requestedSelfAttestedClaimsMap = mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
+    private val mockedPresentationAttestation: PresentationAttestation = mockk()
+    private val mockedRequestedVchMap: RequestedVchMap = mutableMapOf(mockedPresentationAttestation to mockedVch)
+
     init {
-        formatter = OidcResponseFormatter(
+        issuanceResponseFormatter = IssuanceResponseFormatter(
+            mockedCryptoOperations,
+            serializer,
+            mockedVerifiablePresentationFormatter,
+            mockedTokenSigner
+        )
+        presentationResponseFormatter = PresentationResponseFormatter(
             mockedCryptoOperations,
             serializer,
             mockedVerifiablePresentationFormatter,
@@ -68,10 +96,13 @@ class OidcResponseFormatterTest {
             mockedVerifiablePresentationFormatter.createPresentation(
                 mockedVc,
                 expectedValidityInterval,
-                expectedPresentationAudience,
+                any(),
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
+        mockPresentationResponse()
+        mockIssuanceResponseWithNoAttestations()
+        mockPresentationAttestation()
     }
 
     private fun setUpGetPublicKey() {
@@ -97,181 +128,150 @@ class OidcResponseFormatterTest {
     }
 
     @Test
-    fun `format simple siop response`() {
-        val actualFormattedToken = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            expiryInSeconds = expectedExpiry
-        )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
-        assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertNull(actualTokenContents.contract)
-        assertNull(actualTokenContents.attestations)
-        assertNull(actualTokenContents.state)
-        assertNull(actualTokenContents.nonce)
-    }
-
-    @Test
     fun `format presentation response with no attestations`() {
-        val nonce = "123456789876"
-        val state = "mockedState"
-        val actualFormattedToken = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            expiryInSeconds = expectedExpiry,
-            nonce = nonce,
-            state = state
+        val actualFormattedToken = presentationResponseFormatter.formatResponse(
+            mutableMapOf(),
+            mockedPresentationResponse,
+            expectedExpiry
         )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
-        assertEquals(state, actualTokenContents.state)
-        assertEquals(nonce, actualTokenContents.nonce)
+        val actualTokenContents = serializer.parse(PresentationResponseClaims.serializer(), actualFormattedToken)
+        assertEquals(expectedPresentationAudience, actualTokenContents.audience)
+        assertEquals(mockedState, actualTokenContents.state)
+        assertEquals(mockedNonce, actualTokenContents.nonce)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertNull(actualTokenContents.contract)
-        assertNull(actualTokenContents.attestations)
-        assertNull(actualTokenContents.vc)
-        assertNull(actualTokenContents.recipient)
+        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
     }
 
     @Test
     fun `format issuance response with no attestations`() {
-        val actualFormattedToken = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            expiryInSeconds = expectedExpiry,
-            contract = expectedContract
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
+        val actualFormattedToken = issuanceResponseFormatter.formatResponse(
+            mutableMapOf(),
+            mockedIssuanceResponse,
+            expectedExpiry
         )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertNull(actualTokenContents.nonce)
-        assertNull(actualTokenContents.state)
-        assertNull(actualTokenContents.attestations)
-        assertNull(actualTokenContents.vc)
-        assertNull(actualTokenContents.recipient)
+        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
     }
 
     @Test
     fun `format issuance response with id-token attestations`() {
-        val expectedRawToken = "rawToken2343"
-        val actualFormattedToken = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            contract = expectedContract,
-            expiryInSeconds = expectedExpiry,
-            requestedIdTokenMap = mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
+        val actualFormattedToken = issuanceResponseFormatter.formatResponse(
+            mutableMapOf(),
+            mockedIssuanceResponse,
+            expectedExpiry
         )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertEquals(expectedRawToken, actualTokenContents.attestations?.idTokens?.entries?.first()?.value)
-        assertEquals(expectedIdTokenConfig, actualTokenContents.attestations?.idTokens?.entries?.first()?.key)
-        assertNull(actualTokenContents.nonce)
-        assertNull(actualTokenContents.state)
-        assertNull(actualTokenContents.attestations?.selfIssued)
-        assertNull(actualTokenContents.attestations?.presentations)
-        assertNull(actualTokenContents.vc)
-        assertNull(actualTokenContents.recipient)
+        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
+        assertEquals(expectedRawToken, actualTokenContents.attestations.idTokens.entries.first().value)
+        assertEquals(expectedIdTokenConfig, actualTokenContents.attestations.idTokens.entries.first().key)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
     }
 
     @Test
     fun `format issuance response with self attested attestations`() {
-        val claimValue = "value5234"
-        val actualFormattedToken = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            contract = expectedContract,
-            expiryInSeconds = expectedExpiry,
-            requestedSelfAttestedClaimMap = mapOf(expectedSelfAttestedField to claimValue) as RequestedSelfAttestedClaimMap
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
+        val actualFormattedToken = issuanceResponseFormatter.formatResponse(
+            mutableMapOf(),
+            mockedIssuanceResponse,
+            expectedExpiry
         )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertEquals(expectedSelfAttestedField, actualTokenContents.attestations?.selfIssued?.entries?.first()?.key)
-        assertEquals(claimValue, actualTokenContents.attestations?.selfIssued?.entries?.first()?.value)
-        assertNull(actualTokenContents.nonce)
-        assertNull(actualTokenContents.state)
-        assertNull(actualTokenContents.attestations?.idTokens)
-        assertNull(actualTokenContents.attestations?.presentations)
-        assertNull(actualTokenContents.vc)
-        assertNull(actualTokenContents.recipient)
+        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
+        assertEquals(expectedSelfAttestedField, actualTokenContents.attestations.selfIssued.entries.first().key)
+        assertEquals(expectedSelfAttestedClaimValue, actualTokenContents.attestations.selfIssued.entries.first().value)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
     }
 
     @Test
     fun `format issuance response with presentation attestations`() {
-        val mockedPresentationAttestation: PresentationAttestation = mockk()
-        val mockedRequestedVchMap: RequestedVchMap = mutableMapOf(mockedPresentationAttestation to mockedVch)
-        every { mockedPresentationAttestation.credentialType } returns expectedCredentialType
-        every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
-        val actualFormattedToken = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            presentationsAudience = expectedPresentationAudience,
-            contract = expectedContract,
-            expiryInSeconds = expectedExpiry,
-            requestedVchMap = mockedRequestedVchMap
+        every { mockedIssuanceResponse.requestedVchMap } returns mockedRequestedVchMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
+        val actualFormattedToken = issuanceResponseFormatter.formatResponse(
+            mockedRequestedVchMap,
+            mockedIssuanceResponse,
+            expectedExpiry
         )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), actualFormattedToken)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations?.presentations)
-        assertNull(actualTokenContents.nonce)
-        assertNull(actualTokenContents.state)
-        assertNull(actualTokenContents.attestations?.idTokens)
-        assertNull(actualTokenContents.attestations?.selfIssued)
-        assertNull(actualTokenContents.vc)
-        assertNull(actualTokenContents.recipient)
+        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
+        assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations.presentations)
+        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
+        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
     }
 
     @Test
     fun `format issuance response with all attestations`() {
-        val expectedSelfAttestedValue = "value42938"
         val expectedRawToken = "rawToken2343"
-        val mockedPresentationAttestation: PresentationAttestation = mockk()
-        every { mockedPresentationAttestation.credentialType } returns expectedCredentialType
-        every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
-        val mockedRequestedVchMap: RequestedVchMap = mutableMapOf(mockedPresentationAttestation to mockedVch)
-        val results = formatter.format(
-            responder = mockedIdentifier,
-            responseAudience = expectedResponseAudience,
-            contract = expectedContract,
-            presentationsAudience = expectedPresentationAudience,
-            expiryInSeconds = expectedExpiry,
-            requestedVchMap = mockedRequestedVchMap,
-            requestedSelfAttestedClaimMap = mapOf(expectedSelfAttestedField to expectedSelfAttestedValue) as RequestedSelfAttestedClaimMap,
-            requestedIdTokenMap = mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
+        every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
+        every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
+        every { mockedIssuanceResponse.requestedVchMap } returns mockedRequestedVchMap
+        every { mockedIssuanceResponse.request.entityIdentifier } returns expectedResponseAudience
+        val results = issuanceResponseFormatter.formatResponse(
+            mockedRequestedVchMap,
+            mockedIssuanceResponse,
+            expectedExpiry
         )
-        val actualTokenContents = serializer.parse(OidcResponseContent.serializer(), results)
-        assertEquals(expectedResponseAudience, actualTokenContents.aud)
+        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), results)
+        assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.sub)
-        assertEquals(expectedJsonWebKey, actualTokenContents.subJwk)
-        assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations?.presentations)
-        assertEquals(expectedSelfAttestedField, actualTokenContents.attestations?.selfIssued?.entries?.first()?.key)
-        assertEquals(expectedSelfAttestedValue, actualTokenContents.attestations?.selfIssued?.entries?.first()?.value)
-        assertEquals(expectedRawToken, actualTokenContents.attestations?.idTokens?.entries?.first()?.value)
-        assertEquals(expectedIdTokenConfig, actualTokenContents.attestations?.idTokens?.entries?.first()?.key)
-        assertNull(actualTokenContents.nonce)
-        assertNull(actualTokenContents.state)
-        assertNull(actualTokenContents.vc)
-        assertNull(actualTokenContents.recipient)
+        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
+        assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations.presentations)
+        assertEquals(expectedSelfAttestedField, actualTokenContents.attestations.selfIssued.entries.first().key)
+        assertEquals(expectedSelfAttestedClaimValue, actualTokenContents.attestations.selfIssued.entries.first().value)
+        assertEquals(expectedRawToken, actualTokenContents.attestations.idTokens.entries.first().value)
+        assertEquals(expectedIdTokenConfig, actualTokenContents.attestations.idTokens.entries.first().key)
+    }
+
+    private fun mockPresentationResponse() {
+        every { mockedPresentationResponse.request.entityIdentifier } returns expectedDid
+        every { mockedPresentationResponse.audience } returns expectedPresentationAudience
+        every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
+        every { mockedPresentationResponse.request.content.state } returns mockedState
+        every { mockedPresentationResponse.requestedVchPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap
+        every { mockedPresentationResponse.responder } returns mockedIdentifier
+    }
+
+    private fun mockIssuanceResponseWithNoAttestations() {
+        every { mockedIssuanceResponse.request.entityIdentifier } returns expectedDid
+        every { mockedIssuanceResponse.audience } returns expectedResponseAudience
+        every { mockedIssuanceResponse.request.contractUrl } returns expectedContract
+        every { mockedIssuanceResponse.responder } returns mockedIdentifier
+    }
+
+    private fun mockPresentationAttestation() {
+        every { mockedPresentationAttestation.credentialType } returns expectedCredentialType
+        every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
     }
 }
