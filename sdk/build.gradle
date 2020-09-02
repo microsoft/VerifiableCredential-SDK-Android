@@ -102,8 +102,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$com_squareup_okhttp3_okhttp_version"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$kotlin_serialization_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlin_serialization_version"
 
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_ktx_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_ktx_version"
@@ -135,7 +134,6 @@ dependencies {
     testImplementation "io.mockk:mockk:1.10.0"
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:3.11.1"
-    testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "junit:junit:4.13"
 }
 

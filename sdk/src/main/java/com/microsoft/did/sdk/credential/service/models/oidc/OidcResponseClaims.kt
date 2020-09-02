@@ -4,10 +4,12 @@ package com.microsoft.did.sdk.credential.service.models.oidc
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.util.Constants
+import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Polymorphic
 @Serializable
 abstract class OidcResponseClaims {
     @SerialName("sub")
