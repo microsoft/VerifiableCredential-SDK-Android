@@ -60,6 +60,10 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     fun getArchivedVchs() = vchDao.getArchivedVchs()
 
+    fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
+        return vchDao.queryAllActiveVchs().filter { it.verifiableCredential.contents.vc.type.contains(type) }
+    }
+
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return getAllActiveVchs().map { cardList -> filterVcsByType(cardList, type) }
     }

@@ -249,7 +249,7 @@ class VerifiableCredentialManager @Inject constructor(
         return vchRepository.getAllActiveVchs()
     }
 
-    fun queryAllVerifiableCredentials(): List<VerifiableCredentialHolder> {
+    fun queryAllActiveVerifiableCredentials(): List<VerifiableCredentialHolder> {
         return vchRepository.queryAllActiveVchs()
     }
 
@@ -262,6 +262,13 @@ class VerifiableCredentialManager @Inject constructor(
      */
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return vchRepository.getVchsByType(type)
+    }
+
+    /**
+     * Get all Verifiable Credentials Holders from the database by credential type.
+     */
+    fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
+        return vchRepository.queryVchsByType(type)
     }
 
     /**
