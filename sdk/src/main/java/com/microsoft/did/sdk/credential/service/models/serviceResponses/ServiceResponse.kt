@@ -5,7 +5,4 @@
 
 package com.microsoft.did.sdk.credential.service.models.serviceResponses
 
-import kotlinx.serialization.Polymorphic
-
-@Polymorphic
 interface ServiceResponse
