@@ -1,4 +1,7 @@
-// Copyright (c) Microsoft Corporation. All rights reserved
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
 package com.microsoft.did.sdk.credential.service.models
 
@@ -10,7 +13,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  */
 sealed class VcServiceActionRequest(val audience: String)
 
-class ExchangeRequest(val verifiableCredential: VerifiableCredential, val pairwiseDid: String) :
+class ExchangeRequest(val verifiableCredential: VerifiableCredential, val pairwiseDid: String, val requester: Identifier) :
     VcServiceActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
 
 class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier, val rpList: List<String>, val reason: String) :

@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
 import com.microsoft.did.sdk.getOrAwaitValue
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.identifier.models.Identifier
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
@@ -36,6 +36,7 @@ class ReceiptRepositoryTest {
     private val receiptRepository: ReceiptRepository
     private val mockedDatabase: SdkDatabase = mockk()
     private val mockedReceiptDao: ReceiptDao = mockk()
+    private val mockedPairwiseIdentifier: Identifier = mockk()
 
     private val expectedCredentialType1 = "type2354"
     private val expectedCredentialType2 = "type4009"
@@ -54,7 +55,7 @@ class ReceiptRepositoryTest {
         every { vcContract.input.issuer } returns issuer
         issuanceRequest = IssuanceRequest(vcContract, "testContractUrl")
         every { issuanceRequest.contract.input.credentialIssuer } returns credentialIssuer
-        issuanceResponse = IssuanceResponse(issuanceRequest)
+        issuanceResponse = IssuanceResponse(issuanceRequest, mockedPairwiseIdentifier)
         every { mockedDatabase.receiptDao() } returns mockedReceiptDao
         receiptRepository = ReceiptRepository(mockedDatabase)
     }
@@ -88,7 +89,7 @@ class ReceiptRepositoryTest {
         val presentationAttestation: PresentationAttestation = mockk()
         every { presentationAttestation.credentialType } returns expectedCredentialType1
         val receiptCreationStartTime = System.currentTimeMillis()
-        issuanceResponse.addRequestedVch(presentationAttestation, vch)
+        issuanceResponse.requestedVchMap[presentationAttestation] = vch
         val cardId = ""
         every { vch.cardId } returns cardId
         coJustRun { mockedReceiptDao.insert(any()) }
@@ -101,7 +102,7 @@ class ReceiptRepositoryTest {
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId }
+                issuanceResponse.requestedVchMap.values.map { it.cardId }
             )
             val receipts = receiptRepository.getAllReceiptsByVcId(cardId).getOrAwaitValue()
             assertThat(receipts).isNotNull
@@ -124,7 +125,7 @@ class ReceiptRepositoryTest {
         val presentationAttestation: PresentationAttestation = mockk()
         every { presentationAttestation.credentialType } returns expectedCredentialType1
         val receiptCreationStartTime = System.currentTimeMillis()
-        issuanceResponse.addRequestedVch(presentationAttestation, vch)
+        issuanceResponse.requestedVchMap[presentationAttestation] = vch
         val cardId = "testCardId"
         every { vch.cardId } returns cardId
         coJustRun { mockedReceiptDao.insert(any()) }
@@ -137,7 +138,7 @@ class ReceiptRepositoryTest {
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId }
+                issuanceResponse.requestedVchMap.values.map { it.cardId }
             )
             val receipts = receiptRepository.getAllReceiptsByVcId(cardId).getOrAwaitValue()
             assertThat(receipts).isNotNull
@@ -161,7 +162,7 @@ class ReceiptRepositoryTest {
                 issuanceResponse.request.entityIdentifier,
                 issuanceResponse.request.entityName,
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId }
+                issuanceResponse.requestedVchMap.values.map { it.cardId }
             )
         }
         coVerify(exactly = 0) {
@@ -174,13 +175,13 @@ class ReceiptRepositoryTest {
         val vch1: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation1: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation1.credentialType } returns expectedCredentialType1
-        issuanceResponse.addRequestedVch(suppliedPresentationAttestation1, vch1)
+        issuanceResponse.requestedVchMap[suppliedPresentationAttestation1] = vch1
         val vchId1 = "vchId1"
         every { vch1.cardId } returns vchId1
         val vch2: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation2: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation2.credentialType } returns expectedCredentialType1
-        issuanceResponse.addRequestedVch(suppliedPresentationAttestation2, vch2)
+        issuanceResponse.requestedVchMap[suppliedPresentationAttestation2] = vch2
         val vchId2 = "vchId2"
         every { vch2.cardId } returns vchId2
         coJustRun { mockedReceiptDao.insert(any()) }
@@ -197,7 +198,7 @@ class ReceiptRepositoryTest {
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId }
+                issuanceResponse.requestedVchMap.values.map { it.cardId }
             )
             val receipts = receiptRepository.getAllReceipts().getOrAwaitValue()
             assertThat(receipts).isNotNull
@@ -219,13 +220,13 @@ class ReceiptRepositoryTest {
         val vch1: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation1: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation1.credentialType } returns expectedCredentialType1
-        issuanceResponse.addRequestedVch(suppliedPresentationAttestation1, vch1)
+        issuanceResponse.requestedVchMap[suppliedPresentationAttestation1] = vch1
         val cardId1 = "testCardId1"
         every { vch1.cardId } returns cardId1
         val vch2: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation2: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation2.credentialType } returns expectedCredentialType2
-        issuanceResponse.addRequestedVch(suppliedPresentationAttestation2, vch2)
+        issuanceResponse.requestedVchMap[suppliedPresentationAttestation2] = vch2
         val cardId2 = "testCardId2"
         every { vch2.cardId } returns cardId2
         coJustRun { mockedReceiptDao.insert(any()) }
@@ -242,7 +243,7 @@ class ReceiptRepositoryTest {
                 testEntityDid,
                 testEntityName,
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId }
+                issuanceResponse.requestedVchMap.values.map { it.cardId }
             )
             val receipts = receiptRepository.getAllReceipts().getOrAwaitValue()
             assertThat(receipts).isNotNull
@@ -270,7 +271,7 @@ class ReceiptRepositoryTest {
         val vch: VerifiableCredentialHolder = mockk()
         val suppliedPresentationAttestation1: PresentationAttestation = mockk()
         every { suppliedPresentationAttestation1.credentialType } returns expectedCredentialType1
-        issuanceResponse.addRequestedVch(suppliedPresentationAttestation1, vch)
+        issuanceResponse.requestedVchMap[suppliedPresentationAttestation1] = vch
         val cardId = "testCardId"
         every { vch.cardId } returns cardId
         coJustRun { mockedReceiptDao.insert(any()) }
@@ -284,7 +285,7 @@ class ReceiptRepositoryTest {
                 "",
                 "",
                 ReceiptAction.Presentation,
-                issuanceResponse.getRequestedVchs().values.map { it.cardId }
+                issuanceResponse.requestedVchMap.values.map { it.cardId }
             )
             val receipts = receiptRepository.getAllReceiptsByVcId(cardId).getOrAwaitValue()
             assertThat(receipts).isNotNull

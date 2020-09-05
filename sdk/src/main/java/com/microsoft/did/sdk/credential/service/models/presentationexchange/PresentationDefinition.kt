@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credential.service.models.attestations
+package com.microsoft.did.sdk.credential.service.models.presentationexchange
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ClaimAttestation(
-    val claim: String,
-
-    val required: Boolean = false,
-
-    var type: String = ""
+data class PresentationDefinition(
+    @SerialName("input_descriptors")
+    val credentialPresentationInputDescriptors: List<CredentialPresentationInputDescriptor> = emptyList()
 )

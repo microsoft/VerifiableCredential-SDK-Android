@@ -107,6 +107,11 @@ enum class JoseConstants(val value: String) {
     /**
      * Define the JOSE protocol elements
      */
+    Type("typ"),
+
+    /**
+     * Define the JOSE protocol elements
+     */
     Enc("enc"),
 
     /**

@@ -103,7 +103,7 @@ class IdentifierRepositoryTest {
             "testIdentifierName"
         )
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
-        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(ServiceErrorException("Not found"))
+        coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(ServiceErrorException("123", "Not found", true))
         runBlocking {
             val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Failure::class.java)

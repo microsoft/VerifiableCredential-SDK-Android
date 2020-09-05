@@ -15,7 +15,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Registration(
-
     @SerialName("client_name")
     val clientName: String = "",
 

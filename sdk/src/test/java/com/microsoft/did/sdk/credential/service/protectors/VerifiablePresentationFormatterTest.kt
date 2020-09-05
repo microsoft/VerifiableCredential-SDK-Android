@@ -47,10 +47,10 @@ class VerifiablePresentationFormatterTest {
         every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
         val results = formatter.createPresentation(mockedVerifiableCredential, expectedValidityInterval, expectedAudience, mockedIdentifier)
         val contents = serializer.parse(VerifiablePresentationContent.serializer(), results)
-        assertEquals(expectedAudience, contents.aud)
-        assertEquals(expectedDid, contents.iss)
-        assertEquals(expectedPresentationContext, contents.vp.context)
-        assertEquals(expectedPresentationType, contents.vp.type)
-        assertEquals(listOf(expectedRawVerifiableCredential), contents.vp.verifiableCredential)
+        assertEquals(expectedAudience, contents.audience)
+        assertEquals(expectedDid, contents.issuerOfVp)
+        assertEquals(expectedPresentationContext, contents.verifiablePresentation.context)
+        assertEquals(expectedPresentationType, contents.verifiablePresentation.type)
+        assertEquals(listOf(expectedRawVerifiableCredential), contents.verifiablePresentation.verifiableCredential)
     }
 }
