@@ -45,7 +45,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
             val suppliedVcId = verifiableCredentialHolder.verifiableCredential.picId
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
@@ -55,7 +55,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         val verifiableCredentialHolder = createVerifiableCredentialHolder(1)
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVcs().getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(1)
@@ -74,7 +74,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder2)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVcs().getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(2)
@@ -91,7 +91,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
             Assertions.assertThatThrownBy { runBlocking { verifiableCredentialHolderDao.insert(verifiableCredentialHolder2) } }
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllVcs().getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
             if(actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(1)
@@ -108,7 +108,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
             val suppliedVcId = verifiableCredentialHolder.verifiableCredential.picId
-            val actualverifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val actualverifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(actualverifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
@@ -134,7 +134,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
             val suppliedVcId = verifiableCredentialHolder.verifiableCredential.picId
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
@@ -143,7 +143,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
     fun retrieveVchByNonExistingVcIdTest() {
         runBlocking {
             val suppliedVchId = "nonExistingId"
-            val actualReceipts = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            val actualReceipts = verifiableCredentialHolderDao.getVchById(suppliedVchId).getOrAwaitValue()
             assertThat(actualReceipts).isNull()
         }
     }
@@ -185,7 +185,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         )
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById("").getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById("").getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
         }
     }
@@ -196,10 +196,10 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             val suppliedVchId = verifiableCredentialHolder.verifiableCredential.picId
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder)
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVchId).getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder)
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder)
-            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVchId).getOrAwaitValue()
             assertThat(deletedVerifiableCredentialHolder).isNull()
         }
     }
@@ -210,7 +210,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             val suppliedVchId = verifiableCredentialHolder.verifiableCredential.picId
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder)
-            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVchId).getOrAwaitValue()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVchId).getOrAwaitValue()
             assertThat(deletedVerifiableCredentialHolder).isNull()
         }
     }
@@ -225,10 +225,10 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
             val suppliedVcId = verifiableCredentialHolder1.verifiableCredential.picId
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder1)
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder2)
-            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(deletedVerifiableCredentialHolder).isNull()
         }
     }
@@ -243,10 +243,10 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
             val suppliedVcId = verifiableCredentialHolder1.verifiableCredential.picId
-            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder1)
             verifiableCredentialHolderDao.delete(verifiableCredentialHolder2)
-            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVcById(suppliedVcId).getOrAwaitValue()
+            val deletedVerifiableCredentialHolder = verifiableCredentialHolderDao.getVchById(suppliedVcId).getOrAwaitValue()
             assertThat(deletedVerifiableCredentialHolder).isEqualTo(verifiableCredentialHolder1)
         }
     }

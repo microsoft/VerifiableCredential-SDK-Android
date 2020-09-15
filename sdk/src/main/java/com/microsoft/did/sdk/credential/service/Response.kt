@@ -5,10 +5,11 @@
 
 package com.microsoft.did.sdk.credential.service
 
-import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
+import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.identifier.models.Identifier
 
@@ -20,6 +21,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  * @param responder identifies who sent the response
  */
 sealed class Response(open val request: Request, val audience: String, open val responder: Identifier)
+
 
 class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) : Response(request, request.contract.input.credentialIssuer, responder) {
     val requestedVchMap: RequestedVchMap = mutableMapOf()

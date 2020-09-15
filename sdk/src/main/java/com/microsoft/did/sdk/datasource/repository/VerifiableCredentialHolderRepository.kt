@@ -53,36 +53,36 @@ class VerifiableCredentialHolderRepository @Inject constructor(
 
     private val receiptDao = database.receiptDao()
 
-    private val vcDao = database.verifiableCredentialDao()
-
     suspend fun insert(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.insert(verifiableCredentialHolder)
 
     suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
 
-    fun getAllVchs(): LiveData<List<VerifiableCredentialHolder>> = vchDao.getAllVcs()
+    suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.update(verifiableCredentialHolder)
 
-    fun queryAllVchs(): List<VerifiableCredentialHolder> = vchDao.queryAllVcs()
+    fun getAllActiveVchs() = vchDao.getAllActiveVchs()
+
+    fun queryAllActiveVchs() = vchDao.queryAllActiveVchs()
+
+    fun getArchivedVchs() = vchDao.getArchivedVchs()
+
+    fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
+        return vchDao.queryAllActiveVchs().filter { it.verifiableCredential.contents.vc.type.contains(type) }
+    }
 
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
-        return getAllVchs().map { cardList -> filterVcsByType(cardList, type) }
+        return getAllActiveVchs().map { cardList -> filterVcsByType(cardList, type) }
     }
 
     private fun filterVcsByType(vcList: List<VerifiableCredentialHolder>, type: String): List<VerifiableCredentialHolder> {
         return vcList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
     }
 
-    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVcById(id)
+    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVchById(id)
 
     // Receipt Methods
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
 
     suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
-
-    // Verifiable Credential Methods
-    suspend fun getAllVerifiableCredentialsById(primaryVcId: String) =
-        vcDao.getVerifiableCredentialById(primaryVcId)
-
-    suspend fun insert(verifiableCredential: VerifiableCredential) = vcDao.insert(verifiableCredential)
 
     // Card Issuance Methods.
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
@@ -137,14 +137,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         vch: VerifiableCredentialHolder,
         pairwiseIdentifier: Identifier
     ): Result<VerifiableCredential> {
-        val verifiableCredentials = this.getAllVerifiableCredentialsById(vch.cardId)
-        verifiableCredentials.forEach {
-            if (it.contents.sub == pairwiseIdentifier.id) {
-                return Result.Success(it)
-            }
-        }
-        val exchangeRequest = ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id, vch.owner)
-        return this.sendExchangeRequest(exchangeRequest, DEFAULT_EXPIRATION_IN_SECONDS)
+        return sendExchangeRequest(ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id, vch.owner), DEFAULT_EXPIRATION_IN_SECONDS)
     }
 
     private suspend fun sendExchangeRequest(request: ExchangeRequest, expiryInSeconds: Int): Result<VerifiableCredential> {
@@ -165,7 +158,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
                     result.payload,
                     request.verifiableCredential.picId
                 )
-                this.insert(verifiableCredential)
                 Result.Success(verifiableCredential)
             }
             is Result.Failure -> result
