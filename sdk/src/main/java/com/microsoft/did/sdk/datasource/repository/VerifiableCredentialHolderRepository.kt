@@ -93,7 +93,6 @@ class VerifiableCredentialHolderRepository @Inject constructor(
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
         requestedVchMap: RequestedVchMap,
-        responder: Identifier,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<VerifiableCredential> {
         val formattedResponse = issuanceResponseFormatter.formatResponse(
@@ -138,7 +137,7 @@ class VerifiableCredentialHolderRepository @Inject constructor(
         vch: VerifiableCredentialHolder,
         pairwiseIdentifier: Identifier
     ): Result<VerifiableCredential> {
-        return sendExchangeRequest(ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id), vch.owner)
+        return sendExchangeRequest(ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id, vch.owner), DEFAULT_EXPIRATION_IN_SECONDS)
     }
 
     private suspend fun sendExchangeRequest(request: ExchangeRequest, expiryInSeconds: Int): Result<VerifiableCredential> {

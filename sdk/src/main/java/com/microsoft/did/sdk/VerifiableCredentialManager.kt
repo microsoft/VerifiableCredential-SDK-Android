@@ -138,7 +138,6 @@ class VerifiableCredentialManager @Inject constructor(
                 else
                     response.requestedVchMap
                 val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
-                vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, response.responder, response.request.contract)
                 Result.Success(vch)
             }
