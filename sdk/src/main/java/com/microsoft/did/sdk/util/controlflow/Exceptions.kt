@@ -45,6 +45,8 @@ class InvalidSignatureException(message: String) : ValidatorException(message)
 
 class ExpiredTokenExpirationException(message: String) : ValidatorException(message)
 
+class MissingInputInRequestException(message: String) : ValidatorException(message)
+
 class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
 class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
