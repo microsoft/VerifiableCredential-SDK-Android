@@ -66,6 +66,7 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `valid signature is validated successfully`() {
         setUpExpiration(86400)
+        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
