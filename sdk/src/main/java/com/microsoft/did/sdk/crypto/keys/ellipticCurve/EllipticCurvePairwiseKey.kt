@@ -21,8 +21,8 @@ import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.convertToBigEndian
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
-import com.microsoft.did.sdk.util.reduceKeySeedSizeAndConvertToUnsigned
 import com.microsoft.did.sdk.util.publicToXY
+import com.microsoft.did.sdk.util.reduceKeySeedSizeAndConvertToUnsigned
 import java.nio.ByteBuffer
 import java.util.Locale
 import javax.inject.Inject

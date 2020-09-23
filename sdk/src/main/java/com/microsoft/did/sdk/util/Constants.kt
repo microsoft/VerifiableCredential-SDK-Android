@@ -20,6 +20,7 @@ object Constants {
     const val CONTEXT = "@context"
     const val VP_CONTEXT_URL = "https://www.w3.org/2018/credentials/v1"
     const val VERIFIABLE_PRESENTATION_TYPE = "VerifiablePresentation"
+    const val VERIFIABLE_CREDENTIAL_DEFAULT_TYPE = "VerifiableCredential"
 
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000

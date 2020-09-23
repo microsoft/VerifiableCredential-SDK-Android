@@ -5,6 +5,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
+import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import java.util.Date
@@ -26,6 +27,7 @@ class OidcPresentationRequestValidator @Inject constructor(
             throw InvalidSignatureException("Signature is not Valid.")
         }
         checkTokenExpiration(request.content.expirationTime)
+        checkForInputInPresentationRequest(request)
     }
 
     private fun checkTokenExpiration(expiration: Long) {
@@ -37,5 +39,10 @@ class OidcPresentationRequestValidator @Inject constructor(
     private fun getExpirationDeadlineInSeconds(expirationCheckTimeOffsetInMinutes: Int = 5): Long {
         val currentTimeInSeconds = Date().time / MILLISECONDS_IN_A_SECOND
         return currentTimeInSeconds - SECONDS_IN_A_MINUTE * expirationCheckTimeOffsetInMinutes
+    }
+
+    private fun checkForInputInPresentationRequest(request: PresentationRequest) {
+        if(request.getPresentationDefinition().credentialPresentationInputDescriptors.isNullOrEmpty())
+            throw MissingInputInRequestException("Input Descriptor is missing in presentation request.")
     }
 }

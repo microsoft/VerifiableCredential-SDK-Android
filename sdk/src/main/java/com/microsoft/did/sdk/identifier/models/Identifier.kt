@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 /**
  * Data class representing identifier to be stored in database along with its properties in identifier document
  */
-
 @Entity
 @Serializable
 data class Identifier(

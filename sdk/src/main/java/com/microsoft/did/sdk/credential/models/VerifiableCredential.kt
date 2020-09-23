@@ -13,7 +13,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class VerifiableCredential(
     // jti of the verifiable credential
-    @PrimaryKey
     val jti: String,
 
     // raw token.

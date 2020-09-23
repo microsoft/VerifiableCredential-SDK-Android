@@ -5,6 +5,8 @@
 
 package com.microsoft.did.sdk.datasource.repository
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.microsoft.did.sdk.credential.models.*
 import com.microsoft.did.sdk.credential.service.*
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
@@ -16,7 +18,6 @@ import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseF
 import com.microsoft.did.sdk.credential.service.protectors.RevocationResponseFormatter
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
-import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialDao
 import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialHolderDao
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
@@ -37,7 +38,6 @@ import kotlin.test.assertEquals
 class VerifiableCredentialHolderRepositoryTest {
 
     private val database: SdkDatabase = mockk()
-    private val mockedVcDao: VerifiableCredentialDao = mockk()
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
     private val mockedIssuanceRequest: IssuanceRequest = mockk()
     private val mockedPresentationResponse: PresentationResponse = mockk()
@@ -69,8 +69,10 @@ class VerifiableCredentialHolderRepositoryTest {
     private val expectedIdTokenContextMapping = mutableMapOf(expectedIdTokenContextField to "")
     private val expectedSelfAttestedClaimContext = mutableMapOf(expectedSelfAttestedClaimKey to "")
     private val expectedVcToken: String = "vcToken523094"
+    private val expectedExchangedVcToken: String = "ExchangedVcToken123456"
     private val expectedPrimeVcJti: String = "primeJti23723"
     private val expectedExchangedVcJti: String = "exchangeJti293859"
+    private val expectedVch: LiveData<VerifiableCredentialHolder> = MutableLiveData()
 
     private val expectedCredentialStatus: CredentialStatus
     private val expectedRevocationReceipt: RevocationReceipt
@@ -145,7 +147,10 @@ class VerifiableCredentialHolderRepositoryTest {
         coEvery { anyConstructed<SendPresentationResponseNetworkOperation>().fire() } returns Result.Success(Unit)
 
         runBlocking {
-            val actualResult = verifiableCredentialHolderRepository.sendPresentationResponse(mockedPresentationResponse, mockedRequestedPresentationSubmissionMap)
+            val actualResult = verifiableCredentialHolderRepository.sendPresentationResponse(
+                mockedPresentationResponse,
+                mockedRequestedPresentationSubmissionMap
+            )
             assertThat(actualResult).isInstanceOf(Result.Success::class.java)
             assertEquals((actualResult as Result.Success).payload, Unit)
         }
@@ -158,7 +163,10 @@ class VerifiableCredentialHolderRepositoryTest {
         coEvery { anyConstructed<SendPresentationResponseNetworkOperation>().fire() } returns Result.Failure(expectedException)
 
         runBlocking {
-            val actualResult = verifiableCredentialHolderRepository.sendPresentationResponse(mockedPresentationResponse, mockedRequestedPresentationSubmissionMap)
+            val actualResult = verifiableCredentialHolderRepository.sendPresentationResponse(
+                mockedPresentationResponse,
+                mockedRequestedPresentationSubmissionMap
+            )
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
             assertEquals((actualResult as Result.Failure).payload, expectedException)
         }
@@ -170,7 +178,8 @@ class VerifiableCredentialHolderRepositoryTest {
         mockUnwrapSignedVcTopLevelFunction(mockedExchangedVcContent)
         setUpExchangeRequest()
         setUpVpContext()
-        coEvery { verifiableCredentialHolderRepository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns emptyList()
+//        val expectedVch: LiveData<VerifiableCredentialHolder> = MutableLiveData()
+        coEvery { verifiableCredentialHolderRepository.getVchById(expectedPrimeVcJti) } returns expectedVch
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVcToken)
 
         runBlocking {
@@ -193,7 +202,7 @@ class VerifiableCredentialHolderRepositoryTest {
         mockUnwrapSignedVcTopLevelFunction(mockedExchangedVcContent)
         setUpExchangeRequest()
         setUpVpContext()
-        coEvery { verifiableCredentialHolderRepository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns emptyList()
+        coEvery { verifiableCredentialHolderRepository.getVchById(expectedPrimeVcJti) } returns expectedVch
         val expectedException = SdkException()
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Failure(
             expectedException
@@ -211,12 +220,13 @@ class VerifiableCredentialHolderRepositoryTest {
 
     @Test
     fun `get exchanged vc from database successfully`() {
-        setUpVpContext()
         setUpMockedVcContents(mockedExchangedVcContent, expectedExchangedVcJti, expectedPairwiseDid)
-        val mockedExchangedVc: VerifiableCredential = mockk()
-        every { mockedExchangedVc.contents } returns mockedExchangedVcContent
-        coEvery { verifiableCredentialHolderRepository.getAllVerifiableCredentialsById(expectedPrimeVcJti) } returns listOf(
-            mockedExchangedVc
+        mockUnwrapSignedVcTopLevelFunction(mockedExchangedVcContent)
+        setUpExchangeRequest()
+        setUpVpContext()
+        coEvery { verifiableCredentialHolderRepository.getVchById(expectedExchangedVcJti) } returns expectedVch
+        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(
+            expectedExchangedVcToken
         )
 
         runBlocking {
@@ -266,8 +276,6 @@ class VerifiableCredentialHolderRepositoryTest {
         val mockedReceiptDao: ReceiptDao = mockk()
         every { database.verifiableCredentialHolderDao() } returns mockedVchDao
         every { database.receiptDao() } returns mockedReceiptDao
-        every { database.verifiableCredentialDao() } returns mockedVcDao
-        coEvery { mockedVcDao.insert(any()) } returns Unit
     }
 
     private fun setUpFormatter() {

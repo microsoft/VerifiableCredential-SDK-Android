@@ -42,10 +42,11 @@ import java.util.Locale
 
 class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
     init {
-        Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size+1)
+        Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)
     }
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
+
     override val name: String = "ECDSA"
     override val privateKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Sign)
     override val publicKeyUsage: Set<KeyUsage> = setOf(KeyUsage.Verify)

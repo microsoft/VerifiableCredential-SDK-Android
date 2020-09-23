@@ -140,7 +140,6 @@ class VerifiableCredentialManager @Inject constructor(
                 else
                     response.requestedVchMap
                 val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
-                vchRepository.insert(verifiableCredential)
                 val vch = createVch(verifiableCredential.raw, response.responder, response.request.contract)
                 Result.Success(vch)
             }
@@ -250,12 +249,16 @@ class VerifiableCredentialManager @Inject constructor(
     /**
      * Get all Verifiable Credentials Holders from the database.
      */
-    fun getAllVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
-        return vchRepository.getAllVchs()
+    fun getAllActiveVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
+        return vchRepository.getAllActiveVchs()
     }
 
-    fun queryAllVerifiableCredentials(): List<VerifiableCredentialHolder> {
-        return vchRepository.queryAllVchs()
+    fun queryAllActiveVerifiableCredentials(): List<VerifiableCredentialHolder> {
+        return vchRepository.queryAllActiveVchs()
+    }
+
+    fun getArchivedVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
+        return vchRepository.getArchivedVchs()
     }
 
     /**
@@ -263,6 +266,13 @@ class VerifiableCredentialManager @Inject constructor(
      */
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return vchRepository.getVchsByType(type)
+    }
+
+    /**
+     * Get all Verifiable Credentials Holders from the database by credential type.
+     */
+    fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
+        return vchRepository.queryVchsByType(type)
     }
 
     /**
@@ -277,5 +287,18 @@ class VerifiableCredentialManager @Inject constructor(
      */
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> {
         return vchRepository.getVchById(id)
+    }
+
+    suspend fun setIsArchived(vch: VerifiableCredentialHolder, isArchived: Boolean): Result<VerifiableCredentialHolder> {
+        val updatedVch = VerifiableCredentialHolder(vch.cardId, vch.verifiableCredential, vch.owner, vch.displayContract, isArchived)
+        withContext(Dispatchers.IO) {
+            vchRepository.update(updatedVch)
+        }
+        return Result.Success(updatedVch)
+    }
+
+    suspend fun deleteVch(vch: VerifiableCredentialHolder): Result<Unit> {
+        vchRepository.delete(vch)
+        return Result.Success(Unit)
     }
 }

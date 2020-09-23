@@ -27,11 +27,14 @@ class PairwiseKeyException(message: String, cause: Throwable? = null) : CryptoEx
 
 class IdentifierCreatorException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) : SdkException(message, cause, retryable)
+open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
+    SdkException(message, cause, retryable)
 
-open class PresentationException(message: String, cause: Throwable? = null, retryable: Boolean = true) : AuthenticationException(message, cause, retryable)
+open class PresentationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
+    AuthenticationException(message, cause, retryable)
 
-open class IssuanceException(message: String, cause: Throwable? = null, retryable: Boolean = true) : AuthenticationException(message, cause, retryable)
+open class IssuanceException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
+    AuthenticationException(message, cause, retryable)
 
 class ExchangeException(message: String, cause: Throwable? = null) : PresentationException(message, cause)
 
@@ -42,6 +45,8 @@ open class ValidatorException(message: String, cause: Throwable? = null, retryab
 class InvalidSignatureException(message: String) : ValidatorException(message)
 
 class ExpiredTokenExpirationException(message: String) : ValidatorException(message)
+
+class MissingInputInRequestException(message: String) : ValidatorException(message)
 
 class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
