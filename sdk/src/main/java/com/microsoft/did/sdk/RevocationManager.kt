@@ -53,24 +53,4 @@ class RevocationManager @Inject constructor(
             }
         }
     }
-
-    /**
-     * Revokes all verifiable presentations which revokes access for all relying parties to do a status check on the Verifiable Credential
-     *
-     * @param verifiableCredentialHolder The VC for which access to check status is revoked
-     * @param reason Reason for revocation
-     */
-    suspend fun revokeAllVerifiablePresentations(
-        verifiableCredentialHolder: VerifiableCredentialHolder,
-        reason: String = ""
-    ): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                vchRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), reason).abortOnError()
-                //TODO: While adding advanced receipts improve on receipts for revoking all VPs
-                receiptRepository.createAndSaveReceiptsForVCs("", "", ReceiptAction.Revocation, listOf(verifiableCredentialHolder.cardId))
-                Result.Success(Unit)
-            }
-        }
-    }
 }

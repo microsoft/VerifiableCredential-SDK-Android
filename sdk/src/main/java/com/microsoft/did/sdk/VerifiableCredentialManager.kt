@@ -181,10 +181,7 @@ class VerifiableCredentialManager @Inject constructor(
         reason: String = ""
     ): Result<Unit> {
         val revocationManager = RevocationManager(vchRepository, receiptRepository)
-        return if (rpDidToNameMap.isEmpty())
-            revocationManager.revokeAllVerifiablePresentations(verifiableCredentialHolder, reason)
-        else
-            revocationManager.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
+        return revocationManager.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
     }
 
     private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
