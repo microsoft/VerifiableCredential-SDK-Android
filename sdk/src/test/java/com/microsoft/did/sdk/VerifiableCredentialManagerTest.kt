@@ -19,6 +19,7 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
@@ -93,6 +94,7 @@ class VerifiableCredentialManagerTest {
         every { presentationResponse.request.entityIdentifier } returns testEntityDid
         every { presentationResponse.request.entityName } returns testEntityName
         coEvery { verifiableCredentialHolderRepository.sendPresentationResponse(any(), any(), any()) } returns Result.Success(Unit)
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
             val presentationResult = cardManager.sendPresentationResponse(presentationResponse)

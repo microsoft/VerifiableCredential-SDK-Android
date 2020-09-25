@@ -168,7 +168,7 @@ class VerifiableCredentialManager @Inject constructor(
                     response.request.entityIdentifier,
                     response.request.entityName,
                     ReceiptAction.Presentation,
-                    response.requestedVchPresentationSubmissionMap.values.map { it.cardId }
+                    vcRequestedMapping.values.map { it.cardId }
                 )
                 Result.Success(Unit)
             }
@@ -176,10 +176,10 @@ class VerifiableCredentialManager @Inject constructor(
     }
 
     /**
-     * Revokes a verifiable presentation which revokes access for specific relying party/parties or all relying parties to do a status check on the Verifiable Credential
+     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential
      *
      * @param verifiableCredentialHolder The VC for which access to check status is revoked
-     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If map is empty, all verifiable presentations are revoked
+     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked.
      * @param reason Reason for revocation
      */
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
@@ -313,6 +313,10 @@ class VerifiableCredentialManager @Inject constructor(
         return Result.Success(Unit)
     }
 
+    /**
+     * Retrieves RPs to whom VC has been presented
+     * @param vcId id of VC for which RPs presented to is retrieved
+     */
     fun getRpsFromPresentationsOfVc(vcId: String): RpDidToNameMap {
         val receiptsOfVc = queryReceiptByVcId(vcId)
         val receiptsForPresentations = receiptsOfVc.filter { it.action == ReceiptAction.Presentation }

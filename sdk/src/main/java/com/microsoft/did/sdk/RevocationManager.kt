@@ -27,7 +27,7 @@ class RevocationManager @Inject constructor(
 ) {
 
     /**
-     * Revokes verifiable presentation(s) which revokes access for specific relying party/parties to do a status check on the Verifiable Credential
+     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential
      *
      * @param verifiableCredentialHolder The VC for which access to check status is revoked
      * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked
