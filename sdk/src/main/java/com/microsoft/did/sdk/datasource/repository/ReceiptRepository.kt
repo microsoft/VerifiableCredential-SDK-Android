@@ -21,6 +21,8 @@ class ReceiptRepository @Inject constructor(database: SdkDatabase) {
 
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
 
+    fun queryAllReceiptsByVcId(vcId: String): List<Receipt> = receiptDao.queryAllReceiptsByVcId(vcId)
+
     fun getAllReceipts(): LiveData<List<Receipt>> = receiptDao.getAllReceipts()
 
     suspend fun createAndSaveReceiptsForVCs(

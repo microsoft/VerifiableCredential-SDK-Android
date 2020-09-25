@@ -287,6 +287,13 @@ class VerifiableCredentialManager @Inject constructor(
     }
 
     /**
+     * Get receipts by verifiable credential id from the database.
+     */
+    private fun queryReceiptByVcId(vcId: String): List<Receipt> {
+        return receiptRepository.queryAllReceiptsByVcId(vcId)
+    }
+
+    /**
      * Get a Verifiable Credential by id from the database.
      */
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> {
@@ -304,5 +311,11 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun deleteVch(vch: VerifiableCredentialHolder): Result<Unit> {
         vchRepository.delete(vch)
         return Result.Success(Unit)
+    }
+
+    fun getRpsFromPresentationsOfVc(vcId: String): RpDidToNameMap {
+        val receiptsOfVc = queryReceiptByVcId(vcId)
+        val receiptsForPresentations = receiptsOfVc.filter { it.action == ReceiptAction.Presentation }
+        return receiptsForPresentations.map { it.entityIdentifier to it.entityName }.toMap()
     }
 }
