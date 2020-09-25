@@ -32,9 +32,6 @@ object Constants {
     const val DEEP_LINK_SCHEME = "openid"
     const val DEEP_LINK_HOST = "vc"
 
-    //Verifiable Presentation Revocation Constants
-    const val RELYING_PARTY_LIST = "rp"
-
     //Identifier Constants
     const val MASTER_IDENTIFIER_NAME = "did.identifier"
     const val METHOD_NAME = "ion"

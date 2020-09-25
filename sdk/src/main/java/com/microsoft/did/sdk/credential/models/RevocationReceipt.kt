@@ -5,7 +5,6 @@
 
 package com.microsoft.did.sdk.credential.models
 
-import com.microsoft.did.sdk.util.Constants.RELYING_PARTY_LIST
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -19,6 +18,6 @@ data class RevocationReceipt(
     @SerialName("iat")
     val issuedTime: Long
 ) {
-    @SerialName(RELYING_PARTY_LIST)
+    @SerialName("rp")
     val relyingPartyList: Array<String>? = null
 }
