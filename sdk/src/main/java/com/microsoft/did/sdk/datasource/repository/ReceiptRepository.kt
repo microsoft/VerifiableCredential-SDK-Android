@@ -9,7 +9,6 @@ import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.util.controlflow.Result
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -42,7 +41,7 @@ class ReceiptRepository @Inject constructor(database: SdkDatabase) {
     ): List<Receipt> {
         val receiptList = mutableListOf<Receipt>()
         vcIds.forEach {
-            val receipt = Receipt(receiptAction, it, entityDid, entityName)
+            val receipt = Receipt(receiptAction, entityDid, entityName, it)
             receiptList.add(receipt)
         }
         return receiptList

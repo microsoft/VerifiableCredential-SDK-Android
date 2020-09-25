@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
@@ -163,6 +164,12 @@ class VerifiableCredentialManager @Inject constructor(
                 else
                     response.requestedVchPresentationSubmissionMap
                 vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
+                receiptRepository.createAndSaveReceiptsForVCs(
+                    response.request.entityIdentifier,
+                    response.request.entityName,
+                    ReceiptAction.Presentation,
+                    response.requestedVchPresentationSubmissionMap.values.map { it.cardId }
+                )
                 Result.Success(Unit)
             }
         }

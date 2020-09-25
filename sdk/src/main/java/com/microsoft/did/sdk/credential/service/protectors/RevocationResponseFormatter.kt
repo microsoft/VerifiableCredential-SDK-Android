@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.serializer.Serializer
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,7 +29,7 @@ class RevocationResponseFormatter @Inject constructor(
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responder = revocationRequest.owner
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
-
+        val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {
                 publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
