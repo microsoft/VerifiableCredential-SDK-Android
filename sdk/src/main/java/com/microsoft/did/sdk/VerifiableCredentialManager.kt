@@ -46,7 +46,8 @@ class VerifiableCredentialManager @Inject constructor(
     private val vchRepository: VerifiableCredentialHolderRepository,
     private val receiptRepository: ReceiptRepository,
     private val serializer: Serializer,
-    private val presentationRequestValidator: PresentationRequestValidator
+    private val presentationRequestValidator: PresentationRequestValidator,
+    private val revocationManager: RevocationManager
 ) {
 
     /**
@@ -176,10 +177,11 @@ class VerifiableCredentialManager @Inject constructor(
     }
 
     /**
-     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential
+     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
+     * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
      *
      * @param verifiableCredentialHolder The VC for which access to check status is revoked
-     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked.
+     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
      * @param reason Reason for revocation
      */
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
@@ -187,8 +189,7 @@ class VerifiableCredentialManager @Inject constructor(
         rpDidToNameMap: RpDidToNameMap,
         reason: String = ""
     ): Result<Unit> {
-        val revocationManager = RevocationManager(vchRepository, receiptRepository)
-        return revocationManager.revokeVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
+        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
     }
 
     private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
