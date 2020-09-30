@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAt
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.entities.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
@@ -115,7 +115,7 @@ class ResponseTest {
         assertThat(receipt.vcId).isEqualTo("")
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
-        assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.action).isEqualTo(com.microsoft.did.entities.receipts.ReceiptAction.Presentation)
         assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
@@ -134,7 +134,7 @@ class ResponseTest {
         assertThat(receipt.vcId).isEqualTo(cardId)
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
-        assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.action).isEqualTo(com.microsoft.did.entities.receipts.ReceiptAction.Presentation)
         assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
@@ -165,7 +165,7 @@ class ResponseTest {
         assertThat(receipt.vcId).isEqualTo(vchId1)
         assertThat(receipt.entityName).isEqualTo(entityName)
         assertThat(receipt.entityIdentifier).isEqualTo(entityDid)
-        assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.action).isEqualTo(com.microsoft.did.entities.receipts.ReceiptAction.Presentation)
         assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 
@@ -189,12 +189,12 @@ class ResponseTest {
         assertThat(receipt1.vcId).isEqualTo(cardId1)
         assertThat(receipt1.entityName).isEqualTo(entityName)
         assertThat(receipt1.entityIdentifier).isEqualTo(entityDid)
-        assertThat(receipt1.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt1.action).isEqualTo(com.microsoft.did.entities.receipts.ReceiptAction.Presentation)
         val receipt2 = receipts.last()
         assertThat(receipt2.vcId).isEqualTo(cardId2)
         assertThat(receipt2.entityName).isEqualTo(entityName)
         assertThat(receipt2.entityIdentifier).isEqualTo(entityDid)
-        assertThat(receipt2.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt2.action).isEqualTo(com.microsoft.did.entities.receipts.ReceiptAction.Presentation)
         assertThat(receipt1.activityDate).isLessThanOrEqualTo(receipt2.activityDate)
         assertThat(receipt1.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
@@ -214,7 +214,7 @@ class ResponseTest {
         assertThat(receipt.vcId).isEqualTo(cardId)
         assertThat(receipt.entityName).isEqualTo("")
         assertThat(receipt.entityIdentifier).isEqualTo("")
-        assertThat(receipt.action).isEqualTo(ReceiptAction.Presentation)
+        assertThat(receipt.action).isEqualTo(com.microsoft.did.entities.receipts.ReceiptAction.Presentation)
         assertThat(receipt.activityDate).isGreaterThanOrEqualTo(receiptCreationStartTime)
     }
 }

@@ -6,8 +6,8 @@ import android.content.Context
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.entities.receipts.Receipt
+import com.microsoft.did.entities.receipts.ReceiptAction
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
 import com.microsoft.did.sdk.datasource.repository.getOrAwaitValue
@@ -90,9 +90,9 @@ class ReceiptDaoInstrumentedTest {
 
     @Test
     fun insertReceiptWithEmptyVcIdTest() {
-        val suppliedReceipt = Receipt(
+        val suppliedReceipt = com.microsoft.did.entities.receipts.Receipt(
             id = 1,
-            action = ReceiptAction.Presentation,
+            action = com.microsoft.did.entities.receipts.ReceiptAction.Presentation,
             entityIdentifier = "did:ion:test:testEntityDid",
             activityDate = 123445,
             entityName = "testEntityName",
@@ -119,9 +119,9 @@ class ReceiptDaoInstrumentedTest {
 
     @Test
     fun insertReceiptWithEmptyValuesTest() {
-        val suppliedReceipt = Receipt(
+        val suppliedReceipt = com.microsoft.did.entities.receipts.Receipt(
             id = 1,
-            action = ReceiptAction.Presentation,
+            action = com.microsoft.did.entities.receipts.ReceiptAction.Presentation,
             entityIdentifier = "",
             activityDate = 0,
             entityName = "",
@@ -191,10 +191,10 @@ class ReceiptDaoInstrumentedTest {
         sdkDatabase.close()
     }
 
-    private fun createReceipt(id: Int): Receipt {
-        return Receipt(
+    private fun createReceipt(id: Int): com.microsoft.did.entities.receipts.Receipt {
+        return com.microsoft.did.entities.receipts.Receipt(
             id = id,
-            action = ReceiptAction.Presentation,
+            action = com.microsoft.did.entities.receipts.ReceiptAction.Presentation,
             entityIdentifier = "did:ion:test:testEntityDid",
             activityDate = 123445,
             entityName = "testEntityName",
@@ -202,9 +202,9 @@ class ReceiptDaoInstrumentedTest {
         )
     }
 
-    private fun createReceiptWithNoId(id:Int): Receipt {
-        return Receipt(
-            action = ReceiptAction.Presentation,
+    private fun createReceiptWithNoId(id:Int): com.microsoft.did.entities.receipts.Receipt {
+        return com.microsoft.did.entities.receipts.Receipt(
+            action = com.microsoft.did.entities.receipts.ReceiptAction.Presentation,
             entityIdentifier = "did:ion:test:testEntityDid$id",
             activityDate = 123445,
             entityName = "testEntityName$id",

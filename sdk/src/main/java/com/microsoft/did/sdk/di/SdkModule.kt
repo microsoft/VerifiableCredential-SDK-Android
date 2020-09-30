@@ -112,8 +112,7 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
-        return Room.databaseBuilder(context, SdkDatabase::class.java, "VerifiableCredential-db")
-            .addMigrations(DbMigrations.MIGRATION_2_3)
+        return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
             .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
             .build()
     }

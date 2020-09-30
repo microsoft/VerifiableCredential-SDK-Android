@@ -6,10 +6,9 @@
 package com.microsoft.did.sdk
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.entities.receipts.Receipt
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
@@ -20,11 +19,10 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
+import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -41,7 +39,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class VerifiableCredentialManager @Inject constructor(
-    private val vchRepository: VerifiableCredentialHolderRepository,
+    private val vchRepository: VerifiableCredentialRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator
 ) {
@@ -113,14 +111,6 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    fun createIssuanceResponse(request: IssuanceRequest, responder: Identifier): IssuanceResponse {
-        return IssuanceResponse(request, responder)
-    }
-
-    fun createPresentationResponse(request: PresentationRequest, responder: Identifier): PresentationResponse {
-        return PresentationResponse(request, responder)
-    }
-
     /**
      * Send an Issuance Response signed by a responder Identifier.
      *
@@ -130,7 +120,7 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
         exchangeForPairwiseVerifiableCredential: Boolean = true
-    ): Result<VerifiableCredentialHolder> {
+    ): Result<VerifiableCredential> {
         return withContext(Dispatchers.IO) {
             runResultTry {
                 val requestedVchMap = if (exchangeForPairwiseVerifiableCredential)
@@ -138,8 +128,7 @@ class VerifiableCredentialManager @Inject constructor(
                 else
                     response.requestedVchMap
                 val verifiableCredential = vchRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
-                val vch = createVch(verifiableCredential.raw, response.responder, response.request.contract)
-                Result.Success(vch)
+                Result.Success(verifiableCredential)
             }
         }
     }
@@ -208,100 +197,5 @@ class VerifiableCredentialManager @Inject constructor(
             receipts.forEach { saveReceipt(it).abortOnError() }
             Result.Success(Unit)
         }
-    }
-
-    /**
-     * Saves a Verifiable Credential Holder to the database
-     */
-    suspend fun saveVch(verifiableCredentialHolder: VerifiableCredentialHolder): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                vchRepository.insert(verifiableCredentialHolder)
-                Result.Success(Unit)
-            }
-        }
-    }
-
-    private fun createVch(
-        signedVerifiableCredential: String,
-        owner: Identifier,
-        contract: VerifiableCredentialContract
-    ): VerifiableCredentialHolder {
-        val contents = unwrapSignedVerifiableCredential(signedVerifiableCredential, serializer)
-        val verifiableCredential = VerifiableCredential(contents.jti, signedVerifiableCredential, contents, contents.jti)
-        return VerifiableCredentialHolder(
-            contents.jti,
-            verifiableCredential,
-            owner,
-            contract.display
-        )
-    }
-
-    /**
-     * Get all Verifiable Credentials Holders from the database.
-     */
-    fun getAllActiveVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
-        return vchRepository.getAllActiveVchs()
-    }
-
-    fun queryAllActiveVerifiableCredentials(): List<VerifiableCredentialHolder> {
-        return vchRepository.queryAllActiveVchs()
-    }
-
-    fun getArchivedVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
-        return vchRepository.getArchivedVchs()
-    }
-
-    /**
-     * Get all Verifiable Credentials Holders from the database by credential type.
-     */
-    fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
-        return vchRepository.getVchsByType(type)
-    }
-
-    /**
-     * Get all Verifiable Credentials Holders from the database by credential type.
-     */
-    fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
-        return vchRepository.queryVchsByType(type)
-    }
-
-    /**
-     * Get receipts by verifiable credential id from the database.
-     */
-    fun getReceiptByVcId(vcId: String): LiveData<List<Receipt>> {
-        return vchRepository.getAllReceiptsByVcId(vcId)
-    }
-
-    /**
-     * Get receipts by verifiable credential id from the database.
-     */
-    private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                vchRepository.insert(receipt)
-                Result.Success(Unit)
-            }
-        }
-    }
-
-    /**
-     * Get a Verifiable Credential by id from the database.
-     */
-    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> {
-        return vchRepository.getVchById(id)
-    }
-
-    suspend fun setIsArchived(vch: VerifiableCredentialHolder, isArchived: Boolean): Result<VerifiableCredentialHolder> {
-        val updatedVch = VerifiableCredentialHolder(vch.cardId, vch.verifiableCredential, vch.owner, vch.displayContract, isArchived)
-        withContext(Dispatchers.IO) {
-            vchRepository.update(updatedVch)
-        }
-        return Result.Success(updatedVch)
-    }
-
-    suspend fun deleteVch(vch: VerifiableCredentialHolder): Result<Unit> {
-        vchRepository.delete(vch)
-        return Result.Success(Unit)
     }
 }

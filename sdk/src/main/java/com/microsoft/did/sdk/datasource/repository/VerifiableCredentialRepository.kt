@@ -5,11 +5,8 @@
 
 package com.microsoft.did.sdk.datasource.repository
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
@@ -18,7 +15,6 @@ import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
-import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
@@ -33,57 +29,14 @@ import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Repository is an abstraction layer that is consumed by business logic and abstracts away the various data sources
- * that an app can have. In the common case there are two data sources: network and database. The repository decides
- * where to get this data, how and when to cache it, how to handle issues etc. so that the business logic will only
- * ever care to get the object it wants.
- */
 @Singleton
-class VerifiableCredentialHolderRepository @Inject constructor(
-    database: SdkDatabase,
+class VerifiableCredentialRepository @Inject constructor(
     private val apiProvider: ApiProvider,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val presentationResponseFormatter: PresentationResponseFormatter,
     private val exchangeResponseFormatter: ExchangeResponseFormatter,
     private val serializer: Serializer
 ) {
-
-    private val vchDao = database.verifiableCredentialHolderDao()
-
-    private val receiptDao = database.receiptDao()
-
-    suspend fun insert(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.insert(verifiableCredentialHolder)
-
-    suspend fun delete(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.delete(verifiableCredentialHolder)
-
-    suspend fun update(verifiableCredentialHolder: VerifiableCredentialHolder) = vchDao.update(verifiableCredentialHolder)
-
-    fun getAllActiveVchs() = vchDao.getAllActiveVchs()
-
-    fun queryAllActiveVchs() = vchDao.queryAllActiveVchs()
-
-    fun getArchivedVchs() = vchDao.getArchivedVchs()
-
-    fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
-        return vchDao.queryAllActiveVchs().filter { it.verifiableCredential.contents.vc.type.contains(type) }
-    }
-
-    fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
-        return getAllActiveVchs().map { cardList -> filterVcsByType(cardList, type) }
-    }
-
-    private fun filterVcsByType(vcList: List<VerifiableCredentialHolder>, type: String): List<VerifiableCredentialHolder> {
-        return vcList.filter { it.verifiableCredential.contents.vc.type.contains(type) }
-    }
-
-    fun getVchById(id: String): LiveData<VerifiableCredentialHolder> = vchDao.getVchById(id)
-
-    // Receipt Methods
-    fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>> = receiptDao.getAllReceiptsByVcId(vcId)
-
-    suspend fun insert(receipt: Receipt) = receiptDao.insert(receipt)
-
     // Card Issuance Methods.
     suspend fun getContract(url: String) = FetchContractNetworkOperation(
         url,

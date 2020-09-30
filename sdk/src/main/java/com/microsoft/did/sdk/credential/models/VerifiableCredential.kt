@@ -23,5 +23,4 @@ data class VerifiableCredential(
 
     // id of the Prime Verifiable Credential. (if prime VC, jti == cardId)
     val picId: String
-
 )

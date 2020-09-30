@@ -6,8 +6,9 @@
 package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
+import com.microsoft.did.entities.receipts.Receipt
+import com.microsoft.did.entities.receipts.ReceiptAction
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
@@ -32,18 +33,18 @@ class IssuanceResponse(override val request: IssuanceRequest, override val respo
 class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.content.redirectUrl, responder) {
     val requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf()
 
-    fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<Receipt> {
-        val receiptList = mutableListOf<Receipt>()
+    fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<com.microsoft.did.entities.receipts.Receipt> {
+        val receiptList = mutableListOf<com.microsoft.did.entities.receipts.Receipt>()
         requestedVchPresentationSubmissionMap.forEach {
-            val receipt = createReceipt(ReceiptAction.Presentation, it.value.cardId, entityDid, entityName)
+            val receipt = createReceipt(com.microsoft.did.entities.receipts.ReceiptAction.Presentation, it.value.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
         return receiptList
     }
 
-    private fun createReceipt(action: ReceiptAction, vcId: String, entityDid: String, entityName: String): Receipt {
+    private fun createReceipt(action: com.microsoft.did.entities.receipts.ReceiptAction, vcId: String, entityDid: String, entityName: String): com.microsoft.did.entities.receipts.Receipt {
         val date = System.currentTimeMillis()
-        return Receipt(
+        return com.microsoft.did.entities.receipts.Receipt(
             action = action,
             vcId = vcId,
             activityDate = date,
@@ -55,5 +56,5 @@ class PresentationResponse(override val request: PresentationRequest, override v
 
 typealias RequestedIdTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
-typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredentialHolder>
-typealias RequestedVchPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredentialHolder>
+typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredential>
+typealias RequestedVchPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>
