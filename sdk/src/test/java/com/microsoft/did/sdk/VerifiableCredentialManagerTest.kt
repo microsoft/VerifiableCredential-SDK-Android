@@ -19,7 +19,6 @@ import io.mockk.coEvery
 import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
@@ -31,8 +30,9 @@ class VerifiableCredentialManagerTest {
     private val receiptRepository: ReceiptRepository = mockk()
     private val serializer = Serializer()
     private val presentationRequestValidator: PresentationRequestValidator = mockk()
+    private val revocationManager: RevocationManager = RevocationManager(verifiableCredentialHolderRepository, receiptRepository)
     private val cardManager =
-        spyk(VerifiableCredentialManager(verifiableCredentialHolderRepository, receiptRepository, serializer, presentationRequestValidator))
+        spyk(VerifiableCredentialManager(verifiableCredentialHolderRepository, receiptRepository, serializer, presentationRequestValidator, revocationManager))
     private val issuanceRequest: IssuanceRequest
     private val verifiableCredentialHolder: VerifiableCredentialHolder = mockk()
     private val attestations: CredentialAttestations = mockk()
