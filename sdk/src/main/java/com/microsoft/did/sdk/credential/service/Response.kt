@@ -5,11 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service
 
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.entities.receipts.Receipt
-import com.microsoft.did.entities.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -25,17 +21,17 @@ sealed class Response(open val request: Request, val audience: String, open val 
 
 
 class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) : Response(request, request.contract.input.credentialIssuer, responder) {
-    val requestedVchMap: RequestedVchMap = mutableMapOf()
+    val requestedVcMap: RequestedVcMap = mutableMapOf()
     val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
     val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 }
 
 class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.content.redirectUrl, responder) {
-    val requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap = mutableMapOf()
+    val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
 
     fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<com.microsoft.did.entities.receipts.Receipt> {
         val receiptList = mutableListOf<com.microsoft.did.entities.receipts.Receipt>()
-        requestedVchPresentationSubmissionMap.forEach {
+        requestedVcPresentationSubmissionMap.forEach {
             val receipt = createReceipt(com.microsoft.did.entities.receipts.ReceiptAction.Presentation, it.value.cardId, entityDid, entityName)
             receiptList.add(receipt)
         }
@@ -56,5 +52,5 @@ class PresentationResponse(override val request: PresentationRequest, override v
 
 typealias RequestedIdTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
-typealias RequestedVchMap = MutableMap<PresentationAttestation, VerifiableCredential>
-typealias RequestedVchPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>
+typealias RequestedVcMap = MutableMap<PresentationAttestation, VerifiableCredential>
+typealias RequestedVcPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>

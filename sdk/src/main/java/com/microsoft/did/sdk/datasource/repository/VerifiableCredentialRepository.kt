@@ -6,11 +6,10 @@
 package com.microsoft.did.sdk.datasource.repository
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
-import com.microsoft.did.sdk.credential.service.RequestedVchMap
-import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
+import com.microsoft.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
@@ -45,11 +44,11 @@ class VerifiableCredentialRepository @Inject constructor(
 
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
-        requestedVchMap: RequestedVchMap,
+        requestedVcMap: RequestedVcMap,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<VerifiableCredential> {
         val formattedResponse = issuanceResponseFormatter.formatResponse(
-            requestedVchMap = requestedVchMap,
+            requestedVcMap = requestedVcMap,
             issuanceResponse = response,
             expiryInSeconds = expiryInSeconds
         )
@@ -70,11 +69,11 @@ class VerifiableCredentialRepository @Inject constructor(
 
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
-        requestedVchPresentationSubmissionMap: RequestedVchPresentationSubmissionMap,
+        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         val formattedResponse = presentationResponseFormatter.formatResponse(
-            requestedVchPresentationSubmissionMap = requestedVchPresentationSubmissionMap,
+            requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
             presentationResponse = response,
             expiryInSeconds = expiryInSeconds
         )
@@ -87,10 +86,11 @@ class VerifiableCredentialRepository @Inject constructor(
     }
 
     suspend fun getExchangedVerifiableCredential(
-        vch: VerifiableCredentialHolder,
+        verifiableCredential: VerifiableCredential,
+        masterIdentifier: Identifier,
         pairwiseIdentifier: Identifier
     ): Result<VerifiableCredential> {
-        return sendExchangeRequest(ExchangeRequest(vch.verifiableCredential, pairwiseIdentifier.id, vch.owner), DEFAULT_EXPIRATION_IN_SECONDS)
+        return sendExchangeRequest(ExchangeRequest(verifiableCredential, pairwiseIdentifier.id, masterIdentifier), DEFAULT_EXPIRATION_IN_SECONDS)
     }
 
     private suspend fun sendExchangeRequest(request: ExchangeRequest, expiryInSeconds: Int): Result<VerifiableCredential> {
