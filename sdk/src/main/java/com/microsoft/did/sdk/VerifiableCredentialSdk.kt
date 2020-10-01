@@ -30,9 +30,6 @@ object VerifiableCredentialSdk {
     @JvmStatic
     lateinit var verifiableCredentialManager: VerifiableCredentialManager
 
-    @JvmStatic
-    lateinit var identifierManager: IdentifierManager
-
     @JvmOverloads
     @JvmStatic
     fun init(
@@ -47,9 +44,7 @@ object VerifiableCredentialSdk {
             .resolverUrl(resolverUrl)
             .build()
 
-        identifierManager = sdkComponent.identifierManager()
         verifiableCredentialManager = sdkComponent.verifiableCredentialManager()
-
         SdkLog.addConsumer(logConsumer)
     }
 }

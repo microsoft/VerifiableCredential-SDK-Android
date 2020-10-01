@@ -14,6 +14,7 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
+import com.microsoft.did.sdk.credential.service.models.RpDidToNameMap
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
@@ -146,14 +147,8 @@ class VerifiableCredentialManager @Inject constructor(
                 val vcRequestedMapping = if (exchangeForPairwiseVerifiableCredential)
                     exchangeVcsInPresentationRequest(response).abortOnError()
                 else
-                    response.requestedVchPresentationSubmissionMap
-                vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
-                receiptRepository.createAndSaveReceiptsForVCs(
-                    response.request.entityIdentifier,
-                    response.request.entityName,
-                    ReceiptAction.Presentation,
-                    vcRequestedMapping.values.map { it.cardId }
-                )
+                    response.requestedVcPresentationSubmissionMap
+                vcRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
                 Result.Success(Unit)
             }
         }
@@ -168,14 +163,14 @@ class VerifiableCredentialManager @Inject constructor(
      * @param reason Reason for revocation
      */
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
-        verifiableCredentialHolder: VerifiableCredentialHolder,
+        verifiableCredential: VerifiableCredential,
         rpDidToNameMap: RpDidToNameMap,
         reason: String = ""
     ): Result<Unit> {
-        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
+        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpDidToNameMap, reason)
     }
 
-    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
+    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVcMap> {
         return runResultTry {
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val exchangedVcMap = response.requestedVcMap.mapValues {
@@ -193,15 +188,5 @@ class VerifiableCredentialManager @Inject constructor(
             }
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }
-    }
-
-    /**
-     * Retrieves RPs to whom VC has been presented
-     * @param vcId id of VC for which RPs presented to is retrieved
-     */
-    fun getRpsFromPresentationsOfVc(vcId: String): RpDidToNameMap {
-        val receiptsOfVc = queryReceiptByVcId(vcId)
-        val receiptsForPresentations = receiptsOfVc.filter { it.action == ReceiptAction.Presentation }
-        return receiptsForPresentations.map { it.entityIdentifier to it.entityName }.toMap()
     }
 }

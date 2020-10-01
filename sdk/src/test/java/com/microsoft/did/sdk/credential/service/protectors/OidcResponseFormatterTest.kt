@@ -1,13 +1,13 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
@@ -42,7 +42,6 @@ class OidcResponseFormatterTest {
     private val slot = slot<String>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
     private val mockedVc: VerifiableCredential = mockk()
-    private val mockedVch: VerifiableCredentialHolder = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val serializer: Serializer = Serializer()
 
@@ -74,7 +73,7 @@ class OidcResponseFormatterTest {
     private val mockedState = "mockedState"
     private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
     private val credentialPresentationInputDescriptors = CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
-    private val requestedVchPresentationSubmissionMap = mapOf(credentialPresentationInputDescriptors to mockedVch) as RequestedVcPresentationSubmissionMap
+    private val requestedVchPresentationSubmissionMap = mapOf(credentialPresentationInputDescriptors to mockedVc) as RequestedVcPresentationSubmissionMap
 
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
     private val expectedRawToken = "rawToken2343"
@@ -82,7 +81,7 @@ class OidcResponseFormatterTest {
     private val expectedSelfAttestedClaimValue = "value5234"
     private val requestedSelfAttestedClaimsMap = mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
-    private val mockedRequestedVcMap: RequestedVcMap = mutableMapOf(mockedPresentationAttestation to mockedVch)
+    private val mockedRequestedVcMap: RequestedVcMap = mutableMapOf(mockedPresentationAttestation to mockedVc)
 
     init {
         issuanceResponseFormatter = IssuanceResponseFormatter(
@@ -137,7 +136,6 @@ class OidcResponseFormatterTest {
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
-        every { mockedVch.verifiableCredential } returns mockedVc
     }
 
     @Test

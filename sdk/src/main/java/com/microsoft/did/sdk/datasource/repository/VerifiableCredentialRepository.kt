@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
+import com.microsoft.did.sdk.credential.service.protectors.RevocationResponseFormatter
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
@@ -91,11 +92,12 @@ class VerifiableCredentialRepository @Inject constructor(
     }
 
     suspend fun revokeVerifiablePresentation(
-        verifiableCredentialHolder: VerifiableCredentialHolder,
+        verifiableCredential: VerifiableCredential,
+        owner: Identifier,
         rpList: List<String>,
         reason: String
     ): Result<RevocationReceipt> {
-        val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, rpList, reason)
+        val revocationRequest = RevocationRequest(verifiableCredential, owner, rpList, reason)
         val formattedRevocationRequest = revocationResponseFormatter.formatResponse(revocationRequest, DEFAULT_EXPIRATION_IN_SECONDS)
         return sendRevocationRequest(revocationRequest, formattedRevocationRequest)
     }
