@@ -10,21 +10,23 @@ import androidx.lifecycle.LiveData
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.models.receipts.Receipt
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
+import com.microsoft.did.sdk.credential.service.models.RpDidToNameMap
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
-import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -42,8 +44,10 @@ import javax.inject.Singleton
 @Singleton
 class VerifiableCredentialManager @Inject constructor(
     private val vchRepository: VerifiableCredentialHolderRepository,
+    private val receiptRepository: ReceiptRepository,
     private val serializer: Serializer,
-    private val presentationRequestValidator: PresentationRequestValidator
+    private val presentationRequestValidator: PresentationRequestValidator,
+    private val revocationManager: RevocationManager
 ) {
 
     /**
@@ -161,10 +165,31 @@ class VerifiableCredentialManager @Inject constructor(
                 else
                     response.requestedVchPresentationSubmissionMap
                 vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
-                createAndSaveReceipt(response).abortOnError()
+                receiptRepository.createAndSaveReceiptsForVCs(
+                    response.request.entityIdentifier,
+                    response.request.entityName,
+                    ReceiptAction.Presentation,
+                    vcRequestedMapping.values.map { it.cardId }
+                )
                 Result.Success(Unit)
             }
         }
+    }
+
+    /**
+     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
+     * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
+     *
+     * @param verifiableCredentialHolder The VC for which access to check status is revoked
+     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
+     * @param reason Reason for revocation
+     */
+    suspend fun revokeSelectiveOrAllVerifiablePresentation(
+        verifiableCredentialHolder: VerifiableCredentialHolder,
+        rpDidToNameMap: RpDidToNameMap,
+        reason: String = ""
+    ): Result<Unit> {
+        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
     }
 
     private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
@@ -196,17 +221,6 @@ class VerifiableCredentialManager @Inject constructor(
                 )
             }
             Result.Success(exchangedVcMap as RequestedVchPresentationSubmissionMap)
-        }
-    }
-
-    private suspend fun createAndSaveReceipt(response: PresentationResponse): Result<Unit> {
-        return runResultTry {
-            val receipts = response.createReceiptsForPresentedVerifiableCredentials(
-                entityDid = response.request.entityIdentifier,
-                entityName = response.request.entityName
-            )
-            receipts.forEach { saveReceipt(it).abortOnError() }
-            Result.Success(Unit)
         }
     }
 
@@ -270,19 +284,14 @@ class VerifiableCredentialManager @Inject constructor(
      * Get receipts by verifiable credential id from the database.
      */
     fun getReceiptByVcId(vcId: String): LiveData<List<Receipt>> {
-        return vchRepository.getAllReceiptsByVcId(vcId)
+        return receiptRepository.getAllReceiptsByVcId(vcId)
     }
 
     /**
      * Get receipts by verifiable credential id from the database.
      */
-    private suspend fun saveReceipt(receipt: Receipt): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                vchRepository.insert(receipt)
-                Result.Success(Unit)
-            }
-        }
+    private fun queryReceiptByVcId(vcId: String): List<Receipt> {
+        return receiptRepository.queryAllReceiptsByVcId(vcId)
     }
 
     /**
@@ -303,5 +312,15 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun deleteVch(vch: VerifiableCredentialHolder): Result<Unit> {
         vchRepository.delete(vch)
         return Result.Success(Unit)
+    }
+
+    /**
+     * Retrieves RPs to whom VC has been presented
+     * @param vcId id of VC for which RPs presented to is retrieved
+     */
+    fun getRpsFromPresentationsOfVc(vcId: String): RpDidToNameMap {
+        val receiptsOfVc = queryReceiptByVcId(vcId)
+        val receiptsForPresentations = receiptsOfVc.filter { it.action == ReceiptAction.Presentation }
+        return receiptsForPresentations.map { it.entityIdentifier to it.entityName }.toMap()
     }
 }

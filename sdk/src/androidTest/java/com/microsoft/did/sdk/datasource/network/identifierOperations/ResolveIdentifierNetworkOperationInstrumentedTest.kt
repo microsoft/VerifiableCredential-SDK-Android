@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.repository.networking.identifierOperations
+package com.microsoft.did.sdk.datasource.network.identifierOperations
 
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.util.serializer.Serializer

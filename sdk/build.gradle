@@ -43,6 +43,13 @@ android {
 
     sourceSets {
         main.jniLibs.srcDirs = ['libs']
+        String commonTestDir = 'src/commonTest/java'
+        test {
+            java.srcDir commonTestDir
+        }
+        androidTest {
+            java.srcDir commonTestDir
+        }
     }
 
     compileOptions {
@@ -136,6 +143,7 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:3.11.1"
     testImplementation "junit:junit:4.13"
+    testImplementation "android.arch.core:core-testing:1.1.1"
 }
 
 /**
