@@ -5,12 +5,14 @@
 
 package com.microsoft.did.sdk.datasource.repository
 
+import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
@@ -19,10 +21,12 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContra
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
 import javax.inject.Inject
@@ -34,6 +38,7 @@ class VerifiableCredentialRepository @Inject constructor(
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val presentationResponseFormatter: PresentationResponseFormatter,
     private val exchangeResponseFormatter: ExchangeResponseFormatter,
+    private val revocationResponseFormatter: RevocationResponseFormatter,
     private val serializer: Serializer
 ) {
     // Card Issuance Methods.
@@ -83,6 +88,29 @@ class VerifiableCredentialRepository @Inject constructor(
             response.request.content.state,
             apiProvider
         ).fire()
+    }
+
+    suspend fun revokeVerifiablePresentation(
+        verifiableCredentialHolder: VerifiableCredentialHolder,
+        rpList: List<String>,
+        reason: String
+    ): Result<RevocationReceipt> {
+        val revocationRequest = RevocationRequest(verifiableCredentialHolder.verifiableCredential, verifiableCredentialHolder.owner, rpList, reason)
+        val formattedRevocationRequest = revocationResponseFormatter.formatResponse(revocationRequest, DEFAULT_EXPIRATION_IN_SECONDS)
+        return sendRevocationRequest(revocationRequest, formattedRevocationRequest)
+    }
+
+    suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): Result<RevocationReceipt> {
+        val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
+            revocationRequest.audience,
+            formattedRevocationRequest,
+            apiProvider,
+            serializer
+        ).fire()
+        return when (revocationResult) {
+            is Result.Success -> revocationResult
+            is Result.Failure -> Result.Failure(RevocationException("Unable to revoke VP"))
+        }
     }
 
     suspend fun getExchangedVerifiableCredential(

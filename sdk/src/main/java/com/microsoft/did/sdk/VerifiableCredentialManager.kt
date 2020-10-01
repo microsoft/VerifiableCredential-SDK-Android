@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.net.Uri
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
@@ -37,7 +38,8 @@ class VerifiableCredentialManager @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val vcRepository: VerifiableCredentialRepository,
     private val serializer: Serializer,
-    private val presentationRequestValidator: PresentationRequestValidator
+    private val presentationRequestValidator: PresentationRequestValidator,
+    private val revocationManager: RevocationManager
 ) {
 
     /**
@@ -144,13 +146,36 @@ class VerifiableCredentialManager @Inject constructor(
                 val vcRequestedMapping = if (exchangeForPairwiseVerifiableCredential)
                     exchangeVcsInPresentationRequest(response).abortOnError()
                 else
-                    response.requestedVcPresentationSubmissionMap
-                vcRepository.sendPresentationResponse(response, vcRequestedMapping)
+                    response.requestedVchPresentationSubmissionMap
+                vchRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
+                receiptRepository.createAndSaveReceiptsForVCs(
+                    response.request.entityIdentifier,
+                    response.request.entityName,
+                    ReceiptAction.Presentation,
+                    vcRequestedMapping.values.map { it.cardId }
+                )
+                Result.Success(Unit)
             }
         }
     }
 
-    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVcMap> {
+    /**
+     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
+     * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
+     *
+     * @param verifiableCredentialHolder The VC for which access to check status is revoked
+     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
+     * @param reason Reason for revocation
+     */
+    suspend fun revokeSelectiveOrAllVerifiablePresentation(
+        verifiableCredentialHolder: VerifiableCredentialHolder,
+        rpDidToNameMap: RpDidToNameMap,
+        reason: String = ""
+    ): Result<Unit> {
+        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, rpDidToNameMap, reason)
+    }
+
+    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVchMap> {
         return runResultTry {
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val exchangedVcMap = response.requestedVcMap.mapValues {
@@ -168,5 +193,15 @@ class VerifiableCredentialManager @Inject constructor(
             }
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }
+    }
+
+    /**
+     * Retrieves RPs to whom VC has been presented
+     * @param vcId id of VC for which RPs presented to is retrieved
+     */
+    fun getRpsFromPresentationsOfVc(vcId: String): RpDidToNameMap {
+        val receiptsOfVc = queryReceiptByVcId(vcId)
+        val receiptsForPresentations = receiptsOfVc.filter { it.action == ReceiptAction.Presentation }
+        return receiptsForPresentations.map { it.entityIdentifier to it.entityName }.toMap()
     }
 }

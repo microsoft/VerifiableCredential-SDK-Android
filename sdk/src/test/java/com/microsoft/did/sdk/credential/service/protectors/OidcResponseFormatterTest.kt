@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissio
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
+import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -20,6 +21,7 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
@@ -46,6 +48,7 @@ class OidcResponseFormatterTest {
 
     private val issuanceResponseFormatter: IssuanceResponseFormatter
     private val presentationResponseFormatter: PresentationResponseFormatter
+    private val revocationResponseFormatter: RevocationResponseFormatter
 
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
@@ -61,6 +64,11 @@ class OidcResponseFormatterTest {
     private val expectedIdTokenConfig = "testIdTokenConfig234"
     private val expectedCredentialType: String = "type235"
 
+    private val revocationRequest: RevocationRequest = mockk()
+    private val mockedVcRaw = "testRawVc"
+    private val expectedRevocationAudience = "audience1234"
+    private val expectedRevokedRps = listOf("did:ion:test")
+    private val expectedRevocationReason = "testing revocation"
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
     private val mockedState = "mockedState"
@@ -87,6 +95,11 @@ class OidcResponseFormatterTest {
             mockedCryptoOperations,
             serializer,
             mockedVerifiablePresentationFormatter,
+            mockedTokenSigner
+        )
+        revocationResponseFormatter = RevocationResponseFormatter(
+            mockedCryptoOperations,
+            serializer,
             mockedTokenSigner
         )
         setUpGetPublicKey()
@@ -273,5 +286,39 @@ class OidcResponseFormatterTest {
     private fun mockPresentationAttestation() {
         every { mockedPresentationAttestation.credentialType } returns expectedCredentialType
         every { mockedPresentationAttestation.validityInterval } returns expectedValidityInterval
+    }
+
+    @Test
+    fun `format revocation request with revoked RPs and reason for revocation`() {
+        every { revocationRequest.audience } returns expectedRevocationAudience
+        every { revocationRequest.reason } returns expectedRevocationReason
+        every { revocationRequest.rpList } returns expectedRevokedRps
+        every { revocationRequest.owner } returns mockedIdentifier
+        every { revocationRequest.verifiableCredential } returns mockedVc
+        every { mockedVc.raw } returns mockedVcRaw
+        val results = revocationResponseFormatter.formatResponse(revocationRequest, Constants.DEFAULT_EXPIRATION_IN_SECONDS)
+        val actualTokenContents = serializer.parse(RevocationResponseClaims.serializer(), results)
+        assertThat(actualTokenContents.did).isEqualTo(expectedDid)
+        assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
+        assertThat(actualTokenContents.audience).isEqualTo(expectedRevocationAudience)
+        assertThat(actualTokenContents.rpList).isEqualTo(expectedRevokedRps)
+        assertThat(actualTokenContents.reason).isEqualTo(expectedRevocationReason)
+    }
+
+    @Test
+    fun `format revocation request with no reason and RP list`() {
+        every { revocationRequest.audience } returns expectedRevocationAudience
+        every { revocationRequest.verifiableCredential } returns mockedVc
+        every { revocationRequest.owner } returns mockedIdentifier
+        every { revocationRequest.rpList } returns emptyList()
+        every { revocationRequest.reason } returns ""
+        every { mockedVc.raw } returns mockedVcRaw
+        val results = revocationResponseFormatter.formatResponse(revocationRequest, Constants.DEFAULT_EXPIRATION_IN_SECONDS)
+        val actualTokenContents = serializer.parse(RevocationResponseClaims.serializer(), results)
+        assertThat(actualTokenContents.did).isEqualTo(expectedDid)
+        assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
+        assertThat(actualTokenContents.audience).isEqualTo(expectedRevocationAudience)
+        assertThat(actualTokenContents.rpList).isEmpty()
+        assertThat(actualTokenContents.reason).isEmpty()
     }
 }

@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.resolver
+package com.microsoft.did.sdk.identifier.resolvers
 
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.ResolverException

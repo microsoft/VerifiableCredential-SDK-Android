@@ -17,5 +17,7 @@ class ApiProvider @Inject constructor(retrofit: Retrofit) {
 
     val issuanceApis: IssuanceApis = retrofit.create(IssuanceApis::class.java)
 
+    val revocationApis: RevocationApis = retrofit.create(RevocationApis::class.java)
+
     val identifierApi: IdentifierApi = retrofit.create(IdentifierApi::class.java)
 }

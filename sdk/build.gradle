@@ -10,13 +10,13 @@ jacoco {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion compile_sdk_version as Integer
+    buildToolsVersion build_tools_version
     ndkVersion ndk_version
 
     defaultConfig {
-        minSdkVersion 23
-        targetSdkVersion 29
+        minSdkVersion min_sdk_version as Integer
+        targetSdkVersion target_sdk_version as Integer
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -43,11 +43,18 @@ android {
 
     sourceSets {
         main.jniLibs.srcDirs = ['libs']
+        String commonTestDir = 'src/commonTest/java'
+        test {
+            java.srcDir commonTestDir
+        }
+        androidTest {
+            java.srcDir commonTestDir
+        }
     }
 
     compileOptions {
-        sourceCompatibility '1.8'
-        targetCompatibility '1.8'
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     testOptions {
@@ -136,6 +143,7 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:3.11.1"
     testImplementation "junit:junit:4.13"
+    testImplementation "android.arch.core:core-testing:1.1.1"
 }
 
 /**
