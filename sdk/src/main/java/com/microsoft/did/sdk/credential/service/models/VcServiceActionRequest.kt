@@ -19,8 +19,6 @@ class ExchangeRequest(val verifiableCredential: VerifiableCredential, val pairwi
 class RevocationRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier, val rpList: List<String>, val reason: String) :
     VcServiceActionRequest(verifiableCredential.contents.vc.revokeService?.id ?: "")
 
-typealias RpDidToNameMap = Map<String, String>
-
 class StatusRequest(val verifiableCredential: VerifiableCredential, val owner: Identifier) :
     VcServiceActionRequest(verifiableCredential.contents.vc.credentialStatus?.id ?: "")
 

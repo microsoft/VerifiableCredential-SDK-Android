@@ -19,38 +19,16 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  */
 sealed class Response(open val request: Request, val audience: String, open val responder: Identifier)
 
+class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) :
+    Response(request, request.contract.input.credentialIssuer, responder) {
 
-class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) : Response(request, request.contract.input.credentialIssuer, responder) {
-    val requestedVcMap: RequestedVcMap = mutableMapOf()
-    val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
-    val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
+    val requestedVcMap: MutableMap<PresentationAttestation, VerifiableCredential> = mutableMapOf()
+    val requestedIdTokenMap: MutableMap<String, String> = mutableMapOf()
+    val requestedSelfAttestedClaimMap: MutableMap<String, String> = mutableMapOf()
 }
 
-class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) : Response(request, request.content.redirectUrl, responder) {
-    val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
+class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) :
+    Response(request, request.content.redirectUrl, responder) {
 
-    fun createReceiptsForPresentedVerifiableCredentials(entityDid: String, entityName: String): List<com.microsoft.did.entities.receipts.Receipt> {
-        val receiptList = mutableListOf<com.microsoft.did.entities.receipts.Receipt>()
-        requestedVcPresentationSubmissionMap.forEach {
-            val receipt = createReceipt(com.microsoft.did.entities.receipts.ReceiptAction.Presentation, it.value.cardId, entityDid, entityName)
-            receiptList.add(receipt)
-        }
-        return receiptList
-    }
-
-    private fun createReceipt(action: com.microsoft.did.entities.receipts.ReceiptAction, vcId: String, entityDid: String, entityName: String): com.microsoft.did.entities.receipts.Receipt {
-        val date = System.currentTimeMillis()
-        return com.microsoft.did.entities.receipts.Receipt(
-            action = action,
-            vcId = vcId,
-            activityDate = date,
-            entityIdentifier = entityDid,
-            entityName = entityName
-        )
-    }
+    val requestedVcPresentationSubmissionMap: MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential> = mutableMapOf()
 }
-
-typealias RequestedIdTokenMap = MutableMap<String, String>
-typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
-typealias RequestedVcMap = MutableMap<PresentationAttestation, VerifiableCredential>
-typealias RequestedVcPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>

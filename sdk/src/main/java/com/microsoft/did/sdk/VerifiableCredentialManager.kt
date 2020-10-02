@@ -7,14 +7,12 @@ package com.microsoft.did.sdk
 
 import android.net.Uri
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.models.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
-import com.microsoft.did.sdk.credential.service.models.RpDidToNameMap
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
@@ -158,16 +156,16 @@ class VerifiableCredentialManager @Inject constructor(
      * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
      * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
      *
-     * @param verifiableCredentialHolder The VC for which access to check status is revoked
-     * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
+     * @param verifiableCredential The VC for which access to check status is revoked
+     * @param rpList DIDs of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
      * @param reason Reason for revocation
      */
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredential: VerifiableCredential,
-        rpDidToNameMap: RpDidToNameMap,
+        rpList: List<String>,
         reason: String = ""
     ): Result<Unit> {
-        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpDidToNameMap, reason)
+        return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpList, reason)
     }
 
     private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVcMap> {
