@@ -6,7 +6,6 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -21,10 +20,8 @@ import javax.inject.Singleton
 @Singleton
 class RevocationManager @Inject constructor(
     private val vcRepository: VerifiableCredentialRepository,
-    private val receiptRepository: ReceiptRepository,
     private val identifierManager: IdentifierManager
 ) {
-
 
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredential: VerifiableCredential,

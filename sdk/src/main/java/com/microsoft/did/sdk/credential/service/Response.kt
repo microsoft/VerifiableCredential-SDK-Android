@@ -21,14 +21,17 @@ sealed class Response(open val request: Request, val audience: String, open val 
 
 class IssuanceResponse(override val request: IssuanceRequest, override val responder: Identifier) :
     Response(request, request.contract.input.credentialIssuer, responder) {
-
-    val requestedVcMap: MutableMap<PresentationAttestation, VerifiableCredential> = mutableMapOf()
-    val requestedIdTokenMap: MutableMap<String, String> = mutableMapOf()
-    val requestedSelfAttestedClaimMap: MutableMap<String, String> = mutableMapOf()
+    val requestedVcMap: RequestedVcMap = mutableMapOf()
+    val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
+    val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 }
 
 class PresentationResponse(override val request: PresentationRequest, override val responder: Identifier) :
     Response(request, request.content.redirectUrl, responder) {
-
-    val requestedVcPresentationSubmissionMap: MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential> = mutableMapOf()
+    val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
 }
+
+typealias RequestedIdTokenMap = MutableMap<String, String>
+typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
+typealias RequestedVcMap = MutableMap<PresentationAttestation, VerifiableCredential>
+typealias RequestedVcPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>
