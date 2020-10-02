@@ -31,15 +31,16 @@ class PresentationResponseFormatter @Inject constructor(
     fun formatResponse(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
         presentationResponse: PresentationResponse,
+        responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responseId = UUID.randomUUID().toString()
         val (attestationResponse, credentialPresentationSubmission) = createAttestationsAndPresentationSubmission(
             requestedVcPresentationSubmissionMap,
-            presentationResponse
+            presentationResponse,
+            responder
         )
-        val responder = presentationResponse.responder
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
 
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
@@ -58,12 +59,13 @@ class PresentationResponseFormatter @Inject constructor(
 
     private fun createAttestationsAndPresentationSubmission(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
-        presentationResponse: PresentationResponse
+        presentationResponse: PresentationResponse,
+        responder: Identifier
     ): Pair<AttestationClaimModel, PresentationSubmission> {
         val attestationResponse = this.createAttestationClaimModel(
             requestedVcPresentationSubmissionMap,
             presentationResponse.request.entityIdentifier,
-            presentationResponse.responder
+            responder
         )
         val credentialPresentationSubmissionDescriptors =
             presentationResponse.requestedVcPresentationSubmissionMap.map {

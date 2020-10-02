@@ -17,6 +17,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestC
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
 import com.microsoft.did.sdk.util.controlflow.PresentationException
@@ -120,11 +121,16 @@ class VerifiableCredentialManager @Inject constructor(
     ): Result<VerifiableCredential> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val requestedVchMap = if (exchangeForPairwiseVerifiableCredential)
-                    exchangeVcsInIssuanceRequest(response).abortOnError()
-                else
-                    response.requestedVcMap
-                val verifiableCredential = vcRepository.sendIssuanceResponse(response, requestedVchMap).abortOnError()
+                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+                val verifiableCredential = if (exchangeForPairwiseVerifiableCredential) {
+                    val pairwiseIdentifier =
+                        identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
+                    val requestedVchMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
+                    vcRepository.sendIssuanceResponse(response, pairwiseIdentifier, requestedVchMap).abortOnError()
+                } else {
+                    val requestedVchMap = response.requestedVcMap
+                    vcRepository.sendIssuanceResponse(response, masterIdentifier, requestedVchMap).abortOnError()
+                }
                 Result.Success(verifiableCredential)
             }
         }
@@ -142,11 +148,16 @@ class VerifiableCredentialManager @Inject constructor(
     ): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
-                val vcRequestedMapping = if (exchangeForPairwiseVerifiableCredential)
-                    exchangeVcsInPresentationRequest(response).abortOnError()
-                else
-                    response.requestedVcPresentationSubmissionMap
-                vcRepository.sendPresentationResponse(response, vcRequestedMapping).abortOnError()
+                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+                if (exchangeForPairwiseVerifiableCredential) {
+                    val pairwiseIdentifier =
+                        identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
+                    val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
+                    vcRepository.sendPresentationResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
+                } else {
+                    val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
+                    vcRepository.sendPresentationResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+                }
                 Result.Success(Unit)
             }
         }
@@ -168,21 +179,21 @@ class VerifiableCredentialManager @Inject constructor(
         return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpList, reason)
     }
 
-    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse): Result<RequestedVcMap> {
+    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse, responder: Identifier): Result<RequestedVcMap> {
         return runResultTry {
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val exchangedVcMap = response.requestedVcMap.mapValues {
-                vcRepository.getExchangedVerifiableCredential(it.value, response.responder, masterIdentifier).abortOnError()
+                vcRepository.getExchangedVerifiableCredential(it.value, responder, masterIdentifier).abortOnError()
             }
             Result.Success(exchangedVcMap as RequestedVcMap)
         }
     }
 
-    private suspend fun exchangeVcsInPresentationRequest(response: PresentationResponse): Result<RequestedVcPresentationSubmissionMap> {
+    private suspend fun exchangeVcsInPresentationRequest(response: PresentationResponse, responder: Identifier): Result<RequestedVcPresentationSubmissionMap> {
         return runResultTry {
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val exchangedVcMap = response.requestedVcPresentationSubmissionMap.mapValues {
-                vcRepository.getExchangedVerifiableCredential(it.value, response.responder, masterIdentifier).abortOnError()
+                vcRepository.getExchangedVerifiableCredential(it.value, responder, masterIdentifier).abortOnError()
             }
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }

@@ -50,12 +50,14 @@ class VerifiableCredentialRepository @Inject constructor(
 
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
+        responder: Identifier,
         requestedVcMap: RequestedVcMap,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<VerifiableCredential> {
         val formattedResponse = issuanceResponseFormatter.formatResponse(
             requestedVcMap = requestedVcMap,
             issuanceResponse = response,
+            responder = responder,
             expiryInSeconds = expiryInSeconds
         )
         val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
@@ -75,12 +77,14 @@ class VerifiableCredentialRepository @Inject constructor(
 
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
+        responder: Identifier,
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
         val formattedResponse = presentationResponseFormatter.formatResponse(
             requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
             presentationResponse = response,
+            responder = responder,
             expiryInSeconds = expiryInSeconds
         )
         return SendPresentationResponseNetworkOperation(

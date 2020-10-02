@@ -30,6 +30,7 @@ class IssuanceResponseFormatter @Inject constructor(
     fun formatResponse(
         requestedVcMap: RequestedVcMap = mutableMapOf(),
         issuanceResponse: IssuanceResponse,
+        responder: Identifier,
         expiryInSeconds: Int
     ): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
@@ -39,19 +40,19 @@ class IssuanceResponseFormatter @Inject constructor(
             issuanceResponse.requestedIdTokenMap,
             issuanceResponse.requestedSelfAttestedClaimMap,
             issuanceResponse.request.entityIdentifier,
-            issuanceResponse.responder
+            responder
         )
-        return createAndSignOidcResponseContent(issuanceResponse, issuedTime, expiryTime, responseId, attestationResponse)
+        return createAndSignOidcResponseContent(issuanceResponse, responder, issuedTime, expiryTime, responseId, attestationResponse)
     }
 
     private fun createAndSignOidcResponseContent(
         issuanceResponse: IssuanceResponse,
+        responder: Identifier,
         issuedTime: Long,
         expiryTime: Long,
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val responder = issuanceResponse.responder
         val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
             publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
