@@ -121,10 +121,10 @@ class VerifiableCredentialRepository @Inject constructor(
 
     suspend fun getExchangedVerifiableCredential(
         verifiableCredential: VerifiableCredential,
-        masterIdentifier: Identifier,
+        owner: Identifier,
         pairwiseIdentifier: Identifier
     ): Result<VerifiableCredential> {
-        return sendExchangeRequest(ExchangeRequest(verifiableCredential, pairwiseIdentifier.id, masterIdentifier), DEFAULT_EXPIRATION_IN_SECONDS)
+        return sendExchangeRequest(ExchangeRequest(verifiableCredential, pairwiseIdentifier.id, owner), DEFAULT_EXPIRATION_IN_SECONDS)
     }
 
     private suspend fun sendExchangeRequest(request: ExchangeRequest, expiryInSeconds: Int): Result<VerifiableCredential> {

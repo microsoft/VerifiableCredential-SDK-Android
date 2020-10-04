@@ -55,7 +55,17 @@ class IdentifierManager @Inject constructor(
             // peer id for master Identifier will be method name for now.
             val identifier = identifierCreator.create(METHOD_NAME).abortOnError()
             SdkLog.i("Creating Identifier: $identifier")
-            saveIdentifier(identifier)
+            identifierRepository.insert(identifier)
+            Result.Success(identifier)
+        }
+    }
+
+    suspend fun getIdentifierById(id: String): Result<Identifier> {
+        val identifier = identifierRepository.queryByIdentifier(id)
+        return if (identifier != null) {
+            Result.Success(identifier)
+        } else {
+            Result.Failure(RepositoryException("Identifier doesn't exist in db."))
         }
     }
 
@@ -65,7 +75,8 @@ class IdentifierManager @Inject constructor(
                 when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
                     null -> {
                         val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
-                        saveIdentifier(registeredIdentifier)
+                        identifierRepository.insert(registeredIdentifier)
+                        Result.Success(registeredIdentifier)
                     }
                     else -> Result.Success(pairwiseIdentifier)
                 }
@@ -76,14 +87,5 @@ class IdentifierManager @Inject constructor(
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
-    }
-
-    private fun saveIdentifier(identifier: Identifier): Result<Identifier> {
-        return try {
-            identifierRepository.insert(identifier)
-            Result.Success(identifier)
-        } catch (exception: Exception) {
-            throw RepositoryException("Unable to save identifier in repository", exception)
-        }
     }
 }
