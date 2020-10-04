@@ -125,11 +125,11 @@ class VerifiableCredentialManager @Inject constructor(
                 val verifiableCredential = if (exchangeForPairwiseVerifiableCredential) {
                     val pairwiseIdentifier =
                         identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
-                    val requestedVchMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
-                    vcRepository.sendIssuanceResponse(response, pairwiseIdentifier, requestedVchMap).abortOnError()
+                    val requestedVcMap = exchangeVcsInIssuanceRequest(response, masterIdentifier, pairwiseIdentifier).abortOnError()
+                    vcRepository.sendIssuanceResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
                 } else {
-                    val requestedVchMap = response.requestedVcMap
-                    vcRepository.sendIssuanceResponse(response, masterIdentifier, requestedVchMap).abortOnError()
+                    val requestedVcMap = response.requestedVcMap
+                    vcRepository.sendIssuanceResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 }
                 Result.Success(verifiableCredential)
             }
@@ -152,7 +152,7 @@ class VerifiableCredentialManager @Inject constructor(
                 if (exchangeForPairwiseVerifiableCredential) {
                     val pairwiseIdentifier =
                         identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
-                    val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
+                    val vcRequestedMapping = exchangeVcsInPresentationRequest(response, masterIdentifier, pairwiseIdentifier).abortOnError()
                     vcRepository.sendPresentationResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
                 } else {
                     val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
@@ -179,21 +179,27 @@ class VerifiableCredentialManager @Inject constructor(
         return revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpList, reason)
     }
 
-    private suspend fun exchangeVcsInIssuanceRequest(response: IssuanceResponse, responder: Identifier): Result<RequestedVcMap> {
+    private suspend fun exchangeVcsInIssuanceRequest(
+        response: IssuanceResponse,
+        masterIdentifier: Identifier,
+        pairwiseIdentifier: Identifier
+    ): Result<RequestedVcMap> {
         return runResultTry {
-            val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val exchangedVcMap = response.requestedVcMap.mapValues {
-                vcRepository.getExchangedVerifiableCredential(it.value, responder, masterIdentifier).abortOnError()
+                vcRepository.getExchangedVerifiableCredential(it.value, masterIdentifier, pairwiseIdentifier).abortOnError()
             }
             Result.Success(exchangedVcMap as RequestedVcMap)
         }
     }
 
-    private suspend fun exchangeVcsInPresentationRequest(response: PresentationResponse, responder: Identifier): Result<RequestedVcPresentationSubmissionMap> {
+    private suspend fun exchangeVcsInPresentationRequest(
+        response: PresentationResponse,
+        masterIdentifier: Identifier,
+        pairwiseIdentifier: Identifier
+    ): Result<RequestedVcPresentationSubmissionMap> {
         return runResultTry {
-            val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val exchangedVcMap = response.requestedVcPresentationSubmissionMap.mapValues {
-                vcRepository.getExchangedVerifiableCredential(it.value, responder, masterIdentifier).abortOnError()
+                vcRepository.getExchangedVerifiableCredential(it.value, masterIdentifier, pairwiseIdentifier).abortOnError()
             }
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }
