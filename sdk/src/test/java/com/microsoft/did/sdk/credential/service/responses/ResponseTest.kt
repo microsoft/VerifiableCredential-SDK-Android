@@ -2,13 +2,13 @@
 
 package com.microsoft.did.sdk.credential.service.responses
 
+import com.microsoft.did.entities.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
-import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
-import com.microsoft.did.entities.receipts.ReceiptAction
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
+import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.attestations.IdTokenAttestation
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract

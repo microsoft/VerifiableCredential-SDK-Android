@@ -13,11 +13,14 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.serializer.Serializer
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.util.*
+import java.util.Date
 import kotlin.test.fail
 
 class OidcPresentationRequestValidatorTest {
@@ -70,7 +73,7 @@ class OidcPresentationRequestValidatorTest {
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
-                validator.validate(mockedPresentationRequest)
+            validator.validate(mockedPresentationRequest)
         }
     }
 

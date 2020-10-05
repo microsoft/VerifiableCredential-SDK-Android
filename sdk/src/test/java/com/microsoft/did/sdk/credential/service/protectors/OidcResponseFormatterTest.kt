@@ -72,14 +72,17 @@ class OidcResponseFormatterTest {
     private val mockedNonce = "123456789876"
     private val mockedState = "mockedState"
     private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
-    private val credentialPresentationInputDescriptors = CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
-    private val requestedVchPresentationSubmissionMap = mapOf(credentialPresentationInputDescriptors to mockedVc) as RequestedVcPresentationSubmissionMap
+    private val credentialPresentationInputDescriptors =
+        CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
+    private val requestedVchPresentationSubmissionMap =
+        mapOf(credentialPresentationInputDescriptors to mockedVc) as RequestedVcPresentationSubmissionMap
 
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
     private val expectedRawToken = "rawToken2343"
-    private val requestedIdTokenMap =  mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
+    private val requestedIdTokenMap = mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
     private val expectedSelfAttestedClaimValue = "value5234"
-    private val requestedSelfAttestedClaimsMap = mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
+    private val requestedSelfAttestedClaimsMap =
+        mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
     private val mockedRequestedVcMap: RequestedVcMap = mutableMapOf(mockedPresentationAttestation to mockedVc)
 

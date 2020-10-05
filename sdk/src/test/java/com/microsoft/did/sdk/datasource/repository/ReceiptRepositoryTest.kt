@@ -15,7 +15,6 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
-import com.microsoft.did.sdk.getOrAwaitValue
 import com.microsoft.did.sdk.identifier.models.Identifier
 import io.mockk.coJustRun
 import io.mockk.coVerify

@@ -8,7 +8,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.entities.receipts.Receipt
 import com.microsoft.did.entities.receipts.ReceiptAction
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.getOrAwaitValue
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -62,7 +61,7 @@ class ReceiptDaoInstrumentedTest {
             val suppliedVcId = "urn:vc:testVcId"
             val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
-            if(actualReceipts != null)
+            if (actualReceipts != null)
                 assertThat(actualReceipts.size).isEqualTo(2)
             assertThat(actualReceipts).contains(suppliedReceipt1)
             assertThat(actualReceipts).contains(suppliedReceipt2)
@@ -80,7 +79,7 @@ class ReceiptDaoInstrumentedTest {
             val suppliedVcId = "urn:vc:testVcId"
             val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
-            if(actualReceipts != null)
+            if (actualReceipts != null)
                 assertThat(actualReceipts.size).isEqualTo(1)
             assertThat(actualReceipts).contains(suppliedReceipt1)
         }
@@ -110,7 +109,7 @@ class ReceiptDaoInstrumentedTest {
             val suppliedVcId = "nonExistingId"
             val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
-            if(actualReceipts != null)
+            if (actualReceipts != null)
                 assertThat(actualReceipts.size).isEqualTo(0)
         }
     }
@@ -130,7 +129,7 @@ class ReceiptDaoInstrumentedTest {
             val suppliedVcId = ""
             val actualReceipts = receiptDao.getAllReceiptsByVcId(suppliedVcId).getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
-            if(actualReceipts != null)
+            if (actualReceipts != null)
                 assertThat(actualReceipts.first()).isEqualTo(suppliedReceipt)
         }
     }
@@ -142,7 +141,7 @@ class ReceiptDaoInstrumentedTest {
             receiptDao.insert(suppliedReceipt)
             val actualReceipts = receiptDao.getAllReceipts().getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
-            if(actualReceipts != null) {
+            if (actualReceipts != null) {
                 assertThat(actualReceipts.size).isEqualTo(1)
                 val actualReceipt = actualReceipts.first()
                 assertThat(actualReceipt.id).isEqualTo(1)
@@ -164,7 +163,7 @@ class ReceiptDaoInstrumentedTest {
             receiptDao.insert(suppliedReceipt2)
             val actualReceipts = receiptDao.getAllReceipts().getOrAwaitValue()
             assertThat(actualReceipts).isNotNull
-            if(actualReceipts != null) {
+            if (actualReceipts != null) {
                 val actualReceipt1 = actualReceipts.first()
                 val actualReceipt2 = actualReceipts.last()
                 assertThat(actualReceipts.size).isEqualTo(2)
@@ -200,7 +199,7 @@ class ReceiptDaoInstrumentedTest {
         )
     }
 
-    private fun createReceiptWithNoId(id:Int): com.microsoft.did.entities.receipts.Receipt {
+    private fun createReceiptWithNoId(id: Int): com.microsoft.did.entities.receipts.Receipt {
         return com.microsoft.did.entities.receipts.Receipt(
             action = com.microsoft.did.entities.receipts.ReceiptAction.Presentation,
             entityIdentifier = "did:ion:test:testEntityDid$id",

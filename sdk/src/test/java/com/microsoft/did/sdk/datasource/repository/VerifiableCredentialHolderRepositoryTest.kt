@@ -7,8 +7,16 @@ package com.microsoft.did.sdk.datasource.repository
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.microsoft.did.sdk.credential.models.*
-import com.microsoft.did.sdk.credential.service.*
+import com.microsoft.did.sdk.credential.models.CredentialStatus
+import com.microsoft.did.sdk.credential.models.RevocationReceipt
+import com.microsoft.did.sdk.credential.models.ServiceDescriptor
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
@@ -24,15 +32,20 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresent
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.serializer.Serializer
-import kotlinx.coroutines.runBlocking
-import org.junit.Test
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.controlflow.SdkException
+import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.mockkStatic
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.Test
 import kotlin.test.assertEquals
 
 class VerifiableCredentialHolderRepositoryTest {

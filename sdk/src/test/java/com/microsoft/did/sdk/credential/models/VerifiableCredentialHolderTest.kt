@@ -3,7 +3,6 @@
 package com.microsoft.did.sdk.credential.models
 
 import assertk.assertThat
-import assertk.assertions.isEqualTo
 import com.microsoft.did.sdk.credential.service.models.contracts.display.ClaimDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.util.ClaimFormatter

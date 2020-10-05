@@ -2,23 +2,20 @@
 
 package com.microsoft.did.sdk
 
+import com.microsoft.did.entities.receipts.Receipt
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
+import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.entities.receipts.Receipt
 import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
@@ -32,7 +29,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class VerifiableCredentialManagerTest {
-        private val verifiableCredentialRepository: VerifiableCredentialRepository = mockk()
+    private val verifiableCredentialRepository: VerifiableCredentialRepository = mockk()
     private val receiptRepository: ReceiptRepository = mockk()
     private val serializer = Serializer()
     private val presentationRequestValidator: PresentationRequestValidator = mockk()
@@ -125,10 +122,12 @@ class VerifiableCredentialManagerTest {
         val revokeRPMap = mapOf("did:ion:test" to "test.com")
         val revokeReason = "testing revoke"
 
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
+        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
+            revocationReceipt
+        )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, revokeReason)
@@ -146,11 +145,13 @@ class VerifiableCredentialManagerTest {
 
     @Test
     fun `test revoke verifiable presentation no reason`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
+        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
+            revocationReceipt
+        )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
         val revokeRPMap = mapOf("did:ion:test" to "test.com")
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, "")
@@ -164,10 +165,12 @@ class VerifiableCredentialManagerTest {
 
     @Test
     fun `test revoke verifiable presentation for all RPs`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
+        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
+            revocationReceipt
+        )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
@@ -181,10 +184,12 @@ class VerifiableCredentialManagerTest {
 
     @Test
     fun `test revoke verifiable presentation no card Id`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
+        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
+            revocationReceipt
+        )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
         every { verifiableCredentialHolder.cardId } returns ""
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any())}
+        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
             val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")

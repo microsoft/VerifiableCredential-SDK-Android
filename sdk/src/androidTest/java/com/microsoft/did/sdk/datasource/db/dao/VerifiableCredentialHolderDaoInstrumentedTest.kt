@@ -68,7 +68,8 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
         val verifiableCredential = createVerifiableCredential(1)
         val identifier = createIdentifier(2)
         val displayContract = createDisplayContract()
-        val verifiableCredentialHolder2 = VerifiableCredentialHolder("urn:vc:testVchsId2", verifiableCredential, identifier, displayContract)
+        val verifiableCredentialHolder2 =
+            VerifiableCredentialHolder("urn:vc:testVchsId2", verifiableCredential, identifier, displayContract)
 
         runBlocking {
             verifiableCredentialHolderDao.insert(verifiableCredentialHolder1)
@@ -92,7 +93,7 @@ class VerifiableCredentialHolderDaoInstrumentedTest {
                 .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
             val actualVerifiableCredentialHolder = verifiableCredentialHolderDao.getAllActiveVchs().getOrAwaitValue()
             assertThat(actualVerifiableCredentialHolder).isNotNull
-            if(actualVerifiableCredentialHolder != null)
+            if (actualVerifiableCredentialHolder != null)
                 assertThat(actualVerifiableCredentialHolder.size).isEqualTo(1)
             assertThat(actualVerifiableCredentialHolder).contains(verifiableCredentialHolder1)
         }

@@ -5,8 +5,8 @@ import org.junit.Test
 
 class Base64Test {
 
-     /* @see https://tools.ietf.org/html/rfc4648#section-10
-     */
+    /* @see https://tools.ietf.org/html/rfc4648#section-10
+    */
     private val base64TestPairs = listOf(
         Pair("", ""),
         Pair("f", "Zg=="),

@@ -9,8 +9,8 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
+import com.microsoft.did.sdk.util.serializer.Serializer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
@@ -32,7 +32,7 @@ class InMemoryKeyStoreTest {
         )
         actualPrivateKey = MockPrivateKey(subtle.exportKeyJwk(keyPair.privateKey))
         actualPublicKey = MockPublicKey(subtle.exportKeyJwk(keyPair.publicKey))
-        actualSecretKey = SecretKey(JsonWebKey(k="TestSecretKey1"))
+        actualSecretKey = SecretKey(JsonWebKey(k = "TestSecretKey1"))
     }
 
     @Test
@@ -121,7 +121,7 @@ class InMemoryKeyStoreTest {
     @Test
     fun `save two sets of secret keys with same key reference and retrieve them`() {
         inMemoryKeyStore.save(keyRef, actualSecretKey)
-        actualSecretKey = SecretKey(JsonWebKey(k="TestSecretKeys2"))
+        actualSecretKey = SecretKey(JsonWebKey(k = "TestSecretKeys2"))
         inMemoryKeyStore.save(keyRef, actualSecretKey)
         val expectedSecretKeyByRef = inMemoryKeyStore.getSecretKey(keyRef)
         assertThat(expectedSecretKeyByRef.keys).contains(actualSecretKey)
