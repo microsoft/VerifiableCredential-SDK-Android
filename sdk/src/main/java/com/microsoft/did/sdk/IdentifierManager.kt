@@ -18,8 +18,6 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,10 +33,6 @@ class IdentifierManager @Inject constructor(
 ) {
 
     suspend fun getMasterIdentifier(): Result<Identifier> {
-        return withContext(Dispatchers.IO) { getOrCreateMasterIdentifier() }
-    }
-
-    private suspend fun getOrCreateMasterIdentifier(): Result<Identifier> {
         val identifier = identifierRepository.queryByName(MASTER_IDENTIFIER_NAME)
         return if (identifier != null) {
             Result.Success(identifier)
@@ -70,16 +64,14 @@ class IdentifierManager @Inject constructor(
     }
 
     suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
-                    null -> {
-                        val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
-                        identifierRepository.insert(registeredIdentifier)
-                        Result.Success(registeredIdentifier)
-                    }
-                    else -> Result.Success(pairwiseIdentifier)
+        return runResultTry {
+            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
+                null -> {
+                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
+                    identifierRepository.insert(registeredIdentifier)
+                    Result.Success(registeredIdentifier)
                 }
+                else -> Result.Success(pairwiseIdentifier)
             }
         }
     }

@@ -9,8 +9,6 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,18 +20,15 @@ class RevocationManager @Inject constructor(
     private val vcRepository: VerifiableCredentialRepository,
     private val identifierManager: IdentifierManager
 ) {
-
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredential: VerifiableCredential,
         rpList: List<String>,
         reason: String = ""
     ): Result<Unit> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
-                vcRepository.revokeVerifiablePresentation(verifiableCredential, masterIdentifier, rpList, reason).abortOnError()
-                Result.Success(Unit)
-            }
+        return runResultTry {
+            val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+            vcRepository.revokeVerifiablePresentation(verifiableCredential, masterIdentifier, rpList, reason).abortOnError()
+            Result.Success(Unit)
         }
     }
 }
