@@ -81,6 +81,5 @@ class VerifiableCredentialManager @Inject constructor(
         rpList: List<String>,
         reason: String = ""
     ): Result<Unit> = revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpList, reason)
-
 }
 

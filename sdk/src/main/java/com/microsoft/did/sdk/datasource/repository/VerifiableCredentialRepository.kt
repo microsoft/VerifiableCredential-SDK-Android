@@ -106,7 +106,7 @@ class VerifiableCredentialRepository @Inject constructor(
         return sendRevocationRequest(revocationRequest, formattedRevocationRequest)
     }
 
-    suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): Result<RevocationReceipt> {
+    private suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): Result<RevocationReceipt> {
         val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
             revocationRequest.audience,
             formattedRevocationRequest,

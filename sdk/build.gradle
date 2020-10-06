@@ -123,7 +123,8 @@ dependencies {
     implementation "androidx.security:security-crypto:1.0.0-rc03"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
-    api 'com.google.guava:guava:28.1-android' // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
+    api 'com.google.guava:guava:28.1-android'
+    // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
     implementation "com.madgag.spongycastle:prov:1.58.0.0"
     //Used for Json Canonicalization performed for ION
     implementation "io.github.erdtman:java-json-canonicalization:1.1"

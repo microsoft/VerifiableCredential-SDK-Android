@@ -17,7 +17,6 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.Display
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.getOrAwaitValue
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat

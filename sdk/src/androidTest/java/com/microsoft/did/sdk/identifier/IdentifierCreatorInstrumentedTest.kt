@@ -20,8 +20,8 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -101,10 +101,10 @@ class IdentifierCreatorInstrumentedTest {
         token.sign(signKey, cryptoOperations)
         assertThat(token.signatures).isNotNull
         val publicKeys: List<PublicKey> =
-        when(val publicKey = cryptoOperations.keyStore.getPublicKeyById("#${signKey}_1")) {
-            null -> emptyList()
-            else -> listOf(publicKey)
-        }
+            when (val publicKey = cryptoOperations.keyStore.getPublicKeyById("#${signKey}_1")) {
+                null -> emptyList()
+                else -> listOf(publicKey)
+            }
         val matched = token.verify(cryptoOperations, publicKeys)
         assertThat(matched).isTrue()
     }
