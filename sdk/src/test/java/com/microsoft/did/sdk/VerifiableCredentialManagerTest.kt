@@ -14,7 +14,6 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
-import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
