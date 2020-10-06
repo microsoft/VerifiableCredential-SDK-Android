@@ -75,9 +75,16 @@ class PresentationService @Inject constructor(
 
     private suspend fun fetchRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
 
+    /**
+     * Send a Presentation Response.
+     *
+     * @param response PresentationResponse to be formed, signed, and sent.
+     * @param enablePairwise when true a pairwise identifier will be used for this communication,
+     * otherwise the master identifier is used which may allow the relying party to correlate the user
+     */
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
-        enablePairwise: Boolean
+        enablePairwise: Boolean = true
     ): Result<Unit> {
         return runResultTry {
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()

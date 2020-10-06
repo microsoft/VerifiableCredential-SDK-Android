@@ -27,6 +27,12 @@ class IssuanceService @Inject constructor(
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Serializer
 ) {
+
+    /**
+     * Load a Issuance Request from a contract.
+     *
+     * @param contractUrl url that the contract is fetched from
+     */
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
@@ -40,6 +46,13 @@ class IssuanceService @Inject constructor(
         apiProvider
     ).fire()
 
+    /**
+     * Send an Issuance Response.
+     *
+     * @param response IssuanceResponse containing the requested attestations
+     * @param enablePairwise when true a pairwise identifier will be used for this communication,
+     * otherwise the master identifier is used which may allow the relying party to correlate the user
+     */
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
         enablePairwise: Boolean = true

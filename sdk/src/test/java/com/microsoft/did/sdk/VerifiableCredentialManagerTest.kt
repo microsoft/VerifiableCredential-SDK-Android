@@ -41,9 +41,7 @@ class VerifiableCredentialManagerTest {
     private val presentationRequest: PresentationRequest = mockk()
     private val testEntityName = "testEntityName"
     private val testEntityDid = "testEntityDID"
-    private val revocationReceipt: RevocationReceipt = mockk()
-    private val revokedRPs = arrayOf("did:ion:test")
-    private val verifiableCredentialHolderCardId = "testCardId"
+
     private var issuanceResponse: IssuanceResponse
     private var vcContract: VerifiableCredentialContract = mockk()
     private val issuedBy = "testIssuer"
@@ -58,33 +56,6 @@ class VerifiableCredentialManagerTest {
         issuanceRequest = IssuanceRequest(vcContract, "testContractUrl")
         every { issuanceRequest.contract.input.credentialIssuer } returns credentialIssuer
         issuanceResponse = IssuanceResponse(issuanceRequest, mockedPairwiseId)
-    }
-
-    @Test
-    fun `test to create Issuance Response`() {
-        every { issuanceRequest.contract.input.credentialIssuer } returns responseAudience
-        val issuanceResponse = cardManager.createIssuanceResponse(issuanceRequest, mockedPairwiseId)
-        val actualAudience = issuanceResponse.audience
-        val expectedAudience = responseAudience
-        assertThat(actualAudience).isEqualTo(expectedAudience)
-    }
-
-    @Test
-    fun `test to create Presentation Response`() {
-        every { presentationRequest.content.redirectUrl } returns responseAudience
-        val presentationResponse = cardManager.createPresentationResponse(presentationRequest, mockedPairwiseId)
-        val actualAudience = presentationResponse.audience
-        val expectedAudience = responseAudience
-        assertThat(actualAudience).isEqualTo(expectedAudience)
-    }
-
-    @Test
-    fun `test to save card`() {
-        coEvery { verifiableCredentialRepository.insert(verifiableCredentialHolder) } returns Unit
-        runBlocking {
-            val actualResult = cardManager.saveVch(verifiableCredentialHolder)
-            assertThat(actualResult).isInstanceOf(Result.Success::class.java)
-        }
     }
 
     @Test
@@ -116,87 +87,4 @@ class VerifiableCredentialManagerTest {
         }
     }
 
-    @Test
-    fun `test revoke verifiable presentation successfully`() {
-        val revokeRPMap = mapOf("did:ion:test" to "test.com")
-        val revokeReason = "testing revoke"
-
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, revokeReason)
-            assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(
-                verifiableCredentialHolder,
-                revokeRPMap.keys.toList(),
-                revokeReason
-            )
-        }
-    }
-
-    @Test
-    fun `test revoke verifiable presentation no reason`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        val revokeRPMap = mapOf("did:ion:test" to "test.com")
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, "")
-            assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, revokeRPMap.keys.toList(), "")
-        }
-    }
-
-    @Test
-    fun `test revoke verifiable presentation for all RPs`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
-            assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
-        }
-    }
-
-    @Test
-    fun `test revoke verifiable presentation no card Id`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns ""
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
-            assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
-        }
-    }
 }

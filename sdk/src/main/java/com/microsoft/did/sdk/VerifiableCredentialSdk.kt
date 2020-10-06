@@ -28,7 +28,13 @@ import com.microsoft.did.sdk.util.log.SdkLog
 object VerifiableCredentialSdk {
 
     @JvmStatic
-    lateinit var verifiableCredentialManager: VerifiableCredentialManager
+    lateinit var issuanceService: IssuanceService
+
+    @JvmStatic
+    lateinit var presentationService: PresentationService
+
+    @JvmStatic
+    lateinit var revocationService: RevocationService
 
     @JvmOverloads
     @JvmStatic
@@ -44,7 +50,10 @@ object VerifiableCredentialSdk {
             .resolverUrl(resolverUrl)
             .build()
 
-        verifiableCredentialManager = sdkComponent.verifiableCredentialManager()
+        issuanceService = sdkComponent.issuanceService()
+        presentationService = sdkComponent.presentationService()
+        revocationService = sdkComponent.revocationService()
+
         SdkLog.addConsumer(logConsumer)
     }
 }

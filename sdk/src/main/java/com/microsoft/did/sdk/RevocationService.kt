@@ -25,6 +25,14 @@ class RevocationService @Inject constructor(
     private val serializer: Serializer
 ) {
 
+    /**
+     * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
+     * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
+     *
+     * @param verifiableCredential The VC for which access to check status is revoked
+     * @param rpList DIDs of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
+     * @param reason Reason for revocation
+     */
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredential: VerifiableCredential,
         rpList: List<String>,
