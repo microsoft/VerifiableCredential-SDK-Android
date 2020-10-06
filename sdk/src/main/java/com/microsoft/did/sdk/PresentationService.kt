@@ -24,7 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PresentationManager @Inject constructor(
+class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
     private val serializer: Serializer,

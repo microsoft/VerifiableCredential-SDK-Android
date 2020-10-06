@@ -20,8 +20,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class VerifiableCredentialManager @Inject constructor(
-    private val presentationManager: PresentationManager,
-    private val issuanceManager: IssuanceManager,
+    private val presentationService: PresentationService,
+    private val issuanceService: IssuanceService,
     private val revocationService: RevocationService
 ) {
 
@@ -30,7 +30,7 @@ class VerifiableCredentialManager @Inject constructor(
      *
      * @param contractUrl url that the contract is fetched from
      */
-    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> = issuanceManager.getIssuanceRequest(contractUrl)
+    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> = issuanceService.getIssuanceRequest(contractUrl)
 
 
     /**
@@ -43,7 +43,7 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
         enablePairwise: Boolean = true
-    ): Result<VerifiableCredential> = issuanceManager.sendIssuanceResponse(response, enablePairwise)
+    ): Result<VerifiableCredential> = issuanceService.sendIssuanceResponse(response, enablePairwise)
 
 
     /**
@@ -52,7 +52,7 @@ class VerifiableCredentialManager @Inject constructor(
      * @param stringUri OpenID Connect Uri that points to the presentation request.
      */
     suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> =
-        presentationManager.getPresentationRequest(stringUri)
+        presentationService.getPresentationRequest(stringUri)
 
 
     /**
@@ -65,7 +65,7 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
         enablePairwise: Boolean = true
-    ): Result<Unit> = presentationManager.sendPresentationResponse(response, enablePairwise)
+    ): Result<Unit> = presentationService.sendPresentationResponse(response, enablePairwise)
 
 
     /**

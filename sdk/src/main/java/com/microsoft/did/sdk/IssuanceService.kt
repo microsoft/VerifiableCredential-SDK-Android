@@ -21,7 +21,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class IssuanceManager @Inject constructor(
+class IssuanceService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
     private val apiProvider: ApiProvider,
