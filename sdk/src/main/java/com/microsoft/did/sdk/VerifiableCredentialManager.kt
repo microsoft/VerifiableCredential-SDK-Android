@@ -22,7 +22,7 @@ import javax.inject.Singleton
 class VerifiableCredentialManager @Inject constructor(
     private val presentationManager: PresentationManager,
     private val issuanceManager: IssuanceManager,
-    private val revocationManager: RevocationManager
+    private val revocationService: RevocationService
 ) {
 
     /**
@@ -80,6 +80,6 @@ class VerifiableCredentialManager @Inject constructor(
         verifiableCredential: VerifiableCredential,
         rpList: List<String>,
         reason: String = ""
-    ): Result<Unit> = revocationManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpList, reason)
+    ): Result<Unit> = revocationService.revokeSelectiveOrAllVerifiablePresentation(verifiableCredential, rpList, reason)
 }
 

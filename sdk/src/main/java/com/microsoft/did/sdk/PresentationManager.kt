@@ -7,8 +7,12 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -22,9 +26,11 @@ import javax.inject.Singleton
 @Singleton
 class PresentationManager @Inject constructor(
     private val identifierManager: IdentifierManager,
-    private val vcRepository: VerifiableCredentialRepository,
+    private val exchangeService: ExchangeService,
     private val serializer: Serializer,
-    private val presentationRequestValidator: PresentationRequestValidator
+    private val presentationRequestValidator: PresentationRequestValidator,
+    private val apiProvider: ApiProvider,
+    private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
 
     suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
@@ -57,7 +63,7 @@ class PresentationManager @Inject constructor(
         }
         val requestUri = uri.getQueryParameter("request_uri")
         if (requestUri != null) {
-            return vcRepository.getRequest(requestUri)
+            return getRequest(requestUri)
         }
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
@@ -79,10 +85,10 @@ class PresentationManager @Inject constructor(
                 val pairwiseIdentifier =
                     identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
                 val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
-                vcRepository.sendPresentationResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
+                sendPresentationResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
             } else {
                 val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
-                vcRepository.sendPresentationResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+                sendPresentationResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -95,9 +101,31 @@ class PresentationManager @Inject constructor(
         return runResultTry {
             val exchangedVcMap = response.requestedVcPresentationSubmissionMap.mapValues {
                 val owner = identifierManager.getIdentifierById(it.value.contents.sub).abortOnError()
-                vcRepository.getExchangedVerifiableCredential(it.value, owner, pairwiseIdentifier).abortOnError()
+                exchangeService.getExchangedVerifiableCredential(it.value, owner, pairwiseIdentifier).abortOnError()
             }
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }
+    }
+
+    private suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
+
+    private suspend fun sendPresentationResponse(
+        response: PresentationResponse,
+        responder: Identifier,
+        requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
+        expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
+    ): Result<Unit> {
+        val formattedResponse = presentationResponseFormatter.formatResponse(
+            requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
+            presentationResponse = response,
+            responder = responder,
+            expiryInSeconds = expiryInSeconds
+        )
+        return SendPresentationResponseNetworkOperation(
+            response.audience,
+            formattedResponse,
+            response.request.content.state,
+            apiProvider
+        ).fire()
     }
 }
