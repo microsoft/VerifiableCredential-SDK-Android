@@ -10,7 +10,6 @@ import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseForma
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
-import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -28,14 +27,18 @@ class IssuanceService @Inject constructor(
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Serializer
 ) {
-
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
-            val contract = getContract(contractUrl).abortOnError()
+            val contract = fetchContract(contractUrl).abortOnError()
             val request = IssuanceRequest(contract, contractUrl)
             Result.Success(request)
         }
     }
+
+    private suspend fun fetchContract(url: String) = FetchContractNetworkOperation(
+        url,
+        apiProvider
+    ).fire()
 
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
@@ -47,10 +50,10 @@ class IssuanceService @Inject constructor(
                 val pairwiseIdentifier =
                     identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
                 val requestedVcMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
-                sendIssuanceResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
+                formAndSendResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
             } else {
                 val requestedVcMap = response.requestedVcMap
-                sendIssuanceResponse(response, masterIdentifier, requestedVcMap).abortOnError()
+                formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
             }
             Result.Success(verifiableCredential)
         }
@@ -69,12 +72,7 @@ class IssuanceService @Inject constructor(
         }
     }
 
-    private suspend fun getContract(url: String) = FetchContractNetworkOperation(
-        url,
-        apiProvider
-    ).fire()
-
-    private suspend fun sendIssuanceResponse(
+    private suspend fun formAndSendResponse(
         response: IssuanceResponse,
         responder: Identifier,
         requestedVcMap: RequestedVcMap,

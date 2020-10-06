@@ -13,7 +13,6 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
-import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.PresentationException
@@ -32,7 +31,6 @@ class PresentationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
-
     suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
@@ -63,7 +61,7 @@ class PresentationService @Inject constructor(
         }
         val requestUri = uri.getQueryParameter("request_uri")
         if (requestUri != null) {
-            return getRequest(requestUri)
+            return fetchRequest(requestUri)
         }
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
@@ -75,6 +73,8 @@ class PresentationService @Inject constructor(
         }
     }
 
+    private suspend fun fetchRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
+
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
         enablePairwise: Boolean
@@ -85,10 +85,10 @@ class PresentationService @Inject constructor(
                 val pairwiseIdentifier =
                     identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
                 val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
-                sendPresentationResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
+                formAndSendResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
             } else {
                 val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
-                sendPresentationResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+                formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
             }
             Result.Success(Unit)
         }
@@ -107,9 +107,7 @@ class PresentationService @Inject constructor(
         }
     }
 
-    private suspend fun getRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
-
-    private suspend fun sendPresentationResponse(
+    private suspend fun formAndSendResponse(
         response: PresentationResponse,
         responder: Identifier,
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
