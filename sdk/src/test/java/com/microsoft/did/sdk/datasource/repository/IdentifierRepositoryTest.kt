@@ -12,9 +12,9 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
+import io.mockk.coJustRun
 import io.mockk.coVerify
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import kotlinx.coroutines.runBlocking
@@ -48,11 +48,13 @@ class IdentifierRepositoryTest {
             "testUpdateKeyReference",
             "testIdentifierName1"
         )
-        justRun { identifierDao.insert(expectedIdentifier) }
-        identifierRepository.insert(expectedIdentifier)
-        every { identifierDao.queryByIdentifier(expectedIdentifier.id) } returns expectedIdentifier
-        val actualIdentifier = identifierRepository.queryByIdentifier(expectedIdentifier.id)
-        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(expectedIdentifier)
+        coJustRun { identifierDao.insert(expectedIdentifier) }
+        coEvery { identifierDao.queryByIdentifier(expectedIdentifier.id) } returns expectedIdentifier
+        runBlocking {
+            identifierRepository.insert(expectedIdentifier)
+            val actualIdentifier = identifierRepository.queryByIdentifier(expectedIdentifier.id)
+            assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(expectedIdentifier)
+        }
     }
 
     @Test
@@ -66,11 +68,13 @@ class IdentifierRepositoryTest {
             "testUpdateKeyReference",
             "testIdentifierName2"
         )
-        justRun { identifierDao.insert(expectedIdentifier) }
-        identifierRepository.insert(expectedIdentifier)
-        every { identifierDao.queryByName("testIdentifierName2") } returns expectedIdentifier
-        val actualIdentifier = identifierRepository.queryByName("testIdentifierName2")
-        assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(expectedIdentifier)
+        coJustRun { identifierDao.insert(expectedIdentifier) }
+        coEvery { identifierDao.queryByName("testIdentifierName2") } returns expectedIdentifier
+        runBlocking {
+            identifierRepository.insert(expectedIdentifier)
+            val actualIdentifier = identifierRepository.queryByName("testIdentifierName2")
+            assertThat(actualIdentifier).isEqualToComparingFieldByFieldRecursively(expectedIdentifier)
+        }
     }
 
     @Test

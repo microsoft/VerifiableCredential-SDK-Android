@@ -5,7 +5,6 @@ package com.microsoft.did.sdk
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
-import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier

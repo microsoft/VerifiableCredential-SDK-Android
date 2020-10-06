@@ -4,21 +4,15 @@ package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
-import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
-import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.RevocationResponseFormatter
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.formVerifiableCredential
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -50,13 +44,17 @@ class RevocationService @Inject constructor(
         reason: String
     ): Result<RevocationReceipt> {
         val revocationRequest = RevocationRequest(verifiableCredential, owner, rpList, reason)
-        val formattedRevocationRequest = revocationResponseFormatter.formatResponse(revocationRequest,
+        val formattedRevocationRequest = revocationResponseFormatter.formatResponse(
+            revocationRequest,
             Constants.DEFAULT_EXPIRATION_IN_SECONDS
         )
         return sendRevocationRequest(revocationRequest, formattedRevocationRequest)
     }
 
-    private suspend fun sendRevocationRequest(revocationRequest: RevocationRequest, formattedRevocationRequest: String): Result<RevocationReceipt> {
+    private suspend fun sendRevocationRequest(
+        revocationRequest: RevocationRequest,
+        formattedRevocationRequest: String
+    ): Result<RevocationReceipt> {
         val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
             revocationRequest.audience,
             formattedRevocationRequest,

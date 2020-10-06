@@ -24,7 +24,7 @@ import com.microsoft.did.sdk.util.log.SdkLog
  * fun provideIdentifierManager(): IdentifierManager {
  *     return VerifiableCredentialSdk.identifierManager
  * }
-*/
+ */
 object VerifiableCredentialSdk {
 
     @JvmStatic
