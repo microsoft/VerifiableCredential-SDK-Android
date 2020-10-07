@@ -2,115 +2,70 @@
 
 package com.microsoft.did.sdk
 
+import assertk.assertThat
+import assertk.assertions.isInstanceOf
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.service.models.RevocationRequest
+import com.microsoft.did.sdk.credential.service.protectors.RevocationResponseFormatter
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.junit.Before
 import org.junit.Test
 
 class RevocationServiceTest {
 
-    private val revocationService = RevocationService(mockk(), mockk(), mockk(), mockk())
+    private val identifierManager: IdentifierManager = mockk()
+    private val masterIdentifier: Identifier = mockk()
+    private val revocationResponseFormatter: RevocationResponseFormatter = mockk()
+    private val revocationService = spyk(RevocationService(mockk(relaxed = true), identifierManager, revocationResponseFormatter, mockk()))
 
-    private val revocationReceipt: RevocationReceipt = mockk()
-    private val revokedRPs = arrayOf("did:ion:test")
-    private val vcId = "testCardId"
+
+    private val revokeRpList = listOf("did:ion:test")
+    private val revokeReason = "test reason"
     private val verifiableCredential: VerifiableCredential = mockk()
+    private val formattedResponse = "FORMATTED_RESPONSE"
 
-    @Test
-    fun `test revoke verifiable presentation successfully`() {
-
+    @Before
+    fun setup() {
+        mockkConstructor(SendVerifiablePresentationRevocationRequestNetworkOperation::class)
+        coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
+        coEvery { verifiableCredential.contents.vc.revokeService?.id } returns "https://microsoft.com/vcs"
+        coEvery { revocationResponseFormatter.formatResponse(any(), any()) } returns formattedResponse
     }
 
-
     @Test
-    fun `test revoke verifiable presentation successfully1`() {
-        val revokeRPMap = listOf("did:ion:test")
-        val revokeReason = "testing revoke"
-
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
+    fun `revoke verifiable presentation successfully with correct params`() {
+        val expectedRevocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, revokeRpList, revokeReason)
+        val expectedRevocationReceipt: RevocationReceipt = mockk()
+        coEvery { anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire() } returns Result.Success(
+            expectedRevocationReceipt
         )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredential.jti } returns vcId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
-            val status = revocationService.revokeVerifiablePresentation(verifiableCredential, revokeRPMap, revokeReason)
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
+            val actualResult = revocationService.revokeVerifiablePresentation(verifiableCredential, revokeRpList, revokeReason)
+            assertThat(actualResult).isInstanceOf(Result.Success::class.java)
+            assertThat((actualResult as Result.Success).payload == expectedRevocationReceipt)
         }
 
         coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(
-                verifiableCredentialHolder,
-                revokeRPMap.keys.toList(),
-                revokeReason
-            )
+            revocationService.sendRevocationRequest(expectedRevocationRequest, formattedResponse)
+            anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire()
         }
     }
 
     @Test
-    fun `test revoke verifiable presentation no reason`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns vcId
-        val revokeRPMap = mapOf("did:ion:test" to "test.com")
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
+    fun `passing empty list results in failure`() {
         runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, "")
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, revokeRPMap.keys.toList(), "")
-        }
-    }
-
-    @Test
-    fun `test revoke verifiable presentation for all RPs`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns vcId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
-        }
-    }
-
-    @Test
-    fun `test revoke verifiable presentation no card Id`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns ""
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
+            val actualResult = revocationService.revokeVerifiablePresentation(verifiableCredential, emptyList(), revokeReason)
+            assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
         }
     }
 }

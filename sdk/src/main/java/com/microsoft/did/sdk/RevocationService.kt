@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk
 
+import androidx.annotation.VisibleForTesting
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
@@ -27,51 +28,38 @@ class RevocationService @Inject constructor(
 
     /**
      * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
-     * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
      *
      * @param verifiableCredential The VC for which access to check status is revoked
-     * @param rpList DIDs of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
+     * @param rpList DIDs of relying parties whose access is revoked.
      * @param reason Reason for revocation
      */
     suspend fun revokeVerifiablePresentation(
         verifiableCredential: VerifiableCredential,
         rpList: List<String>,
         reason: String = ""
-    ): Result<Unit> {
+    ): Result<RevocationReceipt> {
         return runResultTry {
+            if (rpList.isEmpty()) throw RevocationException("No relying party has been provided.")
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
-            revokeVerifiablePresentation(verifiableCredential, masterIdentifier, rpList, reason).abortOnError()
-            Result.Success(Unit)
+            val revocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, rpList, reason)
+            val formattedRevocationRequest = revocationResponseFormatter.formatResponse(
+                revocationRequest,
+                Constants.DEFAULT_EXPIRATION_IN_SECONDS
+            )
+            sendRevocationRequest(revocationRequest, formattedRevocationRequest)
         }
     }
 
-    private suspend fun revokeVerifiablePresentation(
-        verifiableCredential: VerifiableCredential,
-        owner: Identifier,
-        rpList: List<String>,
-        reason: String
-    ): Result<RevocationReceipt> {
-        val revocationRequest = RevocationRequest(verifiableCredential, owner, rpList, reason)
-        val formattedRevocationRequest = revocationResponseFormatter.formatResponse(
-            revocationRequest,
-            Constants.DEFAULT_EXPIRATION_IN_SECONDS
-        )
-        return sendRevocationRequest(revocationRequest, formattedRevocationRequest)
-    }
-
-    private suspend fun sendRevocationRequest(
+    @VisibleForTesting
+    internal suspend fun sendRevocationRequest(
         revocationRequest: RevocationRequest,
         formattedRevocationRequest: String
     ): Result<RevocationReceipt> {
-        val revocationResult = SendVerifiablePresentationRevocationRequestNetworkOperation(
+        return SendVerifiablePresentationRevocationRequestNetworkOperation(
             revocationRequest.audience,
             formattedRevocationRequest,
             apiProvider,
             serializer
         ).fire()
-        return when (revocationResult) {
-            is Result.Success -> revocationResult
-            is Result.Failure -> Result.Failure(RevocationException("Unable to revoke VP"))
-        }
     }
 }
