@@ -146,6 +146,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = presentationResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedPresentationResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(PresentationResponseClaims.serializer(), actualFormattedToken)
@@ -167,6 +168,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -187,6 +189,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -208,6 +211,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -230,6 +234,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mockedRequestedVcMap,
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -253,6 +258,7 @@ class OidcResponseFormatterTest {
         val results = issuanceResponseFormatter.formatResponse(
             mockedRequestedVcMap,
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), results)
@@ -274,14 +280,12 @@ class OidcResponseFormatterTest {
         every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
         every { mockedPresentationResponse.request.content.state } returns mockedState
         every { mockedPresentationResponse.requestedVcPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap
-        every { mockedPresentationResponse.responder } returns mockedIdentifier
     }
 
     private fun mockIssuanceResponseWithNoAttestations() {
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedDid
         every { mockedIssuanceResponse.audience } returns expectedResponseAudience
         every { mockedIssuanceResponse.request.contractUrl } returns expectedContract
-        every { mockedIssuanceResponse.responder } returns mockedIdentifier
     }
 
     private fun mockPresentationAttestation() {
