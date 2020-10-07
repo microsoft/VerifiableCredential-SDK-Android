@@ -33,7 +33,7 @@ class RevocationService @Inject constructor(
      * @param rpList DIDs of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
      * @param reason Reason for revocation
      */
-    suspend fun revokeSelectiveOrAllVerifiablePresentation(
+    suspend fun revokeVerifiablePresentation(
         verifiableCredential: VerifiableCredential,
         rpList: List<String>,
         reason: String = ""

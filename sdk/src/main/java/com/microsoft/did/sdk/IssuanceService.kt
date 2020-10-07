@@ -33,7 +33,7 @@ class IssuanceService @Inject constructor(
      *
      * @param contractUrl url that the contract is fetched from
      */
-    suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
+    suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
             val request = IssuanceRequest(contract, contractUrl)
@@ -53,7 +53,7 @@ class IssuanceService @Inject constructor(
      * @param enablePairwise when true a pairwise identifier will be used for this communication,
      * otherwise the master identifier is used which may allow the relying party to correlate the user
      */
-    suspend fun sendIssuanceResponse(
+    suspend fun sendResponse(
         response: IssuanceResponse,
         enablePairwise: Boolean = true
     ): Result<VerifiableCredential> {

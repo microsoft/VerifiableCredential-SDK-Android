@@ -31,7 +31,7 @@ class PresentationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
-    suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
+    suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
             val requestToken = getPresentationRequestToken(uri).abortOnError()
@@ -82,7 +82,7 @@ class PresentationService @Inject constructor(
      * @param enablePairwise when true a pairwise identifier will be used for this communication,
      * otherwise the master identifier is used which may allow the relying party to correlate the user
      */
-    suspend fun sendPresentationResponse(
+    suspend fun sendResponse(
         response: PresentationResponse,
         enablePairwise: Boolean = true
     ): Result<Unit> {
