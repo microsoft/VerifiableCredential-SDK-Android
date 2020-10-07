@@ -42,10 +42,7 @@ class RevocationService @Inject constructor(
             if (rpList.isEmpty()) throw RevocationException("No relying party has been provided.")
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val revocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, rpList, reason)
-            val formattedRevocationRequest = revocationResponseFormatter.formatResponse(
-                revocationRequest,
-                Constants.DEFAULT_EXPIRATION_IN_SECONDS
-            )
+            val formattedRevocationRequest = revocationResponseFormatter.formatResponse(revocationRequest)
             sendRevocationRequest(revocationRequest, formattedRevocationRequest)
         }
     }
