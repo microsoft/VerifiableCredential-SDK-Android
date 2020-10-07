@@ -36,6 +36,9 @@ object VerifiableCredentialSdk {
     @JvmStatic
     lateinit var revocationService: RevocationService
 
+    @JvmStatic
+    internal lateinit var identifierManager: IdentifierManager
+
     @JvmOverloads
     @JvmStatic
     fun init(
@@ -53,6 +56,7 @@ object VerifiableCredentialSdk {
         issuanceService = sdkComponent.issuanceService()
         presentationService = sdkComponent.presentationService()
         revocationService = sdkComponent.revocationService()
+        identifierManager = sdkComponent.identifierManager()
 
         SdkLog.addConsumer(logConsumer)
     }

@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.models.Identifier
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.After
@@ -32,9 +33,11 @@ class IdentifierDaoInstrumentedTest {
             "testUpdateKeyReference",
             "testIdentifierName"
         )
-        identifierDao.insert(suppliedIdentifier)
-        val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier.id)
-        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+        runBlocking {
+            identifierDao.insert(suppliedIdentifier)
+            val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier.id)
+            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+        }
     }
 
     @Test
@@ -48,16 +51,20 @@ class IdentifierDaoInstrumentedTest {
             "testUpdateKeyReference",
             "testIdentifierName"
         )
-        identifierDao.insert(suppliedIdentifier)
-        val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier.id)
-        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+        runBlocking {
+            identifierDao.insert(suppliedIdentifier)
+            val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier.id)
+            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+        }
     }
 
     @Test
     fun retrieveIdentifierByNonExistingIdTest() {
         val nonExistingId = "nonExistingId"
-        val actualIdentifier = identifierDao.queryByIdentifier(nonExistingId)
-        assertThat(actualIdentifier).isNull()
+        runBlocking {
+            val actualIdentifier = identifierDao.queryByIdentifier(nonExistingId)
+            assertThat(actualIdentifier).isNull()
+        }
     }
 
     @Test
@@ -80,11 +87,13 @@ class IdentifierDaoInstrumentedTest {
             "testUpdateKeyReference",
             "testIdentifierName"
         )
-        identifierDao.insert(suppliedIdentifier1)
-        Assertions.assertThatThrownBy { identifierDao.insert(suppliedIdentifier2) }
-            .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-        val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier1.id)
-        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
+        runBlocking {
+            identifierDao.insert(suppliedIdentifier1)
+            Assertions.assertThatThrownBy { runBlocking { identifierDao.insert(suppliedIdentifier2) } }
+                .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
+            val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier1.id)
+            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
+        }
     }
 
     @Test
@@ -98,17 +107,21 @@ class IdentifierDaoInstrumentedTest {
             "testUpdateKeyReference",
             "testIdentifierName"
         )
-        identifierDao.insert(suppliedIdentifier)
-        val actualIdentifierName = "testIdentifierName"
-        val actualIdentifier = identifierDao.queryByName(actualIdentifierName)
-        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+        runBlocking {
+            identifierDao.insert(suppliedIdentifier)
+            val actualIdentifierName = "testIdentifierName"
+            val actualIdentifier = identifierDao.queryByName(actualIdentifierName)
+            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier)
+        }
     }
 
     @Test
     fun retrieveIdentifierByNonExistingNameTest() {
         val nonExistingName = "nonExistingName"
-        val actualIdentifier = identifierDao.queryByName(nonExistingName)
-        assertThat(actualIdentifier).isNull()
+        runBlocking {
+            val actualIdentifier = identifierDao.queryByName(nonExistingName)
+            assertThat(actualIdentifier).isNull()
+        }
     }
 
     @Test
@@ -131,13 +144,15 @@ class IdentifierDaoInstrumentedTest {
             "testUpdateKeyReference",
             "testIdentifierName"
         )
-        identifierDao.insert(suppliedIdentifier1)
-        identifierDao.insert(suppliedIdentifier2)
-        val actualIdentifierName = "testIdentifierName"
-        var actualIdentifier = identifierDao.queryByName(actualIdentifierName)
-        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
-        actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier2.id)
-        assertThat(actualIdentifier).isEqualTo(suppliedIdentifier2)
+        runBlocking {
+            identifierDao.insert(suppliedIdentifier1)
+            identifierDao.insert(suppliedIdentifier2)
+            val actualIdentifierName = "testIdentifierName"
+            var actualIdentifier = identifierDao.queryByName(actualIdentifierName)
+            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
+            actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier2.id)
+            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier2)
+        }
     }
 
     @After
