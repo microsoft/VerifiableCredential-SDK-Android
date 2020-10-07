@@ -50,7 +50,6 @@ class ExchangeService @Inject constructor(
             is Result.Success -> {
                 val verifiableCredential = formVerifiableCredential(
                     result.payload,
-                    request.verifiableCredential.picId,
                     serializer
                 )
                 Result.Success(verifiableCredential)

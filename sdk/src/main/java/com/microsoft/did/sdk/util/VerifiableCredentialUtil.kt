@@ -10,9 +10,9 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.serializer.Serializer
 
-fun formVerifiableCredential(rawToken: String, vcId: String? = null, serializer: Serializer): VerifiableCredential {
+fun formVerifiableCredential(rawToken: String, serializer: Serializer): VerifiableCredential {
     val vcContents = unwrapSignedVerifiableCredential(rawToken, serializer)
-    return VerifiableCredential(vcContents.jti, rawToken, vcContents, vcId ?: vcContents.jti)
+    return VerifiableCredential(vcContents.jti, rawToken, vcContents)
 }
 
 fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String, serializer: Serializer): VerifiableCredentialContent {

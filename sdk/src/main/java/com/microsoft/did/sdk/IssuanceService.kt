@@ -104,7 +104,7 @@ class IssuanceService @Inject constructor(
         ).fire()
 
         return when (rawVerifiableCredentialResult) {
-            is Result.Success -> Result.Success(formVerifiableCredential(rawVerifiableCredentialResult.payload, null, serializer))
+            is Result.Success -> Result.Success(formVerifiableCredential(rawVerifiableCredentialResult.payload, serializer))
             is Result.Failure -> rawVerifiableCredentialResult
         }
     }

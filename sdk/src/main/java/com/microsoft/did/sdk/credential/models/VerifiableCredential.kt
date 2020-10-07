@@ -18,8 +18,5 @@ data class VerifiableCredential(
     val raw: String,
 
     // contents of the Verifiable Credential token.
-    val contents: VerifiableCredentialContent,
-
-    // id of the Prime Verifiable Credential. (if prime VC, jti == picId)
-    val picId: String
+    val contents: VerifiableCredentialContent
 )

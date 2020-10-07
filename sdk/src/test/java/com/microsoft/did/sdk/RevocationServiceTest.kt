@@ -3,6 +3,7 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
@@ -21,21 +22,28 @@ class RevocationServiceTest {
     private val revocationReceipt: RevocationReceipt = mockk()
     private val revokedRPs = arrayOf("did:ion:test")
     private val vcId = "testCardId"
+    private val verifiableCredential: VerifiableCredential = mockk()
 
     @Test
     fun `test revoke verifiable presentation successfully`() {
-        val revokeRPMap = mapOf("did:ion:test" to "test.com")
+
+    }
+
+
+    @Test
+    fun `test revoke verifiable presentation successfully1`() {
+        val revokeRPMap = listOf("did:ion:test")
         val revokeReason = "testing revoke"
 
         coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
             revocationReceipt
         )
         every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns vcId
+        every { verifiableCredential.jti } returns vcId
         coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
 
         runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, revokeRPMap, revokeReason)
+            val status = revocationService.revokeVerifiablePresentation(verifiableCredential, revokeRPMap, revokeReason)
             Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
         }
 
