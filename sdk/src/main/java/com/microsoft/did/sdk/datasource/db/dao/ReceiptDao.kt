@@ -15,6 +15,9 @@ interface ReceiptDao {
     @Query("SELECT * FROM Receipt WHERE vcId = :vcId")
     fun getAllReceiptsByVcId(vcId: String): LiveData<List<Receipt>>
 
+    @Query("SELECT * FROM Receipt WHERE vcId = :vcId")
+    fun queryAllReceiptsByVcId(vcId: String): List<Receipt>
+
     @Insert
     suspend fun insert(receipt: Receipt)
 }

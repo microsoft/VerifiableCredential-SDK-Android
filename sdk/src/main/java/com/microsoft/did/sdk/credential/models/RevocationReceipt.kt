@@ -5,23 +5,19 @@
 
 package com.microsoft.did.sdk.credential.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Entity
 @Serializable
-data class VerifiableCredential(
-    // jti of the verifiable credential
-    val jti: String,
-
-    // raw token.
-    val raw: String,
-
-    // contents of the Verifiable Credential token.
-    val contents: VerifiableCredentialContent,
-
-    // id of the Prime Verifiable Credential. (if prime VC, jti == picId)
-    val picId: String
-
-)
+data class RevocationReceipt(
+    @SerialName("jti")
+    val jwtId: String,
+    @SerialName("iss")
+    val issuer: String,
+    val credentialStatus: CredentialStatus,
+    @SerialName("iat")
+    val issuedTime: Long
+) {
+    @SerialName("rp")
+    val relyingPartyList: Array<String>? = null
+}

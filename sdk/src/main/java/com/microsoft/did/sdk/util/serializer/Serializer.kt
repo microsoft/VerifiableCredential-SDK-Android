@@ -4,6 +4,7 @@ package com.microsoft.did.sdk.util.serializer
 
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.PresentationServiceResponse
+import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.ServiceResponse
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -24,6 +25,7 @@ class Serializer @Inject constructor() : ISerializer {
         polymorphic(ServiceResponse::class) {
             IssuanceServiceResponse::class with IssuanceServiceResponse.serializer()
             PresentationServiceResponse::class with PresentationServiceResponse.serializer()
+            RevocationServiceResponse::class with RevocationServiceResponse.serializer()
         }
     }
 
