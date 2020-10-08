@@ -25,10 +25,14 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
 import com.microsoft.did.sdk.datasource.repository.VerifiableCredentialHolderRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_HOST
 import com.microsoft.did.sdk.util.Constants.DEEP_LINK_SCHEME
+import com.microsoft.did.sdk.util.controlflow.DomainValidationException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
+import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.Success
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.unwrapSignedVerifiableCredential
@@ -47,7 +51,8 @@ class VerifiableCredentialManager @Inject constructor(
     private val receiptRepository: ReceiptRepository,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator,
-    private val revocationManager: RevocationManager
+    private val revocationManager: RevocationManager,
+    private val resolver: Resolver
 ) {
 
     /**
@@ -65,7 +70,8 @@ class VerifiableCredentialManager @Inject constructor(
                         PresentationRequestContent.serializer(),
                         JwsToken.deserialize(requestToken, serializer).content()
                     )
-                val request = PresentationRequest(requestToken, tokenContents)
+                val didBoundToVerifierDid = getDomainForRp(tokenContents.issuer)
+                val request = PresentationRequest(requestToken, tokenContents, "presentationtest.com")
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }
@@ -100,7 +106,8 @@ class VerifiableCredentialManager @Inject constructor(
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = vchRepository.getContract(contractUrl).abortOnError()
-            val request = IssuanceRequest(contract, contractUrl)
+            val domainBoundToIssuerDid = getDomainForRp(contract.input.issuer)
+            val request = IssuanceRequest(contract, contractUrl, "issuertest.com")
             Result.Success(request)
         }
     }
@@ -222,6 +229,26 @@ class VerifiableCredentialManager @Inject constructor(
             }
             Result.Success(exchangedVcMap as RequestedVchPresentationSubmissionMap)
         }
+    }
+
+    suspend fun validateDomainBinding(rpDid: String): Result<Success> {
+        val wellKnownConfigDocumentUrl = getDomainForRp(rpDid)
+        val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)
+        return Result.Failure(DomainValidationException("$wellKnownConfigDocumentUrl is not bound to $rpDid"))
+    }
+
+    suspend fun getDomainForRp(rpDid: String): String {
+        return when (val didDocument = resolver.resolve(rpDid)) {
+            is Result.Success -> "testsite.com"
+            /*didDocument.payload.service.firstOrNull()?.endpoint ?: throw MissingDomainBindingDocumentEndpointException(
+                "Endpoint to locate well known configuration document is missing"
+            )*/
+            is Result.Failure -> throw ResolverException("Unable to resolve $rpDid", didDocument.payload)
+        }
+    }
+
+    private suspend fun getWellKnownConfigDocument(configDocumentUrl: String) {
+
     }
 
     /**
