@@ -41,26 +41,6 @@ class SpongyCastleTest {
     }
 
     @Test
-    fun `generateVariousSizeSignTest`() {
-        val privateKey = generatePrivateKey()
-        val publicKey = generatePublicKeyFromPrivateKey(privateKey)
-        for(i in 1..1000) {
-            val data = Random.nextBytes(1000)
-            val digest = MessageDigest.getInstance(Sha.SHA256.algorithm.name)
-            val hash = digest.digest(data)
-
-            val signature = signPayload(hash, privateKey)
-            if(signature[0].toByteArray().size < 32 || signature[1].toByteArray().size < 32) {
-                println("testing $i")
-            }
-            val rs = signature[0].toByteArray() + signature[1].toByteArray()
-            verifySignature(rs, hash, publicKey)
-            assertThat(signature[0].toByteArray().size < 32).isFalse()
-            assertThat(signature[1].toByteArray().size < 32).isFalse()
-        }
-    }
-
-    @Test
     fun `generateSameSizeSignTest`() {
         val privateKey = generatePrivateKey()
         val publicKey = generatePublicKeyFromPrivateKey(privateKey)
@@ -70,9 +50,6 @@ class SpongyCastleTest {
             val hash = digest.digest(data)
 
             val signature = signPayload(hash, privateKey)
-            if(signature[0].toByteArray().size < 32 || signature[1].toByteArray().size < 32) {
-                println("testing $i")
-            }
             val r = convertSignedToUnsignedByteArray(signature[0].toByteArray())
             val s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
             assertThat(r.size < 32).isFalse()
