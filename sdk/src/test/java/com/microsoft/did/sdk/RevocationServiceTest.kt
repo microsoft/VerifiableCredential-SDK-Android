@@ -27,7 +27,6 @@ class RevocationServiceTest {
     private val revocationResponseFormatter: RevocationResponseFormatter = mockk()
     private val revocationService = spyk(RevocationService(mockk(relaxed = true), identifierManager, revocationResponseFormatter, mockk()))
 
-
     private val revokeRpList = listOf("did:ion:test")
     private val revokeReason = "test reason"
     private val verifiableCredential: VerifiableCredential = mockk()
