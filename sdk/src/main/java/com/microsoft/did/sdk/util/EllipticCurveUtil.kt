@@ -79,8 +79,17 @@ fun reduceKeySeedSizeAndConvertToUnsigned(keySeed: ByteArray): ByteArray {
 }
 
 fun convertSignedToUnsignedByteArray(signedByteArray: ByteArray): ByteArray {
-    var unsignedByteArray: ByteArray = signedByteArray
-    if (signedByteArray.size > 32)
-        unsignedByteArray = signedByteArray.sliceArray(1 until signedByteArray.size)
-    return unsignedByteArray
+    return when {
+        signedByteArray.size > 32 -> signedByteArray.sliceArray(1 until signedByteArray.size)
+        signedByteArray.size < 32 -> padByteArrayToExpectedSize(signedByteArray, 32)
+        else -> signedByteArray
+    }
+}
+
+fun padByteArrayToExpectedSize(byteArrayToPad: ByteArray, expectedSize: Int): ByteArray {
+    val paddedByteArray = ByteArray(expectedSize)
+    if(byteArrayToPad.size < expectedSize) {
+        byteArrayToPad.copyInto(paddedByteArray, paddedByteArray.size - byteArrayToPad.size)
+    }
+    return paddedByteArray
 }
