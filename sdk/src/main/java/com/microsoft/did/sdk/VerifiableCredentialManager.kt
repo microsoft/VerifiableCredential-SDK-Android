@@ -19,7 +19,9 @@ import com.microsoft.did.sdk.credential.service.RequestedVchMap
 import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.RpDidToNameMap
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.dnsBinding.DomainLinkageCredential
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.did.sdk.credential.service.models.serviceResponses.DnsBindingResponse
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.ReceiptRepository
@@ -249,6 +251,15 @@ class VerifiableCredentialManager @Inject constructor(
 
     private suspend fun getWellKnownConfigDocument(configDocumentUrl: String) {
 
+    }
+
+    private fun validateWellKnownConfigDocument() {
+    }
+
+    fun deserializeConfigDocument(docAsJwt: String): List<DomainLinkageCredential> {
+        val jwt = JwsToken.deserialize(docAsJwt, serializer)
+        val response = serializer.parse(DnsBindingResponse.serializer(), jwt.content())
+        return response.linked_dids
     }
 
     /**
