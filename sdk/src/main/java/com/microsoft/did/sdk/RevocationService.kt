@@ -47,8 +47,7 @@ class RevocationService @Inject constructor(
         }
     }
 
-    @VisibleForTesting
-    internal suspend fun sendRevocationRequest(
+    private suspend fun sendRevocationRequest(
         revocationRequest: RevocationRequest,
         formattedRevocationRequest: String
     ): Result<RevocationReceipt> {

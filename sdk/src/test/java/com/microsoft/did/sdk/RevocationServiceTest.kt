@@ -55,7 +55,7 @@ class RevocationServiceTest {
         }
 
         coVerify(exactly = 1) {
-            revocationService.sendRevocationRequest(expectedRevocationRequest, formattedResponse)
+            revocationService["sendRevocationRequest"](expectedRevocationRequest, formattedResponse)
             anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire()
         }
     }
