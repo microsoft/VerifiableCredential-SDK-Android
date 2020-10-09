@@ -21,7 +21,6 @@ import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.security.Security
-import kotlin.random.Random
 
 class SpongyCastleTest {
     init {
@@ -44,8 +43,9 @@ class SpongyCastleTest {
     fun `generateSameSizeSignTest`() {
         val privateKey = generatePrivateKey()
         val publicKey = generatePublicKeyFromPrivateKey(privateKey)
+
         for(i in 1..1000) {
-            val data = Random.nextBytes(1000)
+            val data = "Some random payload for testing signature creation-$i".toByteArray()
             val digest = MessageDigest.getInstance(Sha.SHA256.algorithm.name)
             val hash = digest.digest(data)
 
