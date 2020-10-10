@@ -2,13 +2,13 @@
 
 package com.microsoft.did.sdk.identifier.resolvers
 
-import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
+import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -37,7 +37,13 @@ class ResolverTest {
     @Test
     fun failedResolutionInvalidIdTest() {
         val resolver = Resolver("", identifierRepository)
-        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(ServiceErrorException("123", "Not Found", true))
+        coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(
+            ServiceErrorException(
+                "123",
+                "Not Found",
+                true
+            )
+        )
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)

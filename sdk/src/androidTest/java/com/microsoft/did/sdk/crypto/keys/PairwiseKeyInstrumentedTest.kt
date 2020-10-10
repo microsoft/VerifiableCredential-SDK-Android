@@ -40,6 +40,7 @@ class PairwiseKeyInstrumentedTest {
     private var crypto: CryptoOperations
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val seedReference = "masterSeed"
+
     @OptIn(InternalSerializationApi::class)
     private val inputStream: InputStream
 
@@ -207,14 +208,15 @@ class PairwiseKeyInstrumentedTest {
         val testKeysJsonString = inputStream.bufferedReader().readText()
         val serializer = Serializer()
         val testPairwiseKeys = serializer.parse(TestKeys.serializer(), testKeysJsonString)
-        val seed = SecretKey(JsonWebKey(k = Base64Url.encode(stringToByteArray("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"))))
+        val seed =
+            SecretKey(JsonWebKey(k = Base64Url.encode(stringToByteArray("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"))))
         val seedReference = "masterkey"
         keyStore.save(seedReference, seed)
         for (index in 0 until countOfIds) {
             val persona = "abcdef"
             val pairwiseKey = crypto.generatePairwise(alg, seedReference, persona, index.toString())
             assertThat(testPairwiseKeys.keys[index].key).isEqualTo((pairwiseKey as EllipticCurvePrivateKey).d)
-            assertThat(1).isEqualTo(testPairwiseKeys.keys.filter{ it.key == (pairwiseKey).d}.size)
+            assertThat(1).isEqualTo(testPairwiseKeys.keys.filter { it.key == (pairwiseKey).d }.size)
         }
     }
 

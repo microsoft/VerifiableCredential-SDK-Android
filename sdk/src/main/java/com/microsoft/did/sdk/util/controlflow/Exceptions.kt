@@ -38,9 +38,11 @@ open class IssuanceException(message: String, cause: Throwable? = null, retryabl
 
 class ExchangeException(message: String, cause: Throwable? = null) : PresentationException(message, cause)
 
-open class RevocationException(message: String, cause: Throwable? = null, retryable: Boolean = true) : SdkException(message, cause, retryable)
+open class RevocationException(message: String? = null, cause: Throwable? = null, retryable: Boolean = true) :
+    SdkException(message, cause, retryable)
 
-open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
+open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+    SdkException(message, cause, retryable)
 
 class DomainValidationException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 

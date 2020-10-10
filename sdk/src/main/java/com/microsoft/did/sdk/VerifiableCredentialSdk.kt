@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.util.log.SdkLog
  *
  * VerifiableCredentialSdk.init(getApplicationContext());
  *
- * The `VerifiableCredentialManager` and `IdentifierManager` can be accessed through this static reference, but ideally should be provided
+ * The `VerifiableCredentialManager` can be accessed through this static reference, but ideally should be provided
  * by your own dependency injection library. In the case of Dagger2 as such:
  *
  * @Provides
@@ -28,10 +28,16 @@ import com.microsoft.did.sdk.util.log.SdkLog
 object VerifiableCredentialSdk {
 
     @JvmStatic
-    lateinit var verifiableCredentialManager: VerifiableCredentialManager
+    lateinit var issuanceService: IssuanceService
 
     @JvmStatic
-    lateinit var identifierManager: IdentifierManager
+    lateinit var presentationService: PresentationService
+
+    @JvmStatic
+    lateinit var revocationService: RevocationService
+
+    @JvmStatic
+    internal lateinit var identifierManager: IdentifierManager
 
     @JvmOverloads
     @JvmStatic
@@ -47,8 +53,10 @@ object VerifiableCredentialSdk {
             .resolverUrl(resolverUrl)
             .build()
 
+        issuanceService = sdkComponent.issuanceService()
+        presentationService = sdkComponent.presentationService()
+        revocationService = sdkComponent.revocationService()
         identifierManager = sdkComponent.identifierManager()
-        verifiableCredentialManager = sdkComponent.verifiableCredentialManager()
 
         SdkLog.addConsumer(logConsumer)
     }

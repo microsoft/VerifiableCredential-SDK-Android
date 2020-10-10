@@ -1,14 +1,13 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
-import com.microsoft.did.sdk.credential.service.RequestedVchMap
+import com.microsoft.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
-import com.microsoft.did.sdk.credential.service.RequestedVchPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
@@ -43,7 +42,6 @@ class OidcResponseFormatterTest {
     private val slot = slot<String>()
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
     private val mockedVc: VerifiableCredential = mockk()
-    private val mockedVch: VerifiableCredentialHolder = mockk()
     private val mockedIdentifier: Identifier = mockk()
     private val serializer: Serializer = Serializer()
 
@@ -74,16 +72,19 @@ class OidcResponseFormatterTest {
     private val mockedNonce = "123456789876"
     private val mockedState = "mockedState"
     private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
-    private val credentialPresentationInputDescriptors = CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
-    private val requestedVchPresentationSubmissionMap = mapOf(credentialPresentationInputDescriptors to mockedVch) as RequestedVchPresentationSubmissionMap
+    private val credentialPresentationInputDescriptors =
+        CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
+    private val requestedVchPresentationSubmissionMap =
+        mapOf(credentialPresentationInputDescriptors to mockedVc) as RequestedVcPresentationSubmissionMap
 
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
     private val expectedRawToken = "rawToken2343"
-    private val requestedIdTokenMap =  mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
+    private val requestedIdTokenMap = mapOf(expectedIdTokenConfig to expectedRawToken) as RequestedIdTokenMap
     private val expectedSelfAttestedClaimValue = "value5234"
-    private val requestedSelfAttestedClaimsMap = mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
+    private val requestedSelfAttestedClaimsMap =
+        mapOf(expectedSelfAttestedField to expectedSelfAttestedClaimValue) as RequestedSelfAttestedClaimMap
     private val mockedPresentationAttestation: PresentationAttestation = mockk()
-    private val mockedRequestedVchMap: RequestedVchMap = mutableMapOf(mockedPresentationAttestation to mockedVch)
+    private val mockedRequestedVcMap: RequestedVcMap = mutableMapOf(mockedPresentationAttestation to mockedVc)
 
     init {
         issuanceResponseFormatter = IssuanceResponseFormatter(
@@ -138,7 +139,6 @@ class OidcResponseFormatterTest {
                 mockedIdentifier
             )
         } returns expectedVerifiablePresentation
-        every { mockedVch.verifiableCredential } returns mockedVc
     }
 
     @Test
@@ -146,6 +146,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = presentationResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedPresentationResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(PresentationResponseClaims.serializer(), actualFormattedToken)
@@ -167,6 +168,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -187,6 +189,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -208,6 +211,7 @@ class OidcResponseFormatterTest {
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -224,12 +228,13 @@ class OidcResponseFormatterTest {
 
     @Test
     fun `format issuance response with presentation attestations`() {
-        every { mockedIssuanceResponse.requestedVchMap } returns mockedRequestedVchMap
+        every { mockedIssuanceResponse.requestedVcMap } returns mockedRequestedVcMap
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
-            mockedRequestedVchMap,
+            mockedRequestedVcMap,
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
@@ -248,11 +253,12 @@ class OidcResponseFormatterTest {
         val expectedRawToken = "rawToken2343"
         every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
-        every { mockedIssuanceResponse.requestedVchMap } returns mockedRequestedVchMap
+        every { mockedIssuanceResponse.requestedVcMap } returns mockedRequestedVcMap
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedResponseAudience
         val results = issuanceResponseFormatter.formatResponse(
-            mockedRequestedVchMap,
+            mockedRequestedVcMap,
             mockedIssuanceResponse,
+            mockedIdentifier,
             expectedExpiry
         )
         val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), results)
@@ -273,15 +279,13 @@ class OidcResponseFormatterTest {
         every { mockedPresentationResponse.audience } returns expectedPresentationAudience
         every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
         every { mockedPresentationResponse.request.content.state } returns mockedState
-        every { mockedPresentationResponse.requestedVchPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap
-        every { mockedPresentationResponse.responder } returns mockedIdentifier
+        every { mockedPresentationResponse.requestedVcPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap
     }
 
     private fun mockIssuanceResponseWithNoAttestations() {
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedDid
         every { mockedIssuanceResponse.audience } returns expectedResponseAudience
         every { mockedIssuanceResponse.request.contractUrl } returns expectedContract
-        every { mockedIssuanceResponse.responder } returns mockedIdentifier
     }
 
     private fun mockPresentationAttestation() {

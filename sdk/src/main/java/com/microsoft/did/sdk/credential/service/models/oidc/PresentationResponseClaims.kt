@@ -24,4 +24,4 @@ data class PresentationResponseClaims(
     var state: String = "",
 
     var nonce: String = ""
-): OidcResponseClaims()
+) : OidcResponseClaims()

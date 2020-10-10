@@ -17,4 +17,4 @@ data class ExchangeResponseClaims(
     val vc: String = "",
 
     val recipient: String = ""
-): OidcResponseClaims()
+) : OidcResponseClaims()

@@ -13,6 +13,7 @@ import org.junit.Test
 
 class PublicKeyTest {
     private var rsaPublicKey: RsaPublicKey
+
     @MockK
     private var actualJwk: JsonWebKey
 

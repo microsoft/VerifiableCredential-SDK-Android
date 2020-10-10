@@ -53,6 +53,7 @@ class TokenSignerTest {
         every { mockedPrivateKey.kid } returns expectedKid
         every { mockedPrivateKey.alg } returns expectedAlg
     }
+
     //
     private fun setUpIdentifier() {
         every { mockedIdentifier.signatureKeyReference } returns signingKeyRef

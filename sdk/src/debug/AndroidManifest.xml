@@ -1,5 +1,11 @@
-<manifest package="com.microsoft.did.sdk" xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <application android:supportsRtl="true" android:usesCleartextTraffic="true" android:allowBackup="true"/>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.microsoft.did.sdk">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <application
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:usesCleartextTraffic="true" />
 </manifest>

@@ -233,34 +233,7 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    suspend fun validateDomainBinding(rpDid: String): Result<Success> {
-        val wellKnownConfigDocumentUrl = getDomainForRp(rpDid)
-        val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)
-        return Result.Failure(DomainValidationException("$wellKnownConfigDocumentUrl is not bound to $rpDid"))
-    }
 
-    suspend fun getDomainForRp(rpDid: String): String {
-        return when (val didDocument = resolver.resolve(rpDid)) {
-            is Result.Success -> "testsite.com"
-            /*didDocument.payload.service.firstOrNull()?.endpoint ?: throw MissingDomainBindingDocumentEndpointException(
-                "Endpoint to locate well known configuration document is missing"
-            )*/
-            is Result.Failure -> throw ResolverException("Unable to resolve $rpDid", didDocument.payload)
-        }
-    }
-
-    private suspend fun getWellKnownConfigDocument(configDocumentUrl: String) {
-
-    }
-
-    private fun validateWellKnownConfigDocument() {
-    }
-
-    fun deserializeConfigDocument(docAsJwt: String): List<DomainLinkageCredential> {
-        val jwt = JwsToken.deserialize(docAsJwt, serializer)
-        val response = serializer.parse(DnsBindingResponse.serializer(), jwt.content())
-        return response.linked_dids
-    }
 
     /**
      * Saves a Verifiable Credential Holder to the database
