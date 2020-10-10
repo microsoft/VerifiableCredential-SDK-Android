@@ -4,12 +4,7 @@ package com.microsoft.did.sdk.datasource.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialHolder
-import com.microsoft.did.sdk.credential.models.receipts.Receipt
 import com.microsoft.did.sdk.datasource.db.dao.IdentifierDao
-import com.microsoft.did.sdk.datasource.db.dao.ReceiptDao
-import com.microsoft.did.sdk.datasource.db.dao.VerifiableCredentialHolderDao
 import com.microsoft.did.sdk.identifier.models.Identifier
 
 /**
@@ -22,13 +17,8 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [VerifiableCredentialHolder::class, Identifier::class, Receipt::class], version = 3)
-@TypeConverters(RoomConverters::class)
+@Database(entities = [Identifier::class], version = 1)
 abstract class SdkDatabase : RoomDatabase() {
-
-    abstract fun verifiableCredentialHolderDao(): VerifiableCredentialHolderDao
-
-    abstract fun receiptDao(): ReceiptDao
 
     abstract fun identifierDao(): IdentifierDao
 }

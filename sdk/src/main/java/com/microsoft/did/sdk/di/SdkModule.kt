@@ -20,7 +20,6 @@ import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.datasource.db.DbMigrations
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
@@ -112,8 +111,7 @@ internal class SdkModule {
     @Provides
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
-        return Room.databaseBuilder(context, SdkDatabase::class.java, "VerifiableCredential-db")
-            .addMigrations(DbMigrations.MIGRATION_2_3)
+        return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
             .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
             .build()
     }

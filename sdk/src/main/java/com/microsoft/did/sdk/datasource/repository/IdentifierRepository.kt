@@ -18,9 +18,9 @@ class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiPro
         apiProvider, url, identifier
     ).fire()
 
-    fun insert(identifier: Identifier) = identifierDao.insert(identifier)
+    suspend fun insert(identifier: Identifier) = identifierDao.insert(identifier)
 
-    fun queryByIdentifier(identifier: String): Identifier = identifierDao.queryByIdentifier(identifier)
+    suspend fun queryByIdentifier(identifier: String): Identifier? = identifierDao.queryByIdentifier(identifier)
 
-    fun queryByName(name: String): Identifier? = identifierDao.queryByName(name)
+    suspend fun queryByName(name: String): Identifier? = identifierDao.queryByName(name)
 }

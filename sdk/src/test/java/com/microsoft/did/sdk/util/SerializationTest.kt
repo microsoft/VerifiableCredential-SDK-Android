@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.util
 
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
+import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
@@ -56,6 +56,7 @@ class SerializationTest {
         assertThat(actualReceipt).isNotNull()
         assertThat(actualReceipt).isEqualTo(expectedReceipt)
     }
+
     @Test
     fun `testing polymorphic serialization`() {
         val serializer = Serializer()

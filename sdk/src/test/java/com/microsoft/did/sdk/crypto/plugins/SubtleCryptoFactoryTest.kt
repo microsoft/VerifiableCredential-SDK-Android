@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.crypto.plugins
 
-import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
+import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.did.sdk.util.serializer.Serializer
 import org.assertj.core.api.Assertions.assertThat

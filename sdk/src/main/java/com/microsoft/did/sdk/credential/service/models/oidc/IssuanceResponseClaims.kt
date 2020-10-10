@@ -17,4 +17,4 @@ data class IssuanceResponseClaims(
     var contract: String = "",
 
     var attestations: AttestationClaimModel = AttestationClaimModel()
-): OidcResponseClaims()
+) : OidcResponseClaims()

@@ -10,7 +10,11 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.*
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyType
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
@@ -81,13 +85,14 @@ class AndroidSubtleInstrumentedTest {
         val keyReference = "KeyReference4"
         cryptoKeyPair = androidSubtle.generateKeyPair(
             EcdsaParams(
-            hash =  Sha.SHA256.algorithm,
-            additionalParams = mapOf(
-                "namedCurve" to "P-256K",
-                "format" to "DER",
-                "KeyReference" to keyReference
-            )
-        ), true, listOf(KeyUsage.Sign))
+                hash = Sha.SHA256.algorithm,
+                additionalParams = mapOf(
+                    "namedCurve" to "P-256K",
+                    "format" to "DER",
+                    "KeyReference" to keyReference
+                )
+            ), true, listOf(KeyUsage.Sign)
+        )
         val payload = byteArrayOf(
             123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
             32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,

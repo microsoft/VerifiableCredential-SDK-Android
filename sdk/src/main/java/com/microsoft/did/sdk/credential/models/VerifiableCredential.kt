@@ -6,7 +6,6 @@
 package com.microsoft.did.sdk.credential.models
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Entity
@@ -19,9 +18,5 @@ data class VerifiableCredential(
     val raw: String,
 
     // contents of the Verifiable Credential token.
-    val contents: VerifiableCredentialContent,
-
-    // id of the Prime Verifiable Credential. (if prime VC, jti == picId)
-    val picId: String
-
+    val contents: VerifiableCredentialContent
 )

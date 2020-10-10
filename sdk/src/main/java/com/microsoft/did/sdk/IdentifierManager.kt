@@ -18,8 +18,6 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,16 +27,12 @@ import javax.inject.Singleton
  */
 @Singleton
 class IdentifierManager @Inject constructor(
-    val identifierRepository: IdentifierRepository,
+    private val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
     private val identifierCreator: IdentifierCreator
 ) {
 
     suspend fun getMasterIdentifier(): Result<Identifier> {
-        return withContext(Dispatchers.IO) { getOrCreateMasterIdentifier() }
-    }
-
-    private suspend fun getOrCreateMasterIdentifier(): Result<Identifier> {
         val identifier = identifierRepository.queryByName(MASTER_IDENTIFIER_NAME)
         return if (identifier != null) {
             Result.Success(identifier)
@@ -55,20 +49,29 @@ class IdentifierManager @Inject constructor(
             // peer id for master Identifier will be method name for now.
             val identifier = identifierCreator.create(METHOD_NAME).abortOnError()
             SdkLog.i("Creating Identifier: $identifier")
-            saveIdentifier(identifier)
+            identifierRepository.insert(identifier)
+            Result.Success(identifier)
+        }
+    }
+
+    suspend fun getIdentifierById(id: String): Result<Identifier> {
+        val identifier = identifierRepository.queryByIdentifier(id)
+        return if (identifier != null) {
+            Result.Success(identifier)
+        } else {
+            Result.Failure(RepositoryException("Identifier doesn't exist in db."))
         }
     }
 
     suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
-        return withContext(Dispatchers.IO) {
-            runResultTry {
-                when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
-                    null -> {
-                        val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
-                        saveIdentifier(registeredIdentifier)
-                    }
-                    else -> Result.Success(pairwiseIdentifier)
+        return runResultTry {
+            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
+                null -> {
+                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
+                    identifierRepository.insert(registeredIdentifier)
+                    Result.Success(registeredIdentifier)
                 }
+                else -> Result.Success(pairwiseIdentifier)
             }
         }
     }
@@ -76,14 +79,5 @@ class IdentifierManager @Inject constructor(
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
-    }
-
-    private fun saveIdentifier(identifier: Identifier): Result<Identifier> {
-        return try {
-            identifierRepository.insert(identifier)
-            Result.Success(identifier)
-        } catch (exception: Exception) {
-            throw RepositoryException("Unable to save identifier in repository", exception)
-        }
     }
 }
