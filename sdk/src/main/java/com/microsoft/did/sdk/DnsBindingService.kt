@@ -20,7 +20,6 @@ import javax.inject.Singleton
 @Singleton
 class DnsBindingService @Inject constructor(
     private val apiProvider: ApiProvider,
-    private val revocationResponseFormatter: RevocationResponseFormatter,
     private val resolver: Resolver,
     private val serializer: Serializer
 ) {

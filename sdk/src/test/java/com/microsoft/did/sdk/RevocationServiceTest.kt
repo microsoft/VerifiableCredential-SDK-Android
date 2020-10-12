@@ -2,8 +2,6 @@
 
 package com.microsoft.did.sdk
 
-import assertk.assertThat
-import assertk.assertions.isInstanceOf
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
@@ -12,14 +10,12 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifia
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
-import io.mockk.coJustRun
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 
@@ -81,7 +77,7 @@ class RevocationServiceTest {
 
         runBlocking {
             val status = revocationService.revokeVerifiablePresentation(verifiableCredential, revokeRpList, "")
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
+            assertThat(status).isInstanceOf(Result.Success::class.java)
         }
 
         coVerify(exactly = 1) {
@@ -89,40 +85,4 @@ class RevocationServiceTest {
             anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire()
         }
     }
-
-/*    @Test
-    fun `test revoke verifiable presentation for all RPs`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(
-            revocationReceipt
-        )
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns verifiableCredentialHolderCardId
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
-        }
-    }*/
-
-/*    @Test
-    fun `test revoke verifiable presentation no card Id`() {
-        coEvery { verifiableCredentialHolderRepository.revokeVerifiablePresentation(any(), any(), any()) } returns Result.Success(revocationReceipt)
-        every { revocationReceipt.relyingPartyList } returns revokedRPs
-        every { verifiableCredentialHolder.cardId } returns ""
-        coJustRun { receiptRepository.createAndSaveReceiptsForVCs(any(), any(), any(), any()) }
-
-        runBlocking {
-            val status = cardManager.revokeSelectiveOrAllVerifiablePresentation(verifiableCredentialHolder, emptyMap(), "")
-            Assertions.assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            verifiableCredentialHolderRepository.revokeVerifiablePresentation(verifiableCredentialHolder, emptyList(), "")
-        }
-    }*/
 }
