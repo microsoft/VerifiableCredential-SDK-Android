@@ -1,7 +1,8 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------------------------*//*
+
 
 package com.microsoft.did.sdk
 
@@ -43,10 +44,12 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+*/
 /**
  * This class manages all functionality for managing, getting/creating, presenting, and storing Verifiable Credentials.
  * We only support OpenId Connect Protocol in order to get and present Verifiable Credentials.
- */
+ *//*
+
 @Singleton
 class VerifiableCredentialManager @Inject constructor(
     private val vchRepository: VerifiableCredentialHolderRepository,
@@ -57,11 +60,13 @@ class VerifiableCredentialManager @Inject constructor(
     private val resolver: Resolver
 ) {
 
-    /**
+    */
+/**
      * Get Presentation Request.
      *
      * @param stringUri OpenID Connect Uri that points to the presentation request.
-     */
+     *//*
+
     suspend fun getPresentationRequest(stringUri: String): Result<PresentationRequest> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -100,11 +105,13 @@ class VerifiableCredentialManager @Inject constructor(
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
-    /**
+    */
+/**
      * Get Issuance Request from a contract.
      *
      * @param contractUrl url that the contract is fetched from
-     */
+     *//*
+
     suspend fun getIssuanceRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = vchRepository.getContract(contractUrl).abortOnError()
@@ -114,11 +121,13 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    /**
+    */
+/**
      * Validate an OpenID Connect Request with default Validator.
      *
      * @param request to be validated.
-     */
+     *//*
+
     private suspend fun isRequestValid(request: PresentationRequest): Result<Unit> {
         return runResultTry {
             presentationRequestValidator.validate(request)
@@ -134,12 +143,14 @@ class VerifiableCredentialManager @Inject constructor(
         return PresentationResponse(request, responder)
     }
 
-    /**
+    */
+/**
      * Send an Issuance Response signed by a responder Identifier.
      *
      * @param response IssuanceResponse to be formed, signed, and sent.
      * @param exchangeForPairwiseVerifiableCredential Configuration to turn on/off pairwise exchange. It is set to true by default
-     */
+     *//*
+
     suspend fun sendIssuanceResponse(
         response: IssuanceResponse,
         exchangeForPairwiseVerifiableCredential: Boolean = true
@@ -157,12 +168,14 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    /**
+    */
+/**
      * Send a Presentation Response signed by a responder Identifier.
      *
      * @param response PresentationResponse to be formed, signed, and sent.
      * @param exchangeForPairwiseVerifiableCredential Configuration to turn on/off pairwise exchange. It is set to true by default
-     */
+     *//*
+
     suspend fun sendPresentationResponse(
         response: PresentationResponse,
         exchangeForPairwiseVerifiableCredential: Boolean = true
@@ -185,14 +198,16 @@ class VerifiableCredentialManager @Inject constructor(
         }
     }
 
-    /**
+    */
+/**
      * Revokes a verifiable presentation which revokes access for relying parties listed to do a status check on the Verifiable Credential.
      * If relying party is not supplied, verifiable credential is revoked for all relying parties it has been presented.
      *
      * @param verifiableCredentialHolder The VC for which access to check status is revoked
      * @param rpDidToNameMap Map of DIDs and names of relying parties whose access is revoked. If empty, verifiable credential is revoked for all relying parties
      * @param reason Reason for revocation
-     */
+     *//*
+
     suspend fun revokeSelectiveOrAllVerifiablePresentation(
         verifiableCredentialHolder: VerifiableCredentialHolder,
         rpDidToNameMap: RpDidToNameMap,
@@ -235,9 +250,11 @@ class VerifiableCredentialManager @Inject constructor(
 
 
 
-    /**
+    */
+/**
      * Saves a Verifiable Credential Holder to the database
-     */
+     *//*
+
     suspend fun saveVch(verifiableCredentialHolder: VerifiableCredentialHolder): Result<Unit> {
         return withContext(Dispatchers.IO) {
             runResultTry {
@@ -262,9 +279,11 @@ class VerifiableCredentialManager @Inject constructor(
         )
     }
 
-    /**
+    */
+/**
      * Get all Verifiable Credentials Holders from the database.
-     */
+     *//*
+
     fun getAllActiveVerifiableCredentials(): LiveData<List<VerifiableCredentialHolder>> {
         return vchRepository.getAllActiveVchs()
     }
@@ -277,37 +296,47 @@ class VerifiableCredentialManager @Inject constructor(
         return vchRepository.getArchivedVchs()
     }
 
-    /**
+    */
+/**
      * Get all Verifiable Credentials Holders from the database by credential type.
-     */
+     *//*
+
     fun getVchsByType(type: String): LiveData<List<VerifiableCredentialHolder>> {
         return vchRepository.getVchsByType(type)
     }
 
-    /**
+    */
+/**
      * Get all Verifiable Credentials Holders from the database by credential type.
-     */
+     *//*
+
     fun queryVchsByType(type: String): List<VerifiableCredentialHolder> {
         return vchRepository.queryVchsByType(type)
     }
 
-    /**
+    */
+/**
      * Get receipts by verifiable credential id from the database.
-     */
+     *//*
+
     fun getReceiptByVcId(vcId: String): LiveData<List<Receipt>> {
         return receiptRepository.getAllReceiptsByVcId(vcId)
     }
 
-    /**
+    */
+/**
      * Get receipts by verifiable credential id from the database.
-     */
+     *//*
+
     private fun queryReceiptByVcId(vcId: String): List<Receipt> {
         return receiptRepository.queryAllReceiptsByVcId(vcId)
     }
 
-    /**
+    */
+/**
      * Get a Verifiable Credential by id from the database.
-     */
+     *//*
+
     fun getVchById(id: String): LiveData<VerifiableCredentialHolder> {
         return vchRepository.getVchById(id)
     }
@@ -325,13 +354,16 @@ class VerifiableCredentialManager @Inject constructor(
         return Result.Success(Unit)
     }
 
-    /**
+    */
+/**
      * Retrieves RPs to whom VC has been presented
      * @param vcId id of VC for which RPs presented to is retrieved
-     */
+     *//*
+
     fun getRpsFromPresentationsOfVc(vcId: String): RpDidToNameMap {
         val receiptsOfVc = queryReceiptByVcId(vcId)
         val receiptsForPresentations = receiptsOfVc.filter { it.action == ReceiptAction.Presentation }
         return receiptsForPresentations.map { it.entityIdentifier to it.entityName }.toMap()
     }
 }
+*/
