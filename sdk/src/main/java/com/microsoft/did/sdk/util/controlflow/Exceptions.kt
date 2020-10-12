@@ -54,6 +54,10 @@ class MissingInputInRequestException(message: String) : ValidatorException(messa
 
 class MissingDomainBindingDocumentEndpointException(message: String) : ValidatorException(message)
 
+class IdNotMatchingException(message: String): ValidatorException(message)
+
+class MissingIssuanceDateException(message: String): ValidatorException(message)
+
 class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
 class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
