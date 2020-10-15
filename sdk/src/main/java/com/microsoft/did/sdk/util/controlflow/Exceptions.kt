@@ -44,7 +44,7 @@ open class RevocationException(message: String? = null, cause: Throwable? = null
 open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
-class DomainValidationException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
+class UnableToFetchWellKnownConfigDocument(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
 class InvalidSignatureException(message: String) : ValidatorException(message)
 
@@ -52,11 +52,13 @@ class ExpiredTokenExpirationException(message: String) : ValidatorException(mess
 
 class MissingInputInRequestException(message: String) : ValidatorException(message)
 
-class MissingDomainBindingDocumentEndpointException(message: String) : ValidatorException(message)
+class MissingLinkedDomainInDidException(message: String) : ValidatorException(message)
 
 class IdNotMatchingException(message: String): ValidatorException(message)
 
 class MissingIssuanceDateException(message: String): ValidatorException(message)
+
+class LinkedDomainNotBoundException(message: String): ValidatorException(message)
 
 class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 

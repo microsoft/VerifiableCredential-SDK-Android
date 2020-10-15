@@ -10,5 +10,5 @@ import retrofit2.http.Url
 interface DnsBindingApis {
 
     @GET
-    suspend fun getWellKnownConfigDocument(@Url overrideUrl: String): Response<DnsBindingResponse>
+    suspend fun fetchWellKnownConfigDocument(@Url overrideUrl: String): Response<DnsBindingResponse>
 }

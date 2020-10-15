@@ -15,5 +15,5 @@ class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(url: Stri
     GetNetworkOperation<DnsBindingResponse, DnsBindingResponse>() {
 
     override val call: suspend () -> Response<DnsBindingResponse> =
-        { apiProvider.dnsBindingApis.getWellKnownConfigDocument("$url/.well-known/did-configuration.json") }
+        { apiProvider.dnsBindingApis.fetchWellKnownConfigDocument("$url/.well-known/did-configuration.json") }
 }

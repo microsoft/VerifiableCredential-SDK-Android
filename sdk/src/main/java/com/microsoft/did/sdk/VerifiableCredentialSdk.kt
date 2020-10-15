@@ -37,7 +37,10 @@ object VerifiableCredentialSdk {
     lateinit var revocationService: RevocationService
 
     @JvmStatic
-    internal lateinit var identifierManager: IdentifierManager
+    lateinit var dnsBindingService: DnsBindingService
+
+    @JvmStatic
+    lateinit var identifierManager: IdentifierManager
 
     @JvmOverloads
     @JvmStatic
@@ -56,6 +59,7 @@ object VerifiableCredentialSdk {
         issuanceService = sdkComponent.issuanceService()
         presentationService = sdkComponent.presentationService()
         revocationService = sdkComponent.revocationService()
+        dnsBindingService = sdkComponent.dnsBindingService()
         identifierManager = sdkComponent.identifierManager()
 
         SdkLog.addConsumer(logConsumer)
