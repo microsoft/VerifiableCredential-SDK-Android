@@ -23,6 +23,7 @@ import javax.inject.Singleton
 class IssuanceService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
+    private val dnsBindingService: DnsBindingService,
     private val apiProvider: ApiProvider,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Serializer
@@ -36,7 +37,8 @@ class IssuanceService @Inject constructor(
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
-            val request = IssuanceRequest(contract, contractUrl)
+            val entityDomain = dnsBindingService.getDomainFromRpDid(contract.input.issuer)
+            val request = IssuanceRequest(contract, contractUrl, entityDomain)
             Result.Success(request)
         }
     }

@@ -29,5 +29,3 @@ class PresentationRequest(val serializedToken: String, val content: Presentation
         return content.presentationDefinition
     }
 }
-
-typealias DnsBindingInfoMap = MutableMap<String, Boolean>

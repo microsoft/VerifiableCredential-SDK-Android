@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.util.Constants
 import retrofit2.Response
 import javax.inject.Inject
 
-class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(url: String, apiProvider: ApiProvider) :
+class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: String, apiProvider: ApiProvider) :
     GetNetworkOperation<DnsBindingResponse, DnsBindingResponse>() {
 
     override val call: suspend () -> Response<DnsBindingResponse> =

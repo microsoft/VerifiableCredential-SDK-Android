@@ -26,6 +26,7 @@ import javax.inject.Singleton
 class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
+    private val dnsBindingService: DnsBindingService,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
@@ -40,8 +41,9 @@ class PresentationService @Inject constructor(
                     PresentationRequestContent.serializer(),
                     JwsToken.deserialize(requestToken, serializer).content()
                 )
-            val request = PresentationRequest(requestToken, tokenContents)
-            isRequestValid(request).abortOnError()
+            val entityDomain = dnsBindingService.getDomainName(tokenContents.clientId)
+            val request = PresentationRequest(requestToken, tokenContents, entityDomain)
+//            isRequestValid(request).abortOnError()
             Result.Success(request)
         }
     }
