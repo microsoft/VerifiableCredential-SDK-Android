@@ -53,12 +53,4 @@ class DnsBindingService @Inject constructor(
 
     private suspend fun getWellKnownConfigDocument(configDocumentUrl: String) =
         FetchWellKnownConfigDocumentNetworkOperation(configDocumentUrl, apiProvider).fire()
-
-/*        if (domainLinkageCredential.sub != domainLinkageCredential.vc.credentialSubject.id)
-            throw IdNotMatchingException("Subject DID doesn't match credential subject DID")
-        if (domainLinkageCredential.iss != domainLinkageCredential.vc.credentialSubject.id)
-            throw IdNotMatchingException("Issuer DID doesn't match credential subject DID")
-        if (domainLinkageCredential.vc.issuanceDate.isNullOrEmpty())
-            throw MissingIssuanceDateException("Issuance Date is missing in Domain Linkage Credential")*//*
-    }*/
 }

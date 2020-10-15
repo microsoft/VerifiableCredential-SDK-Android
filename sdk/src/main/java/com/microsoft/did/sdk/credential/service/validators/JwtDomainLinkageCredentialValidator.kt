@@ -23,6 +23,7 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
         return verifyDidConfigResource(domainLinkageCredential, rpDid, rpDomain)
     }
 
+    //TODO: validate expiration date once it is in
     private fun verifyDidConfigResource(domainLinkageCredential: DomainLinkageCredential, rpDid: String, rpDomain: String): Boolean {
         return !((domainLinkageCredential.vc.credentialSubject.id != rpDid) ||
             (domainLinkageCredential.sub != domainLinkageCredential.vc.credentialSubject.id) ||
