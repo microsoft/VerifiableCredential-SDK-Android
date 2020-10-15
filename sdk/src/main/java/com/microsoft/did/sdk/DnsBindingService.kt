@@ -22,7 +22,7 @@ class DnsBindingService @Inject constructor(
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
-    suspend fun verifyDomainBinding(rpDid: String): Result<String> {
+    suspend fun verifyDnsBinding(rpDid: String): Result<String> {
         return runResultTry {
             val wellKnownConfigDocumentUrl = getDomainFromRpDid(rpDid)
             when (val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)) {
