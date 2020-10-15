@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredenti
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.dnsBindingOperations.FetchWellKnownConfigDocumentNetworkOperation
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.LinkedDomainNotBoundException
 import com.microsoft.did.sdk.util.controlflow.MissingLinkedDomainInDidException
 import com.microsoft.did.sdk.util.controlflow.ResolverException
@@ -41,7 +42,7 @@ class DnsBindingService @Inject constructor(
         return when (val didDocument = resolver.resolve(rpDid)) {
             is Result.Success -> {
                 if (didDocument.payload.service == null) throw MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing")
-                val linkedDomains = didDocument.payload.service.filter { it.type == "LinkedDomains" }
+                val linkedDomains = didDocument.payload.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT }
                 if (linkedDomains.isEmpty())
                     throw MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing")
                 else

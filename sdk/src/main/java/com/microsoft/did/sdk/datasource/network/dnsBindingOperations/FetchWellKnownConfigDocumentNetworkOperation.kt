@@ -8,6 +8,7 @@ package com.microsoft.did.sdk.datasource.network.dnsBindingOperations
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.DnsBindingResponse
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.util.Constants
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -15,5 +16,5 @@ class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(url: Stri
     GetNetworkOperation<DnsBindingResponse, DnsBindingResponse>() {
 
     override val call: suspend () -> Response<DnsBindingResponse> =
-        { apiProvider.dnsBindingApis.fetchWellKnownConfigDocument("$url/.well-known/did-configuration.json") }
+        { apiProvider.dnsBindingApis.fetchWellKnownConfigDocument("$url/${Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION}") }
 }

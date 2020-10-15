@@ -2,12 +2,19 @@
 
 package com.microsoft.did.sdk.credential.service.models.dnsBinding
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class DomainLinkageCredential (
-    val sub: String,
-    val iss: String,
-    val nbf: Long,
+    @SerialName("sub")
+    val subject: String,
+
+    @SerialName("iss")
+    val issuer: String,
+
+    @SerialName("nbf")
+    val notValidBefore: Long,
+
     val vc: DomainLinkageCredentialContent
 )
