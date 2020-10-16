@@ -13,7 +13,6 @@ import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnableToFetchWellKnownConfigDocument
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import java.net.URI
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -12,7 +12,6 @@ import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.Test
-import java.net.URI
 
 class JwtDomainLinkageCredentialValidatorTest {
 
@@ -43,24 +42,6 @@ class JwtDomainLinkageCredentialValidatorTest {
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, rpDid, "www.google.com")
             Assertions.assertThat(validated).isTrue()
-        }
-    }
-
-    @Test
-    fun `test`() {
-        val id = "https://verify.test.com"
-        val i = getDomainName(id)
-        print(i)
-    }
-
-    fun getDomainName(url: String): String {
-        val uri = URI(url)
-        val domain = uri.host
-        return if (domain.startsWith("www."))
-            domain.substring(4)
-        else {
-            val start = domain.indexOfFirst({ it == '.'})
-            domain.substring(start+1)
         }
     }
 }
