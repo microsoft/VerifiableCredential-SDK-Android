@@ -6,7 +6,6 @@ import com.microsoft.did.sdk.credential.service.models.serviceResponses.DnsBindi
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
@@ -35,10 +34,8 @@ class JwtDomainLinkageCredentialValidatorTest {
 }"""
         val rpDid = "did:ion:EiB7J-k0f3ImG-zyFUFRmV4gaOsdfjy3kddJ_d9OOv7shA?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlCZlBUWjFYbTR4TmM5NnZQcndvWTA1bkxfNDVZUG15b1Vnb3lSakFLQU1kZyIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUFFTk00cE5LYkZ6U2YxRk1YRE5sYTBVNlFCVG1rY1BHOE1wTGNRZFZPTktnIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQi1DTTU1SF92N0xaQW9CWEk2OXZEcnA1X2d0X2ptQzJublhCLVU5TlRxV2ciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnXzM3MzdmMjI2IiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJsck5PY18yb3RjM3ZUeEluZTBlckhUUy1GbGF4OUJrQ2FWekJLVFVfZ2JnIiwieSI6InVUNFd4bnlRYVp3LTR6TlhBdTM0dllqSnZ3ZFhuZDJ4WjdxVmVhamd0c0UifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
         val response = serializer.parse(DnsBindingResponse.serializer(), docJwt)
-        val domainLinkageCredentialJwt = response.linked_dids.first()
-        val jwt = JwsToken.deserialize(domainLinkageCredentialJwt, serializer)
-        every { JwsToken.deserialize(domainLinkageCredentialJwt, serializer) } returns jwt
-        coEvery { mockedJwtValidator.verifySignature(jwt) } returns true
+        val domainLinkageCredentialJwt = response.linkedDids.first()
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, rpDid, "www.google.com")
             Assertions.assertThat(validated).isTrue()

@@ -13,5 +13,6 @@ import kotlinx.serialization.Serializable
 data class DnsBindingResponse(
     @SerialName(CONTEXT)
     val context: String,
-    val linked_dids: List<String>
+    @SerialName("linked_dids")
+    val linkedDids: List<String>
 ): ServiceResponse

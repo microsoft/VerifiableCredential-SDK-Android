@@ -5,13 +5,14 @@ package com.microsoft.did.sdk
 import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.dnsBindingOperations.FetchWellKnownConfigDocumentNetworkOperation
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.LinkedDomainNotBoundException
 import com.microsoft.did.sdk.util.controlflow.MissingLinkedDomainInDidException
-import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnableToFetchWellKnownConfigDocument
+import com.microsoft.did.sdk.util.controlflow.map
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,12 +25,12 @@ class DnsBindingService @Inject constructor(
 ) {
     suspend fun verifyDnsBinding(rpDid: String, wellKnownConfigDocumentUrl: String): Result<Unit> {
         return runResultTry {
-            if(wellKnownConfigDocumentUrl.isEmpty())
+            if (wellKnownConfigDocumentUrl.isEmpty())
                 Result.Failure(MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing"))
             when (val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)) {
                 is Result.Success -> {
-                    wellKnownConfigDocument.payload.linked_dids.forEach {
-                        val isDomainBound = jwtDomainLinkageCredentialValidator.validate(it, rpDid, wellKnownConfigDocumentUrl)
+                    wellKnownConfigDocument.payload.linkedDids.forEach { linkedDid ->
+                        val isDomainBound = jwtDomainLinkageCredentialValidator.validate(linkedDid, rpDid, wellKnownConfigDocumentUrl)
                         if (isDomainBound) Result.Success(Unit)
                     }
                 }
@@ -39,19 +40,19 @@ class DnsBindingService @Inject constructor(
         }
     }
 
-    suspend fun getDomainFromRpDid(rpDid: String): String {
-        return when (val didDocument = resolver.resolve(rpDid)) {
-            is Result.Success -> {
-                val noDomainName = ""
-                if (didDocument.payload.service == null) return noDomainName
-                val linkedDomains = didDocument.payload.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT }
-                if (linkedDomains.isEmpty())
-                    noDomainName
-                else
-                    linkedDomains.first().serviceEndpoint
-            }
-            is Result.Failure -> throw ResolverException("Unable to resolve $rpDid", didDocument.payload)
-        }
+    suspend fun getDomainFromRpDid(rpDid: String): Result<String> {
+        val didDocument = resolver.resolve(rpDid)
+        return didDocument.map { didDocument -> getLinkedDomains(didDocument) }
+    }
+
+    private fun getLinkedDomains(didDocument: IdentifierDocument): String {
+        val noDomainName = ""
+        if (didDocument.service == null) return noDomainName
+        val linkedDomains = didDocument.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT }
+        return if (linkedDomains.isEmpty())
+            noDomainName
+        else
+            linkedDomains.first().serviceEndpoint
     }
 
     private suspend fun getWellKnownConfigDocument(configDocumentUrl: String) =
