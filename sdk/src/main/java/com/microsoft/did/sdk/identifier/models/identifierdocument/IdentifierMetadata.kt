@@ -9,6 +9,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IdentifierMetadata(
     @SerialName("operationPublicKeys")
-    val operationPublicKeys: List<IdentifierDocumentPublicKey>,
-    val recoveryKey: JsonWebKey
+    val operationPublicKeys: List<IdentifierDocumentPublicKey>? = null,
+    val recoveryKey: JsonWebKey? = null
 )
