@@ -47,5 +47,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun registrationUrl(@Named("registrationUrl") registrationUrl: String): Builder
+
+        @BindsInstance
+        fun walletInfo(@Named("walletInfo") walletInfo: String): Builder
     }
 }

@@ -34,6 +34,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 /**
@@ -73,11 +74,12 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient(): OkHttpClient {
+    fun defaultOkHttpClient(@Named("walletInfo") walletInfo: String): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)
+            .addInterceptor(UserAgentInterceptor(walletInfo))
             .build()
     }
 
