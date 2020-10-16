@@ -48,24 +48,29 @@ abstract class BaseNetworkOperation<S, T> {
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
         val requestId = response.headers()["request-id"] ?: "?"
+        val correlationVector = response.headers()["ms-cv"] ?: "?"
         return when (response.code()) {
             401 -> Result.Failure(UnauthorizedException(requestId, "${response.code()}: ${response.errorBody()?.string()}", false))
             402, 403, 404 -> Result.Failure(
                 ServiceErrorException(
                     requestId,
-                    "${response.code()}: ${response.errorBody()?.string()}",
+                    defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     false
                 )
             )
             500, 501, 502, 503 -> Result.Failure(
                 ServiceUnreachableException(
                     requestId,
-                    "${response.code()}: ${response.errorBody()?.string()}",
+                    defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     true
                 )
             )
             else -> Result.Failure(NetworkException(requestId, "Unknown Status code ${response.code()}", true))
         }
+    }
+
+    private fun defaultErrorMessage(httpCode: Int, requestId: String, correlationVector: String, errorBody: String): String {
+        return "RequestId: $requestId\nCorrelationVector: $correlationVector\nHttp code: $httpCode\nErrorBody: $errorBody"
     }
 
     fun <S> onRetry(): Result<S> {
