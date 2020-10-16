@@ -28,7 +28,6 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import dagger.Module
 import dagger.Provides
-import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -74,12 +73,12 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient(@Named("walletInfo") walletInfo: String): OkHttpClient {
+    fun defaultOkHttpClient(@Named("userAgentInfo") userAgentInfo: String): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)
-            .addInterceptor(UserAgentInterceptor(walletInfo))
+            .addInterceptor(UserAgentInterceptor(userAgentInfo))
             .build()
     }
 

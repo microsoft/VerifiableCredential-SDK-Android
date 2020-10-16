@@ -44,13 +44,13 @@ object VerifiableCredentialSdk {
     fun init(
         context: Context,
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
-        walletInfo: String,
+        userAgentInfo: String,
         registrationUrl: String = "",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
-            .walletInfo(walletInfo)
+            .userAgentInfo(userAgentInfo)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .build()
