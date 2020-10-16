@@ -22,33 +22,31 @@ class DnsBindingService @Inject constructor(
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
-    suspend fun verifyDnsBinding(rpDid: String): Result<String> {
+    suspend fun verifyDnsBinding(rpDid: String, wellKnownConfigDocumentUrl: String): Result<Unit> {
         return runResultTry {
-            val wellKnownConfigDocumentUrl = getDomainFromRpDid(rpDid)
-            validateConfigDoc(wellKnownConfigDocumentUrl, rpDid)
-        }
-    }
-
-    private suspend fun validateConfigDoc(wellKnownConfigDocumentUrl: String, rpDid: String): Result<String> {
-        when (val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)) {
-            is Result.Success -> {
-                wellKnownConfigDocument.payload.linked_dids.forEach {
-                    val isDomainBound = jwtDomainLinkageCredentialValidator.validate(it, rpDid, wellKnownConfigDocumentUrl)
-                    if (isDomainBound) return Result.Success(wellKnownConfigDocumentUrl)
+            if(wellKnownConfigDocumentUrl.isEmpty())
+                Result.Failure(MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing"))
+            when (val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)) {
+                is Result.Success -> {
+                    wellKnownConfigDocument.payload.linked_dids.forEach {
+                        val isDomainBound = jwtDomainLinkageCredentialValidator.validate(it, rpDid, wellKnownConfigDocumentUrl)
+                        if (isDomainBound) Result.Success(Unit)
+                    }
                 }
+                is Result.Failure -> Result.Failure(UnableToFetchWellKnownConfigDocument("Unable to fetch well-known config document from $wellKnownConfigDocumentUrl for DID $rpDid"))
             }
-            is Result.Failure -> return Result.Failure(UnableToFetchWellKnownConfigDocument("Unable to fetch well-known config document from $wellKnownConfigDocumentUrl for DID $rpDid"))
+            Result.Failure(LinkedDomainNotBoundException("$wellKnownConfigDocumentUrl is not bound to $rpDid"))
         }
-        return Result.Failure(LinkedDomainNotBoundException("$wellKnownConfigDocumentUrl is not bound to $rpDid"))
     }
 
     suspend fun getDomainFromRpDid(rpDid: String): String {
         return when (val didDocument = resolver.resolve(rpDid)) {
             is Result.Success -> {
-                if (didDocument.payload.service == null) throw MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing")
+                val noDomainName = ""
+                if (didDocument.payload.service == null) return noDomainName
                 val linkedDomains = didDocument.payload.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT }
                 if (linkedDomains.isEmpty())
-                    throw MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing")
+                    noDomainName
                 else
                     linkedDomains.first().serviceEndpoint
             }
