@@ -8,6 +8,7 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -24,12 +25,14 @@ import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.serializer.Serializer
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
@@ -80,12 +83,13 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun defaultRetrofit(okHttpClient: OkHttpClient, serializer: Serializer): Retrofit {
+        val contentType = MediaType.get("application/json")
         return Retrofit.Builder()
             .baseUrl("http://TODO.me")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(serializer.json.asConverterFactory(contentType))
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
     }
