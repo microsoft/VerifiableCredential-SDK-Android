@@ -18,7 +18,6 @@ class FetchContractNetworkOperation(val url: String, apiProvider: ApiProvider) :
 
     override fun onSuccess(response: Response<VerifiableCredentialContract>): Result<VerifiableCredentialContract> {
         val contract = response.body() ?: throw IssuanceException("Contract was not found in response")
-        contract.input.attestations.idTokens.map { claim -> claim.claims.map { type -> if (type.type == null) type.type = "" } }
         return Result.Success(contract)
     }
 }
