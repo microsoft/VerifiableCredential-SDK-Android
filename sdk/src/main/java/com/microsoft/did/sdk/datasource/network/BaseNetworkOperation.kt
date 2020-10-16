@@ -50,7 +50,13 @@ abstract class BaseNetworkOperation<S, T> {
         val requestId = response.headers()["request-id"] ?: "?"
         val correlationVector = response.headers()["ms-cv"] ?: "?"
         return when (response.code()) {
-            401 -> Result.Failure(UnauthorizedException(requestId, "${response.code()}: ${response.errorBody()?.string()}", false))
+            401 -> Result.Failure(
+                UnauthorizedException(
+                    requestId,
+                    defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
+                    false
+                )
+            )
             402, 403, 404 -> Result.Failure(
                 ServiceErrorException(
                     requestId,
