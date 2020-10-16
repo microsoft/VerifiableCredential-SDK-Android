@@ -30,25 +30,7 @@ class DnsBindingService @Inject constructor(
         }
     }
 
-    suspend fun temporaryBindingCheck(clientId: String, rpDid: String): Result<String> {
-        return runResultTry {
-            val wellKnownConfigDocumentUrl = getDomainName(clientId)
-            validateConfigDoc(wellKnownConfigDocumentUrl, rpDid)
-        }
-    }
-
-    fun getDomainName(url: String): String {
-        val uri = URI(url)
-        val domain = uri.host
-        return if (domain.startsWith("www."))
-            "https://" + domain.substring(4)
-        else {
-            val start = domain.indexOfFirst({ it == '.'})
-            "https://" + domain.substring(start+1)
-        }
-    }
-
-    suspend fun validateConfigDoc(wellKnownConfigDocumentUrl: String, rpDid: String): Result<String> {
+    private suspend fun validateConfigDoc(wellKnownConfigDocumentUrl: String, rpDid: String): Result<String> {
         when (val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)) {
             is Result.Success -> {
                 wellKnownConfigDocument.payload.linked_dids.forEach {
@@ -69,7 +51,7 @@ class DnsBindingService @Inject constructor(
                 if (linkedDomains.isEmpty())
                     throw MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing")
                 else
-                    linkedDomains.first().endpoint
+                    linkedDomains.first().serviceEndpoint
             }
             is Result.Failure -> throw ResolverException("Unable to resolve $rpDid", didDocument.payload)
         }
