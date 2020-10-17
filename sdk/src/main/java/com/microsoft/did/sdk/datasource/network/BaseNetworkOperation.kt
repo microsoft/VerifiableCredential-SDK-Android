@@ -49,7 +49,7 @@ abstract class BaseNetworkOperation<S, T> {
     open fun onFailure(response: Response<S>): Result<Nothing> {
         val requestId = response.headers()["request-id"] ?: "?"
         val correlationVector = response.headers()["ms-cv"] ?: "?"
-        return when (response.code()) {
+        return when (response.code()) { 
             401 -> Result.Failure(
                 UnauthorizedException(
                     requestId,
