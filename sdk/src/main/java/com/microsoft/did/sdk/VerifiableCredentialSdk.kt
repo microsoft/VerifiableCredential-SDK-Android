@@ -43,7 +43,7 @@ object VerifiableCredentialSdk {
      * Initializes VerifiableCredentialSdk
      *
      * @param context context instance
-     * @param userAgentInfo it contains name and version of the client
+     * @param userAgentInfo it contains name and version of the client. It will be used in User-Agent header for all the requests.
      * @param logConsumer logger implementation to be used
      * @param registrationUrl url used to register DID
      * @param resolverUrl url used to resolve DID
