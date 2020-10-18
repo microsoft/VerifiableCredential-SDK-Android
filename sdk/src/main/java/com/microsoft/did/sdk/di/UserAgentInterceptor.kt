@@ -17,5 +17,4 @@ class UserAgentInterceptor(private val userAgentInfo: String) : Interceptor {
             .build()
         return chain.proceed(requestWithUserAgentInfo)
     }
-
 }
