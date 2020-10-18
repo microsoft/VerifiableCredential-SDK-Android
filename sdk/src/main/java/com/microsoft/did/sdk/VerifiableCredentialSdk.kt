@@ -40,7 +40,7 @@ object VerifiableCredentialSdk {
     internal lateinit var identifierManager: IdentifierManager
 
     /**
-     * Initializes the VerifiableCredentialSdk
+     * Initializes VerifiableCredentialSdk
      *
      * @param context context instance
      * @param userAgentInfo it contains name and version of the client
