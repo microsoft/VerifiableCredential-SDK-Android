@@ -29,7 +29,7 @@ class DnsBindingService @Inject constructor(
             val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
             wellKnownConfigDocument.linkedDids.forEach { linkedDid ->
                 val isDomainBound = jwtDomainLinkageCredentialValidator.validate(linkedDid, relyingPartyDid, domainUrl)
-                if (isDomainBound) Result.Success(Unit)
+                if (isDomainBound) return@runResultTry Result.Success(Unit)
             }
             Result.Failure(LinkedDomainNotBoundException("$domainUrl is not bound to $relyingPartyDid"))
         }
@@ -49,7 +49,6 @@ class DnsBindingService @Inject constructor(
         else
             linkedDomains.first().serviceEndpoint
     }
-
-    private suspend fun getWellKnownConfigDocument(configDocumentUrl: String) =
-        FetchWellKnownConfigDocumentNetworkOperation(configDocumentUrl, apiProvider).fire()
+    private suspend fun getWellKnownConfigDocument(domainUrl: String) =
+        FetchWellKnownConfigDocumentNetworkOperation(domainUrl, apiProvider).fire()
 }
