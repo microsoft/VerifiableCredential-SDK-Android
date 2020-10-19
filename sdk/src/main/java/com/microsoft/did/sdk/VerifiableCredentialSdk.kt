@@ -21,8 +21,8 @@ import com.microsoft.did.sdk.util.log.SdkLog
  * by your own dependency injection library. In the case of Dagger2 as such:
  *
  * @Provides
- * fun provideIdentifierManager(): IdentifierManager {
- *     return VerifiableCredentialSdk.identifierManager
+ * fun provideIssuanceService(): IssuanceService {
+ *     return VerifiableCredentialSdk.issuanceService
  * }
  */
 object VerifiableCredentialSdk {
@@ -39,16 +39,27 @@ object VerifiableCredentialSdk {
     @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
 
+    /**
+     * Initializes VerifiableCredentialSdk
+     *
+     * @param context context instance
+     * @param userAgentInfo it contains name and version of the client. It will be used in User-Agent header for all the requests.
+     * @param logConsumer logger implementation to be used
+     * @param registrationUrl url used to register DID
+     * @param resolverUrl url used to resolve DID
+     */
     @JvmOverloads
     @JvmStatic
     fun init(
         context: Context,
+        userAgentInfo: String,
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         registrationUrl: String = "",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
+            .userAgentInfo(userAgentInfo)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .build()
