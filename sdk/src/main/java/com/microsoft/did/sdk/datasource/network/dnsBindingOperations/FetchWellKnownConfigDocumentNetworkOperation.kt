@@ -9,6 +9,8 @@ import com.microsoft.did.sdk.credential.service.models.serviceResponses.DnsBindi
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.UnableToFetchWellKnownConfigDocument
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -17,4 +19,8 @@ class FetchWellKnownConfigDocumentNetworkOperation @Inject constructor(val url: 
 
     override val call: suspend () -> Response<DnsBindingResponse> =
         { apiProvider.dnsBindingApis.fetchWellKnownConfigDocument("$url/${Constants.WELL_KNOWN_CONFIG_DOCUMENT_LOCATION}") }
+
+    override fun onFailure(response: Response<DnsBindingResponse>): Result<Nothing> {
+        return Result.Failure(UnableToFetchWellKnownConfigDocument("Unable to fetch well-known config document from $url"))
+    }
 }

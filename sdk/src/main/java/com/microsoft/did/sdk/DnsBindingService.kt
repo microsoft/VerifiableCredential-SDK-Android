@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.LinkedDomainNotBoundException
 import com.microsoft.did.sdk.util.controlflow.MissingLinkedDomainInDidException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.UnableToFetchWellKnownConfigDocument
 import com.microsoft.did.sdk.util.controlflow.map
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import javax.inject.Inject
@@ -27,14 +26,10 @@ class DnsBindingService @Inject constructor(
         return runResultTry {
             if (domainUrl.isEmpty())
                 Result.Failure(MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing"))
-            when (val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl)) {
-                is Result.Success -> {
-                    wellKnownConfigDocument.payload.linkedDids.forEach { linkedDid ->
-                        val isDomainBound = jwtDomainLinkageCredentialValidator.validate(linkedDid, relyingPartyDid, domainUrl)
-                        if (isDomainBound) Result.Success(Unit)
-                    }
-                }
-                is Result.Failure -> Result.Failure(UnableToFetchWellKnownConfigDocument("Unable to fetch well-known config document from $domainUrl for DID $relyingPartyDid"))
+            val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
+            wellKnownConfigDocument.linkedDids.forEach { linkedDid ->
+                val isDomainBound = jwtDomainLinkageCredentialValidator.validate(linkedDid, relyingPartyDid, domainUrl)
+                if (isDomainBound) Result.Success(Unit)
             }
             Result.Failure(LinkedDomainNotBoundException("$domainUrl is not bound to $relyingPartyDid"))
         }
