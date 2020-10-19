@@ -18,5 +18,7 @@ data class IdTokenAttestation(
 
     val client_id: String,
 
-    val redirect_uri: String
+    val redirect_uri: String = "",
+
+    val scope: String = "openid"
 )
