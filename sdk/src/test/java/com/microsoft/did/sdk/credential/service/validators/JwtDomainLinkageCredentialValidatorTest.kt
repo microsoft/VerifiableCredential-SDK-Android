@@ -3,11 +3,9 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.DnsBindingResponse
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
 import io.mockk.mockk
-import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.Test
@@ -20,11 +18,10 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     init {
         jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, serializer)
-        mockkObject(JwsToken)
     }
 
     @Test
-    fun `validateConfigDoc`() {
+    fun `validate well known config document`() {
         val docJwt =
             """{
     "@context": "https://identity.foundation/.well-known/contexts/did-configuration-v0.0.jsonld",

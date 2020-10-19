@@ -66,23 +66,4 @@ class RevocationServiceTest {
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
         }
     }
-
-    @Test
-    fun `test revoke verifiable presentation no reason`() {
-        val expectedRevocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, revokeRpList, "")
-        val expectedRevocationReceipt: RevocationReceipt = mockk()
-        coEvery { anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire() } returns Result.Success(
-            expectedRevocationReceipt
-        )
-
-        runBlocking {
-            val status = revocationService.revokeVerifiablePresentation(verifiableCredential, revokeRpList, "")
-            assertThat(status).isInstanceOf(Result.Success::class.java)
-        }
-
-        coVerify(exactly = 1) {
-            revocationService["sendRevocationRequest"](expectedRevocationRequest, formattedResponse)
-            anyConstructed<SendVerifiablePresentationRevocationRequestNetworkOperation>().fire()
-        }
-    }
 }

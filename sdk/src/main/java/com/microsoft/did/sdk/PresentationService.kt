@@ -41,7 +41,7 @@ class PresentationService @Inject constructor(
                     PresentationRequestContent.serializer(),
                     JwsToken.deserialize(requestToken, serializer).content()
                 )
-            val entityDomain = dnsBindingService.getDomainFromRpDid(tokenContents.issuer)
+            val entityDomain = dnsBindingService.getDomainUrlFromRelyingPartyDid(tokenContents.issuer).abortOnError()
             val request = PresentationRequest(requestToken, tokenContents, entityDomain)
             isRequestValid(request).abortOnError()
             Result.Success(request)

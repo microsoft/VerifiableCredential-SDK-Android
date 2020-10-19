@@ -14,8 +14,8 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val serializer: Serializer
 ) : DomainLinkageCredentialValidator {
 
-    override suspend fun validate(domainLinkageCredentialJwt: String, rpDid: String, rpDomain: String): Boolean {
-        val jwt = JwsToken.deserialize(domainLinkageCredentialJwt, serializer)
+    override suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean {
+        val jwt = JwsToken.deserialize(domainLinkageCredential, serializer)
         val domainLinkageCredential = serializer.parse(DomainLinkageCredential.serializer(), jwt.content())
         if (!jwtValidator.verifySignature(jwt)) {
             return false
@@ -25,11 +25,18 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
 
     //TODO: validate expiration date once it is in
     private fun verifyDidConfigResource(domainLinkageCredential: DomainLinkageCredential, rpDid: String, rpDomain: String): Boolean {
-        return !((domainLinkageCredential.vc.credentialSubject.did != rpDid) ||
-            (domainLinkageCredential.subject != domainLinkageCredential.vc.credentialSubject.did) ||
-            (domainLinkageCredential.issuer != domainLinkageCredential.vc.credentialSubject.did) ||
-            (domainLinkageCredential.vc.issuanceDate.isNullOrEmpty()) ||
-            (domainLinkageCredential.vc.credentialSubject.domainUrl.isNullOrEmpty() ||
-                domainLinkageCredential.vc.credentialSubject.domainUrl != rpDomain))
+        return isCredentialSubjectIdValid(domainLinkageCredential, rpDid)
+            && isCredentialSubjectOriginValid(domainLinkageCredential, rpDomain)
+            && domainLinkageCredential.vc.issuanceDate.isNotEmpty()
+    }
+
+    private fun isCredentialSubjectIdValid(domainLinkageCredential: DomainLinkageCredential, rpDid: String): Boolean {
+        return (domainLinkageCredential.subject == domainLinkageCredential.vc.credentialSubject.did)
+            && (domainLinkageCredential.issuer == domainLinkageCredential.vc.credentialSubject.did)
+            && domainLinkageCredential.vc.credentialSubject.did == rpDid
+    }
+
+    private fun isCredentialSubjectOriginValid(domainLinkageCredential: DomainLinkageCredential, rpDomain: String): Boolean {
+        return domainLinkageCredential.vc.credentialSubject.domainUrl.isNotEmpty() && domainLinkageCredential.vc.credentialSubject.domainUrl == rpDomain
     }
 }

@@ -23,34 +23,32 @@ class DnsBindingService @Inject constructor(
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
-    suspend fun verifyDnsBinding(rpDid: String, wellKnownConfigDocumentUrl: String): Result<Unit> {
+    suspend fun fetchAndVerifyDnsBinding(relyingPartyDid: String, domainUrl: String): Result<Unit> {
         return runResultTry {
-            if (wellKnownConfigDocumentUrl.isEmpty())
+            if (domainUrl.isEmpty())
                 Result.Failure(MissingLinkedDomainInDidException("Domain to locate well known configuration document is missing"))
-            when (val wellKnownConfigDocument = getWellKnownConfigDocument(wellKnownConfigDocumentUrl)) {
+            when (val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl)) {
                 is Result.Success -> {
                     wellKnownConfigDocument.payload.linkedDids.forEach { linkedDid ->
-                        val isDomainBound = jwtDomainLinkageCredentialValidator.validate(linkedDid, rpDid, wellKnownConfigDocumentUrl)
+                        val isDomainBound = jwtDomainLinkageCredentialValidator.validate(linkedDid, relyingPartyDid, domainUrl)
                         if (isDomainBound) Result.Success(Unit)
                     }
                 }
-                is Result.Failure -> Result.Failure(UnableToFetchWellKnownConfigDocument("Unable to fetch well-known config document from $wellKnownConfigDocumentUrl for DID $rpDid"))
+                is Result.Failure -> Result.Failure(UnableToFetchWellKnownConfigDocument("Unable to fetch well-known config document from $domainUrl for DID $relyingPartyDid"))
             }
-            Result.Failure(LinkedDomainNotBoundException("$wellKnownConfigDocumentUrl is not bound to $rpDid"))
+            Result.Failure(LinkedDomainNotBoundException("$domainUrl is not bound to $relyingPartyDid"))
         }
     }
 
-    suspend fun getDomainFromRpDid(rpDid: String): Result<String> {
-        val didDocument = resolver.resolve(rpDid)
-        return didDocument.map { didDocument -> getLinkedDomains(didDocument) }
+    suspend fun getDomainUrlFromRelyingPartyDid(relyingPartyDid: String): Result<String> {
+        val didDocument = resolver.resolve(relyingPartyDid)
+        return didDocument.map { didDocument -> getFirstLinkedDomainsEndpoint(didDocument) }
     }
 
-    private fun getLinkedDomains(didDocument: IdentifierDocument): String {
-        val noDomainName = ""
-        if (didDocument.service == null) return noDomainName
+    private fun getFirstLinkedDomainsEndpoint(didDocument: IdentifierDocument): String {
         val linkedDomains = didDocument.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT }
         return if (linkedDomains.isEmpty())
-            noDomainName
+            ""
         else
             linkedDomains.first().serviceEndpoint
     }
