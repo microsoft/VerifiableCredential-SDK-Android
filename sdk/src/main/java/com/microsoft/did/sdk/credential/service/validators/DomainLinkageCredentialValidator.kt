@@ -4,5 +4,5 @@ package com.microsoft.did.sdk.credential.service.validators
 
 interface DomainLinkageCredentialValidator {
 
-    suspend fun validate(domainLinkageCredentialJwt: String, rpDid: String, rpDomain: String): Boolean
+    suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean
 }
