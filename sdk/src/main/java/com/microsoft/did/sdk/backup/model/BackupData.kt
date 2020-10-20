@@ -7,5 +7,6 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 
 data class BackupData(
     val vcs: Map<VerifiableCredential, Map<String, String>>,
+    val metaData: Map<String, String>,
     val identifiers: List<Identifier>
 )
