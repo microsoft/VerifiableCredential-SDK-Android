@@ -24,7 +24,10 @@ object Constants {
 
     //Well-Known Config Document Constants
     const val WELL_KNOWN_CONFIG_DOCUMENT_LOCATION = ".well-known/did-configuration.json"
-    const val LINKED_DOMAINS_SERVICE_ENDPOINT = "LinkedDomains"
+    const val LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE = "LinkedDomains"
+    const val LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS = "origins"
+    const val SERVICE_ENDPOINT_TYPE = "type"
+    const val SERVICE_ENDPOINT = "serviceEndpoint"
 
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000

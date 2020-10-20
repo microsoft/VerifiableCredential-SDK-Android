@@ -17,16 +17,22 @@ import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.content
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -71,6 +77,9 @@ class IssuanceServiceTest {
             suppliedVcContent
         )
     private val formattedResponse = "FORMATTED_RESPONSE"
+    private val mockedIdentifierDocument: IdentifierDocument = mockk()
+    private val mockedIdentifierDocumentService: JsonObject = mockk()
+    private val mockedIdentifierDocumentLinkedDomainEndPoint: JsonElement = mockk()
 
     init {
         coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
@@ -82,9 +91,7 @@ class IssuanceServiceTest {
     }
 
     private fun setUpTestContract(expectedContractJwt: String): VerifiableCredentialContract {
-        val contract = serializer.parse(VerifiableCredentialContract.serializer(), expectedContractJwt)
-        contract.input.attestations.idTokens.map { claim -> claim.claims.map { type -> if (type.type == null) type.type = "" } }
-        return contract
+        return serializer.parse(VerifiableCredentialContract.serializer(), expectedContractJwt)
     }
 
     @Test
@@ -96,9 +103,11 @@ class IssuanceServiceTest {
         val expectedEntityIdentifier =
             "did:ion:EiCfeOciEjwupwRQsJC3wMZzz3_M3XIo6bhy7aJkCG6CAQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEMDQwY2lQakUxR0xqLXEyWmRyLVJaXzVlcU8yNFlDMFI5bTlEd2ZHMkdGQSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUMyRmQ5UE90emFNcUtMaDNRTFp0Wk43V0RDRHJjdkN4eTNvdlNERDhKRGVRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQ2gtaTFDMW1fM2N4SGJNM3pXemRRdExxMnBvRldaX25FVEJTb0NhT2JZTWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnXzBmOTdlZWZjIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoQ0xsb3JJbGx2M2FWSkRiYkNxM0VHbzU2bWV6Q3RLWkZGcUtvS3RVc3BzIiwieSI6Imh1VG5iTEc3MWU0NDNEeVJkeU5DX3dfc3paR0hVYUcxUHdsMHpXb0h2LUEifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
 
-        coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(
-            expectedContract
-        )
+        coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(expectedContract)
+        coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns Result.Success(mockedIdentifierDocument)
+        every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
+        every { mockedIdentifierDocumentService["type"] } returns mockedIdentifierDocumentLinkedDomainEndPoint
+        every { mockedIdentifierDocumentLinkedDomainEndPoint.content } returns "LinkedDomain"
 
         runBlocking {
             val actualRequest = issuanceService.getRequest(suppliedContractUrl)

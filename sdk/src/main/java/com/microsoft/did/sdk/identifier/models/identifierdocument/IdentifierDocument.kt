@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.identifier.models.identifierdocument
 
-import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Class to represent Identifier Document returned on resolving an identifier
@@ -12,5 +12,5 @@ data class IdentifierDocument(
     val publicKey: List<IdentifierDocumentPublicKey>,
     val id: String
 ) {
-    var service: List<IdentifierDocumentService> = emptyList()
+    var service: List<JsonObject> = emptyList()
 }
