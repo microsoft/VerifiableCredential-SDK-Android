@@ -6,12 +6,16 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
+import com.microsoft.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.formVerifiableCredential
@@ -25,6 +29,7 @@ class IssuanceService @Inject constructor(
     private val exchangeService: ExchangeService,
     private val dnsBindingService: DnsBindingService,
     private val apiProvider: ApiProvider,
+    private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Serializer
 ) {
@@ -36,7 +41,9 @@ class IssuanceService @Inject constructor(
      */
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
-            val contract = fetchContract(contractUrl).abortOnError()
+            val signedContract = fetchContract(contractUrl).abortOnError()
+            verifySignature(signedContract)
+            val contract = unwrapSignedContract(signedContract)
             val entityDomain = dnsBindingService.getDomainUrlFromRelyingPartyDid(contract.input.issuer).abortOnError()
             val request = IssuanceRequest(contract, contractUrl, entityDomain)
             Result.Success(request)
@@ -47,6 +54,18 @@ class IssuanceService @Inject constructor(
         url,
         apiProvider
     ).fire()
+
+    private fun unwrapSignedContract(signedContract: String): VerifiableCredentialContract {
+        val token = JwsToken.deserialize(signedContract, serializer)
+        return serializer.parse(VerifiableCredentialContract.serializer(), token.content())
+    }
+
+    private suspend fun verifySignature(signedContract: String) {
+        val token = JwsToken.deserialize(signedContract, serializer)
+        if (!jwtValidator.verifySignature(token)) {
+            throw InvalidSignatureException("Signature is not Valid.")
+        }
+    }
 
     /**
      * Send an Issuance Response.

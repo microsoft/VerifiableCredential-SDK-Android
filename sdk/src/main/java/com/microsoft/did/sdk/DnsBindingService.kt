@@ -65,6 +65,8 @@ class DnsBindingService @Inject constructor(
         }
     }
 
-    private suspend fun getWellKnownConfigDocument(domainUrl: String) =
-        FetchWellKnownConfigDocumentNetworkOperation(domainUrl, apiProvider).fire()
+    private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
+        domainUrl,
+        apiProvider
+    ).fire()
 }
