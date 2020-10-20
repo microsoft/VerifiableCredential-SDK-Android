@@ -10,7 +10,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DnsBindingResponse(
+data class LinkedDomainsResponse(
     @SerialName(CONTEXT)
     val context: String,
     @SerialName("linked_dids")

@@ -52,9 +52,9 @@ class ExpiredTokenExpirationException(message: String) : ValidatorException(mess
 
 class MissingInputInRequestException(message: String) : ValidatorException(message)
 
-class MissingLinkedDomainInDidException(message: String) : ValidatorException(message)
+class MissingLinkedDomainsInDidException(message: String) : ValidatorException(message)
 
-class LinkedDomainNotBoundException(message: String): ValidatorException(message)
+class DomainNotLinkedException(message: String): ValidatorException(message)
 
 class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 

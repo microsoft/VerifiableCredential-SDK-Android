@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.credential.service.validators
 
-import com.microsoft.did.sdk.credential.service.models.dnsBinding.DomainLinkageCredential
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.DomainLinkageCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject

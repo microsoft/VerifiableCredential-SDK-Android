@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.credential.service.models.dnsBinding
+package com.microsoft.did.sdk.credential.service.models.linkedDomains
 
 import com.microsoft.did.sdk.util.Constants
 import kotlinx.serialization.SerialName

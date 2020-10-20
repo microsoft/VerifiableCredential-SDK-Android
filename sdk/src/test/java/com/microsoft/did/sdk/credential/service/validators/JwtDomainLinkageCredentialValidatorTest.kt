@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.credential.service.validators
 
-import com.microsoft.did.sdk.credential.service.models.serviceResponses.DnsBindingResponse
+import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -31,7 +31,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `validate well known config document with correct inputs`() {
-        val response = serializer.parse(DnsBindingResponse.serializer(), docJwt)
+        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
@@ -42,7 +42,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `failing validation of well known config document with incorrect issuer DID`() {
-        val response = serializer.parse(DnsBindingResponse.serializer(), docJwt)
+        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
@@ -53,7 +53,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `failing validation of well known config document with incorrect domain url`() {
-        val response = serializer.parse(DnsBindingResponse.serializer(), docJwt)
+        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
@@ -64,7 +64,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `failing validation of well known config document with invalid signature`() {
-        val response = serializer.parse(DnsBindingResponse.serializer(), docJwt)
+        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
         runBlocking {

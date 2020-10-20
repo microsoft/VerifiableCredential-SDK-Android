@@ -27,7 +27,7 @@ import javax.inject.Singleton
 class IssuanceService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
-    private val dnsBindingService: DnsBindingService,
+    private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
@@ -44,7 +44,7 @@ class IssuanceService @Inject constructor(
             val signedContract = fetchContract(contractUrl).abortOnError()
             verifySignature(signedContract)
             val contract = unwrapSignedContract(signedContract)
-            val entityDomain = dnsBindingService.getDomainUrlFromRelyingPartyDid(contract.input.issuer).abortOnError()
+            val entityDomain = linkedDomainsService.getDomainUrlFromRelyingPartyDid(contract.input.issuer).abortOnError()
             val request = IssuanceRequest(contract, contractUrl, entityDomain)
             Result.Success(request)
         }

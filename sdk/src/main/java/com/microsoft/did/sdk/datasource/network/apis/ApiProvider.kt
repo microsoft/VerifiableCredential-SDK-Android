@@ -19,7 +19,7 @@ class ApiProvider @Inject constructor(retrofit: Retrofit) {
 
     val revocationApis: RevocationApis = retrofit.create(RevocationApis::class.java)
 
-    val dnsBindingApis: DnsBindingApis = retrofit.create(DnsBindingApis::class.java)
+    val linkedDomainsApis: LinkedDomainsApis = retrofit.create(LinkedDomainsApis::class.java)
 
     val identifierApi: IdentifierApi = retrofit.create(IdentifierApi::class.java)
 }
