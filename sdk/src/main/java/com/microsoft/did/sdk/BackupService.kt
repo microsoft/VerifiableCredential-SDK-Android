@@ -4,7 +4,7 @@ package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.backup.model.BackupData
 
-class BackupUseCase {
+class BackupService {
 
     fun createBackupString(backupData: BackupData): String {
 

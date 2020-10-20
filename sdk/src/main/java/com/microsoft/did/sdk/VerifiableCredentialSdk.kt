@@ -37,6 +37,9 @@ object VerifiableCredentialSdk {
     lateinit var revocationService: RevocationService
 
     @JvmStatic
+    lateinit var backupService: BackupService
+
+    @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
 
     @JvmOverloads
