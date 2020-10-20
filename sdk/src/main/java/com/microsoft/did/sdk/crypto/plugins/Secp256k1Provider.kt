@@ -22,6 +22,7 @@ import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.convertSignedToUnsignedByteArray
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.publicToXY
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.spongycastle.asn1.ASN1InputStream
@@ -110,7 +111,10 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         val privateKeyParams = ECPrivateKeyParameters(BigInteger(1, keyData), ecDomainParameters)
         signingSigner.init(true, privateKeyParams)
 
+        var startLoad = System.nanoTime()
         val signature = signingSigner.generateSignature(hashedData)
+        var loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - pure generateSignature: ${loadTimeInMs}ms")
         return convertSignatureToUnsignedByteArray(signature)
     }
 

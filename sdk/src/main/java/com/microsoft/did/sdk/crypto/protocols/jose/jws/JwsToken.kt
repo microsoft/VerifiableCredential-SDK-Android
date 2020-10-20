@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
 import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import java.util.Locale
@@ -145,9 +146,15 @@ class JwsToken private constructor(
      * @param header optional headers added to the signature
      */
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
+        var startLoad = System.nanoTime()
         // 1. Get the signing key's metadata
         val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
 
+        var loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - cryptoOperations.keyStore.getPrivateKey(: ${loadTimeInMs}ms")
+
+
+        startLoad = System.nanoTime()
         // 3. Compute headers
         val headers = header.toMutableMap()
         val protected = mutableMapOf<String, String>()
@@ -175,14 +182,22 @@ class JwsToken private constructor(
             val jsonProtected = serializer.stringify(protected, String::class, String::class)
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected))
         }
-
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - compute headers: ${loadTimeInMs}ms")
+        startLoad = System.nanoTime()
         val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - signature input: ${loadTimeInMs}ms")
 
+        startLoad = System.nanoTime()
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName)
         )
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - sign: ${loadTimeInMs}ms")
 
+        startLoad = System.nanoTime()
         val signatureBase64 = Base64Url.encode(signature)
 
         this.signatures.add(
@@ -192,6 +207,8 @@ class JwsToken private constructor(
                 signature = signatureBase64
             )
         )
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - base64+add: ${loadTimeInMs}ms")
     }
 
     /**

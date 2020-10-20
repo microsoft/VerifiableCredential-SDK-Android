@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,6 +34,7 @@ class PresentationService @Inject constructor(
 ) {
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
+            val startLoad = System.nanoTime()
             val uri = verifyUri(stringUri)
             val requestToken = getPresentationRequestToken(uri).abortOnError()
             val tokenContents =
@@ -42,6 +44,8 @@ class PresentationService @Inject constructor(
                 )
             val request = PresentationRequest(requestToken, tokenContents)
             isRequestValid(request).abortOnError()
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - SDK load time (PRESENTATION}): ${loadTimeInMs}ms")
             Result.Success(request)
         }
     }
@@ -87,6 +91,7 @@ class PresentationService @Inject constructor(
         enablePairwise: Boolean = true
     ): Result<Unit> {
         return runResultTry {
+            val startLoad = System.nanoTime()
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             if (enablePairwise) {
                 val pairwiseIdentifier =
@@ -97,6 +102,8 @@ class PresentationService @Inject constructor(
                 val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
                 formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
             }
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - SDK complete response time (PRESENTATION}): ${loadTimeInMs}ms")
             Result.Success(Unit)
         }
     }
@@ -106,10 +113,13 @@ class PresentationService @Inject constructor(
         pairwiseIdentifier: Identifier
     ): Result<RequestedVcPresentationSubmissionMap> {
         return runResultTry {
+            val startLoad = System.nanoTime()
             val exchangedVcMap = response.requestedVcPresentationSubmissionMap.mapValues {
                 val owner = identifierManager.getIdentifierById(it.value.contents.sub).abortOnError()
                 exchangeService.getExchangedVerifiableCredential(it.value, owner, pairwiseIdentifier).abortOnError()
             }
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - Exchange Vcs (PRESENTATION}): ${loadTimeInMs}ms")
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }
     }
@@ -120,12 +130,15 @@ class PresentationService @Inject constructor(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
+        val startLoad = System.nanoTime()
         val formattedResponse = presentationResponseFormatter.formatResponse(
             requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
             presentationResponse = response,
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
+        val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - format Response for SendPresentation (PRESENTATION}): ${loadTimeInMs}ms")
         return SendPresentationResponseNetworkOperation(
             response.audience,
             formattedResponse,

@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import java.util.UUID
 import javax.inject.Inject
@@ -34,15 +35,28 @@ class PresentationResponseFormatter @Inject constructor(
         responder: Identifier,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): String {
+        var startLoad = System.nanoTime()
+
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responseId = UUID.randomUUID().toString()
+        var loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - createIssuedAndExpiryTime: ${loadTimeInMs}ms")
+
+        startLoad = System.nanoTime()
         val (attestationResponse, credentialPresentationSubmission) = createAttestationsAndPresentationSubmission(
             requestedVcPresentationSubmissionMap,
             presentationResponse,
             responder
         )
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - createAttestationsAndPresentationSubmission: ${loadTimeInMs}ms")
 
+        startLoad = System.nanoTime()
+        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - cryptoOperations.keyStore.getPublicKey: ${loadTimeInMs}ms")
+
+        startLoad = System.nanoTime()
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
             publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
             audience = presentationResponse.audience
@@ -54,6 +68,9 @@ class PresentationResponseFormatter @Inject constructor(
             state = presentationResponse.request.content.state
             this.responseId = responseId
         }
+
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - PresentationResponseClaims: ${loadTimeInMs}ms")
         return signContents(oidcResponseClaims, responder)
     }
 
@@ -62,11 +79,16 @@ class PresentationResponseFormatter @Inject constructor(
         presentationResponse: PresentationResponse,
         responder: Identifier
     ): Pair<AttestationClaimModel, PresentationSubmission> {
+        var startLoad = System.nanoTime()
         val attestationResponse = this.createAttestationClaimModel(
             requestedVcPresentationSubmissionMap,
             presentationResponse.request.entityIdentifier,
             responder
         )
+        var loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - createAttestationClaimModel: ${loadTimeInMs}ms")
+
+        startLoad = System.nanoTime()
         val credentialPresentationSubmissionDescriptors =
             presentationResponse.requestedVcPresentationSubmissionMap.map {
                 PresentationSubmissionDescriptor(
@@ -76,6 +98,8 @@ class PresentationResponseFormatter @Inject constructor(
                     Constants.CREDENTIAL_PRESENTATION_ENCODING
                 )
             }
+        loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - requestedVcPresentationSubmissionMap: ${loadTimeInMs}ms")
         val credentialPresentationSubmission = PresentationSubmission(credentialPresentationSubmissionDescriptors)
         return Pair(attestationResponse, credentialPresentationSubmission)
     }
@@ -108,7 +132,11 @@ class PresentationResponseFormatter @Inject constructor(
     }
 
     private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
+        val startLoad = System.nanoTime()
         val serializedResponseContent = serializer.stringify(PresentationResponseClaims.serializer(), contents)
-        return signer.signWithIdentifier(serializedResponseContent, responder)
+        val signedStr = signer.signWithIdentifier(serializedResponseContent, responder)
+        val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+        SdkLog.v("Perf - signContents: ${loadTimeInMs}ms")
+        return signedStr
     }
 }

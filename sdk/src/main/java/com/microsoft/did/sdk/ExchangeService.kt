@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVcExchangeRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -40,7 +41,7 @@ class ExchangeService @Inject constructor(
         }
         val formattedPairwiseRequest = exchangeResponseFormatter.formatResponse(request, expiryInSeconds)
 
-        val result = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+        val result = SendVcExchangeRequestNetworkOperation(
             request.audience,
             formattedPairwiseRequest,
             apiProvider

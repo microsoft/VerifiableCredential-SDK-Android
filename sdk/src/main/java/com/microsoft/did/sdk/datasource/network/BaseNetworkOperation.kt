@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
+import com.microsoft.did.sdk.util.log.SdkLog
 import retrofit2.Response
 import java.io.IOException
 
@@ -26,13 +27,18 @@ abstract class BaseNetworkOperation<S, T> {
     abstract val call: suspend () -> Response<S>
 
     open suspend fun fire(): Result<T> {
+        val startLoad = System.nanoTime()
         try {
             val response = call.invoke()
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - Network call (${this.javaClass.simpleName}): ${loadTimeInMs}ms")
             if (response.isSuccessful) {
                 return onSuccess(response)
             }
             return onFailure(response)
         } catch (exception: IOException) {
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - Network call failed (${this.javaClass.simpleName}): ${loadTimeInMs}ms")
             return Result.Failure(LocalNetworkException("Failed to send request.", exception))
         }
     }

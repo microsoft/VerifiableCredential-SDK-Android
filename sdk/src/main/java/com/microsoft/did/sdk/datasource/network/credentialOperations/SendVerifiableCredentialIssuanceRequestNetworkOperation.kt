@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
 import retrofit2.Response
 
-class SendVerifiableCredentialIssuanceRequestNetworkOperation(
+open class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     url: String,
     serializedResponse: String,
     apiProvider: ApiProvider

@@ -15,6 +15,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.formVerifiableCredential
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,8 +36,11 @@ class IssuanceService @Inject constructor(
      */
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
+            val startLoad = System.nanoTime()
             val contract = fetchContract(contractUrl).abortOnError()
             val request = IssuanceRequest(contract, contractUrl)
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - SDK load time (ISSUANCE}): ${loadTimeInMs}ms")
             Result.Success(request)
         }
     }
@@ -58,6 +62,7 @@ class IssuanceService @Inject constructor(
         enablePairwise: Boolean = true
     ): Result<VerifiableCredential> {
         return runResultTry {
+            val startLoad = System.nanoTime()
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val verifiableCredential = if (enablePairwise) {
                 val pairwiseIdentifier =
@@ -68,6 +73,8 @@ class IssuanceService @Inject constructor(
                 val requestedVcMap = response.requestedVcMap
                 formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
             }
+            val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
+            SdkLog.v("mPerf - SDK complete response time (ISSUANCE}): ${loadTimeInMs}ms")
             Result.Success(verifiableCredential)
         }
     }
