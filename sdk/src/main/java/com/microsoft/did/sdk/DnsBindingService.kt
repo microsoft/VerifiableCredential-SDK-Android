@@ -42,13 +42,13 @@ class DnsBindingService @Inject constructor(
 
     private fun getFirstLinkedDomainsEndpoint(didDocument: IdentifierDocument): String {
         val noDomainName = ""
-        if (didDocument.service == null) return noDomainName
         val linkedDomains = didDocument.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT }
         return if (linkedDomains.isEmpty())
             noDomainName
         else
             linkedDomains.first().serviceEndpoint
     }
+
     private suspend fun getWellKnownConfigDocument(domainUrl: String) =
         FetchWellKnownConfigDocumentNetworkOperation(domainUrl, apiProvider).fire()
 }
