@@ -45,7 +45,7 @@ class PresentationService @Inject constructor(
             val request = PresentationRequest(requestToken, tokenContents)
             isRequestValid(request).abortOnError()
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - SDK load time (PRESENTATION}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - SDK load time (PRESENTATION}): ${loadTimeInMs}ms")
             Result.Success(request)
         }
     }
@@ -103,7 +103,7 @@ class PresentationService @Inject constructor(
                 formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
             }
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - SDK complete response time (PRESENTATION}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - SDK complete response time (PRESENTATION}): ${loadTimeInMs}ms")
             Result.Success(Unit)
         }
     }
@@ -119,7 +119,7 @@ class PresentationService @Inject constructor(
                 exchangeService.getExchangedVerifiableCredential(it.value, owner, pairwiseIdentifier).abortOnError()
             }
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - Exchange Vcs (PRESENTATION}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - Exchange Vcs (PRESENTATION}): ${loadTimeInMs}ms")
             Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
         }
     }

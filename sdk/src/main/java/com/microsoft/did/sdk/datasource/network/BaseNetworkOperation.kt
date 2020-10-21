@@ -31,14 +31,14 @@ abstract class BaseNetworkOperation<S, T> {
         try {
             val response = call.invoke()
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - Network call (${this.javaClass.simpleName}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - Network call (${this.javaClass.simpleName}): ${loadTimeInMs}ms")
             if (response.isSuccessful) {
                 return onSuccess(response)
             }
             return onFailure(response)
         } catch (exception: IOException) {
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - Network call failed (${this.javaClass.simpleName}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - Network call failed (${this.javaClass.simpleName}): ${loadTimeInMs}ms")
             return Result.Failure(LocalNetworkException("Failed to send request.", exception))
         }
     }

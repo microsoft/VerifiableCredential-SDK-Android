@@ -40,7 +40,7 @@ class IssuanceService @Inject constructor(
             val contract = fetchContract(contractUrl).abortOnError()
             val request = IssuanceRequest(contract, contractUrl)
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - SDK load time (ISSUANCE}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - SDK load time (ISSUANCE}): ${loadTimeInMs}ms")
             Result.Success(request)
         }
     }
@@ -74,7 +74,7 @@ class IssuanceService @Inject constructor(
                 formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
             }
             val loadTimeInMs = (System.nanoTime() - startLoad) / 1000000
-            SdkLog.v("mPerf - SDK complete response time (ISSUANCE}): ${loadTimeInMs}ms")
+            SdkLog.i("mPerf - SDK complete response time (ISSUANCE}): ${loadTimeInMs}ms")
             Result.Success(verifiableCredential)
         }
     }
