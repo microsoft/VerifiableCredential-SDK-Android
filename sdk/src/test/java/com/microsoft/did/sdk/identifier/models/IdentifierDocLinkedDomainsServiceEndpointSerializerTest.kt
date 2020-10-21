@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.util.serializer.Serializer
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
-class IdentifierDocServiceEndpointSerializerTest {
+class IdentifierDocLinkedDomainsServiceEndpointSerializerTest {
     private val serializer = Serializer()
 
     @Test

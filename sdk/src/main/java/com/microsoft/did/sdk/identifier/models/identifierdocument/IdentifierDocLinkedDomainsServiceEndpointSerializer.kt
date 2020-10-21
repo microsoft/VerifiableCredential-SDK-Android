@@ -20,8 +20,15 @@ import kotlinx.serialization.json.JsonLiteral
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.content
 
+/**
+ * This class serializes/deserializes serviceEndpoint property in IdentifierDocument.
+ * The serviceEndpoint can be a String or Key/Value pair where key is "origins" and value is a list of String.
+ * It only supports service endpoint of type "LinkedDomains".
+ * @see [Well Known DID Configuration] (https://identity.foundation/.well-known/resources/did-configuration/#linked-domain-service-endpoint)
+ */
 @Serializer(forClass = List::class)
-class IdentifierDocServiceEndpointSerializer (dataSerializer: KSerializer<String> ) : KSerializer<List<String>> {
+class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :
+    KSerializer<List<String>> {
     override val descriptor: SerialDescriptor = PrimitiveDescriptor("serviceEndpoint", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: List<String>) {
