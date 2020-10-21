@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.identifier.models.payload.document
 
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocServiceEndpointSerializer
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,5 +12,6 @@ import kotlinx.serialization.Serializable
 data class IdentifierDocumentService(
     val id: String,
     val type: String,
+    @Serializable(with = IdentifierDocServiceEndpointSerializer::class)
     val serviceEndpoint: String
 )

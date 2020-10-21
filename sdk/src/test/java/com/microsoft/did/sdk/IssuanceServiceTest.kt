@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContra
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -29,9 +30,6 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.content
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -78,8 +76,8 @@ class IssuanceServiceTest {
         )
     private val formattedResponse = "FORMATTED_RESPONSE"
     private val mockedIdentifierDocument: IdentifierDocument = mockk()
-    private val mockedIdentifierDocumentService: JsonObject = mockk()
-    private val mockedIdentifierDocumentLinkedDomainsEndPoint: JsonElement = mockk()
+    private val mockedIdentifierDocumentService: IdentifierDocumentService = mockk()
+    private val mockedIdentifierDocumentServiceEndpoint = ""
 
     init {
         coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
@@ -108,8 +106,7 @@ class IssuanceServiceTest {
         every { issuanceService["unwrapSignedContract"](expectedContractJwt) } returns expectedContract
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns Result.Success(mockedIdentifierDocument)
         every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
-        every { mockedIdentifierDocumentService["type"] } returns mockedIdentifierDocumentLinkedDomainsEndPoint
-        every { mockedIdentifierDocumentLinkedDomainsEndPoint.content } returns "LinkedDomain"
+        every { mockedIdentifierDocumentService.serviceEndpoint } returns mockedIdentifierDocumentServiceEndpoint
 
         runBlocking {
             val actualRequest = issuanceService.getRequest(suppliedContractUrl)

@@ -8,19 +8,11 @@ import com.microsoft.did.sdk.datasource.network.linkedDomainsOperations.FetchWel
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS
-import com.microsoft.did.sdk.util.Constants.SERVICE_ENDPOINT
-import com.microsoft.did.sdk.util.Constants.SERVICE_ENDPOINT_TYPE
 import com.microsoft.did.sdk.util.controlflow.DomainNotLinkedException
 import com.microsoft.did.sdk.util.controlflow.MissingLinkedDomainsInDidException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.LinkedDomainEndpointInUnknownFormatException
 import com.microsoft.did.sdk.util.controlflow.map
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonLiteral
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.content
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -45,24 +37,12 @@ class LinkedDomainsService @Inject constructor(
 
     suspend fun getDomainUrlFromRelyingPartyDid(relyingPartyDid: String): Result<String> {
         val didDocument = resolver.resolve(relyingPartyDid)
-        return didDocument.map { didDocument -> getFirstLinkedDomainsEndpoint(didDocument) }
+        return didDocument.map { getFirstLinkedDomainServiceEndpoint(it) }
     }
 
-    fun getFirstLinkedDomainsEndpoint(didDocument: IdentifierDocument): String {
-        val noDomainName = ""
-        val linkedDomains = didDocument.service.filter { endpoint ->
-            endpoint[SERVICE_ENDPOINT_TYPE]?.let { linkedDomainEndpoint -> linkedDomainEndpoint.content == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE }
-                ?: run { false }
-        }
-        return if (linkedDomains.isEmpty())
-            noDomainName
-        else {
-            when (val linkedDomain = linkedDomains.first()[SERVICE_ENDPOINT]) {
-                is JsonLiteral -> linkedDomain.content
-                is JsonObject -> (linkedDomain[LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS] as JsonArray).first().content
-                else -> throw LinkedDomainEndpointInUnknownFormatException("Linked Domains service endpoint is not in the correct format")
-            }
-        }
+    private fun getFirstLinkedDomainServiceEndpoint(didDocument: IdentifierDocument): String {
+        val linkedDomainsServices = didDocument.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE }
+        return if (linkedDomainsServices.isEmpty()) "" else linkedDomainsServices.first().serviceEndpoint
     }
 
     private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
