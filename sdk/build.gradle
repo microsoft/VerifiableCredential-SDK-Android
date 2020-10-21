@@ -1,7 +1,22 @@
+buildscript {
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version"
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlinx-serialization'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'jacoco'
 
@@ -67,19 +82,6 @@ android {
     }
 }
 
-buildscript {
-    repositories {
-        google()
-        jcenter()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
     kapt "com.google.dagger:dagger-compiler:$dagger_version"
@@ -97,8 +99,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$com_squareup_okhttp3_okhttp_version"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$kotlin_serialization_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
 
     // KTX
     implementation "androidx.collection:collection-ktx:$collections_ktx_version"
