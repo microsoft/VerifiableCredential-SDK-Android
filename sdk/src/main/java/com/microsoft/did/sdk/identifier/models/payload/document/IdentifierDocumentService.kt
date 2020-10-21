@@ -13,5 +13,5 @@ data class IdentifierDocumentService(
     val id: String,
     val type: String,
     @Serializable(with = IdentifierDocServiceEndpointSerializer::class)
-    val serviceEndpoint: String
+    val serviceEndpoint: List<String>
 )

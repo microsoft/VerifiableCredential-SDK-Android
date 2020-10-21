@@ -106,7 +106,7 @@ class IssuanceServiceTest {
         every { issuanceService["unwrapSignedContract"](expectedContractJwt) } returns expectedContract
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns Result.Success(mockedIdentifierDocument)
         every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
-        every { mockedIdentifierDocumentService.serviceEndpoint } returns mockedIdentifierDocumentServiceEndpoint
+        every { mockedIdentifierDocumentService.serviceEndpoint } returns listOf(mockedIdentifierDocumentServiceEndpoint)
 
         runBlocking {
             val actualRequest = issuanceService.getRequest(suppliedContractUrl)

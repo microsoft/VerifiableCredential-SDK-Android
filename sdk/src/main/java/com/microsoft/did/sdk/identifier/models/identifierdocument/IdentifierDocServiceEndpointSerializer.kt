@@ -11,24 +11,27 @@ import kotlinx.serialization.PrimitiveDescriptor
 import kotlinx.serialization.PrimitiveKind
 import kotlinx.serialization.SerialDescriptor
 import kotlinx.serialization.Serializer
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.decode
+import kotlinx.serialization.encode
 import kotlinx.serialization.json.JsonElementSerializer
 import kotlinx.serialization.json.JsonLiteral
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.content
 
-@Serializer(forClass = String::class)
-class IdentifierDocServiceEndpointSerializer : KSerializer<String> {
+@Serializer(forClass = List::class)
+class IdentifierDocServiceEndpointSerializer (dataSerializer: KSerializer<String> ) : KSerializer<List<String>> {
     override val descriptor: SerialDescriptor = PrimitiveDescriptor("serviceEndpoint", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: String) {
-        encoder.encodeString(value)
+    override fun serialize(encoder: Encoder, value: List<String>) {
+        encoder.encode(ListSerializer(String.serializer()), value)
     }
 
-    override fun deserialize(decoder: Decoder): String {
+    override fun deserialize(decoder: Decoder): List<String> {
         return when (val serviceEndpointJsonElement = decoder.decode(JsonElementSerializer)) {
-            is JsonLiteral -> serviceEndpointJsonElement.content
-            is JsonObject -> (serviceEndpointJsonElement.getArray(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS)).first().content
+            is JsonLiteral -> listOf(serviceEndpointJsonElement.content)
+            is JsonObject -> (serviceEndpointJsonElement.getArray(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS)).map { it.content }
             else -> throw LinkedDomainEndpointInUnknownFormatException("Linked Domains service endpoint is not in the correct format")
         }
     }

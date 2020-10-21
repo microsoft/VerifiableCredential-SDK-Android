@@ -42,7 +42,7 @@ class LinkedDomainsService @Inject constructor(
 
     private fun getFirstLinkedDomainServiceEndpoint(didDocument: IdentifierDocument): String {
         val linkedDomainsServices = didDocument.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE }
-        return if (linkedDomainsServices.isEmpty()) "" else linkedDomainsServices.first().serviceEndpoint
+        return if (linkedDomainsServices.isEmpty()) "" else linkedDomainsServices.first().serviceEndpoint.first()
     }
 
     private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
