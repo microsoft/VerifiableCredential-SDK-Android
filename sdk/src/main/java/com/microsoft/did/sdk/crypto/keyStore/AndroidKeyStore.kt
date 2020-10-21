@@ -22,15 +22,15 @@ import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
+import kotlinx.serialization.json.Json
 import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Serializer) :
+class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Json) :
     com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
 
     companion object {
@@ -168,7 +168,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val alias = checkOrCreateKeyId(keyReference, key.kid)
         val jwk = key.toJWK()
         jwk.kid = alias
-        val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = serializer.encodeToString(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -182,7 +182,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         // This key is not natively supported
         val jwk = key.toJWK()
         jwk.kid = alias
-        val jwkString = serializer.stringify(JsonWebKey.serializer(), jwk)
+        val jwkString = serializer.encodeToString(JsonWebKey.serializer(), jwk)
         val keyValue = stringToByteArray(jwkString)
         saveSecureData(alias, keyValue)
     }
@@ -246,7 +246,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 val keyRef = keyReferenceMatch.groupValues[1]
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
-                val key = serializer.parse(JsonWebKey.serializer(), byteArrayToString(jwkData))
+                val key = serializer.decodeFromString(JsonWebKey.serializer(), byteArrayToString(jwkData))
                 val keyType = toKeyType(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
@@ -269,7 +269,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     private fun getSecurePrivateKey(alias: String): PrivateKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = serializer.decodeFromString(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty == KeyType.RSA.value) {
             return RsaPrivateKey(jwk)
         } else if (jwk.kty == KeyType.EllipticCurve.value) {
@@ -281,7 +281,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     private fun getSecureSecretKey(alias: String): SecretKey? {
         val data = getSecureData(alias) ?: return null
-        val jwk = serializer.parse(JsonWebKey.serializer(), byteArrayToString(data))
+        val jwk = serializer.decodeFromString(JsonWebKey.serializer(), byteArrayToString(data))
         if (jwk.kty != KeyType.Octets.value) {
             throw KeyException("$alias is not a secret key.")
         }

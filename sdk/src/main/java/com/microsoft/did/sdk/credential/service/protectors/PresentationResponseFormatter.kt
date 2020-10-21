@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,7 +24,7 @@ import javax.inject.Singleton
 @Singleton
 class PresentationResponseFormatter @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val serializer: Serializer,
+    private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner
 ) {
@@ -108,7 +108,7 @@ class PresentationResponseFormatter @Inject constructor(
     }
 
     private fun signContents(contents: PresentationResponseClaims, responder: Identifier): String {
-        val serializedResponseContent = serializer.stringify(PresentationResponseClaims.serializer(), contents)
+        val serializedResponseContent = serializer.encodeToString(PresentationResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 }

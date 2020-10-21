@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class OidcPresentationRequestValidator @Inject constructor(
     private val jwtValidator: JwtValidator,
-    private val serializer: Serializer
+    private val serializer: Json
 ) : PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {

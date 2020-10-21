@@ -4,7 +4,6 @@ package com.microsoft.did.sdk.datasource.network.credentialOperations
 
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.SignatureException
-import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

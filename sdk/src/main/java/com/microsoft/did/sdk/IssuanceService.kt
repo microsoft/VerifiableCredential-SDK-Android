@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.formVerifiableCredential
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,7 +25,7 @@ class IssuanceService @Inject constructor(
     private val exchangeService: ExchangeService,
     private val apiProvider: ApiProvider,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
-    private val serializer: Serializer
+    private val serializer: Json
 ) {
 
     /**

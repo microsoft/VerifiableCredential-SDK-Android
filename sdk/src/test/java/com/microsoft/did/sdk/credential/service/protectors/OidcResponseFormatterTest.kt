@@ -22,10 +22,10 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -43,7 +43,7 @@ class OidcResponseFormatterTest {
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
     private val mockedVc: VerifiableCredential = mockk()
     private val mockedIdentifier: Identifier = mockk()
-    private val serializer: Serializer = Serializer()
+    private val serializer: Json = Json
 
     private val issuanceResponseFormatter: IssuanceResponseFormatter
     private val presentationResponseFormatter: PresentationResponseFormatter

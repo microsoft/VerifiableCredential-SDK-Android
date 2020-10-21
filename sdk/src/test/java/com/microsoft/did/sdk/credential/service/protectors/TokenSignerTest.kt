@@ -6,11 +6,11 @@ import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.slot
+import kotlinx.serialization.json.Json
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -36,7 +36,7 @@ class TokenSignerTest {
     private val expectedPayload = "payload12423"
     private val expectedTypeInJwtHeader = "JWT"
     private val expectedHeader = mapOf("kid" to "$expectedDid$expectedKid", "typ" to expectedTypeInJwtHeader)
-    private val serializer = Serializer()
+    private val serializer = Json
     private val expectedSignedPayload = "signedPayload45236"
 
     init {

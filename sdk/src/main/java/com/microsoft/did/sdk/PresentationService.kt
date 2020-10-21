@@ -18,7 +18,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +26,7 @@ import javax.inject.Singleton
 class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
-    private val serializer: Serializer,
+    private val serializer: Json,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
@@ -36,7 +36,7 @@ class PresentationService @Inject constructor(
             val uri = verifyUri(stringUri)
             val requestToken = getPresentationRequestToken(uri).abortOnError()
             val tokenContents =
-                serializer.parse(
+                serializer.decodeFromString(
                     PresentationRequestContent.serializer(),
                     JwsToken.deserialize(requestToken, serializer).content()
                 )
