@@ -22,10 +22,10 @@ import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -43,7 +43,6 @@ class OidcResponseFormatterTest {
     private val mockedVerifiablePresentationFormatter: VerifiablePresentationFormatter = mockk()
     private val mockedVc: VerifiableCredential = mockk()
     private val mockedIdentifier: Identifier = mockk()
-    private val serializer: Json = Json
 
     private val issuanceResponseFormatter: IssuanceResponseFormatter
     private val presentationResponseFormatter: PresentationResponseFormatter
@@ -89,19 +88,19 @@ class OidcResponseFormatterTest {
     init {
         issuanceResponseFormatter = IssuanceResponseFormatter(
             mockedCryptoOperations,
-            serializer,
+            defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
             mockedTokenSigner
         )
         presentationResponseFormatter = PresentationResponseFormatter(
             mockedCryptoOperations,
-            serializer,
+            defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
             mockedTokenSigner
         )
         revocationResponseFormatter = RevocationResponseFormatter(
             mockedCryptoOperations,
-            serializer,
+            defaultTestSerializer,
             mockedTokenSigner
         )
         setUpGetPublicKey()
@@ -149,7 +148,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = serializer.parse(PresentationResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
         assertEquals(mockedState, actualTokenContents.state)
         assertEquals(mockedNonce, actualTokenContents.nonce)
@@ -171,7 +170,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -192,7 +191,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -214,7 +213,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -237,7 +236,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), actualFormattedToken)
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -261,7 +260,7 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = serializer.parse(IssuanceResponseClaims.serializer(), results)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(IssuanceResponseClaims.serializer(), results)
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
@@ -302,7 +301,7 @@ class OidcResponseFormatterTest {
         every { revocationRequest.verifiableCredential } returns mockedVc
         every { mockedVc.raw } returns mockedVcRaw
         val results = revocationResponseFormatter.formatResponse(revocationRequest, Constants.DEFAULT_EXPIRATION_IN_SECONDS)
-        val actualTokenContents = serializer.parse(RevocationResponseClaims.serializer(), results)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(RevocationResponseClaims.serializer(), results)
         assertThat(actualTokenContents.did).isEqualTo(expectedDid)
         assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
         assertThat(actualTokenContents.audience).isEqualTo(expectedRevocationAudience)
@@ -319,7 +318,7 @@ class OidcResponseFormatterTest {
         every { revocationRequest.reason } returns ""
         every { mockedVc.raw } returns mockedVcRaw
         val results = revocationResponseFormatter.formatResponse(revocationRequest, Constants.DEFAULT_EXPIRATION_IN_SECONDS)
-        val actualTokenContents = serializer.parse(RevocationResponseClaims.serializer(), results)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(RevocationResponseClaims.serializer(), results)
         assertThat(actualTokenContents.did).isEqualTo(expectedDid)
         assertThat(actualTokenContents.vc).isEqualTo(mockedVcRaw)
         assertThat(actualTokenContents.audience).isEqualTo(expectedRevocationAudience)

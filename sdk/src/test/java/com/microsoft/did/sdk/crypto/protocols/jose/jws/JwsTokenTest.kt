@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -25,12 +26,11 @@ class JwsTokenTest {
  "exp":1300819380,${'\r'}
  "http://example.com/is_root":true}"""
 
-    private val serializer = Serializer()
     private val ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
 
     init {
         /* This is the payload used for all the operations below */
-        subtle = Subtle(setOf(MockProvider()), serializer)
+        subtle = Subtle(setOf(MockProvider()), defaultTestSerializer)
         crypto = CryptoOperations(subtle, keyStore, ellipticCurvePairwiseKey)
         keyRef = Base64Url.encode(Random.nextBytes(8))
         val keyPair = subtle.generateKeyPair(
@@ -46,36 +46,33 @@ class JwsTokenTest {
 
     @Test
     fun `test serialization of json in flat format`() {
-        val serializer = Serializer()
         val testData: ByteArray = stringToByteArray(payload)
-        val token = JwsToken(testData, serializer)
+        val token = JwsToken(testData, defaultTestSerializer)
         token.sign(keyRef, crypto)
-        val serialized = token.serialize(serializer, JwsFormat.FlatJson)
+        val serialized = token.serialize(defaultTestSerializer, JwsFormat.FlatJson)
         assertThat(serialized).doesNotContain("signatures")
-        val verifyToken = JwsToken.deserialize(serialized, serializer)
+        val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
         assertThat(verifyToken.signatures.size).isEqualTo(1)
     }
 
     @Test
     fun `test serialization of json in general json format`() {
-        val serializer = Serializer()
         val testData: ByteArray = stringToByteArray(payload)
-        val token = JwsToken(testData, serializer)
+        val token = JwsToken(testData, defaultTestSerializer)
         token.sign(keyRef, crypto)
-        val serialized = token.serialize(serializer, JwsFormat.GeneralJson)
+        val serialized = token.serialize(defaultTestSerializer, JwsFormat.GeneralJson)
         assertThat(serialized).contains("signatures")
-        val verifyToken = JwsToken.deserialize(serialized, serializer)
+        val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
         assertThat(verifyToken.signatures.size).isGreaterThanOrEqualTo(1)
     }
 
     @Test
     fun signAndVerify() {
-        val serializer = Serializer()
         val testData = Random.Default.nextBytes(32)
-        val token = JwsToken(testData, serializer)
+        val token = JwsToken(testData, defaultTestSerializer)
         token.sign(keyRef, crypto)
-        val serialized = token.serialize(serializer, JwsFormat.Compact)
-        val verifyToken = JwsToken.deserialize(serialized, serializer)
+        val serialized = token.serialize(defaultTestSerializer, JwsFormat.Compact)
+        val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
         val matched = verifyToken.verify(crypto)
         assertThat(matched).isTrue()
     }

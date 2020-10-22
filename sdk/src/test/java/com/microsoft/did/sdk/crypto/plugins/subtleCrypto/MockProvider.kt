@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
@@ -38,15 +39,13 @@ class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.val
 
         companion object {
             fun serialize(key: CryptoKey, data: ByteArray): ByteArray {
-                val serializer = Serializer()
                 val datagram = Datagram(key.handle as String, byteArrayToString(data))
-                val json = serializer.stringify(serializer(), datagram)
+                val json = defaultTestSerializer.encodeToString(serializer(), datagram)
                 return stringToByteArray(json)
             }
 
             fun deserialize(datagram: ByteArray): Datagram {
-                val serializer = Serializer()
-                return serializer.parse(serializer(), byteArrayToString(datagram))
+                return defaultTestSerializer.decodeFromString(serializer(), byteArrayToString(datagram))
             }
         }
     }
