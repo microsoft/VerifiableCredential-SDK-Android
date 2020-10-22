@@ -101,20 +101,12 @@ private class ByteGroup private constructor(val ir: List<Int>, val bytes: Int) {
     }
 
     fun toString(dictionary: List<String>, padding: Char? = null): String {
-        var output = ""
-        output += dictionary[ir[0]]
-        output += dictionary[ir[1]]
-        output += if (bytes > 1) {
-            dictionary[ir[2]]
-        } else {
-            padding ?: ""
-        }
-        output += if (bytes > 2) {
-            dictionary[ir[3]]
-        } else {
-            padding ?: ""
-        }
-        return output
+        val output = StringBuilder()
+        output.append(dictionary[ir[0]])
+        output.append(dictionary[ir[1]])
+        output.append(if (bytes > 1) dictionary[ir[2]] else padding ?: "")
+        output.append(if (bytes > 2) dictionary[ir[3]] else padding ?: "")
+        return output.toString()
     }
 
     fun toBytes(): ByteArray {
@@ -153,10 +145,10 @@ private fun decode(data: String, dictionary: List<String>, padding: Char?): Byte
 }
 
 private fun encode(data: ByteArray, dictionary: List<String>, padding: Char?): String {
-    var output = ""
+    val output = StringBuilder()
     for (index in data.indices step 3) {
         val slice = data.sliceArray(index..min(index + 2, data.size - 1))
-        output += ByteGroup.fromByteArray(slice).toString(dictionary, padding)
+        output.append(ByteGroup.fromByteArray(slice).toString(dictionary, padding))
     }
-    return output
+    return output.toString()
 }
