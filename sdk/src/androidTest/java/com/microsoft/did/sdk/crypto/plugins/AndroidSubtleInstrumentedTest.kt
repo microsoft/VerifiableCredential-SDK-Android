@@ -20,6 +20,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.defaultTestSerializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -33,8 +34,7 @@ class AndroidSubtleInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val serializer = Serializer()
-        keyStore = AndroidKeyStore(context, serializer)
+        keyStore = AndroidKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
         val keyReference = "KeyReference1"
         cryptoKeyPair = androidSubtle.generateKeyPair(

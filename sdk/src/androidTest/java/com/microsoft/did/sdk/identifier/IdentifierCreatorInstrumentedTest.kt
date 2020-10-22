@@ -17,6 +17,7 @@ import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.did.sdk.defaultTestSerializer
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
@@ -39,14 +40,13 @@ class IdentifierCreatorInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        VerifiableCredentialSdk.init(context)
-        val serializer = Serializer()
-        val keyStore = AndroidKeyStore(context, serializer)
+        VerifiableCredentialSdk.init(context, "testAgent")
+        val keyStore = AndroidKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
-        ecSubtle = EllipticCurveSubtleCrypto(androidSubtle, serializer)
+        ecSubtle = EllipticCurveSubtleCrypto(androidSubtle, defaultTestSerializer)
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
         cryptoOperations = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
-        val sidetreePayloadProcessor = SidetreePayloadProcessor(serializer)
+        val sidetreePayloadProcessor = SidetreePayloadProcessor(defaultTestSerializer)
         identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
@@ -84,7 +84,6 @@ class IdentifierCreatorInstrumentedTest {
 
     @Test
     fun signAndVerifyTest() {
-        val serializer = Serializer()
         val test = "test string"
         val testPayload = test.toByteArray()
         var signKey = ""
@@ -96,7 +95,7 @@ class IdentifierCreatorInstrumentedTest {
                 }
         }
 
-        val token = JwsToken(testPayload, serializer)
+        val token = JwsToken(testPayload, defaultTestSerializer)
         token.sign(signKey, cryptoOperations)
         assertThat(token.signatures).isNotNull
         val publicKeys: List<PublicKey> =

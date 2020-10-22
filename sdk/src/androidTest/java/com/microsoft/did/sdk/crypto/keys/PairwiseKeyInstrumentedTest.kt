@@ -21,15 +21,15 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
+import com.microsoft.did.sdk.defaultTestSerializer
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.stringToByteArray
-import kotlinx.io.InputStream
-import kotlinx.serialization.InternalSerializationApi
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.io.InputStream
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class PairwiseKeyInstrumentedTest {
@@ -40,17 +40,15 @@ class PairwiseKeyInstrumentedTest {
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val seedReference = "masterSeed"
 
-    @OptIn(InternalSerializationApi::class)
     private val inputStream: InputStream
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val serializer = Serializer()
         inputStream = context.assets.open("Pairwise.EC.json")
-        keyStore = AndroidKeyStore(context, serializer)
+        keyStore = AndroidKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
-        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, serializer)
+        ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, defaultTestSerializer)
         crypto = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
         val suppliedStringForSeedGeneration = "abcdefg"
         val seed = SecretKey(
@@ -205,8 +203,7 @@ class PairwiseKeyInstrumentedTest {
             )
         )
         val testKeysJsonString = inputStream.bufferedReader().readText()
-        val serializer = Serializer()
-        val testPairwiseKeys = serializer.parse(TestKeys.serializer(), testKeysJsonString)
+        val testPairwiseKeys = defaultTestSerializer.decodeFromString(TestKeys.serializer(), testKeysJsonString)
         val seed =
             SecretKey(JsonWebKey(k = Base64Url.encode(stringToByteArray("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"))))
         val seedReference = "masterkey"
