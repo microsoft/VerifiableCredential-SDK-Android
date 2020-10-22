@@ -29,7 +29,8 @@ class SendVerifiablePresentationRevocationRequestNetworkOperationTest {
 
     @Test
     fun `test unwrapping revocation receipt successfully`() {
-        val revocationReceipt = sendPresentationResponseNetworkOperation.unwrapRevocationReceipt(suppliedRevocationReceipt, defaultTestSerializer)
+        val revocationReceipt =
+            sendPresentationResponseNetworkOperation.unwrapRevocationReceipt(suppliedRevocationReceipt, defaultTestSerializer)
         assertThat(revocationReceipt.issuer).isEqualTo(expectedIssuer)
         assertThat(revocationReceipt.jwtId).isEqualTo(expectedJti)
         assertThat(revocationReceipt.issuedTime).isEqualTo(expectedIssuedAtTime)

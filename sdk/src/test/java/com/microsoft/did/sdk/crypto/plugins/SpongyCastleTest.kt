@@ -44,7 +44,7 @@ class SpongyCastleTest {
         val privateKey = generatePrivateKey()
         val publicKey = generatePublicKeyFromPrivateKey(privateKey)
 
-        for(i in 1..1000) {
+        for (i in 1..1000) {
             val data = "Some random payload for testing signature creation-$i".toByteArray()
             val digest = MessageDigest.getInstance(Sha.SHA256.algorithm.name)
             val hash = digest.digest(data)
@@ -54,7 +54,7 @@ class SpongyCastleTest {
             val s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
             assertThat(r.size < 32).isFalse()
             assertThat(s.size < 32).isFalse()
-            verifySignature(r+s, hash, publicKey)
+            verifySignature(r + s, hash, publicKey)
         }
     }
 
