@@ -14,6 +14,7 @@ import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
+import kotlinx.serialization.Serializable
 import java.util.Locale
 
 /**

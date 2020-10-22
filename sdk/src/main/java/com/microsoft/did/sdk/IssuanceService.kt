@@ -42,8 +42,9 @@ class IssuanceService @Inject constructor(
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val signedContract = fetchContract(contractUrl).abortOnError()
-            verifySignature(signedContract)
-            val contract = unwrapSignedContract(signedContract)
+            val token = JwsToken.deserialize(signedContract, serializer)
+            verifySignature(token)
+            val contract = serializer.parse(VerifiableCredentialContract.serializer(), token.content())
             val entityDomain = linkedDomainsService.getDomainUrlFromRelyingPartyDid(contract.input.issuer).abortOnError()
             val request = IssuanceRequest(contract, contractUrl, entityDomain)
             Result.Success(request)
@@ -55,13 +56,7 @@ class IssuanceService @Inject constructor(
         apiProvider
     ).fire()
 
-    private fun unwrapSignedContract(signedContract: String): VerifiableCredentialContract {
-        val token = JwsToken.deserialize(signedContract, serializer)
-        return serializer.parse(VerifiableCredentialContract.serializer(), token.content())
-    }
-
-    private suspend fun verifySignature(signedContract: String) {
-        val token = JwsToken.deserialize(signedContract, serializer)
+    private suspend fun verifySignature(token: JwsToken) {
         if (!jwtValidator.verifySignature(token)) {
             throw InvalidSignatureException("Signature is not Valid.")
         }

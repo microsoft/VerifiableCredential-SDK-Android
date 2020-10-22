@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.identifier.models.identifierdocument
 
-import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.LinkedDomainEndpointInUnknownFormatException
 import kotlinx.serialization.Decoder
 import kotlinx.serialization.Encoder
@@ -38,8 +37,17 @@ class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARA
     override fun deserialize(decoder: Decoder): List<String> {
         return when (val serviceEndpointJsonElement = decoder.decode(JsonElementSerializer)) {
             is JsonLiteral -> listOf(serviceEndpointJsonElement.content)
-            is JsonObject -> (serviceEndpointJsonElement.getArray(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS)).map { it.content }
+            is JsonObject -> {
+                val jsonObjectKey = serviceEndpointJsonElement.keys.first()
+                if (jsonObjectKey.equals(ServiceEndpointKeys.Origins.name, true))
+                    (serviceEndpointJsonElement.getArray(jsonObjectKey)).map { jsonObject -> jsonObject.content }
+                else emptyList()
+            }
             else -> throw LinkedDomainEndpointInUnknownFormatException("Linked Domains service endpoint is not in the correct format")
         }
     }
+}
+
+enum class ServiceEndpointKeys {
+    Origins
 }
