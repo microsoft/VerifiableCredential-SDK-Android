@@ -45,7 +45,7 @@ class IssuanceService @Inject constructor(
             val token = JwsToken.deserialize(signedContract, serializer)
             verifySignature(token)
             val contract = serializer.parse(VerifiableCredentialContract.serializer(), token.content())
-            val entityDomain = linkedDomainsService.getDomainUrlFromRelyingPartyDid(contract.input.issuer).abortOnError()
+            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
             val request = IssuanceRequest(contract, contractUrl, entityDomain)
             Result.Success(request)
         }

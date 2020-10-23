@@ -52,17 +52,11 @@ class ExpiredTokenExpirationException(message: String) : ValidatorException(mess
 
 class MissingInputInRequestException(message: String) : ValidatorException(message)
 
-class MissingLinkedDomainsInDidException(message: String) : ValidatorException(message)
-
-class DomainNotLinkedException(message: String): ValidatorException(message)
-
-class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
-
 open class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
 class LinkedDomainEndpointInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
 
-class LinkedDomainEndpointMissingOriginsException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
+class MissingLinkedDomainInDidException(message: String) : ValidatorException(message)
 
 class RegistrarException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
