@@ -37,10 +37,10 @@ object VerifiableCredentialSdk {
     lateinit var revocationService: RevocationService
 
     @JvmStatic
-    lateinit var linkedDomainsService: LinkedDomainsService
+    internal lateinit var linkedDomainsService: LinkedDomainsService
 
     @JvmStatic
-    lateinit var identifierManager: IdentifierManager
+    internal lateinit var identifierManager: IdentifierManager
 
     /**
      * Initializes VerifiableCredentialSdk

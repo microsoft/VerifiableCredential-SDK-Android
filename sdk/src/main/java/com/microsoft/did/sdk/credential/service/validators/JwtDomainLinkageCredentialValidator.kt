@@ -14,8 +14,8 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val serializer: Serializer
 ) : DomainLinkageCredentialValidator {
 
-    override suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean {
-        val jwt = JwsToken.deserialize(domainLinkageCredential, serializer)
+    override suspend fun validate(domainLinkageCredentialJwt: String, rpDid: String, rpDomain: String): Boolean {
+        val jwt = JwsToken.deserialize(domainLinkageCredentialJwt, serializer)
         val domainLinkageCredential = serializer.parse(DomainLinkageCredential.serializer(), jwt.content())
         if (!jwtValidator.verifySignature(jwt)) {
             return false
@@ -31,8 +31,8 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
     }
 
     private fun isCredentialSubjectIdValid(domainLinkageCredential: DomainLinkageCredential, rpDid: String): Boolean {
-        return (domainLinkageCredential.subject == domainLinkageCredential.vc.credentialSubject.did)
-            && (domainLinkageCredential.issuer == domainLinkageCredential.vc.credentialSubject.did)
+        return domainLinkageCredential.subject == domainLinkageCredential.vc.credentialSubject.did
+            && domainLinkageCredential.issuer == domainLinkageCredential.vc.credentialSubject.did
             && domainLinkageCredential.vc.credentialSubject.did == rpDid
     }
 

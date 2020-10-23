@@ -8,5 +8,4 @@ import kotlinx.serialization.Serializable
 sealed class LinkedDomainResult<out S> {
     class Verified<out S>(val payload: S) : LinkedDomainResult<S>()
     class UnVerified<out S>(val payload: S) : LinkedDomainResult<S>()
-    class Missing<out S>(val payload: S) : LinkedDomainResult<S>()
 }

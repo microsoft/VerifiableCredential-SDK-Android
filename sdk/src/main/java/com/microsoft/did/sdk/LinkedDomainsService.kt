@@ -22,25 +22,25 @@ class LinkedDomainsService @Inject constructor(
 ) {
     suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult<String>> {
         return runResultTry {
-            val domainUrl = getDomainUrlFromRelyingPartyDid(relyingPartyDid).abortOnError()
-            if(domainUrl.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainResult.Missing(""))
+            val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
+            if (domainUrls.isEmpty())
+                return@runResultTry Result.Success(LinkedDomainResult.UnVerified(""))
+            val domainUrl = domainUrls.first()
             val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
-            wellKnownConfigDocument.linkedDids.forEach { linkedDid ->
-                val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDid, relyingPartyDid, domainUrl)
+            wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
+                val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
                 if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainResult.Verified(domainUrl))
             }
             Result.Success(LinkedDomainResult.UnVerified(domainUrl))
         }
     }
 
-    private suspend fun getDomainUrlFromRelyingPartyDid(relyingPartyDid: String): Result<String> {
+    private suspend fun getLinkedDomainsFromDid(relyingPartyDid: String): Result<List<String>> {
         val didDocumentResult = resolver.resolve(relyingPartyDid)
         return didDocumentResult.map { didDocument ->
-            val linkedDomainsServices = didDocument.service.filter { it.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE }
-            if (linkedDomainsServices.isEmpty()) ""
-            else linkedDomainsServices.first().serviceEndpoint.first()
-
+            val linkedDomainsServices =
+                didDocument.service.filter { service -> service.type == Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE }
+            if (linkedDomainsServices.isEmpty()) emptyList() else linkedDomainsServices.first().serviceEndpoint
         }
     }
 
