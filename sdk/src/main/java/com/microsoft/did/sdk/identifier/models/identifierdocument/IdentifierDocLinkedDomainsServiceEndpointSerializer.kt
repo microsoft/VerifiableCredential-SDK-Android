@@ -39,7 +39,7 @@ class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARA
             is JsonLiteral -> listOf(serviceEndpointJsonElement.content)
             is JsonObject -> {
                 val jsonObjectKey = serviceEndpointJsonElement.keys.first()
-                if (jsonObjectKey.equals(ServiceEndpointKeys.Origins.name, true))
+                if (jsonObjectKey.equals(ServiceEndpointKeys.Origins.value, true))
                     (serviceEndpointJsonElement.getArray(jsonObjectKey)).map { jsonObject -> jsonObject.content }
                 else emptyList()
             }
@@ -48,6 +48,6 @@ class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARA
     }
 }
 
-enum class ServiceEndpointKeys {
-    Origins
+enum class ServiceEndpointKeys(val value: String) {
+    Origins("origins")
 }

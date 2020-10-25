@@ -23,11 +23,9 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
         return verifyDidConfigResource(domainLinkageCredential, rpDid, rpDomain)
     }
 
-    //TODO: validate expiration date once it is in
     private fun verifyDidConfigResource(domainLinkageCredential: DomainLinkageCredential, rpDid: String, rpDomain: String): Boolean {
         return isCredentialSubjectIdValid(domainLinkageCredential, rpDid)
             && isCredentialSubjectOriginValid(domainLinkageCredential, rpDomain)
-            && domainLinkageCredential.vc.issuanceDate.isNotEmpty()
     }
 
     private fun isCredentialSubjectIdValid(domainLinkageCredential: DomainLinkageCredential, rpDid: String): Boolean {
@@ -37,6 +35,6 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
     }
 
     private fun isCredentialSubjectOriginValid(domainLinkageCredential: DomainLinkageCredential, rpDomain: String): Boolean {
-        return domainLinkageCredential.vc.credentialSubject.domainUrl.isNotEmpty() && domainLinkageCredential.vc.credentialSubject.domainUrl == rpDomain
+        return domainLinkageCredential.vc.credentialSubject.domainUrl.equals(rpDomain, true)
     }
 }

@@ -12,6 +12,7 @@ data class DomainLinkageCredentialContent (
     val context: List<String>,
     val issuer: String,
     val issuanceDate: String,
+    val expirationDate: String,
     val type: List<String>,
     val credentialSubject: DomainLinkageCredentialSubject
 )

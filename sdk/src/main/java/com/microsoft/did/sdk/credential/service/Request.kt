@@ -16,7 +16,11 @@ import kotlinx.serialization.Serializable
 sealed class Request(val entityName: String, val entityIdentifier: String, val entityDomain: LinkedDomainResult<String>)
 
 @Serializable
-class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String, val domain: LinkedDomainResult<String>) :
+class IssuanceRequest(
+    val contract: VerifiableCredentialContract,
+    val contractUrl: String,
+    val domain: LinkedDomainResult<String> = LinkedDomainResult.UnVerified("")
+) :
     Request(contract.display.card.issuedBy, contract.input.issuer, domain) {
     fun getAttestations(): CredentialAttestations {
         return contract.input.attestations
@@ -24,7 +28,11 @@ class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUr
 }
 
 @Serializable
-class PresentationRequest(val serializedToken: String, val content: PresentationRequestContent, val domain: LinkedDomainResult<String>) :
+class PresentationRequest(
+    val serializedToken: String,
+    val content: PresentationRequestContent,
+    val domain: LinkedDomainResult<String> = LinkedDomainResult.UnVerified("")
+) :
     Request(content.registration.clientName, content.issuer, domain) {
     fun getPresentationDefinition(): PresentationDefinition {
         return content.presentationDefinition
