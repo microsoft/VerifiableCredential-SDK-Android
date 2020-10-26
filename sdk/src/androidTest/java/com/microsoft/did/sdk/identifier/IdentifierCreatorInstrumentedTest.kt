@@ -75,7 +75,7 @@ class IdentifierCreatorInstrumentedTest {
         runBlocking {
             val domain = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithoutServiceEndpoint)
             assertThat(domain).isInstanceOf(Result.Success::class.java)
-            assertThat((domain as Result.Success).payload).isInstanceOf(LinkedDomainResult.Missing::class.java)
+            assertThat((domain as Result.Success).payload).isInstanceOf(LinkedDomainResult.UnVerified::class.java)
         }
     }
 
