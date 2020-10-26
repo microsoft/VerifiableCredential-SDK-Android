@@ -8,18 +8,19 @@ package com.microsoft.did.sdk.credential.service
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(val entityName: String, val entityIdentifier: String, val entityDomain: LinkedDomainResult<String>)
+sealed class Request(val entityName: String, val entityIdentifier: String, val entityDomain: LinkedDomainResult)
 
 @Serializable
 class IssuanceRequest(
     val contract: VerifiableCredentialContract,
     val contractUrl: String,
-    val domain: LinkedDomainResult<String> = LinkedDomainResult.UnVerified("")
+    val domain: LinkedDomainResult = LinkedDomainUnVerified("")
 ) :
     Request(contract.display.card.issuedBy, contract.input.issuer, domain) {
     fun getAttestations(): CredentialAttestations {
@@ -31,7 +32,7 @@ class IssuanceRequest(
 class PresentationRequest(
     val serializedToken: String,
     val content: PresentationRequestContent,
-    val domain: LinkedDomainResult<String> = LinkedDomainResult.UnVerified("")
+    val domain: LinkedDomainResult = LinkedDomainUnVerified("")
 ) :
     Request(content.registration.clientName, content.issuer, domain) {
     fun getPresentationDefinition(): PresentationDefinition {

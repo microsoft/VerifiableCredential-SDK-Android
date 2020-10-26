@@ -3,6 +3,8 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.linkedDomainsOperations.FetchWellKnownConfigDocumentNetworkOperation
@@ -20,18 +22,18 @@ class LinkedDomainsService @Inject constructor(
     private val resolver: Resolver,
     private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
-    suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult<String>> {
+    suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
         return runResultTry {
             val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
             if (domainUrls.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainResult.UnVerified(""))
+                return@runResultTry Result.Success(LinkedDomainUnVerified(""))
             val domainUrl = domainUrls.first()
             val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
             wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
                 val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
-                if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainResult.Verified(domainUrl))
+                if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainVerified(domainUrl))
             }
-            Result.Success(LinkedDomainResult.UnVerified(domainUrl))
+            Result.Success(LinkedDomainUnVerified(domainUrl))
         }
     }
 
