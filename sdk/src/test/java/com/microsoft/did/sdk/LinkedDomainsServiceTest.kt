@@ -3,6 +3,8 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
@@ -44,8 +46,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val linkedDomainsResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(linkedDomainsResult).isInstanceOf(Result.Success::class.java)
-            assertThat((linkedDomainsResult as Result.Success).payload).isInstanceOf(LinkedDomainResult.Verified::class.java)
-            assertThat((linkedDomainsResult.payload as LinkedDomainResult.Verified).payload).isEqualTo(expectedDomainUrl)
+            assertThat((linkedDomainsResult as Result.Success).payload).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainsResult.payload as LinkedDomainVerified).domainUrl).isEqualTo(expectedDomainUrl)
         }
     }
 
@@ -64,8 +66,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val linkedDomainsArrResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithMultipleServiceEndpoints)
             assertThat(linkedDomainsArrResult).isInstanceOf(Result.Success::class.java)
-            assertThat((linkedDomainsArrResult as Result.Success).payload).isInstanceOf(LinkedDomainResult.Verified::class.java)
-            assertThat((linkedDomainsArrResult.payload as LinkedDomainResult.Verified).payload).isEqualTo(expectedDomainUrl)
+            assertThat((linkedDomainsArrResult as Result.Success).payload).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((linkedDomainsArrResult.payload as LinkedDomainVerified).domainUrl).isEqualTo(expectedDomainUrl)
         }
     }
 
@@ -80,8 +82,8 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val actualDomainUrlResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithoutServiceEndpoint)
             assertThat(actualDomainUrlResult).isInstanceOf(Result.Success::class.java)
-            assertThat((actualDomainUrlResult as Result.Success).payload).isInstanceOf(LinkedDomainResult.UnVerified::class.java)
-            assertThat((actualDomainUrlResult.payload as LinkedDomainResult.UnVerified).payload).isEqualTo("")
+            assertThat((actualDomainUrlResult as Result.Success).payload).isInstanceOf(LinkedDomainUnVerified::class.java)
+            assertThat((actualDomainUrlResult.payload as LinkedDomainUnVerified).domainUrl).isEqualTo("")
         }
     }
 }

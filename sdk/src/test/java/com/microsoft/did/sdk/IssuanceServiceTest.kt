@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
@@ -117,7 +117,7 @@ class IssuanceServiceTest {
         coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(expectedContractJwt)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
-            LinkedDomainResult.Verified(mockedIdentifierDocumentServiceEndpoint)
+            LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
         coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns Result.Success(mockedIdentifierDocument)
         every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
@@ -128,8 +128,8 @@ class IssuanceServiceTest {
             val actualRequest = issuanceService.getRequest(suppliedContractUrl)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             assertThat((actualRequest as Result.Success).payload.contractUrl).isEqualTo(suppliedContractUrl)
-            assertThat(actualRequest.payload.domain).isInstanceOf(LinkedDomainResult.Verified::class.java)
-            assertThat((actualRequest.payload.domain as LinkedDomainResult.Verified).payload).isEqualTo(mockedIdentifierDocumentServiceEndpoint)
+            assertThat(actualRequest.payload.domain).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((actualRequest.payload.domain as LinkedDomainVerified).domainUrl).isEqualTo(mockedIdentifierDocumentServiceEndpoint)
             assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
             assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
         }

@@ -5,11 +5,7 @@ package com.microsoft.did.sdk.identifier
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.VerifiableCredentialSdk
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
-import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
-import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.PublicKey
@@ -21,14 +17,12 @@ import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
-import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -43,8 +37,6 @@ class IdentifierCreatorInstrumentedTest {
     private val ecSubtle: EllipticCurveSubtleCrypto
     private val identifierCreator: IdentifierCreator
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
-    private val mockedJwtDomainLinkageCredentialValidator: JwtDomainLinkageCredentialValidator
-    private val linkedDomainsService: LinkedDomainsService
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -61,22 +53,6 @@ class IdentifierCreatorInstrumentedTest {
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.ALL)
         )
-        val resolver = Resolver("https://beta.discover.did.microsoft.com/1.0/identifiers", VerifiableCredentialSdk.identifierManager.identifierRepository)
-        val jwtValidator = JwtValidator(cryptoOperations, resolver, serializer)
-        mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(jwtValidator, serializer)
-        linkedDomainsService = LinkedDomainsService(mockk(relaxed = true), resolver, mockedJwtDomainLinkageCredentialValidator)
-    }
-
-
-    @Test
-    fun `testfetchAndVerify`() {
-        val suppliedDidWithoutServiceEndpoint =
-            "did:ion:EiAGYVovJcSCiUWuX9K1eFHBcv4BorIjMG7e44hf1hKtGg?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlDUDBKOEVyRmZXeEw2WGNqT2g4STU2Smp3bXhVQ01zWk5yT2ZoSWFMbUxVQSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUQyNHVWbkd1ZW9aZUs0OEl1aE9BZ1c4Z3NvTmdncHV2bGRRSUVjM09wNFZRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQXpYZmprQkE1Z05tZWJOam56TmhkYzYycjdCUkJremcyOXFLWVBON3MtQUEiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoiY2FwcHRvc28taXNzdWVyLXNpdGUtc2lnbmluZy1rZXkiLCJ0eXBlIjoiRWNkc2FTZWNwMjU2azFWZXJpZmljYXRpb25LZXkyMDE5IiwiandrIjp7ImtpZCI6Imh0dHBzOi8vdmMtMjAyMC1rdi52YXVsdC5henVyZS5uZXQva2V5cy9jYXBwdG9zby1pc3N1ZXItc2l0ZS1zaWduaW5nLWtleS9lZTM5MDUxNGFhN2Y0ZjNiYTAzZjViNDM3ZjNlYjRlZSIsImt0eSI6IkVDIiwiY3J2Ijoic2VjcDI1NmsxIiwieCI6IkFIQ29XM1k4cHVvRmFqa0JqeU1HcUtwZTJ3TktFb1BaSWtINDVxelJaeVUiLCJ5IjoiQ3JaaU02VU1sLVFNMnlCYTgtaS1kTlM3X1JyeDA3VnN3OVlTVlA4UzBxTSJ9LCJwdXJwb3NlIjpbImF1dGgiLCJnZW5lcmFsIl19XX19XX0"
-        runBlocking {
-            val domain = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithoutServiceEndpoint)
-            assertThat(domain).isInstanceOf(Result.Success::class.java)
-            assertThat((domain as Result.Success).payload).isInstanceOf(LinkedDomainResult.UnVerified::class.java)
-        }
     }
 
     @Test
