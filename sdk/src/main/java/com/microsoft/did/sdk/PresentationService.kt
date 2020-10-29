@@ -8,6 +8,7 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
+import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -27,6 +28,7 @@ class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
     private val serializer: Serializer,
+    private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
@@ -34,13 +36,13 @@ class PresentationService @Inject constructor(
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
-            val requestToken = getPresentationRequestToken(uri).abortOnError()
-            val tokenContents =
+            val tokenContents = getPresentationRequestToken(uri).abortOnError()
+/*            val tokenContents =
                 serializer.parse(
                     PresentationRequestContent.serializer(),
                     JwsToken.deserialize(requestToken, serializer).content()
-                )
-            val request = PresentationRequest(requestToken, tokenContents)
+                )*/
+            val request = PresentationRequest("", tokenContents)
             isRequestValid(request).abortOnError()
             Result.Success(request)
         }
@@ -54,10 +56,11 @@ class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestToken(uri: Uri): Result<String> {
+    private suspend fun getPresentationRequestToken(uri: Uri): Result<PresentationRequestContent> {
         val serializedToken = uri.getQueryParameter("request")
         if (serializedToken != null) {
-            return Result.Success(serializedToken)
+            val token = serializer.parse(PresentationRequestContent.serializer(), serializedToken)
+            return Result.Success(token)
         }
         val requestUri = uri.getQueryParameter("request_uri")
         if (requestUri != null) {
@@ -73,7 +76,7 @@ class PresentationService @Inject constructor(
         }
     }
 
-    private suspend fun fetchRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider).fire()
+    private suspend fun fetchRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer).fire()
 
     /**
      * Send a Presentation Response.
