@@ -34,7 +34,7 @@ class FetchPresentationRequestNetworkOperation(
             if(jwtValidator.verifySignature(jwsToken))
                 Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
             else
-                throw InvalidSignatureException("Signature is not Valid.")
+                throw InvalidSignatureException("Signature is not Valid on Presentation Request.")
         }
     }
 }

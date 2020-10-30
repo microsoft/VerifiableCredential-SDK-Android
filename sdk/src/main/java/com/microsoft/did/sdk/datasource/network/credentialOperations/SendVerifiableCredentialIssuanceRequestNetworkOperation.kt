@@ -37,7 +37,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
                 val verifiableCredentialContent = serializer.parse(VerifiableCredentialContent.serializer(), jwsToken.content())
                 Result.Success(VerifiableCredential(verifiableCredentialContent.jti, rawVerifiableCredential, verifiableCredentialContent))
             } else
-                throw InvalidSignatureException("Signature is not Valid.")
+                throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         }
     }
 }
