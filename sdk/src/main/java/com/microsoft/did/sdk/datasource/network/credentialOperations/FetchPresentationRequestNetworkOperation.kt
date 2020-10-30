@@ -13,6 +13,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import retrofit2.Response
 
@@ -26,7 +27,7 @@ class FetchPresentationRequestNetworkOperation(
     override val call: suspend () -> Response<String> = { apiProvider.presentationApis.getRequest(url) }
 
     override fun onSuccess(response: Response<String>): Result<PresentationRequestContent> {
-        return runBlocking {
+        return runBlocking (Dispatchers.IO) {
             val jwsToken = JwsToken.deserialize(response.body()!!, serializer)
             if(jwtValidator.verifySignature(jwsToken))
                 Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))

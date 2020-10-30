@@ -2,15 +2,12 @@
 
 package com.microsoft.did.sdk
 
-import androidx.annotation.VisibleForTesting
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.protectors.RevocationResponseFormatter
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiablePresentationRevocationRequestNetworkOperation
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.controlflow.runResultTry

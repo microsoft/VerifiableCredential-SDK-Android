@@ -37,12 +37,7 @@ class PresentationService @Inject constructor(
         return runResultTry {
             val uri = verifyUri(stringUri)
             val tokenContents = getPresentationRequestToken(uri).abortOnError()
-/*            val tokenContents =
-                serializer.parse(
-                    PresentationRequestContent.serializer(),
-                    JwsToken.deserialize(requestToken, serializer).content()
-                )*/
-            val request = PresentationRequest("", tokenContents)
+            val request = PresentationRequest(tokenContents)
             isRequestValid(request).abortOnError()
             Result.Success(request)
         }
@@ -59,8 +54,9 @@ class PresentationService @Inject constructor(
     private suspend fun getPresentationRequestToken(uri: Uri): Result<PresentationRequestContent> {
         val serializedToken = uri.getQueryParameter("request")
         if (serializedToken != null) {
-            val token = serializer.parse(PresentationRequestContent.serializer(), serializedToken)
-            return Result.Success(token)
+            val jwsToken = JwsToken.deserialize(serializedToken, serializer)
+            val presentationRequest = serializer.parse(PresentationRequestContent.serializer(), jwsToken.content())
+            return Result.Success(presentationRequest)
         }
         val requestUri = uri.getQueryParameter("request_uri")
         if (requestUri != null) {

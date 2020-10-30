@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
+import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
@@ -14,7 +15,6 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.formVerifiableCredential
 import com.microsoft.did.sdk.util.serializer.Serializer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +25,7 @@ class IssuanceService @Inject constructor(
     private val exchangeService: ExchangeService,
     private val apiProvider: ApiProvider,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
+    private val jwtValidator: JwtValidator,
     private val serializer: Serializer
 ) {
 
@@ -97,15 +98,12 @@ class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        val rawVerifiableCredentialResult = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+        return SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
             formattedResponse,
-            apiProvider
+            apiProvider,
+            jwtValidator,
+            serializer
         ).fire()
-
-        return when (rawVerifiableCredentialResult) {
-            is Result.Success -> Result.Success(formVerifiableCredential(rawVerifiableCredentialResult.payload, serializer))
-            is Result.Failure -> rawVerifiableCredentialResult
-        }
     }
 }

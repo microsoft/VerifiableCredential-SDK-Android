@@ -23,7 +23,7 @@ class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUr
 }
 
 @Serializable
-class PresentationRequest(val serializedToken: String, val content: PresentationRequestContent) :
+class PresentationRequest(val content: PresentationRequestContent) :
     Request(content.registration.clientName, content.issuer) {
     fun getPresentationDefinition(): PresentationDefinition {
         return content.presentationDefinition
