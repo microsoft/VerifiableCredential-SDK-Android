@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,8 @@ class FetchPresentationRequestNetworkOperation(
 
     override fun onSuccess(response: Response<String>): Result<PresentationRequestContent> {
         return runBlocking (Dispatchers.IO) {
-            val jwsToken = JwsToken.deserialize(response.body()!!, serializer)
+            val requestJwsToken = response.body() ?: throw PresentationException("No Presentation Request in Body.")
+            val jwsToken = JwsToken.deserialize(requestJwsToken, serializer)
             if(jwtValidator.verifySignature(jwsToken))
                 Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
             else
