@@ -2,8 +2,7 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
@@ -82,8 +81,7 @@ class LinkedDomainsServiceTest {
         runBlocking {
             val actualDomainUrlResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithoutServiceEndpoint)
             assertThat(actualDomainUrlResult).isInstanceOf(Result.Success::class.java)
-            assertThat((actualDomainUrlResult as Result.Success).payload).isInstanceOf(LinkedDomainUnVerified::class.java)
-            assertThat((actualDomainUrlResult.payload as LinkedDomainUnVerified).domainUrl).isEqualTo("")
+            assertThat((actualDomainUrlResult as Result.Success).payload).isInstanceOf(LinkedDomainMissing::class.java)
         }
     }
 }

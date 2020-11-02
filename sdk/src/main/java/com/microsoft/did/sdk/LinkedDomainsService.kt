@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk
 
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
@@ -26,7 +27,7 @@ class LinkedDomainsService @Inject constructor(
         return runResultTry {
             val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
             if (domainUrls.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainUnVerified(""))
+                return@runResultTry Result.Success(LinkedDomainMissing)
             val domainUrl = domainUrls.first()
             val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
             wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
@@ -42,7 +43,7 @@ class LinkedDomainsService @Inject constructor(
         return didDocumentResult.map { didDocument ->
             val linkedDomainsServices =
                 didDocument.service.filter { service -> service.type.equals(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE, true) }
-            if (linkedDomainsServices.isEmpty()) emptyList() else linkedDomainsServices.first().serviceEndpoint
+            if (linkedDomainsServices.isEmpty()) emptyList() else linkedDomainsServices.map { it.serviceEndpoint }.flatten()
         }
     }
 

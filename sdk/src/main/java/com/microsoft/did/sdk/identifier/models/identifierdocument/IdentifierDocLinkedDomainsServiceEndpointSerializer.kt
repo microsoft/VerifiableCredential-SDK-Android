@@ -38,9 +38,8 @@ class IdentifierDocLinkedDomainsServiceEndpointSerializer(@Suppress("UNUSED_PARA
         return when (val serviceEndpointJsonElement = decoder.decode(JsonElementSerializer)) {
             is JsonLiteral -> listOf(serviceEndpointJsonElement.content)
             is JsonObject -> {
-                val jsonObjectKey = serviceEndpointJsonElement.keys.first()
-                if (jsonObjectKey.equals(ServiceEndpointKeys.Origins.value, true))
-                    (serviceEndpointJsonElement.getArray(jsonObjectKey)).map { jsonObject -> jsonObject.content }
+                val jsonObjectKey = serviceEndpointJsonElement.keys.find { it.equals(ServiceEndpointKeys.Origins.value, true) }
+                if (jsonObjectKey != null) (serviceEndpointJsonElement.getArray(jsonObjectKey)).map { jsonObject -> jsonObject.content }
                 else emptyList()
             }
             else -> throw LinkedDomainEndpointInUnknownFormatException("Linked Domains service endpoint is not in the correct format")

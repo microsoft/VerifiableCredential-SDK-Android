@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
@@ -140,7 +140,7 @@ class IssuanceServiceTest {
     fun `test to send Issuance Response`() {
         val suppliedContractUrl =
             "https://portableidentitycards.azure-api.net/dev-v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/BusinessCard"
-        val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainUnVerified(""))
+        val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainMissing)
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         val requestedVcMap = mapOf(mockk<PresentationAttestation>() to expectedVerifiableCredential) as RequestedVcMap
 
