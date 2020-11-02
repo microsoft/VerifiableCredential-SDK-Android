@@ -14,13 +14,13 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val serializer: Serializer
 ) : DomainLinkageCredentialValidator {
 
-    override suspend fun validate(domainLinkageCredentialJwt: String, rpDid: String, rpDomain: String): Boolean {
-        val jwt = JwsToken.deserialize(domainLinkageCredentialJwt, serializer)
-        val domainLinkageCredential = serializer.parse(DomainLinkageCredential.serializer(), jwt.content())
+    override suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean {
+        val jwt = JwsToken.deserialize(domainLinkageCredential, serializer)
+        val domainLinkageCredentialParsed = serializer.parse(DomainLinkageCredential.serializer(), jwt.content())
         if (!jwtValidator.verifySignature(jwt)) {
             return false
         }
-        return verifyDidConfigResource(domainLinkageCredential, rpDid, rpDomain)
+        return verifyDidConfigResource(domainLinkageCredentialParsed, rpDid, rpDomain)
     }
 
     private fun verifyDidConfigResource(domainLinkageCredential: DomainLinkageCredential, rpDid: String, rpDomain: String): Boolean {
