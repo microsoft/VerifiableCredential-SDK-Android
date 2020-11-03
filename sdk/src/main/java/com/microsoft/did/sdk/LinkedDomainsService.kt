@@ -27,7 +27,7 @@ class LinkedDomainsService @Inject constructor(
         return runResultTry {
             val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
             if (domainUrls.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainMissing)
+                return@runResultTry Result.Success(LinkedDomainMissing())
             val domainUrl = domainUrls.first()
             val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
             wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->

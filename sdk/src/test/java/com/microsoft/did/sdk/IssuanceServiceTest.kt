@@ -140,7 +140,7 @@ class IssuanceServiceTest {
     fun `test to send Issuance Response`() {
         val suppliedContractUrl =
             "https://portableidentitycards.azure-api.net/dev-v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/BusinessCard"
-        val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainMissing)
+        val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainMissing())
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         val requestedVcMap = mapOf(mockk<PresentationAttestation>() to expectedVerifiableCredential) as RequestedVcMap
 

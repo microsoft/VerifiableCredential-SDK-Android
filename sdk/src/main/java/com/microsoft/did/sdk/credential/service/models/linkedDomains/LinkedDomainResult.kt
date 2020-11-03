@@ -14,4 +14,4 @@ class LinkedDomainVerified(val domainUrl: String) : LinkedDomainResult()
 class LinkedDomainUnVerified(val domainUrl: String) : LinkedDomainResult()
 
 @Serializable
-object LinkedDomainMissing : LinkedDomainResult()
+class LinkedDomainMissing : LinkedDomainResult()
