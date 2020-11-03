@@ -55,15 +55,11 @@ class PresentationService @Inject constructor(
 
     private suspend fun getPresentationRequestToken(uri: Uri): Result<PresentationRequestContent> {
         val serializedToken = uri.getQueryParameter("request")
-        if (serializedToken != null) {
-            val jwsToken = JwsToken.deserialize(serializedToken, serializer)
-            val presentationRequest = serializer.parse(PresentationRequestContent.serializer(), jwsToken.content())
-            return Result.Success(presentationRequest)
-        }
+        if (serializedToken != null)
+            return Result.Success(unwrapPresentationRequest(serializedToken))
         val requestUri = uri.getQueryParameter("request_uri")
-        if (requestUri != null) {
+        if (requestUri != null)
             return fetchRequest(requestUri)
-        }
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
@@ -74,7 +70,13 @@ class PresentationService @Inject constructor(
         }
     }
 
-    private suspend fun fetchRequest(url: String) = FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer).fire()
+    private fun unwrapPresentationRequest(serializedToken: String): PresentationRequestContent {
+        val jwsToken = JwsToken.deserialize(serializedToken, serializer)
+        return serializer.parse(PresentationRequestContent.serializer(), jwsToken.content())
+    }
+
+    private suspend fun fetchRequest(url: String) =
+        FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer).fire()
 
     /**
      * Send a Presentation Response.
