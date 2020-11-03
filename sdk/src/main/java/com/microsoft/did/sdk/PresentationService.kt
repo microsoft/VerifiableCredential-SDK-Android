@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresen
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -37,9 +38,9 @@ class PresentationService @Inject constructor(
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
-            val tokenContents = getPresentationRequestToken(uri).abortOnError()
-            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(tokenContents.issuer).abortOnError()
-            val request = PresentationRequest(tokenContents, entityDomain)
+            val presentationRequestContent = getPresentationRequestToken(uri).abortOnError()
+            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
+            val request = PresentationRequest(presentationRequestContent, entityDomain)
             isRequestValid(request).abortOnError()
             Result.Success(request)
         }
@@ -54,12 +55,12 @@ class PresentationService @Inject constructor(
     }
 
     private suspend fun getPresentationRequestToken(uri: Uri): Result<PresentationRequestContent> {
-        val serializedToken = uri.getQueryParameter("request")
-        if (serializedToken != null)
-            return Result.Success(unwrapPresentationRequest(serializedToken))
-        val requestUri = uri.getQueryParameter("request_uri")
-        if (requestUri != null)
-            return fetchRequest(requestUri)
+        val requestParameter = uri.getQueryParameter("request")
+        if (requestParameter != null)
+            return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
+        val requestUriParameter = uri.getQueryParameter("request_uri")
+        if (requestUriParameter != null)
+            return fetchRequest(requestUriParameter)
         return Result.Failure(PresentationException("No query parameter 'request' nor 'request_uri' is passed."))
     }
 
@@ -70,9 +71,11 @@ class PresentationService @Inject constructor(
         }
     }
 
-    private fun unwrapPresentationRequest(serializedToken: String): PresentationRequestContent {
-        val jwsToken = JwsToken.deserialize(serializedToken, serializer)
-        return serializer.parse(PresentationRequestContent.serializer(), jwsToken.content())
+    private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
+        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        if (!jwtValidator.verifySignature(jwsToken))
+            throw InvalidSignatureException("Signature is not valid on Presentation Request.")
+        return Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 
     private suspend fun fetchRequest(url: String) =

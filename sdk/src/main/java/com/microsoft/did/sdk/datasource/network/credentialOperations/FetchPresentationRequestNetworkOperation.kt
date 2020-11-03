@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
 import retrofit2.Response
 
-//TODO("override onSuccess method to create receipt when this is spec'd out")
+//TODO("improve onSuccess method to create receipt when this is spec'd out")
 class FetchPresentationRequestNetworkOperation(
     private val url: String,
     private val apiProvider: ApiProvider,
