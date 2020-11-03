@@ -43,7 +43,7 @@ class LinkedDomainsService @Inject constructor(
         return didDocumentResult.map { didDocument ->
             val linkedDomainsServices =
                 didDocument.service.filter { service -> service.type.equals(Constants.LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE, true) }
-            if (linkedDomainsServices.isEmpty()) emptyList() else linkedDomainsServices.map { it.serviceEndpoint }.flatten()
+            linkedDomainsServices.map { it.serviceEndpoint }.flatten()
         }
     }
 
