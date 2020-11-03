@@ -16,8 +16,6 @@ import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import retrofit2.Response
 
 class SendVerifiableCredentialIssuanceRequestNetworkOperation(
@@ -29,15 +27,16 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
 ) : PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
 
-    override fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
-        return runBlocking(Dispatchers.IO) {
-            val rawVerifiableCredential = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
-            val jwsToken = JwsToken.deserialize(rawVerifiableCredential, serializer)
-            if (jwtValidator.verifySignature(jwsToken)) {
-                val verifiableCredentialContent = serializer.parse(VerifiableCredentialContent.serializer(), jwsToken.content())
-                Result.Success(VerifiableCredential(verifiableCredentialContent.jti, rawVerifiableCredential, verifiableCredentialContent))
-            } else
-                throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
-        }
+    override suspend fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
+        val jwsTokenString = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
+        return verifyAndUnWrapIssuanceResponse(jwsTokenString)
+    }
+
+    private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {
+        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        if (!jwtValidator.verifySignature(jwsToken))
+            throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
+        val verifiableCredentialContent = serializer.parse(VerifiableCredentialContent.serializer(), jwsToken.content())
+        return Result.Success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
     }
 }

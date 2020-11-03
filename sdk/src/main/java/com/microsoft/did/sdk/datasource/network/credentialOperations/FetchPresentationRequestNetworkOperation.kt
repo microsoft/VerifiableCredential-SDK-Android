@@ -14,8 +14,6 @@ import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.serializer.Serializer
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import retrofit2.Response
 
 //TODO("override onSuccess method to create receipt when this is spec'd out")
@@ -27,14 +25,15 @@ class FetchPresentationRequestNetworkOperation(
 ) : GetNetworkOperation<String, PresentationRequestContent>() {
     override val call: suspend () -> Response<String> = { apiProvider.presentationApis.getRequest(url) }
 
-    override fun onSuccess(response: Response<String>): Result<PresentationRequestContent> {
-        return runBlocking (Dispatchers.IO) {
-            val requestJwsToken = response.body() ?: throw PresentationException("No Presentation Request in Body.")
-            val jwsToken = JwsToken.deserialize(requestJwsToken, serializer)
-            if(jwtValidator.verifySignature(jwsToken))
-                Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
-            else
-                throw InvalidSignatureException("Signature is not Valid on Presentation Request.")
-        }
+    override suspend fun onSuccess(response: Response<String>): Result<PresentationRequestContent> {
+        val jwsTokenString = response.body() ?: throw PresentationException("No Presentation Request in Body.")
+        return verifyAndUnwrapPresentationRequest(jwsTokenString)
+    }
+
+    private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
+        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        if (!jwtValidator.verifySignature(jwsToken))
+            throw InvalidSignatureException("Signature is not valid on Presentation Request.")
+        return Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 }

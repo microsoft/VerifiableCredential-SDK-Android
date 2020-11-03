@@ -40,7 +40,7 @@ class IdentifierCreatorInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        VerifiableCredentialSdk.init(context)
+        VerifiableCredentialSdk.init(context, "")
         val serializer = Serializer()
         val keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)

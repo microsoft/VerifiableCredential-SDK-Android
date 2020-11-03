@@ -44,15 +44,17 @@ open class RevocationException(message: String? = null, cause: Throwable? = null
 open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
+class UnableToFetchWellKnownConfigDocument(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
+
 class InvalidSignatureException(message: String) : ValidatorException(message)
 
 class ExpiredTokenExpirationException(message: String) : ValidatorException(message)
 
 class MissingInputInRequestException(message: String) : ValidatorException(message)
 
-class FormatterException(message: String, cause: Throwable? = null) : SdkException(message, cause)
+open class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
-class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
+class LinkedDomainEndpointInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)
 
 class RegistrarException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 

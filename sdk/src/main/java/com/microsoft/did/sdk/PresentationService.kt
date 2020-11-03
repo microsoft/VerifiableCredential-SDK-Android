@@ -27,6 +27,7 @@ import javax.inject.Singleton
 class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
+    private val linkedDomainsService: LinkedDomainsService,
     private val serializer: Serializer,
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
@@ -37,7 +38,8 @@ class PresentationService @Inject constructor(
         return runResultTry {
             val uri = verifyUri(stringUri)
             val tokenContents = getPresentationRequestToken(uri).abortOnError()
-            val request = PresentationRequest(tokenContents)
+            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(tokenContents.issuer).abortOnError()
+            val request = PresentationRequest(tokenContents, entityDomain)
             isRequestValid(request).abortOnError()
             Result.Success(request)
         }

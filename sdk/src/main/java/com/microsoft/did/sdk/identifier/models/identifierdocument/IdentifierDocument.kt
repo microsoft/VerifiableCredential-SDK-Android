@@ -12,5 +12,5 @@ data class IdentifierDocument(
     val publicKey: List<IdentifierDocumentPublicKey>,
     val id: String
 ) {
-    var service: List<IdentifierDocumentService>? = emptyList()
+    var service: List<IdentifierDocumentService> = emptyList()
 }

@@ -23,9 +23,10 @@ import javax.inject.Singleton
 class IssuanceService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
+    private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,
-    private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val jwtValidator: JwtValidator,
+    private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Serializer
 ) {
 
@@ -37,14 +38,17 @@ class IssuanceService @Inject constructor(
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
-            val request = IssuanceRequest(contract, contractUrl)
+            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+            val request = IssuanceRequest(contract, contractUrl, entityDomain)
             Result.Success(request)
         }
     }
 
     private suspend fun fetchContract(url: String) = FetchContractNetworkOperation(
         url,
-        apiProvider
+        apiProvider,
+        jwtValidator,
+        serializer
     ).fire()
 
     /**
