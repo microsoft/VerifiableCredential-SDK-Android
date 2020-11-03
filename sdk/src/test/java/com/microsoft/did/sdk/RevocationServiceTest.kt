@@ -2,8 +2,6 @@
 
 package com.microsoft.did.sdk
 
-import assertk.assertThat
-import assertk.assertions.isInstanceOf
 import com.microsoft.did.sdk.credential.models.RevocationReceipt
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
@@ -17,6 +15,7 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Before
 import org.junit.Test
 

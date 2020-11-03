@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
+import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.IdentifierManager
 import com.microsoft.did.sdk.IssuanceService
 import com.microsoft.did.sdk.PresentationService
@@ -34,6 +35,8 @@ internal interface SdkComponent {
     fun presentationService(): PresentationService
 
     fun revocationService(): RevocationService
+
+    fun linkedDomainsService(): LinkedDomainsService
 
     @Component.Builder
     interface Builder {

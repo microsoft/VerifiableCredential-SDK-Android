@@ -8,6 +8,8 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
+import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
@@ -123,7 +125,13 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultValidator(validator: OidcPresentationRequestValidator): PresentationRequestValidator {
+    fun defaultPresentationRequestValidator(validator: OidcPresentationRequestValidator): PresentationRequestValidator {
+        return validator
+    }
+
+    @Provides
+    @Singleton
+    fun defaultDomainLinkageCredentialValidator(validator: JwtDomainLinkageCredentialValidator): DomainLinkageCredentialValidator {
         return validator
     }
 }

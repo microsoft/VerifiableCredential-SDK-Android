@@ -26,6 +26,7 @@ import javax.inject.Singleton
 class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
+    private val linkedDomainsService: LinkedDomainsService,
     private val serializer: Serializer,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
@@ -40,7 +41,8 @@ class PresentationService @Inject constructor(
                     PresentationRequestContent.serializer(),
                     JwsToken.deserialize(requestToken, serializer).content()
                 )
-            val request = PresentationRequest(requestToken, tokenContents)
+            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(tokenContents.issuer).abortOnError()
+            val request = PresentationRequest(requestToken, tokenContents, entityDomain)
             isRequestValid(request).abortOnError()
             Result.Success(request)
         }

@@ -7,24 +7,33 @@ package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(val entityName: String, val entityIdentifier: String)
+sealed class Request(val entityName: String, val entityIdentifier: String, val entityDomain: LinkedDomainResult)
 
 @Serializable
-class IssuanceRequest(val contract: VerifiableCredentialContract, val contractUrl: String) :
-    Request(contract.display.card.issuedBy, contract.input.issuer) {
+class IssuanceRequest(
+    val contract: VerifiableCredentialContract,
+    val contractUrl: String,
+    val domain: LinkedDomainResult
+) :
+    Request(contract.display.card.issuedBy, contract.input.issuer, domain) {
     fun getAttestations(): CredentialAttestations {
         return contract.input.attestations
     }
 }
 
 @Serializable
-class PresentationRequest(val serializedToken: String, val content: PresentationRequestContent) :
-    Request(content.registration.clientName, content.issuer) {
+class PresentationRequest(
+    val serializedToken: String,
+    val content: PresentationRequestContent,
+    val domain: LinkedDomainResult
+) :
+    Request(content.registration.clientName, content.issuer, domain) {
     fun getPresentationDefinition(): PresentationDefinition {
         return content.presentationDefinition
     }

@@ -22,6 +22,11 @@ object Constants {
     const val VERIFIABLE_PRESENTATION_TYPE = "VerifiablePresentation"
     const val VERIFIABLE_CREDENTIAL_DEFAULT_TYPE = "VerifiableCredential"
 
+    //Well-Known Config Document Constants
+    const val WELL_KNOWN_CONFIG_DOCUMENT_LOCATION = ".well-known/did-configuration.json"
+    const val LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE = "LinkedDomains"
+    const val LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS = "origins"
+
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000
     const val SECONDS_IN_A_MINUTE = 60
