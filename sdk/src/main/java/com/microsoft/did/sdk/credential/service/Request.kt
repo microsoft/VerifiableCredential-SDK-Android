@@ -20,8 +20,7 @@ class IssuanceRequest(
     val contract: VerifiableCredentialContract,
     val contractUrl: String,
     val domain: LinkedDomainResult
-) :
-    Request(contract.display.card.issuedBy, contract.input.issuer, domain) {
+) : Request(contract.display.card.issuedBy, contract.input.issuer, domain) {
     fun getAttestations(): CredentialAttestations {
         return contract.input.attestations
     }
@@ -29,11 +28,9 @@ class IssuanceRequest(
 
 @Serializable
 class PresentationRequest(
-    val serializedToken: String,
     val content: PresentationRequestContent,
     val domain: LinkedDomainResult
-) :
-    Request(content.registration.clientName, content.issuer, domain) {
+) : Request(content.registration.clientName, content.issuer, domain) {
     fun getPresentationDefinition(): PresentationDefinition {
         return content.presentationDefinition
     }

@@ -14,7 +14,7 @@ class SendPresentationResponseNetworkOperation(url: String, serializedResponse: 
     PostNetworkOperation<String, Unit>() {
     override val call: suspend () -> Response<String> = { apiProvider.presentationApis.sendResponse(url, serializedResponse, state) }
 
-    override fun onSuccess(response: Response<String>): Result<Unit> {
+    override suspend fun onSuccess(response: Response<String>): Result<Unit> {
         return Result.Success(Unit)
     }
 }
