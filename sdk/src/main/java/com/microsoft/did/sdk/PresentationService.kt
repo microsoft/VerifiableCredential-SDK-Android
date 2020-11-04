@@ -38,7 +38,7 @@ class PresentationService @Inject constructor(
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
-            val presentationRequestContent = getPresentationRequestToken(uri).abortOnError()
+            val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
             val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
             val request = PresentationRequest(presentationRequestContent, entityDomain)
             isRequestValid(request).abortOnError()
@@ -54,7 +54,7 @@ class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestToken(uri: Uri): Result<PresentationRequestContent> {
+    private suspend fun getPresentationRequestContent(uri: Uri): Result<PresentationRequestContent> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
