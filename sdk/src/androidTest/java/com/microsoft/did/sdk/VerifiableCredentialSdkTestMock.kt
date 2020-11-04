@@ -11,21 +11,22 @@ import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
 
 /**
- * This class initializes the VerifiableCredentialSdk. The `init` method has to be called before the members can be accessed.
+ * This class initializes a mock object VerifiableCredentialSdkTestMock which is used for testing purposes. The `init` method
+ * has to be called before the members can be accessed.
  * Call the init method as soon as possible, for example in the `onCreate()` method of your `Application` implementation.
  * An Android context and user agent information (i.e, name/version) have to be provided as such:
  *
- * VerifiableCredentialSdk.init(getApplicationContext(), "");
+ * VerifiableCredentialSdkTestMock.init(getApplicationContext(), "");
  *
  * The `VerifiableCredentialManager` can be accessed through this static reference, but ideally should be provided
  * by your own dependency injection library. In the case of Dagger2 as such:
  *
  * @Provides
  * fun provideIssuanceService(): IssuanceService {
- *     return VerifiableCredentialSdk.issuanceService
+ *     return VerifiableCredentialSdkTestMock.issuanceService
  * }
  */
-object VerifiableCredentialSdk {
+object VerifiableCredentialSdkTestMock {
 
     @JvmStatic
     lateinit var issuanceService: IssuanceService
@@ -37,10 +38,10 @@ object VerifiableCredentialSdk {
     lateinit var revocationService: RevocationService
 
     @JvmStatic
-    internal lateinit var identifierManager: IdentifierManager
+    lateinit var identifierManager: IdentifierManager
 
     /**
-     * Initializes VerifiableCredentialSdk
+     * Initializes VerifiableCredentialSdkTestMock
      *
      * @param context context instance
      * @param userAgentInfo it contains name and version of the client. It will be used in User-Agent header for all the requests.

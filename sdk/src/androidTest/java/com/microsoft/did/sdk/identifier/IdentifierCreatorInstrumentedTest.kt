@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.identifier
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.VerifiableCredentialSdk
+import com.microsoft.did.sdk.VerifiableCredentialSdkTestMock
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
 import com.microsoft.did.sdk.crypto.keys.PublicKey
@@ -25,7 +25,6 @@ import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.security.MessageDigest
@@ -41,7 +40,7 @@ class IdentifierCreatorInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        VerifiableCredentialSdk.init(context, "")
+        VerifiableCredentialSdkTestMock.init(context, "")
         val serializer = Serializer()
         val keyStore = AndroidKeyStore(context, serializer)
         androidSubtle = AndroidSubtle(keyStore)
@@ -84,7 +83,6 @@ class IdentifierCreatorInstrumentedTest {
         }
     }
 
-    @Ignore("Ignoring the test since it fails only in pipeline but passes on local machine")
     @Test
     fun signAndVerifyTest() {
         val serializer = Serializer()
@@ -93,7 +91,7 @@ class IdentifierCreatorInstrumentedTest {
         var signKey = ""
         runBlocking {
             signKey =
-                when (val id = VerifiableCredentialSdk.identifierManager.getMasterIdentifier()) {
+                when (val id = VerifiableCredentialSdkTestMock.identifierManager.getMasterIdentifier()) {
                     is Result.Success -> id.payload.signatureKeyReference
                     else -> ""
                 }
