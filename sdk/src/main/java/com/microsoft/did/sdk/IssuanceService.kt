@@ -38,8 +38,8 @@ class IssuanceService @Inject constructor(
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
-            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
-            val request = IssuanceRequest(contract, contractUrl, entityDomain)
+            val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+            val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
             Result.Success(request)
         }
     }

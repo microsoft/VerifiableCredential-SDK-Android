@@ -39,8 +39,8 @@ class PresentationService @Inject constructor(
         return runResultTry {
             val uri = verifyUri(stringUri)
             val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-            val entityDomain = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
-            val request = PresentationRequest(presentationRequestContent, entityDomain)
+            val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
+            val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
             isRequestValid(request).abortOnError()
             Result.Success(request)
         }
