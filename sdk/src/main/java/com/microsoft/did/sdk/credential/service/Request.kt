@@ -28,7 +28,6 @@ class IssuanceRequest(
 
 @Serializable
 class PresentationRequest(
-    val serializedToken: String,
     val content: PresentationRequestContent,
     val linkedDomainResult: LinkedDomainResult
 ) : Request(content.registration.clientName, content.issuer, linkedDomainResult) {

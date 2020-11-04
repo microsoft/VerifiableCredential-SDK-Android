@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseForma
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -46,7 +47,7 @@ class IssuanceServiceTest {
     private val mockedJwtValidator: JwtValidator = mockk()
     private val exchangeResponseFormatter: ExchangeResponseFormatter = mockk()
     private val issuanceResponseFormatter: IssuanceResponseFormatter = mockk()
-    private val exchangeService = ExchangeService(mockk(relaxed = true), exchangeResponseFormatter, serializer)
+    private val exchangeService = ExchangeService(mockk(relaxed = true), exchangeResponseFormatter, mockedJwtValidator, serializer)
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, serializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
@@ -114,7 +115,7 @@ class IssuanceServiceTest {
         val expectedEntityIdentifier =
             "did:ion:EiCfeOciEjwupwRQsJC3wMZzz3_M3XIo6bhy7aJkCG6CAQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEMDQwY2lQakUxR0xqLXEyWmRyLVJaXzVlcU8yNFlDMFI5bTlEd2ZHMkdGQSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUMyRmQ5UE90emFNcUtMaDNRTFp0Wk43V0RDRHJjdkN4eTNvdlNERDhKRGVRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQ2gtaTFDMW1fM2N4SGJNM3pXemRRdExxMnBvRldaX25FVEJTb0NhT2JZTWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnXzBmOTdlZWZjIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoQ0xsb3JJbGx2M2FWSkRiYkNxM0VHbzU2bWV6Q3RLWkZGcUtvS3RVc3BzIiwieSI6Imh1VG5iTEc3MWU0NDNEeVJkeU5DX3dfc3paR0hVYUcxUHdsMHpXb0h2LUEifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
 
-        coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(expectedContractJwt)
+        coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(unwrapContract(expectedContractJwt))
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
@@ -173,6 +174,11 @@ class IssuanceServiceTest {
                 Constants.DEFAULT_EXPIRATION_IN_SECONDS
             )
         }
+    }
+
+    private fun unwrapContract(jwsTokenString: String): VerifiableCredentialContract {
+        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        return serializer.parse(VerifiableCredentialContract.serializer(), jwsToken.content())
     }
 }
 
