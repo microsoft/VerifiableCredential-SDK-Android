@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomai
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result

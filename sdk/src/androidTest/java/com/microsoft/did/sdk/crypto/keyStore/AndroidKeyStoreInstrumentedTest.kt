@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.did.sdk.defaultTestSerializer
+import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy

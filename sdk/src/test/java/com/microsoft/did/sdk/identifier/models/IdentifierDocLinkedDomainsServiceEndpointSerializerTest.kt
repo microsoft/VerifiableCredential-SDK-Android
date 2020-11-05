@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.identifier.models
 import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isTrue
-import com.microsoft.did.sdk.defaultTestSerializer
+import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import org.assertj.core.api.Assertions
 import org.junit.Test
