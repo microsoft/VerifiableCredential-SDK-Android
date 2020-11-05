@@ -4,19 +4,19 @@ package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.DomainLinkageCredential
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class JwtDomainLinkageCredentialValidator @Inject constructor(
     private val jwtValidator: JwtValidator,
-    private val serializer: Serializer
+    private val serializer: Json
 ) : DomainLinkageCredentialValidator {
 
     override suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean {
         val jwt = JwsToken.deserialize(domainLinkageCredential, serializer)
-        val domainLinkageCredentialParsed = serializer.parse(DomainLinkageCredential.serializer(), jwt.content())
+        val domainLinkageCredentialParsed = serializer.decodeFromString(DomainLinkageCredential.serializer(), jwt.content())
         if (!jwtValidator.verifySignature(jwt)) {
             return false
         }

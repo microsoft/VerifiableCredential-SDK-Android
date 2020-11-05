@@ -75,7 +75,7 @@ class PresentationService @Inject constructor(
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
+        return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 
     private suspend fun fetchRequest(url: String) =

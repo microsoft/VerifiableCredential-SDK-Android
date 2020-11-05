@@ -7,4 +7,4 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContractServiceResponse(
     val token: String
-) : ServiceResponse
+)

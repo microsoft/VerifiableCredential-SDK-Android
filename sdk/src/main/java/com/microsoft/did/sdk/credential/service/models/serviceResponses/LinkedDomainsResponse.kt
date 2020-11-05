@@ -15,4 +15,4 @@ data class LinkedDomainsResponse(
     val context: String,
     @SerialName("linked_dids")
     val linkedDids: List<String>
-): ServiceResponse
+)
