@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class TokenSigner @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val serializer: Serializer
+    private val serializer: Json
 ) {
 
     /**

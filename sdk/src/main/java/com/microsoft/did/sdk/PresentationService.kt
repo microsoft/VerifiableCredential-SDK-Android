@@ -20,7 +20,7 @@ import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,7 +29,7 @@ class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
     private val exchangeService: ExchangeService,
     private val linkedDomainsService: LinkedDomainsService,
-    private val serializer: Serializer,
+    private val serializer: Json,
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
@@ -75,7 +75,7 @@ class PresentationService @Inject constructor(
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
+        return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 
     private suspend fun fetchRequest(url: String) =

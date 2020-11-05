@@ -10,13 +10,13 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import java.util.Locale
 
 /**
  * sourced from https://github.com/PeculiarVentures/webcrypto-core/blob/master/src/subtle.ts
  */
-open class Subtle(providers: Set<Provider> = emptySet(), private val serializer: Serializer) : SubtleCrypto {
+open class Subtle(providers: Set<Provider> = emptySet(), private val serializer: Json) : SubtleCrypto {
     val provider = providers.map {
         Pair(it.name.toLowerCase(Locale.ENGLISH), it)
     }.toMap()
@@ -128,7 +128,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
         val keyData: ByteArray
         if (format == KeyFormat.Jwk) {
             val keyJwk = this.exportKeyJwk(key)
-            val jwkSequence = serializer.stringify(JsonWebKey.serializer(), keyJwk).asSequence()
+            val jwkSequence = serializer.encodeToString(JsonWebKey.serializer(), keyJwk).asSequence()
             keyData = ByteArray(jwkSequence.count())
             jwkSequence.forEachIndexed { index, character ->
                 keyData[index] = character.toByte()

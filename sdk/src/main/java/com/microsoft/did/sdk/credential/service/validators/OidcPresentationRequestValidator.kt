@@ -5,6 +5,7 @@ import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
 import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
+import kotlinx.serialization.json.Json
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton

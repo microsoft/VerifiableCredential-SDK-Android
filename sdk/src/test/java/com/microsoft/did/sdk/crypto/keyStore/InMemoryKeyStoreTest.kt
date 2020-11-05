@@ -10,14 +10,14 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
-import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 
 class InMemoryKeyStoreTest {
     private val inMemoryKeyStore = InMemoryKeyStore()
-    private val subtle = Subtle(setOf(MockProvider()), Serializer())
+    private val subtle = Subtle(setOf(MockProvider()), defaultTestSerializer)
     private val keyRef: String = "TestKeys"
     private var keyPair: CryptoKeyPair
     private var actualPublicKey: MockPublicKey

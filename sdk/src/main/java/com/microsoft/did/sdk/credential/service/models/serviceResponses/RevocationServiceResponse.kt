@@ -8,4 +8,4 @@ package com.microsoft.did.sdk.credential.service.models.serviceResponses
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RevocationServiceResponse(val receipt: HashMap<String, String>) : ServiceResponse
+data class RevocationServiceResponse(val receipt: HashMap<String, String>)

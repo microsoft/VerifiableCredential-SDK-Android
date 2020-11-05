@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
-import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.di.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,8 +28,7 @@ class CryptoOperationsInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val serializer = Serializer()
-        keyStore = AndroidKeyStore(context, serializer)
+        keyStore = AndroidKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
         crypto = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
@@ -39,7 +38,7 @@ class CryptoOperationsInstrumentedTest {
     fun generateEllipticCurveKeyPairTest() {
         val publicKey = crypto.generateKeyPair(keyRef, KeyType.EllipticCurve)
         val publicKeyJWK = publicKey.toJWK()
-        assertThat(publicKeyJWK.kid).isNotNull()
+        assertThat(publicKeyJWK.kid).isNotNull
         val expectedKeyType = "EC"
         val actualKeyType = publicKeyJWK.kty
         assertThat(actualKeyType).isEqualTo(expectedKeyType)
@@ -49,7 +48,7 @@ class CryptoOperationsInstrumentedTest {
     fun generateRSAKeyPairTest() {
         val publicKey = crypto.generateKeyPair(keyRef, KeyType.RSA)
         val publicKeyJWK = publicKey.toJWK()
-        assertThat(publicKeyJWK.kid).isNotNull()
+        assertThat(publicKeyJWK.kid).isNotNull
         val expectedKeyType = "RSA"
         val actualKeyType = publicKeyJWK.kty
         assertThat(actualKeyType).isEqualTo(expectedKeyType)

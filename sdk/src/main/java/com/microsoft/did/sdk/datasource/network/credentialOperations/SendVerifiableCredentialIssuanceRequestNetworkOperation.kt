@@ -15,7 +15,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import retrofit2.Response
 
 class SendVerifiableCredentialIssuanceRequestNetworkOperation(
@@ -23,7 +23,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     serializedResponse: String,
     apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Serializer
+    private val serializer: Json
 ) : PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
 
@@ -36,7 +36,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
-        val verifiableCredentialContent = serializer.parse(VerifiableCredentialContent.serializer(), jwsToken.content())
+        val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
         return Result.Success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
     }
 }

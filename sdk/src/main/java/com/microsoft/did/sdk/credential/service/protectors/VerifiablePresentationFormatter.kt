@@ -5,14 +5,14 @@ import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.Ve
 import com.microsoft.did.sdk.credential.service.models.verifiablePresentation.VerifiablePresentationDescriptor
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class VerifiablePresentationFormatter @Inject constructor(
-    private val serializer: Serializer,
+    private val serializer: Json,
     private val signer: TokenSigner
 ) {
 
@@ -42,7 +42,7 @@ class VerifiablePresentationFormatter @Inject constructor(
                 tokenExpiryTime = expiryTime,
                 audience = audience
             )
-        val serializedContents = serializer.stringify(VerifiablePresentationContent.serializer(), contents)
+        val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)
     }
 }

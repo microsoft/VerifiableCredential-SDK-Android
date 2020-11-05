@@ -3,12 +3,11 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.util.defaultTestSerializer
 
 class MockPublicKey(key: JsonWebKey) : PublicKey(key) {
     override fun minimumAlphabeticJwk(): String {
-        val serializer = Serializer()
-        return serializer.stringify(JsonWebKey.serializer(), this.toJWK())
+        return defaultTestSerializer.encodeToString(JsonWebKey.serializer(), this.toJWK())
     }
 
     override fun toJWK(): JsonWebKey {

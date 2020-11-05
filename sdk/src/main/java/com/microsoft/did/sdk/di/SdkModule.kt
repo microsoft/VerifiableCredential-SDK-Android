@@ -27,9 +27,9 @@ import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.did.sdk.util.serializer.Serializer
 import dagger.Module
 import dagger.Provides
+import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -51,7 +51,7 @@ import javax.inject.Singleton
  * https://developer.android.com/training/dependency-injection
  */
 @Module
-internal class SdkModule {
+class SdkModule {
 
     @Provides
     @Singleton
@@ -86,13 +86,13 @@ internal class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultRetrofit(okHttpClient: OkHttpClient, serializer: Serializer): Retrofit {
+    fun defaultRetrofit(okHttpClient: OkHttpClient, serializer: Json): Retrofit {
         val contentType = MediaType.get("application/json")
         return Retrofit.Builder()
             .baseUrl("http://TODO.me")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(serializer.json.asConverterFactory(contentType))
+            .addConverterFactory(serializer.asConverterFactory(contentType))
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
     }
@@ -133,5 +133,15 @@ internal class SdkModule {
     @Singleton
     fun defaultDomainLinkageCredentialValidator(validator: JwtDomainLinkageCredentialValidator): DomainLinkageCredentialValidator {
         return validator
+    }
+
+    @Provides
+    @Singleton
+    fun defaultJsonSerializer(): Json {
+        return Json {
+            encodeDefaults = false
+            ignoreUnknownKeys = true
+            isLenient = true
+        }
     }
 }

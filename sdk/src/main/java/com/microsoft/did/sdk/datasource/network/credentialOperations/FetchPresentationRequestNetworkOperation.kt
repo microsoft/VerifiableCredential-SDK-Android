@@ -13,7 +13,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import retrofit2.Response
 
 //TODO("improve onSuccess method to create receipt when this is spec'd out")
@@ -21,7 +21,7 @@ class FetchPresentationRequestNetworkOperation(
     private val url: String,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Serializer
+    private val serializer: Json
 ) : GetNetworkOperation<String, PresentationRequestContent>() {
     override val call: suspend () -> Response<String> = { apiProvider.presentationApis.getRequest(url) }
 
@@ -34,6 +34,6 @@ class FetchPresentationRequestNetworkOperation(
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(serializer.parse(PresentationRequestContent.serializer(), jwsToken.content()))
+        return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 }

@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,7 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class RevocationResponseFormatter @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val serializer: Serializer,
+    private val serializer: Json,
     private val signer: TokenSigner
 ) {
 
@@ -45,7 +45,7 @@ class RevocationResponseFormatter @Inject constructor(
     }
 
     private fun signContents(contents: RevocationResponseClaims, responder: Identifier): String {
-        val serializedResponseContent = serializer.stringify(RevocationResponseClaims.serializer(), contents)
+        val serializedResponseContent = serializer.encodeToString(RevocationResponseClaims.serializer(), contents)
         return signer.signWithIdentifier(serializedResponseContent, responder)
     }
 }

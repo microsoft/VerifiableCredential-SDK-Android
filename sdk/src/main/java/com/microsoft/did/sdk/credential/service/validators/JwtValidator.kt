@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +23,7 @@ import javax.inject.Singleton
 class JwtValidator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
     private val resolver: Resolver,
-    private val serializer: Serializer
+    private val serializer: Json
 ) {
 
     /**

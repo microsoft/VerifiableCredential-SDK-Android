@@ -14,14 +14,14 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import retrofit2.Response
 
 class FetchContractNetworkOperation(
     val url: String,
     apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Serializer
+    private val serializer: Json
 ) : GetNetworkOperation<ContractServiceResponse, VerifiableCredentialContract>() {
     override val call: suspend () -> Response<ContractServiceResponse> = { apiProvider.issuanceApis.getContract(url) }
 
@@ -34,6 +34,6 @@ class FetchContractNetworkOperation(
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Issuance Request.")
-        return Result.Success(serializer.parse(VerifiableCredentialContract.serializer(), jwsToken.content()))
+        return Result.Success(serializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content()))
     }
 }

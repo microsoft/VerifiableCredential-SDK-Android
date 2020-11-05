@@ -8,7 +8,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
@@ -16,12 +15,11 @@ import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -40,14 +38,13 @@ class IdentifierCreatorInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        VerifiableCredentialSdk.init(context, "")
-        val serializer = Serializer()
-        val keyStore = AndroidKeyStore(context, serializer)
+        VerifiableCredentialSdk.init(context, "testAgent")
+        val keyStore = AndroidKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
-        ecSubtle = EllipticCurveSubtleCrypto(androidSubtle, serializer)
+        ecSubtle = EllipticCurveSubtleCrypto(androidSubtle, defaultTestSerializer)
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
         cryptoOperations = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
-        val sidetreePayloadProcessor = SidetreePayloadProcessor(serializer)
+        val sidetreePayloadProcessor = SidetreePayloadProcessor(defaultTestSerializer)
         identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
@@ -86,7 +83,6 @@ class IdentifierCreatorInstrumentedTest {
     // This test fails during compile time on pipeline but passes on local builds. Commenting it out for now until we figure out a solution for it.
 /*    @Test
     fun signAndVerifyTest() {
-        val serializer = Serializer()
         val test = "test string"
         val testPayload = test.toByteArray()
         var signKey = ""
@@ -98,7 +94,7 @@ class IdentifierCreatorInstrumentedTest {
                 }
         }
 
-        val token = JwsToken(testPayload, serializer)
+        val token = JwsToken(testPayload, defaultTestSerializer)
         token.sign(signKey, cryptoOperations)
         assertThat(token.signatures).isNotNull
         val publicKeys: List<PublicKey> =

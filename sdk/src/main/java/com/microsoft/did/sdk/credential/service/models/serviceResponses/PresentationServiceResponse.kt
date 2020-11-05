@@ -11,4 +11,4 @@ import kotlinx.serialization.Serializable
  * TODO(We do not know what this looks like yet)
  */
 @Serializable
-class PresentationServiceResponse : ServiceResponse
+class PresentationServiceResponse

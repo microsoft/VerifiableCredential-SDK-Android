@@ -11,12 +11,12 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
-import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.Date
@@ -37,7 +37,8 @@ class OidcPresentationRequestValidatorTest {
     private val expectedSerializedToken: String = "token2364302"
 
     private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator()
-    private val serializer: Serializer = Serializer()
+    
+	private val serializer: Json = Json
 
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"

@@ -5,7 +5,6 @@ import com.microsoft.did.sdk.credential.service.models.serviceResponses.Revocati
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
-import com.microsoft.did.sdk.util.serializer.Serializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -38,31 +37,28 @@ class SerializationTest {
 
     @Test
     fun `serialize and deserialize an identity document`() {
-        val serializer = Serializer()
-        val serializedDocument = serializer.stringify(IdentifierDocument.serializer(), actualDocument)
-        val expectedDocument = serializer.parse(IdentifierDocument.serializer(), serializedDocument)
-        val serializedExpectedDocument = serializer.stringify(IdentifierDocument.serializer(), expectedDocument)
+        val serializedDocument = defaultTestSerializer.encodeToString(IdentifierDocument.serializer(), actualDocument)
+        val expectedDocument = defaultTestSerializer.decodeFromString(IdentifierDocument.serializer(), serializedDocument)
+        val serializedExpectedDocument = defaultTestSerializer.encodeToString(IdentifierDocument.serializer(), expectedDocument)
         assertThat(serializedDocument).isEqualTo(serializedExpectedDocument)
     }
 
     @Test
     fun `deserialize revocation receipt with varying keys`() {
-        val serializer = Serializer()
-        val revokeReceipt = serializer.parse(RevocationServiceResponse.serializer(), receipt)
+        val revokeReceipt = defaultTestSerializer.decodeFromString(RevocationServiceResponse.serializer(), receipt)
         val actualKey = revokeReceipt.receipt.keys.firstOrNull()
-        assertThat(actualKey).isNotNull()
+        assertThat(actualKey).isNotNull
         assertThat(actualKey).isEqualTo(expectedKey)
         val actualReceipt = revokeReceipt.receipt.values.firstOrNull()
-        assertThat(actualReceipt).isNotNull()
+        assertThat(actualReceipt).isNotNull
         assertThat(actualReceipt).isEqualTo(expectedReceipt)
     }
 
     @Test
     fun `testing polymorphic serialization`() {
-        val serializer = Serializer()
         val issResponse = IssuanceServiceResponse("testvc")
         val expectedSerializedResult = """{"vc":"testvc"}"""
-        val serialized = serializer.stringify(IssuanceServiceResponse.serializer(), issResponse)
+        val serialized = defaultTestSerializer.encodeToString(IssuanceServiceResponse.serializer(), issResponse)
         assertThat(serialized).isEqualTo(expectedSerializedResult)
     }
 }

@@ -3,8 +3,10 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jws
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.byteArrayToString
-import com.microsoft.did.sdk.util.serializer.Serializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 
 /**
  * JWS signature used by the general JSON
@@ -26,18 +28,19 @@ data class JwsSignature(
      */
     val signature: String
 ) {
-    fun getKid(serializer: Serializer): String? {
+    fun getKid(serializer: Json): String? {
         return getMember(JoseConstants.Kid.value, serializer)
     }
 
-    fun getAlg(serializer: Serializer): String? {
+    fun getAlg(serializer: Json): String? {
         return getMember(JoseConstants.Alg.value, serializer)
     }
 
-    private fun getMember(member: String, serializer: Serializer): String? {
+    private fun getMember(member: String, serializer: Json): String? {
         if (protected.isNotEmpty()) {
             val jsonProtected = Base64Url.decode(protected)
-            val mapObject = serializer.parseMap(byteArrayToString(jsonProtected), String::class, String::class)
+            val mapObject =
+                serializer.decodeFromString(MapSerializer(String.serializer(), String.serializer()), byteArrayToString(jsonProtected))
             if (mapObject.containsKey(member)) {
                 return mapObject[member]
             }

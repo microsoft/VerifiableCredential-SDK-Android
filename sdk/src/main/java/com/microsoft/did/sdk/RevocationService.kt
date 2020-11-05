@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifia
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.RevocationException
 import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +20,7 @@ class RevocationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val identifierManager: IdentifierManager,
     private val revocationResponseFormatter: RevocationResponseFormatter,
-    private val serializer: Serializer
+    private val serializer: Json
 ) {
 
     /**

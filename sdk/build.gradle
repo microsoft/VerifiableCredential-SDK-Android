@@ -1,7 +1,10 @@
+plugins {
+    id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+}
+
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlinx-serialization'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'jacoco'
 
@@ -65,18 +68,14 @@ android {
         explainIssues true
         showAll true
     }
-}
 
-buildscript {
-    repositories {
-        google()
-        jcenter()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    sourceSets {
+        androidTest {
+            java.srcDirs += "src/sharedTest/java"
+        }
+        test {
+            java.srcDirs += "src/sharedTest/java"
+        }
     }
 }
 
@@ -87,7 +86,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
     implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
-    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.5.0"
+    implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
     implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
     implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
@@ -97,8 +96,7 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$com_squareup_okhttp3_okhttp_version"
 
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$kotlin_serialization_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version"
 
     // KTX
     implementation "androidx.collection:collection-ktx:$collections_ktx_version"

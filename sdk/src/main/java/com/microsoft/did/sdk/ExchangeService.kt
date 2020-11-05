@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,8 +20,8 @@ import javax.inject.Singleton
 class ExchangeService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val exchangeResponseFormatter: ExchangeResponseFormatter,
-    private val jwtValidator: JwtValidator,
-    private val serializer: Serializer
+    private val serializer: Json,
+    private val jwtValidator: JwtValidator
 ) {
 
     suspend fun getExchangedVerifiableCredential(
