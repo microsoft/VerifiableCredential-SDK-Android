@@ -3,7 +3,7 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.LinkedDomainsResponse
-import com.microsoft.did.sdk.util.serializer.Serializer
+import com.microsoft.did.sdk.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -12,7 +12,6 @@ import org.junit.Test
 
 class JwtDomainLinkageCredentialValidatorTest {
 
-    private val serializer = Serializer()
     private val jwtDomainLinkageCredentialValidator: JwtDomainLinkageCredentialValidator
     private val mockedJwtValidator: JwtValidator = mockk()
     private val docJwt =
@@ -23,12 +22,12 @@ class JwtDomainLinkageCredentialValidatorTest {
     private val invalidDomainUrl = "test.com"
 
     init {
-        jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, serializer)
+        jwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     }
 
     @Test
     fun `validate well known config document with correct inputs`() {
-        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
@@ -39,7 +38,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `failing validation of well known config document with incorrect issuer DID`() {
-        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
@@ -50,7 +49,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `failing validation of well known config document with incorrect domain url`() {
-        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         runBlocking {
@@ -61,7 +60,7 @@ class JwtDomainLinkageCredentialValidatorTest {
 
     @Test
     fun `failing validation of well known config document with invalid signature`() {
-        val response = serializer.parse(LinkedDomainsResponse.serializer(), docJwt)
+        val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns false
         runBlocking {

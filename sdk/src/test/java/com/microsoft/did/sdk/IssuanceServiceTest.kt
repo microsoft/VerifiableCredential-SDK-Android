@@ -25,7 +25,6 @@ import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocume
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.serializer.Serializer
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -38,7 +37,6 @@ import org.junit.Test
 
 class IssuanceServiceTest {
 
-    private val serializer = Serializer()
     private val identifierManager: IdentifierManager = mockk()
     private val masterIdentifier: Identifier = mockk()
     private val pairwiseIdentifier: Identifier = mockk()
@@ -47,8 +45,9 @@ class IssuanceServiceTest {
     private val mockedJwtValidator: JwtValidator = mockk()
     private val exchangeResponseFormatter: ExchangeResponseFormatter = mockk()
     private val issuanceResponseFormatter: IssuanceResponseFormatter = mockk()
-    private val exchangeService = ExchangeService(mockk(relaxed = true), exchangeResponseFormatter, mockedJwtValidator, serializer)
-    private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, serializer)
+    private val exchangeService = ExchangeService(mockk(relaxed = true), exchangeResponseFormatter,
+        defaultTestSerializer, mockedJwtValidator)
+    private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
     private val issuanceService =
@@ -60,7 +59,7 @@ class IssuanceServiceTest {
                 mockk(relaxed = true),
                 mockedJwtValidator,
                 issuanceResponseFormatter,
-                serializer
+                defaultTestSerializer
             )
         )
 
@@ -105,7 +104,7 @@ class IssuanceServiceTest {
     }
 
     private fun setUpTestContract(expectedContractJwt: String): VerifiableCredentialContract {
-        return serializer.parse(VerifiableCredentialContract.serializer(), expectedContractJwt)
+        return defaultTestSerializer.decodeFromString(VerifiableCredentialContract.serializer(), expectedContractJwt)
     }
 
     @Test
@@ -177,8 +176,8 @@ class IssuanceServiceTest {
     }
 
     private fun unwrapContract(jwsTokenString: String): VerifiableCredentialContract {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
-        return serializer.parse(VerifiableCredentialContract.serializer(), jwsToken.content())
+        val jwsToken = JwsToken.deserialize(jwsTokenString, defaultTestSerializer)
+        return defaultTestSerializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
     }
 }
 

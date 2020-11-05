@@ -4,5 +4,4 @@ package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.di.SdkModule
 
-// Keep in sync with `fun defaultJsonSerializer()` in SdkModule
 val defaultTestSerializer = SdkModule().defaultJsonSerializer()
