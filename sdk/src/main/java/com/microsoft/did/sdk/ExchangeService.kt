@@ -5,13 +5,13 @@ package com.microsoft.did.sdk
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
+import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.ExchangeException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.formVerifiableCredential
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -20,7 +20,8 @@ import javax.inject.Singleton
 class ExchangeService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val exchangeResponseFormatter: ExchangeResponseFormatter,
-    private val serializer: Json
+    private val serializer: Json,
+    private val jwtValidator: JwtValidator
 ) {
 
     suspend fun getExchangedVerifiableCredential(
@@ -40,21 +41,12 @@ class ExchangeService @Inject constructor(
         }
         val formattedPairwiseRequest = exchangeResponseFormatter.formatResponse(request, expiryInSeconds)
 
-        val result = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+        return SendVerifiableCredentialIssuanceRequestNetworkOperation(
             request.audience,
             formattedPairwiseRequest,
-            apiProvider
+            apiProvider,
+            jwtValidator,
+            serializer
         ).fire()
-
-        return when (result) {
-            is Result.Success -> {
-                val verifiableCredential = formVerifiableCredential(
-                    result.payload,
-                    serializer
-                )
-                Result.Success(verifiableCredential)
-            }
-            is Result.Failure -> result
-        }
     }
 }

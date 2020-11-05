@@ -13,9 +13,9 @@ import com.microsoft.did.sdk.util.log.SdkLog
 /**
  * This class initializes the VerifiableCredentialSdk. The `init` method has to be called before the members can be accessed.
  * Call the init method as soon as possible, for example in the `onCreate()` method of your `Application` implementation.
- * An Android context has to be provided as such:
+ * An Android context and user agent information (i.e, name/version) have to be provided as such:
  *
- * VerifiableCredentialSdk.init(getApplicationContext());
+ * VerifiableCredentialSdk.init(getApplicationContext(), "");
  *
  * The `VerifiableCredentialManager` can be accessed through this static reference, but ideally should be provided
  * by your own dependency injection library. In the case of Dagger2 as such:

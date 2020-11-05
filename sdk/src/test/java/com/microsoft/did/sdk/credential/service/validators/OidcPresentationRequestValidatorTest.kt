@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
-import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -37,21 +36,20 @@ class OidcPresentationRequestValidatorTest {
 
     private val expectedSerializedToken: String = "token2364302"
 
-    private val validator: OidcPresentationRequestValidator
-    private val serializer: Json = Json
+    private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator()
+    
+	private val serializer: Json = Json
 
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
 
     init {
-        validator = OidcPresentationRequestValidator(mockedJwtValidator, serializer)
         setUpPresentationRequest()
         setUpIdentifier()
         mockkObject(JwsToken)
     }
 
     private fun setUpPresentationRequest() {
-        every { mockedPresentationRequest.serializedToken } returns expectedSerializedToken
         every { mockedPresentationRequest.content } returns mockedOidcRequestContentRequestContent
     }
 
@@ -74,21 +72,6 @@ class OidcPresentationRequestValidatorTest {
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
             validator.validate(mockedPresentationRequest)
-        }
-    }
-
-    @Test
-    fun `invalid signature fails successfully`() {
-        setUpExpiration(86400)
-        every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
-        coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns false
-        runBlocking {
-            try {
-                validator.validate(mockedPresentationRequest)
-                fail()
-            } catch (exception: Exception) {
-                assertThat(exception).isInstanceOf(InvalidSignatureException::class.java)
-            }
         }
     }
 
