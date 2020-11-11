@@ -22,7 +22,7 @@ class FetchPresentationRequestNetworkOperation(
     private val url: String,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
-    private val serializer: Json,
+    private val serializer: Json
 ) : GetNetworkOperation<String, PresentationRequestContent>() {
     override val call: suspend () -> Response<String> = { apiProvider.presentationApis.getRequest(url) }
 
