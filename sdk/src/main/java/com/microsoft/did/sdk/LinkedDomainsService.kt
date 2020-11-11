@@ -26,6 +26,12 @@ class LinkedDomainsService @Inject constructor(
     suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
         return runResultTry {
             val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
+            verifyLinkedDomains(domainUrls, relyingPartyDid)
+        }
+    }
+
+    private suspend fun verifyLinkedDomains(domainUrls: List<String>, relyingPartyDid: String): Result<LinkedDomainResult> {
+        return runResultTry {
             if (domainUrls.isEmpty())
                 return@runResultTry Result.Success(LinkedDomainMissing())
             val domainUrl = domainUrls.first()

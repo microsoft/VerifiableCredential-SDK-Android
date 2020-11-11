@@ -6,10 +6,10 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.UnSupportedOperationException
+import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import java.util.Locale
 
 abstract class Provider {
@@ -228,7 +228,7 @@ abstract class Provider {
 
     protected open fun checkAlgorithmName(algorithm: Algorithm) {
         if (algorithm.name.toLowerCase(Locale.ENGLISH) != this.name.toLowerCase(Locale.ENGLISH)) {
-            throw AlgorithmException("Unrecognized Algorithm ${algorithm.name}")
+            throw UnSupportedAlgorithmException("Unrecognized Algorithm ${algorithm.name}")
         }
     }
 

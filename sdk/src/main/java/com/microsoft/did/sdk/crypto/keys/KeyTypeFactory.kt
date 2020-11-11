@@ -5,7 +5,7 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import java.util.Locale
 
 /**
@@ -21,7 +21,7 @@ object KeyTypeFactory {
             "hmac" -> KeyType.Octets
             "ecdsa", "ecdh" -> KeyType.EllipticCurve
             "rsassa-pkcs1-v1_5", "rsa-oaep", "rsa-oaep-256" -> KeyType.RSA
-            else -> throw AlgorithmException("The algorithm '${algorithm.name}' is not supported")
+            else -> throw UnSupportedAlgorithmException("The algorithm '${algorithm.name}' is not supported")
         }
     }
 }

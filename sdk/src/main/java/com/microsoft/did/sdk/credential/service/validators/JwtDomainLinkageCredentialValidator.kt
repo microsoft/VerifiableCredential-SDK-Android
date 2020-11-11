@@ -17,9 +17,8 @@ class JwtDomainLinkageCredentialValidator @Inject constructor(
     override suspend fun validate(domainLinkageCredential: String, rpDid: String, rpDomain: String): Boolean {
         val jwt = JwsToken.deserialize(domainLinkageCredential, serializer)
         val domainLinkageCredentialParsed = serializer.decodeFromString(DomainLinkageCredential.serializer(), jwt.content())
-        if (!jwtValidator.verifySignature(jwt)) {
+        if (!(jwtValidator.verifySignature(jwt) && jwtValidator.validateDidInHeaderAndPayload(jwt, domainLinkageCredentialParsed.issuer)))
             return false
-        }
         return verifyDidConfigResource(domainLinkageCredentialParsed, rpDid, rpDomain)
     }
 

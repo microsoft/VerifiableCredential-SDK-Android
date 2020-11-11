@@ -7,9 +7,9 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
+import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import kotlinx.serialization.json.Json
 import java.util.Locale
 
@@ -22,7 +22,7 @@ open class Subtle(providers: Set<Provider> = emptySet(), private val serializer:
     }.toMap()
 
     private fun getProvider(algorithm: String): Provider {
-        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw AlgorithmException("Unknown algorithm $algorithm")
+        return provider[algorithm.toLowerCase(Locale.ENGLISH)] ?: throw UnSupportedAlgorithmException("Unknown algorithm $algorithm")
     }
 
     override fun encrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {

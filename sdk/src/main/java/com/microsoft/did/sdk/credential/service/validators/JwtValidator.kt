@@ -30,10 +30,14 @@ class JwtValidator @Inject constructor(
      * Verify the signature on the JwsToken.
      */
     suspend fun verifySignature(token: JwsToken): Boolean {
-        val signature = token.signatures.first()
-        val (did, _) = getKid(signature)
-        val publicKeys = resolvePublicKeys(did)
+        val didInHeader = getDidFromHeader(token)
+        val publicKeys = resolvePublicKeys(didInHeader)
         return token.verify(cryptoOperations, publicKeys)
+    }
+
+    fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
+        val didInHeader = getDidFromHeader(jwsToken)
+        return didInHeader == didInPayload
     }
 
     private fun getKid(signature: JwsSignature): Pair<String, String> {
@@ -50,5 +54,11 @@ class JwtValidator @Inject constructor(
             }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
         }
+    }
+
+    private fun getDidFromHeader(token: JwsToken): String {
+        val signature = token.signatures.first()
+        val (didInHeader, _) = getKid(signature)
+        return didInHeader
     }
 }

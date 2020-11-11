@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
 import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -199,13 +200,15 @@ class JwsToken private constructor(
      *Verify the JWS signatures
      */
     fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false): Boolean {
-        val results = this.signatures.map {
-            val fullyQuantifiedKid = it.getKid(serializer) ?: ""
+        val results = this.signatures.map {jwsSignature ->
+            val algorithm = jwsSignature.getAlg(serializer)
+            if (algorithm != JoseConstants.Es256K.value) throw UnSupportedAlgorithmException("$algorithm is not supported.")
+            val fullyQuantifiedKid = jwsSignature.getKid(serializer) ?: ""
             val kid = JwaCryptoConverter.extractDidAndKeyId(fullyQuantifiedKid).second
-            val signatureInput = "${it.protected}.${this.payload}"
+            val signatureInput = "${jwsSignature.protected}.${this.payload}"
             val publicKey = cryptoOperations.keyStore.getPublicKeyById(kid)
             if (publicKey != null) {
-                verifyWithKey(cryptoOperations, signatureInput, it, publicKey)
+                verifyWithKey(cryptoOperations, signatureInput, jwsSignature, publicKey)
             } else {
                 // use one of the provided public Keys
                 val key = publicKeys.firstOrNull {
@@ -213,10 +216,10 @@ class JwsToken private constructor(
                 }
                 when {
                     key != null -> {
-                        verifyWithKey(cryptoOperations, signatureInput, it, key)
+                        verifyWithKey(cryptoOperations, signatureInput, jwsSignature, key)
                     }
                     publicKeys.isNotEmpty() -> {
-                        verifyWithKey(cryptoOperations, signatureInput, it, publicKeys.first())
+                        verifyWithKey(cryptoOperations, signatureInput, jwsSignature, publicKeys.first())
                     }
                     else -> false
                 }

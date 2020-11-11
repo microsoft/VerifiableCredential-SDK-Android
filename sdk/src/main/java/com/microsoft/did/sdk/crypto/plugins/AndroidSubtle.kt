@@ -26,6 +26,7 @@ import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
+import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import com.microsoft.did.sdk.util.log.SdkLog
 import java.math.BigInteger
 import java.security.KeyFactory
@@ -97,7 +98,7 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) :
                 generator.init(alg.length.toInt())
                 generator.generateKey()
             }
-            else -> throw AlgorithmException("Unsupported symmetric key algorithm: ${algorithm.name}")
+            else -> throw UnSupportedAlgorithmException("Unsupported symmetric key algorithm: ${algorithm.name}")
         }
         return CryptoKey(
             type = KeyType.Secret,
@@ -300,25 +301,25 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) :
                     W3cCryptoApiConstants.Sha256.value -> AndroidConstants.EcDsaSha256.value
                     W3cCryptoApiConstants.Sha384.value -> AndroidConstants.EcDsaSha384.value
                     W3cCryptoApiConstants.Sha512.value -> AndroidConstants.EcDsaSha512.value
-                    else -> throw AlgorithmException("Unsupported ECDSA hash algorithm: ${ecDsaParams.hash.name}")
+                    else -> throw UnSupportedAlgorithmException("Unsupported ECDSA hash algorithm: ${ecDsaParams.hash.name}")
                 }
             }
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> {
                 // The hash is indicated by the key's "algorithm" slot.
                 val keyAlgorithm = cryptoKey.algorithm as? RsaHashedKeyAlgorithm
-                    ?: throw AlgorithmException("Unsupported RSA key algorithm: ${cryptoKey.algorithm.name}")
+                    ?: throw UnSupportedAlgorithmException("Unsupported RSA key algorithm: ${cryptoKey.algorithm.name}")
                 when (keyAlgorithm.hash.name) {
                     W3cCryptoApiConstants.Sha1.value -> AndroidConstants.RsSha1.value
                     W3cCryptoApiConstants.Sha224.value -> AndroidConstants.RsSha224.value
                     W3cCryptoApiConstants.Sha256.value -> AndroidConstants.RsSha256.value
                     W3cCryptoApiConstants.Sha384.value -> AndroidConstants.RsSha384.value
                     W3cCryptoApiConstants.Sha512.value -> AndroidConstants.RsSha512.value
-                    else -> throw AlgorithmException("Unsupported RSA hash algorithm: ${keyAlgorithm.hash.name}")
+                    else -> throw UnSupportedAlgorithmException("Unsupported RSA hash algorithm: ${keyAlgorithm.hash.name}")
                 }
             }
             W3cCryptoApiConstants.HmacSha256.value -> AndroidConstants.HmacSha256.value
             W3cCryptoApiConstants.HmacSha512.value -> AndroidConstants.HmacSha512.value
-            else -> throw AlgorithmException("Unsupported algorithm: ${algorithm.name}")
+            else -> throw UnSupportedAlgorithmException("Unsupported algorithm: ${algorithm.name}")
         }
     }
 
@@ -326,7 +327,7 @@ class AndroidSubtle @Inject constructor(private var keyStore: AndroidKeyStore) :
         return when (algorithm.name) {
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value -> AndroidConstants.Rsa.value
             W3cCryptoApiConstants.EcDsa.value -> AndroidConstants.Ec.value
-            else -> throw AlgorithmException("Unknown algorithm used: ${algorithm.name}")
+            else -> throw UnSupportedAlgorithmException("Unknown algorithm used: ${algorithm.name}")
         }
     }
 
