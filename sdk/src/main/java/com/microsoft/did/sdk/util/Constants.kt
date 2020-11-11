@@ -10,6 +10,9 @@ object Constants {
     // OIDC Protocol Constants
     const val SELF_ISSUED = "https://self-issued.me"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
+    const val RESPONSE_TYPE = "id_token"
+    const val RESPONSE_MODE = "form_post"
+    const val SCOPE = "openid did_authn"
 
     //Presentation Exchange Constants
     const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"
@@ -25,7 +28,6 @@ object Constants {
     //Well-Known Config Document Constants
     const val WELL_KNOWN_CONFIG_DOCUMENT_LOCATION = ".well-known/did-configuration.json"
     const val LINKED_DOMAINS_SERVICE_ENDPOINT_TYPE = "LinkedDomains"
-    const val LINKED_DOMAINS_SERVICE_ENDPOINT_ORIGINS = "origins"
 
     // General Constants
     const val MILLISECONDS_IN_A_SECOND = 1000

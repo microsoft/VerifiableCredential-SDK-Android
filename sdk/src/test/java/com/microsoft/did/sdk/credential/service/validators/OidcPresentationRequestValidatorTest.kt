@@ -30,7 +30,7 @@ class OidcPresentationRequestValidatorTest {
 
     private val mockedJwtValidator: JwtValidator = mockk()
 
-    private val mockedOidcRequestContentRequestContent: PresentationRequestContent = mockk()
+    private val mockedOidcRequestContent: PresentationRequestContent = mockk()
 
     private val mockedIdentifier: Identifier = mockk()
 
@@ -42,6 +42,10 @@ class OidcPresentationRequestValidatorTest {
 
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
+    private val expectedResponseType = "id_token"
+    private val expectedResponseMode = "form_post"
+    private val expectedScope = "openid did_authn"
+    private val expectedExpirationTime = 86400L
 
     init {
         setUpPresentationRequest()
@@ -50,7 +54,7 @@ class OidcPresentationRequestValidatorTest {
     }
 
     private fun setUpPresentationRequest() {
-        every { mockedPresentationRequest.content } returns mockedOidcRequestContentRequestContent
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
     }
 
     private fun setUpIdentifier() {
@@ -61,13 +65,21 @@ class OidcPresentationRequestValidatorTest {
     private fun setUpExpiration(offsetInSecond: Long) {
         val currentTimeInSeconds: Long = Date().time / Constants.MILLISECONDS_IN_A_SECOND
         val currentTimePlusOffsetInSeconds = currentTimeInSeconds + offsetInSecond
-        every { mockedOidcRequestContentRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
+        every { mockedOidcRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
+    }
+
+    private fun setUpOidcRequestContent() {
+        every { mockedOidcRequestContent.responseType } returns expectedResponseType
+        every { mockedOidcRequestContent.responseMode } returns expectedResponseMode
+        every { mockedOidcRequestContent.scope } returns expectedScope
     }
 
     @Test
     fun `valid signature is validated successfully`() {
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        setUpOidcRequestContent()
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
@@ -78,6 +90,7 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `throws when token expiration is expired`() {
         setUpExpiration(-86400)
+        setUpOidcRequestContent()
         every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {

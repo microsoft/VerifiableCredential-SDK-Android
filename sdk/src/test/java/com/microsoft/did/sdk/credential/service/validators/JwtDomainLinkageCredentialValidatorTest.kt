@@ -30,6 +30,7 @@ class JwtDomainLinkageCredentialValidatorTest {
         val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, validRpDid, validDomainUrl)
             Assertions.assertThat(validated).isTrue()
@@ -41,6 +42,7 @@ class JwtDomainLinkageCredentialValidatorTest {
         val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, invalidRpDid, validDomainUrl)
             Assertions.assertThat(validated).isFalse()
@@ -52,6 +54,7 @@ class JwtDomainLinkageCredentialValidatorTest {
         val response = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), docJwt)
         val domainLinkageCredentialJwt = response.linkedDids.first()
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val validated = jwtDomainLinkageCredentialValidator.validate(domainLinkageCredentialJwt, validRpDid, invalidDomainUrl)
             Assertions.assertThat(validated).isFalse()
