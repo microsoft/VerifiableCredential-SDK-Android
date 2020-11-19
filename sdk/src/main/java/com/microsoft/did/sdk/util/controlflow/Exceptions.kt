@@ -19,6 +19,8 @@ class KeyFormatException(message: String, cause: Throwable? = null) : CryptoExce
 
 class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
+class UnSupportedAlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
+
 class SignatureException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
 class EncodingException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
@@ -50,7 +52,15 @@ class InvalidSignatureException(message: String) : ValidatorException(message)
 
 class ExpiredTokenExpirationException(message: String) : ValidatorException(message)
 
+class InvalidResponseTypeException(message: String) : ValidatorException(message)
+
+class InvalidResponseModeException(message: String) : ValidatorException(message)
+
+class InvalidScopeException(message: String) : ValidatorException(message)
+
 class MissingInputInRequestException(message: String) : ValidatorException(message)
+
+class DidInHeaderAndPayloadNotMatching(message: String) : ValidatorException(message)
 
 open class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 

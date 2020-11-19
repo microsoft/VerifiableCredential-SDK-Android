@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -32,8 +33,11 @@ class FetchContractNetworkOperation(
 
     private suspend fun verifyAndUnwrapContract(jwsTokenString: String): Result<VerifiableCredentialContract> {
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val verifiableCredentialContract = serializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Issuance Request.")
-        return Result.Success(serializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content()))
+        if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, verifiableCredentialContract.input.issuer))
+            throw DidInHeaderAndPayloadNotMatching("DID used to sign the contract doesn't match the DID in the contract.")
+        return Result.Success(verifiableCredentialContract)
     }
 }

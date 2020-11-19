@@ -41,6 +41,7 @@ class LinkedDomainsServiceTest {
         coEvery { mockedResolver.resolve(suppliedDidWithSingleServiceEndpoint) } returns Result.Success(expectedResponse.didDocument)
         coEvery { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(expectedWellKnownConfigDocument)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val linkedDomainsResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithSingleServiceEndpoint)
             assertThat(linkedDomainsResult).isInstanceOf(Result.Success::class.java)
@@ -61,6 +62,7 @@ class LinkedDomainsServiceTest {
         coEvery { mockedResolver.resolve(suppliedDidWithMultipleServiceEndpoints) } returns Result.Success(expectedResponse.didDocument)
         coEvery { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(expectedWellKnownConfigDocument)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
             val linkedDomainsArrResult = linkedDomainsService.fetchAndVerifyLinkedDomains(suppliedDidWithMultipleServiceEndpoints)
             assertThat(linkedDomainsArrResult).isInstanceOf(Result.Success::class.java)

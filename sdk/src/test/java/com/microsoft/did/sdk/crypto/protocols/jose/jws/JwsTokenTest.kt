@@ -11,8 +11,10 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.microsoft.did.sdk.util.stringToByteArray
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import kotlin.random.Random
@@ -73,7 +75,10 @@ class JwsTokenTest {
         token.sign(keyRef, crypto)
         val serialized = token.serialize(defaultTestSerializer, JwsFormat.Compact)
         val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
-        val matched = verifyToken.verify(crypto)
-        assertThat(matched).isTrue()
+        Assertions.assertThatThrownBy {
+            verifyToken.verify(crypto)
+        }.isInstanceOf(
+            UnSupportedAlgorithmException::class.java
+        )
     }
 }

@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -32,8 +33,11 @@ class FetchPresentationRequestNetworkOperation(
 
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
         val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val presentationRequestContent = serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
-        return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
+        if (!jwtValidator.validateDidInHeaderAndPayload(jwsToken, presentationRequestContent.issuer))
+            throw DidInHeaderAndPayloadNotMatching("DID used to sign the presentation request doesn't match the DID in presentation request.")
+        return Result.Success(presentationRequestContent)
     }
 }
