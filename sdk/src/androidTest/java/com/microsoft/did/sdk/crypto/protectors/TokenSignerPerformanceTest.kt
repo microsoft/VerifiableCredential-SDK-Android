@@ -8,25 +8,37 @@ package com.microsoft.did.sdk.crypto.plugins
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
+import com.microsoft.did.sdk.credential.service.protectors.TokenSigner
+import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyType
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.di.defaultTestSerializer
+import com.microsoft.did.sdk.identifier.IdentifierCreator
+import com.microsoft.did.sdk.identifier.SidetreePayloadProcessor
+import com.microsoft.did.sdk.identifier.models.Identifier
+import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.Success
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class EllipticCurveSubtleCryptoPerformanceTest {
-    private val testName = "EllipticCurveSubtleCryptoPerformanceTest"
+class TokenSignerPerformanceTest {
+    private val testName = "TokenSignerPerformanceTest"
     private val androidSubtle: AndroidSubtle
     private val ellipticCurveSubtleCrypto: EllipticCurveSubtleCrypto
     private val cryptoKeyPair: CryptoKeyPair
+    private val keyReference = "KeyReference1"
+    private val serializer = Json
+    private val signer: TokenSigner
+    private val cryptoOperations: CryptoOperations
+    private val identifierCreator: IdentifierCreator
 
     init {
         println("PerfTest->(${getTestName()}) - Start init")
@@ -35,7 +47,6 @@ class EllipticCurveSubtleCryptoPerformanceTest {
         val keyStore = AndroidKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, defaultTestSerializer)
-        val keyReference = "KeyReference1"
         cryptoKeyPair = ellipticCurveSubtleCrypto.generateKeyPair(
             EcKeyGenParams(
                 namedCurve = W3cCryptoApiConstants.Secp256k1.value,
@@ -45,6 +56,12 @@ class EllipticCurveSubtleCryptoPerformanceTest {
                 )
             ), true, listOf(KeyUsage.Sign)
         )
+
+        cryptoOperations = CryptoOperations(ellipticCurveSubtleCrypto, keyStore, EllipticCurvePairwiseKey())
+        val sidetreePayloadProcessor = SidetreePayloadProcessor(defaultTestSerializer)
+        identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor)
+
+        signer = TokenSigner(cryptoOperations, serializer)
         println("PerfTest->(${getTestName()}) - End init: ${timer(startTime)}")
     }
 
@@ -64,20 +81,23 @@ class EllipticCurveSubtleCryptoPerformanceTest {
 
     @Test
     fun signAndVerifySignatureTest() {
-        val payload = byteArrayOf(
-            123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
-            32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
-            32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
-            109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
-            111, 116, 34, 58, 116, 114, 117, 101, 125
-        )
+        val payload = "the Answer to the Ultimate Question of Life, the Universe, and Everything"
+        val result: Result<Identifier> = identifierCreator.create("ION")
         println("PerfTest->(${getTestName()}) - Start sign")
-        val startTime = getStartTime()
-        val signedPayload = ellipticCurveSubtleCrypto.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
-        println("PerfTest->(${getTestName()}) - End sign: ${timer(startTime)}")
+        var startTime = getStartTime()
+        when (result) {
+            is Result.Success -> {
+                // use result.payload (Identifier)
+                val signedPayload = signer.signWithIdentifier(payload, result.payload)
+                println("PerfTest->(${getTestName()}) - End sign: ${timer(startTime)}")
+                println("PerfTest->(${getTestName()}) - Signed token: ${signedPayload}")
+            }
+        }
+
         println("PerfTest->(${getTestName()}) - Start verify")
-        val verified = ellipticCurveSubtleCrypto.verify(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.publicKey, signedPayload, payload)
+        startTime = getStartTime()
+        //val verified = ellipticCurveSubtleCrypto.verify(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.publicKey, signedPayload, payload)
         println("PerfTest->(${getTestName()}) - End verify: ${timer(startTime)}")
-        assertThat(verified).isTrue()
+        //assertThat(verified).isTrue()
     }
 }
