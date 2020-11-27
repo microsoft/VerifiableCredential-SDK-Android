@@ -27,13 +27,7 @@ class EllipticCurveSubtleCryptoPerformanceTest {
     private val androidSubtle: AndroidSubtle
     private val ellipticCurveSubtleCrypto: EllipticCurveSubtleCrypto
     private val cryptoKeyPair: CryptoKeyPair
-    private val payload = byteArrayOf(
-        123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
-        32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
-        32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
-        109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
-        111, 116, 34, 58, 116, 114, 117, 101, 125
-    )
+    private val payload = ByteArray(2048) {it.toByte()}
 
     init {
         println("PerfTest->(${getTestName()}) - Start init")

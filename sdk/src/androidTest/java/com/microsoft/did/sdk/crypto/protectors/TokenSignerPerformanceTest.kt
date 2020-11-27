@@ -56,7 +56,11 @@ class TokenSignerPerformanceTest {
     private val identifierCreator: IdentifierCreator
     private val identifierRepository: IdentifierRepository
     private val identifier: Identifier
-    private val payload = "the Answer to the Ultimate Question of Life, the Universe, and Everything"
+    private val charPool : List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+    private val payload =(1..2048)
+        .map { i -> kotlin.random.Random.nextInt(0, charPool.size) }
+        .map(charPool::get)
+        .joinToString("")
 
     init {
         println("PerfTest->(${getTestName()}) - Start init")

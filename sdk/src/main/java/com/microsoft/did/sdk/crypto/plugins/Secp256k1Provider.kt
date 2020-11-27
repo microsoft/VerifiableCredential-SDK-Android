@@ -44,6 +44,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
     init {
         Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)
     }
+    private val testName = "Secp256k1Provider"
 
     data class Secp256k1Handle(val alias: String, val data: ByteArray)
 
@@ -109,17 +110,34 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         val ecDomainParameters = createCurveParameters()
         val privateKeyParams = ECPrivateKeyParameters(BigInteger(1, keyData), ecDomainParameters)
         signingSigner.init(true, privateKeyParams)
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start Secp256k1Provider sign: 0")
+        val startTime = getStartTime()
 
         val signature = signingSigner.generateSignature(hashedData)
+        println("PerfTest->(${getTestName()}) in  μs - 0: End  Secp256k1Provider sign: ${timer(startTime)}")
+
         return convertSignatureToUnsignedByteArray(signature)
+    }
+
+    fun getTestName(): String {
+        return this.testName
+    }
+
+    fun getStartTime(): Long {
+        return System.nanoTime()
+    }
+
+    fun timer(start: Long): String {
+        val timing = System.nanoTime() - start
+        return (timing / 1000).toString()
     }
 
     /**
      * Signature is returned as array of BigIntegers for R and S. Converting them into unsigned byte array.
      */
     private fun convertSignatureToUnsignedByteArray(signature: Array<BigInteger>): ByteArray {
-        var r = convertSignedToUnsignedByteArray(signature[0].toByteArray())
-        var s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
+        val r = convertSignedToUnsignedByteArray(signature[0].toByteArray())
+        val s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
         return r + s
     }
 
