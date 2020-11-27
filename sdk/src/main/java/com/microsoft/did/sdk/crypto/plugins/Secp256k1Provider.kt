@@ -137,7 +137,7 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
      */
     private fun convertSignatureToUnsignedByteArray(signature: Array<BigInteger>): ByteArray {
         val r = convertSignedToUnsignedByteArray(signature[0].toByteArray())
-        val s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
+        val  s = convertSignedToUnsignedByteArray(signature[1].toByteArray())
         return r + s
     }
 

@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
@@ -27,6 +28,8 @@ class JwsToken private constructor(
     signatures: List<JwsSignature> = emptyList(),
     private val serializer: Json
 ) {
+    private val testName = "JwsToken"
+    private val privateKeyCache = HashMap<String, PrivateKey>()
 
     val signatures: MutableList<JwsSignature> = signatures.toMutableList()
 
@@ -140,6 +143,19 @@ class JwsToken private constructor(
         )
     }
 
+    fun getTestName(): String {
+        return this.testName
+    }
+
+    fun getStartTime(): Long {
+        return System.nanoTime()
+    }
+
+    fun timer(start: Long): String {
+        val timing = System.nanoTime() - start
+        return (timing / 1000).toString()
+    }
+
     /**
      * Adds a signature using the given key
      * @param signingKeyReference reference to signing key
@@ -148,7 +164,15 @@ class JwsToken private constructor(
      */
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
-        val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken sign: 0")
+        val startTime = getStartTime()
+        var signingKey = privateKeyCache.get(signingKeyReference)
+        if (signingKey == null) {
+            // TODO needs strategy for changing keys
+            signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
+            privateKeyCache.put(signingKeyReference, signingKey)
+        }
+        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken sign: ${timer(startTime)}")
 
         // 3. Compute headers
         val headers = header.toMutableMap()
