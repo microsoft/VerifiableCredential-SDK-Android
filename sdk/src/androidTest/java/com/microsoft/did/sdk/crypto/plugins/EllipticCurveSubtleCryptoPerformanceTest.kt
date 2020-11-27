@@ -27,6 +27,13 @@ class EllipticCurveSubtleCryptoPerformanceTest {
     private val androidSubtle: AndroidSubtle
     private val ellipticCurveSubtleCrypto: EllipticCurveSubtleCrypto
     private val cryptoKeyPair: CryptoKeyPair
+    private val payload = byteArrayOf(
+        123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
+        32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
+        32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
+        109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
+        111, 116, 34, 58, 116, 114, 117, 101, 125
+    )
 
     init {
         println("PerfTest->(${getTestName()}) - Start init")
@@ -58,26 +65,21 @@ class EllipticCurveSubtleCryptoPerformanceTest {
 
     fun timer(start: Long): String {
         val timing = System.nanoTime() - start
-        return (timing/1000).toString() + " μs"
+        return (timing/1000).toString()
     }
 
 
     @Test
     fun signAndVerifySignatureTest() {
-        val payload = byteArrayOf(
-            123, 34, 105, 115, 115, 34, 58, 34, 106, 111, 101, 34, 44, 13, 10,
-            32, 34, 101, 120, 112, 34, 58, 49, 51, 48, 48, 56, 49, 57, 51, 56, 48, 44, 13, 10,
-            32, 34, 104, 116, 116, 112, 58, 47, 47, 101, 120, 97,
-            109, 112, 108, 101, 46, 99, 111, 109, 47, 105, 115, 95, 114, 111,
-            111, 116, 34, 58, 116, 114, 117, 101, 125
-        )
-        println("PerfTest->(${getTestName()}) - Start sign")
-        val startTime = getStartTime()
-        val signedPayload = ellipticCurveSubtleCrypto.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
-        println("PerfTest->(${getTestName()}) - End sign: ${timer(startTime)}")
-        println("PerfTest->(${getTestName()}) - Start verify")
-        val verified = ellipticCurveSubtleCrypto.verify(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.publicKey, signedPayload, payload)
-        println("PerfTest->(${getTestName()}) - End verify: ${timer(startTime)}")
-        assertThat(verified).isTrue()
+        for (loop in 0..9) {
+            println("PerfTest->(${getTestName()}) in  μs - (${loop}): Start sign: 0")
+            val startTime = getStartTime()
+            val signedPayload = ellipticCurveSubtleCrypto.sign(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.privateKey, payload)
+            println("PerfTest->(${getTestName()}) in  μs - (${loop}): End sign: ${timer(startTime)}")
+            println("PerfTest->(${getTestName()}) in  μs - (${loop}): Start verify: 0")
+            val verified = ellipticCurveSubtleCrypto.verify(cryptoKeyPair.privateKey.algorithm, cryptoKeyPair.publicKey, signedPayload, payload)
+            println("PerfTest->(${getTestName()}) in  μs - (${loop}): End verify: ${timer(startTime)}")
+            assertThat(verified).isTrue()
+        }
     }
 }
