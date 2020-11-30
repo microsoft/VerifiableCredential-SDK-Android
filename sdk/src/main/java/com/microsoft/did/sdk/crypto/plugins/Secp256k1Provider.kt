@@ -110,26 +110,8 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         val ecDomainParameters = createCurveParameters()
         val privateKeyParams = ECPrivateKeyParameters(BigInteger(1, keyData), ecDomainParameters)
         signingSigner.init(true, privateKeyParams)
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start Secp256k1Provider sign: 0")
-        val startTime = getStartTime()
-
         val signature = signingSigner.generateSignature(hashedData)
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  Secp256k1Provider sign: ${timer(startTime)}")
-
         return convertSignatureToUnsignedByteArray(signature)
-    }
-
-    fun getTestName(): String {
-        return this.testName
-    }
-
-    fun getStartTime(): Long {
-        return System.nanoTime()
-    }
-
-    fun timer(start: Long): String {
-        val timing = System.nanoTime() - start
-        return (timing / 1000).toString()
     }
 
     /**

@@ -141,19 +141,6 @@ class JwsToken private constructor(
         )
     }
 
-    fun getTestName(): String {
-        return this.testName
-    }
-
-    fun getStartTime(): Long {
-        return System.nanoTime()
-    }
-
-    fun timer(start: Long): String {
-        val timing = System.nanoTime() - start
-        return (timing / 1000).toString()
-    }
-
     /**
      * Adds a signature using the given key
      * @param signingKeyReference reference to signing key
@@ -162,13 +149,7 @@ class JwsToken private constructor(
      */
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken get key sign: 0")
-        var startTime = getStartTime()
         val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken get key sign: ${timer(startTime)}")
-
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken prepare sign: 0")
-        startTime = getStartTime()
 
         // 3. Compute headers
         val headers = header.toMutableMap()
@@ -199,16 +180,11 @@ class JwsToken private constructor(
         }
 
         val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken prepare sign: ${timer(startTime)}")
-
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken sign: 0")
-        startTime = getStartTime()
 
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName)
         )
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken sign: ${timer(startTime)}")
 
         val signatureBase64 = Base64Url.encode(signature)
 

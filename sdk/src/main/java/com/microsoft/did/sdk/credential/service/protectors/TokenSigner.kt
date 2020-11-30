@@ -30,15 +30,8 @@ class TokenSigner @Inject constructor(
      * @return JwsToken
      */
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start TokenSigner setup: 0")
-        var startTime = getStartTime()
-
         // caching in JwsToken gets lost because of constructor
         val token = JwsToken(payload, serializer)
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  TokenSigner setup: ${timer(startTime)}")
-
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start key get: 0")
-        startTime = getStartTime()
 
         var kid = kidCache.get(identifier.id)
         if (kid == null) {
@@ -52,30 +45,8 @@ class TokenSigner @Inject constructor(
         val additionalHeaders = mutableMapOf<String, String>()
         additionalHeaders[JoseConstants.Kid.value] = "${identifier.id}${kid}"
         additionalHeaders[JoseConstants.Type.value] = CREDENTIAL_PRESENTATION_FORMAT
-        println("PerfTest->(${getTestName()}) in  μs - 0: End key get: ${timer(startTime)}")
-
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start TokenSigner sign: 0")
-        startTime = getStartTime()
         token.sign(identifier.signatureKeyReference, cryptoOperations, additionalHeaders)
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  TokenSigner sign: ${timer(startTime)}")
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start TokenSigner serialize: 0")
-        startTime = getStartTime()
         val serialized = token.serialize(serializer)
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  TokenSigner serialize: ${timer(startTime)}")
         return serialized
     }
-
-    fun getTestName(): String {
-        return this.testName
-    }
-
-    fun getStartTime(): Long {
-        return System.nanoTime()
-    }
-
-    fun timer(start: Long): String {
-        val timing = System.nanoTime() - start
-        return (timing / 1000).toString()
-    }
-
 }
