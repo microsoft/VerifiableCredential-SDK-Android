@@ -33,6 +33,7 @@ class TokenSigner @Inject constructor(
         println("PerfTest->(${getTestName()}) in  μs - 0: Start TokenSigner setup: 0")
         var startTime = getStartTime()
 
+        // caching in JwsToken gets lost because of constructor
         val token = JwsToken(payload, serializer)
         println("PerfTest->(${getTestName()}) in  μs - 0: End  TokenSigner setup: ${timer(startTime)}")
 
@@ -42,6 +43,7 @@ class TokenSigner @Inject constructor(
         var kid = kidCache.get(identifier.id)
         if (kid == null) {
             // TODO make more bullet proof in case key changes
+                // Removing this cache seems to have a impact on speed - to be checked
             kid = cryptoOperations.keyStore.getPrivateKey(identifier.signatureKeyReference).getKey().kid
             kidCache.put(identifier.id, kid)
         }

@@ -35,6 +35,14 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     companion object {
         const val provider = "AndroidKeyStore"
+        // caches
+        private val nativePrivateKeyCache = HashMap<String, KeyContainer<PrivateKey>>()
+        private val softwarePrivateKeyCache = HashMap<String, KeyContainer<PrivateKey>>()
+        private val nativePublicKeyCache = HashMap<String, KeyContainer<PublicKey>>()
+        private val softwarePublicKeyCache = HashMap<String, KeyContainer<PublicKey>>()
+        private var nativeList: Map<String, KeyStoreListItem>? = null
+        private var secureDataList: Map<String, KeyStoreListItem>? = null
+
         private val regexForKeyReference = Regex("^#(.*)_[^.]+$")
         private val regexForKeyIndex = Regex("^#.*_([^.]+\$)")
 
@@ -57,53 +65,88 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     override fun getPrivateKey(keyReference: String): KeyContainer<PrivateKey> {
-        val nativeKeys = listNativeKeys()
-        var key = nativeKeys[keyReference]
-        if (key != null) {
-            return KeyContainer(
-                kty = key.kty,
-                keys = key.kids.map {
-                    AndroidKeyConverter.androidPrivateKeyToPrivateKey(it, keyStore)
-                }
-            )
+        var privateKey = nativePrivateKeyCache.get(keyReference)
+        if (privateKey == null) {
+            // TODO needs strategy for changing keys
+            val nativeKeys = listNativeKeys()
+            val key = nativeKeys[keyReference]
+            if (key != null) {
+                val container = KeyContainer(
+                    kty = key.kty,
+                    keys = key.kids.map {
+                        AndroidKeyConverter.androidPrivateKeyToPrivateKey(it, keyStore)
+                    }
+                )
+                nativePrivateKeyCache.put(keyReference, container)
+                return container
+            }
+        } else {
+            return privateKey
         }
-        val softwareKeys = listSecureData()
-        key = softwareKeys[keyReference]
-        if (key != null) {
-            return KeyContainer(
-                kty = key.kty,
-                keys = key.kids.map {
-                    getSecurePrivateKey(it)!!
-                }
-            )
+
+        privateKey = softwarePrivateKeyCache.get(keyReference)
+        if (privateKey == null) {
+            // TODO needs strategy for changing keys
+            val softwareKeys = listSecureData()
+            val key = softwareKeys[keyReference]
+            if (key != null) {
+                val container = KeyContainer(
+                    kty = key.kty,
+                    keys = key.kids.map {
+                        getSecurePrivateKey(it)!!
+                    }
+                )
+                softwarePrivateKeyCache.put(keyReference, container)
+                return container
+            }
+        } else {
+            return privateKey
         }
-        throw KeyStoreException("Key $keyReference not found")
+
+        throw KeyStoreException("Private Key $keyReference not found")
     }
 
     override fun getPublicKey(keyReference: String): KeyContainer<PublicKey> {
-        val nativeKeys = listNativeKeys()
-        var key = nativeKeys[keyReference]
-        if (key != null) {
-            return KeyContainer(
-                kty = key.kty,
-                keys = key.kids.map {
-                    val entry = keyStore.getCertificate(it).publicKey
-                        ?: throw KeyException("Key $it is not a private key.")
-                    AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry)
-                }
-            )
+        var publicKey = nativePublicKeyCache.get(keyReference)
+        if (publicKey == null) {
+            // TODO needs strategy for changing keys
+            val nativeKeys = listNativeKeys()
+            val key = nativeKeys[keyReference]
+            if (key != null) {
+                val container = KeyContainer(
+                    kty = key.kty,
+                    keys = key.kids.map {
+                        val entry = keyStore.getCertificate(it).publicKey
+                            ?: throw KeyException("Key $it is not a private key.")
+                        AndroidKeyConverter.androidPublicKeyToPublicKey(it, entry)
+                    }
+                )
+                nativePublicKeyCache.put(keyReference, container)
+                return container
+            }
+        } else {
+            return publicKey
         }
-        val softwareKeys = listSecureData()
-        key = softwareKeys[keyReference]
-        if (key != null) {
-            return KeyContainer(
-                kty = key.kty,
-                keys = key.kids.map {
-                    getSecurePublicKey(it)!!
-                }
-            )
+
+        publicKey = softwarePublicKeyCache.get(keyReference)
+        if (publicKey == null) {
+            val softwareKeys = listSecureData()
+            val key = softwareKeys[keyReference]
+            if (key != null) {
+                val container = KeyContainer(
+                    kty = key.kty,
+                    keys = key.kids.map {
+                        getSecurePublicKey(it)!!
+                    }
+                )
+                softwarePublicKeyCache.put(keyReference, container)
+                return container
+            }
+        } else {
+            return publicKey
         }
-        throw KeyStoreException("Key $keyReference not found")
+
+        throw KeyStoreException("Public Key $keyReference not found")
     }
 
     override fun getSecretKeyById(keyId: String): SecretKey? {
@@ -149,12 +192,14 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         var keyRef = findReferenceInList(nativeKeys, keyId)
         if (!keyRef.isNullOrBlank()) {
             keyStore.deleteEntry(keyId)
+            nativeList = null
             return
         }
         val softwareKeys = listSecureData()
         keyRef = findReferenceInList(softwareKeys, keyId)
         if (!keyRef.isNullOrBlank()) {
             deleteSecureData(keyId)
+            secureDataList = null
         }
     }
 
@@ -175,10 +220,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
 
     override fun save(keyReference: String, key: PrivateKey) {
         val alias = checkOrCreateKeyId(keyReference, key.kid)
-        if (keyStore.containsAlias(alias)) {
-            // do nothing, the key is already there.
-            return
-        }
+
         // This key is not natively supported
         val jwk = key.toJWK()
         jwk.kid = alias
@@ -204,6 +246,10 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
     }
 
     private fun listNativeKeys(): Map<String, KeyStoreListItem> {
+        if (nativeList != null) {
+            return nativeList!!
+        }
+
         val output = emptyMap<String, KeyStoreListItem>().toMutableMap()
         val aliases = keyStore.aliases()
         // KeyRef (as key reference) -> KeyRef.VersionNumber (as key identifier)
@@ -231,10 +277,15 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 }
             }
         }
+        nativeList = output
         return output
     }
 
     private fun listSecureData(): Map<String, KeyStoreListItem> {
+        if (secureDataList != null) {
+            return secureDataList!!
+        }
+
         val sharedPreferences = getSharedPreferences()
         val keys = sharedPreferences.all.keys
         // all stored keys should be in JWT format
@@ -260,6 +311,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
                 }
             }
         }
+        secureDataList = keyMap
         return keyMap
     }
 
@@ -302,6 +354,7 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val editor = sharedPreferences.edit()
         editor.remove(alias)
         editor.apply()
+        secureDataList = null
     }
 
     private fun saveSecureData(alias: String, data: ByteArray) {
@@ -309,6 +362,13 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val editor = sharedPreferences.edit()
         editor.putString(alias, Base64.encodeToString(data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
         editor.apply()
+
+        // Clear caches
+        nativePrivateKeyCache.clear()
+        softwarePrivateKeyCache.clear()
+        nativePublicKeyCache.clear()
+        softwarePublicKeyCache.clear()
+        secureDataList = null
     }
 
     private fun getSharedPreferences(): SharedPreferences {

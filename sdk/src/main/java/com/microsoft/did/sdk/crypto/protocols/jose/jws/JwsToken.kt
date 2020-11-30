@@ -29,8 +29,6 @@ class JwsToken private constructor(
     private val serializer: Json
 ) {
     private val testName = "JwsToken"
-    private val privateKeyCache = HashMap<String, PrivateKey>()
-
     val signatures: MutableList<JwsSignature> = signatures.toMutableList()
 
     companion object {
@@ -164,15 +162,13 @@ class JwsToken private constructor(
      */
     fun sign(signingKeyReference: String, cryptoOperations: CryptoOperations, header: Map<String, String> = emptyMap()) {
         // 1. Get the signing key's metadata
-        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken sign: 0")
-        val startTime = getStartTime()
-        var signingKey = privateKeyCache.get(signingKeyReference)
-        if (signingKey == null) {
-            // TODO needs strategy for changing keys
-            signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
-            privateKeyCache.put(signingKeyReference, signingKey)
-        }
-        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken sign: ${timer(startTime)}")
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken get key sign: 0")
+        var startTime = getStartTime()
+        val signingKey = cryptoOperations.keyStore.getPrivateKey(signingKeyReference).getKey()
+        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken get key sign: ${timer(startTime)}")
+
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken prepare sign: 0")
+        startTime = getStartTime()
 
         // 3. Compute headers
         val headers = header.toMutableMap()
@@ -203,11 +199,16 @@ class JwsToken private constructor(
         }
 
         val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
+        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken prepare sign: ${timer(startTime)}")
+
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start JwsToken sign: 0")
+        startTime = getStartTime()
 
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName)
         )
+        println("PerfTest->(${getTestName()}) in  μs - 0: End  JwsToken sign: ${timer(startTime)}")
 
         val signatureBase64 = Base64Url.encode(signature)
 

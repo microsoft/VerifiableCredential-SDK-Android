@@ -52,5 +52,6 @@ class CryptoOperationsInstrumentedTest {
         val expectedKeyType = "RSA"
         val actualKeyType = publicKeyJWK.kty
         assertThat(actualKeyType).isEqualTo(expectedKeyType)
+        keyStore.deletePrivateKey(keyRef)
     }
 }

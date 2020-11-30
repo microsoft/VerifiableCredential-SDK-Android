@@ -45,7 +45,21 @@ class CryptoOperations(
     val keyStore: KeyStore,
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
 ) {
+    private val testName = "CryptoOperations"
     val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
+
+    fun getTestName(): String {
+        return this.testName
+    }
+
+    fun getStartTime(): Long {
+        return System.nanoTime()
+    }
+
+    fun timer(start: Long): String {
+        val timing = System.nanoTime() - start
+        return (timing / 1000).toString()
+    }
 
     /**
      * Sign payload with key stored in keyStore.
@@ -54,11 +68,22 @@ class CryptoOperations(
      */
     fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
         SdkLog.d("Signing with $signingKeyReference")
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start CryptoOperations get key: 0")
+        var startTime = getStartTime()
         val privateKey = keyStore.getPrivateKey(signingKeyReference)
+        println("PerfTest->(${getTestName()}) in  μs - 0: End CryptoOperations get key: ${timer(startTime)}")
+
         val alg = algorithm ?: privateKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start CryptoOperations import key: 0")
+        startTime = getStartTime()
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.PRIVATE)
         val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
-        return subtle.sign(alg, key, payload)
+        println("PerfTest->(${getTestName()}) in  μs - 0: End CryptoOperations import key: ${timer(startTime)}")
+        println("PerfTest->(${getTestName()}) in  μs - 0: Start CryptoOperations sign: 0")
+        startTime = getStartTime()
+        val signature = subtle.sign(alg, key, payload)
+        println("PerfTest->(${getTestName()}) in  μs - 0: End CryptoOperations sign: ${timer(startTime)}")
+        return signature
     }
 
     /**
