@@ -8,9 +8,9 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
@@ -75,12 +75,13 @@ class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient(@Named("userAgentInfo") userAgentInfo: String): OkHttpClient {
+    fun defaultOkHttpClient(@Named("userAgentInfo") userAgentInfo: String, context: Context): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(UserAgentInterceptor(userAgentInfo))
+            .addInterceptor(CorrelationVectorInterceptor(context))
             .build()
     }
 
