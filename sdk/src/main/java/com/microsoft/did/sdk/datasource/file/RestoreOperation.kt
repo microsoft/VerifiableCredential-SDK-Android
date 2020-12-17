@@ -1,45 +1,83 @@
 package com.microsoft.did.sdk.datasource.file
 
+import android.content.Context
+import android.content.Intent
+import android.content.res.Resources
+import android.net.Uri
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.keys.KeyType;
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
+import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Base64Url
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.formVerifiableCredential
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import java.io.BufferedInputStream
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.security.KeyException
 import javax.inject.Inject
+import kotlin.random.Random
 
 class RestoreOperation @Inject constructor (
     private val identifierRepository: IdentifierRepository,
     private val cryptoOperations: CryptoOperations,
+    private val serializer: Json
 ) {
-    private fun restoreVerifiedCredential(
-        jti: String,
-        vcJwt: String
-    ) {
 
+    private fun parseBackupfileFromUri(context: Context, uri: Uri, password: String): MicrosoftBackup2020 {
+        val stringBuilder = StringBuilder()
+        context.contentResolver.openInputStream(uri)?.use { stream ->
+            BufferedReader(InputStreamReader(stream)).useLines { lines ->
+                for (line in lines) {
+                    stringBuilder.append(line)
+                }
+            }
+        }
+        val content = stringBuilder.toString()
+//        TODO: NEED JWE implimented
+//        return serializer.decodeFromString<MicrosoftBackup2020>(content)
     }
 
-    private fun restoreIdentifier (
+    private suspend fun restoreIdentifier (
         identifierData: RawIdentity
     ): Identifier {
-        val signingKeyRef = if (identifierData.signatureKey != null) {
-            importKey(identifierData.signatureKey, identifierData.alias, Constants.SIGNATURE_KEYREFERENCE)
-        } else {
-            ""
+        val alias = Base64Url.encode(Random.nextBytes(2))
+        var signingKeyRef: String = ""
+        var encryptingKeyRef: String = ""
+        var recoveryKeyRef: String = ""
+        var updateKeyRef: String = ""
+        for (key in identifierData.keys) {
+            if (key.key_ops?.containsAll(listOf("sign", "verify")) == true) {
+                signingKeyRef = importKey(key, alias)
+            }
+            if (key.key_ops?.containsAll(listOf("encrypt", "decrypt")) == true ||
+                key.key_ops?.containsAll(listOf("wrapKey", "unwrapKey")) == true) {
+                encryptingKeyRef = importKey(key, alias)
+            }
+            if (key.key_ops?.contains("update") == true) {
+                updateKeyRef = importKey(key, alias)
+            }
+            if (key.key_ops?.contains("recover") == true) {
+                recoveryKeyRef = importKey(key, alias)
+            }
         }
-        val recoveryKeyRef = importKey(identifierData.recoveryKey, identifierData.alias, Constants.RECOVERY_KEYREFERENCE)
-        val updateKeyRef = importKey(identifierData.updateKey, identifierData.alias, Constants.UPDATE_KEYREFERENCE)
-
+        if (updateKeyRef.isEmpty() || recoveryKeyRef.isBlank()) {
+            throw KeyException("update and recovery key required")
+        }
         val id = Identifier(
             identifierData.id,
-            identifierData.alias,
+            alias,
             signingKeyRef,
-            "",
+            encryptingKeyRef,
             recoveryKeyRef,
             updateKeyRef,
             identifierData.name
@@ -50,8 +88,7 @@ class RestoreOperation @Inject constructor (
 
     private fun importKey(
         jwk: JsonWebKey,
-        alias: String,
-        keyReferenceSuffix: String
+        alias: String
     ): String {
         val key = when (jwk.kty) {
             KeyType.RSA.value -> {
@@ -71,9 +108,13 @@ class RestoreOperation @Inject constructor (
             return knownKeys.first().key
         }
 
-        val keyRef = "${alias}_${keyReferenceSuffix}"
+        val keyRef = "${alias}_${if (key.kid.isNullOrEmpty()) 
+            {
+                Base64Url.encode(Random.nextBytes(2))
+            } else{
+                key.kid
+            }}"
         cryptoOperations.keyStore.save(keyRef, key);
         return keyRef;
     }
-
 }

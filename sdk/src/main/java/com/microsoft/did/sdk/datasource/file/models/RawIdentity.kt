@@ -21,9 +21,5 @@ import javax.inject.Inject
 data class RawIdentity (
     val id: String,
     val name: String,
-    val alias: String,
-    val signatureKey: JsonWebKey?,
-    val encryptionKey: JsonWebKey?,
-    val recoveryKey: JsonWebKey,
-    val updateKey: JsonWebKey
+    val keys: List<JsonWebKey>
 )
