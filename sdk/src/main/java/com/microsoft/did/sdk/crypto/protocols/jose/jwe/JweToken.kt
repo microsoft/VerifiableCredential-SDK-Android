@@ -3,7 +3,12 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKey
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
+import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
+import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
+import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsGeneralJson
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.byteArrayToString
@@ -72,12 +77,12 @@ class JweToken private constructor (
                     )
                     token.recipients.add(JweRecipient(
                         encryptedKey = key,
-                        headers = JweToken.Companion.SafeJoinHeaders(serializer, protected, null, null)
+                        headers = JweToken.Companion.SafeJoinHeaders(serializer, protected, null, null),
                     ))
                 }
                 jwe.toLowerCase(Locale.ENGLISH).contains("\"recipients\"") -> { // general
                     val rawData = serializer.decodeFromString(JweGeneralJson.serializer(), jwe)
-                    val token = Jwetoken(
+                    val token = JweToken(
                         serializer,
                         ciphertext = Base64Url.decode(rawData.ciphertext),
                         iv = Base64Url.decode(rawData.iv),
@@ -87,13 +92,13 @@ class JweToken private constructor (
                     for (val recipient in rawData.recipients) {
                         token.recipients.add(JweRecipient(
                             encryptedKey = recipient.encryptedKey,
-                            headers = JweToken.Companion.safeJoinHeaders(serializers, rawData.protected, rawData.unprotected, recipient.header)
+                            headers = JweToken.Companion.safeJoinHeaders(serializers, rawData.protected, rawData.unprotected, recipient.header),
                         ))
                     }
                 }
                 else -> { // flat
                     val rawData = serializer.decodeFromString(JweFlatJson.serializer(), jwe)
-                    val token = Jwetoken(
+                    val token = JweToken(
                         serializer,
                         ciphertext = Base64Url.decode(rawData.ciphertext),
                         iv = Base64Url.decode(rawData.iv),
@@ -102,7 +107,7 @@ class JweToken private constructor (
                     )
                     token.recipients.add(JweRecipient(
                         encryptedKey = rawData.encryptedKey,
-                        headers = JweToken.Companion.safeJoinHeaders(serializers, rawData.protected, rawData.unprotected, rawData.header)
+                        headers = JweToken.Companion.safeJoinHeaders(serializers, rawData.protected, rawData.unprotected, rawData.header),
                     ))
                 }
             }
@@ -112,15 +117,60 @@ class JweToken private constructor (
 
     constructor(serializer: Json, plaintext: String): this(serializer, plaintext.toByteArray())
     private var recipients: MutableList<JweRecipient> = mutableListOf()
-    private var alg: String = ""
-    private var cek: ByteArray = ByteArray(0)
+    private var enc: String = ""
+    private var cek: CryptoKey? = null
+
+    fun encrypt(cryptoOperations: CryptoOperations) {
+        // default to aes 128 gcm
+        if (enc.isEmpty()) {
+            enc = JoseConstants.AesGcm128.value
+        }
+        this.encrypt(cryptoOperations, enc)
+    }
+
+    fun encrypt(cryptoOperations: CryptoOperations, enc: String) {
+        var reEncrypt = false
+        if (this.enc != enc) {
+            this.enc = enc
+            reEncrypt = true
+        }
+        if (reEncrypt || cek == null) {
+            val encryption = JwaCryptoConverter.jwkAlgToKeyGenWebCrypto(enc)
+            var subtle = cryptoOperations.subtleCryptoFactory.getSymmetricEncrypter(encryption.name, SubtleCryptoScope.ALL)
+            cek = subtle.generateKey(encryption, true, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt))
+            iv = subtle.exportKey(KeyFormat.Raw, subtle.generateKey(encryption, true, listOf(KeyUsage.Encrypt)))
+            algorithm.additionalParams["iv"] = iv
+            algorithm.additionalParams["aad"] = this.aad
+            this.ciphertext = subtle.encrypt(encryption, key, this.plaintext)
+            for (val recipient in recipients) {
+                recipient.encryptedKey = wrapCekFor(cryptoOperations, recipient.publicKey, recipient.headers[JoseConstants.Alg])
+            }
+        }
+    }
+
+    private fun wrapCekFor(cryptoOperations: CryptoOperations, publicKey: PublicKey, alg: String?): ByteArray {
+        val algorithmUsed = alg?: publicKey.alg
+        if (algorithmUsed.isNullOrBlank()) {
+            throw KeyException("Cannot wrap Content Encryption Key with public key, unknown algorithm.")
+        }
+        if (cek == null) {
+            throw KeyException("There is no Content Encryption Key yet.")
+        }
+        val algorithm = JwaCryptoConverter.jwaAlgToWebCrypto(algorithmUsed)
+        val subtle = cryptoOperations.subtleCryptoFactory.getKeyEncrypter(algorithm.name, SubtleCryptoScope.PUBLIC)
+        val encryptedKey = subtle.wrapKey(KeyFormat.Raw, cek, publicKey, algorithm)
+        return encryptedKey
+    }
 
 
-    fun encrypt(cryptoOperations: CryptoOperations, alg: String) {
-        this.alg = alg
-        // form cek if not present (if updated, update all recipient encrypted keys)
-        // update iv, aad, tag
-        // encrypt plaintext using cek and alg
+    fun addRecipient(cryptoOperations: CryptoOperations, publicKey: PublicKey, headers: Map<String, String> = emptyMap()) {
+        var encryptedKey: ByteArray
+        if (this.cek.size == 0) {
+            encryptedKey = ByteArray(0)
+        } else {
+            encryptedKey = wrapCekFor(cryptoOperations, publicKey, headers[JoseConstants.Alg])
+        }
+        this.recipients.add( JweRecipient(encryptedKey, headers, publicKey) )
     }
 
     fun serialize(format: JweFormat = JweFormat.Compact): String {
@@ -149,18 +199,7 @@ class JweToken private constructor (
 
     }
 
-    fun addRecipient(cryptoOperations: CryptoOperations, publicKey: PublicKey, headers: Map<String, String> = emptyMap()) {
-        var encryptedKey: ByteArray
-        if (this.cek.size == 0) {
-            encryptedKey = ByteArray(0)
-        } else {
-            // encrypt cek using 'enc', or public keys default method
-        }
-        this.recipients.add( JweRecipient(encryptedKey, headers, publicKey) )
-    }
-
     fun decrypt(cryptoOperations: CryptoOperations, privateKeys: List<PrivateKey>): ByteArray? {
-        //
 
     }
 }

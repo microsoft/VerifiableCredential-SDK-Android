@@ -12,5 +12,5 @@ data class JweRecipient (
     @SerialName("header")
     val headers: Map<String, String>,
     @Transient
-    val publicKey: PublicKey?
+    val publicKey: PublicKey? = null
 ) {}
