@@ -23,7 +23,7 @@ import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.UPDATE_KEYREFERENCE
-import com.microsoft.did.sdk.util.canonicalizePublicKeyAsByteArray
+import com.microsoft.did.sdk.util.canonicalizeAsByteArray
 import com.microsoft.did.sdk.util.controlflow.IdentifierCreatorException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.multiHash
@@ -147,18 +147,18 @@ class IdentifierCreator @Inject constructor(
      */
     private fun computeUniqueSuffix(registrationPayload: RegistrationPayload): String {
         val suffixDataCanonicalized =
-            canonicalizePublicKeyAsByteArray(serializer.encodeToString(SuffixData.serializer(), registrationPayload.suffixData))
-        val suffixDataHash = multiHash(suffixDataCanonicalized)
-        val uniqueSuffix = Base64Url.encode(suffixDataHash)
-        return "did:${Constants.METHOD_NAME}:$uniqueSuffix"
+            canonicalizeAsByteArray(serializer.encodeToString(SuffixData.serializer(), registrationPayload.suffixData))
+        val suffixDataCanonicalizedHash = multiHash(suffixDataCanonicalized)
+        val uniqueSuffix = Base64Url.encode(suffixDataCanonicalizedHash)
+        return "did+${Constants.COLON}+${Constants.METHOD_NAME}+${Constants.COLON}+$uniqueSuffix"
     }
 
     private fun computeLongFormIdentifier(registrationPayload: RegistrationPayload): String {
         val registrationPayloadCanonicalized =
-            canonicalizePublicKeyAsByteArray(serializer.encodeToString(RegistrationPayload.serializer(), registrationPayload))
-        val registrationPayloadEncoded = Base64Url.encode(registrationPayloadCanonicalized)
+            canonicalizeAsByteArray(serializer.encodeToString(RegistrationPayload.serializer(), registrationPayload))
+        val registrationPayloadCanonicalizedEncoded = Base64Url.encode(registrationPayloadCanonicalized)
         val identifierShortForm = computeUniqueSuffix(registrationPayload)
-        return "$identifierShortForm:$registrationPayloadEncoded"
+        return "$identifierShortForm+${Constants.COLON}+$registrationPayloadCanonicalizedEncoded"
     }
 
     private fun transformIdentifierDocumentToIdentifier(
@@ -189,5 +189,4 @@ class IdentifierCreator @Inject constructor(
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
     }
-
 }

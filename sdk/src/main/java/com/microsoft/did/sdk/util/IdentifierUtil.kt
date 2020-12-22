@@ -18,7 +18,7 @@ internal fun nonMultiHash(bytes: ByteArray): ByteArray {
     return digest.digest(bytes)
 }
 
-fun canonicalizePublicKeyAsByteArray(inputString: String): ByteArray {
+fun canonicalizeAsByteArray(inputString: String): ByteArray {
     val jsonCanonicalizer = JsonCanonicalizer(inputString)
     return jsonCanonicalizer.encodedUTF8
 }
