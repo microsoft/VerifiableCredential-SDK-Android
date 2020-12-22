@@ -31,8 +31,8 @@ data class IdentifierDocumentPublicKeyInput(
     /**
      * The JWK public key.
      */
-    val jwk: JsonWebKey,
+    val publicKeyJwk: JsonWebKey,
 
-    @SerialName("purpose")
+    @SerialName("purposes")
     val purpose: List<String>
 )

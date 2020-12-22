@@ -45,7 +45,7 @@ class IdentifierCreatorInstrumentedTest {
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
         cryptoOperations = CryptoOperations(androidSubtle, keyStore, ellipticCurvePairwiseKey)
         val sidetreePayloadProcessor = SidetreePayloadProcessor(defaultTestSerializer)
-        identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor)
+        identifierCreator = IdentifierCreator(cryptoOperations, sidetreePayloadProcessor, defaultTestSerializer)
         cryptoOperations.subtleCryptoFactory.addMessageSigner(
             name = W3cCryptoApiConstants.EcDsa.value,
             subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.ALL)

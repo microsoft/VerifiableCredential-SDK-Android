@@ -42,8 +42,7 @@ object Constants {
     //Identifier Constants
     const val MASTER_IDENTIFIER_NAME = "did.identifier"
     const val METHOD_NAME = "ion"
-    const val INITIAL_STATE_LONGFORM = "-$METHOD_NAME-initial-state"
-    const val SIDETREE_OPERATION_TYPE = "create"
+    const val IDENTIFIER_PUBLIC_KEY_PURPOSE = "authentication"
     const val SIDETREE_PATCH_ACTION = "replace"
     const val SIDETREE_MULTIHASH_CODE = 18
     const val SIDETREE_MULTIHASH_LENGTH = 32

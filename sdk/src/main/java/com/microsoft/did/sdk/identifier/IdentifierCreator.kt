@@ -15,6 +15,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
+import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
@@ -22,9 +23,12 @@ import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.Constants.RECOVERY_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.SIGNATURE_KEYREFERENCE
 import com.microsoft.did.sdk.util.Constants.UPDATE_KEYREFERENCE
+import com.microsoft.did.sdk.util.canonicalizePublicKeyAsByteArray
 import com.microsoft.did.sdk.util.controlflow.IdentifierCreatorException
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.multiHash
 import com.microsoft.did.sdk.util.stringToByteArray
+import kotlinx.serialization.json.Json
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +41,8 @@ import kotlin.random.Random
 @Singleton
 class IdentifierCreator @Inject constructor(
     private val cryptoOperations: CryptoOperations,
-    private val payloadProcessor: SidetreePayloadProcessor
+    private val payloadProcessor: SidetreePayloadProcessor,
+    private val serializer: Json
 ) {
 
     fun create(methodName: String): Result<Identifier> {
@@ -50,7 +55,7 @@ class IdentifierCreator @Inject constructor(
             val recoveryPublicKey = cryptoOperations.generateKeyPair("${alias}_$recoveryKeyReference", KeyType.EllipticCurve)
             val updatePublicKey = cryptoOperations.generateKeyPair("${alias}_$updateKeyReference", KeyType.EllipticCurve)
             val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updatePublicKey)
-            val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
+            val identifierLongForm = computeLongFormIdentifier(registrationPayload)
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(
@@ -96,7 +101,7 @@ class IdentifierCreator @Inject constructor(
             val updatePublicKey =
                 generateAndSaveKey(alg, peerId, "${alias}_$updateKeyIdForPairwiseKey", "${alias}_$updateKeyReference", personaId, "")
             val registrationPayload = payloadProcessor.generateCreatePayload(signingPublicKey, recoveryPublicKey, updatePublicKey)
-            val identifierLongForm = computeLongFormIdentifier(payloadProcessor, registrationPayload)
+            val identifierLongForm = computeLongFormIdentifier(registrationPayload)
 
             Result.Success(
                 transformIdentifierDocumentToIdentifier(
@@ -140,20 +145,20 @@ class IdentifierCreator @Inject constructor(
      * Computes unique suffix for did short form.
      * In unpublished resolution or long form, id is generated in SDK.
      */
-    private fun computeUniqueSuffix(payloadProcessor: SidetreePayloadProcessor, registrationPayload: RegistrationPayload): String {
-        val suffixDataByteArray = Base64Url.decode(registrationPayload.suffixData)
-        val suffixDataHash = payloadProcessor.multiHash(suffixDataByteArray)
+    private fun computeUniqueSuffix(registrationPayload: RegistrationPayload): String {
+        val suffixDataCanonicalized =
+            canonicalizePublicKeyAsByteArray(serializer.encodeToString(SuffixData.serializer(), registrationPayload.suffixData))
+        val suffixDataHash = multiHash(suffixDataCanonicalized)
         val uniqueSuffix = Base64Url.encode(suffixDataHash)
         return "did:${Constants.METHOD_NAME}:$uniqueSuffix"
     }
 
-    private fun computeLongFormIdentifier(
-        payloadProcessor: SidetreePayloadProcessor,
-        registrationPayload: RegistrationPayload
-    ): String {
-        val registrationPayloadEncoded = registrationPayload.suffixData + "." + registrationPayload.patchData
-        val identifierShortForm = computeUniqueSuffix(payloadProcessor, registrationPayload)
-        return "$identifierShortForm?${Constants.INITIAL_STATE_LONGFORM}=$registrationPayloadEncoded"
+    private fun computeLongFormIdentifier(registrationPayload: RegistrationPayload): String {
+        val registrationPayloadCanonicalized =
+            canonicalizePublicKeyAsByteArray(serializer.encodeToString(RegistrationPayload.serializer(), registrationPayload))
+        val registrationPayloadEncoded = Base64Url.encode(registrationPayloadCanonicalized)
+        val identifierShortForm = computeUniqueSuffix(registrationPayload)
+        return "$identifierShortForm:$registrationPayloadEncoded"
     }
 
     private fun transformIdentifierDocumentToIdentifier(
@@ -184,4 +189,5 @@ class IdentifierCreator @Inject constructor(
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
     }
+
 }
