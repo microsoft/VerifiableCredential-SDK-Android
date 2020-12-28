@@ -5,7 +5,6 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import android.preference.PreferenceManager
 import com.microsoft.correlationvector.CorrelationVector
-import com.microsoft.did.sdk.util.log.SdkLog
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
 import okhttp3.Response
@@ -19,15 +18,12 @@ class CorrelationVectorInterceptor @Inject constructor(private val context: Cont
         val originalRequest = chain.request()
         val correlationVectorString = readCorrelationVector(context)
         val requestWithCorrelationVectorBuilder = originalRequest.newBuilder()
-        var debugCv: String? = null
         if (correlationVectorString != null) {
             val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
             writeCorrelationVector(context, correlationVectorIncremented)
             requestWithCorrelationVectorBuilder.header("ms-cv", correlationVectorIncremented)
-            debugCv = correlationVectorIncremented
         }
         val requestWithCorrelationVector = requestWithCorrelationVectorBuilder.build()
-        SdkLog.d("Making network call ${requestWithCorrelationVector.url()} with correlation vector $debugCv")
         return chain.proceed(requestWithCorrelationVector)
     }
 

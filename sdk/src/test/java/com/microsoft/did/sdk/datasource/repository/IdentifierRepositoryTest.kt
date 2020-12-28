@@ -116,6 +116,7 @@ class IdentifierRepositoryTest {
         coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(
             ServiceErrorException(
                 "123",
+                "paMxWRuFSV+mo+Hso8IBVw.0",
                 "Not found",
                 true
             )
