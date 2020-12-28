@@ -41,6 +41,7 @@ class ResolverTest {
         coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(
             ServiceErrorException(
                 "123",
+                "paMxWRuFSV+mo+Hso8IBVw.0",
                 "Not Found",
                 true
             )

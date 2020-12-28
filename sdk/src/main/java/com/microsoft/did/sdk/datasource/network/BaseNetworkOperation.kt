@@ -41,6 +41,7 @@ abstract class BaseNetworkOperation<S, T> {
         // TODO("how do we want to handle null bodies")
         // TODO("how to not suppress this warning")
         @Suppress("UNCHECKED_CAST")
+        val correlationVector = response.headers()["ms-cv"] ?: "?"
         val transformedPayload = (response.body() ?: throw LocalNetworkException("Body of Response is null.")) as T
         return Result.Success(transformedPayload)
     }
@@ -53,6 +54,7 @@ abstract class BaseNetworkOperation<S, T> {
             401 -> Result.Failure(
                 UnauthorizedException(
                     requestId,
+                    correlationVector,
                     defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     false
                 )
@@ -60,6 +62,7 @@ abstract class BaseNetworkOperation<S, T> {
             402, 403, 404 -> Result.Failure(
                 ServiceErrorException(
                     requestId,
+                    correlationVector,
                     defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     false
                 )
@@ -67,11 +70,12 @@ abstract class BaseNetworkOperation<S, T> {
             500, 501, 502, 503 -> Result.Failure(
                 ServiceUnreachableException(
                     requestId,
+                    correlationVector,
                     defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     true
                 )
             )
-            else -> Result.Failure(NetworkException(requestId, "Unknown Status code ${response.code()}", true))
+            else -> Result.Failure(NetworkException(requestId, correlationVector, "Unknown Status code ${response.code()}", true))
         }
     }
 
