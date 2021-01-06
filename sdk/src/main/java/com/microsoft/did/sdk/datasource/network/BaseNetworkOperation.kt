@@ -5,6 +5,8 @@
 
 package com.microsoft.did.sdk.datasource.network
 
+import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
+import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.NetworkException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -41,15 +43,14 @@ abstract class BaseNetworkOperation<S, T> {
         // TODO("how do we want to handle null bodies")
         // TODO("how to not suppress this warning")
         @Suppress("UNCHECKED_CAST")
-        val correlationVector = response.headers()["ms-cv"] ?: "?"
         val transformedPayload = (response.body() ?: throw LocalNetworkException("Body of Response is null.")) as T
         return Result.Success(transformedPayload)
     }
 
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
-        val requestId = response.headers()["request-id"] ?: "?"
-        val correlationVector = response.headers()["ms-cv"] ?: "?"
+        val requestId = response.headers()[REQUEST_ID_HEADER] ?: "?"
+        val correlationVector = response.headers()[CORRELATION_VECTOR_HEADER] ?: "?"
         return when (response.code()) {
             401 -> Result.Failure(
                 UnauthorizedException(

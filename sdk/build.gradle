@@ -13,7 +13,7 @@ jacoco {
 }
 
 repositories{
-    maven { url 'https://jitpack.io' }
+    maven { url "https://jitpack.io" }
 }
 
 android {
@@ -115,7 +115,7 @@ dependencies {
     implementation "com.madgag.spongycastle:prov:1.58.0.0"
     //Used for Json Canonicalization performed for ION
     implementation "io.github.erdtman:java-json-canonicalization:1.1"
-    implementation 'com.github.microsoft:CorrelationVector-Java:master-SNAPSHOT'
+    implementation "com.github.microsoft:CorrelationVector-Java:1.0"
 
     // test dependencies
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
