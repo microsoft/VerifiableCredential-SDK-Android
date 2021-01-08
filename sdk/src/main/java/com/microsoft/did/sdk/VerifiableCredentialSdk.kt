@@ -37,6 +37,9 @@ object VerifiableCredentialSdk {
     lateinit var revocationService: RevocationService
 
     @JvmStatic
+    lateinit var correlationVectorService: CorrelationVectorService
+
+    @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
 
     /**
@@ -67,6 +70,7 @@ object VerifiableCredentialSdk {
         issuanceService = sdkComponent.issuanceService()
         presentationService = sdkComponent.presentationService()
         revocationService = sdkComponent.revocationService()
+        correlationVectorService = sdkComponent.correlationVectorService()
         identifierManager = sdkComponent.identifierManager()
 
         SdkLog.addConsumer(logConsumer)

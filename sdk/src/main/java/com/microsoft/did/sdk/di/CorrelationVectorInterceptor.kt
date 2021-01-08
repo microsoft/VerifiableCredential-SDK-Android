@@ -2,38 +2,26 @@
 
 package com.microsoft.did.sdk.di
 
-import android.content.Context
-import android.preference.PreferenceManager
-import com.microsoft.correlationvector.CorrelationVector
+import com.microsoft.did.sdk.CorrelationVectorService
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
-import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_IN_PREF
+import com.microsoft.did.sdk.util.log.SdkLog
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
 import okhttp3.Response
 import java.io.IOException
 import javax.inject.Inject
 
-class CorrelationVectorInterceptor @Inject constructor(private val context: Context) : Interceptor {
+class CorrelationVectorInterceptor @Inject constructor(private val correlationVectorService: CorrelationVectorService) : Interceptor {
 
     @Throws(IOException::class)
     override fun intercept(chain: Chain): Response {
         val originalRequest = chain.request()
-        val correlationVectorString = readCorrelationVector(context)
+        val correlationVector = correlationVectorService.incrementAndSave()
         val requestWithCorrelationVectorBuilder = originalRequest.newBuilder()
-        if (correlationVectorString != null) {
-            val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
-            writeCorrelationVector(context, correlationVectorIncremented)
-            requestWithCorrelationVectorBuilder.header(CORRELATION_VECTOR_HEADER, correlationVectorIncremented)
-        }
+        if (correlationVector.isNotEmpty())
+            requestWithCorrelationVectorBuilder.header(CORRELATION_VECTOR_HEADER, correlationVector)
         val requestWithCorrelationVector = requestWithCorrelationVectorBuilder.build()
+        SdkLog.d("Making network call ${requestWithCorrelationVector.url()} with correlation vector $correlationVector")
         return chain.proceed(requestWithCorrelationVector)
-    }
-
-    private fun writeCorrelationVector(applicationContext: Context, correlationId: String) {
-        PreferenceManager.getDefaultSharedPreferences(applicationContext).edit().putString(CORRELATION_VECTOR_IN_PREF, correlationId).apply()
-    }
-
-    private fun readCorrelationVector(applicationContext: Context): String? {
-        return PreferenceManager.getDefaultSharedPreferences(applicationContext).getString(CORRELATION_VECTOR_IN_PREF, null)
     }
 }
