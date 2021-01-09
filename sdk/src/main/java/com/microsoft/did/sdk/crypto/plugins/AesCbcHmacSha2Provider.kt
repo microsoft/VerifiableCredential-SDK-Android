@@ -8,6 +8,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Subtle
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.EncryptionException
 import kotlinx.serialization.json.Json
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -65,7 +66,7 @@ class AesCbcHmacSha2Provider (private val aesCbcSize: W3cCryptoApiConstants) : P
 
     override fun onEncrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
         val params = algorithm as AesCbcHmacSha2Algorithm;
-        return aesCbcHmacEncrypt("key.handle as ByteArray, data, params.aad, params.iv)
+        return aesCbcHmacEncrypt(key.handle as ByteArray, data, params.aad, params.iv)
     }
 
     override fun onDecrypt(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
@@ -73,7 +74,8 @@ class AesCbcHmacSha2Provider (private val aesCbcSize: W3cCryptoApiConstants) : P
         if (params.tag == null) {
             throw AlgorithmException("AES-CBC-HMAC-SHA2 requires a tag on decrypt")
         }
-        return aesCbcHmacDecrypt(key.handle as ByteArray, params.aad, params.iv, data, params.tag!)
+        return aesCbcHmacDecrypt(key.handle as ByteArray, params.aad, params.iv, data, params.tag)?: throw
+                EncryptionException("Decryption failed")
     }
 
     /**
@@ -147,9 +149,8 @@ class AesCbcHmacSha2Provider (private val aesCbcSize: W3cCryptoApiConstants) : P
         // 6. Tag = first TagLength of HMAC
         val tag = fullTag.slice(IntRange(0, secondaryKeyLength))
         // return ciphertext and tag
-        return ByteArray(ciphertext.size + tag.size) {
-                index ->
-            return if (index < ciphertext.size) {
+        return ByteArray(ciphertext.size + tag.size) { index ->
+            if (index < ciphertext.size) {
                 ciphertext[index]
             } else {
                 tag[index - ciphertext.size]
