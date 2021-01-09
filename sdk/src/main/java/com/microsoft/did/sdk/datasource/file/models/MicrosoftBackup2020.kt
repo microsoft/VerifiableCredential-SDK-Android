@@ -25,7 +25,7 @@ data class MicrosoftBackup2020 (
     }
 
     private class VCIterator: Iterator<Pair<VerifiableCredential, VCMetadata>> constructor (
-        val vcs: Map<String, VCMetadata>,
+        val vcs: Map<String, String>,
         val vcsMetaInf: Map<String, VCMetadata>
     ) {
         val jtis: Iterator<String> = vcs.keys.iterator()

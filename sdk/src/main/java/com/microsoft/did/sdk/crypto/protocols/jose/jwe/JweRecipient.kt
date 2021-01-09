@@ -8,7 +8,7 @@ import kotlinx.serialization.Transient
 @Serializable
 data class JweRecipient (
     @SerialName("encrypted_key")
-    val encryptedKey: ByteArray,
+    var encryptedKey: String,
     @SerialName("header")
     val headers: Map<String, String>,
     @Transient

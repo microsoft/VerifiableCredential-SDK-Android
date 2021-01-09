@@ -62,17 +62,32 @@ enum class JoseConstants(val value: String) {
     /**
      * Define JOSE algorithm constants
      */
-    AesGcm128("128GCM"),
+    AesGcm128("A128GCM"),
 
     /**
      * Define JOSE algorithm constants
      */
-    AesGcm192("192GCM"),
+    AesGcm192("A192GCM"),
 
     /**
      * Define JOSE algorithm constants
      */
-    AesGcm256("256GCM"),
+    AesGcm256("A256GCM"),
+
+    /**
+     * Define JOSE algorithm constants
+     */
+    AesCbc128("A128CBC-HS256"),
+
+    /**
+     * Define JOSE algorithm constants
+     */
+    AesCbc192("A192CBC-HS384"),
+
+    /**
+     * Define JOSE algorithm constants
+     */
+    AesCbc256("A256CBC-HS512"),
 
     /**
      * Define JOSE algorithm constants

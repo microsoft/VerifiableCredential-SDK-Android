@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.keys.KeyType;
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
+import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
@@ -43,8 +44,10 @@ class RestoreOperation @Inject constructor (
             }
         }
         val content = stringBuilder.toString()
-//        TODO: NEED JWE implimented
-//        return serializer.decodeFromString<MicrosoftBackup2020>(content)
+        val token = JweToken.deserialize(content)
+        // transform password to a decryption key
+
+        return serializer.decodeFromString<MicrosoftBackup2020>(token.contentAsString)
     }
 
     private suspend fun restoreIdentifier (
