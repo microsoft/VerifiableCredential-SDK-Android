@@ -54,7 +54,6 @@ class JweToken private constructor (
             return outputMap.toMap()
         }
 
-
         fun deserialize(jwe: String, serializer: Json = Json.Default): JweToken {
             //  protected.encrypted-key.iv.ciphertext.tag
             val compactRegex = Regex("([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)\\.([A-Za-z\\d_-]*)")
@@ -128,8 +127,10 @@ class JweToken private constructor (
             serializer, mapOf(JoseConstants.Enc.value to JoseConstants.AesGcm128.value)),
         plaintext.toByteArray())
     private var recipients: MutableList<JweRecipient> = mutableListOf()
-    private var enc: String? get() = JweToken.Companion.parseProtected(serializer, protected)[JoseConstants.Enc.value]
-    private var alg: String? get() = JweToken.Companion.parseProtected(serializer, protected)[JoseConstants.Alg.value]
+    private var enc: String? = null
+        get() = JweToken.Companion.parseProtected(serializer, protected)[JoseConstants.Enc.value]
+    private var alg: String? = null
+        get() = JweToken.Companion.parseProtected(serializer, protected)[JoseConstants.Alg.value]
     private var cek: CryptoKey? = null
 
     fun encrypt(cryptoOperations: CryptoOperations, protectedHeader: Map<String, String>? = null, secretKey: SecretKey? = null) {
@@ -147,7 +148,7 @@ class JweToken private constructor (
             this.protected = protectedHeader
             reEncrypt = true
         }
-        if (enc.isEmpty()) {
+        if (enc.isNullOrEmpty()) {
             // default to aes 256 cbc for ios interop
             val headers = JweToken.Companion.parseProtected(serializer, protectedHeader)
             headers[JoseConstants.Enc.value] = JoseConstants.AesGcm128.value
