@@ -49,8 +49,8 @@ abstract class BaseNetworkOperation<S, T> {
 
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
-        val requestId = response.headers()[REQUEST_ID_HEADER] ?: "?"
-        val correlationVector = response.headers()[CORRELATION_VECTOR_HEADER] ?: "?"
+        val requestId = response.headers()[REQUEST_ID_HEADER]
+        val correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
         return when (response.code()) {
             401 -> Result.Failure(
                 UnauthorizedException(
@@ -80,8 +80,14 @@ abstract class BaseNetworkOperation<S, T> {
         }
     }
 
-    private fun defaultErrorMessage(httpCode: Int, requestId: String, correlationVector: String, errorBody: String): String {
-        return "RequestId: $requestId\nCorrelationVector: $correlationVector\nHttp code: $httpCode\nErrorBody: $errorBody"
+    private fun defaultErrorMessage(httpCode: Int, requestId: String?, correlationVector: String?, errorBody: String): String {
+        val errorMessage = StringBuilder()
+        if(requestId != null)
+            errorMessage.append("RequestId: $requestId\n")
+        if(correlationVector != null)
+            errorMessage.append("CorrelationVector: $correlationVector\n")
+        errorMessage.append("Http code: $httpCode\nErrorBody: $errorBody")
+        return errorMessage.toString()
     }
 
     fun <S> onRetry(): Result<S> {

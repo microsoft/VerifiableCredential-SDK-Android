@@ -70,12 +70,12 @@ class RegistrarException(message: String, cause: Throwable? = null) : SdkExcepti
 
 open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
 
-open class NetworkException(val requestId: String, val correlationVector: String, message: String, retryable: Boolean) : SdkException(message, null, retryable)
+open class NetworkException(val requestId: String? = null, val correlationVector: String? = null, message: String, retryable: Boolean) : SdkException(message, null, retryable)
 
-class ServiceUnreachableException(requestId: String, correlationVector: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
+class ServiceUnreachableException(requestId: String?, correlationVector: String?, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
 
-class ServiceErrorException(requestId: String, correlationVector: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
+class ServiceErrorException(requestId: String?, correlationVector: String?, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
 
-class UnauthorizedException(requestId: String, correlationVector: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
+class UnauthorizedException(requestId: String?, correlationVector: String?, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
