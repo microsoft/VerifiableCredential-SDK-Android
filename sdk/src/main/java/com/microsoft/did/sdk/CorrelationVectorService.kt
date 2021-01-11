@@ -22,7 +22,7 @@ class CorrelationVectorService @Inject constructor(private val context: Context)
 
     fun incrementAndSave(): String {
         val correlationVectorString = getCorrelationVector(context)
-        if (correlationVectorString != null) {
+        if (correlationVectorString != null && correlationVectorString.isNotEmpty()) {
             val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
             saveCorrelationVector(context, correlationVectorIncremented)
             return correlationVectorIncremented
