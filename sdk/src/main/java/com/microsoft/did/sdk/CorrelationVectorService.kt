@@ -35,7 +35,8 @@ class CorrelationVectorService @Inject constructor(private val context: Context)
     }
 
     private fun saveCorrelationVector(applicationContext: Context, correlationId: String) {
-        PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()
-            .putString(Constants.CORRELATION_VECTOR_IN_PREF, correlationId).apply()
+        if (correlationId.isNotEmpty())
+            PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()
+                .putString(Constants.CORRELATION_VECTOR_IN_PREF, correlationId).apply()
     }
 }
