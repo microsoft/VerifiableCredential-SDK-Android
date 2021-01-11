@@ -14,13 +14,13 @@ import javax.inject.Inject
 
 class CorrelationVectorService @Inject constructor(private val context: Context) {
 
-    fun createAndSave(): String {
+    fun startNewFlowAndSave(): String {
         val correlationId = CorrelationVector(CorrelationVectorVersion.V2).value
         saveCorrelationVector(context, correlationId)
         return correlationId
     }
 
-    fun incrementAndSave(): String {
+    internal fun incrementAndSave(): String {
         val correlationVectorString = getCorrelationVector(context)
         if (correlationVectorString != null && correlationVectorString.isNotEmpty()) {
             val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
