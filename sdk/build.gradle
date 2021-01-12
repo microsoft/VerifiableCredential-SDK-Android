@@ -7,9 +7,20 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'jacoco'
+apply plugin: 'org.jetbrains.dokka'
 
 jacoco {
     toolVersion = "0.8.5"
+}
+
+dokkaGfm.configure {
+    moduleName.set("sdk")
+    dokkaSourceSets {
+        named("main") {
+            noAndroidSdkLink.set(false)
+        }
+    }
+    outputDirectory.set(file("$rootDir/docs"))
 }
 
 android {
