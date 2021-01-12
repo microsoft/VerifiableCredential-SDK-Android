@@ -150,7 +150,7 @@ class IdentifierCreator @Inject constructor(
             canonicalizeAsByteArray(serializer.encodeToString(SuffixData.serializer(), registrationPayload.suffixData))
         val suffixDataCanonicalizedHash = multiHash(suffixDataCanonicalized)
         val uniqueSuffix = Base64Url.encode(suffixDataCanonicalizedHash)
-        return "did+${Constants.COLON}+${Constants.METHOD_NAME}+${Constants.COLON}+$uniqueSuffix"
+        return "did${Constants.COLON}${Constants.METHOD_NAME}${Constants.COLON}$uniqueSuffix"
     }
 
     private fun computeLongFormIdentifier(registrationPayload: RegistrationPayload): String {
@@ -158,7 +158,7 @@ class IdentifierCreator @Inject constructor(
             canonicalizeAsByteArray(serializer.encodeToString(RegistrationPayload.serializer(), registrationPayload))
         val registrationPayloadCanonicalizedEncoded = Base64Url.encode(registrationPayloadCanonicalized)
         val identifierShortForm = computeUniqueSuffix(registrationPayload)
-        return "$identifierShortForm+${Constants.COLON}+$registrationPayloadCanonicalizedEncoded"
+        return "$identifierShortForm${Constants.COLON}$registrationPayloadCanonicalizedEncoded"
     }
 
     private fun transformIdentifierDocumentToIdentifier(
