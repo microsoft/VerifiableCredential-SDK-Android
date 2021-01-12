@@ -4,7 +4,6 @@ package com.microsoft.did.sdk.di
 
 import com.microsoft.did.sdk.CorrelationVectorService
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
-import com.microsoft.did.sdk.util.log.SdkLog
 import okhttp3.Interceptor
 import okhttp3.Interceptor.Chain
 import okhttp3.Response
@@ -21,7 +20,6 @@ class CorrelationVectorInterceptor @Inject constructor(private val correlationVe
         if (correlationVector.isNotEmpty())
             requestWithCorrelationVectorBuilder.header(CORRELATION_VECTOR_HEADER, correlationVector)
         val requestWithCorrelationVector = requestWithCorrelationVectorBuilder.build()
-        SdkLog.d("Making network call ${requestWithCorrelationVector.url()} with correlation vector $correlationVector")
         return chain.proceed(requestWithCorrelationVector)
     }
 }

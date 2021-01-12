@@ -73,6 +73,8 @@ object VerifiableCredentialSdk {
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierManager = sdkComponent.identifierManager()
 
+        correlationVectorService.startNewFlowAndSave()
+
         SdkLog.addConsumer(logConsumer)
     }
 }
