@@ -52,7 +52,7 @@ class JwtValidatorTest {
     }
 
     private fun setUpResolver() {
-        every { mockedIdentifierDocument.publicKey } returns listOf(mockedIdentifierDocumentPublicKey)
+        every { mockedIdentifierDocument.verificationMethod } returns listOf(mockedIdentifierDocumentPublicKey)
         every { mockedIdentifierDocumentPublicKey.toPublicKey() } returns mockedPublicKey
     }
 
