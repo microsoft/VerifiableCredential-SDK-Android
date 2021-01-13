@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
+import com.microsoft.did.sdk.CorrelationVectorService
 import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.IdentifierManager
 import com.microsoft.did.sdk.IssuanceService
@@ -37,6 +38,8 @@ internal interface SdkComponent {
     fun revocationService(): RevocationService
 
     fun linkedDomainsService(): LinkedDomainsService
+    
+    fun correlationVectorService(): CorrelationVectorService
 
     @Component.Builder
     interface Builder {
