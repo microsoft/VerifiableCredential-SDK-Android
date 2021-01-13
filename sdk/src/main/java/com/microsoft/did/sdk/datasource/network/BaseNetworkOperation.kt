@@ -5,6 +5,8 @@
 
 package com.microsoft.did.sdk.datasource.network
 
+import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
+import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.NetworkException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -47,12 +49,13 @@ abstract class BaseNetworkOperation<S, T> {
 
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
-        val requestId = response.headers()["request-id"] ?: "?"
-        val correlationVector = response.headers()["ms-cv"] ?: "?"
+        val requestId = response.headers()[REQUEST_ID_HEADER]
+        val correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
         return when (response.code()) {
             401 -> Result.Failure(
                 UnauthorizedException(
                     requestId,
+                    correlationVector,
                     defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     false
                 )
@@ -60,6 +63,7 @@ abstract class BaseNetworkOperation<S, T> {
             402, 403, 404 -> Result.Failure(
                 ServiceErrorException(
                     requestId,
+                    correlationVector,
                     defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     false
                 )
@@ -67,16 +71,23 @@ abstract class BaseNetworkOperation<S, T> {
             500, 501, 502, 503 -> Result.Failure(
                 ServiceUnreachableException(
                     requestId,
+                    correlationVector,
                     defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
                     true
                 )
             )
-            else -> Result.Failure(NetworkException(requestId, "Unknown Status code ${response.code()}", true))
+            else -> Result.Failure(NetworkException(requestId, correlationVector, "Unknown Status code ${response.code()}", true))
         }
     }
 
-    private fun defaultErrorMessage(httpCode: Int, requestId: String, correlationVector: String, errorBody: String): String {
-        return "RequestId: $requestId\nCorrelationVector: $correlationVector\nHttp code: $httpCode\nErrorBody: $errorBody"
+    private fun defaultErrorMessage(httpCode: Int, requestId: String?, correlationVector: String?, errorBody: String): String {
+        val errorMessage = StringBuilder()
+        if(requestId != null)
+            errorMessage.append("RequestId: $requestId\n")
+        if(correlationVector != null)
+            errorMessage.append("CorrelationVector: $correlationVector\n")
+        errorMessage.append("Http code: $httpCode\nErrorBody: $errorBody")
+        return errorMessage.toString()
     }
 
     fun <S> onRetry(): Result<S> {
