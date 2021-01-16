@@ -9,17 +9,15 @@ import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
-import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.util.Base64Url
@@ -35,7 +33,7 @@ import java.io.InputStream
 class PairwiseKeyInstrumentedTest {
     private val androidSubtle: SubtleCrypto
     private val ellipticCurveSubtleCrypto: SubtleCrypto
-    private val keyStore: AndroidKeyStore
+    private val keyStore: EncryptedKeyStore
     private var crypto: CryptoOperations
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
     private val seedReference = "masterSeed"
@@ -45,7 +43,7 @@ class PairwiseKeyInstrumentedTest {
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
         inputStream = context.assets.open("Pairwise.EC.json")
-        keyStore = AndroidKeyStore(context, defaultTestSerializer)
+        keyStore = EncryptedKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurvePairwiseKey = EllipticCurvePairwiseKey()
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, defaultTestSerializer)

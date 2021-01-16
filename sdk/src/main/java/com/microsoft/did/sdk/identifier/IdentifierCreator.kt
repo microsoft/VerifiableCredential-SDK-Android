@@ -123,7 +123,7 @@ class IdentifierCreator @Inject constructor(
     ): PublicKey {
         val privateKeyJwk = cryptoOperations.generatePairwise(algorithm, AndroidConstants.masterSeed.value, personaId, target)
         privateKeyJwk.kid = "#${kid}"
-        privateKeyJwk.use = toKeyUse(keyUsage)
+        privateKeyJwk.use = KeyUse.fromString(keyUsage)
         val publicKeyJwk = privateKeyJwk.getPublicKey()
         publicKeyJwk.kid = "#${kid}"
         val pairwiseKeyReference = keyReference ?: generateKeyReferenceId(personaId, target, algorithm.name, KeyUse.Signature.value)

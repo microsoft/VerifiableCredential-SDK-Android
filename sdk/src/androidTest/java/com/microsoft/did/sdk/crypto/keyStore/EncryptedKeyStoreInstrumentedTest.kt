@@ -22,16 +22,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class EncryptedSharedPrefKeyStoreInstrumentedTest {
+class EncryptedKeyStoreInstrumentedTest {
 
-    private val keyStore: EncryptedSharedPrefKeyStore
+    private val keyStore: EncryptedKeyStore
     private val keyRef: String = "TestKeys"
     private var actualPublicKey: RsaPublicKey
     private var actualPrivateKey: RsaPrivateKey
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        keyStore = EncryptedSharedPrefKeyStore(context, defaultTestSerializer)
+        keyStore = EncryptedKeyStore(context, defaultTestSerializer)
         val androidSubtle = AndroidSubtle(keyStore)
         val keyPair = androidSubtle.generateKeyPair(
             RsaHashedKeyAlgorithm(
@@ -79,7 +79,7 @@ class EncryptedSharedPrefKeyStoreInstrumentedTest {
     fun getPublicKeyByReferenceTest() {
         keyStore.save(keyRef, actualPublicKey)
         val expectedPublicKey = keyStore.getPublicKey(keyRef)
-        assertThat(actualPublicKey.key).isEqualTo(expectedPublicKey.keys[0].key)
+        assertThat(actualPublicKey.key).isEqualTo(expectedPublicKey.keys[0].jwk)
     }
 
     @Test

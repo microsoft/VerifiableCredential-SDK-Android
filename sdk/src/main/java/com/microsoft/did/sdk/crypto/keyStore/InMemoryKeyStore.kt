@@ -1,6 +1,6 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
-import com.microsoft.did.sdk.crypto.keys.IKeyStoreItem
+import com.microsoft.did.sdk.crypto.keys.Key
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
@@ -48,7 +48,7 @@ class InMemoryKeyStore : KeyStore() {
         return findKeyMatchingIdIn(publicKeys, keyId) ?: findKeyMatchingIdIn(privateKeys, keyId)?.getPublicKey()
     }
 
-    private fun <T : IKeyStoreItem> findKeyMatchingIdIn(map: Map<String, KeyContainer<T>>, keyId: String): T? {
+    private fun <T : Key> findKeyMatchingIdIn(map: Map<String, KeyContainer<T>>, keyId: String): T? {
         return map.map {
             it.value.keys.firstOrNull { key -> key.kid == keyId }
         }.firstOrNull {

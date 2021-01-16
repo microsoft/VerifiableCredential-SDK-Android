@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
+import com.microsoft.did.sdk.crypto.keys.Key
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.keys.PublicKey
@@ -41,13 +42,5 @@ abstract class KeyStore {
      * @param keyReference Reference for the key being saved.
      * @param key being saved to the key store.
      */
-    abstract fun save(keyReference: String, key: SecretKey): Unit
-
-    abstract fun save(keyReference: String, key: PrivateKey): Unit
-    abstract fun save(keyReference: String, key: PublicKey): Unit
-
-    /**
-     * Lists all key references with their corresponding key ids
-     */
-    abstract fun list(): Map<String, KeyStoreListItem>
+    abstract fun save(key: Key)
 }

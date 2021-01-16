@@ -4,7 +4,6 @@ import com.microsoft.did.sdk.crypto.keys.MockPrivateKey
 import com.microsoft.did.sdk.crypto.keys.MockPublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
@@ -137,7 +136,7 @@ class InMemoryKeyStoreTest {
     fun `retrieve public key using key reference`() {
         inMemoryKeyStore.save(keyRef, actualPublicKey)
         val expectedPublicKey = inMemoryKeyStore.getPublicKey(keyRef)
-        assertThat(actualPublicKey.key).isEqualTo(expectedPublicKey.keys[0].key)
+        assertThat(actualPublicKey.key).isEqualTo(expectedPublicKey.keys[0].jwk)
     }
 
     @Test

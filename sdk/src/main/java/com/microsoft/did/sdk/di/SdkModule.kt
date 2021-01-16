@@ -14,12 +14,11 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.crypto.plugins.EllipticCurveSubtleCrypto
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoMapItem
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
@@ -105,13 +104,7 @@ class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultSubtleCrypto(subtle: AndroidSubtle): SubtleCrypto {
-        return subtle
-    }
-
-    @Provides
-    @Singleton
-    fun defaultKeyStore(keyStore: AndroidKeyStore): KeyStore {
+    fun defaultKeyStore(keyStore: EncryptedKeyStore): KeyStore {
         return keyStore
     }
 

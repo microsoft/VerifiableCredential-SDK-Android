@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.crypto.plugins
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.crypto.keyStore.AndroidKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
@@ -29,7 +29,7 @@ class EllipticCurveSubtleCryptoInstrumentedTest {
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        val keyStore = AndroidKeyStore(context, defaultTestSerializer)
+        val keyStore = EncryptedKeyStore(context, defaultTestSerializer)
         androidSubtle = AndroidSubtle(keyStore)
         ellipticCurveSubtleCrypto = EllipticCurveSubtleCrypto(androidSubtle, defaultTestSerializer)
         val keyReference = "KeyReference1"

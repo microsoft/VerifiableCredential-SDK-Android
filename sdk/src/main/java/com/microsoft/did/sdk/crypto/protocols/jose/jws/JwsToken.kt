@@ -178,7 +178,7 @@ class JwsToken private constructor(
             encodedProtected = Base64Url.encode(stringToByteArray(jsonProtected))
         }
 
-        val signatureInput = stringToByteArray("$encodedProtected.${this.payload}")
+        val signatureInput = stringToByteArray("$encodedProtected.$payload")
 
         val signature = cryptoOperations.sign(
             signatureInput, signingKeyReference,
@@ -200,7 +200,7 @@ class JwsToken private constructor(
      *Verify the JWS signatures
      */
     fun verify(cryptoOperations: CryptoOperations, publicKeys: List<PublicKey> = emptyList(), all: Boolean = false): Boolean {
-        val results = this.signatures.map {jwsSignature ->
+        val results = this.signatures.map { jwsSignature ->
             val algorithm = jwsSignature.getAlg(serializer)
             if (algorithm != JoseConstants.Es256K.value) throw UnSupportedAlgorithmException("$algorithm is not supported.")
             val fullyQuantifiedKid = jwsSignature.getKid(serializer) ?: ""

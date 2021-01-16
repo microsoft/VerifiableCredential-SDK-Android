@@ -4,12 +4,10 @@ package com.microsoft.did.sdk.crypto.keyStore
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.microsoft.did.sdk.crypto.keys.IKeyStoreItem
+import com.microsoft.did.sdk.crypto.keys.Key
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
@@ -23,14 +21,13 @@ import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
 @Singleton
-class EncryptedSharedPrefKeyStore @Inject constructor(private val context: Context, private val serializer: Json) :
+class EncryptedKeyStore @Inject constructor(private val context: Context, private val serializer: Json) :
     com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
 
     private val encryptedSharedPreferences = getSharedPreferences()
@@ -169,7 +166,7 @@ class EncryptedSharedPrefKeyStore @Inject constructor(private val context: Conte
         }.entries.firstOrNull()?.key
     }
 
-    override fun save(key: IKeyStoreItem) {
+    override fun save(key: Key) {
 
     }
 //        val alias = checkOrCreateKeyId(keyReference, key.kid)
@@ -225,13 +222,13 @@ class EncryptedSharedPrefKeyStore @Inject constructor(private val context: Conte
         val keyMap = mutableMapOf<String, KeyStoreListItem>()
         keys.forEach {
             // verify that it matches the regex and grab the key reference
-            val keyReferenceMatch = EncryptedSharedPrefKeyStore.regexForKeyReference.matchEntire(it)
+            val keyReferenceMatch = EncryptedKeyStore.regexForKeyReference.matchEntire(it)
             if (keyReferenceMatch != null) {
                 val keyRef = keyReferenceMatch.groupValues[1]
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val key = serializer.decodeFromString(JsonWebKey.serializer(), byteArrayToString(jwkData))
-                val keyType = KeyType.toKeyType(key.kty)
+                val keyType = KeyType.toEnum(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
                 } else {
