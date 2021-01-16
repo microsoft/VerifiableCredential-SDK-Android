@@ -1,16 +1,15 @@
 package com.microsoft.did.sdk.crypto.models
 
+import com.microsoft.did.sdk.util.controlflow.KeyException
+
 enum class KeyUse(val value: String) {
     Signature("sig"),
     Encryption("enc"),
-    Secret("secret")
-}
+    Secret("secret");
 
-fun toKeyUse(use: String): KeyUse? {
-    return when (use) {
-        KeyUse.Signature.value -> KeyUse.Signature
-        KeyUse.Encryption.value -> KeyUse.Encryption
-        KeyUse.Secret.value -> KeyUse.Secret
-        else -> null
+    companion object {
+        fun fromString(use: String): KeyUse {
+            return values().find { it.value == use } ?: throw KeyException("Unknown Key Use value: $use")
+        }
     }
 }

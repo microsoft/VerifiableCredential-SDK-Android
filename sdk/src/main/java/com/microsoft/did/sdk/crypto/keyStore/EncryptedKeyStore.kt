@@ -8,6 +8,8 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
+import com.microsoft.did.sdk.crypto.keys.IKeyStoreItem
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.PrivateKey
@@ -15,7 +17,6 @@ import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
-import com.microsoft.did.sdk.crypto.keys.toKeyType
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.util.AndroidKeyConverter
 import com.microsoft.did.sdk.util.byteArrayToString
@@ -24,21 +25,25 @@ import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.serialization.json.Json
-import java.security.KeyStore
-import javax.crypto.KeyGenerator
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 @Singleton
-class AndroidKeyStore @Inject constructor(private val context: Context, private val serializer: Json) :
+class EncryptedSharedPrefKeyStore @Inject constructor(private val context: Context, private val serializer: Json) :
     com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
 
-    companion object {
-        const val provider = "AndroidKeyStore"
-        private val regexForKeyReference = Regex("^#(.*)_[^.]+$")
-        private val regexForKeyIndex = Regex("^#.*_([^.]+\$)")
+    private val encryptedSharedPreferences = getSharedPreferences()
 
-        val keyStore: KeyStore by lazy { KeyStore.getInstance(provider).apply { load(null) } }
+    private fun getSharedPreferences(): SharedPreferences {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        return EncryptedSharedPreferences.create(
+            "secret_shared_prefs",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     override fun getSecretKey(keyReference: String): KeyContainer<SecretKey> {
@@ -164,37 +169,16 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         }.entries.firstOrNull()?.key
     }
 
-    override fun save(keyReference: String, key: SecretKey) {
-        val alias = checkOrCreateKeyId(keyReference, key.kid)
-        val jwk = key.toJWK()
-        jwk.kid = alias
-        val jwkString = serializer.encodeToString(JsonWebKey.serializer(), jwk)
-        val keyValue = stringToByteArray(jwkString)
-        saveSecureData(alias, keyValue)
-    }
+    override fun save(key: IKeyStoreItem) {
 
-    override fun save(keyReference: String, key: PrivateKey) {
-        val alias = checkOrCreateKeyId(keyReference, key.kid)
-        if (keyStore.containsAlias(alias)) {
-            // do nothing, the key is already there.
-            return
-        }
-        // This key is not natively supported
-        val jwk = key.toJWK()
-        jwk.kid = alias
-        val jwkString = serializer.encodeToString(JsonWebKey.serializer(), jwk)
-        val keyValue = stringToByteArray(jwkString)
-        saveSecureData(alias, keyValue)
     }
-
-    override fun save(keyReference: String, key: PublicKey) {
-        val alias = checkOrCreateKeyId(keyReference, key.kid)
-        if (keyStore.containsAlias(alias)) {
-            // do nothing, the key is already there.
-            return
-        }
-        throw KeyException("Why are you even saving a public key; this makes no sense. Rethink your life.")
-    }
+//        val alias = checkOrCreateKeyId(keyReference, key.kid)
+//        val jwk = key.toJWK()
+//        jwk.kid = alias
+//        val jwkString = serializer.encodeToString(JsonWebKey.serializer(), jwk)
+//        val keyValue = stringToByteArray(jwkString)
+//        saveSecureData(alias, keyValue)
+//    }
 
     override fun list(): Map<String, KeyStoreListItem> {
         val result = mutableMapOf<String, KeyStoreListItem>()
@@ -241,13 +225,13 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val keyMap = mutableMapOf<String, KeyStoreListItem>()
         keys.forEach {
             // verify that it matches the regex and grab the key reference
-            val keyReferenceMatch = AndroidKeyStore.regexForKeyReference.matchEntire(it)
+            val keyReferenceMatch = EncryptedSharedPrefKeyStore.regexForKeyReference.matchEntire(it)
             if (keyReferenceMatch != null) {
                 val keyRef = keyReferenceMatch.groupValues[1]
                 val jwkBase64 = sharedPreferences.getString(it, null)!!
                 val jwkData = Base64.decode(jwkBase64, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
                 val key = serializer.decodeFromString(JsonWebKey.serializer(), byteArrayToString(jwkData))
-                val keyType = toKeyType(key.kty)
+                val keyType = KeyType.toKeyType(key.kty)
                 if (!keyMap.containsKey(keyRef)) {
                     keyMap[keyRef] = KeyStoreListItem(keyType, mutableListOf(it))
                 } else {
@@ -309,38 +293,6 @@ class AndroidKeyStore @Inject constructor(private val context: Context, private 
         val editor = sharedPreferences.edit()
         editor.putString(alias, Base64.encodeToString(data, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP))
         editor.apply()
-    }
-
-    private fun getSharedPreferences(): SharedPreferences {
-        val masterKeyAlias = getSecretVaultMasterKey()
-        return EncryptedSharedPreferences.create(
-            "secret_shared_prefs",
-            masterKeyAlias,
-            context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    }
-
-    private fun getSecretVaultMasterKey(): String {
-        val alias = "ms-useragent-secret-masterkey"
-
-        if (!keyStore.containsAlias(alias)) {
-            // Generate the master key
-            val generator = KeyGenerator.getInstance("AES", provider)
-            generator.init(
-                KeyGenParameterSpec.Builder(
-                    alias,
-                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-                ).setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                    .setKeySize(256)
-                    .build()
-            )
-            generator.generateKey()
-        }
-
-        return alias
     }
 
     //TODO: Modify kid derived from key reference to not use . and not begin with #. It should be Base64url charset for sidetree registration to work with these as ids

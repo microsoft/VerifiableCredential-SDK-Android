@@ -3,7 +3,7 @@ package com.microsoft.did.sdk.crypto.keys
 import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 
-class KeyContainer<T : IKeyStoreItem>(
+class KeyContainer<T : Key>(
     val kty: KeyType,
     val keys: List<T> = emptyList(),
     val use: KeyUse? = null,

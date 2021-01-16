@@ -13,19 +13,11 @@ enum class KeyUsage(val value: String) {
     DeriveKey("deriveKey"),
     DeriveBits("deriveBits"),
     WrapKey("wrapKey"),
-    UnwrapKey("unwrapKey")
-}
+    UnwrapKey("unwrapKey");
 
-fun toKeyUsage(key_ops: String): KeyUsage {
-    return when (key_ops) {
-        KeyUsage.Encrypt.value -> KeyUsage.Encrypt
-        KeyUsage.Decrypt.value -> KeyUsage.Decrypt
-        KeyUsage.Sign.value -> KeyUsage.Sign
-        KeyUsage.Verify.value -> KeyUsage.Verify
-        KeyUsage.DeriveBits.value -> KeyUsage.DeriveBits
-        KeyUsage.DeriveKey.value -> KeyUsage.DeriveKey
-        KeyUsage.WrapKey.value -> KeyUsage.WrapKey
-        KeyUsage.UnwrapKey.value -> KeyUsage.UnwrapKey
-        else -> throw KeyException("Unknown key_op $key_ops")
+    companion object {
+        fun fromString(keyUsage: String): KeyUsage {
+            return values().find { it.value == keyUsage } ?: throw KeyException("Unknown Key Usage value: $keyUsage")
+        }
     }
 }

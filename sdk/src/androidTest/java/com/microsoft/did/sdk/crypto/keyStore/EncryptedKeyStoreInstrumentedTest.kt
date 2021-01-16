@@ -8,15 +8,12 @@ package com.microsoft.did.sdk.crypto.keyStore
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
-import com.microsoft.did.sdk.crypto.plugins.AndroidSubtle
 import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
@@ -25,16 +22,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4ClassRunner::class)
-class AndroidKeyStoreInstrumentedTest {
+class EncryptedSharedPrefKeyStoreInstrumentedTest {
 
-    private val keyStore: AndroidKeyStore
+    private val keyStore: EncryptedSharedPrefKeyStore
     private val keyRef: String = "TestKeys"
     private var actualPublicKey: RsaPublicKey
     private var actualPrivateKey: RsaPrivateKey
 
     init {
         val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        keyStore = AndroidKeyStore(context, defaultTestSerializer)
+        keyStore = EncryptedSharedPrefKeyStore(context, defaultTestSerializer)
         val androidSubtle = AndroidSubtle(keyStore)
         val keyPair = androidSubtle.generateKeyPair(
             RsaHashedKeyAlgorithm(
