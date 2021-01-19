@@ -12,15 +12,15 @@ import com.microsoft.correlationvector.CorrelationVectorVersion
 import com.microsoft.did.sdk.util.Constants
 import javax.inject.Inject
 
-class CorrelationVectorService @Inject constructor(private val context: Context) {
+class CorrelationVectorService @Inject constructor() {
 
-    fun startNewFlowAndSave(): String {
+    fun startNewFlowAndSave(context: Context): String {
         val correlationId = CorrelationVector(CorrelationVectorVersion.V2).value
         saveCorrelationVector(context, correlationId)
         return correlationId
     }
 
-    internal fun incrementAndSave(): String {
+    internal fun incrementAndSave(context: Context): String {
         val correlationVectorString = getCorrelationVector(context)
         if (correlationVectorString != null && correlationVectorString.isNotEmpty()) {
             val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
@@ -30,7 +30,7 @@ class CorrelationVectorService @Inject constructor(private val context: Context)
         return ""
     }
 
-    fun getCorrelationVector(applicationContext: Context = context): String? {
+    fun getCorrelationVector(applicationContext: Context): String? {
         return PreferenceManager.getDefaultSharedPreferences(applicationContext).getString(Constants.CORRELATION_VECTOR_IN_PREF, null)
     }
 
