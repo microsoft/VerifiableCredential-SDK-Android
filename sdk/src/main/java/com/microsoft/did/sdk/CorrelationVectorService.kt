@@ -6,7 +6,7 @@
 package com.microsoft.did.sdk
 
 import android.content.Context
-import android.preference.PreferenceManager
+import androidx.preference.PreferenceManager
 import com.microsoft.correlationvector.CorrelationVector
 import com.microsoft.correlationvector.CorrelationVectorVersion
 import com.microsoft.did.sdk.util.Constants
