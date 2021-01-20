@@ -108,6 +108,7 @@ dependencies {
 
     //other
     implementation "androidx.security:security-crypto:1.0.0-rc03"
+    implementation "androidx.preference:preference:$androidx_preference_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
     api 'com.google.guava:guava:28.1-android'
@@ -115,7 +116,7 @@ dependencies {
     implementation "com.madgag.spongycastle:prov:1.58.0.0"
     //Used for Json Canonicalization performed for ION
     implementation "io.github.erdtman:java-json-canonicalization:1.1"
-    implementation "com.github.microsoft:CorrelationVector-Java:1.0"
+    implementation "com.github.microsoft:CorrelationVector-Java:$correlation_vector_version"
 
     // test dependencies
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
