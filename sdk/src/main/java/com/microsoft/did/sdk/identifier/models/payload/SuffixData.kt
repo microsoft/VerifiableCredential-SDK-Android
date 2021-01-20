@@ -11,8 +11,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SuffixData(
-    @SerialName("delta_hash")
+    @SerialName("deltaHash")
     val patchDataHash: String,
-    @SerialName("recovery_commitment")
+    @SerialName("recoveryCommitment")
     val nextRecoveryCommitmentHash: String
 )

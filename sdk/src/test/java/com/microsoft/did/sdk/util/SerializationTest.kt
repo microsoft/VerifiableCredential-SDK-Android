@@ -12,7 +12,7 @@ class SerializationTest {
     private var actualDocument: IdentifierDocument =
         IdentifierDocument(
             id = "did:test:hub.id",
-            publicKey = listOf(
+            verificationMethod = listOf(
                 IdentifierDocumentPublicKey(
                     id = "#signingKey",
                     type = "Secp256k1VerificationKey2018",
