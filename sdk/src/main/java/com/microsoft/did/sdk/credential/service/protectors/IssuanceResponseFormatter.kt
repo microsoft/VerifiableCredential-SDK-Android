@@ -53,7 +53,7 @@ class IssuanceResponseFormatter @Inject constructor(
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val key = cryptoOperations.keyStore.getKey(responder.signatureKeyReference).getKey()
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
             publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
             audience = issuanceResponse.audience

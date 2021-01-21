@@ -17,7 +17,6 @@ import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
@@ -27,8 +26,6 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
-import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
@@ -54,10 +51,12 @@ class CryptoOperations(
      */
     fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
         SdkLog.d("Signing with $signingKeyReference")
-        val privateKey = keyStore.getPrivateKey(signingKeyReference)
-        val alg = algorithm ?: privateKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
-        val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.PRIVATE)
-        val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
+        val key = keyStore.getKey(signingKeyReference)
+
+
+
+//        val alg = algorithm ?: privateKey.alg
+        val subtle = subtleCryptoFactory.getMessageSigner(key.alg.name, SubtleCryptoScope.PRIVATE)
         return subtle.sign(alg, key, payload)
     }
 
@@ -66,7 +65,7 @@ class CryptoOperations(
      */
     fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
         SdkLog.d("Verifying with $signingKeyReference")
-        val publicKey = keyStore.getPublicKey(signingKeyReference)
+        val publicKey = keyStore.getKey(signingKeyReference)
         val alg = algorithm ?: publicKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
         val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.PUBLIC)
         val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
@@ -112,7 +111,7 @@ class CryptoOperations(
                     ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
                 )
                 SdkLog.d("Saving key pair to keystore.")
-                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
+                keyStore.saveKey(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
             }
             KeyType.EllipticCurve -> {
                 val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.PRIVATE)
@@ -126,10 +125,10 @@ class CryptoOperations(
                     ), true, listOf(KeyUsage.Sign, KeyUsage.Verify)
                 )
                 SdkLog.d("Saving key pair to keystore.")
-                keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
+                keyStore.saveKey(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
             }
         }
-        return keyStore.getPublicKey(keyReference).getKey()
+        return keyStore.getKey(keyReference).getKey()
     }
 
     /**
@@ -156,7 +155,7 @@ class CryptoOperations(
         val randomNumberGenerator = SecureRandom()
         val seed = randomNumberGenerator.generateSeed(16)
         val secretKey = SecretKey(JsonWebKey(k = Base64Url.encode(seed)))
-        keyStore.save(AndroidConstants.masterSeed.value, secretKey)
+        keyStore.saveKey(AndroidConstants.masterSeed.value, secretKey)
     }
 
     /**

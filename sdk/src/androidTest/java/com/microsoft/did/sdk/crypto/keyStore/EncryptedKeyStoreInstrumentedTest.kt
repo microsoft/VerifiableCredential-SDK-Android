@@ -47,8 +47,8 @@ class EncryptedKeyStoreInstrumentedTest {
 
     @Test
     fun savePublicAndPrivateKeyPairTest() {
-        keyStore.save(keyRef, actualPublicKey)
-        keyStore.save(keyRef, actualPrivateKey)
+        keyStore.saveKey(keyRef, actualPublicKey)
+        keyStore.saveKey(keyRef, actualPrivateKey)
 
         val expectedPublicKeyById = keyStore.getPublicKeyById(actualPublicKey.kid)
         assertThat(actualPublicKey).isEqualToComparingFieldByFieldRecursively(expectedPublicKeyById)
@@ -59,8 +59,8 @@ class EncryptedKeyStoreInstrumentedTest {
 
     @Test
     fun listKeysTest() {
-        keyStore.save(keyRef, actualPrivateKey)
-        keyStore.save(keyRef, actualPublicKey)
+        keyStore.saveKey(keyRef, actualPrivateKey)
+        keyStore.saveKey(keyRef, actualPublicKey)
         val keysInKeyStore = keyStore.list()
         val expectedPrivateKey = keysInKeyStore[keyRef]
         assertThat(expectedPrivateKey!!.getLatestKeyId()).isNotNull()
@@ -72,40 +72,40 @@ class EncryptedKeyStoreInstrumentedTest {
     @Test
     fun invalidKeyReferenceTest() {
         val nonExistingPublicKeyRef = "kid1"
-        assertThatThrownBy { keyStore.getPublicKey(nonExistingPublicKeyRef) }.isInstanceOf(KeyStoreException::class.java)
+        assertThatThrownBy { keyStore.getKey(nonExistingPublicKeyRef) }.isInstanceOf(KeyStoreException::class.java)
     }
 
     @Test
     fun getPublicKeyByReferenceTest() {
-        keyStore.save(keyRef, actualPublicKey)
-        val expectedPublicKey = keyStore.getPublicKey(keyRef)
+        keyStore.saveKey(keyRef, actualPublicKey)
+        val expectedPublicKey = keyStore.getKey(keyRef)
         assertThat(actualPublicKey.key).isEqualTo(expectedPublicKey.keys[0].jwk)
     }
 
     @Test
     fun getPublicKeyByIdTest() {
-        keyStore.save(keyRef, actualPublicKey)
+        keyStore.saveKey(keyRef, actualPublicKey)
         val expectedPublicKey = keyStore.getPublicKeyById(actualPublicKey.kid)
         assertThat(actualPublicKey).isEqualToComparingFieldByFieldRecursively(expectedPublicKey)
     }
 
     @Test
     fun getPrivateKeyByReferenceTest() {
-        keyStore.save(keyRef, actualPrivateKey)
+        keyStore.saveKey(keyRef, actualPrivateKey)
         val expectedPrivateKey = keyStore.getPrivateKey(keyRef)
         assertThat(actualPrivateKey.key).isEqualTo(expectedPrivateKey.keys[0].key)
     }
 
     @Test
     fun getPrivateKeyByIdTest() {
-        keyStore.save(keyRef, actualPrivateKey)
+        keyStore.saveKey(keyRef, actualPrivateKey)
         val expectedPrivateKey = keyStore.getPrivateKeyById(actualPrivateKey.kid)
         assertThat(actualPrivateKey).isEqualToComparingFieldByFieldRecursively(expectedPrivateKey)
     }
 
     @Test
     fun checkOrCreateKidTest() {
-        keyStore.save(keyRef, actualPrivateKey)
+        keyStore.saveKey(keyRef, actualPrivateKey)
         val kid = keyStore.checkOrCreateKeyId(keyRef, null)
         assertThat(kid).startsWith("#${keyRef}_")
     }
@@ -124,7 +124,7 @@ class EncryptedKeyStoreInstrumentedTest {
                 kid = "#${keyRef}_1"
             )
         )
-        keyStore.save(keyRef, secretKey)
+        keyStore.saveKey(keyRef, secretKey)
         val actualSecretKey = keyStore.getSecretKey(keyRef)
         assertThat(actualSecretKey.keys.firstOrNull()).isEqualToComparingFieldByFieldRecursively(secretKey)
     }
@@ -137,7 +137,7 @@ class EncryptedKeyStoreInstrumentedTest {
                 kid = "#secret_2"
             )
         )
-        keyStore.save("secret", secretKey)
+        keyStore.saveKey("secret", secretKey)
         val actualSecretKey = keyStore.getSecretKeyById(secretKey.kid)
         assertThat(actualSecretKey).isEqualToComparingFieldByFieldRecursively(secretKey)
     }

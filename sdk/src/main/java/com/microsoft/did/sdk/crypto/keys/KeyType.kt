@@ -8,7 +8,7 @@ enum class KeyType(val value: String) {
     RSA("RSA");
 
     companion object {
-        fun toEnum(kty: String): KeyType {
+        fun fromString(kty: String): KeyType {
             return values().find { it.value == kty } ?: throw KeyException("Unknown Key Type value: $kty")
         }
     }

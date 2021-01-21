@@ -10,9 +10,9 @@ class EllipticCurvePublicKey(key: JsonWebKey) : PublicKey(key) {
         return "{\"crv\":\"$crv\",\"kty\":\"${kty.value}\",\"x\":\"$x\",\"y\":\"$y\"}"
     }
 
-    var crv = key.crv
-    var x = key.x
-    var y = key.y
+    val crv = key.crv
+    val x = key.x
+    val y = key.y
     override var kty = KeyType.EllipticCurve
     override var key_ops: List<KeyUsage>? = listOf(KeyUsage.Verify)
 

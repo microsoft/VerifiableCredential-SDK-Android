@@ -41,7 +41,7 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse,
             responder
         )
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val key = cryptoOperations.keyStore.getKey(responder.signatureKeyReference).getKey()
 
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
             publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)

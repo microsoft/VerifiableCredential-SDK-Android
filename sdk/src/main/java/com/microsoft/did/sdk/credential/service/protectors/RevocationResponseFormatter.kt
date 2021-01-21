@@ -29,7 +29,7 @@ class RevocationResponseFormatter @Inject constructor(
     fun formatResponse(revocationRequest: RevocationRequest, expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responder = revocationRequest.owner
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val key = cryptoOperations.keyStore.getKey(responder.signatureKeyReference).getKey()
         val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {

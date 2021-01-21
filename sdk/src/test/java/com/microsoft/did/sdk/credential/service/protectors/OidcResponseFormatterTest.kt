@@ -12,7 +12,6 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
@@ -123,7 +122,7 @@ class OidcResponseFormatterTest {
         every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
         every { mockedIdentifier.id } returns expectedDid
         every { mockedCryptoOperations.keyStore } returns mockedKeyStore
-        every { mockedKeyStore.getPublicKey(signingKeyRef) } returns mockedKeyContainer
+        every { mockedKeyStore.getKey(signingKeyRef) } returns mockedKeyContainer
         every { mockedKeyContainer.getKey() } returns mockedPublicKey
         every { mockedPublicKey.getThumbprint(mockedCryptoOperations, Sha.SHA256.algorithm) } returns expectedThumbprint
         every { mockedPublicKey.toJWK() } returns expectedJsonWebKey

@@ -1,14 +1,13 @@
 package com.microsoft.did.sdk.crypto.keys
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.models.KeyUse
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
 import com.microsoft.did.sdk.util.Base64Url
 
-sealed class Key(
+abstract class Key(
         val kid: String,
         val kty: KeyType,
         val use: KeyUse,
@@ -34,47 +33,5 @@ sealed class Key(
         val hash = digest.digest(sha, jsonUtf8)
         // undocumented, but assumed base64url of hash is returned
         return Base64Url.encode(hash)
-    }
-}
-
-sealed class PublicKey(
-        kid: String,
-        kty: KeyType,
-        use: KeyUse,
-        key_ops: List<KeyUsage> = emptyList(),
-        alg: String
-) : Key(kid, kty, use, key_ops, alg) {
-
-}
-
-sealed class PrivateKey(
-        kid: String,
-        kty: KeyType,
-        use: KeyUse,
-        key_ops: List<KeyUsage> = emptyList(),
-        alg: String
-) : Key(kid, kty, use, key_ops, alg) {
-
-    /**
-     * Gets the corresponding public key
-     * @returns The corresponding {@link PublicKey}
-     */
-    abstract fun getPublicKey(): PublicKey
-
-    override fun minimumAlphabeticJwk(): String {
-        return this.getPublicKey().minimumAlphabeticJwk()
-    }
-}
-
-class SecretKey(
-        kid: String,
-        kty: KeyType = KeyType.Octets,
-        use: KeyUse,
-        key_ops: List<KeyUsage> = emptyList(),
-        alg: String,
-        val secret: String
-) : Key(kid, kty, use, key_ops, alg) {
-    override fun minimumAlphabeticJwk(): String {
-        TODO("Not yet implemented")
     }
 }

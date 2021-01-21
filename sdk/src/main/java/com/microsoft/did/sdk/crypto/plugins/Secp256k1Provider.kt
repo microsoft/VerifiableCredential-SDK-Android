@@ -37,6 +37,7 @@ import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.security.Security
+import java.security.Signature
 import java.util.Locale
 
 class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
@@ -103,6 +104,8 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         if (hashedData.size != 32) {
             throw SignatureException("Data must be 32 bytes")
         }
+
+        val s = Signature.getInstance()
 
         val signingSigner = ECDSASigner()
         val ecDomainParameters = createCurveParameters()

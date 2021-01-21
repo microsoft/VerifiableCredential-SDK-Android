@@ -55,7 +55,7 @@ class PairwiseKeyInstrumentedTest {
                 k = Base64Url.encode(stringToByteArray(suppliedStringForSeedGeneration))
             )
         )
-        keyStore.save(seedReference, seed)
+        keyStore.saveKey(seedReference, seed)
     }
 
     /**
@@ -116,7 +116,7 @@ class PairwiseKeyInstrumentedTest {
 
         // Generate pairwise key
         val ecPairwiseKey = crypto.generatePairwise(alg, seedReference, persona, peer)
-        keyStore.save("key", ecPairwiseKey)
+        keyStore.saveKey("key", ecPairwiseKey)
 
         //Use the pairwise key generated to sign and verify just to make sure it is successful. Verify doesn't return anything to make assertions on that. If verification fails, test would fail automatically.
         val ecAlgorithm = EcdsaParams(
@@ -156,8 +156,8 @@ class PairwiseKeyInstrumentedTest {
                     k = Base64Url.encode(stringToByteArray("1234567890-$i"))
                 )
             )
-            keyStore.save(seedReference, keyValue)
-            keyStore.save(keyReference, keyValue)
+            keyStore.saveKey(seedReference, keyValue)
+            keyStore.saveKey(keyReference, keyValue)
 
             val actualPairwiseKey = crypto.generatePairwise(alg, keyReference, persona, peer)
             results[i] = (actualPairwiseKey as EllipticCurvePrivateKey).d
@@ -205,7 +205,7 @@ class PairwiseKeyInstrumentedTest {
         val seed =
             SecretKey(JsonWebKey(k = Base64Url.encode(stringToByteArray("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi"))))
         val seedReference = "masterkey"
-        keyStore.save(seedReference, seed)
+        keyStore.saveKey(seedReference, seed)
         for (index in 0 until countOfIds) {
             val persona = "abcdef"
             val pairwiseKey = crypto.generatePairwise(alg, seedReference, persona, index.toString())
