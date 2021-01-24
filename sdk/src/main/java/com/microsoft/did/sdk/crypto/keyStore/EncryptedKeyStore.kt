@@ -26,8 +26,7 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
-class EncryptedKeyStore @Inject constructor(context: Context, private val serializer: Json) :
+class EncryptedKeyStore constructor(context: Context, private val serializer: Json) :
         com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
 
     private val encryptedSharedPreferences = getSharedPreferences(context)

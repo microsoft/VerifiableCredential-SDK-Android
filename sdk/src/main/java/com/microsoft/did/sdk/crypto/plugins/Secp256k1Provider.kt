@@ -21,6 +21,7 @@ import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.convertSignedToUnsignedByteArray
 import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.publicToXY
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.spongycastle.asn1.ASN1InputStream
@@ -35,12 +36,11 @@ import org.spongycastle.jce.ECNamedCurveTable
 import org.spongycastle.jce.provider.BouncyCastleProvider
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
-import java.security.SecureRandom
-import java.security.Security
-import java.security.Signature
+import java.security.*
 import java.util.Locale
+import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 
-class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() {
+class Secp256k1Provider : Provider() {
     init {
         Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)
     }
@@ -97,24 +97,46 @@ class Secp256k1Provider(private val subtleCryptoSha: SubtleCrypto) : Provider() 
         }
     }
 
-    override fun onSign(algorithm: Algorithm, key: CryptoKey, data: ByteArray): ByteArray {
-        val keyData = (key.handle as Secp256k1Handle).data
-        val ecAlgorithm = algorithm as EcdsaParams
-        val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
-        if (hashedData.size != 32) {
-            throw SignatureException("Data must be 32 bytes")
-        }
+    override fun onSign(data: ByteArray, keyStore: KeyStore, keyAlias: String): ByteArray {
+//        val keyData = (key.handle as Secp256k1Handle).data
+//        val ecAlgorithm = algorithm as EcdsaParams
+//        val hashedData = subtleCryptoSha.digest(ecAlgorithm.hash, data)
+//        if (hashedData.size != 32) {
+//            throw SignatureException("Data must be 32 bytes")
+//        }
+//
+//        val signingSigner = ECDSASigner()
+//        val ecDomainParameters = createCurveParameters()
+//        val privateKeyParams = ECPrivateKeyParameters(BigInteger(1, keyData), ecDomainParameters)
+//        signingSigner.init(true, privateKeyParams)
+//
+//        val signature = signingSigner.generateSignature(hashedData)
+//        val oldSig = convertSignatureToUnsignedByteArray(signature)
+//
+//        // New algo
+//
+//        val keySpec = org.spongycastle.jce.spec.ECPrivateKeySpec(BigInteger(1, keyData), ECNamedCurveTable.getParameterSpec(SECP256K1_CURVE_NAME_EC))
+//        val ecRestoredKey = KeyFactory.getInstance("EC", "SC").generatePrivate(keySpec)
 
-        val s = Signature.getInstance()
 
-        val signingSigner = ECDSASigner()
-        val ecDomainParameters = createCurveParameters()
-        val privateKeyParams = ECPrivateKeyParameters(BigInteger(1, keyData), ecDomainParameters)
-        signingSigner.init(true, privateKeyParams)
+        val signer = Signature.getInstance("SHA256WITHPLAIN-ECDSA", "SC")
+                .apply {
+                    initSign(ecRestoredKey)
+                    update(data)
+                }
+        val newSig = signer.sign()
+        val sigEqual = newSig.contentEquals(oldSig)
 
-        val signature = signingSigner.generateSignature(hashedData)
-        return convertSignatureToUnsignedByteArray(signature)
+        return newSig
     }
+
+    // NEW CODE
+
+//        val keyGen = KeyPairGenerator.getInstance("EC", "SC")
+//        keyGen.initialize(ECNamedCurveTable.getParameterSpec(SECP256K1_CURVE_NAME_EC))
+//        val keyPair = keyGen.genKeyPair()
+//        val key = keyPair.private
+//        key.encoded
 
     /**
      * Signature is returned as array of BigIntegers for R and S. Converting them into unsigned byte array.
