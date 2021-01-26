@@ -38,10 +38,11 @@ class IssuanceService @Inject constructor(
      *
      * @param contractUrl url that the contract is fetched from
      */
-    suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
+    suspend fun getRequest(contractUrl: String, isLinkedDomainsEnabled: Boolean): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
-            val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+            val linkedDomainResult =
+                if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else null
             val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
             Result.Success(request)
         }

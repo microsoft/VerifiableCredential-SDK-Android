@@ -126,7 +126,7 @@ class IssuanceServiceTest {
         every { mockedIdentifierDocumentService.serviceEndpoint } returns listOf(mockedIdentifierDocumentServiceEndpoint)
 
         runBlocking {
-            val actualRequest = issuanceService.getRequest(suppliedContractUrl)
+            val actualRequest = issuanceService.getRequest(suppliedContractUrl, true)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             assertThat((actualRequest as Result.Success).payload.contractUrl).isEqualTo(suppliedContractUrl)
             assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)

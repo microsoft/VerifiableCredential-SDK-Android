@@ -35,11 +35,13 @@ class PresentationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
-    suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
+    suspend fun getRequest(stringUri: String, isLinkedDomainsEnabled: Boolean): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
             val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-            val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
+            val linkedDomainResult =
+                if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
+                    .abortOnError() else null
             val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
             isRequestValid(request).abortOnError()
             Result.Success(request)
