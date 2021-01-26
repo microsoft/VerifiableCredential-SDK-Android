@@ -38,12 +38,13 @@ object Constants {
 
     const val DEEP_LINK_SCHEME = "openid"
     const val DEEP_LINK_HOST = "vc"
+    const val CORRELATION_VECTOR_IN_PREF = "correlation_vector"
 
     //Identifier Constants
     const val MASTER_IDENTIFIER_NAME = "did.identifier"
     const val METHOD_NAME = "ion"
-    const val INITIAL_STATE_LONGFORM = "-$METHOD_NAME-initial-state"
-    const val SIDETREE_OPERATION_TYPE = "create"
+    const val IDENTIFIER_PUBLIC_KEY_PURPOSE = "authentication"
+    const val COLON = ":"
     const val SIDETREE_PATCH_ACTION = "replace"
     const val SIDETREE_MULTIHASH_CODE = 18
     const val SIDETREE_MULTIHASH_LENGTH = 32
@@ -51,4 +52,9 @@ object Constants {
     const val SIGNATURE_KEYREFERENCE = "sign"
     const val RECOVERY_KEYREFERENCE = "recover"
     const val UPDATE_KEYREFERENCE = "update"
+
+    // Header Constants for network calls
+    const val USER_AGENT_HEADER = "User-Agent"
+    const val CORRELATION_VECTOR_HEADER = "ms-cv"
+    const val REQUEST_ID_HEADER = "request-id"
 }
