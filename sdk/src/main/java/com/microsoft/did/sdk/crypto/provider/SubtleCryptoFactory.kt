@@ -1,6 +1,7 @@
-package com.microsoft.did.sdk.crypto.plugins
+// Copyright (c) Microsoft Corporation. All rights reserved
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
+package com.microsoft.did.sdk.crypto.provider
+
 import com.microsoft.did.sdk.util.controlflow.CryptoException
 
 /*---------------------------------------------------------------------------------------------
@@ -12,7 +13,6 @@ import com.microsoft.did.sdk.util.controlflow.CryptoException
  * Utility class to handle all CryptoSuite dependency injection
  */
 class SubtleCryptoFactory(default: SubtleCrypto) {
-
     private val defaultSubtleCryptoMapItem = SubtleCryptoMapItem(default, SubtleCryptoScope.ALL)
 
     /**

@@ -4,7 +4,7 @@ package com.microsoft.did.sdk.util
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
-import com.microsoft.did.sdk.crypto.plugins.Secp256k1Provider
+import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.spongycastle.jce.ECNamedCurveTable
@@ -13,6 +13,14 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.security.KeyFactory
+
+enum class Secp256k1Tag(val byte: Byte) {
+    EVEN(0x02),
+    ODD(0x03),
+    UNCOMPRESSED(0x04),
+    HYBRID_EVEN(0x06),
+    HYBRID_ODD(0x07)
+}
 
 /**
  *  Converts the public key returned by library from byte array to x and y co-ordinates to be used in JWK

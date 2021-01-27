@@ -1,10 +1,9 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.crypto.provider.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.util.Base64Url

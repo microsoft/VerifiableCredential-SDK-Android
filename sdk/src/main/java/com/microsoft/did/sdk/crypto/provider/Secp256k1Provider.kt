@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.crypto.plugins
+package com.microsoft.did.sdk.crypto.provider
 
-import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
 import com.microsoft.did.sdk.util.Constants.SECP256K1_CURVE_NAME_EC
 import org.spongycastle.jce.ECNamedCurveTable
 import org.spongycastle.jce.provider.BouncyCastleProvider

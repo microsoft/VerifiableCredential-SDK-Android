@@ -4,9 +4,9 @@ import android.content.Context
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.crypto.plugins.Secp256k1Provider
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.Provider
+import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
+import com.microsoft.did.sdk.crypto.provider.SubtleCryptoScope
+import com.microsoft.did.sdk.crypto.provider.Provider
 import com.microsoft.did.sdk.util.log.SdkLog
 import kotlinx.serialization.json.Json
 

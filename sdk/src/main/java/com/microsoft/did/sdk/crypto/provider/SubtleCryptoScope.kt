@@ -1,4 +1,4 @@
-package com.microsoft.did.sdk.crypto.plugins
+package com.microsoft.did.sdk.crypto.provider
 
 enum class SubtleCryptoScope {
     ALL,

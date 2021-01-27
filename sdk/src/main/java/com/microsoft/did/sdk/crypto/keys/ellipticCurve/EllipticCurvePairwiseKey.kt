@@ -7,15 +7,13 @@ package com.microsoft.did.sdk.crypto.keys.ellipticCurve
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.crypto.provider.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException

@@ -6,7 +6,6 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver

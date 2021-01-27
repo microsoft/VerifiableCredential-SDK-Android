@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.identifier.models.identifierdocument
 
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey

@@ -6,10 +6,7 @@ package com.microsoft.did.sdk.identifier
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.AndroidConstants
-import com.microsoft.did.sdk.crypto.keys.KeyUse
-import com.microsoft.did.sdk.crypto.models.toKeyUse
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams

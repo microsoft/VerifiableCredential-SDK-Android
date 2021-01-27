@@ -9,9 +9,6 @@ import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.KeyTypeFactory
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.keys.PublicKey
-import com.microsoft.did.sdk.crypto.keys.SecretKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
@@ -19,50 +16,31 @@ import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
+import com.microsoft.did.sdk.crypto.provider.SubtleCryptoScope
+import com.microsoft.did.sdk.crypto.provider.Provider
+import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.log.SdkLog
+import java.security.PrivateKey
 import java.security.SecureRandom
 
-/**
- * Class that encompasses all of Crypto
- * @param subtleCrypto primitives for operations.
- * @param keyStore specific keyStore that securely holds keys.
- */
 class CryptoOperations(
-    subtleCrypto: SubtleCrypto,
-    val keyStore: KeyStore,
+    private val keyStore: KeyStore,
+    private val defaultProvider: Provider = Secp256k1Provider(),
     private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
 ) {
-    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
 
-    /**
-     * Sign payload with key stored in keyStore.
-     * @param payload to sign.
-     * @param signingKeyReference reference to key stored in keystore.
-     */
-    fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
-        SdkLog.d("Signing with $signingKeyReference")
-        val key = keyStore.getKey(signingKeyReference)
-
-
-
-//        val alg = algorithm ?: privateKey.alg
-        val subtle = subtleCryptoFactory.getMessageSigner(key.alg.name, SubtleCryptoScope.PRIVATE)
-        return subtle.sign(alg, key, payload)
+    fun sign(payload: ByteArray, keyId: String, provider: Provider = defaultProvider): ByteArray {
+        val signingKey = keyStore.getKey<PrivateKey>(keyId)
+        return provider.sign(signingKey, payload)
     }
 
-    /**
-     * Verify payload with key stored in keyStore.
-     */
     fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
         SdkLog.d("Verifying with $signingKeyReference")
         val publicKey = keyStore.getKey(signingKeyReference)

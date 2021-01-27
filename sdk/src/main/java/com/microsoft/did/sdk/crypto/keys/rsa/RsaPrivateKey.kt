@@ -1,8 +1,6 @@
 package com.microsoft.did.sdk.crypto.keys.rsa
 
 import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.keys.PublicKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 
 class RsaPrivateKey(jwk: JsonWebKey) : PrivateKey(jwk) {
