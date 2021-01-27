@@ -1,7 +1,6 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.InMemoryKeyStore
 import com.microsoft.did.sdk.crypto.keys.MockPrivateKey
 import com.microsoft.did.sdk.crypto.keys.MockPublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
