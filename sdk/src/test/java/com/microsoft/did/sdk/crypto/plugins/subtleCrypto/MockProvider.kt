@@ -1,7 +1,5 @@
 package com.microsoft.did.sdk.crypto.plugins.subtleCrypto
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.CryptoKeyPair
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyType

@@ -3,7 +3,6 @@
 package com.microsoft.did.sdk.util
 
 import android.util.Base64
-import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey

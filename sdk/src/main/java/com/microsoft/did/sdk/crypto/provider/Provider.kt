@@ -33,7 +33,7 @@ abstract class Provider {
         throw UnSupportedOperationException("Encrypt not supported.")
     }
 
-    protected open fun decrypt(key: SecretKey, data: ByteArray): ByteArray {
+    open fun decrypt(key: SecretKey, data: ByteArray): ByteArray {
         throw UnSupportedOperationException("Decrypt not supported.")
     }
 }

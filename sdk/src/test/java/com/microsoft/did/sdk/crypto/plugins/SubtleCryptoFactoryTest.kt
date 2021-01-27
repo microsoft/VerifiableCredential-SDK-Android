@@ -2,9 +2,6 @@ package com.microsoft.did.sdk.crypto.plugins
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
-import com.microsoft.did.sdk.crypto.provider.SubtleCryptoFactory
-import com.microsoft.did.sdk.crypto.provider.SubtleCryptoMapItem
-import com.microsoft.did.sdk.crypto.provider.SubtleCryptoScope
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

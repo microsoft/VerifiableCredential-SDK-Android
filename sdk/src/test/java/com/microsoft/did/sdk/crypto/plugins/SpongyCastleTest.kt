@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.crypto.plugins
 
-import com.microsoft.did.sdk.crypto.models.AndroidConstants
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
 import com.microsoft.did.sdk.util.Constants

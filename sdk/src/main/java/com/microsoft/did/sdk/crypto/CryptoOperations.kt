@@ -10,25 +10,17 @@ import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.keys.KeyType
 import com.microsoft.did.sdk.crypto.keys.KeyTypeFactory
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
-import com.microsoft.did.sdk.crypto.models.AndroidConstants
-import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
-import com.microsoft.did.sdk.crypto.provider.SubtleCryptoScope
 import com.microsoft.did.sdk.crypto.provider.Provider
 import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
-import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
-import com.microsoft.did.sdk.util.controlflow.SignatureException
-import com.microsoft.did.sdk.util.log.SdkLog
 import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.SecureRandom
+import javax.crypto.SecretKey
 
 class CryptoOperations(
     private val keyStore: KeyStore,
@@ -41,72 +33,30 @@ class CryptoOperations(
         return provider.sign(signingKey, payload)
     }
 
-    fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
-        SdkLog.d("Verifying with $signingKeyReference")
-        val publicKey = keyStore.getKey(signingKeyReference)
-        val alg = algorithm ?: publicKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
-        val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.PUBLIC)
-        val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
-        if (!subtle.verify(alg, key, signature, payload)) {
-            throw SignatureException("Signature invalid")
-        }
+    fun verify(payload: ByteArray, signature: ByteArray, keyId: String, provider: Provider = defaultProvider): Boolean {
+        val publicKey = keyStore.getKey<PublicKey>(keyId)
+        return provider.verify(publicKey, payload, signature)
+    }
+
+    fun encrypt(payload: ByteArray, keyId: String, provider: Provider = defaultProvider): ByteArray {
+        val secretKey = keyStore.getKey<SecretKey>(keyId)
+        return provider.encrypt(secretKey, payload)
+    }
+
+    fun decrypt(payload: ByteArray, keyId: String, provider: Provider = defaultProvider): ByteArray {
+        val secretKey = keyStore.getKey<SecretKey>(keyId)
+        return provider.decrypt(secretKey, payload)
     }
 
     /**
-     * Encrypt payload with key stored in keyStore.
+     * Generates a KeyPair with the given provider.
+     *
+     * Stores the private key in the KeyStore with given keyId and returns the corresponding public key.
      */
-    fun encrypt() {
-        TODO("Not implemented")
-    }
-
-    /**
-     * Decrypt payload with key stored in keyStore.
-     */
-    fun decrypt() {
-        TODO("Not implemented")
-    }
-
-    /**
-     * Generates a key pair.
-     * @param keyType the type of key to generate
-     * @returns the associated public key
-     */
-    fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
-        SdkLog.d("Generating new key pair $keyReference of type ${keyType.value}")
-        when (keyType) {
-            KeyType.Octets -> throw KeyException("Cannot generate a symmetric key")
-            KeyType.RSA -> {
-                val subtle = subtleCryptoFactory.getSharedKeyEncrypter(
-                    W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
-                    SubtleCryptoScope.PRIVATE
-                )
-                val keyPair = subtle.generateKeyPair(
-                    RsaHashedKeyAlgorithm(
-                        modulusLength = 4096UL,
-                        publicExponent = 65537UL,
-                        hash = Sha.SHA256.algorithm,
-                        additionalParams = mapOf("KeyReference" to keyReference)
-                    ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
-                )
-                SdkLog.d("Saving key pair to keystore.")
-                keyStore.saveKey(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
-            }
-            KeyType.EllipticCurve -> {
-                val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.PRIVATE)
-                val keyPair = subtle.generateKeyPair(
-                    EcKeyGenParams(
-                        namedCurve = W3cCryptoApiConstants.Secp256k1.value,
-                        additionalParams = mapOf(
-                            "hash" to Sha.SHA256.algorithm,
-                            "KeyReference" to keyReference
-                        )
-                    ), true, listOf(KeyUsage.Sign, KeyUsage.Verify)
-                )
-                SdkLog.d("Saving key pair to keystore.")
-                keyStore.saveKey(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
-            }
-        }
-        return keyStore.getKey(keyReference).getKey()
+    fun generateKeyPair(keyId: String, provider: Provider = defaultProvider): PublicKey {
+        val keyPair = provider.generateKeyPair()
+        keyStore.saveKey(keyPair.private, keyId)
+        return keyPair.public
     }
 
     /**
@@ -153,6 +103,7 @@ class CryptoOperations(
         // Get the seed
         val jwk = keyStore.getSecretKey(seedReference)
 
+        keyStore.getKey<SecretKey>(seedReference)
         masterKey = generateMasterKeyFromSeed(jwk, userDid)
         masterKeys[userDid] = masterKey
         return masterKey
