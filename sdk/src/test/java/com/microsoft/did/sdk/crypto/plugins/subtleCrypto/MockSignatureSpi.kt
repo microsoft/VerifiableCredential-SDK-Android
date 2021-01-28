@@ -6,7 +6,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyType
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.crypto.provider.Provider
+import com.microsoft.did.sdk.crypto.spi.SignatureSpi
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.byteArrayToString
 import com.microsoft.did.sdk.util.controlflow.KeyException
@@ -16,7 +16,7 @@ import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
 
-class MockProvider(override var name: String = W3cCryptoApiConstants.RsaOaep.value) : Provider() {
+class MockSignatureSpi(override var name: String = W3cCryptoApiConstants.RsaOaep.value) : SignatureSpi() {
     override val privateKeyUsage: Set<KeyUsage>? = setOf(
         KeyUsage.Sign,
         KeyUsage.Decrypt

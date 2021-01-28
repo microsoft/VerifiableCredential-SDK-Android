@@ -1,18 +1,18 @@
 package com.microsoft.did.sdk.crypto.plugins
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
+import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockSignatureSpi
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class SubtleCryptoFactoryTest {
-    private val subtle = Subtle(setOf(MockProvider()), defaultTestSerializer)
+    private val subtle = Subtle(setOf(MockSignatureSpi()), defaultTestSerializer)
     private val subtleCryptoFactory = SubtleCryptoFactory(subtle)
 
     @Test
     fun `get message authentication code signers object for a given algorithm name`() {
-        val mockProviderForHmac = MockProvider(W3cCryptoApiConstants.Hmac.value)
+        val mockProviderForHmac = MockSignatureSpi(W3cCryptoApiConstants.Hmac.value)
         val ecSubtle = Subtle(setOf(mockProviderForHmac), defaultTestSerializer)
         subtleCryptoFactory.addMessageAuthenticationCodeSigner(
             W3cCryptoApiConstants.Hmac.value,
@@ -24,7 +24,7 @@ class SubtleCryptoFactoryTest {
 
     @Test
     fun `get message digest for a given algorithm name`() {
-        val mockProviderForSha = MockProvider(W3cCryptoApiConstants.Sha512.value)
+        val mockProviderForSha = MockSignatureSpi(W3cCryptoApiConstants.Sha512.value)
         val ecSubtle = Subtle(setOf(mockProviderForSha), defaultTestSerializer)
         subtleCryptoFactory.addMessageDigest(W3cCryptoApiConstants.Sha512.value, SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.PUBLIC))
         val msgDigest = subtleCryptoFactory.getMessageDigest(W3cCryptoApiConstants.Sha512.value, SubtleCryptoScope.PUBLIC)
@@ -33,7 +33,7 @@ class SubtleCryptoFactoryTest {
 
     @Test
     fun `get message signer for a given algorithm name`() {
-        val mockProviderForEc = MockProvider(W3cCryptoApiConstants.EcDsa.value)
+        val mockProviderForEc = MockSignatureSpi(W3cCryptoApiConstants.EcDsa.value)
         val ecSubtle = Subtle(setOf(mockProviderForEc), defaultTestSerializer)
         subtleCryptoFactory.addMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.PRIVATE))
         val msgSigner = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.PRIVATE)
@@ -42,7 +42,7 @@ class SubtleCryptoFactoryTest {
 
     @Test
     fun `get shared key encrypter for a given algorithm`() {
-        val mockProviderForRsa = MockProvider(W3cCryptoApiConstants.RsaSsaPkcs1V15.value)
+        val mockProviderForRsa = MockSignatureSpi(W3cCryptoApiConstants.RsaSsaPkcs1V15.value)
         val rsaSubtle = Subtle(setOf(mockProviderForRsa), defaultTestSerializer)
         subtleCryptoFactory.addSharedKeyEncrypter(
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
@@ -55,7 +55,7 @@ class SubtleCryptoFactoryTest {
 
     @Test
     fun `get symmetric key encrypter for a given algorithm`() {
-        val mockProviderForRsa = MockProvider(W3cCryptoApiConstants.RsaSsaPkcs1V15.value)
+        val mockProviderForRsa = MockSignatureSpi(W3cCryptoApiConstants.RsaSsaPkcs1V15.value)
         val rsaSubtle = Subtle(setOf(mockProviderForRsa), defaultTestSerializer)
         subtleCryptoFactory.addSymmetricEncrypter(
             W3cCryptoApiConstants.RsaSsaPkcs1V15.value,

@@ -1,6 +1,7 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.SigningAlgorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
@@ -14,7 +15,12 @@ import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import com.microsoft.did.sdk.util.stringToByteArray
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.spongycastle.jce.spec.ECPrivateKeySpec
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.DSAParameterSpec
 import java.util.Locale
+import javax.crypto.spec.DHParameterSpec
 
 /**
  * Class for containing JWS token operations.
@@ -182,6 +188,24 @@ class JwsToken private constructor(
             signatureInput, signingKeyReference,
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName)
         )
+
+//        val signingKey = keyStore.getKey<PrivateKey>(keyId)
+        val signer = Signature.getInstance("ECDSAWITHPLAIN-jdas", "SC")
+            .apply {
+                initSign(signingKey)
+                update(payload)
+                if (alg.spec != null) setParameter(DSAParameterSpec(192331, 2382, 3853))
+            }
+        signer.sign()
+
+        cryptoOperations.sign(payload, "masterKey", SigningAlgorithm.Rsa(DHParameterSpec(24727, 24642)))
+
+
+
+        val keyFactory = KeyFactory.getInstance("EC", "SC")
+        val keySpec = ECPrivateKeySpec()
+
+        cryptoOperations.generatePrivateKey(CryptoOperations.KeyAlgorithm)
 
         val signatureBase64 = Base64Url.encode(signature)
 

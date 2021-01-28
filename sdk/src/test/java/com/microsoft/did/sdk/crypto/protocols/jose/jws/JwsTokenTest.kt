@@ -6,7 +6,7 @@ import com.microsoft.did.sdk.crypto.keys.MockPublicKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaOaepParams
-import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockProvider
+import com.microsoft.did.sdk.crypto.plugins.subtleCrypto.MockSignatureSpi
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.UnSupportedAlgorithmException
 import com.microsoft.did.sdk.util.defaultTestSerializer
@@ -29,7 +29,7 @@ class JwsTokenTest {
 
     init {
         /* This is the payload used for all the operations below */
-        subtle = Subtle(setOf(MockProvider()), defaultTestSerializer)
+        subtle = Subtle(setOf(MockSignatureSpi()), defaultTestSerializer)
         crypto = CryptoOperations(subtle, keyStore, ellipticCurvePairwiseKey)
         keyRef = Base64Url.encode(Random.nextBytes(8))
         val keyPair = subtle.generateKeyPair(
