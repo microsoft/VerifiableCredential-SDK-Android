@@ -189,24 +189,6 @@ class JwsToken private constructor(
             JwaCryptoConverter.jwaAlgToWebCrypto(algorithmName)
         )
 
-//        val signingKey = keyStore.getKey<PrivateKey>(keyId)
-        val signer = Signature.getInstance("ECDSAWITHPLAIN-jdas", "SC")
-            .apply {
-                initSign(signingKey)
-                update(payload)
-                if (alg.spec != null) setParameter(DSAParameterSpec(192331, 2382, 3853))
-            }
-        signer.sign()
-
-        cryptoOperations.sign(payload, "masterKey", SigningAlgorithm.Rsa(DHParameterSpec(24727, 24642)))
-
-
-
-        val keyFactory = KeyFactory.getInstance("EC", "SC")
-        val keySpec = ECPrivateKeySpec()
-
-        cryptoOperations.generatePrivateKey(CryptoOperations.KeyAlgorithm)
-
         val signatureBase64 = Base64Url.encode(signature)
 
         this.signatures.add(

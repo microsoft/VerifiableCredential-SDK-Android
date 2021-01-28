@@ -6,23 +6,13 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.KeyStore
-import com.microsoft.did.sdk.crypto.keys.KeyContainer
-import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.keys.KeyTypeFactory
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
 import com.microsoft.did.sdk.crypto.spi.EcPairwiseKeySpec
-import com.microsoft.did.sdk.crypto.spi.SignatureSpi
-import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
 import org.spongycastle.jce.provider.BouncyCastleProvider
 import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
-import java.security.SecureRandom
 import java.security.Security
 import java.security.Signature
 import java.security.spec.AlgorithmParameterSpec
@@ -32,24 +22,6 @@ import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
 import javax.crypto.SecretKey
-
-open class SigningAlgorithm(val name: String, val provider: String, val spec: AlgorithmParameterSpec? = null) {
-    class Secp256k1 : SigningAlgorithm("SHA256WITHPLAIN-ECDSA", "SC")
-}
-
-open class DigestAlgorithm(val name: String, val provider: String) {
-    class Sha256 : DigestAlgorithm("SHA-256", "SC")
-    class Rsa : DigestAlgorithm("SHA-512", "SC") // EXAMPLE
-}
-
-open class CipherAlgorithm(val name: String, val provider: String) {
-    class DesCbcPkcs5Padding : DigestAlgorithm("DES/CBC/PKCS5Padding", "SC") // EXAMPLE
-}
-
-open class KeyAlgorithm(val name: String, val provider: String, val keySpec: KeySpec) {
-    class Secp256(ecPrivateKeySpec: ECPrivateKeySpec) : KeyAlgorithm("EC", "SC", ecPrivateKeySpec) // EXAMPLE
-    class EcPairwise(ecPairwiseKeySpec: EcPairwiseKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwiseKeySpec) // EXAMPLE
-}
 
 class CryptoOperations(
     private val keyStore: KeyStore,
