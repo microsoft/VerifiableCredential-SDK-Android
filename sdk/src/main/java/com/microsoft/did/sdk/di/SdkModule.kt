@@ -51,26 +51,6 @@ class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultCryptoOperations(
-        subtleCrypto: SubtleCrypto,
-        ecSubtle: EllipticCurveSubtleCrypto,
-        keyStore: KeyStore,
-        ecPairwiseKey: EllipticCurvePairwiseKey
-    ): CryptoOperations {
-        val defaultCryptoOperations = CryptoOperations(subtleCrypto, keyStore, ecPairwiseKey)
-        defaultCryptoOperations.subtleCryptoFactory.addMessageSigner(
-            name = W3cCryptoApiConstants.EcDsa.value,
-            subtleCrypto = SubtleCryptoMapItem(ecSubtle, SubtleCryptoScope.ALL)
-        )
-        defaultCryptoOperations.subtleCryptoFactory.addMessageAuthenticationCodeSigner(
-            name = W3cCryptoApiConstants.Hmac.value,
-            subtleCrypto = SubtleCryptoMapItem(subtleCrypto, SubtleCryptoScope.ALL)
-        )
-        return defaultCryptoOperations
-    }
-
-    @Provides
-    @Singleton
     fun defaultOkHttpClient(@Named("userAgentInfo") userAgentInfo: String, correlationVectorService: CorrelationVectorService): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
@@ -98,12 +78,6 @@ class SdkModule {
     @Singleton
     fun defaultRegistrar(registrar: SidetreeRegistrar): Registrar {
         return registrar
-    }
-
-    @Provides
-    @Singleton
-    fun defaultKeyStore(keyStore: EncryptedKeyStore): KeyStore {
-        return keyStore
     }
 
     @Provides

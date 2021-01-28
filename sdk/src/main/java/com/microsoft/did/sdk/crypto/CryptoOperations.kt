@@ -22,10 +22,10 @@ import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
 import javax.crypto.SecretKey
+import javax.inject.Inject
 
-class CryptoOperations(
-    private val keyStore: KeyStore,
-    private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
+class CryptoOperations @Inject constructor(
+    private val keyStore: KeyStore
 ) {
     init {
         Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)

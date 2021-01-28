@@ -9,9 +9,9 @@ import androidx.security.crypto.MasterKeys
 import com.microsoft.did.sdk.util.JavaObjectSerializer
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import java.security.Key
+import javax.inject.Inject
 
-class EncryptedKeyStore constructor(context: Context) :
-    com.microsoft.did.sdk.crypto.keyStore.KeyStore() {
+class EncryptedKeyStore @Inject constructor(context: Context) : KeyStore() {
 
     private val encryptedSharedPreferences = getSharedPreferences(context)
 
