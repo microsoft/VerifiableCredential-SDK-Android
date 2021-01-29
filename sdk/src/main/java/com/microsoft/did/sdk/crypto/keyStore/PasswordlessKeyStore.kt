@@ -3,55 +3,75 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
+import android.security.keystore.KeyProperties
+import android.security.keystore.KeyProtection
+import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
-import com.nimbusds.jose.util.Base64URL
+import org.spongycastle.asn1.x509.SubjectKeyIdentifier
+import org.spongycastle.x509.X509V3CertificateGenerator
+import java.io.File
+import java.math.BigInteger
+import java.security.KeyPair
 import java.security.KeyStore
 import java.security.SecureRandom
-import javax.inject.Inject
+import java.security.cert.Certificate
+import java.util.*
+import javax.security.auth.x500.X500Principal
 
-object PasswordlessKeyStore @Inject constructor(context: Context) {
+
+object PasswordlessKeyStore {
     private val keyName = "DID_KEYVAULT_LOCK"
     private val keyStoreFileName = "didKeyStore.jks"
-    val keyStore: KeyStore
+    private val fqdn = "self-signed.local"
 
-    init {
-        val encryptedSharedPreferences = getSharedPreferences(context)
-        val password = getOrGenerateKey(encryptedSharedPreferences)
-        keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-        keyStore.load(context.openFileInput(keyStoreFileName), password)
+    public enum class Purpose {
+        SIGN,
+        ENCRYPT
     }
 
-    fun save(context: Context) {
-        val encryptedSharedPreferences = getSharedPreferences(context)
-        val password = getOrGenerateKey(encryptedSharedPreferences)
-        keyStore.store(context.openFileOutput(keyStoreFileName, Context.MODE_PRIVATE), password)
+    fun createKeyStore(context: Context): KeyStore {
+        val encryptedFile = getEncryptedFile(context)
+        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+        keyStore.load(encryptedFile.openFileInput(), null)
+        return keyStore
     }
 
-    private fun getSharedPreferences(context: Context): SharedPreferences {
-        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-        return EncryptedSharedPreferences.create(
-            "secret_shared_prefs",
-            masterKeyAlias,
-            context,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-    }
+    fun savePrivateKey(context: Context, keyStore: KeyStore, keyPair: KeyPair, keyId: String, purpose: Purpose) {
+        val serverChain: Array<Certificate?> = arrayOfNulls(1)
+        val builder = X509V3CertificateGenerator()
+        val owner = X500Principal("CN=$fqdn");
+        val randomBytes = ByteArray(64)
+        SecureRandom().nextBytes(randomBytes)
+        builder.setSerialNumber(BigInteger(randomBytes))
+        builder.setIssuerDN(owner)
+        builder.setNotBefore(Date())
+        builder.setNotAfter(Date())
+        builder.setSubjectDN(owner)
+        builder.setPublicKey(keyPair.public)
+        builder.setSignatureAlgorithm("SHA256WithRSAEncryption")
+        builder.addExtension(org.spongycastle.asn1.x509.X509Extension.subjectKeyIdentifier, false,
+        SubjectKeyIdentifier(keyId.toByteArray()))
+        serverChain[0] = builder.generate(keyPair.private, "SC") // note: private key of CA
 
-    private fun getOrGenerateKey(encryptedSharedPreferences: SharedPreferences): CharArray {
-        var key = encryptedSharedPreferences.getString(keyName, null)
-        if (key == null) {
-            key = generateSecret()
-            encryptedSharedPreferences.edit().putString(keyName, key).apply()
+        var protectionPurpose = when (purpose) {
+            Purpose.SIGN -> KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+            Purpose.ENCRYPT -> KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_WRAP_KEY
         }
-        return key.toCharArray()
+        val protection = KeyProtection.Builder(protectionPurpose)
+
+        keyStore.setEntry(
+            keyId,
+            KeyStore.PrivateKeyEntry(keyPair.private, serverChain as Array<Certificate>),
+            protection.build())
+        val encryptedFile = getEncryptedFile(context)
+        keyStore.store(encryptedFile.openFileOutput(), null)
     }
 
-    private fun generateSecret(): String {
-        val byteArray = ByteArray(32)
-        SecureRandom().nextBytes(byteArray)
-        return Base64URL.encode(byteArray).toString()
+    private fun getEncryptedFile(context: Context): EncryptedFile {
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        return EncryptedFile.Builder(
+            File(context.filesDir, keyStoreFileName),
+            context, masterKeyAlias, EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB).build()
+
     }
 }
