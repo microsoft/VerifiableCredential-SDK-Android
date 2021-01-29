@@ -108,6 +108,7 @@ dependencies {
 
     // JWE/JWS
     implementation "com.nimbusds:nimbus-jose-jwt:$nimbus_jose_jwt_version"
+    implementation "com.madgag.spongycastle:pkix:1.58.0.0"
 
     //other
     implementation "androidx.security:security-crypto:1.0.0-rc03"
