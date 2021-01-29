@@ -16,6 +16,6 @@ fun formVerifiableCredential(rawToken: String, serializer: Json): VerifiableCred
 }
 
 fun unwrapSignedVerifiableCredential(signedVerifiableCredential: String, serializer: Json): VerifiableCredentialContent {
-    val token = JwsToken.deserialize(signedVerifiableCredential, serializer)
+    val token = JwsToken.deserialize(signedVerifiableCredential)
     return serializer.decodeFromString(VerifiableCredentialContent.serializer(), token.content())
 }

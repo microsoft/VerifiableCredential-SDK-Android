@@ -32,7 +32,7 @@ class FetchContractNetworkOperation(
     }
 
     private suspend fun verifyAndUnwrapContract(jwsTokenString: String): Result<VerifiableCredentialContract> {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         val verifiableCredentialContract = serializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Issuance Request.")

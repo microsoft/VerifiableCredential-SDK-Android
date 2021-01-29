@@ -34,7 +34,7 @@ class SendVerifiablePresentationRevocationRequestNetworkOperation(
     }
 
     fun unwrapRevocationReceipt(signedReceipt: String, serializer: Json): RevocationReceipt {
-        val token = JwsToken.deserialize(signedReceipt, serializer)
+        val token = JwsToken.deserialize(signedReceipt)
         return serializer.decodeFromString(RevocationReceipt.serializer(), token.content())
     }
 }
