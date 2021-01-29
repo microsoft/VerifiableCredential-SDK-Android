@@ -33,12 +33,11 @@ fun publicToXY(keyData: ByteArray): Pair<String, String> {
     }
 }
 
-fun convertToBigEndian(keyBytes: ByteArray): ByteBuffer {
+fun convertToBigEndian(keyBytes: ByteArray): ByteArray {
     val keyBytesInBigEndian = ByteBuffer.allocate(32)
     keyBytesInBigEndian.put(keyBytes)
     keyBytesInBigEndian.order(ByteOrder.BIG_ENDIAN)
-    keyBytesInBigEndian.array()
-    return keyBytesInBigEndian
+    return keyBytesInBigEndian.array()
 }
 
 /**
