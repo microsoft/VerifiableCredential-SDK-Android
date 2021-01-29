@@ -32,7 +32,7 @@ class FetchPresentationRequestNetworkOperation(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         val presentationRequestContent = serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")

@@ -72,7 +72,7 @@ class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))

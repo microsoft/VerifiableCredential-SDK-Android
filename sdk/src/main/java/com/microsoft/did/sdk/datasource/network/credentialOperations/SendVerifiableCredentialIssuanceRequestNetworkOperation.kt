@@ -33,7 +33,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     }
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())

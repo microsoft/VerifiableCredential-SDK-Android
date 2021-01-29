@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
 import kotlinx.serialization.json.Json
+import java.security.PublicKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,9 +21,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class JwtValidator @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
-    private val resolver: Resolver,
-    private val serializer: Json
+    private val resolver: Resolver
 ) {
 
     /**
@@ -31,7 +30,7 @@ class JwtValidator @Inject constructor(
     suspend fun verifySignature(token: JwsToken): Boolean {
         val didInHeader = getDidFromHeader(token)
         val publicKeys = resolvePublicKeys(didInHeader)
-        return token.verify(cryptoOperations, publicKeys)
+        return token.verify(publicKeys)
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
@@ -39,8 +38,8 @@ class JwtValidator @Inject constructor(
         return didInHeader == didInPayload
     }
 
-    private fun getKid(signature: JwsSignature): Pair<String, String> {
-        val kid = signature.getKid(serializer) ?: throw ValidatorException("no kid specified in token")
+    private fun getKid(token: JwsToken): Pair<String, String> {
+        val kid = token.getKeyId()
         val parsedKid = kid.split("#")
         return Pair(parsedKid[0], parsedKid[1])
     }
@@ -56,8 +55,7 @@ class JwtValidator @Inject constructor(
     }
 
     private fun getDidFromHeader(token: JwsToken): String {
-        val signature = token.signatures.first()
-        val (didInHeader, _) = getKid(signature)
+        val (didInHeader, _) = getKid(token)
         return didInHeader
     }
 }
