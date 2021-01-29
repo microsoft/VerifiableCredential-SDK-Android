@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.crypto.plugins
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.convertSignedToUnsignedByteArray
+import com.microsoft.did.sdk.crypto.util.convertSignedToUnsignedByteArray
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.spongycastle.crypto.params.ECDomainParameters

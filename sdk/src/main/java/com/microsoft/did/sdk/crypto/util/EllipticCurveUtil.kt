@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.util
+package com.microsoft.did.sdk.crypto.util
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.provider.Secp256k1Provider
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.KeyFormatException
 import org.spongycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.spongycastle.jce.ECNamedCurveTable

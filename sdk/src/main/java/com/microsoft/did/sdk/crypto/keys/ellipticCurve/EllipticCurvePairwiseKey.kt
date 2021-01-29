@@ -16,10 +16,10 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParam
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
-import com.microsoft.did.sdk.util.convertToBigEndian
-import com.microsoft.did.sdk.util.generatePublicKeyFromPrivateKey
-import com.microsoft.did.sdk.util.publicToXY
-import com.microsoft.did.sdk.util.reduceKeySeedSizeAndConvertToUnsigned
+import com.microsoft.did.sdk.crypto.util.convertToBigEndian
+import com.microsoft.did.sdk.crypto.util.generatePublicKeyFromPrivateKey
+import com.microsoft.did.sdk.crypto.util.publicToXY
+import com.microsoft.did.sdk.crypto.util.reduceKeySeedSizeAndConvertToUnsigned
 import java.nio.ByteBuffer
 import java.util.Locale
 import javax.inject.Inject

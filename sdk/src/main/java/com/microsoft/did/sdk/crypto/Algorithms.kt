@@ -24,3 +24,7 @@ open class KeyAlgorithm(val name: String, val provider: String, val keySpec: Key
     class Secp256(ecPrivateKeySpec: ECPrivateKeySpec) : KeyAlgorithm("EC", "SC", ecPrivateKeySpec) // EXAMPLE
     class EcPairwise(ecPairwiseKeySpec: EcPairwiseKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwiseKeySpec) // EXAMPLE
 }
+
+open class MacAlgorithm(val name: String, val provider: String) {
+    class Hmac512 : MacAlgorithm("HMAC512", "SC")
+}

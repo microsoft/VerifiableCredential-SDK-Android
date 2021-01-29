@@ -21,6 +21,7 @@ import java.security.spec.KeySpec
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
+import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.inject.Inject
 
@@ -91,6 +92,13 @@ class CryptoOperations @Inject constructor(
     fun generatePrivateKey(alg: KeyAlgorithm): PrivateKey {
         val keyFactory = KeyFactory.getInstance(alg.name, alg.provider)
         return keyFactory.generatePrivate(alg.keySpec)
+    }
+
+    fun computeMac(payload: ByteArray, key: SecretKey, alg: MacAlgorithm) {
+        return Mac.getInstance(alg.name, alg.provider).run {​​
+            init(key)
+            doFinal(payload)
+        }​​
     }
 
 //    /**
