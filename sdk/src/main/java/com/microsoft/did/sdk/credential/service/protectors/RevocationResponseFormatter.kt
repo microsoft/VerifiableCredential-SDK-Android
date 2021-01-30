@@ -8,9 +8,11 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
+import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -21,7 +23,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class RevocationResponseFormatter @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
+    private val keyStore: EncryptedKeyStore,
     private val serializer: Json,
     private val signer: TokenSigner
 ) {
@@ -29,14 +31,14 @@ class RevocationResponseFormatter @Inject constructor(
     fun formatResponse(revocationRequest: RevocationRequest, expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responder = revocationRequest.owner
-        val key = cryptoOperations.keyStore.getKey(responder.signatureKeyReference).getKey()
+        val keyJwk = JWK.load(keyStore.keyStore, revocationRequest.owner.signatureKeyReference, null)
         val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {
-                publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+                publicKeyThumbPrint = keyJwk.computeThumbprint().toString()
                 audience = revocationRequest.audience
                 did = responder.id
-                publicKeyJwk = key.toJWK()
+                publicKeyJwk = keyJwk.toPublicJWK()
                 responseCreationTime = issuedTime
                 responseExpirationTime = expiryTime
                 this.responseId = responseId
