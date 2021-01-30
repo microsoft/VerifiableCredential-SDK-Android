@@ -29,6 +29,11 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
         private const val FQDM = "self-signed.local"
     }
 
+    enum class KeyPurpose(val value: Int) {
+        SIGN(KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY),
+        ENCRYPT(KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+    }
+
     private val encryptedFile by lazy { getEncryptedFile(context) }
 
     /**
@@ -43,9 +48,9 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
             ?: throw KeyStoreException("Stored key $keyId is not of the requested Key type")
     }
 
-    fun storeKeyPair(keyPair: KeyPair, keyId: String) {
+    fun storeKeyPair(keyPair: KeyPair, keyId: String, purpose: KeyPurpose = KeyPurpose.SIGN) {
         val certChain = createSelfSignedCertificateChain(keyPair, keyId)
-        val protection = KeyProtection.Builder(KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY).build()
+        val protection = KeyProtection.Builder(purpose.value).build()
 
         keyStore.setEntry(
             keyId,
@@ -56,7 +61,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
     }
 
     fun storeSecretKey(secretKey: SecretKey, keyId: String) {
-        val protection = KeyProtection.Builder(KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT).build()
+        val protection = KeyProtection.Builder(KeyPurpose.ENCRYPT.value).build()
         keyStore.setEntry(keyId, KeyStore.SecretKeyEntry(secretKey), protection)
         saveToFile(keyStore)
     }
