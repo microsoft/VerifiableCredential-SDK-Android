@@ -20,8 +20,8 @@ import javax.inject.Singleton
 class OidcPresentationRequestValidator @Inject constructor() : PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
-        //TODO: Check for response type once it is changed to id_token
         checkResponseMode(request.content.responseMode)
+        checkResponseType(request.content.responseType)
         checkScope(request.content.scope)
         checkTokenExpiration(request.content.expirationTime)
         checkForInputInPresentationRequest(request)
