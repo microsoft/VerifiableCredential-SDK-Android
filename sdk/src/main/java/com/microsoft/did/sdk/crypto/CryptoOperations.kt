@@ -5,19 +5,15 @@
 
 package com.microsoft.did.sdk.crypto
 
-import com.microsoft.did.sdk.crypto.keyStore.KeyStore
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
-import com.microsoft.did.sdk.crypto.spi.EcPairwiseKeySpec
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import org.spongycastle.jce.provider.BouncyCastleProvider
 import java.security.KeyFactory
+import java.security.KeyPairGenerator
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.Security
 import java.security.Signature
-import java.security.spec.AlgorithmParameterSpec
-import java.security.spec.ECPrivateKeySpec
-import java.security.spec.KeySpec
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
@@ -26,7 +22,7 @@ import javax.crypto.SecretKey
 import javax.inject.Inject
 
 class CryptoOperations @Inject constructor(
-    private val keyStore: KeyStore
+    private val keyStore: EncryptedKeyStore
 ) {
     init {
         Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)
@@ -101,16 +97,13 @@ class CryptoOperations @Inject constructor(
         }​​
     }
 
-//    /**
-//     * Generates a KeyPair with the given provider.
-//     *
-//     * Stores the private key in the KeyStore with given keyId and returns the corresponding public key.
-//     */
-//    fun generateKeyPair(keyId: String, signatureSpi: SignatureSpi): PublicKey {
-//        val keyPair = signatureSpi.generateKeyPair()
-//        keyStore.saveKey(keyPair.private, keyId)
-//        return keyPair.public
-//    }
+    fun generateKeyPair(keyId: String, alg: KeyGenAlgorithm): PublicKey {
+        val keyGen = KeyPairGenerator.getInstance(alg.name, alg.provider)
+        keyGen.initialize(alg.spec)
+        val keyPair = keyGen.genKeyPair()
+        keyStore.storeKeyPair(keyPair, keyId)
+        return keyPair.public
+    }
 //
 //    /**
 //     * Generate a pairwise key for the specified algorithms

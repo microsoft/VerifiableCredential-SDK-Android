@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk
 
+import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
@@ -47,7 +48,7 @@ class IdentifierManager @Inject constructor(
             //TODO(seed is needed for pairwise key generation)
             cryptoOperations.generateAndStoreSeed()
             // peer id for master Identifier will be method name for now.
-            val identifier = identifierCreator.create(METHOD_NAME).abortOnError()
+            val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
             SdkLog.i("Creating Identifier: $identifier")
             identifierRepository.insert(identifier)
             Result.Success(identifier)
@@ -67,7 +68,7 @@ class IdentifierManager @Inject constructor(
         return runResultTry {
             when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
                 null -> {
-                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
+                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier, peerId)
                     identifierRepository.insert(registeredIdentifier)
                     Result.Success(registeredIdentifier)
                 }
@@ -78,6 +79,6 @@ class IdentifierManager @Inject constructor(
 
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
-        return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
+        return Base64.encodeToString(digest.digest(stringToByteArray(peerId)), Base64.URL_SAFE)
     }
 }

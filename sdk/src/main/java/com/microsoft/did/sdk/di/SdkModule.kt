@@ -14,11 +14,6 @@ import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredenti
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.keyStore.KeyStore
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar

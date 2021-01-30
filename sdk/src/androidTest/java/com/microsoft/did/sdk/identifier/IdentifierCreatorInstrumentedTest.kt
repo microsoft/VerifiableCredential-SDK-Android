@@ -7,7 +7,6 @@ import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.VerifiableCredentialSdk
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
 import com.microsoft.did.sdk.di.defaultTestSerializer

@@ -9,7 +9,6 @@ import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.models.Sha

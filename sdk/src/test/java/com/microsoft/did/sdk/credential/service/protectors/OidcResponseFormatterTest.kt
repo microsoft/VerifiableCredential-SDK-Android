@@ -14,7 +14,6 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey

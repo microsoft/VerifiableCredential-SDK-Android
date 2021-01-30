@@ -3,6 +3,8 @@
 package com.microsoft.did.sdk.identifier.models.payload.document
 
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.nimbusds.jose.jwk.JWK
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,10 +30,8 @@ data class IdentifierDocumentPublicKeyInput(
      */
     val controller: String? = null,
 
-    /**
-     * The JWK public key.
-     */
-    val publicKeyJwk: JsonWebKey,
+    @Contextual
+    val publicKeyJwk: JWK,
 
     @SerialName("purposes")
     val purpose: List<String>

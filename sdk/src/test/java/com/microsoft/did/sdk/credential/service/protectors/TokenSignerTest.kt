@@ -1,7 +1,6 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keyStore.KeyStore
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier

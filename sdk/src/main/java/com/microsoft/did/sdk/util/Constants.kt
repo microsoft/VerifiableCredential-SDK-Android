@@ -49,9 +49,6 @@ object Constants {
     const val SIDETREE_MULTIHASH_CODE = 18
     const val SIDETREE_MULTIHASH_LENGTH = 32
     const val SECP256K1_CURVE_NAME_EC = "secp256k1"
-    const val SIGNATURE_KEYREFERENCE = "sign"
-    const val RECOVERY_KEYREFERENCE = "recover"
-    const val UPDATE_KEYREFERENCE = "update"
 
     // Header Constants for network calls
     const val USER_AGENT_HEADER = "User-Agent"

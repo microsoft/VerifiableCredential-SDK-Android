@@ -8,10 +8,6 @@ import com.nimbusds.jose.util.Base64URL
 import java.security.KeyStore
 import java.security.PublicKey
 
-/**
- * Class for containing JWS token operations.
- * @class
- */
 class JwsToken private constructor(
     private val jwsObject: JWSObject
 ) {
@@ -43,19 +39,10 @@ class JwsToken private constructor(
         builder.customParam(headerKey, headerValue)
     }
 
-    /**
-     * Serialize a JWS token object from token.
-     */
     fun serialize(): String {
         return jwsObject.serialize()
     }
 
-    /**
-     * Adds a signature using the given key
-     * @param signingKeyReference reference to signing key
-     * @param cryptoOperations CryptoOperations used to form the signatures
-     * @param header optional headers added to the signature
-     */
     fun sign(keyId: String, keyStore: KeyStore) {
         val out = JWSObject(builder.build(), jwsObject.payload)
         val key = JWK.load(keyStore, keyId, null)
@@ -63,9 +50,6 @@ class JwsToken private constructor(
         out.sign(signer)
     }
 
-    /**
-     *Verify the JWS signatures
-     */
     fun verify(publicKeys: List<PublicKey> = emptyList()): Boolean {
         for (i in 0..publicKeys.count()) {
             val key = publicKeys[i]

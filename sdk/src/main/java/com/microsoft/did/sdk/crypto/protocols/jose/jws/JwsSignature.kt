@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
+import android.util.Base64
 import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.byteArrayToString
@@ -38,7 +39,7 @@ data class JwsSignature(
 
     private fun getMember(member: String, serializer: Json): String? {
         if (protected.isNotEmpty()) {
-            val jsonProtected = Base64Url.decode(protected)
+            val jsonProtected = Base64.decode(protected, Base64.URL_SAFE)
             val mapObject =
                 serializer.decodeFromString(MapSerializer(String.serializer(), String.serializer()), byteArrayToString(jsonProtected))
             if (mapObject.containsKey(member)) {
