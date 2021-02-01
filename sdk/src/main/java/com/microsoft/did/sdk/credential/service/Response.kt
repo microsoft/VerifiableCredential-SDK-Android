@@ -25,7 +25,7 @@ class IssuanceResponse(override val request: IssuanceRequest) :
 }
 
 class PresentationResponse(override val request: PresentationRequest) :
-    Response(request, request.content.redirectUrl) {
+    Response(request, request.content.clientId) {
     val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
 }
 
