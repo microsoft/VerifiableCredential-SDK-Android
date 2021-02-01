@@ -2,7 +2,8 @@
 
 package com.microsoft.did.sdk.crypto
 
-import com.microsoft.did.sdk.crypto.spi.EcPairwiseKeySpec
+import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
+import com.microsoft.did.sdk.crypto.spi.EcPairwisePublicKeySpec
 import com.microsoft.did.sdk.util.Constants
 import org.spongycastle.jce.ECNamedCurveTable
 import java.security.spec.AlgorithmParameterSpec
@@ -15,7 +16,6 @@ abstract class SigningAlgorithm(val name: String, val provider: String, val spec
 
 abstract class DigestAlgorithm(val name: String, val provider: String) {
     class Sha256 : DigestAlgorithm("SHA-256", "SC")
-    class Rsa : DigestAlgorithm("SHA-512", "SC") // EXAMPLE
 }
 
 abstract class CipherAlgorithm(val name: String, val provider: String) {
@@ -23,8 +23,8 @@ abstract class CipherAlgorithm(val name: String, val provider: String) {
 }
 
 abstract class KeyAlgorithm(val name: String, val provider: String, val keySpec: KeySpec) {
-    class Secp256k1(ecPrivateKeySpec: ECPrivateKeySpec) : KeyAlgorithm("EC", "SC", ecPrivateKeySpec) // EXAMPLE
-    class EcPairwise(ecPairwiseKeySpec: EcPairwiseKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwiseKeySpec) // EXAMPLE
+    class EcPrivatePairwise(ecPairwisePrivateKeySpec: EcPairwisePrivateKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwisePrivateKeySpec)
+    class EcPublicPairwise(ecPairwisePublicKeySpec: EcPairwisePublicKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwisePublicKeySpec)
 }
 
 abstract class KeyGenAlgorithm(val name: String, val provider: String, val spec: AlgorithmParameterSpec) {

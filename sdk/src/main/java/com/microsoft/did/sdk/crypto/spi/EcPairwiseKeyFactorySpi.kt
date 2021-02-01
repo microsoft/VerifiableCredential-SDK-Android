@@ -8,8 +8,10 @@ import com.microsoft.did.sdk.crypto.util.publicToXY
 import com.microsoft.did.sdk.crypto.util.reduceKeySeedSizeAndConvertToUnsigned
 import com.microsoft.did.sdk.util.Constants
 import org.spongycastle.jce.ECNamedCurveTable
+import org.spongycastle.jce.spec.ECParameterSpec
 import org.spongycastle.jce.spec.ECPrivateKeySpec
-import java.lang.UnsupportedOperationException
+import org.spongycastle.jce.spec.ECPublicKeySpec
+import org.spongycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.security.Key
 import java.security.KeyFactory
@@ -23,22 +25,24 @@ import javax.crypto.spec.SecretKeySpec
 
 class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
     override fun engineGeneratePublic(keySpec: KeySpec?): PublicKey {
-        throw UnsupportedOperationException("")
+        val ecKeySpec = keySpec as? EcPairwisePublicKeySpec
+            ?: throw InvalidKeySpecException("Keyspec has to be of type ${EcPairwisePublicKeySpec::class.qualifiedName}")
+
+        val ecSpec: ECParameterSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
+        val q: ECPoint = ecSpec.g.multiply(ecKeySpec.privateKey.d)
+        val pubSpec = ECPublicKeySpec(q, ecSpec)
+        val keyFactory = KeyFactory.getInstance("EC", "SC")
+        return keyFactory.generatePublic(pubSpec)
     }
 
     override fun engineGeneratePrivate(keySpec: KeySpec?): PrivateKey {
-        val ecKeySpec = keySpec as? EcPairwiseKeySpec
-            ?: throw InvalidKeySpecException("Keyspec has to be of type ${EcPairwiseKeySpec::class.qualifiedName}")
+        val ecKeySpec = keySpec as? EcPairwisePrivateKeySpec
+            ?: throw InvalidKeySpecException("Keyspec has to be of type ${EcPairwisePrivateKeySpec::class.qualifiedName}")
 
         val masterKey = computeMac(ecKeySpec.userDid.toByteArray(), ecKeySpec.seed)
         val pairwiseKeySeedSigned = computeMac(ecKeySpec.peerDid.toByteArray(), masterKey)
         val pairwiseKeySeedUnsigned = reduceKeySeedSizeAndConvertToUnsigned(pairwiseKeySeedSigned)
-
-        val pubKey = generatePublicKeyFromPrivateKey(pairwiseKeySeedUnsigned)
-        val xyData = publicToXY(pubKey)
-//
-//        val pairwiseKeySeedInBigEndian = convertToBigEndian(pairwiseKeySeedUnsigned)
-// TODO: anything needed from here?
+        
         val keyFactory = KeyFactory.getInstance("EC", "SC")
         val pairwiseKeySpec = ECPrivateKeySpec(
             BigInteger(1, pairwiseKeySeedUnsigned),
