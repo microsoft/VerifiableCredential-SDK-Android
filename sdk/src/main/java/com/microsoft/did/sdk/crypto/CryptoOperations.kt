@@ -28,7 +28,7 @@ object CryptoOperations {
     }
 
     fun sign(payload: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
-        val signer = Signature.getInstance(alg.name, alg.provider)
+        val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
             .apply {
                 initSign(signingKey)
                 update(payload)
@@ -43,7 +43,7 @@ object CryptoOperations {
     }
 
     fun verify(payload: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
-        val verifier = Signature.getInstance(alg.name, alg.provider)
+        val verifier = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
             .apply {
                 initVerify(publicKey)
                 if (alg.spec != null) setParameter(alg.spec)
@@ -52,7 +52,7 @@ object CryptoOperations {
     }
 
     fun digest(payload: ByteArray, alg: DigestAlgorithm): ByteArray {
-        val messageDigest = MessageDigest.getInstance(alg.name, alg.provider)
+        val messageDigest = if (alg.provider == null) MessageDigest.getInstance(alg.name) else MessageDigest.getInstance(alg.name, alg.provider)
         return messageDigest.digest(payload)
     }
 
@@ -62,7 +62,7 @@ object CryptoOperations {
     }
 
     fun encrypt(payload: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
-        val cipher = Cipher.getInstance(alg.name, alg.provider)
+        val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
         cipher.init(ENCRYPT_MODE, key)
         return cipher.doFinal(payload)
     }
@@ -73,19 +73,19 @@ object CryptoOperations {
     }
 
     fun decrypt(payload: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
-        val cipher = Cipher.getInstance(alg.name, alg.provider)
+        val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
         cipher.init(DECRYPT_MODE, key)
         return cipher.doFinal(payload)
     }
 
     fun computeMac(payload: ByteArray, key: SecretKey, alg: MacAlgorithm): ByteArray {
-        val mac = Mac.getInstance(alg.name, alg.provider)
+        val mac = if (alg.provider == null) Mac.getInstance(alg.name) else Mac.getInstance(alg.name, alg.provider)
         mac.init(key)
         return mac.doFinal(payload)
     }
 
     fun generateKeyPair(keyId: String, alg: KeyGenAlgorithm): PublicKey {
-        val keyGen = KeyPairGenerator.getInstance(alg.name, alg.provider)
+        val keyGen = if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
         keyGen.initialize(alg.spec)
         val keyPair = keyGen.genKeyPair()
         EncryptedKeyStore.storeKeyPair(keyPair, keyId)
@@ -93,12 +93,12 @@ object CryptoOperations {
     }
 
     fun generatePrivateKey(alg: KeyAlgorithm): PrivateKey {
-        val factory = KeyFactory.getInstance(alg.name, alg.provider)
+        val factory = if (alg.provider == null) KeyFactory.getInstance(alg.name) else KeyFactory.getInstance(alg.name, alg.provider)
         return factory.generatePrivate(alg.keySpec)
     }
 
     fun generatePublicKey(alg: KeyAlgorithm): PublicKey {
-        val factory = KeyFactory.getInstance(alg.name, alg.provider)
+        val factory = if (alg.provider == null) KeyFactory.getInstance(alg.name) else KeyFactory.getInstance(alg.name, alg.provider)
         return factory.generatePublic(alg.keySpec)
     }
 

@@ -51,8 +51,7 @@ class JwsToken private constructor(
     }
 
     fun verify(publicKeys: List<PublicKey> = emptyList()): Boolean {
-        for (i in 0..publicKeys.count()) {
-            val key = publicKeys[i]
+        for (key in publicKeys) {
             val verifier = DefaultJWSVerifierFactory().createJWSVerifier(jwsObject.header, key)
             if (jwsObject.verify(verifier)) {
                 return true
