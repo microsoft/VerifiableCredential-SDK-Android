@@ -22,19 +22,23 @@ import javax.crypto.SecretKey
 import javax.inject.Inject
 import javax.security.auth.x500.X500Principal
 
-class EncryptedKeyStore @Inject constructor(context: Context) {
+object EncryptedKeyStore {
 
-    companion object {
-        private const val KEYSTORE_FILENAME = "didKeyStore.jks"
-        private const val FQDM = "self-signed.local"
-    }
+    private const val KEYSTORE_FILENAME = "didKeyStore.jks"
+    private const val FQDM = "self-signed.local"
 
     enum class KeyPurpose(val value: Int) {
         SIGN(KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY),
         ENCRYPT(KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
     }
 
-    private val encryptedFile by lazy { getEncryptedFile(context) }
+    private lateinit var encryptedFile: EncryptedFile
+
+    fun initialize(
+        context: Context
+    ) {
+        encryptedFile = getEncryptedFile(context)
+    }
 
     /**
      * DO NOT add or modify entries of this keyStore directly, instead use the `store...`

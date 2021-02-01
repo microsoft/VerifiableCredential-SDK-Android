@@ -23,7 +23,6 @@ import javax.inject.Singleton
  */
 @Singleton
 class RevocationResponseFormatter @Inject constructor(
-    private val keyStore: EncryptedKeyStore,
     private val serializer: Json,
     private val signer: TokenSigner
 ) {
@@ -31,7 +30,7 @@ class RevocationResponseFormatter @Inject constructor(
     fun formatResponse(revocationRequest: RevocationRequest, expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responder = revocationRequest.owner
-        val keyJwk = JWK.load(keyStore.keyStore, revocationRequest.owner.signatureKeyReference, null)
+        val keyJwk = JWK.load(EncryptedKeyStore.keyStore, revocationRequest.owner.signatureKeyReference, null)
         val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {

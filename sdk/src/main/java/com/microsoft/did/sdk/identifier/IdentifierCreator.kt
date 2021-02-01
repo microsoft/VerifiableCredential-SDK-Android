@@ -30,9 +30,7 @@ import kotlin.random.Random
 
 @Singleton
 class IdentifierCreator @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
     private val payloadProcessor: SidetreePayloadProcessor,
-    private val keyStore: EncryptedKeyStore,
     private val sideTreeHelper: SideTreeHelper,
     private val serializer: Json
 ) {
@@ -71,8 +69,8 @@ class IdentifierCreator @Inject constructor(
      */
     private fun generateAndStoreKeyPair(): JWK {
         val keyId = generateRandomKeyId()
-        cryptoOperations.generateKeyPair(keyId, KeyGenAlgorithm.Secp256k1())
-        return JWK.load(keyStore.keyStore, keyId, null).toPublicJWK()
+        CryptoOperations.generateKeyPair(keyId, KeyGenAlgorithm.Secp256k1())
+        return JWK.load(EncryptedKeyStore.keyStore, keyId, null).toPublicJWK()
     }
 
     private fun generateRandomKeyId(): String {
@@ -96,14 +94,14 @@ class IdentifierCreator @Inject constructor(
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
         val pairwiseKeys = createPairwiseKeyPair(persona, peerId)
-        keyStore.storeKeyPair(pairwiseKeys, keyId)
-        return JWK.load(keyStore.keyStore, keyId, null).toPublicJWK()
+        EncryptedKeyStore.storeKeyPair(pairwiseKeys, keyId)
+        return JWK.load(EncryptedKeyStore.keyStore, keyId, null).toPublicJWK()
     }
 
     private fun createPairwiseKeyPair(persona: Identifier, peerId: String): KeyPair {
         val keyFactory = KeyFactory.getInstance("EcPairwise", "DID")
         val keySpec = EcPairwisePrivateKeySpec(
-            cryptoOperations.getSeed(persona.name),
+            CryptoOperations.getSeed(persona.name),
             persona.id,
             peerId
         )

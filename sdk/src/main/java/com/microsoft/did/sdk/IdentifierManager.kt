@@ -27,7 +27,6 @@ import javax.inject.Singleton
 @Singleton
 class IdentifierManager @Inject constructor(
     private val identifierRepository: IdentifierRepository,
-    private val cryptoOperations: CryptoOperations,
     private val identifierCreator: IdentifierCreator
 ) {
 
@@ -42,7 +41,7 @@ class IdentifierManager @Inject constructor(
 
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
-            cryptoOperations.generateSeed(MASTER_IDENTIFIER_NAME)
+            CryptoOperations.generateSeed(MASTER_IDENTIFIER_NAME)
             val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
             SdkLog.i("Creating Identifier: $identifier")
             identifierRepository.insert(identifier)

@@ -24,7 +24,6 @@ import java.security.MessageDigest
 @RunWith(AndroidJUnit4ClassRunner::class)
 class IdentifierCreatorInstrumentedTest {
 
-    private val cryptoOperations: CryptoOperations
     private val androidSubtle: SubtleCrypto
     private val ecSubtle: EllipticCurveSubtleCrypto
     private val identifierCreator: IdentifierCreator

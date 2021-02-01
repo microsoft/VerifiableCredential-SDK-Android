@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.di.DaggerSdkComponent
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -78,5 +79,7 @@ object VerifiableCredentialSdk {
         correlationVectorService.startNewFlowAndSave()
 
         SdkLog.addConsumer(logConsumer)
+
+        EncryptedKeyStore.initialize(context)
     }
 }

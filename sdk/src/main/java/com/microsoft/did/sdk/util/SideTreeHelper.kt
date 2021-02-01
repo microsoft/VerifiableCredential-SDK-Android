@@ -9,11 +9,11 @@ import com.nimbusds.jose.jwk.JWK
 import org.erdtman.jcs.JsonCanonicalizer
 import javax.inject.Inject
 
-class SideTreeHelper @Inject constructor(private val cryptoOperations: CryptoOperations) {
+class SideTreeHelper @Inject constructor() {
 
     fun canonicalizeAndMultiHash(json: String): String {
         val jsonCanonicalizer = JsonCanonicalizer(json)
-        val hashed = cryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
+        val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
         val hashedInfo = prependMultiHashInfo(hashed)
         return Base64.encodeToString(hashedInfo, Base64.URL_SAFE)
     }
@@ -30,8 +30,8 @@ class SideTreeHelper @Inject constructor(private val cryptoOperations: CryptoOpe
      */
     private fun canonicalizeAndDoubleMultiHash(json: String): String {
         val jsonCanonicalizer = JsonCanonicalizer(json)
-        val hashed = cryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
-        val doubleHashed = cryptoOperations.digest(hashed, DigestAlgorithm.Sha256())
+        val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
+        val doubleHashed = CryptoOperations.digest(hashed, DigestAlgorithm.Sha256())
         val doubleHashedInfo = prependMultiHashInfo(doubleHashed)
         return Base64.encodeToString(doubleHashedInfo, Base64.URL_SAFE)
     }

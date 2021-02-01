@@ -20,9 +20,7 @@ import javax.inject.Singleton
  * Class that can protect some content by signing.
  */
 @Singleton
-class TokenSigner @Inject constructor(
-    private val keyStore: EncryptedKeyStore
-) {
+class TokenSigner @Inject constructor() {
 
     /**
      * Sign content with keyReference.
@@ -33,7 +31,7 @@ class TokenSigner @Inject constructor(
         // adding kid value to header.
         token.setKeyId("${identifier.id}#${identifier.signatureKeyReference}")
         token.setType(JOSEObjectType.JWT)
-        token.sign(identifier.signatureKeyReference, keyStore.keyStore)
+        token.sign(identifier.signatureKeyReference, EncryptedKeyStore.keyStore)
         return token.serialize()
     }
 }

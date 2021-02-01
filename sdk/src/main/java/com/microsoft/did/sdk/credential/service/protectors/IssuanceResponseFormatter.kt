@@ -21,7 +21,6 @@ import javax.inject.Singleton
 
 @Singleton
 class IssuanceResponseFormatter @Inject constructor(
-    private val keyStore: EncryptedKeyStore,
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner
@@ -53,7 +52,7 @@ class IssuanceResponseFormatter @Inject constructor(
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = JWK.load(keyStore.keyStore, responder.signatureKeyReference, null)
+        val key = JWK.load(EncryptedKeyStore.keyStore, responder.signatureKeyReference, null)
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = issuanceResponse.audience

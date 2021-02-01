@@ -19,7 +19,6 @@ import javax.inject.Singleton
 
 @Singleton
 class ExchangeResponseFormatter @Inject constructor(
-    private val keyStore: EncryptedKeyStore,
     private val serializer: Json,
     private val signer: TokenSigner
 ) {
@@ -36,7 +35,7 @@ class ExchangeResponseFormatter @Inject constructor(
         responseId: String
     ): String {
         val requester = exchangeRequest.requester
-        val keyJwk = JWK.load(keyStore.keyStore, requester.signatureKeyReference, null)
+        val keyJwk = JWK.load(EncryptedKeyStore.keyStore, requester.signatureKeyReference, null)
         val contents = ExchangeResponseClaims(exchangeRequest.verifiableCredential.raw, exchangeRequest.pairwiseDid).apply {
             publicKeyThumbPrint = keyJwk.computeThumbprint().toString()
             audience = exchangeRequest.audience
