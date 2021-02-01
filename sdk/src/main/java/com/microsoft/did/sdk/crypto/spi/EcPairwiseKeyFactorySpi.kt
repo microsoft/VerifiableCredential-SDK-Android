@@ -2,10 +2,6 @@
 
 package com.microsoft.did.sdk.crypto.spi
 
-
-import com.microsoft.did.sdk.crypto.util.generatePublicKeyFromPrivateKey
-import com.microsoft.did.sdk.crypto.util.publicToXY
-import com.microsoft.did.sdk.crypto.util.reduceKeySeedSizeAndConvertToUnsigned
 import com.microsoft.did.sdk.util.Constants
 import org.spongycastle.jce.ECNamedCurveTable
 import org.spongycastle.jce.spec.ECParameterSpec
@@ -42,7 +38,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
         val masterKey = computeMac(ecKeySpec.userDid.toByteArray(), ecKeySpec.seed)
         val pairwiseKeySeedSigned = computeMac(ecKeySpec.peerDid.toByteArray(), masterKey)
         val pairwiseKeySeedUnsigned = reduceKeySeedSizeAndConvertToUnsigned(pairwiseKeySeedSigned)
-        
+
         val keyFactory = KeyFactory.getInstance("EC", "SC")
         val pairwiseKeySpec = ECPrivateKeySpec(
             BigInteger(1, pairwiseKeySeedUnsigned),
@@ -64,5 +60,33 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
 
     override fun engineTranslateKey(key: Key?): Key {
         throw UnsupportedOperationException("")
+    }
+
+    /**
+     * Private key size is 32 bytes for Secp256k1. Since we use SHA512 to generate pairwise key it is 64 bytes.
+     * This method computes a modulus of generated pairwise key with order N of Secp256k1 curve to reduce its size to 32 bytes. It returns BigInteger of reduced pairwise key
+     * While converting BigInteger returned to byte array it is converted to signed byte array. Since we don't need the sign bit, it is truncated and converted to unsigned byte array
+     * @param keySeed byte array of pairwise key generated using SHA512 (64 bytes)
+     * @return unsigned byte array of pairwise key reduced to 32 bytes
+     */
+    private fun reduceKeySeedSizeAndConvertToUnsigned(keySeed: ByteArray): ByteArray {
+        val ecSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
+        return convertSignedToUnsignedByteArray(BigInteger(1, keySeed).rem(ecSpec.n).toByteArray())
+    }
+
+    private fun convertSignedToUnsignedByteArray(signedByteArray: ByteArray): ByteArray {
+        return when {
+            signedByteArray.size > 32 -> signedByteArray.sliceArray(1 until signedByteArray.size)
+            signedByteArray.size < 32 -> padByteArrayToExpectedSize(signedByteArray, 32)
+            else -> signedByteArray
+        }
+    }
+
+    private fun padByteArrayToExpectedSize(byteArrayToPad: ByteArray, expectedSize: Int): ByteArray {
+        val paddedByteArray = ByteArray(expectedSize)
+        if(byteArrayToPad.size < expectedSize) {
+            byteArrayToPad.copyInto(paddedByteArray, paddedByteArray.size - byteArrayToPad.size)
+        }
+        return paddedByteArray
     }
 }

@@ -2,21 +2,15 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "b6af7ce0b77df3c9d93d26bd94936e09",
+    "identityHash": "ab318663043a4fedec02d37952cf12f3",
     "entities": [
       {
         "tableName": "Identifier",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `alias` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `signatureKeyReference` TEXT NOT NULL, `encryptionKeyReference` TEXT NOT NULL, `recoveryKeyReference` TEXT NOT NULL, `updateKeyReference` TEXT NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "alias",
-            "columnName": "alias",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -64,7 +58,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b6af7ce0b77df3c9d93d26bd94936e09')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ab318663043a4fedec02d37952cf12f3')"
     ]
   }
 }

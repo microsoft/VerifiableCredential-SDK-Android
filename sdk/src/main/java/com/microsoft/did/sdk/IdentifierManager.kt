@@ -10,10 +10,8 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Base64Url
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
-import com.microsoft.did.sdk.util.Constants.METHOD_NAME
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -42,12 +40,9 @@ class IdentifierManager @Inject constructor(
         }
     }
 
-    // Master Identifier will be created once per app.
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
-            //TODO(seed is needed for pairwise key generation)
-            cryptoOperations.generateAndStoreSeed()
-            // peer id for master Identifier will be method name for now.
+            cryptoOperations.generateSeed(MASTER_IDENTIFIER_NAME)
             val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
             SdkLog.i("Creating Identifier: $identifier")
             identifierRepository.insert(identifier)
