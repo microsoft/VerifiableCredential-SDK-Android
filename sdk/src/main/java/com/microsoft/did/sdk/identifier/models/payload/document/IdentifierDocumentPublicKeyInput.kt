@@ -2,7 +2,6 @@
 
 package com.microsoft.did.sdk.identifier.models.payload.document
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName

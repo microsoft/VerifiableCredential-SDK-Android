@@ -11,14 +11,12 @@ import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimMode
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
-import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
-import kotlinx.serialization.json.Json
 import com.nimbusds.jose.jwk.JWK
+import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton

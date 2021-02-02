@@ -7,9 +7,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
-import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.JWK

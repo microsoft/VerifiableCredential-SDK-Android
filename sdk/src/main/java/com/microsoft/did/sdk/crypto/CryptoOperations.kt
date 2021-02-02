@@ -7,14 +7,20 @@ package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import org.spongycastle.jce.provider.BouncyCastleProvider
-import java.security.*
+import java.security.KeyFactory
+import java.security.KeyPairGenerator
+import java.security.MessageDigest
+import java.security.PrivateKey
+import java.security.PublicKey
+import java.security.SecureRandom
+import java.security.Security
+import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
-import javax.inject.Inject
 
 object CryptoOperations {
     init {
@@ -52,7 +58,8 @@ object CryptoOperations {
     }
 
     fun digest(payload: ByteArray, alg: DigestAlgorithm): ByteArray {
-        val messageDigest = if (alg.provider == null) MessageDigest.getInstance(alg.name) else MessageDigest.getInstance(alg.name, alg.provider)
+        val messageDigest =
+            if (alg.provider == null) MessageDigest.getInstance(alg.name) else MessageDigest.getInstance(alg.name, alg.provider)
         return messageDigest.digest(payload)
     }
 
@@ -85,7 +92,8 @@ object CryptoOperations {
     }
 
     fun generateKeyPair(keyId: String, alg: KeyGenAlgorithm): PublicKey {
-        val keyGen = if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
+        val keyGen =
+            if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
         keyGen.initialize(alg.spec)
         val keyPair = keyGen.genKeyPair()
         EncryptedKeyStore.storeKeyPair(keyPair, keyId)

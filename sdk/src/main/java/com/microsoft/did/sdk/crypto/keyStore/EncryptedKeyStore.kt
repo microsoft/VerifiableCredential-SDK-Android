@@ -17,9 +17,8 @@ import java.security.KeyStore
 import java.security.KeyStoreException
 import java.security.SecureRandom
 import java.security.cert.Certificate
-import java.util.*
+import java.util.Date
 import javax.crypto.SecretKey
-import javax.inject.Inject
 import javax.security.auth.x500.X500Principal
 
 object EncryptedKeyStore {
@@ -34,9 +33,7 @@ object EncryptedKeyStore {
 
     private lateinit var encryptedFile: EncryptedFile
 
-    fun initialize(
-        context: Context
-    ) {
+    fun initialize(context: Context) {
         encryptedFile = getEncryptedFile(context)
     }
 
@@ -79,7 +76,7 @@ object EncryptedKeyStore {
     }
 
     private fun createSelfSignedCertificate(keyPair: KeyPair, keyId: String): Certificate {
-        val owner = X500Principal("CN=$FQDM");
+        val owner = X500Principal("CN=$FQDM")
         val randomBytes = ByteArray(64)
         SecureRandom().nextBytes(randomBytes)
         val builder = X509V3CertificateGenerator()

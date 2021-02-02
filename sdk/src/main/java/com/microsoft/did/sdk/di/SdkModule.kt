@@ -46,7 +46,10 @@ class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultOkHttpClient(@Named("userAgentInfo") userAgentInfo: String, correlationVectorService: CorrelationVectorService): OkHttpClient {
+    fun defaultOkHttpClient(
+        @Named("userAgentInfo") userAgentInfo: String,
+        correlationVectorService: CorrelationVectorService
+    ): OkHttpClient {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()

@@ -84,7 +84,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
 
     private fun padByteArrayToExpectedSize(byteArrayToPad: ByteArray, expectedSize: Int): ByteArray {
         val paddedByteArray = ByteArray(expectedSize)
-        if(byteArrayToPad.size < expectedSize) {
+        if (byteArrayToPad.size < expectedSize) {
             byteArrayToPad.copyInto(paddedByteArray, paddedByteArray.size - byteArrayToPad.size)
         }
         return paddedByteArray

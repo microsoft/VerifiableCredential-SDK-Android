@@ -82,9 +82,9 @@ abstract class BaseNetworkOperation<S, T> {
 
     private fun defaultErrorMessage(httpCode: Int, requestId: String?, correlationVector: String?, errorBody: String): String {
         val errorMessage = StringBuilder()
-        if(requestId != null)
+        if (requestId != null)
             errorMessage.append("RequestId: $requestId\n")
-        if(correlationVector != null)
+        if (correlationVector != null)
             errorMessage.append("CorrelationVector: $correlationVector\n")
         errorMessage.append("Http code: $httpCode\nErrorBody: $errorBody")
         return errorMessage.toString()

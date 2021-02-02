@@ -3,13 +3,9 @@ package com.microsoft.did.sdk.identifier.models.identifierdocument
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.KeyAlgorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.util.Base64URL
 import kotlinx.serialization.Serializable
-import org.spongycastle.jce.ECNamedCurveTable
-import org.spongycastle.math.ec.ECCurve
-import org.spongycastle.math.ec.ECPoint
 import java.security.PublicKey
 import java.security.spec.RSAPublicKeySpec
 

@@ -7,12 +7,9 @@ import com.microsoft.did.sdk.crypto.spi.EcPairwisePublicKeySpec
 import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.Curve
 import org.spongycastle.jce.ECNamedCurveTable
-import org.spongycastle.jce.interfaces.ECPublicKey
-import java.security.spec.ECPoint
 import java.math.BigInteger
-import java.security.Provider
 import java.security.spec.AlgorithmParameterSpec
-import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
 import java.security.spec.ECPublicKeySpec
 import java.security.spec.KeySpec
 import java.security.spec.RSAPublicKeySpec
@@ -30,10 +27,13 @@ abstract class CipherAlgorithm(val name: String, val provider: String?) {
 }
 
 abstract class KeyAlgorithm(val name: String, val provider: String?, val keySpec: KeySpec) {
-    class EcPrivatePairwise(ecPairwisePrivateKeySpec: EcPairwisePrivateKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwisePrivateKeySpec)
+    class EcPrivatePairwise(ecPairwisePrivateKeySpec: EcPairwisePrivateKeySpec) :
+        KeyAlgorithm("ecPairwise", "DID", ecPairwisePrivateKeySpec)
+
     class EcPublicPairwise(ecPairwisePublicKeySpec: EcPairwisePublicKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwisePublicKeySpec)
     class RSAPublic(keySpec: RSAPublicKeySpec) : KeyAlgorithm("RSA", "SC", keySpec)
-    class Secp256k1Public(x: BigInteger, y: BigInteger): KeyAlgorithm("EC", null, ECPublicKeySpec(ECPoint(x, y), Curve.SECP256K1.toECParameterSpec()))
+    class Secp256k1Public(x: BigInteger, y: BigInteger) :
+        KeyAlgorithm("EC", null, ECPublicKeySpec(ECPoint(x, y), Curve.SECP256K1.toECParameterSpec()))
 }
 
 abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec) {
