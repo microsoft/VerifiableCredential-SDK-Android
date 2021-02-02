@@ -8,11 +8,9 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.ExchangeResponseClaims
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.models.Sha
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
-import java.security.KeyStore
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton

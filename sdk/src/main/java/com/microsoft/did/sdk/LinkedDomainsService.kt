@@ -33,7 +33,7 @@ class LinkedDomainsService @Inject constructor(
     private suspend fun verifyLinkedDomains(domainUrls: List<String>, relyingPartyDid: String): Result<LinkedDomainResult> {
         return runResultTry {
             if (domainUrls.isEmpty())
-                return@runResultTry Result.Success(LinkedDomainMissing())
+                return@runResultTry Result.Success(LinkedDomainMissing)
             val domainUrl = domainUrls.first()
             val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
             wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->

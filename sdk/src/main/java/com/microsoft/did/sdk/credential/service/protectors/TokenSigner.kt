@@ -5,14 +5,10 @@
 
 package com.microsoft.did.sdk.credential.service.protectors
 
-import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants.CREDENTIAL_PRESENTATION_FORMAT
 import com.nimbusds.jose.JOSEObjectType
-import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 

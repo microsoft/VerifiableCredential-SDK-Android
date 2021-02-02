@@ -8,7 +8,6 @@ package com.microsoft.did.sdk.crypto
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
 import com.microsoft.did.sdk.di.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

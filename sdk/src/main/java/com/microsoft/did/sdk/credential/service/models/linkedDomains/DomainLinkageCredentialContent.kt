@@ -7,7 +7,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DomainLinkageCredentialContent (
+data class DomainLinkageCredentialContent(
     @SerialName(Constants.CONTEXT)
     val context: List<String>,
     val issuer: String,
