@@ -6,7 +6,9 @@ package com.microsoft.did.sdk.identifier
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.KeyGenAlgorithm
+import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
@@ -20,11 +22,10 @@ import com.microsoft.did.sdk.util.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
-import org.bouncycastle.jce.interfaces.ECPrivateKey
 import org.bouncycastle.jce.interfaces.ECPublicKey
-import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.MessageDigest
+import java.security.interfaces.ECPrivateKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -102,15 +103,14 @@ class IdentifierCreator @Inject constructor(
     }
 
     private fun createPairwiseKeyPair(persona: Identifier, peerId: String): KeyPair {
-        val keyFactory = KeyFactory.getInstance("EcPairwise", "DID")
-        val keySpec = EcPairwisePrivateKeySpec(
+        val privateKeySpec = EcPairwisePrivateKeySpec(
             keyStore.getKey(persona.name).toOctetSequenceKey().toByteArray(),
             persona.id,
             peerId
         )
-        val privateKey = keyFactory.generatePrivate(keySpec) as ECPrivateKey
+        val privateKey = CryptoOperations.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(privateKeySpec))
         val publicKeySpec = EcPairwisePublicKeySpec(privateKey)
-        val publicKey = keyFactory.generatePublic(publicKeySpec) as ECPublicKey
+        val publicKey = CryptoOperations.generateKey<ECPublicKey>(PublicKeyFactoryAlgorithm.EcPairwise(publicKeySpec))
         return KeyPair(publicKey, privateKey)
     }
 

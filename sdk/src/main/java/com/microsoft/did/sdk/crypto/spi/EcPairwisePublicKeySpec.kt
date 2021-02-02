@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.crypto.spi
 
-import org.bouncycastle.jce.interfaces.ECPrivateKey
+import java.security.interfaces.ECPrivateKey
 import java.security.spec.KeySpec
 
 class EcPairwisePublicKeySpec(

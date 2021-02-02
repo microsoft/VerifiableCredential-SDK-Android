@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk.crypto
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -76,14 +77,14 @@ object CryptoOperations {
         return keyGen.genKeyPair()
     }
 
-    fun generatePrivateKey(alg: KeyAlgorithm): PrivateKey {
+    inline fun <reified T : Key> generateKey(alg: PrivateKeyFactoryAlgorithm): T {
         val factory = if (alg.provider == null) KeyFactory.getInstance(alg.name) else KeyFactory.getInstance(alg.name, alg.provider)
-        return factory.generatePrivate(alg.keySpec)
+        return factory.generatePrivate(alg.keySpec) as T
     }
 
-    fun generatePublicKey(alg: KeyAlgorithm): PublicKey {
+    inline fun <reified T : Key> generateKey(alg: PublicKeyFactoryAlgorithm): T {
         val factory = if (alg.provider == null) KeyFactory.getInstance(alg.name) else KeyFactory.getInstance(alg.name, alg.provider)
-        return factory.generatePublic(alg.keySpec)
+        return factory.generatePublic(alg.keySpec) as T
     }
 
     /**

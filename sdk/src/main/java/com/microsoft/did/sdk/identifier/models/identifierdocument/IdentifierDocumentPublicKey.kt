@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.identifier.models.identifierdocument
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.KeyAlgorithm
+import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.util.Base64URL
@@ -40,12 +40,12 @@ data class IdentifierDocumentPublicKey(
             in LinkedDataKeySpecification.RsaSignature2018.values -> {
                 val n = Base64URL.from(publicKeyJwk.n).decodeToBigInteger()
                 val e = Base64URL.from(publicKeyJwk.e).decodeToBigInteger()
-                return CryptoOperations.generatePublicKey(KeyAlgorithm.RSAPublic(RSAPublicKeySpec(n, e)))
+                return CryptoOperations.generateKey(PublicKeyFactoryAlgorithm.RsaPublic(RSAPublicKeySpec(n, e)))
             }
             in LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values -> {
                 val x = Base64URL.from(publicKeyJwk.x).decodeToBigInteger()
                 val y = Base64URL.from(publicKeyJwk.y).decodeToBigInteger()
-                return CryptoOperations.generatePublicKey(KeyAlgorithm.Secp256k1Public(x, y))
+                return CryptoOperations.generateKey(PublicKeyFactoryAlgorithm.Secp256k1(x, y))
             }
             in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
                 throw KeyException("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")

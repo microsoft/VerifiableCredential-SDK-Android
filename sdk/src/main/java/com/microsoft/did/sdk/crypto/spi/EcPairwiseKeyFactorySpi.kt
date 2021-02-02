@@ -2,15 +2,15 @@
 
 package com.microsoft.did.sdk.crypto.spi
 
+import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
+import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.util.Constants
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.spec.ECParameterSpec
-import org.bouncycastle.jce.spec.ECPrivateKeySpec
-import org.bouncycastle.jce.spec.ECPublicKeySpec
 import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.security.Key
-import java.security.KeyFactory
 import java.security.KeyFactorySpi
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -25,10 +25,8 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
             ?: throw InvalidKeySpecException("Keyspec has to be of type ${EcPairwisePublicKeySpec::class.qualifiedName}")
 
         val ecSpec: ECParameterSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
-        val q: ECPoint = ecSpec.g.multiply(ecKeySpec.privateKey.d)
-        val pubSpec = ECPublicKeySpec(q, ecSpec)
-        val keyFactory = KeyFactory.getInstance("EC", "SC")
-        return keyFactory.generatePublic(pubSpec)
+        val q: ECPoint = ecSpec.g.multiply(ecKeySpec.privateKey.s)
+        return CryptoOperations.generateKey(PublicKeyFactoryAlgorithm.Secp256k1(q.xCoord.toBigInteger(), q.yCoord.toBigInteger()))
     }
 
     override fun engineGeneratePrivate(keySpec: KeySpec?): PrivateKey {
@@ -39,12 +37,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
         val pairwiseKeySeedSigned = computeMac(ecKeySpec.peerDid.toByteArray(), masterKey)
         val pairwiseKeySeedUnsigned = reduceKeySeedSizeAndConvertToUnsigned(pairwiseKeySeedSigned)
 
-        val keyFactory = KeyFactory.getInstance("EC", "SC")
-        val pairwiseKeySpec = ECPrivateKeySpec(
-            BigInteger(1, pairwiseKeySeedUnsigned),
-            ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
-        )
-        return keyFactory.generatePrivate(pairwiseKeySpec)
+        return CryptoOperations.generateKey(PrivateKeyFactoryAlgorithm.Secp256k1(BigInteger(1, pairwiseKeySeedUnsigned)))
     }
 
     private fun computeMac(payload: ByteArray, seed: ByteArray): ByteArray {
