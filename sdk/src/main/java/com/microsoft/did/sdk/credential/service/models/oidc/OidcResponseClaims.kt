@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.crypto.keyStore.JwkSerializer
 import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Contextual
@@ -20,7 +21,7 @@ abstract class OidcResponseClaims {
     var did: String = ""
 
     @SerialName("sub_jwk")
-    @Contextual
+    @Serializable(with = JwkSerializer::class)
     var publicKeyJwk: JWK? = null
 
     @SerialName("iat")

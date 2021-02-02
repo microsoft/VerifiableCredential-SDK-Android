@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.identifier.models.payload.document
 
+import com.microsoft.did.sdk.crypto.keyStore.JwkSerializer
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
@@ -28,7 +29,7 @@ data class IdentifierDocumentPublicKeyInput(
      */
     val controller: String? = null,
 
-    @Contextual
+    @Serializable(with = JwkSerializer::class)
     val publicKeyJwk: JWK,
 
     @SerialName("purposes")
