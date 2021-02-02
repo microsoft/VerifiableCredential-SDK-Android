@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResp
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
@@ -39,7 +40,7 @@ class LinkedDomainsServiceTest {
         val expectedWellKnownConfigDocument = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), expectedWellKnownConfigDocumentResponse)
         val expectedDomainUrl = "https://issuertestng.com"
         coEvery { mockedResolver.resolve(suppliedDidWithSingleServiceEndpoint) } returns Result.Success(expectedResponse.didDocument)
-        coEvery { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(expectedWellKnownConfigDocument)
+        every { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(expectedWellKnownConfigDocument)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
@@ -60,7 +61,7 @@ class LinkedDomainsServiceTest {
         val expectedWellKnownConfigDocument = defaultTestSerializer.decodeFromString(LinkedDomainsResponse.serializer(), expectedWellKnownConfigDocumentResponse)
         val expectedDomainUrl = "https://issuertestng.com"
         coEvery { mockedResolver.resolve(suppliedDidWithMultipleServiceEndpoints) } returns Result.Success(expectedResponse.didDocument)
-        coEvery { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(expectedWellKnownConfigDocument)
+        every { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(expectedWellKnownConfigDocument)
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
         coEvery { mockedJwtValidator.validateDidInHeaderAndPayload(any(), any()) } returns true
         runBlocking {
