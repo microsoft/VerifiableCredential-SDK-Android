@@ -68,7 +68,7 @@ class JwsTokenTest {
     @Test
     fun signAndVerify() {
         val testData = Random.Default.nextBytes(32)
-        val token = JwsToken(testData, defaultTestSerializer)
+        val token = JwsToken(testData)
         token.sign(keyRef, crypto)
         val serialized = token.serialize(defaultTestSerializer, JwsFormat.Compact)
         val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)

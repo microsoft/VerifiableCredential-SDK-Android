@@ -139,7 +139,7 @@ class IssuanceServiceTest {
     @Test
     fun `test to send Issuance Response`() {
         val suppliedContractUrl = "BusinessCard"
-        val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainMissing())
+        val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainMissing)
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         val requestedVcMap = mapOf(mockk<PresentationAttestation>() to expectedVerifiableCredential) as RequestedVcMap
 
