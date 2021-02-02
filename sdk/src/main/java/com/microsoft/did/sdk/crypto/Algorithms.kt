@@ -35,7 +35,7 @@ abstract class KeyAlgorithm(val name: String, val provider: String?, val keySpec
         KeyAlgorithm("ecPairwise", "DID", ecPairwisePrivateKeySpec)
 
     class EcPublicPairwise(ecPairwisePublicKeySpec: EcPairwisePublicKeySpec) : KeyAlgorithm("ecPairwise", "DID", ecPairwisePublicKeySpec)
-    class RSAPublic(keySpec: RSAPublicKeySpec) : KeyAlgorithm("RSA", "SC", keySpec)
+    class RSAPublic(keySpec: RSAPublicKeySpec) : KeyAlgorithm("RSA", null, keySpec)
     class Secp256k1Public(x: BigInteger, y: BigInteger) :
         KeyAlgorithm("EC", null, ECPublicKeySpec(ECPoint(x, y), Curve.SECP256K1.toECParameterSpec()))
 }

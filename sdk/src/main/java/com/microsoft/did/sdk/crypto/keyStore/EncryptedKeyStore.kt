@@ -5,8 +5,17 @@ package com.microsoft.did.sdk.crypto.keyStore
 import android.content.Context
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
+import com.microsoft.did.sdk.crypto.KeyAlgorithm
+import com.microsoft.did.sdk.util.Constants
+import org.bouncycastle.asn1.x500.X500Name
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier
+import org.bouncycastle.asn1.x509.Extension
 import org.bouncycastle.asn1.x509.SubjectKeyIdentifier
-import org.bouncycastle.x509.X509V3CertificateGenerator
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
+import org.bouncycastle.cert.X509v3CertificateBuilder
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder
 import java.io.File
 import java.io.IOException
 import java.math.BigInteger
@@ -18,7 +27,6 @@ import java.security.SecureRandom
 import java.security.cert.Certificate
 import java.util.Date
 import javax.crypto.SecretKey
-import javax.security.auth.x500.X500Principal
 
 object EncryptedKeyStore {
 
@@ -71,21 +79,27 @@ object EncryptedKeyStore {
         return arrayOf(createSelfSignedCertificate(keyPair, keyId))
     }
 
-    private fun createSelfSignedCertificate(keyPair: KeyPair, keyId: String): Certificate {
-        val owner = X500Principal("CN=$FQDM");
-        val builder = X509V3CertificateGenerator()
-        builder.setSerialNumber(BigInteger(64, SecureRandom()))
-        builder.setIssuerDN(owner)
-        builder.setNotBefore(Date())
-        builder.setNotAfter(Date())
-        builder.setSubjectDN(owner)
-        builder.setPublicKey(keyPair.public)
-        builder.setSignatureAlgorithm("SHA256WITHECDSA")
+    private fun createSelfSignedCertificate(keyPair: KeyPair, keyId: String, ): Certificate {
+        val owner = X500Name("CN=$FQDM");
+        val builder = X509v3CertificateBuilder(
+            owner,
+            BigInteger(64, SecureRandom()),
+            Date(),
+            Date(),
+            owner,
+            SubjectPublicKeyInfo(
+                ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC),
+                keyPair.public.encoded
+            )
+        )
         builder.addExtension(
-            org.bouncycastle.asn1.x509.X509Extension.subjectKeyIdentifier, false,
+            Extension.subjectKeyIdentifier, false,
             SubjectKeyIdentifier(keyId.toByteArray())
         )
-        return builder.generate(keyPair.private, "BC")
+        val certHolder = builder.build(JcaContentSignerBuilder("SHA256WithECDSA").build(keyPair.private))
+        val cert = JcaX509CertificateConverter().setProvider("BC").getCertificate(certHolder)
+        cert.verify(keyPair.public)
+        return cert
     }
 
     private fun loadKeyStore(): KeyStore {
