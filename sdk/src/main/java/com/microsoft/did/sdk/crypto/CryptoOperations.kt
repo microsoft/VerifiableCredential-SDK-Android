@@ -20,7 +20,6 @@ import javax.crypto.Cipher.DECRYPT_MODE
 import javax.crypto.Cipher.ENCRYPT_MODE
 import javax.crypto.Mac
 import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
 
 object CryptoOperations {
     init {
@@ -90,9 +89,8 @@ object CryptoOperations {
     /**
      * Generates a 256 bit seed.
      */
-    fun generateSeed(): SecretKey {
+    fun generateSeed(): ByteArray {
         val randomNumberGenerator = SecureRandom()
-        val seed = randomNumberGenerator.generateSeed(16)
-        return SecretKeySpec(seed, "RAW")
+        return randomNumberGenerator.generateSeed(16)
     }
 }

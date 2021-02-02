@@ -18,6 +18,8 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
+import com.nimbusds.jose.jwk.ECKey
+import com.nimbusds.jose.jwk.OctetSequenceKey
 import java.security.KeyStore
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -45,7 +47,7 @@ class IdentifierManager @Inject constructor(
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
             val seed = CryptoOperations.generateSeed()
-            keyStore.storeKey(seed, MASTER_IDENTIFIER_NAME)
+            keyStore.storeKey(OctetSequenceKey.Builder(seed).build(), MASTER_IDENTIFIER_NAME)
             val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
             SdkLog.i("Creating Identifier: $identifier")
             identifierRepository.insert(identifier)

@@ -6,7 +6,6 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JOSEObjectType
@@ -22,7 +21,7 @@ class TokenSigner @Inject constructor(
         // adding kid value to header.
         token.setKeyId("${identifier.id}#${identifier.signatureKeyReference}")
         token.setType(JOSEObjectType.JWT)
-        val privateKey = keyStore.getKeyPair(identifier.signatureKeyReference).toPrivateJwk().toECKey().toECPrivateKey()
+        val privateKey = keyStore.getKey(identifier.signatureKeyReference)
         token.sign(privateKey)
         return token.serialize()
     }

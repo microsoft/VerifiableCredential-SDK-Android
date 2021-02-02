@@ -6,17 +6,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.microsoft.did.sdk.util.JavaObjectSerializer
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
-import java.security.Key
-import java.security.KeyPair
+import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
 
 class EncryptedKeyStore @Inject constructor(context: Context) {
 
     companion object {
         private const val KEY_PREFIX = "DID_KEY_"
-        private const val KEYPAIR_PREFIX = "DID_KEYPAIR_"
     }
 
     private val encryptedSharedPreferences = getSharedPreferences(context)
@@ -32,27 +29,13 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
         )
     }
 
-    fun storeKeyPair(keyPair: KeyPair, keyId: String) {
-        val serializedKey = JavaObjectSerializer.toString(keyPair)
-        encryptedSharedPreferences.edit().putString(KEYPAIR_PREFIX + keyId, serializedKey).apply()
+    fun storeKey(key: JWK, keyId: String) {
+        encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, key.toJSONString()).apply()
     }
 
-    fun getKeyPair(keyId: String): KeyPair {
-        val keyString = encryptedSharedPreferences.getString(keyId, null)
+    fun getKey(keyId: String): JWK {
+        val keyJson = encryptedSharedPreferences.getString(keyId, null)
             ?: throw KeyStoreException("Key $keyId not found")
-        return JavaObjectSerializer.fromString(keyString) as KeyPair
-    }
-
-    fun storeKey(key: Key, keyId: String) {
-        val serializedKey = JavaObjectSerializer.toString(key)
-        encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, serializedKey).apply()
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun <T : Key> getKey(keyId: String): T {
-        val keyString = encryptedSharedPreferences.getString(keyId, null)
-            ?: throw KeyStoreException("Key $keyId not found")
-        return JavaObjectSerializer.fromString(keyString) as? T
-            ?: throw KeyStoreException("Stored key $keyId is not of the requested Key type")
+        return JWK.parse(keyJson)
     }
 }

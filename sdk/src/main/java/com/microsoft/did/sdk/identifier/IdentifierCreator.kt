@@ -8,6 +8,7 @@ import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.crypto.keyStore.toPublicJwk
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePublicKeySpec
@@ -72,9 +73,9 @@ class IdentifierCreator @Inject constructor(
      */
     private fun generateAndStoreKeyPair(): JWK {
         val keyId = generateRandomKeyId()
-        val keyPair = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1())
-        keyStore.storeKeyPair(keyPair, keyId)
-        return keyPair.toPublicJwk()
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1()).toPrivateJwk()
+        keyStore.storeKey(privateKey, keyId)
+        return privateKey.toPublicJWK()
     }
 
     private fun generateRandomKeyId(): String {
@@ -97,15 +98,15 @@ class IdentifierCreator @Inject constructor(
      */
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
-        val pairwiseKeys = createPairwiseKeyPair(persona, peerId)
-        keyStore.storeKeyPair(pairwiseKeys, keyId)
-        return pairwiseKeys.toPublicJwk()
+        val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk()
+        keyStore.storeKey(pairwisePrivateKey, keyId)
+        return pairwisePrivateKey.toPublicJWK()
     }
 
     private fun createPairwiseKeyPair(persona: Identifier, peerId: String): KeyPair {
         val keyFactory = KeyFactory.getInstance("EcPairwise", "DID")
         val keySpec = EcPairwisePrivateKeySpec(
-            keyStore.getKey<SecretKey>(persona.name).encoded,
+            keyStore.getKey(persona.name).toOctetSequenceKey().toByteArray(),
             persona.id,
             peerId
         )

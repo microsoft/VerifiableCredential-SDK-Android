@@ -42,7 +42,8 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse,
             responder
         )
-        val key = keyStore.getKeyPair(responder.signatureKeyReference).toPrivateJwk()
+        val key = keyStore.getKey(responder.signatureKeyReference)
+
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = presentationResponse.audience

@@ -54,7 +54,7 @@ class IssuanceResponseFormatter @Inject constructor(
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = keyStore.getKeyPair(responder.signatureKeyReference).toPrivateJwk()
+        val key = keyStore.getKey(responder.signatureKeyReference)
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = issuanceResponse.audience

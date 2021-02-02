@@ -35,7 +35,7 @@ class ExchangeResponseFormatter @Inject constructor(
         responseId: String
     ): String {
         val requester = exchangeRequest.requester
-        val keyJwk = keyStore.getKeyPair(requester.signatureKeyReference).toPrivateJwk()
+        val keyJwk = keyStore.getKey(requester.signatureKeyReference)
         val contents = ExchangeResponseClaims(exchangeRequest.verifiableCredential.raw, exchangeRequest.pairwiseDid).apply {
             publicKeyThumbPrint = keyJwk.computeThumbprint().toString()
             audience = exchangeRequest.audience
