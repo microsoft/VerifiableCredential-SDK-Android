@@ -27,11 +27,11 @@ import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.spyk
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -143,10 +143,10 @@ class IssuanceServiceTest {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         val requestedVcMap = mapOf(mockk<PresentationAttestation>() to expectedVerifiableCredential) as RequestedVcMap
 
-        coEvery { issuanceService["exchangeVcsInIssuanceRequest"](issuanceResponse, pairwiseIdentifier) } returns Result.Success(
+        every { issuanceService["exchangeVcsInIssuanceRequest"](issuanceResponse, pairwiseIdentifier) } returns Result.Success(
             requestedVcMap
         )
-        coEvery {
+        every {
             issuanceService["formAndSendResponse"](
                 issuanceResponse,
                 pairwiseIdentifier,
@@ -165,7 +165,7 @@ class IssuanceServiceTest {
             assertThat(createdVerifiableCredential.payload.contents).isEqualTo(suppliedVcContent)
         }
 
-        coVerify(exactly = 1) {
+        verify(exactly = 1) {
             issuanceService["exchangeVcsInIssuanceRequest"](issuanceResponse, pairwiseIdentifier)
             issuanceService["formAndSendResponse"](
                 issuanceResponse,
