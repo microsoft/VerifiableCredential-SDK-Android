@@ -19,8 +19,8 @@ import com.microsoft.did.sdk.util.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
-import org.spongycastle.jce.interfaces.ECPrivateKey
-import org.spongycastle.jce.interfaces.ECPublicKey
+import org.bouncycastle.jce.interfaces.ECPrivateKey
+import org.bouncycastle.jce.interfaces.ECPublicKey
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.MessageDigest

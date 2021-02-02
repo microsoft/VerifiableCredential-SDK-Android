@@ -3,11 +3,11 @@
 package com.microsoft.did.sdk.crypto.spi
 
 import com.microsoft.did.sdk.util.Constants
-import org.spongycastle.jce.ECNamedCurveTable
-import org.spongycastle.jce.spec.ECParameterSpec
-import org.spongycastle.jce.spec.ECPrivateKeySpec
-import org.spongycastle.jce.spec.ECPublicKeySpec
-import org.spongycastle.math.ec.ECPoint
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.jce.spec.ECParameterSpec
+import org.bouncycastle.jce.spec.ECPrivateKeySpec
+import org.bouncycastle.jce.spec.ECPublicKeySpec
+import org.bouncycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.security.Key
 import java.security.KeyFactory

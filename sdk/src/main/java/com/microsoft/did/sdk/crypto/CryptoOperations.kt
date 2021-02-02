@@ -6,7 +6,8 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import org.spongycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.bouncycastle.math.ec.custom.sec.SecP256K1Curve
 import java.security.*
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE

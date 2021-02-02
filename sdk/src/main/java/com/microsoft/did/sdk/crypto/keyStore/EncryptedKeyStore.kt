@@ -3,13 +3,12 @@
 package com.microsoft.did.sdk.crypto.keyStore
 
 import android.content.Context
-import android.security.keystore.KeyProperties
-import android.security.keystore.KeyProtection
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKeys
-import org.spongycastle.asn1.x509.SubjectKeyIdentifier
-import org.spongycastle.x509.X509V3CertificateGenerator
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier
+import org.bouncycastle.x509.X509V3CertificateGenerator
 import java.io.File
+import java.io.IOException
 import java.math.BigInteger
 import java.security.Key
 import java.security.KeyPair
@@ -19,7 +18,6 @@ import java.security.SecureRandom
 import java.security.cert.Certificate
 import java.util.*
 import javax.crypto.SecretKey
-import javax.inject.Inject
 import javax.security.auth.x500.X500Principal
 
 object EncryptedKeyStore {
@@ -27,17 +25,13 @@ object EncryptedKeyStore {
     private const val KEYSTORE_FILENAME = "didKeyStore.jks"
     private const val FQDM = "self-signed.local"
 
-    enum class KeyPurpose(val value: Int) {
-        SIGN(KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY),
-        ENCRYPT(KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
-    }
-
     private lateinit var encryptedFile: EncryptedFile
+    private lateinit var encryptedFileLocation: File
 
     fun initialize(
         context: Context
     ) {
-        encryptedFile = getEncryptedFile(context)
+        initializeEncryptedFile(context)
     }
 
     /**
@@ -52,25 +46,24 @@ object EncryptedKeyStore {
             ?: throw KeyStoreException("Stored key $keyId is not of the requested Key type")
     }
 
-    fun storeKeyPair(keyPair: KeyPair, keyId: String, purpose: KeyPurpose = KeyPurpose.SIGN) {
+    fun storeKeyPair(keyPair: KeyPair, keyId: String) {
         val certChain = createSelfSignedCertificateChain(keyPair, keyId)
-        val protection = KeyProtection.Builder(purpose.value).build()
 
         keyStore.setEntry(
             keyId,
             KeyStore.PrivateKeyEntry(keyPair.private, certChain),
-            protection
+            null
         )
         saveToFile(keyStore)
     }
 
     fun storeSecretKey(secretKey: SecretKey, keyId: String) {
-        val protection = KeyProtection.Builder(KeyPurpose.ENCRYPT.value).build()
-        keyStore.setEntry(keyId, KeyStore.SecretKeyEntry(secretKey), protection)
+        keyStore.setEntry(keyId, KeyStore.SecretKeyEntry(secretKey), null)
         saveToFile(keyStore)
     }
 
     private fun saveToFile(keyStore: KeyStore) {
+        encryptedFileLocation.delete()
         keyStore.store(encryptedFile.openFileOutput(), null)
     }
 
@@ -80,33 +73,36 @@ object EncryptedKeyStore {
 
     private fun createSelfSignedCertificate(keyPair: KeyPair, keyId: String): Certificate {
         val owner = X500Principal("CN=$FQDM");
-        val randomBytes = ByteArray(64)
-        SecureRandom().nextBytes(randomBytes)
         val builder = X509V3CertificateGenerator()
-        builder.setSerialNumber(BigInteger(randomBytes))
+        builder.setSerialNumber(BigInteger(64, SecureRandom()))
         builder.setIssuerDN(owner)
         builder.setNotBefore(Date())
         builder.setNotAfter(Date())
         builder.setSubjectDN(owner)
         builder.setPublicKey(keyPair.public)
-        builder.setSignatureAlgorithm("SHA256WITHPLAIN-ECDSA")
+        builder.setSignatureAlgorithm("SHA256WITHECDSA")
         builder.addExtension(
-            org.spongycastle.asn1.x509.X509Extension.subjectKeyIdentifier, false,
+            org.bouncycastle.asn1.x509.X509Extension.subjectKeyIdentifier, false,
             SubjectKeyIdentifier(keyId.toByteArray())
         )
-        return builder.generate(keyPair.private, "SC")
+        return builder.generate(keyPair.private, "BC")
     }
 
     private fun loadKeyStore(): KeyStore {
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-        keyStore.load(encryptedFile.openFileInput(), null)
+        try {
+            keyStore.load(encryptedFile.openFileInput(), null)
+        } catch (exp: IOException) {
+            keyStore.load(null, null)
+        }
         return keyStore
     }
 
-    private fun getEncryptedFile(context: Context): EncryptedFile {
+    private fun initializeEncryptedFile(context: Context) {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
-        return EncryptedFile.Builder(
-            File(context.filesDir, KEYSTORE_FILENAME),
+        encryptedFileLocation = File(context.filesDir, KEYSTORE_FILENAME)
+        encryptedFile = EncryptedFile.Builder(
+            encryptedFileLocation,
             context, masterKeyAlias, EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
         ).build()
     }
