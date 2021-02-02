@@ -9,7 +9,6 @@ import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
-import com.microsoft.did.sdk.crypto.keyStore.toPublicJwk
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePublicKeySpec
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -26,7 +25,6 @@ import org.bouncycastle.jce.interfaces.ECPublicKey
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.MessageDigest
-import javax.crypto.SecretKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -73,7 +71,7 @@ class IdentifierCreator @Inject constructor(
      */
     private fun generateAndStoreKeyPair(): JWK {
         val keyId = generateRandomKeyId()
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1()).toPrivateJwk()
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1()).toPrivateJwk(keyId)
         keyStore.storeKey(privateKey, keyId)
         return privateKey.toPublicJWK()
     }
@@ -98,7 +96,7 @@ class IdentifierCreator @Inject constructor(
      */
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
-        val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk()
+        val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk(keyId)
         keyStore.storeKey(pairwisePrivateKey, keyId)
         return pairwisePrivateKey.toPublicJWK()
     }
