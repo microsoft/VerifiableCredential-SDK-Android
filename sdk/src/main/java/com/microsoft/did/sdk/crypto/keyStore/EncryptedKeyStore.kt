@@ -34,7 +34,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
     }
 
     fun getKey(keyId: String): JWK {
-        val keyJson = encryptedSharedPreferences.getString(keyId, null)
+        val keyJson = encryptedSharedPreferences.getString(KEY_PREFIX + keyId, null)
             ?: throw KeyStoreException("Key $keyId not found")
         return JWK.parse(keyJson)
     }
