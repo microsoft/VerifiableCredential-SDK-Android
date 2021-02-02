@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
@@ -25,7 +26,8 @@ import javax.inject.Singleton
 class PresentationResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
     fun formatResponse(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
@@ -40,7 +42,7 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse,
             responder
         )
-        val key = JWK.load(EncryptedKeyStore.keyStore, responder.signatureKeyReference, null)
+        val key = keyStore.getKeyPair(responder.signatureKeyReference).toPrivateJwk()
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = presentationResponse.audience

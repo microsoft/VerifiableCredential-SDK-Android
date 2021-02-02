@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
@@ -23,7 +24,8 @@ import javax.inject.Singleton
 class IssuanceResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     fun formatResponse(
@@ -52,7 +54,7 @@ class IssuanceResponseFormatter @Inject constructor(
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = JWK.load(EncryptedKeyStore.keyStore, responder.signatureKeyReference, null)
+        val key = keyStore.getKeyPair(responder.signatureKeyReference).toPrivateJwk()
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = issuanceResponse.audience

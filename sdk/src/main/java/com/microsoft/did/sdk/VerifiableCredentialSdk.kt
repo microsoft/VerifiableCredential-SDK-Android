@@ -79,7 +79,5 @@ object VerifiableCredentialSdk {
         correlationVectorService.startNewFlowAndSave()
 
         SdkLog.addConsumer(logConsumer)
-
-        EncryptedKeyStore.initialize(context)
     }
 }

@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -17,6 +18,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
+import java.security.KeyStore
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,7 +29,8 @@ import javax.inject.Singleton
 @Singleton
 class IdentifierManager @Inject constructor(
     private val identifierRepository: IdentifierRepository,
-    private val identifierCreator: IdentifierCreator
+    private val identifierCreator: IdentifierCreator,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     suspend fun getMasterIdentifier(): Result<Identifier> {
@@ -41,7 +44,8 @@ class IdentifierManager @Inject constructor(
 
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
-            CryptoOperations.generateSeed(MASTER_IDENTIFIER_NAME)
+            val seed = CryptoOperations.generateSeed()
+            keyStore.storeKey(seed, MASTER_IDENTIFIER_NAME)
             val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
             SdkLog.i("Creating Identifier: $identifier")
             identifierRepository.insert(identifier)

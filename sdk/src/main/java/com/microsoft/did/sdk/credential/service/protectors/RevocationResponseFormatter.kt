@@ -8,6 +8,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPublicJwk
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.JWK
@@ -22,13 +23,14 @@ import javax.inject.Singleton
 @Singleton
 class RevocationResponseFormatter @Inject constructor(
     private val serializer: Json,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     fun formatResponse(revocationRequest: RevocationRequest, expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responder = revocationRequest.owner
-        val keyJwk = JWK.load(EncryptedKeyStore.keyStore, revocationRequest.owner.signatureKeyReference, null)
+        val keyJwk = keyStore.getKeyPair(revocationRequest.owner.signatureKeyReference).toPublicJwk()
         val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {

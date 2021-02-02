@@ -8,9 +8,7 @@ package com.microsoft.did.sdk.crypto.keyStore
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.spongycastle.jce.ECNamedCurveTable
@@ -36,7 +34,7 @@ class EncryptedKeyStoreInstrumentedTest {
 
     @Test
     fun saveAndGetPrivateKeyTest() {
-        keyStore.saveKey(expectedPrivateKey, keyRef)
+        keyStore.storeKey(expectedPrivateKey, keyRef)
         val actualPrivateKey = keyStore.getKey<PrivateKey>(keyRef)
         assertThat(expectedPrivateKey).isEqualToComparingFieldByFieldRecursively(actualPrivateKey)
     }

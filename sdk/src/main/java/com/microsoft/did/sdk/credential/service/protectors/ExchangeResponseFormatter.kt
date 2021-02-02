@@ -8,6 +8,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.models.ExchangeRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.ExchangeResponseClaims
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
@@ -18,7 +19,8 @@ import javax.inject.Singleton
 @Singleton
 class ExchangeResponseFormatter @Inject constructor(
     private val serializer: Json,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
     fun formatResponse(exchangeRequest: ExchangeRequest, expiryInSeconds: Int): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
@@ -33,7 +35,7 @@ class ExchangeResponseFormatter @Inject constructor(
         responseId: String
     ): String {
         val requester = exchangeRequest.requester
-        val keyJwk = JWK.load(EncryptedKeyStore.keyStore, requester.signatureKeyReference, null)
+        val keyJwk = keyStore.getKeyPair(requester.signatureKeyReference).toPrivateJwk()
         val contents = ExchangeResponseClaims(exchangeRequest.verifiableCredential.raw, exchangeRequest.pairwiseDid).apply {
             publicKeyThumbPrint = keyJwk.computeThumbprint().toString()
             audience = exchangeRequest.audience

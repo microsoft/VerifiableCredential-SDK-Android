@@ -6,28 +6,24 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JOSEObjectType
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Class that can protect some content by signing.
- */
 @Singleton
-class TokenSigner @Inject constructor() {
-
-    /**
-     * Sign content with keyReference.
-     * @return JwsToken
-     */
+class TokenSigner @Inject constructor(
+    private val keyStore: EncryptedKeyStore
+) {
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
         val token = JwsToken(payload)
         // adding kid value to header.
         token.setKeyId("${identifier.id}#${identifier.signatureKeyReference}")
         token.setType(JOSEObjectType.JWT)
-        token.sign(identifier.signatureKeyReference, EncryptedKeyStore.keyStore)
+        val privateKey = keyStore.getKeyPair(identifier.signatureKeyReference).toPrivateJwk().toECKey().toECPrivateKey()
+        token.sign(privateKey)
         return token.serialize()
     }
 }

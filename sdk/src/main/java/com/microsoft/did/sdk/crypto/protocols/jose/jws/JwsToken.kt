@@ -7,10 +7,13 @@ import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
+import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.util.Base64URL
-import java.security.KeyStore
+import java.security.KeyPair
 import java.security.PublicKey
+import java.security.interfaces.ECPublicKey
 
 class JwsToken private constructor(
     private val jwsObject: JWSObject
@@ -47,10 +50,9 @@ class JwsToken private constructor(
         return jwsObject.serialize()
     }
 
-    fun sign(keyId: String, keyStore: KeyStore) {
+    fun sign(privateKey: JWK) {
         val out = JWSObject(builder.build(), jwsObject.payload)
-        val key = JWK.load(keyStore, keyId, null)
-        val signer = DefaultJWSSignerFactory().createJWSSigner(key, jwsObject.header.algorithm)
+        val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
         out.sign(signer)
     }
 

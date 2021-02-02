@@ -8,6 +8,7 @@ import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.keyStore.toPublicJwk
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePublicKeySpec
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -24,6 +25,7 @@ import org.bouncycastle.jce.interfaces.ECPublicKey
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.MessageDigest
+import javax.crypto.SecretKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -32,7 +34,8 @@ import kotlin.random.Random
 class IdentifierCreator @Inject constructor(
     private val payloadProcessor: SidetreePayloadProcessor,
     private val sideTreeHelper: SideTreeHelper,
-    private val serializer: Json
+    private val serializer: Json,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     fun create(personaName: String): Identifier {
@@ -69,8 +72,9 @@ class IdentifierCreator @Inject constructor(
      */
     private fun generateAndStoreKeyPair(): JWK {
         val keyId = generateRandomKeyId()
-        CryptoOperations.generateKeyPair(keyId, KeyGenAlgorithm.Secp256k1())
-        return JWK.load(EncryptedKeyStore.keyStore, keyId, null).toPublicJWK()
+        val keyPair = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1())
+        keyStore.storeKeyPair(keyPair, keyId)
+        return keyPair.toPublicJwk()
     }
 
     private fun generateRandomKeyId(): String {
@@ -94,14 +98,14 @@ class IdentifierCreator @Inject constructor(
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
         val pairwiseKeys = createPairwiseKeyPair(persona, peerId)
-        EncryptedKeyStore.storeKeyPair(pairwiseKeys, keyId)
-        return JWK.load(EncryptedKeyStore.keyStore, keyId, null).toPublicJWK()
+        keyStore.storeKeyPair(pairwiseKeys, keyId)
+        return pairwiseKeys.toPublicJwk()
     }
 
     private fun createPairwiseKeyPair(persona: Identifier, peerId: String): KeyPair {
         val keyFactory = KeyFactory.getInstance("EcPairwise", "DID")
         val keySpec = EcPairwisePrivateKeySpec(
-            CryptoOperations.getSeed(persona.name),
+            keyStore.getKey<SecretKey>(persona.name).encoded,
             persona.id,
             peerId
         )

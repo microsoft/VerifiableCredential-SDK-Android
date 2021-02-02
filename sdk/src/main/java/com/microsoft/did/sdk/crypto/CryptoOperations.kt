@@ -5,9 +5,9 @@
 
 package com.microsoft.did.sdk.crypto
 
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.KeyFactory
+import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.MessageDigest
 import java.security.PrivateKey
@@ -28,11 +28,6 @@ object CryptoOperations {
         Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
     }
 
-    fun sign(payload: ByteArray, keyId: String, alg: SigningAlgorithm): ByteArray {
-        val signingKey = EncryptedKeyStore.getKey<PrivateKey>(keyId)
-        return sign(payload, signingKey, alg)
-    }
-
     fun sign(payload: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
         val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
             .apply {
@@ -41,11 +36,6 @@ object CryptoOperations {
                 if (alg.spec != null) setParameter(alg.spec)
             }
         return signer.sign()
-    }
-
-    fun verify(payload: ByteArray, keyId: String, alg: SigningAlgorithm): Boolean {
-        val publicKey = EncryptedKeyStore.getKey<PublicKey>(keyId)
-        return verify(payload, publicKey, alg)
     }
 
     fun verify(payload: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
@@ -63,20 +53,10 @@ object CryptoOperations {
         return messageDigest.digest(payload)
     }
 
-    fun encrypt(payload: ByteArray, keyId: String, alg: CipherAlgorithm): ByteArray {
-        val secretKey = EncryptedKeyStore.getKey<SecretKey>(keyId)
-        return encrypt(payload, secretKey, alg)
-    }
-
     fun encrypt(payload: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
         val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
         cipher.init(ENCRYPT_MODE, key)
         return cipher.doFinal(payload)
-    }
-
-    fun decrypt(payload: ByteArray, keyId: String, alg: CipherAlgorithm): ByteArray {
-        val secretKey = EncryptedKeyStore.getKey<SecretKey>(keyId)
-        return encrypt(payload, secretKey, alg)
     }
 
     fun decrypt(payload: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
@@ -91,13 +71,10 @@ object CryptoOperations {
         return mac.doFinal(payload)
     }
 
-    fun generateKeyPair(keyId: String, alg: KeyGenAlgorithm): PublicKey {
-        val keyGen =
-            if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
+    fun generateKeyPair(alg: KeyGenAlgorithm): KeyPair {
+        val keyGen = if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
         keyGen.initialize(alg.spec)
-        val keyPair = keyGen.genKeyPair()
-        EncryptedKeyStore.storeKeyPair(keyPair, keyId)
-        return keyPair.public
+        return keyGen.genKeyPair()
     }
 
     fun generatePrivateKey(alg: KeyAlgorithm): PrivateKey {
@@ -111,16 +88,11 @@ object CryptoOperations {
     }
 
     /**
-     * Generates and stores a 256 bit seed.
+     * Generates a 256 bit seed.
      */
-    fun generateSeed(persona: String) {
+    fun generateSeed(): SecretKey {
         val randomNumberGenerator = SecureRandom()
         val seed = randomNumberGenerator.generateSeed(16)
-        val secretKey = SecretKeySpec(seed, "RAW")
-        EncryptedKeyStore.storeSecretKey(secretKey, persona)
-    }
-
-    fun getSeed(persona: String): ByteArray {
-        return EncryptedKeyStore.getKey<SecretKeySpec>(persona).encoded
+        return SecretKeySpec(seed, "RAW")
     }
 }
