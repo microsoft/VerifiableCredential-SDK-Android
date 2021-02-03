@@ -59,6 +59,17 @@ enum class W3cCryptoApiConstants(val value: String) {
     AesKw("AES-KW"),
 
     Hmac("HMAC"),
+    HmacSha256("HmacSha256"),
+    HmacSha384("HmacSha384"),
     HmacSha512("HmacSha512"),
-    HmacSha256("HmacSha256")
+
+    Pbkdf2("PBKDF2"),
+
+    /**
+     * @see https://tools.ietf.org/html/rfc7518#section-5.2.3
+     */
+    Aes128CbcHmacSha256("AES_128_CBC_HMAC_SHA_256"),
+    Aes192CbcHmacSha384("AES_129_CBC_HMAC_SHA_384"),
+    Aes256CbcHmacSha512("AES_256_CBC_HMAC_SHA_512"),
+
 }

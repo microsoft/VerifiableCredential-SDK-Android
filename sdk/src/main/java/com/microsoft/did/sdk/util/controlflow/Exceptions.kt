@@ -23,6 +23,8 @@ class UnSupportedAlgorithmException(message: String, cause: Throwable? = null) :
 
 class SignatureException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
+class EncryptionException(message: String, cause: Throwable? = null): CryptoException(message, cause)
+
 class EncodingException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
 class PairwiseKeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
