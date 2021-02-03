@@ -9,7 +9,6 @@ import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocume
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentPublicKeyInput
 import com.microsoft.did.sdk.util.Constants.IDENTIFIER_PUBLIC_KEY_PURPOSE
 import com.microsoft.did.sdk.util.Constants.SIDETREE_PATCH_ACTION
-import com.microsoft.did.sdk.util.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import javax.inject.Inject

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.di
+package com.microsoft.did.sdk.datasource.network.interceptors
 
 import com.microsoft.did.sdk.util.Constants.USER_AGENT_HEADER
 import okhttp3.Interceptor

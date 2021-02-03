@@ -18,7 +18,6 @@ import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.util.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer

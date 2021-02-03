@@ -5,7 +5,6 @@
 
 package com.microsoft.did.sdk.crypto
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -24,7 +23,6 @@ import javax.crypto.SecretKey
 
 object CryptoOperations {
     init {
-        Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)
         Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
     }
 

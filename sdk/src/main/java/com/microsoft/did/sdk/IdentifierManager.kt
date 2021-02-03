@@ -18,7 +18,6 @@ import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.did.sdk.util.stringToByteArray
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -78,6 +77,6 @@ class IdentifierManager @Inject constructor(
 
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
-        return Base64.encodeToString(digest.digest(stringToByteArray(peerId)), Constants.BASE64_URL_SAFE)
+        return Base64.encodeToString(digest.digest(peerId.toByteArray()), Constants.BASE64_URL_SAFE)
     }
 }
