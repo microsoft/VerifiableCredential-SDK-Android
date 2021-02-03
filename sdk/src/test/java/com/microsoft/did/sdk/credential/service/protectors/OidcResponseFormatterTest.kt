@@ -12,9 +12,10 @@ import com.microsoft.did.sdk.credential.service.models.attestations.Presentation
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keys.KeyContainer
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSurrogate
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -24,15 +25,13 @@ import io.mockk.mockk
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.security.PublicKey
 import kotlin.test.assertEquals
 
 class OidcResponseFormatterTest {
 
     // mocks for retrieving public key.
-    private val mockedCryptoOperations: CryptoOperations = mockk()
-    private val mockedKeyStore: KeyStore = mockk()
-    private val mockedKeyContainer: KeyContainer<PublicKey> = mockk()
-    private val mockedPublicKey: PublicKey = mockk()
+    private val mockedKeyStore: EncryptedKeyStore = mockk()
 
     private val mockedTokenSigner: TokenSigner = mockk()
     private val slot = slot<String>()
@@ -83,21 +82,21 @@ class OidcResponseFormatterTest {
 
     init {
         issuanceResponseFormatter = IssuanceResponseFormatter(
-            mockedCryptoOperations,
             defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
-            mockedTokenSigner
+            mockedTokenSigner,
+            mockedKeyStore
         )
         presentationResponseFormatter = PresentationResponseFormatter(
-            mockedCryptoOperations,
             defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
-            mockedTokenSigner
+            mockedTokenSigner,
+            mockedKeyStore
         )
         revocationResponseFormatter = RevocationResponseFormatter(
-            mockedCryptoOperations,
             defaultTestSerializer,
-            mockedTokenSigner
+            mockedTokenSigner,
+            mockedKeyStore
         )
         setUpGetPublicKey()
         setUpExpectedPresentations()
@@ -118,11 +117,6 @@ class OidcResponseFormatterTest {
     private fun setUpGetPublicKey() {
         every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
         every { mockedIdentifier.id } returns expectedDid
-        every { mockedCryptoOperations.keyStore } returns mockedKeyStore
-        every { mockedKeyStore.getKey(signingKeyRef) } returns mockedKeyContainer
-        every { mockedKeyContainer.getKey() } returns mockedPublicKey
-        every { mockedPublicKey.getThumbprint(mockedCryptoOperations, Sha.SHA256.algorithm) } returns expectedThumbprint
-        every { mockedPublicKey.toJWK() } returns expectedJsonWebKey
     }
 
     private fun setUpExpectedPresentations() {

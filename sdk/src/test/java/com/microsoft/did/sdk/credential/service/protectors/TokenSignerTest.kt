@@ -1,9 +1,10 @@
 package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keys.KeyContainer
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.nimbusds.jose.jwk.ECKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
@@ -16,10 +17,8 @@ class TokenSignerTest {
 
     // mocks for retrieving kid.
     private val mockedCryptoOperations: CryptoOperations = mockk()
-    private val mockedKeyStore: KeyStore = mockk()
-    private val mockedKeyContainer: KeyContainer<PrivateKey> = mockk()
-    private val mockedPrivateKey: PrivateKey = mockk()
-
+    private val mockedKeyStore: EncryptedKeyStore = mockk()
+    private val mockKey: ECKey = mockk()
     private val mockedIdentifier: Identifier = mockk()
 
     private val slot = slot<Map<String, String>>()
@@ -38,18 +37,9 @@ class TokenSignerTest {
     private val expectedSignedPayload = "signedPayload45236"
 
     init {
-        signer = TokenSigner(mockedCryptoOperations, serializer)
-        setUpGetPrivateKey()
+        signer = TokenSigner(mockedKeyStore)
         setUpIdentifier()
         mockkConstructor(JwsToken::class)
-    }
-
-    private fun setUpGetPrivateKey() {
-        every { mockedCryptoOperations.keyStore } returns mockedKeyStore
-        every { mockedKeyStore.getPrivateKey(signingKeyRef) } returns mockedKeyContainer
-        every { mockedKeyContainer.getKey() } returns mockedPrivateKey
-        every { mockedPrivateKey.kid } returns expectedKid
-        every { mockedPrivateKey.alg } returns expectedAlg
     }
 
     //
@@ -61,13 +51,10 @@ class TokenSignerTest {
     @Test
     fun signPayloadTest() {
         every {
-            anyConstructed<JwsToken>().sign(signingKeyRef, mockedCryptoOperations, capture(slot))
-        } answers {
-            assertEquals(expectedHeader, slot.captured)
-        }
-        every { anyConstructed<JwsToken>().serialize(serializer) } returns expectedSignedPayload
+            anyConstructed<JwsToken>().sign(mockKey)
+        } answers { }
+        every { anyConstructed<JwsToken>().serialize() } returns expectedSignedPayload
         val actualSignedPayload = signer.signWithIdentifier(expectedPayload, mockedIdentifier)
         assertEquals(expectedSignedPayload, actualSignedPayload)
-
     }
 }
