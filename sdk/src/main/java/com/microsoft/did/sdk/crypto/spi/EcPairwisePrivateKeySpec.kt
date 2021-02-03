@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.crypto.spi
 import java.security.spec.KeySpec
 
 class EcPairwisePrivateKeySpec(
-    val seed: ByteArray,
+    val personaSeed: ByteArray,
     val userDid: String,
     val peerDid: String
 ) : KeySpec

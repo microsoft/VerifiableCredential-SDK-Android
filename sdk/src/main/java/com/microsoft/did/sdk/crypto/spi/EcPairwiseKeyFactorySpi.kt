@@ -39,8 +39,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
         val ecKeySpec = keySpec as? EcPairwisePrivateKeySpec
             ?: throw InvalidKeySpecException("Keyspec has to be of type ${EcPairwisePrivateKeySpec::class.qualifiedName}")
 
-        val masterKey = computeMac(ecKeySpec.userDid.toByteArray(), ecKeySpec.seed)
-        val pairwiseKeySeedSigned = computeMac(ecKeySpec.peerDid.toByteArray(), masterKey)
+        val pairwiseKeySeedSigned = computeMac(ecKeySpec.peerDid.toByteArray(), ecKeySpec.personaSeed)
         val pairwiseKeySeedUnsigned = reduceKeySeedSizeAndConvertToUnsigned(pairwiseKeySeedSigned)
 
         return CryptoOperations.generateKey(PrivateKeyFactoryAlgorithm.Secp256k1(BigInteger(1, pairwiseKeySeedUnsigned)))
