@@ -22,32 +22,34 @@ object JwkSerializer : KSerializer<JWK> {
         val okpJwk = value as? OctetKeyPair
         encoder.encodeSerializableValue(
             JwkSurrogate.serializer(), JwkSurrogate(
-            kty = value.keyType.value,
-            kid = value.keyID,
-            use = value.keyUse?.value,
-            key_ops = value.keyOperations?.toList()?.map { it.identifier() },
-            alg = value.algorithm?.name,
-            crv = ecJwk?.curve?.stdName ?: okpJwk?.curve?.stdName,
-            x = ecJwk?.x?.toString() ?: okpJwk?.x?.toString(),
-            y = ecJwk?.y?.toString(),
-            d = ecJwk?.d?.toString() ?: rsaJwk?.privateExponent?.toString() ?:
-                okpJwk?.d?.toString(),
-            n = rsaJwk?.modulus?.toString(),
-            e = rsaJwk?.publicExponent?.toString(),
-            p = rsaJwk?.firstPrimeFactor?.toString(),
-            q = rsaJwk?.secondPrimeFactor?.toString(),
-            dp = rsaJwk?.firstFactorCRTExponent?.toString(),
-            dq = rsaJwk?.secondFactorCRTExponent?.toString(),
-            qi = rsaJwk?.firstCRTCoefficient?.toString(),
-            oth = rsaJwk?.otherPrimes?.map { JwkSurrogate.RsaOtherPrimesInfo(
-                r = it.primeFactor.toString(),
-                d = it.factorCRTExponent.toString(),
-                t = it.factorCRTCoefficient.toString()
-            )},
-            k = octJwk?.keyValue?.toString()
-        )
+                kty = value.keyType.value,
+                kid = value.keyID,
+                use = value.keyUse?.value,
+                key_ops = value.keyOperations?.toList()?.map { it.identifier() },
+                alg = value.algorithm?.name,
+                crv = ecJwk?.curve?.stdName ?: okpJwk?.curve?.stdName,
+                x = ecJwk?.x?.toString() ?: okpJwk?.x?.toString(),
+                y = ecJwk?.y?.toString(),
+                d = ecJwk?.d?.toString() ?: rsaJwk?.privateExponent?.toString() ?: okpJwk?.d?.toString(),
+                n = rsaJwk?.modulus?.toString(),
+                e = rsaJwk?.publicExponent?.toString(),
+                p = rsaJwk?.firstPrimeFactor?.toString(),
+                q = rsaJwk?.secondPrimeFactor?.toString(),
+                dp = rsaJwk?.firstFactorCRTExponent?.toString(),
+                dq = rsaJwk?.secondFactorCRTExponent?.toString(),
+                qi = rsaJwk?.firstCRTCoefficient?.toString(),
+                oth = rsaJwk?.otherPrimes?.map {
+                    JwkSurrogate.RsaOtherPrimesInfo(
+                        r = it.primeFactor.toString(),
+                        d = it.factorCRTExponent.toString(),
+                        t = it.factorCRTCoefficient.toString()
+                    )
+                },
+                k = octJwk?.keyValue?.toString()
+            )
         )
     }
+
     override fun deserialize(decoder: Decoder): JWK {
         val jsonWebKey = decoder.decodeSerializableValue(JwkSurrogate.serializer())
         return JWK.parse(Json.encodeToString(JwkSurrogate.serializer(), jsonWebKey))

@@ -19,9 +19,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.stringToByteArray
-import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.OctetSequenceKey
-import java.security.KeyStore
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton

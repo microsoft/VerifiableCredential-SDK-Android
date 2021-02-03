@@ -6,9 +6,9 @@ package com.microsoft.did.sdk.identifier
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.KeyGenAlgorithm
 import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
+import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec

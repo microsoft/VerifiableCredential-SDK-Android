@@ -72,7 +72,8 @@ object CryptoOperations {
     }
 
     fun generateKeyPair(alg: KeyGenAlgorithm): KeyPair {
-        val keyGen = if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
+        val keyGen =
+            if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
         keyGen.initialize(alg.spec)
         return keyGen.genKeyPair()
     }

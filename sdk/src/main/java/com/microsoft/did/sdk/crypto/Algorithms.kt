@@ -20,13 +20,12 @@ abstract class DigestAlgorithm(val name: String, val provider: String?) {
     class Sha256 : DigestAlgorithm("SHA-256", null)
 }
 
-abstract class CipherAlgorithm(val name: String, val provider: String?) {
-
-}
+abstract class CipherAlgorithm(val name: String, val provider: String?)
 
 abstract class PrivateKeyFactoryAlgorithm(val name: String, val provider: String?, val keySpec: KeySpec) {
     class EcPairwise(ecPairwisePrivateKeySpec: EcPairwisePrivateKeySpec) :
         PrivateKeyFactoryAlgorithm("ecPairwise", "DID", ecPairwisePrivateKeySpec)
+
     class Secp256k1(s: BigInteger) :
         PrivateKeyFactoryAlgorithm("EC", null, ECPrivateKeySpec(s, Curve.SECP256K1.toECParameterSpec()))
 }
@@ -34,6 +33,7 @@ abstract class PrivateKeyFactoryAlgorithm(val name: String, val provider: String
 abstract class PublicKeyFactoryAlgorithm(val name: String, val provider: String?, val keySpec: KeySpec) {
     class Secp256k1(x: BigInteger, y: BigInteger) :
         PublicKeyFactoryAlgorithm("EC", null, ECPublicKeySpec(ECPoint(x, y), Curve.SECP256K1.toECParameterSpec()))
+
     class EcPairwise(ecPairwisePublicKeySpec: EcPairwisePublicKeySpec) :
         PublicKeyFactoryAlgorithm("ecPairwise", "DID", ecPairwisePublicKeySpec)
 }
