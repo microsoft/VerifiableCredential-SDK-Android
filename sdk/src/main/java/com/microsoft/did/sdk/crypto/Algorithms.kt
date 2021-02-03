@@ -45,5 +45,5 @@ abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec
 }
 
 abstract class MacAlgorithm(val name: String, val provider: String?) {
-    class Hmac512 : MacAlgorithm("HMAC512", null)
+    class HmacSha512 : MacAlgorithm("HmacSHA512", null)
 }

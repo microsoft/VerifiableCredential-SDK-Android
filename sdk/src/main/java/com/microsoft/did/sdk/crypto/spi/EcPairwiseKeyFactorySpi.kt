@@ -3,6 +3,7 @@
 package com.microsoft.did.sdk.crypto.spi
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.MacAlgorithm
 import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.util.Constants
@@ -41,10 +42,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
     }
 
     private fun computeMac(payload: ByteArray, seed: ByteArray): ByteArray {
-        val mac = Mac.getInstance("HmacSHA512").apply {
-            init(SecretKeySpec(seed, "AES"))
-        }
-        return mac.doFinal(payload)
+        return CryptoOperations.computeMac(payload, SecretKeySpec(seed, "AES"), MacAlgorithm.HmacSha512())
     }
 
     override fun <T : KeySpec?> engineGetKeySpec(key: Key?, keySpec: Class<T>?): T {
