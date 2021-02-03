@@ -134,7 +134,7 @@ class IdentifierCreator @Inject constructor(
         return "$identifierShortForm${Constants.COLON}$registrationPayloadCanonicalizedEncoded"
     }
 
-    private fun pairwiseIdentifierName(personaDid: String, peerId: String): String {
+    fun pairwiseIdentifierName(personaDid: String, peerId: String): String {
         val concatDids = personaDid + peerId
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64.encodeToString(digest.digest(concatDids.toByteArray()), Constants.BASE64_URL_SAFE)

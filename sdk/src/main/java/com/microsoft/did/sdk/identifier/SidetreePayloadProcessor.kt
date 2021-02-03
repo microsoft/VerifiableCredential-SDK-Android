@@ -30,22 +30,9 @@ class SidetreePayloadProcessor @Inject constructor(
         updatePublicKey: JWK
     ): RegistrationPayload {
         val identifierDocumentPatch = createIdentifierDocumentPatch(signingPublicKey)
-        val patchData = createPatchData(identifierDocumentPatch, generatePublicKeyJwk(updatePublicKey))
-        val suffixData = createSuffixData(patchData, generatePublicKeyJwk(recoveryPublicKey))
+        val patchData = createPatchData(identifierDocumentPatch, updatePublicKey)
+        val suffixData = createSuffixData(patchData, recoveryPublicKey)
         return RegistrationPayload(suffixData, patchData)
-    }
-
-    private fun generatePublicKeyJwk(publicKeyJwk: JWK): JWK {
-        return publicKeyJwk
-        // TODO: verify the params kty, crv, x, y are properly set on this JWK, otherwise apply below code:
-//        return when (publicKeyJwk.keyType) {
-//            KeyType.RSA.value -> publicKeyJwk
-//            else -> {
-//                //Sidetree api specifically checks for curve name for elliptic curve keys. Hence it is set here.
-//                val curveName = SECP256K1_CURVE_NAME_EC
-//                JsonWebKey(kty = publicKeyJwk.kty, crv = curveName, x = publicKeyJwk.x, y = publicKeyJwk.y)
-//            }
-//        }
     }
 
     private fun createDocumentPayload(signingPublicKey: JWK): IdentifierDocumentPayload {
@@ -54,7 +41,7 @@ class SidetreePayloadProcessor @Inject constructor(
                 IdentifierDocumentPublicKeyInput(
                     id = signingPublicKey.keyID,
                     type = LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values.first(),
-                    publicKeyJwk = generatePublicKeyJwk(signingPublicKey),
+                    publicKeyJwk = signingPublicKey,
                     purpose = listOf(IDENTIFIER_PUBLIC_KEY_PURPOSE)
                 )
             )

@@ -5,21 +5,17 @@
 
 package com.microsoft.did.sdk
 
-import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import com.nimbusds.jose.jwk.OctetSequenceKey
-import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,21 +58,17 @@ class IdentifierManager @Inject constructor(
         }
     }
 
-    suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
+    suspend fun getOrCreatePairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
         return runResultTry {
-            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
-                null -> {
-                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier, peerId)
-                    identifierRepository.insert(registeredIdentifier)
-                    Result.Success(registeredIdentifier)
-                }
-                else -> Result.Success(pairwiseIdentifier)
-            }
+            val pairwiseName = identifierCreator.pairwiseIdentifierName(identifier.id, peerId)
+            val pairwiseIdentifier = identifierRepository.queryByName(pairwiseName) ?: createPairwiseIdentifier(identifier, peerId)
+            Result.Success(pairwiseIdentifier)
         }
     }
 
-    private fun pairwiseIdentifierName(peerId: String): String {
-        val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
-        return Base64.encodeToString(digest.digest(peerId.toByteArray()), Constants.BASE64_URL_SAFE)
+    private suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Identifier {
+        val registeredIdentifier = identifierCreator.createPairwiseId(identifier, peerId)
+        identifierRepository.insert(registeredIdentifier)
+        return registeredIdentifier
     }
 }

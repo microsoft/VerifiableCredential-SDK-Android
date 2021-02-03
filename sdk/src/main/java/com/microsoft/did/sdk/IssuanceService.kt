@@ -69,7 +69,7 @@ class IssuanceService @Inject constructor(
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             val verifiableCredential = if (enablePairwise) {
                 val pairwiseIdentifier =
-                    identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
+                    identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
                 val requestedVcMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
                 formAndSendResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
             } else {

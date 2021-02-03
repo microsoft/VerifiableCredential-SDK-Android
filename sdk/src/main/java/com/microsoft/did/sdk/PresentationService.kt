@@ -96,7 +96,7 @@ class PresentationService @Inject constructor(
             val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
             if (enablePairwise) {
                 val pairwiseIdentifier =
-                    identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
+                    identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
                 val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
                 formAndSendResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
             } else {
