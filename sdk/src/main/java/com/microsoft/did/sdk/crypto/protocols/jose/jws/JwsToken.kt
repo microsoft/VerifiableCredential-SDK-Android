@@ -16,7 +16,7 @@ import java.security.PublicKey
 import java.security.interfaces.ECPublicKey
 
 class JwsToken private constructor(
-    private val jwsObject: JWSObject
+    private var jwsObject: JWSObject
 ) {
     private val builder = JWSHeader.Builder(jwsObject.header)
 
@@ -51,9 +51,9 @@ class JwsToken private constructor(
     }
 
     fun sign(privateKey: JWK) {
-        val out = JWSObject(builder.build(), jwsObject.payload)
+        jwsObject = JWSObject(builder.build(), jwsObject.payload)
         val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
-        out.sign(signer)
+        jwsObject.sign(signer)
     }
 
     fun verify(publicKeys: List<PublicKey> = emptyList()): Boolean {
