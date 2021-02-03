@@ -42,26 +42,5 @@ data class IdentifierDocumentPublicKey(
 ) {
     fun toPublicKey(): PublicKey {
         return KeyConverter.toJavaKeys(listOf(publicKeyJwk)).first() as PublicKey
-//        when (type) {
-//            in LinkedDataKeySpecification.RsaSignature2018.values -> {
-//                val n = Base64URL.from(publicKeyJwk.n).decodeToBigInteger()
-//                val e = Base64URL.from(publicKeyJwk.e).decodeToBigInteger()
-//                return CryptoOperations.generateKey(PublicKeyFactoryAlgorithm.RsaPublic(RSAPublicKeySpec(n, e)))
-//            }
-//            in LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values -> {
-//                val x = Base64URL.from(publicKeyJwk.x).decodeToBigInteger()
-//                val y = Base64URL.from(publicKeyJwk.y).decodeToBigInteger()
-//                return CryptoOperations.generateKey(PublicKeyFactoryAlgorithm.Secp256k1(x, y))
-//            }
-//            in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
-//                throw KeyException("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
-//            }
-//            in LinkedDataKeySpecification.Ed25519Signature2018.values -> {
-//                throw KeyException("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
-//            }
-//            else -> {
-//                throw KeyException("Unknown key type: $type")
-//            }
-//        }
     }
 }
