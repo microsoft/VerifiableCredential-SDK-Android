@@ -1,29 +1,27 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.crypto.keyStore
+package com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.jwk.RSAKey
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 
 object JwkSerializer : KSerializer<JWK> {
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("JWK", PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor = JwkSurrogate.serializer().descriptor
     override fun serialize(encoder: Encoder, value: JWK) {
         val ecJwk = value as? ECKey
         val rsaJwk = value as? RSAKey
         val octJwk = value as? OctetSequenceKey
         val okpJwk = value as? OctetKeyPair
-        encoder.encodeSerializableValue(JsonWebKey.serializer(), JsonWebKey(
+        encoder.encodeSerializableValue(
+            JwkSurrogate.serializer(), JwkSurrogate(
             kty = value.keyType.value,
             kid = value.keyID,
             use = value.keyUse?.value,
@@ -41,16 +39,17 @@ object JwkSerializer : KSerializer<JWK> {
             dp = rsaJwk?.firstFactorCRTExponent?.toString(),
             dq = rsaJwk?.secondFactorCRTExponent?.toString(),
             qi = rsaJwk?.firstCRTCoefficient?.toString(),
-            oth = rsaJwk?.otherPrimes?.map { JsonWebKey.RsaOtherPrimesInfo(
+            oth = rsaJwk?.otherPrimes?.map { JwkSurrogate.RsaOtherPrimesInfo(
                 r = it.primeFactor.toString(),
                 d = it.factorCRTExponent.toString(),
                 t = it.factorCRTCoefficient.toString()
             )},
             k = octJwk?.keyValue?.toString()
-        ))
+        )
+        )
     }
     override fun deserialize(decoder: Decoder): JWK {
-        val jsonWebKey = decoder.decodeSerializableValue(JsonWebKey.serializer())
-        return JWK.parse(Json.encodeToString(JsonWebKey.serializer(), jsonWebKey))
+        val jsonWebKey = decoder.decodeSerializableValue(JwkSurrogate.serializer())
+        return JWK.parse(Json.encodeToString(JwkSurrogate.serializer(), jsonWebKey))
     }
 }

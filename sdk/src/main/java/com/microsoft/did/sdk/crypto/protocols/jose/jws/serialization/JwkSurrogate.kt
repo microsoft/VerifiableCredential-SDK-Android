@@ -1,9 +1,11 @@
-package com.microsoft.did.sdk.crypto.models.webCryptoApi
+// Copyright (c) Microsoft Corporation. All rights reserved
+
+package com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class JsonWebKey(
+data class JwkSurrogate(
     // The following fields are defined in Section 3.1 of JSON Web Key
     var kty: String = "",
     var kid: String? = null,

@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.identifier.models.identifierdocument
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSurrogate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,5 +10,5 @@ import kotlinx.serialization.Serializable
 data class IdentifierMetadata(
     @SerialName("operationPublicKeys")
     val operationPublicKeys: List<IdentifierDocumentPublicKey>? = null,
-    val recoveryKey: JsonWebKey? = null
+    val recoveryKey: JwkSurrogate? = null
 )

@@ -2,7 +2,7 @@ package com.microsoft.did.sdk.util
 
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.RevocationServiceResponse
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSurrogate
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocumentPublicKey
 import org.assertj.core.api.Assertions.assertThat
@@ -17,7 +17,7 @@ class SerializationTest {
                     id = "#signingKey",
                     type = "Secp256k1VerificationKey2018",
                     controller = "did:test:hub.id",
-                    publicKeyJwk = JsonWebKey(
+                    publicKeyJwk = JwkSurrogate(
                         kty = "EC",
                         crv = "secp256k1",
                         x = "AEaA_TMpNsRwmZNwe70z2q_dz1rQ7G8gN0_UAydEMyU",

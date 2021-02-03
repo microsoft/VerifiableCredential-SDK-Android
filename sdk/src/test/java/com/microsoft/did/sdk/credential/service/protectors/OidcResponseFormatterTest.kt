@@ -15,8 +15,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseCl
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keys.KeyContainer
-import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSurrogate
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.defaultTestSerializer
@@ -53,7 +52,7 @@ class OidcResponseFormatterTest {
     private val expectedPresentationAudience: String = "audience6237"
     private val expectedThumbprint: String = "thumbprint534233"
     private val expectedExpiry: Int = 42
-    private val expectedJsonWebKey = JsonWebKey()
+    private val expectedJsonWebKey = JwkSurrogate()
     private val expectedVerifiablePresentation = "expectedPresentation"
     private val expectedSelfAttestedField = "testField3423442"
     private val expectedIdTokenConfig = "testIdTokenConfig234"

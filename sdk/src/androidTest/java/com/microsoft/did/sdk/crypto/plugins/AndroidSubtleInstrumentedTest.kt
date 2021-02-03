@@ -8,16 +8,6 @@ package com.microsoft.did.sdk.crypto.plugins
 import android.content.Context
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyType
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
-import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
 import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
