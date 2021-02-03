@@ -5,6 +5,8 @@
 
 package com.microsoft.did.sdk.util
 
+import android.util.Base64
+
 object Constants {
 
     // OIDC Protocol Constants
@@ -54,4 +56,7 @@ object Constants {
     const val USER_AGENT_HEADER = "User-Agent"
     const val CORRELATION_VECTOR_HEADER = "ms-cv"
     const val REQUEST_ID_HEADER = "request-id"
+
+    //  Base64 Encoding flags
+    const val BASE64_URL_SAFE = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
 }

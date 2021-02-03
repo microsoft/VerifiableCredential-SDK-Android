@@ -11,6 +11,7 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
@@ -79,6 +80,6 @@ class IdentifierManager @Inject constructor(
 
     private fun pairwiseIdentifierName(peerId: String): String {
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
-        return Base64.encodeToString(digest.digest(stringToByteArray(peerId)), Base64.URL_SAFE)
+        return Base64.encodeToString(digest.digest(stringToByteArray(peerId)), Constants.BASE64_URL_SAFE)
     }
 }

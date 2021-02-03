@@ -78,7 +78,7 @@ class IdentifierCreator @Inject constructor(
     }
 
     private fun generateRandomKeyId(): String {
-        return Base64.encodeToString(Random.nextBytes(16), Base64.URL_SAFE)
+        return Base64.encodeToString(Random.nextBytes(16), Constants.BASE64_URL_SAFE)
     }
 
     fun createPairwiseId(persona: Identifier, peerId: String): Identifier {
@@ -123,7 +123,7 @@ class IdentifierCreator @Inject constructor(
     private fun computeLongFormIdentifier(registrationPayload: RegistrationPayload): String {
         val registrationPayloadString = serializer.encodeToString(RegistrationPayload.serializer(), registrationPayload)
         val registrationPayloadCanonicalized = JsonCanonicalizer(registrationPayloadString).encodedUTF8
-        val registrationPayloadCanonicalizedEncoded = Base64.encodeToString(registrationPayloadCanonicalized, Base64.URL_SAFE)
+        val registrationPayloadCanonicalizedEncoded = Base64.encodeToString(registrationPayloadCanonicalized, Constants.BASE64_URL_SAFE)
         val identifierShortForm = computeDidShortFormIdentifier(registrationPayload)
         return "$identifierShortForm${Constants.COLON}$registrationPayloadCanonicalizedEncoded"
     }
@@ -131,6 +131,6 @@ class IdentifierCreator @Inject constructor(
     private fun pairwiseIdentifierName(personaDid: String, peerId: String): String {
         val concatDids = personaDid + peerId
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
-        return Base64.encodeToString(digest.digest(concatDids.toByteArray()), Base64.URL_SAFE)
+        return Base64.encodeToString(digest.digest(concatDids.toByteArray()), Constants.BASE64_URL_SAFE)
     }
 }

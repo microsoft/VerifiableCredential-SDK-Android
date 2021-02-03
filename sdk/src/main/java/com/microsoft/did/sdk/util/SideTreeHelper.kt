@@ -15,7 +15,7 @@ class SideTreeHelper @Inject constructor() {
         val jsonCanonicalizer = JsonCanonicalizer(json)
         val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
         val hashedInfo = prependMultiHashInfo(hashed)
-        return Base64.encodeToString(hashedInfo, Base64.URL_SAFE)
+        return Base64.encodeToString(hashedInfo, Constants.BASE64_URL_SAFE)
     }
 
     /**
@@ -33,7 +33,7 @@ class SideTreeHelper @Inject constructor() {
         val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
         val doubleHashed = CryptoOperations.digest(hashed, DigestAlgorithm.Sha256())
         val doubleHashedInfo = prependMultiHashInfo(doubleHashed)
-        return Base64.encodeToString(doubleHashedInfo, Base64.URL_SAFE)
+        return Base64.encodeToString(doubleHashedInfo, Constants.BASE64_URL_SAFE)
     }
 
     /**
