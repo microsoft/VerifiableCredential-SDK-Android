@@ -17,7 +17,6 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.spec.InvalidKeySpecException
 import java.security.spec.KeySpec
-import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
 class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
@@ -27,7 +26,13 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
 
         val ecSpec: ECParameterSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
         val q: ECPoint = ecSpec.g.multiply(ecKeySpec.privateKey.s)
-        return CryptoOperations.generateKey(PublicKeyFactoryAlgorithm.Secp256k1(q.xCoord.toBigInteger(), q.yCoord.toBigInteger()))
+        val qNormalized = q.normalize()
+        return CryptoOperations.generateKey(
+            PublicKeyFactoryAlgorithm.Secp256k1(
+                qNormalized.affineXCoord.toBigInteger(),
+                qNormalized.affineYCoord.toBigInteger()
+            )
+        )
     }
 
     override fun engineGeneratePrivate(keySpec: KeySpec?): PrivateKey {

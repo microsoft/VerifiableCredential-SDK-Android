@@ -22,10 +22,10 @@ import com.microsoft.did.sdk.util.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
-import org.bouncycastle.jce.interfaces.ECPublicKey
 import java.security.KeyPair
 import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
+import java.security.interfaces.ECPublicKey
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
