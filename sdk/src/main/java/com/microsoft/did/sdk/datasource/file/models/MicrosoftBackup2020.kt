@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.datasource.file.models
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.util.formVerifiableCredential
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 /**
  * @constructor
@@ -20,14 +21,15 @@ data class MicrosoftBackup2020 (
 ) {
     val type = "MicrosoftWallet2020"
 
-    fun vcsToIterator(): Iterator<Pair<VerifiableCredential, VCMetadata>> {
-        return VCIterator(vcs, vcsMetaInf)
+    fun vcsToIterator(serializer: Json): Iterator<Pair<VerifiableCredential, VCMetadata>> {
+        return VCIterator(vcs, vcsMetaInf, serializer)
     }
 
-    private class VCIterator: Iterator<Pair<VerifiableCredential, VCMetadata>> constructor (
+    private class VCIterator (
         val vcs: Map<String, String>,
-        val vcsMetaInf: Map<String, VCMetadata>
-    ) {
+        val vcsMetaInf: Map<String, VCMetadata>,
+        val serializer: Json
+    ) : Iterator<Pair<VerifiableCredential, VCMetadata>> {
         val jtis: Iterator<String> = vcs.keys.iterator()
 
         override fun hasNext(): Boolean {
@@ -36,7 +38,7 @@ data class MicrosoftBackup2020 (
 
         override fun next(): Pair<VerifiableCredential, VCMetadata> {
             val jti = jtis.next()
-            return Pair(formVerifiableCredential(vcs[jti]), vcsMetaInf[jti])
+            return Pair(formVerifiableCredential(vcs[jti]!!, serializer), vcsMetaInf[jti]!!)
         }
     }
 }

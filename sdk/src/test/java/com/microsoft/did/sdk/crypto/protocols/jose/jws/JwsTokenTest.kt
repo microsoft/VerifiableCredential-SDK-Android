@@ -44,33 +44,11 @@ class JwsTokenTest {
     }
 
     @Test
-    fun `test serialization of json in flat format`() {
-        val testData: ByteArray = stringToByteArray(payload)
-        val token = JwsToken(testData, defaultTestSerializer)
-        token.sign(keyRef, crypto)
-        val serialized = token.serialize(defaultTestSerializer, JwsFormat.FlatJson)
-        assertThat(serialized).doesNotContain("signatures")
-        val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
-        assertThat(verifyToken.signatures.size).isEqualTo(1)
-    }
-
-    @Test
-    fun `test serialization of json in general json format`() {
-        val testData: ByteArray = stringToByteArray(payload)
-        val token = JwsToken(testData, defaultTestSerializer)
-        token.sign(keyRef, crypto)
-        val serialized = token.serialize(defaultTestSerializer, JwsFormat.GeneralJson)
-        assertThat(serialized).contains("signatures")
-        val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
-        assertThat(verifyToken.signatures.size).isGreaterThanOrEqualTo(1)
-    }
-
-    @Test
     fun signAndVerify() {
         val testData = Random.Default.nextBytes(32)
         val token = JwsToken(testData)
         token.sign(keyRef, crypto)
-        val serialized = token.serialize(defaultTestSerializer, JwsFormat.Compact)
+        val serialized = token.serialize(defaultTestSerializer)
         val verifyToken = JwsToken.deserialize(serialized, defaultTestSerializer)
         Assertions.assertThatThrownBy {
             verifyToken.verify(crypto)

@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.AesKeyGenPara
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcdsaParams
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
-import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoConverter
+import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.di.defaultTestSerializer
 import com.microsoft.did.sdk.util.stringToByteArray
 import org.assertj.core.api.Assertions.assertThat
@@ -117,7 +117,7 @@ class AndroidSubtleInstrumentedTest {
         val actualJwk = androidSubtle.exportKeyJwk(cryptoKeyPair.publicKey)
 
         actualJwk.alg = cryptoKeyPair.publicKey.algorithm.name
-        val expectedAlgorithm = JwaCryptoConverter.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name)
+        val expectedAlgorithm = JwaCryptoHelper.jwaAlgToWebCrypto(cryptoKeyPair.publicKey.algorithm.name)
         val expectedKeyUsage = KeyUsage.Sign
         val expectedKeyType = KeyType.Public
         val actualCryptoKey = androidSubtle.importKey(KeyFormat.Jwk, actualJwk, expectedAlgorithm, false, listOf(KeyUsage.Sign))

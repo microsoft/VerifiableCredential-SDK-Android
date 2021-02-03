@@ -1,27 +1,19 @@
 package com.microsoft.did.sdk.datasource.file
 
 import android.content.Context
-import android.content.Intent
-import android.content.res.Resources
 import android.net.Uri
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
+import android.util.Base64
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.crypto.keys.KeyType;
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Base64Url
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.formVerifiableCredential
+import com.microsoft.did.sdk.util.Constants
+import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import java.io.BufferedInputStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.security.KeyException
@@ -30,7 +22,7 @@ import kotlin.random.Random
 
 class RestoreOperation @Inject constructor (
     private val identifierRepository: IdentifierRepository,
-    private val cryptoOperations: CryptoOperations,
+    private val keyStore: EncryptedKeyStore
     private val serializer: Json
 ) {
 
@@ -45,15 +37,19 @@ class RestoreOperation @Inject constructor (
         }
         val content = stringBuilder.toString()
         val token = JweToken.deserialize(content)
+        val secretKey = OctetSequenceKey.Builder(password.toByteArray())
+            .build()
         // transform password to a decryption key
 
-        return serializer.decodeFromString<MicrosoftBackup2020>(token.contentAsString)
+        token.decrypt(keyStore, secretKey)
+
+        return serializer.decodeFromString<MicrosoftBackup2020>("token.contentAsString")
     }
 
     private suspend fun restoreIdentifier (
         identifierData: RawIdentity
     ): Identifier {
-        val alias = Base64Url.encode(Random.nextBytes(2))
+        val alias = Base64.encodeToString(Random.nextBytes(2), Constants.BASE64_URL_SAFE)
         var signingKeyRef: String = ""
         var encryptingKeyRef: String = ""
         var recoveryKeyRef: String = ""
@@ -78,7 +74,6 @@ class RestoreOperation @Inject constructor (
         }
         val id = Identifier(
             identifierData.id,
-            alias,
             signingKeyRef,
             encryptingKeyRef,
             recoveryKeyRef,
@@ -93,31 +88,32 @@ class RestoreOperation @Inject constructor (
         jwk: JsonWebKey,
         alias: String
     ): String {
-        val key = when (jwk.kty) {
-            KeyType.RSA.value -> {
-                RsaPrivateKey(jwk)
-            }
-            KeyType.EllipticCurve.value -> {
-                EllipticCurvePrivateKey(jwk)
-            }
-            else -> {
-                throw KeyException("Unsupported key type ${jwk.kty}")
-            }
-        }
-        val knownKeys = cryptoOperations.keyStore.list().entries.filter {
-            it.value.kids.contains(key.kid)
-        }
-        if (knownKeys.isNotEmpty()) {
-            return knownKeys.first().key
-        }
-
-        val keyRef = "${alias}_${if (key.kid.isNullOrEmpty()) 
-            {
-                Base64Url.encode(Random.nextBytes(2))
-            } else{
-                key.kid
-            }}"
-        cryptoOperations.keyStore.save(keyRef, key);
-        return keyRef;
+//        val key = when (jwk.kty) {
+//            KeyType.RSA.value -> {
+//                RsaPrivateKey(jwk)
+//            }
+//            KeyType.EllipticCurve.value -> {
+//                EllipticCurvePrivateKey(jwk)
+//            }
+//            else -> {
+//                throw KeyException("Unsupported key type ${jwk.kty}")
+//            }
+//        }
+//        val knownKeys = cryptoOperations.keyStore.list().entries.filter {
+//            it.value.kids.contains(key.kid)
+//        }
+//        if (knownKeys.isNotEmpty()) {
+//            return knownKeys.first().key
+//        }
+//
+//        val keyRef = "${alias}_${if (key.kid.isNullOrEmpty())
+//            {
+//                Base64Url.encode(Random.nextBytes(2))
+//            } else{
+//                key.kid
+//            }}"
+//        cryptoOperations.keyStore.save(keyRef, key);
+//        return keyRef;
+        return ""
     }
 }
