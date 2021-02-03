@@ -177,7 +177,7 @@ class IssuanceServiceTest {
     }
 
     private fun unwrapContract(jwsTokenString: String): VerifiableCredentialContract {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, defaultTestSerializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         return defaultTestSerializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
     }
 }

@@ -26,7 +26,6 @@ class IdentifierDaoInstrumentedTest {
     fun insertAndRetrieveIdentifierByIdTest() {
         val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -44,7 +43,6 @@ class IdentifierDaoInstrumentedTest {
     fun insertIdentifierWithEmptyIdTest() {
         val suppliedIdentifier = Identifier(
             "",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -71,7 +69,6 @@ class IdentifierDaoInstrumentedTest {
     fun insertIdentifiersWithSameIdsFailingForSecondInsertTest() {
         val suppliedIdentifier1 = Identifier(
             "did:ion:test:testId",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -80,7 +77,6 @@ class IdentifierDaoInstrumentedTest {
         )
         val suppliedIdentifier2 = Identifier(
             "did:ion:test:testId",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -100,7 +96,6 @@ class IdentifierDaoInstrumentedTest {
     fun insertAndRetrieveIdentifierByNameTest() {
         val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -128,7 +123,6 @@ class IdentifierDaoInstrumentedTest {
     fun insertTwoIdentifiersWithSameNameAndRetrieveTest() {
         val suppliedIdentifier1 = Identifier(
             "did:ion:test:testId1",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -137,7 +131,6 @@ class IdentifierDaoInstrumentedTest {
         )
         val suppliedIdentifier2 = Identifier(
             "did:ion:test:testId2",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
