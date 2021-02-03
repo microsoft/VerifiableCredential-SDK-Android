@@ -6,6 +6,8 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -146,5 +148,11 @@ class SdkModule {
             ignoreUnknownKeys = true
             isLenient = true
         }
+    }
+
+    @Provides
+    @Singleton
+    fun defaultSharedPreferences(context: Context): SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(context)
     }
 }

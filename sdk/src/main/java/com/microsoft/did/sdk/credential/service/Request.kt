@@ -13,13 +13,13 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Pres
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class Request(val entityName: String, val entityIdentifier: String, val entityLinkedDomainResult: LinkedDomainResult? = null)
+sealed class Request(val entityName: String, val entityIdentifier: String, val entityLinkedDomainResult: LinkedDomainResult)
 
 @Serializable
 class IssuanceRequest(
     val contract: VerifiableCredentialContract,
     val contractUrl: String,
-    val linkedDomainResult: LinkedDomainResult? = null
+    val linkedDomainResult: LinkedDomainResult
 ) : Request(contract.display.card.issuedBy, contract.input.issuer, linkedDomainResult) {
     fun getAttestations(): CredentialAttestations {
         return contract.input.attestations
@@ -29,7 +29,7 @@ class IssuanceRequest(
 @Serializable
 class PresentationRequest(
     val content: PresentationRequestContent,
-    val linkedDomainResult: LinkedDomainResult? = null
+    val linkedDomainResult: LinkedDomainResult
 ) : Request(content.registration.clientName, content.issuer, linkedDomainResult) {
     fun getPresentationDefinition(): PresentationDefinition {
         return content.presentationDefinition

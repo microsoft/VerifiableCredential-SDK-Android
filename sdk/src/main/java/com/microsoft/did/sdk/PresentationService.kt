@@ -6,6 +6,7 @@ import android.net.Uri
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainDisabled
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
@@ -35,13 +36,14 @@ class PresentationService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter
 ) {
-    suspend fun getRequest(stringUri: String, isLinkedDomainsEnabled: Boolean): Result<PresentationRequest> {
+    suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
             val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
+            val isLinkedDomainsEnabled = VerifiableCredentialSdk.FeatureFlag.linkedDomains
             val linkedDomainResult =
                 if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
-                    .abortOnError() else null
+                    .abortOnError() else LinkedDomainDisabled()
             val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
             isRequestValid(request).abortOnError()
             Result.Success(request)
