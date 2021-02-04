@@ -1,7 +1,11 @@
+
+@file:UseSerializers(JwkSerializer::class)
 package com.microsoft.did.sdk.datasource.file.models
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.serialization.JwkSerializer
+import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 
 /**
  * @constructor
@@ -17,5 +21,5 @@ import kotlinx.serialization.Serializable
 data class RawIdentity (
     val id: String,
     val name: String,
-    val keys: List<JsonWebKey>
+    val keys: List<JWK>
 )

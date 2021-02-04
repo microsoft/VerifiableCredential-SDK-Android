@@ -4,25 +4,28 @@ import android.content.Context
 import android.net.Uri
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyOperation
+import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.security.KeyException
+import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import kotlin.random.Random
 
 class RestoreOperation @Inject constructor (
     private val identifierRepository: IdentifierRepository,
-    private val keyStore: EncryptedKeyStore
+    private val keyStore: EncryptedKeyStore,
     private val serializer: Json
 ) {
 
@@ -37,8 +40,7 @@ class RestoreOperation @Inject constructor (
         }
         val content = stringBuilder.toString()
         val token = JweToken.deserialize(content)
-        val secretKey = OctetSequenceKey.Builder(password.toByteArray())
-            .build()
+        val secretKey = SecretKeySpec(password.toByteArray(), "RAW")
         // transform password to a decryption key
 
         token.decrypt(keyStore, secretKey)
@@ -49,24 +51,21 @@ class RestoreOperation @Inject constructor (
     private suspend fun restoreIdentifier (
         identifierData: RawIdentity
     ): Identifier {
-        val alias = Base64.encodeToString(Random.nextBytes(2), Constants.BASE64_URL_SAFE)
         var signingKeyRef: String = ""
         var encryptingKeyRef: String = ""
         var recoveryKeyRef: String = ""
         var updateKeyRef: String = ""
         for (key in identifierData.keys) {
-            if (key.key_ops?.containsAll(listOf("sign", "verify")) == true) {
-                signingKeyRef = importKey(key, alias)
+            if (signingKeyRef.isBlank() &&
+                (key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
+                 key.keyUse == KeyUse.SIGNATURE)) {
+                signingKeyRef = importKey(key)
             }
-            if (key.key_ops?.containsAll(listOf("encrypt", "decrypt")) == true ||
-                key.key_ops?.containsAll(listOf("wrapKey", "unwrapKey")) == true) {
-                encryptingKeyRef = importKey(key, alias)
-            }
-            if (key.key_ops?.contains("update") == true) {
-                updateKeyRef = importKey(key, alias)
-            }
-            if (key.key_ops?.contains("recover") == true) {
-                recoveryKeyRef = importKey(key, alias)
+            if (encryptingKeyRef.isBlank() &&
+                (key.keyOperations?.containsAll(listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT)) == true ||
+                 key.keyOperations?.containsAll(listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY)) == true ||
+                 key.keyUse == KeyUse.ENCRYPTION)) {
+                encryptingKeyRef = importKey(key)
             }
         }
         if (updateKeyRef.isEmpty() || recoveryKeyRef.isBlank()) {
@@ -85,35 +84,12 @@ class RestoreOperation @Inject constructor (
     }
 
     private fun importKey(
-        jwk: JsonWebKey,
-        alias: String
+        jwk: JWK
     ): String {
-//        val key = when (jwk.kty) {
-//            KeyType.RSA.value -> {
-//                RsaPrivateKey(jwk)
-//            }
-//            KeyType.EllipticCurve.value -> {
-//                EllipticCurvePrivateKey(jwk)
-//            }
-//            else -> {
-//                throw KeyException("Unsupported key type ${jwk.kty}")
-//            }
-//        }
-//        val knownKeys = cryptoOperations.keyStore.list().entries.filter {
-//            it.value.kids.contains(key.kid)
-//        }
-//        if (knownKeys.isNotEmpty()) {
-//            return knownKeys.first().key
-//        }
-//
-//        val keyRef = "${alias}_${if (key.kid.isNullOrEmpty())
-//            {
-//                Base64Url.encode(Random.nextBytes(2))
-//            } else{
-//                key.kid
-//            }}"
-//        cryptoOperations.keyStore.save(keyRef, key);
-//        return keyRef;
-        return ""
+        val kid = jwk.keyID ?: throw com.microsoft.did.sdk.util.controlflow.KeyException("Imported JWK has no key id.")
+        if (!keyStore.containsKey(kid)) {
+            keyStore.storeKey(jwk, kid)
+        }
+        return kid
     }
 }

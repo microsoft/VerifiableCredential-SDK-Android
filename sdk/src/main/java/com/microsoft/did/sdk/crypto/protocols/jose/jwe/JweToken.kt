@@ -25,7 +25,7 @@ import com.nimbusds.jose.jwk.RSAKey
 import java.security.Key
 
 const val SALT_LENGTH = 8
-const val ITERATION_COUNT = 1000
+const val ITERATION_COUNT = 100 * 1000
 
 class JweToken private constructor (
     private val jweToken: JWEObject
@@ -42,7 +42,7 @@ class JweToken private constructor (
         get() = this.jweToken.payload.toString()
 
     constructor(plaintext: String, algorithm: JWEAlgorithm = JWEAlgorithm.ECDH_ES_A256KW,
-                encryption: EncryptionMethod = EncryptionMethod.A256GCM): this(
+                encryption: EncryptionMethod = EncryptionMethod.A256CBC_HS512): this(
         JWEObject(
             JWEHeader(algorithm, encryption),
             Payload(plaintext)

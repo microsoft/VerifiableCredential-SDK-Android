@@ -1,7 +1,7 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.util.formVerifiableCredential
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -38,7 +38,10 @@ data class MicrosoftBackup2020 (
 
         override fun next(): Pair<VerifiableCredential, VCMetadata> {
             val jti = jtis.next()
-            return Pair(formVerifiableCredential(vcs[jti]!!, serializer), vcsMetaInf[jti]!!)
+            val rawToken = vcs[jti]!!
+            val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), rawToken)
+            val vc = VerifiableCredential(verifiableCredentialContent.jti, rawToken, verifiableCredentialContent)
+            return Pair(vc, vcsMetaInf[jti]!!)
         }
     }
 }

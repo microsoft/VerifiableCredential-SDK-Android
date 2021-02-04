@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization
+package com.microsoft.did.sdk.crypto.protocols.jose.serialization
 
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK

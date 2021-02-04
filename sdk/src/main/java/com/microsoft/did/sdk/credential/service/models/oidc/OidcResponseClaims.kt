@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSerializer
+import com.microsoft.did.sdk.crypto.protocols.jose.serialization.JwkSerializer
 import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Required
