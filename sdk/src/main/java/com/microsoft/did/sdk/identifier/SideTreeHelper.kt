@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.util
+package com.microsoft.did.sdk.identifier
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.DigestAlgorithm
+import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.jwk.JWK
 import org.erdtman.jcs.JsonCanonicalizer
 import javax.inject.Inject

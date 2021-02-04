@@ -3,12 +3,12 @@
 package com.microsoft.did.sdk.datasource.network.credentialOperations
 
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
-import com.microsoft.did.sdk.util.controlflow.SignatureException
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.Test
+import java.text.ParseException
 
 class SendVerifiablePresentationRevocationRequestNetworkOperationTest {
     private val apiProvider: ApiProvider = mockk()
@@ -48,7 +48,7 @@ class SendVerifiablePresentationRevocationRequestNetworkOperationTest {
                 defaultTestSerializer
             )
         }.isInstanceOf(
-            SignatureException::class.java
+            ParseException::class.java
         )
     }
 

@@ -7,36 +7,38 @@ package com.microsoft.did.sdk.crypto.keyStore
 
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import androidx.test.platform.app.InstrumentationRegistry
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.controlflow.KeyStoreException
+import com.nimbusds.jose.jwk.JWK
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.spongycastle.jce.ECNamedCurveTable
-import java.math.BigInteger
-import java.security.KeyFactory
-import java.security.PrivateKey
 
 @RunWith(AndroidJUnit4ClassRunner::class)
 class EncryptedKeyStoreInstrumentedTest {
 
-    private val keyStore: EncryptedKeyStore
-    private val keyRef: String = "TestKeys"
-    private var expectedPrivateKey: PrivateKey
+    private val keyStore = EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
 
-    init {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        keyStore = EncryptedKeyStore(context)
+    private val signingJwk = JWK.parse("{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"signKey\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}")
+    private val updateJwk = JWK.parse("{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"updateKey\",\"x\":\"iK9EveBFpO_KltBpKJfvq2KA2da-_VmYOwhJCAk6pRM\",\"y\":\"45wg6vkIT4JXcwzEJBjEWsJWxWv9cLXhdOAA4CACb8k\"}")
 
-        val secret = ByteArray(32) { pos -> pos.toByte() }
-        val keySpec = org.spongycastle.jce.spec.ECPrivateKeySpec(BigInteger(1, secret), ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC))
-        expectedPrivateKey = KeyFactory.getInstance("EC", "SC").generatePrivate(keySpec)
+    @Test
+    fun saveAndGet() {
+        keyStore.storeKey(signingJwk, "key1")
+        val actualKey = keyStore.getKey("key1")
+        assertThat(signingJwk).isEqualToComparingFieldByFieldRecursively(actualKey)
     }
 
     @Test
-    fun saveAndGetPrivateKeyTest() {
-        keyStore.storeKey(expectedPrivateKey, keyRef)
-        val actualPrivateKey = keyStore.getKey<PrivateKey>(keyRef)
-        assertThat(expectedPrivateKey).isEqualToComparingFieldByFieldRecursively(actualPrivateKey)
+    fun overwriteKey() {
+        keyStore.storeKey(signingJwk, "key2")
+        keyStore.storeKey(updateJwk, "key2")
+        val actualKey = keyStore.getKey("key2")
+        assertThat(actualKey).isEqualToComparingFieldByFieldRecursively(updateJwk)
+    }
+
+    @Test(expected = KeyStoreException::class)
+    fun unknownKey() {
+        keyStore.getKey("key55")
     }
 
 }

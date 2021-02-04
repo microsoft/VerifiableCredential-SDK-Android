@@ -15,6 +15,8 @@ import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCrede
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
+import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor
 import com.microsoft.did.sdk.identifier.registrars.Registrar
 import com.microsoft.did.sdk.identifier.registrars.SidetreeRegistrar
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -82,7 +84,6 @@ class SdkModule {
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
         return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
-            .fallbackToDestructiveMigration() // TODO: we don't want this here as soon as we go into production
             .build()
     }
 

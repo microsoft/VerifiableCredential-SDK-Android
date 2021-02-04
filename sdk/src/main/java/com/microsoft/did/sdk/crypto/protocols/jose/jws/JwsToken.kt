@@ -7,13 +7,10 @@ import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.shaded.json.parser.ParseException
 import com.nimbusds.jose.util.Base64URL
-import java.security.KeyPair
 import java.security.PublicKey
-import java.security.interfaces.ECPublicKey
 
 class JwsToken private constructor(
     private var jwsObject: JWSObject
@@ -30,7 +27,7 @@ class JwsToken private constructor(
 
     constructor(content: String) : this(JWSObject(JWSHeader(JWSAlgorithm.ES256K), Payload(Base64URL.encode(content))))
 
-    fun getKeyId(): String {
+    fun getKeyId(): String? {
         return jwsObject.header.keyID
     }
 

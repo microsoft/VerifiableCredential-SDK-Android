@@ -36,9 +36,12 @@ class JwtValidator @Inject constructor(
     }
 
     private fun getKid(token: JwsToken): Pair<String, String> {
-        val kid = token.getKeyId()
-        val parsedKid = kid.split("#")
-        return Pair(parsedKid[0], parsedKid[1])
+        token.getKeyId()?.let {
+            kid ->
+            val parsedKid = kid.split("#")
+            return Pair(parsedKid[0], parsedKid[1])
+        }
+        throw ValidatorException("JWS contains no key id")
     }
 
     private suspend fun resolvePublicKeys(did: String): List<PublicKey> {

@@ -2,9 +2,8 @@
 
 package com.microsoft.did.sdk.identifier.models.payload.document
 
-import com.microsoft.did.sdk.crypto.keyStore.JwkSerializer
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSerializer
 import com.nimbusds.jose.jwk.JWK
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

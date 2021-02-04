@@ -97,7 +97,7 @@ class IssuanceServiceTest {
 
     init {
         coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
-        coEvery { identifierManager.createPairwiseIdentifier(masterIdentifier, any()) } returns Result.Success(pairwiseIdentifier)
+        coEvery { identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, any()) } returns Result.Success(pairwiseIdentifier)
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
@@ -177,7 +177,7 @@ class IssuanceServiceTest {
     }
 
     private fun unwrapContract(jwsTokenString: String): VerifiableCredentialContract {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, defaultTestSerializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         return defaultTestSerializer.decodeFromString(VerifiableCredentialContract.serializer(), jwsToken.content())
     }
 }

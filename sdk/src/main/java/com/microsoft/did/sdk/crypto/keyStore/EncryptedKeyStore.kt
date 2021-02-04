@@ -14,6 +14,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
 
     companion object {
         private const val KEY_PREFIX = "DID_KEY_"
+        private const val FILE_NAME = "DID_encrypted_keys"
     }
 
     private val encryptedSharedPreferences = getSharedPreferences(context)
@@ -21,7 +22,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
     private fun getSharedPreferences(context: Context): SharedPreferences {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
         return EncryptedSharedPreferences.create(
-            "secret_shared_prefs",
+            FILE_NAME,
             masterKeyAlias,
             context,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,

@@ -6,9 +6,10 @@ package com.microsoft.did.sdk.identifier
 
 import android.util.Base64
 import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.KeyGenAlgorithm
+import com.microsoft.did.sdk.crypto.MacAlgorithm
 import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
+import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
 import com.microsoft.did.sdk.crypto.spi.EcPairwisePrivateKeySpec
@@ -18,7 +19,6 @@ import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.util.SideTreeHelper
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
@@ -26,6 +26,7 @@ import java.security.KeyPair
 import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -77,6 +78,11 @@ class IdentifierCreator @Inject constructor(
         return privateKey.toPublicJWK()
     }
 
+    internal fun generatePersonaSeed(personaDid: String): ByteArray {
+        val masterSeed = keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME).toOctetSequenceKey().toByteArray()
+        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, "AES"), MacAlgorithm.HmacSha512())
+    }
+
     private fun generateRandomKeyId(): String {
         return Base64.encodeToString(Random.nextBytes(16), Constants.BASE64_URL_SAFE)
     }
@@ -104,8 +110,7 @@ class IdentifierCreator @Inject constructor(
 
     private fun createPairwiseKeyPair(persona: Identifier, peerId: String): KeyPair {
         val privateKeySpec = EcPairwisePrivateKeySpec(
-            keyStore.getKey(persona.name).toOctetSequenceKey().toByteArray(),
-            persona.id,
+            generatePersonaSeed(persona.id),
             peerId
         )
         val privateKey = CryptoOperations.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(privateKeySpec))
@@ -128,7 +133,7 @@ class IdentifierCreator @Inject constructor(
         return "$identifierShortForm${Constants.COLON}$registrationPayloadCanonicalizedEncoded"
     }
 
-    private fun pairwiseIdentifierName(personaDid: String, peerId: String): String {
+    fun pairwiseIdentifierName(personaDid: String, peerId: String): String {
         val concatDids = personaDid + peerId
         val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
         return Base64.encodeToString(digest.digest(concatDids.toByteArray()), Constants.BASE64_URL_SAFE)

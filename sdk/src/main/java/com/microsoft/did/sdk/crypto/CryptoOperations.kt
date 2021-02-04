@@ -5,7 +5,6 @@
 
 package com.microsoft.did.sdk.crypto
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -24,12 +23,12 @@ import javax.crypto.SecretKey
 
 object CryptoOperations {
     init {
-        Security.insertProviderAt(BouncyCastleProvider(), Security.getProviders().size + 1)
         Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
     }
 
     fun sign(payload: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
         val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
+        signer
             .apply {
                 initSign(signingKey)
                 update(payload)
@@ -38,13 +37,15 @@ object CryptoOperations {
         return signer.sign()
     }
 
-    fun verify(payload: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
+    fun verify(payload: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
         val verifier = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
+        verifier
             .apply {
                 initVerify(publicKey)
+                this.update(payload)
                 if (alg.spec != null) setParameter(alg.spec)
             }
-        return verifier.verify(payload)
+        return verifier.verify(signature)
     }
 
     fun digest(payload: ByteArray, alg: DigestAlgorithm): ByteArray {
@@ -72,7 +73,8 @@ object CryptoOperations {
     }
 
     fun generateKeyPair(alg: KeyGenAlgorithm): KeyPair {
-        val keyGen = if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
+        val keyGen =
+            if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
         keyGen.initialize(alg.spec)
         return keyGen.genKeyPair()
     }
