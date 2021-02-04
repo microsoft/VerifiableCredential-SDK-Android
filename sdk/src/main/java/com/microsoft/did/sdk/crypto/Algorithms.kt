@@ -13,7 +13,7 @@ import java.security.spec.ECPublicKeySpec
 import java.security.spec.KeySpec
 
 abstract class SigningAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec? = null) {
-    class Secp256k1 : SigningAlgorithm("SHA256withPLAIN-ECDSA", "BC") // EXAMPLE
+    class Secp256k1 : SigningAlgorithm("SHA256withECDSA", null) // EXAMPLE
 }
 
 abstract class DigestAlgorithm(val name: String, val provider: String?) {
