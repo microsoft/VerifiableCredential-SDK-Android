@@ -5,7 +5,7 @@
 
 package com.microsoft.did.sdk.util.controlflow
 
-open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false) : Exception(message, cause)
+open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false, val code: String?= null) : Exception(message, cause)
 
 class UnSupportedOperationException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
@@ -70,12 +70,12 @@ class RegistrarException(message: String, cause: Throwable? = null) : SdkExcepti
 
 open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
 
-open class NetworkException(val requestId: String? = null, val correlationVector: String? = null, message: String, retryable: Boolean) : SdkException(message, null, retryable)
+open class NetworkException(val requestId: String? = null, val correlationVector: String? = null, errorCode: String, message: String, retryable: Boolean) : SdkException(message, null, retryable, errorCode)
 
-class ServiceUnreachableException(requestId: String?, correlationVector: String?, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
+class ServiceUnreachableException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
 
-class ServiceErrorException(requestId: String?, correlationVector: String?, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
+class ServiceErrorException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
 
-class UnauthorizedException(requestId: String?, correlationVector: String?, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, message, retryable)
+class UnauthorizedException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
