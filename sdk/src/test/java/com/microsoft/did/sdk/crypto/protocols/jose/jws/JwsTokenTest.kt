@@ -1,7 +1,6 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
-import android.util.Base64
-import com.microsoft.did.sdk.util.Constants
+import java.util.Base64
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
@@ -10,11 +9,11 @@ import org.junit.Test
 import kotlin.random.Random
 
 class JwsTokenTest {
-    private val keyRef = Base64.encodeToString(Random.nextBytes(8), Constants.BASE64_URL_SAFE)
+    private val keyRef = Base64.getEncoder().encodeToString(Random.nextBytes(8))
     private val key: ECKey
-    private val payload: String = "{\"iss\":\"joe\"," +
-        "\"exp\":1300819380," +
-        "\"http://example.com/is_root\":true}"
+    private val payload: String = "{\"iss\":\"joe\",\n" +
+        " \"exp\":1300819380,\n" +
+        " \"http://example.com/is_root\":true}"
 
     init {
         /* This is the payload used for all the operations below */
@@ -36,7 +35,7 @@ class JwsTokenTest {
           "\"y\":\"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0\"," +
           "\"d\":\"jpsQnnGQmL-YBIffH1136cspYG6-0iY7X1fCE9-E9LI\"" +
          "}").toPublicKey()))).isTrue
-        Assertions.assertThat(token.content()).isEqualTo(payload)
+        Assertions.assertThat(token.content()).asString().isEqualToIgnoringNewLines(payload)
     }
 
     @Test
