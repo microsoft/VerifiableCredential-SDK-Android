@@ -111,7 +111,6 @@ class IdentifierCreator @Inject constructor(
     private fun createPairwiseKeyPair(persona: Identifier, peerId: String): KeyPair {
         val privateKeySpec = EcPairwisePrivateKeySpec(
             generatePersonaSeed(persona.id),
-            persona.id,
             peerId
         )
         val privateKey = CryptoOperations.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(privateKeySpec))
