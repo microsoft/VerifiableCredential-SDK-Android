@@ -14,18 +14,16 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponse
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
-import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSurrogate
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.nimbusds.jose.jwk.JWK
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.security.PublicKey
 import kotlin.test.assertEquals
 
 class OidcResponseFormatterTest {
@@ -51,7 +49,7 @@ class OidcResponseFormatterTest {
     private val expectedPresentationAudience: String = "audience6237"
     private val expectedThumbprint: String = "thumbprint534233"
     private val expectedExpiry: Int = 42
-    private val expectedJsonWebKey = JwkSurrogate()
+    private val expectedJsonWebKey = JWK.parse("")
     private val expectedVerifiablePresentation = "expectedPresentation"
     private val expectedSelfAttestedField = "testField3423442"
     private val expectedIdTokenConfig = "testIdTokenConfig234"
