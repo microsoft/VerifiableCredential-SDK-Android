@@ -27,10 +27,6 @@ import com.microsoft.did.sdk.util.log.SdkLog
  */
 object VerifiableCredentialSdk {
 
-    object FeatureFlag {
-        var linkedDomains: Boolean = false
-    }
-
     @JvmStatic
     lateinit var issuanceService: IssuanceService
 
@@ -46,7 +42,8 @@ object VerifiableCredentialSdk {
     @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
 
-//    lateinit var featureFlag: FeatureFlag
+    @JvmStatic
+    lateinit var featureFlag: FeatureFlag
 
     /**
      * Initializes VerifiableCredentialSdk
@@ -80,7 +77,7 @@ object VerifiableCredentialSdk {
         identifierManager = sdkComponent.identifierManager()
 
         correlationVectorService.startNewFlowAndSave()
-//        featureFlag = FeatureFlag()
+        featureFlag = sdkComponent.featureFlag()
 
         SdkLog.addConsumer(logConsumer)
     }

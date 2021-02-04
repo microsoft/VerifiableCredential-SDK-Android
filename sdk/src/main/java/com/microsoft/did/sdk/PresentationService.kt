@@ -34,13 +34,14 @@ class PresentationService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
-    private val presentationResponseFormatter: PresentationResponseFormatter
+    private val presentationResponseFormatter: PresentationResponseFormatter,
+    private val featureFlag: FeatureFlag
 ) {
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             val uri = verifyUri(stringUri)
             val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-            val isLinkedDomainsEnabled = VerifiableCredentialSdk.FeatureFlag.linkedDomains
+            val isLinkedDomainsEnabled = featureFlag.linkedDomains
             val linkedDomainResult =
                 if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
                     .abortOnError() else LinkedDomainDisabled()
