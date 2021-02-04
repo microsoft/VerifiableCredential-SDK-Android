@@ -46,7 +46,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
     }
 
     private fun computeMac(payload: ByteArray, seed: ByteArray): ByteArray {
-        return CryptoOperations.computeMac(payload, SecretKeySpec(seed, "AES"), MacAlgorithm.HmacSha512())
+        return CryptoOperations.computeMac(payload, SecretKeySpec(seed, "AES"), MacAlgorithm.HmacSha512)
     }
 
     override fun <T : KeySpec?> engineGetKeySpec(key: Key?, keySpec: Class<T>?): T {

@@ -73,14 +73,14 @@ class IdentifierCreator @Inject constructor(
      */
     private fun generateAndStoreKeyPair(): JWK {
         val keyId = generateRandomKeyId()
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1()).toPrivateJwk(keyId)
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk(keyId)
         keyStore.storeKey(privateKey, keyId)
         return privateKey.toPublicJWK()
     }
 
     internal fun generatePersonaSeed(personaDid: String): ByteArray {
         val masterSeed = keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME).toOctetSequenceKey().toByteArray()
-        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, "AES"), MacAlgorithm.HmacSha512())
+        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, "AES"), MacAlgorithm.HmacSha512)
     }
 
     private fun generateRandomKeyId(): String {

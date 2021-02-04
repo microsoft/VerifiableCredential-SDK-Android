@@ -13,11 +13,11 @@ import java.security.spec.ECPublicKeySpec
 import java.security.spec.KeySpec
 
 abstract class SigningAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec? = null) {
-    class Secp256k1 : SigningAlgorithm("SHA256withECDSA", null) // EXAMPLE
+    object Secp256k1 : SigningAlgorithm("SHA256WITHPLAIN-ECDSA", "BC") // EXAMPLE
 }
 
 abstract class DigestAlgorithm(val name: String, val provider: String?) {
-    class Sha256 : DigestAlgorithm("SHA-256", null)
+    object Sha256 : DigestAlgorithm("SHA-256", null)
 }
 
 abstract class CipherAlgorithm(val name: String, val provider: String?)
@@ -39,9 +39,9 @@ abstract class PublicKeyFactoryAlgorithm(val name: String, val provider: String?
 }
 
 abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec) {
-    class Secp256k1 : KeyGenAlgorithm("EC", null, Curve.SECP256K1.toECParameterSpec())
+    object Secp256k1 : KeyGenAlgorithm("EC", null, Curve.SECP256K1.toECParameterSpec())
 }
 
 abstract class MacAlgorithm(val name: String, val provider: String?) {
-    class HmacSha512 : MacAlgorithm("HmacSHA512", null)
+    object HmacSha512 : MacAlgorithm("HmacSHA512", null)
 }

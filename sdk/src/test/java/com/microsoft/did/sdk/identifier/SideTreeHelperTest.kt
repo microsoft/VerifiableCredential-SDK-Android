@@ -25,7 +25,7 @@ class SideTreeHelperTest {
     @Test
     fun `test multi hash result`() {
         val expectedHash = "EiCoXB_oNrdSXnCDs4QZ7gjq0e986KfN_4WoHfAlo6iNyw"
-        val actualHash = sideTreeHelper.canonicalizeAndMultiHash(testJwk)
+        val actualHash = sideTreeHelper.canonicalizeAndMultiHash(testJwkRearrangedWithSpaces)
         assertThat(actualHash).isEqualTo(expectedHash)
     }
 
@@ -39,7 +39,7 @@ class SideTreeHelperTest {
     @Test
     fun `test createCommitmentValue result`() {
         val expectedCommitment = "EiDGJuWSAbriN_z4zES82csqhfwN__DFLwFFbchNNKoucg"
-        val actualCommitment1 = sideTreeHelper.createCommitmentValue(JWK.parse(testJwk))
+        val actualCommitment1 = sideTreeHelper.createCommitmentValue(JWK.parse(testJwkRearrangedWithSpaces))
         assertThat(actualCommitment1).isEqualTo(expectedCommitment)
     }
 
