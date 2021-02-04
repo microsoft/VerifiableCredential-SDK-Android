@@ -21,8 +21,11 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.util.Base64URL
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkClass
+import io.mockk.mockkConstructor
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -101,6 +104,9 @@ class OidcResponseFormatterTest {
         )
         setUpGetPublicKey()
         setUpExpectedPresentations()
+        every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
+        every { expectedJsonWebKey.computeThumbprint() } returns Base64URL(expectedThumbprint)
+        every { expectedJsonWebKey.toPublicJWK() } returns expectedJsonWebKey
         every { mockedTokenSigner.signWithIdentifier(capture(slot), mockedIdentifier) } answers { slot.captured }
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
