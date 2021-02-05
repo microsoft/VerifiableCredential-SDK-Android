@@ -18,8 +18,13 @@ data class MicrosoftBackup2020 (
     val vcsMetaInf: Map<String, VCMetadata>,
     val metaInf: WalletMetadata,
     val identifiers: List<RawIdentity>
-) {
-    val type = "MicrosoftWallet2020"
+) : BackupFile() {
+    companion object {
+        const val MICROSOFT_BACKUP_TYPE = "MicrosoftWallet2020"
+    }
+
+    override val type: String
+        get() = MICROSOFT_BACKUP_TYPE
 
     fun vcsToIterator(serializer: Json): Iterator<Pair<VerifiableCredential, VCMetadata>> {
         return VCIterator(vcs, vcsMetaInf, serializer)

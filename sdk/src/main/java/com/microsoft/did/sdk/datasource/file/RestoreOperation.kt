@@ -1,51 +1,103 @@
 package com.microsoft.did.sdk.datasource.file
 
-import android.content.Context
-import android.net.Uri
-import android.util.Base64
+import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
+import com.microsoft.did.sdk.datasource.file.models.RestoreInteraction
+import com.microsoft.did.sdk.datasource.file.models.VCMetadata
+import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.controlflow.AlgorithmException
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
-import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.io.InputStream
 import java.security.KeyException
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
-import kotlin.random.Random
+
+
+typealias RestoreVerifiableCredentialCallback = (verifiableCredential: VerifiableCredential, metadata: VCMetadata) -> Unit
+typealias RestoreMetadataCallback = (metadata: WalletMetadata) -> Unit
 
 class RestoreOperation @Inject constructor (
     private val identifierRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
     private val serializer: Json
 ) {
+    private lateinit var restoreVerifiedCredentialCallback: RestoreVerifiableCredentialCallback
+    private lateinit var restoreMetadataCallback: RestoreMetadataCallback
+    private lateinit var jweToken: JweToken
+    fun initialize (restoreVerifiedCredentialCallback: RestoreVerifiableCredentialCallback, restoreMetadataCallback: RestoreMetadataCallback, backup: InputStream) {
+        this.restoreVerifiedCredentialCallback = restoreVerifiedCredentialCallback
+        this.restoreMetadataCallback = restoreMetadataCallback
+        val jweString = String(backup.readBytes())
 
-    private fun parseBackupfileFromUri(context: Context, uri: Uri, password: String): MicrosoftBackup2020 {
-        val stringBuilder = StringBuilder()
-        context.contentResolver.openInputStream(uri)?.use { stream ->
-            BufferedReader(InputStreamReader(stream)).useLines { lines ->
-                for (line in lines) {
-                    stringBuilder.append(line)
-                }
-            }
+//        val stringBuilder = StringBuilder()
+//        context.contentResolver.openInputStream(uri)?.use { stream ->
+//            BufferedReader(InputStreamReader(stream)).useLines { lines ->
+//                for (line in lines) {
+//                    stringBuilder.append(line)
+//                }
+//            }
+//        }
+//        val content = stringBuilder.toString()
+//        val token = JweToken.deserialize(content)
+
+        this.jweToken = JweToken.deserialize(jweString)
+        // validate we know this backup
+        val cty = this.jweToken.getContentType()
+        when (cty) {
+            MicrosoftBackup2020.MICROSOFT_BACKUP_TYPE ->
+                return
+            else ->
+                throw AlgorithmException("Unknown backup file format: $cty")
         }
-        val content = stringBuilder.toString()
-        val token = JweToken.deserialize(content)
-        val secretKey = SecretKeySpec(password.toByteArray(), "RAW")
-        // transform password to a decryption key
+    }
 
-        token.decrypt(keyStore, secretKey)
+    fun getRequiredUserInteraction(): RestoreInteraction {
+        val alg = jweToken.getKeyAlgorithm()
+        return if (alg.name.startsWith("PBE")) {
+            RestoreInteraction.PASSWORD
+        } else {
+            RestoreInteraction.UNKNOWN
+        }
+    }
 
-        return serializer.decodeFromString<MicrosoftBackup2020>("token.contentAsString")
+    suspend fun restoreWithPassword(password: String) {
+        jweToken.decrypt(keyStore, SecretKeySpec(password.toByteArray(), "RAW"))
+        restore()
+    }
+
+    private suspend fun restore() {
+        if (this.restoreVerifiedCredentialCallback == null || this.restoreMetadataCallback == null) {
+            throw AlgorithmException("Restore callback not set.")
+        }
+        val cty = this.jweToken.getContentType()
+        when (cty) {
+            MicrosoftBackup2020.MICROSOFT_BACKUP_TYPE -> {
+                val backup = serializer.decodeFromString<MicrosoftBackup2020>(jweToken.contentAsString)
+                restoreFromMicrosoftBackup2020(backup)
+            }
+            else ->
+                throw AlgorithmException("Unknown backup file format: $cty")
+        }
+    }
+
+
+    private suspend fun restoreFromMicrosoftBackup2020(backup: MicrosoftBackup2020) {
+        backup.identifiers.forEach { raw -> restoreIdentifier(raw) }
+        backup.vcsToIterator(serializer).forEach {
+                dataPair ->
+            // TODO: Some validation that the VC is issued to an identifier under our control
+            restoreVerifiedCredentialCallback(dataPair.first, dataPair.second)
+        }
+        restoreMetadataCallback(backup.metaInf)
     }
 
     private suspend fun restoreIdentifier (

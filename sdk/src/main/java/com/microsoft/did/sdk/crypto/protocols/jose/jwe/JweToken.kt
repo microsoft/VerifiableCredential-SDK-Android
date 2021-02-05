@@ -48,6 +48,14 @@ class JweToken private constructor (
             Payload(plaintext)
         )) {}
 
+    fun getContentType(): String? {
+        return jweToken.header.contentType
+    }
+
+    fun getKeyAlgorithm(): JWEAlgorithm {
+        return jweToken.header.algorithm
+    }
+
     fun encrypt(publicKey: JWK)  {
         var encrypter: JWEEncrypter? = null
         when (publicKey::class) {
