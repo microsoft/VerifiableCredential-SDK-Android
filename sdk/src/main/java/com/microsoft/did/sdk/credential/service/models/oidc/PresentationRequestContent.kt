@@ -16,11 +16,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationRequestContent(
-    // what type of object the response should be (should be idtoken). // TODO: validate
     @SerialName("response_type")
     val responseType: String = "",
 
-    // what mode the response should be sent in (should always be form post). // TODO: validate
     @SerialName("response_mode")
     val responseMode: String = "",
 
@@ -33,7 +31,6 @@ data class PresentationRequestContent(
     @SerialName("iss")
     val issuer: String = "",
 
-    // should contain "openid did_authn" // TODO: validate
     val scope: String = "",
 
     val state: String = "",
