@@ -103,8 +103,8 @@ class PairwiseKeyInstrumentedTest {
 
         val data = "1234567890".toByteArray()
 
-        val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.Secp256k1())
-        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.Secp256k1())).isTrue;
+        val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.Secp256k1)
+        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.Secp256k1)).isTrue;
     }
 
     /**
