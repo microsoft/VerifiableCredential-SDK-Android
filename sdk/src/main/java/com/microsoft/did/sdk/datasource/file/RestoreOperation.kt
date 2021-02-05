@@ -5,7 +5,7 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
-import com.microsoft.did.sdk.datasource.file.models.RestoreInteraction
+import com.microsoft.did.sdk.datasource.file.models.BackupSecurityMethod
 import com.microsoft.did.sdk.datasource.file.models.VCMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
@@ -60,12 +60,12 @@ class RestoreOperation @Inject constructor (
         }
     }
 
-    fun getRequiredUserInteraction(): RestoreInteraction {
+    fun getRequiredUserInteraction(): BackupSecurityMethod {
         val alg = jweToken.getKeyAlgorithm()
         return if (alg.name.startsWith("PBE")) {
-            RestoreInteraction.PASSWORD
+            BackupSecurityMethod.PASSWORD
         } else {
-            RestoreInteraction.UNKNOWN
+            BackupSecurityMethod.UNKNOWN
         }
     }
 

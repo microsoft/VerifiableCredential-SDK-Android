@@ -2,7 +2,7 @@
 
 package com.microsoft.did.sdk.datasource.file.models
 
-enum class RestoreInteraction {
+enum class BackupSecurityMethod {
     NONE,
     PASSWORD,
     UNKNOWN
