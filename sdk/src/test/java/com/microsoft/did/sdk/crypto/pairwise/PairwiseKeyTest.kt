@@ -3,11 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.crypto.keys
+package com.microsoft.did.sdk.crypto.pairwise
 
-import android.content.Context
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import androidx.test.platform.app.InstrumentationRegistry
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
@@ -24,23 +21,19 @@ import io.mockk.every
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import org.junit.runner.RunWith
+import java.io.File
 import java.io.InputStream
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
-@RunWith(AndroidJUnit4ClassRunner::class)
-class PairwiseKeyInstrumentedTest {
+class PairwiseKeyTest {
     private var crypto: CryptoOperations
     private val suppliedStringForSeedGeneration = "abcdefg"
     private val seed: ByteArray = suppliedStringForSeedGeneration.toByteArray()
     private val seedKey = OctetSequenceKey.Builder(seed).build()
-
-    private val inputStream: InputStream
+    private val inputStream: InputStream = File(".\\src\\test\\assets\\Pairwise.EC.json").inputStream()
 
     init {
-        val context: Context = InstrumentationRegistry.getInstrumentation().targetContext
-        inputStream = context.assets.open("Pairwise.EC.json")
         crypto = CryptoOperations
     }
 
@@ -103,8 +96,8 @@ class PairwiseKeyInstrumentedTest {
 
         val data = "1234567890".toByteArray()
 
-        val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.Secp256k1)
-        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.Secp256k1)).isTrue;
+        val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.Ecdsa256)
+        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.Ecdsa256)).isTrue;
     }
 
     /**
