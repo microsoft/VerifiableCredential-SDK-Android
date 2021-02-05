@@ -7,10 +7,12 @@ package com.microsoft.did.sdk.datasource.network
 
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
 import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
+import com.microsoft.did.sdk.util.controlflow.ClientException
+import com.microsoft.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.NetworkException
+import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
 import retrofit2.Response
@@ -61,8 +63,28 @@ abstract class BaseNetworkOperation<S, T> {
                     false
                 )
             )
-            402, 403, 404 -> Result.Failure(
-                ServiceErrorException(
+            402 -> Result.Failure(
+                ClientException(
+                    requestId,
+                    correlationVector,
+                    response.code().toString(),
+                    response.errorBody()?.string() ?: "",
+                    false
+                )
+            )
+            403 -> {
+                Result.Failure(
+                    ForbiddenException(
+                        requestId,
+                        correlationVector,
+                        response.code().toString(),
+                        response.errorBody()?.string() ?: "",
+                        false
+                    )
+                )
+            }
+            404 -> Result.Failure(
+                NotFoundException(
                     requestId,
                     correlationVector,
                     response.code().toString(),

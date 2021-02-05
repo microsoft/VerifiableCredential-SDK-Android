@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestC
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
+import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -98,7 +98,7 @@ class OidcPresentationRequestValidatorTest {
                 validator.validate(mockedPresentationRequest)
                 fail()
             } catch (exception: Exception) {
-                assertThat(exception).isInstanceOf(ExpiredTokenExpirationException::class.java)
+                assertThat(exception).isInstanceOf(ExpiredTokenException::class.java)
             }
         }
     }

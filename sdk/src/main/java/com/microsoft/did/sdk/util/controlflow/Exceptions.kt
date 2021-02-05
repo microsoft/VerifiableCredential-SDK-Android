@@ -50,7 +50,7 @@ class UnableToFetchWellKnownConfigDocument(message: String, cause: Throwable? = 
 
 class InvalidSignatureException(message: String) : ValidatorException(message)
 
-class ExpiredTokenExpirationException(message: String) : ValidatorException(message)
+class ExpiredTokenException(message: String) : ValidatorException(message)
 
 class InvalidResponseTypeException(message: String) : ValidatorException(message)
 
@@ -74,7 +74,11 @@ open class NetworkException(val requestId: String? = null, val correlationVector
 
 class ServiceUnreachableException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
 
-class ServiceErrorException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
+open class ClientException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
+
+class ForbiddenException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : ClientException(requestId, correlationVector, errorCode, message, retryable)
+
+class NotFoundException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : ClientException(requestId, correlationVector, errorCode, message, retryable)
 
 class UnauthorizedException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
 
