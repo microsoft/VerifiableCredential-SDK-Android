@@ -20,6 +20,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyType
 import com.nimbusds.jose.util.Base64URL
 import io.mockk.every
 import io.mockk.mockk
@@ -51,9 +52,11 @@ class OidcResponseFormatterTest {
     private val expectedContract = "http://testcontract.com"
     private val expectedResponseAudience: String = "audience2432"
     private val expectedPresentationAudience: String = "audience6237"
-    private val expectedThumbprint: String = "thumbprint534233"
     private val expectedExpiry: Int = 42
-    private val expectedJsonWebKey: JWK = mockk()
+    private val expectedJsonWebKey: JWK = JWK.parse("{\"kty\":\"EC\"," +
+            "\"crv\":\"secp256k1\",\"x\":\"WfY7Px6AgH6x-_dgAoRbg8weYRJA36ON-gQiFnETrqw\"," +
+            "\"y\":\"IzFx3BUGztK0cyDStiunXbrZYYTtKbOUzx16SUK0sAY\"}")
+    private val expectedThumbprint: String = expectedJsonWebKey.computeThumbprint().toString()
     private val expectedVerifiablePresentation = "expectedPresentation"
     private val expectedSelfAttestedField = "testField3423442"
     private val expectedIdTokenConfig = "testIdTokenConfig234"
@@ -103,8 +106,6 @@ class OidcResponseFormatterTest {
         setUpGetPublicKey()
         setUpExpectedPresentations()
         every { mockedKeyStore.getKey(signingKeyRef) } returns expectedJsonWebKey
-        every { expectedJsonWebKey.computeThumbprint() } returns Base64URL(expectedThumbprint)
-        every { expectedJsonWebKey.toPublicJWK() } returns expectedJsonWebKey
         every { mockedTokenSigner.signWithIdentifier(capture(slot), mockedIdentifier) } answers { slot.captured }
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
