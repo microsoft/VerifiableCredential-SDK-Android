@@ -24,12 +24,14 @@ import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
 import java.security.KeyPair
 import java.security.MessageDigest
+import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import java.util.Random
+import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.random.Random
 
 @Singleton
 class IdentifierCreator @Inject constructor(
@@ -84,7 +86,7 @@ class IdentifierCreator @Inject constructor(
     }
 
     private fun generateRandomKeyId(): String {
-        return Base64.encodeToString(Random.nextBytes(16), Constants.BASE64_URL_SAFE)
+        return UUID.randomUUID().toString().replace("-", "")
     }
 
     fun createPairwiseId(persona: Identifier, peerId: String): Identifier {
