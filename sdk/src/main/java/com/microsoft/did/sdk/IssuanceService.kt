@@ -9,6 +9,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainDisabled
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -30,7 +31,8 @@ class IssuanceService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
-    private val serializer: Json
+    private val serializer: Json,
+    private val featureFlag: FeatureFlag
 ) {
 
     /**
@@ -41,7 +43,9 @@ class IssuanceService @Inject constructor(
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
             val contract = fetchContract(contractUrl).abortOnError()
-            val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+            val isLinkedDomainsEnabled = featureFlag.linkedDomains
+            val linkedDomainResult =
+                if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else LinkedDomainDisabled()
             val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
             Result.Success(request)
         }
