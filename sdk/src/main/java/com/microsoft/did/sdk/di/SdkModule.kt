@@ -55,6 +55,7 @@ class SdkModule {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()
+            .followRedirects(false)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(UserAgentInterceptor(userAgentInfo))
             .addInterceptor(CorrelationVectorInterceptor(correlationVectorService))
