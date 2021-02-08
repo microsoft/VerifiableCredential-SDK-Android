@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestC
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
+import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
@@ -122,7 +122,7 @@ class OidcPresentationRequestValidatorTest {
             try {
                 validator.validate(mockedPresentationRequest)
             } catch (exception: Exception) {
-                assertThat(exception).isInstanceOf(ExpiredTokenExpirationException::class.java)
+                assertThat(exception).isInstanceOf(ExpiredTokenException::class.java)
             }
         }
     }
