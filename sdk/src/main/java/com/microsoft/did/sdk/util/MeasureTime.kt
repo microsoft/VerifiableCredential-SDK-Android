@@ -8,6 +8,6 @@ inline fun <R> logTime(name: String, block: () -> R): R {
     val start = System.currentTimeMillis()
     val result = block()
     val elapsedTime = System.currentTimeMillis() - start
-    SdkLog.v("Perf: $name - ${elapsedTime}ms")
+    SdkLog.i("Perf: $name - ${elapsedTime}ms")
     return result
 }
