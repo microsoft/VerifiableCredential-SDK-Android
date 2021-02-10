@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
+import com.microsoft.did.sdk.BackupAndRestoreService
 import com.microsoft.did.sdk.CorrelationVectorService
 import com.microsoft.did.sdk.IdentifierManager
 import com.microsoft.did.sdk.IssuanceService
@@ -40,6 +41,8 @@ internal interface SdkComponent {
     fun linkedDomainsService(): LinkedDomainsService
 
     fun correlationVectorService(): CorrelationVectorService
+
+    fun backupAndRestoreService(): BackupAndRestoreService
 
     @Component.Builder
     interface Builder {

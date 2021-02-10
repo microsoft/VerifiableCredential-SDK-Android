@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.microsoft.did.sdk.datasource.file.models.DifWordList
 import com.microsoft.did.sdk.di.DaggerSdkComponent
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -42,7 +43,11 @@ object VerifiableCredentialSdk {
     lateinit var correlationVectorService: CorrelationVectorService
 
     @JvmStatic
+    lateinit var backupAndRestoreService: BackupAndRestoreService
+
+    @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
+
 
     /**
      * Initializes VerifiableCredentialSdk
@@ -74,6 +79,8 @@ object VerifiableCredentialSdk {
         revocationService = sdkComponent.revocationService()
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierManager = sdkComponent.identifierManager()
+        backupAndRestoreService = sdkComponent.backupAndRestoreService()
+        DifWordList.initializeWordList(context)
 
         correlationVectorService.startNewFlowAndSave()
 

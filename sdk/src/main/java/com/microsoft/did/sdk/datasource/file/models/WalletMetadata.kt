@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.datasource.file.models
 
-interface WalletMetadata {
-    val type: String
-}
+import kotlinx.serialization.Serializable
+
+@Serializable
+abstract class WalletMetadata {}

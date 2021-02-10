@@ -41,16 +41,14 @@ class JweToken private constructor (
     val contentAsString: String
         get() = this.jweToken.payload.toString()
 
+    var contentType: String? = jweToken.header.contentType
+
     constructor(plaintext: String, algorithm: JWEAlgorithm = JWEAlgorithm.ECDH_ES_A256KW,
                 encryption: EncryptionMethod = EncryptionMethod.A256CBC_HS512): this(
         JWEObject(
             JWEHeader(algorithm, encryption),
             Payload(plaintext)
         )) {}
-
-    fun getContentType(): String? {
-        return jweToken.header.contentType
-    }
 
     fun getKeyAlgorithm(): JWEAlgorithm {
         return jweToken.header.algorithm
@@ -83,7 +81,7 @@ class JweToken private constructor (
         return jweToken.serialize()
     }
 
-    fun decrypt(keyStore: EncryptedKeyStore, privateKey: Key? = null): ByteArray? {
+    fun decrypt(keyStore: EncryptedKeyStore? = null, privateKey: Key? = null): ByteArray? {
         // attempt with a specific key
         var decrypter: JWEDecrypter? = null
         if (privateKey != null) {
@@ -92,12 +90,14 @@ class JweToken private constructor (
             } catch (exception: JOSEException) {
                 return null
             }
-        } else {
+        } else if (keyStore != null) {
             jweToken.header.keyID?.let { keyId ->
                 val keyRef = JwaCryptoHelper.extractDidAndKeyId(keyId).second
                 val key = keyStore.getKey(keyRef)
                 decrypter = DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, KeyConverter.toJavaKeys(listOf(key)).first())
             }
+        } else {
+            throw IllegalArgumentException("keyStore or privateKey must be passed as input")
         }
         if (decrypter != null) {
             try {
