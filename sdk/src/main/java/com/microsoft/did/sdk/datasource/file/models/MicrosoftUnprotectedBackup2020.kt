@@ -5,6 +5,11 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
+import com.microsoft.did.sdk.util.controlflow.MalformedMetadata
+import com.microsoft.did.sdk.util.controlflow.MalformedVerifiableCredential
+import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
@@ -31,9 +36,9 @@ class MicrosoftUnprotectedBackup2020 (
     val identifiers: List<RawIdentity>
 ) : UnprotectedBackup() {
     @Transient
-    private lateinit var metadataCallback: (WalletMetadata) -> Unit
+    private lateinit var metadataCallback: suspend (WalletMetadata) -> Unit
     @Transient
-    private lateinit var verifiableCredentialCallback: (VerifiableCredential, VCMetadata) -> Unit
+    private lateinit var verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit
     @Transient
     @Inject
     internal lateinit var jsonSerializer: Json
@@ -99,20 +104,39 @@ class MicrosoftUnprotectedBackup2020 (
     }
 
     fun initialize(
-        walletMetadataCallback: (WalletMetadata) -> Unit,
-        verifiableCredentialCallback: (VerifiableCredential, VCMetadata) -> Unit) {
+        walletMetadataCallback: suspend (WalletMetadata) -> Unit,
+        verifiableCredentialCallback:  suspend (VerifiableCredential, VCMetadata) -> Unit) {
         this.metadataCallback = walletMetadataCallback
         this.verifiableCredentialCallback = verifiableCredentialCallback
     }
 
-    override suspend fun import() {
-        this.identifiers.forEach { raw -> restoreIdentifier(raw) }
+    override suspend fun import(): Result<Unit> {
+        try {
+            this.identifiers.forEach { raw -> restoreIdentifier(raw) }
+        } catch (exception: SdkException) {
+            return Result.Failure(exception)
+        } catch (exception: Exception) {
+            return Result.Failure(MalformedIdentity("unhandled exception thrown", exception))
+        }
         this.vcsToIterator(jsonSerializer).forEach {
                 dataPair ->
             // TODO: Some validation that the VC is issued to an identifier under our control
-            verifiableCredentialCallback(dataPair.first, dataPair.second)
+            try {
+                verifiableCredentialCallback(dataPair.first, dataPair.second)
+            } catch (exception: SdkException) {
+                return Result.Failure(exception)
+            } catch (exception: Exception) {
+                return Result.Failure(MalformedVerifiableCredential("unhandled exception thrown", exception))
+            }
         }
-        metadataCallback(this.metaInf)
+        try {
+            metadataCallback(this.metaInf)
+        } catch (exception: SdkException) {
+            return Result.Failure(exception)
+        } catch (exception: Exception) {
+            return Result.Failure(MalformedMetadata("unhandled exception thrown", exception))
+        }
+        return Result.Success(Unit)
     }
 
     private suspend fun restoreIdentifier (
@@ -136,7 +160,7 @@ class MicrosoftUnprotectedBackup2020 (
             }
         }
         if (updateKeyRef.isEmpty() || recoveryKeyRef.isBlank()) {
-            throw KeyException("update and recovery key required")
+            throw MalformedIdentity("update and recovery key required")
         }
         val id = Identifier(
             identifierData.id,

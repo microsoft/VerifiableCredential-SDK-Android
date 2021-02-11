@@ -19,8 +19,8 @@ class TokenSigner @Inject constructor(
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
         val token = JwsToken(payload)
         // adding kid value to header.
-        token.setKeyId("${identifier.id}#${identifier.signatureKeyReference}")
-        token.setType(JOSEObjectType.JWT)
+        token.keyId = "${identifier.id}#${identifier.signatureKeyReference}"
+        token.type = JOSEObjectType.JWT
         val privateKey = keyStore.getKey(identifier.signatureKeyReference)
         token.sign(privateKey)
         return token.serialize()

@@ -1,6 +1,8 @@
 package com.microsoft.did.sdk.datasource.file.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-abstract class WalletMetadata {}
+@SerialName("BaseWallet")
+open class WalletMetadata {}

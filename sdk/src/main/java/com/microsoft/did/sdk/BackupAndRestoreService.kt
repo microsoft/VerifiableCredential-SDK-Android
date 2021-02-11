@@ -12,6 +12,7 @@ import com.microsoft.did.sdk.datasource.file.models.VCMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import com.microsoft.did.sdk.datasource.file.models.DifWordList
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.did.sdk.util.controlflow.Result
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import javax.inject.Inject
@@ -19,7 +20,6 @@ import javax.inject.Singleton
 
 @Singleton
 class BackupAndRestoreService @Inject constructor(
-
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
 ){
@@ -44,7 +44,8 @@ class BackupAndRestoreService @Inject constructor(
         )
     }
 
-    suspend fun parseBackup(input: InputStream): JweProtectedBackup {
-        return JweProtectedBackup.parseBackup(input)
+    suspend fun parseBackup(input: InputStream,
+                            jsonSerializer: Json = UnprotectedBackup.serializer): Result<JweProtectedBackup> {
+        return JweProtectedBackup.parseBackup(input, jsonSerializer)
     }
 }

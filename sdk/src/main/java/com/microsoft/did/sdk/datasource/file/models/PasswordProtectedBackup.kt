@@ -4,9 +4,12 @@ package com.microsoft.did.sdk.datasource.file.models
 
 import com.microsoft.did.sdk.BackupAndRestoreService
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
+import com.microsoft.did.sdk.util.controlflow.FailedDecrypt
+import com.microsoft.did.sdk.util.controlflow.Result
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.json.Json
+import java.lang.Exception
 import java.security.SecureRandom
 import javax.crypto.spec.SecretKeySpec
 
@@ -14,6 +17,7 @@ const val PASSWORD_SET_SIZE = 12
 
 class PasswordProtectedBackup internal constructor(
     token: JweToken,
+    val serializer: Json,
     val password: List<String>? = null
     ) : JweProtectedBackup(token) {
 
@@ -22,7 +26,7 @@ class PasswordProtectedBackup internal constructor(
             val data = backup.toString(serializer)
             val token = JweToken(data, JWEAlgorithm.PBES2_HS512_A256KW)
             token.contentType = backup.type
-            return PasswordProtectedBackup(token, initializePasswordSet())
+            return PasswordProtectedBackup(token, serializer, initializePasswordSet())
         }
 
         internal fun initializePasswordSet(setSize: Int = PASSWORD_SET_SIZE): List<String> {
@@ -54,14 +58,22 @@ class PasswordProtectedBackup internal constructor(
         throw RuntimeException("No password has been initialized")
     }
 
-    suspend fun decrypt(password: String): Boolean {
+    suspend fun decrypt(password: String): Result<UnprotectedBackup> {
         // this can be a very long operation, thus the suspend
         val words = password.split(Regex("\\s+")).filter { it.isNotBlank() }
-        val secretKey = SecretKeySpec(
-            words.joinToString(" ").toByteArray(),
-            "RAW"
-        )
-        return (jweToken.decrypt(privateKey = secretKey) != null)
+        try {
+            val secretKey = SecretKeySpec(
+                words.joinToString(" ").toByteArray(),
+                "RAW"
+            )
+            jweToken.decrypt(privateKey = secretKey)?.let {
+                data ->
+                return Result.Success(payload = serializer.decodeFromString(UnprotectedBackup.serializer(), String(data)))
+            }
+            return Result.Failure(FailedDecrypt("Incorrect Password"))
+        } catch (exception: Exception) {
+            return Result.Failure(FailedDecrypt("Unknown error", exception))
+        }
     }
 
     fun getDisplayPassword(): String {

@@ -28,8 +28,10 @@ const val SALT_LENGTH = 8
 const val ITERATION_COUNT = 100 * 1000
 
 class JweToken private constructor (
-    private val jweToken: JWEObject
+    private var jweToken: JWEObject
 ) {
+    var contentType: String? = jweToken.header.contentType
+
     companion object {
         fun deserialize(jwe: String): JweToken {
             return JweToken(JWEObject.parse(jwe))
@@ -40,8 +42,6 @@ class JweToken private constructor (
         get() = this.jweToken.payload.toBytes()
     val contentAsString: String
         get() = this.jweToken.payload.toString()
-
-    var contentType: String? = jweToken.header.contentType
 
     constructor(plaintext: String, algorithm: JWEAlgorithm = JWEAlgorithm.ECDH_ES_A256KW,
                 encryption: EncryptionMethod = EncryptionMethod.A256CBC_HS512): this(
@@ -71,6 +71,9 @@ class JweToken private constructor (
             }
         }
         encrypter?.let {
+            val builder = JWEHeader.Builder(jweToken.header)
+            contentType?.let { builder.contentType(it) }
+            jweToken = JWEObject(builder.build(), jweToken.payload)
             jweToken.encrypt(it)
             return
         }

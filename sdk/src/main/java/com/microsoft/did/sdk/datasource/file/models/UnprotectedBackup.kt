@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.datasource.file.models
 
+import com.microsoft.did.sdk.util.controlflow.Result
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -24,5 +25,5 @@ abstract class UnprotectedBackup {
         return jsonSerializer.encodeToString(this)
     }
 
-    abstract suspend fun import()
+    abstract suspend fun import(): Result<Unit>
 }

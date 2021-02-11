@@ -15,7 +15,8 @@ import java.security.PublicKey
 class JwsToken private constructor(
     private var jwsObject: JWSObject
 ) {
-    private val builder = JWSHeader.Builder(jwsObject.header)
+    var keyId: String? = jwsObject.header.keyID
+    var type: JOSEObjectType? = jwsObject.header.type
 
     companion object {
         fun deserialize(jws: String): JwsToken {
@@ -27,27 +28,14 @@ class JwsToken private constructor(
 
     constructor(content: String) : this(JWSObject(JWSHeader(JWSAlgorithm.ES256K), Payload(Base64URL.encode(content))))
 
-    fun getKeyId(): String? {
-        return jwsObject.header.keyID
-    }
-
-    fun setKeyId(string: String) {
-        builder.keyID(string)
-    }
-
-    fun setType(type: JOSEObjectType) {
-        builder.type(type)
-    }
-
-    fun setHeader(headerKey: String, headerValue: String) {
-        builder.customParam(headerKey, headerValue)
-    }
-
     fun serialize(): String {
         return jwsObject.serialize()
     }
 
     fun sign(privateKey: JWK) {
+        val builder = JWSHeader.Builder(jwsObject.header)
+        keyId?.let { builder.keyID(it) }
+        type?.let { builder.type(it) }
         jwsObject = JWSObject(builder.build(), jwsObject.payload)
         val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
         jwsObject.sign(signer)
