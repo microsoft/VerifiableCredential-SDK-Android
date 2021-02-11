@@ -25,10 +25,8 @@ import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
 import java.security.KeyPair
 import java.security.MessageDigest
-import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
-import java.util.Random
 import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
@@ -77,7 +75,7 @@ class IdentifierCreator @Inject constructor(
     private fun generateAndStoreKeyPair(): JWK {
         val keyId = generateRandomKeyId()
         val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk(keyId)
-        keyStore.storeKey(privateKey, keyId)
+        keyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }
 
@@ -107,7 +105,7 @@ class IdentifierCreator @Inject constructor(
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
         val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk(keyId)
-        keyStore.storeKey(pairwisePrivateKey, keyId)
+        keyStore.storeKey(keyId, pairwisePrivateKey)
         return pairwisePrivateKey.toPublicJWK()
     }
 
@@ -124,7 +122,7 @@ class IdentifierCreator @Inject constructor(
 
     private fun computeDidShortFormIdentifier(registrationPayload: RegistrationPayload): String {
         val suffixDataString = serializer.encodeToString(SuffixData.serializer(), registrationPayload.suffixData)
-        val uniqueSuffix = sideTreeHelper.canonicalizeAndMultiHash(suffixDataString)
+        val uniqueSuffix = sideTreeHelper.canonicalizeMultiHashEncode(suffixDataString)
         return "did${Constants.COLON}${Constants.METHOD_NAME}${Constants.COLON}$uniqueSuffix"
     }
 

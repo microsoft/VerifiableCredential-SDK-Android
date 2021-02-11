@@ -16,15 +16,15 @@ class SideTreeHelperTest {
 
     @Test
     fun `multi hash is equal through canonicalization`() {
-        val actualMultiHash1 = sideTreeHelper.canonicalizeAndMultiHash(testJwk)
-        val actualMultiHash2 = sideTreeHelper.canonicalizeAndMultiHash(testJwkRearrangedWithSpaces)
+        val actualMultiHash1 = sideTreeHelper.canonicalizeMultiHashEncode(testJwk)
+        val actualMultiHash2 = sideTreeHelper.canonicalizeMultiHashEncode(testJwkRearrangedWithSpaces)
         assertThat(actualMultiHash1).isEqualTo(actualMultiHash2)
     }
 
     @Test
     fun `multi hash result`() {
         val expectedHash = "EiCoXB_oNrdSXnCDs4QZ7gjq0e986KfN_4WoHfAlo6iNyw"
-        val actualHash = sideTreeHelper.canonicalizeAndMultiHash(testJwkRearrangedWithSpaces)
+        val actualHash = sideTreeHelper.canonicalizeMultiHashEncode(testJwkRearrangedWithSpaces)
         assertThat(actualHash).isEqualTo(expectedHash)
     }
 

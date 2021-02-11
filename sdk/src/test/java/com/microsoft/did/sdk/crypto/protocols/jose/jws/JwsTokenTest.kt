@@ -10,20 +10,15 @@ import kotlin.random.Random
 
 class JwsTokenTest {
     private val keyRef = Base64.getEncoder().encodeToString(Random.nextBytes(8))
-    private val key: ECKey
+    private val key: ECKey = ECKeyGenerator(Curve.SECP256K1)
+        .keyID(keyRef)
+        .generate()
     private val payload: String = "{\"iss\":\"joe\",\n" +
         " \"exp\":1300819380,\n" +
         " \"http://example.com/is_root\":true}"
 
-    init {
-        /* This is the payload used for all the operations below */
-        key = ECKeyGenerator(Curve.SECP256K1)
-            .keyID(keyRef)
-            .generate()
-    }
-
     @Test
-    fun deserializeAndVerifyTest() {
+    fun `deserialize and verify`() {
         val token = JwsToken.deserialize("eyJhbGciOiJFUzI1NiJ9." +
             "eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt" +
             "cGxlLmNvbS9pc19yb290Ijp0cnVlfQ." +
@@ -39,7 +34,7 @@ class JwsTokenTest {
     }
 
     @Test
-    fun signAndVerify() {
+    fun `sign and verify`() {
         val testData = Random.Default.nextBytes(32)
         val token = JwsToken(testData)
         token.sign(key)

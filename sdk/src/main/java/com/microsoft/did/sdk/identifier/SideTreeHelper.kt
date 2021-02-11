@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class SideTreeHelper @Inject constructor() {
 
-    fun canonicalizeAndMultiHash(json: String): String {
+    fun canonicalizeMultiHashEncode(json: String): String {
         val jsonCanonicalizer = JsonCanonicalizer(json)
         val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256)
         val hashedInfo = prependMultiHashInfo(hashed)

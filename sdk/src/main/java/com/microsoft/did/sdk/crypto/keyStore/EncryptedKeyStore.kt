@@ -30,7 +30,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
         )
     }
 
-    fun storeKey(key: JWK, keyId: String) {
+    fun storeKey(keyId: String, key: JWK) {
         encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, key.toJSONString()).apply()
     }
 

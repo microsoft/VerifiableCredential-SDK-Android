@@ -41,7 +41,7 @@ class IdentifierManager @Inject constructor(
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
             val seed = CryptoOperations.generateSeed()
-            keyStore.storeKey(OctetSequenceKey.Builder(seed).build(), MASTER_IDENTIFIER_NAME)
+            keyStore.storeKey(MASTER_IDENTIFIER_NAME, OctetSequenceKey.Builder(seed).build())
             val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
             SdkLog.i("Creating Identifier: $identifier")
             identifierRepository.insert(identifier)

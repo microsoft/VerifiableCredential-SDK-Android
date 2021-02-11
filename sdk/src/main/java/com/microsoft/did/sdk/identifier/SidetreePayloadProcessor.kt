@@ -60,7 +60,7 @@ class SidetreePayloadProcessor @Inject constructor(
 
     private fun createSuffixData(patchData: PatchData, recoveryKey: JWK): SuffixData {
         val patchDataJson = serializer.encodeToString(PatchData.serializer(), patchData)
-        val patchDataEncoded = sideTreeHelper.canonicalizeAndMultiHash(patchDataJson)
+        val patchDataEncoded = sideTreeHelper.canonicalizeMultiHashEncode(patchDataJson)
         val recoveryCommitment = sideTreeHelper.createCommitmentValue(recoveryKey)
 
         return SuffixData(patchDataEncoded, recoveryCommitment)
