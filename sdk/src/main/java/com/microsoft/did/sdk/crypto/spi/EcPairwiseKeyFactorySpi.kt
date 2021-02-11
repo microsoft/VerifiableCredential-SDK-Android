@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.crypto.MacAlgorithm
 import com.microsoft.did.sdk.crypto.PrivateKeyFactoryAlgorithm
 import com.microsoft.did.sdk.crypto.PublicKeyFactoryAlgorithm
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.AES_KEY
 import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.spec.ECParameterSpec
 import org.bouncycastle.math.ec.ECPoint
@@ -19,7 +20,17 @@ import java.security.spec.InvalidKeySpecException
 import java.security.spec.KeySpec
 import javax.crypto.spec.SecretKeySpec
 
+/**
+ * This KeyFactorySpi is registered in DidProvider to provide Pairwise Key generation through the Java Security Framework.
+ *
+ * See class and method comments of KeyFactorySpi for more detailed information about this functions.
+ *
+ * A Pairwise key pair is deterministically generated given the original key and information about the peer that this key
+ * is supposed to be used with. The pairwise key provides anonymity such that peers can not correlate the entity using them
+ * through the signatures used for communication.
+ */
 class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
+
     override fun engineGeneratePublic(keySpec: KeySpec?): PublicKey {
         val ecKeySpec = keySpec as? EcPairwisePublicKeySpec
             ?: throw InvalidKeySpecException("Keyspec has to be of type ${EcPairwisePublicKeySpec::class.qualifiedName}")
@@ -46,7 +57,7 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
     }
 
     private fun computeMac(payload: ByteArray, seed: ByteArray): ByteArray {
-        return CryptoOperations.computeMac(payload, SecretKeySpec(seed, "AES"), MacAlgorithm.HmacSha512)
+        return CryptoOperations.computeMac(payload, SecretKeySpec(seed, AES_KEY), MacAlgorithm.HmacSha512)
     }
 
     override fun <T : KeySpec?> engineGetKeySpec(key: Key?, keySpec: Class<T>?): T {

@@ -14,30 +14,29 @@ class SideTreeHelperTest {
     private val testJwk = "{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"signKey\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}"
     private val testJwkRearrangedWithSpaces = "{ \"kid\" : \"signKey\",\"crv\":\"secp256k1\",\"kty\":\"EC\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}"
 
-
     @Test
-    fun `test multi hash is equal through canonicalization`() {
+    fun `multi hash is equal through canonicalization`() {
         val actualMultiHash1 = sideTreeHelper.canonicalizeAndMultiHash(testJwk)
         val actualMultiHash2 = sideTreeHelper.canonicalizeAndMultiHash(testJwkRearrangedWithSpaces)
         assertThat(actualMultiHash1).isEqualTo(actualMultiHash2)
     }
 
     @Test
-    fun `test multi hash result`() {
+    fun `multi hash result`() {
         val expectedHash = "EiCoXB_oNrdSXnCDs4QZ7gjq0e986KfN_4WoHfAlo6iNyw"
         val actualHash = sideTreeHelper.canonicalizeAndMultiHash(testJwkRearrangedWithSpaces)
         assertThat(actualHash).isEqualTo(expectedHash)
     }
 
     @Test
-    fun `test createCommitmentValue is equal through canonicalization`() {
+    fun `createCommitmentValue is equal through canonicalization`() {
         val actualCommitment1 = sideTreeHelper.createCommitmentValue(JWK.parse(testJwk))
         val actualCommitment2 = sideTreeHelper.createCommitmentValue(JWK.parse(testJwkRearrangedWithSpaces))
         assertThat(actualCommitment1).isEqualTo(actualCommitment2)
     }
 
     @Test
-    fun `test createCommitmentValue result`() {
+    fun `createCommitmentValue result`() {
         val expectedCommitment = "EiDGJuWSAbriN_z4zES82csqhfwN__DFLwFFbchNNKoucg"
         val actualCommitment1 = sideTreeHelper.createCommitmentValue(JWK.parse(testJwkRearrangedWithSpaces))
         assertThat(actualCommitment1).isEqualTo(expectedCommitment)

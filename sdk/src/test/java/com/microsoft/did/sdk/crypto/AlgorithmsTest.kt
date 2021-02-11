@@ -5,6 +5,7 @@ package com.microsoft.did.sdk.crypto
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
+import com.microsoft.did.sdk.util.Constants.AES_KEY
 import org.junit.Test
 import java.math.BigInteger
 import java.security.interfaces.ECPrivateKey
@@ -32,7 +33,7 @@ class AlgorithmsTest {
     @Test
     fun `test MacAlgorithm HmacSha512`() {
         val seed = ByteArray(16, { it.toByte() })
-        val secretKey = SecretKeySpec(seed, "AES")
+        val secretKey = SecretKeySpec(seed, AES_KEY)
         val actualMac = CryptoOperations.computeMac("abcd".toByteArray(), secretKey, MacAlgorithm.HmacSha512)
         val expectedMac =
             "d5ab30f6bf979aa39519441d9a6821fb43387261006ab91a561c687ba24a823cc1f8cc7144591c0942435408074232252a9f098aa38b077c39cd18dc5effc1e9"

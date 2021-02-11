@@ -27,22 +27,17 @@ import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 
 class PairwiseKeyTest {
-    private var crypto: CryptoOperations
+    private var crypto: CryptoOperations = CryptoOperations
     private val suppliedStringForSeedGeneration = "abcdefg"
     private val seed: ByteArray = suppliedStringForSeedGeneration.toByteArray()
     private val seedKey = OctetSequenceKey.Builder(seed).build()
     private val inputStream: InputStream = File(".\\src\\test\\assets\\Pairwise.EC.json").inputStream()
-
-    init {
-        crypto = CryptoOperations
-    }
 
     /**
      * Tests if pairwise key generated with the same master seed, persona id and peer id is same every time
      */
     @Test
     fun generateSamePairwiseKeyTest() {
-//        val persona = "did:persona:1"
         val peer = "did:peer:1"
         val privateParams = PrivateKeyFactoryAlgorithm.EcPairwise(EcPairwisePrivateKeySpec(seed, peer))
         val pairwiseKey1 = crypto.generateKey<ECPrivateKey>(privateParams)
@@ -55,9 +50,8 @@ class PairwiseKeyTest {
      * a) verifies if master key generated from same master seed and persona id is same every time
      * b) verifies if master key generated from same master seed but different persona id is different from test vector
      */
-
     @Test
-    fun generatePersonaMasterKeyTest() {
+    fun `verify pairwise persona seed generation`() {
         val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
         var persona = "persona"
         val keyStore: EncryptedKeyStore = mockk()
@@ -77,14 +71,10 @@ class PairwiseKeyTest {
         assertThat(actualEncodedMasterKey.toString()).isNotEqualTo(expectedEncodedMasterKey)
     }
 
-    /**
-     * Generate deterministic pairwise key and test if it is capable of signing
-     */
     @Test
-    fun generateDeterministicECPairwiseKey() {
+    fun `generate pairwise KeyPair, sign and verify`() {
         val peer = "did:peer"
 
-        // Generate pairwise key
         val ecPairwiseKey = crypto.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(
             EcPairwisePrivateKeySpec(seed, peer)
         ))
@@ -92,10 +82,7 @@ class PairwiseKeyTest {
             EcPairwisePublicKeySpec(ecPairwiseKey)
         ))
 
-        //Use the pairwise key generated to sign and verify just to make sure it is successful. Verify doesn't return anything to make assertions on that. If verification fails, test would fail automatically.
-
         val data = "1234567890".toByteArray()
-
         val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.Ecdsa256)
         assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.Ecdsa256)).isTrue;
     }
@@ -104,7 +91,7 @@ class PairwiseKeyTest {
      * Generate pairwise keys with different master seed but same persona id and peer id as input and verifies if pairwise keys generated are unique
      */
     @Test
-    fun generateUniquePairwiseKeyUsingDifferentSeed() {
+    fun `verify unique pairwise generation for unique master seed`() {
         val results = Array<String?>(50) { "" }
         val persona = "did:persona:1"
         val peer = "did:peer:1"
@@ -127,7 +114,7 @@ class PairwiseKeyTest {
      * Generate pairwise keys with different peer id but same persona id and master seed as input and verifies if pairwise keys generated are unique
      */
     @Test
-    fun generateUniquePairwiseKeyUsingDifferentPeer() {
+    fun `verify unique pairwise generation for unique peer`() {
         val results = Array<String?>(50) { "" }
         val persona = "did:persona:1"
         val peer = "did:peer:1"
@@ -151,7 +138,7 @@ class PairwiseKeyTest {
      * generates pairwise keys and verifies if pairwise keys generated match the keys in test vector file
      */
     @Test
-    fun generateSameKeysInFile() {
+    fun `verify pairwise key generation using test vectors`() {
         val countOfIds = 10
         val testKeysJsonString = inputStream.bufferedReader().readText()
         val testPairwiseKeys = defaultTestSerializer.decodeFromString(TestKeys.serializer(), testKeysJsonString)

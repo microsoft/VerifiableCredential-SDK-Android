@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.AES_KEY
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
@@ -82,7 +83,7 @@ class IdentifierCreator @Inject constructor(
 
     internal fun generatePersonaSeed(personaDid: String): ByteArray {
         val masterSeed = keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME).toOctetSequenceKey().toByteArray()
-        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, "AES"), MacAlgorithm.HmacSha512)
+        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, AES_KEY), MacAlgorithm.HmacSha512)
     }
 
     private fun generateRandomKeyId(): String {
