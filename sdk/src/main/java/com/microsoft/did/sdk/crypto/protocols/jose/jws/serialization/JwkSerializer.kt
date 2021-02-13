@@ -14,6 +14,14 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 
+/**
+ * This object tells the Kotlin Serialization framework how to serialize a JWK.
+ * Because JWK is a java class from a third-party provider a so called "surrogate"
+ * class is required. This class is not for use elsewhere.
+ *
+ * Please refer to kotlin serialization docs for more info:
+ * https://github.com/Kotlin/kotlinx.serialization/blob/master/docs/serializers.md#composite-serializer-via-surrogate
+ */
 object JwkSerializer : KSerializer<JWK> {
     override val descriptor: SerialDescriptor = JwkSurrogate.serializer().descriptor
     override fun serialize(encoder: Encoder, value: JWK) {
@@ -56,6 +64,9 @@ object JwkSerializer : KSerializer<JWK> {
         return JWK.parse(Json.encodeToString(JwkSurrogate.serializer(), jsonWebKey))
     }
 
+    /**
+     * This class is not supposed to be used anywhere else. Use Nimbus JWK instead. See JwkSerializer class comment.
+     */
     @Serializable
     private data class JwkSurrogate(
         // The following fields are defined in Section 3.1 of JSON Web Key

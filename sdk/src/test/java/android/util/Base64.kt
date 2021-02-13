@@ -4,6 +4,7 @@
 
 package android.util
 
+import com.microsoft.did.sdk.util.Constants
 import java.util.Base64
 
 /**
@@ -16,11 +17,13 @@ import java.util.Base64
 object Base64 {
     @JvmStatic
     fun encodeToString(input: ByteArray?, flags: Int): String {
+        if (flags != Constants.BASE64_URL_SAFE) throw UnsupportedOperationException("This mock currently supports only one combination of flags")
         return Base64.getUrlEncoder().withoutPadding().encodeToString(input)
     }
 
     @JvmStatic
     fun decode(str: String?, flags: Int): ByteArray {
+        if (flags != Constants.BASE64_URL_SAFE) throw UnsupportedOperationException("This mock currently supports only one combination of flags")
         return Base64.getUrlDecoder().decode(str)
     }
 }

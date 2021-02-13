@@ -83,8 +83,8 @@ class PairwiseKeyTest {
         ))
 
         val data = "1234567890".toByteArray()
-        val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.Ecdsa256)
-        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.Ecdsa256)).isTrue;
+        val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.ES256K)
+        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.ES256K)).isTrue;
     }
 
     /**
