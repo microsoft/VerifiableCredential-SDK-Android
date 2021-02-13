@@ -3,8 +3,10 @@ package com.microsoft.did.sdk.datasource.file.models
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.controlflow.DuplicateIdentity
 import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
 import com.microsoft.did.sdk.util.controlflow.MalformedMetadata
 import com.microsoft.did.sdk.util.controlflow.MalformedVerifiableCredential
@@ -15,10 +17,7 @@ import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
-import java.security.KeyException
-import javax.inject.Inject
 
 /**
  * @constructor
@@ -33,86 +32,24 @@ class MicrosoftUnprotectedBackup2020 (
     val vcs: Map<String, String>,
     val vcsMetaInf: Map<String, VCMetadata>,
     val metaInf: WalletMetadata,
-    val identifiers: List<RawIdentity>
+    val identifiers: List<RawIdentity>,
 ) : UnprotectedBackup() {
-    @Transient
-    private lateinit var metadataCallback: suspend (WalletMetadata) -> Unit
-    @Transient
-    private lateinit var verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit
-    @Transient
-    @Inject
-    internal lateinit var jsonSerializer: Json
-    @Transient
-    @Inject
-    internal lateinit var identityRepository: IdentifierRepository
-    @Transient
-    @Inject
-    internal lateinit var keyStore: EncryptedKeyStore
-
     override val type: String
         get() = MICROSOFT_BACKUP_TYPE
 
     companion object {
         const val MICROSOFT_BACKUP_TYPE = "MicrosoftWallet2020"
 
-        suspend fun build(
-            metadata: WalletMetadata,
-            verifiableCredentials: List<Pair<VerifiableCredential, VCMetadata>>,
-            identityRepository: IdentifierRepository,
-            keyStore: EncryptedKeyStore): MicrosoftUnprotectedBackup2020 {
-
-            val vcMap = mutableMapOf<String, String>()
-            val vcMetaMap = mutableMapOf<String, VCMetadata>()
-            val ownedDids = mutableListOf<String>()
-
-            verifiableCredentials.forEach { vcPair ->
-                val jti = vcPair.first.jti
-                vcMap[jti] = vcPair.first.raw
-                vcMetaMap[jti] = vcPair.second
-                ownedDids.add(vcPair.first.contents.sub)
-            }
-
-            val identifiers = ownedDids.mapNotNull {
-                identityRepository.queryByIdentifier(it)?.let { identity ->
-                    val keys = listOf(
-                        identity.encryptionKeyReference,
-                        identity.signatureKeyReference,
-                        identity.updateKeyReference,
-                        identity.recoveryKeyReference
-                    ).mapNotNull { keyId ->
-                        if (keyId.isNotBlank()) {
-                            keyStore.getKey(keyId)
-                        } else {
-                            null
-                        }
-                    }
-                    RawIdentity(
-                        identity.id,
-                        name = identity.name,
-                        keys
-                    )
-                }
-            }
-
-            return MicrosoftUnprotectedBackup2020(
-                metaInf = metadata,
-                vcs = vcMap,
-                vcsMetaInf = vcMetaMap,
-                identifiers = identifiers
-            )
-        }
     }
 
-    fun initialize(
+    suspend fun import(
         walletMetadataCallback: suspend (WalletMetadata) -> Unit,
-        verifiableCredentialCallback:  suspend (VerifiableCredential, VCMetadata) -> Unit) {
-        this.metadataCallback = walletMetadataCallback
-        this.verifiableCredentialCallback = verifiableCredentialCallback
-    }
-
-    override suspend fun import(): Result<Unit> {
+        verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit,
+        identityRepository: IdentifierRepository,
+        keyStore: EncryptedKeyStore,
+        jsonSerializer: Json): Result<Unit> {
         try {
-            this.identifiers.forEach { raw -> restoreIdentifier(raw) }
+            this.identifiers.forEach { raw -> restoreIdentifier(raw, identityRepository, keyStore) }
         } catch (exception: SdkException) {
             return Result.Failure(exception)
         } catch (exception: Exception) {
@@ -130,7 +67,7 @@ class MicrosoftUnprotectedBackup2020 (
             }
         }
         try {
-            metadataCallback(this.metaInf)
+            walletMetadataCallback(this.metaInf)
         } catch (exception: SdkException) {
             return Result.Failure(exception)
         } catch (exception: Exception) {
@@ -140,27 +77,35 @@ class MicrosoftUnprotectedBackup2020 (
     }
 
     private suspend fun restoreIdentifier (
-        identifierData: RawIdentity
+        identifierData: RawIdentity,
+        identityRepository: IdentifierRepository,
+        keyStore: EncryptedKeyStore
     ): Identifier {
         var signingKeyRef: String = ""
         var encryptingKeyRef: String = ""
-        var recoveryKeyRef: String = ""
-        var updateKeyRef: String = ""
+        val recoveryKeyRef: String = identifierData.recoveryKey
+        val updateKeyRef: String = identifierData.updateKey
         for (key in identifierData.keys) {
             if (signingKeyRef.isBlank() &&
                 (key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
                     key.keyUse == KeyUse.SIGNATURE)) {
-                signingKeyRef = importKey(key)
-            }
-            if (encryptingKeyRef.isBlank() &&
-                (key.keyOperations?.containsAll(listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT)) == true ||
-                    key.keyOperations?.containsAll(listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY)) == true ||
+                signingKeyRef = importKey(key, keyStore)
+            } else if (encryptingKeyRef.isBlank() &&
+                (key.keyOperations?.any { listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT).contains(it) } == true ||
+                    key.keyOperations?.any { listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY).contains(it) } == true ||
                     key.keyUse == KeyUse.ENCRYPTION)) {
-                encryptingKeyRef = importKey(key)
+                encryptingKeyRef = importKey(key, keyStore)
+            } else if (key.keyID == updateKeyRef) {
+                importKey(key, keyStore)
+            } else if (key.keyID == recoveryKeyRef) {
+                importKey(key, keyStore)
             }
         }
-        if (updateKeyRef.isEmpty() || recoveryKeyRef.isBlank()) {
+        if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
             throw MalformedIdentity("update and recovery key required")
+        }
+        if (identityRepository.queryByIdentifier(identifierData.id) != null) {
+            throw DuplicateIdentity("Identifier ${identifierData.id} already exists.")
         }
         val id = Identifier(
             identifierData.id,
@@ -175,7 +120,8 @@ class MicrosoftUnprotectedBackup2020 (
     }
 
     private fun importKey(
-        jwk: JWK
+        jwk: JWK,
+        keyStore: EncryptedKeyStore
     ): String {
         val kid = jwk.keyID ?: throw com.microsoft.did.sdk.util.controlflow.KeyException("Imported JWK has no key id.")
         if (!keyStore.containsKey(kid)) {
@@ -185,7 +131,7 @@ class MicrosoftUnprotectedBackup2020 (
     }
 
 
-    fun vcsToIterator(serializer: Json): Iterator<Pair<VerifiableCredential, VCMetadata>> {
+    private fun vcsToIterator(serializer: Json): Iterator<Pair<VerifiableCredential, VCMetadata>> {
         return VCIterator(vcs, vcsMetaInf, serializer)
     }
 
@@ -203,7 +149,8 @@ class MicrosoftUnprotectedBackup2020 (
         override fun next(): Pair<VerifiableCredential, VCMetadata> {
             val jti = jtis.next()
             val rawToken = vcs[jti]!!
-            val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), rawToken)
+            val jwsToken = JwsToken.deserialize(rawToken)
+            val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
             val vc = VerifiableCredential(verifiableCredentialContent.jti, rawToken, verifiableCredentialContent)
             return Pair(vc, vcsMetaInf[jti]!!)
         }

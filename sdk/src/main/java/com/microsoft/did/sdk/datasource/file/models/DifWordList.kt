@@ -7,9 +7,10 @@ import android.content.res.AssetManager
 import java.io.InputStreamReader
 
 object DifWordList {
-    lateinit var wordList: List<String>
-
-    internal fun initializeWordList(context: Context) {
-        this.wordList = InputStreamReader(context.assets.open("difwordlist.txt", AssetManager.ACCESS_STREAMING), "UTF-8").readLines()
+    internal fun getWordList(context: Context): List<String> {
+        val reader = InputStreamReader(context.assets.open("difwordlist.txt", AssetManager.ACCESS_STREAMING), "UTF-8")
+        val words = reader.readLines()
+        reader.close()
+        return words
     }
 }

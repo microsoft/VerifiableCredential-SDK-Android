@@ -24,6 +24,4 @@ abstract class UnprotectedBackup {
     fun toString(jsonSerializer: Json): String {
         return jsonSerializer.encodeToString(this)
     }
-
-    abstract suspend fun import(): Result<Unit>
 }

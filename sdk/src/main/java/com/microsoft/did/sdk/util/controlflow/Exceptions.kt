@@ -45,11 +45,15 @@ open class MalformedBackup(message: String, cause: Throwable? = null): BackupRes
 
 class MalformedIdentity(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
 
+class DuplicateIdentity(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
+
 class MalformedMetadata(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
 
 class MalformedVerifiableCredential(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
 
 class FailedDecrypt(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
+
+class BadPassword(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
 
 open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     SdkException(message, cause, retryable)

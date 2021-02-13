@@ -2,15 +2,15 @@
 
 package com.microsoft.did.sdk.datasource.file.models
 
-import com.microsoft.did.sdk.BackupAndRestoreService
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
+import com.microsoft.did.sdk.util.controlflow.BadPassword
 import com.microsoft.did.sdk.util.controlflow.FailedDecrypt
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.json.Json
 import java.lang.Exception
-import java.security.SecureRandom
 import javax.crypto.spec.SecretKeySpec
 
 const val PASSWORD_SET_SIZE = 12
@@ -21,30 +21,18 @@ class PasswordProtectedBackup internal constructor(
     val password: List<String>? = null
     ) : JweProtectedBackup(token) {
 
-    companion object {
-        fun wrap(backup: UnprotectedBackup, serializer: Json): PasswordProtectedBackup {
-            val data = backup.toString(serializer)
+    internal constructor(
+        backup: UnprotectedBackup,
+        password: String,
+        serializer: Json
+    ) : this({ unprotectedBackup: UnprotectedBackup ->
+            val data = unprotectedBackup.toString(serializer)
             val token = JweToken(data, JWEAlgorithm.PBES2_HS512_A256KW)
-            token.contentType = backup.type
-            return PasswordProtectedBackup(token, serializer, initializePasswordSet())
-        }
-
-        internal fun initializePasswordSet(setSize: Int = PASSWORD_SET_SIZE): List<String> {
-            val random = SecureRandom()
-            val wordSet = MutableList(setSize) { "" }
-            val wordList = BackupAndRestoreService.getWordList()
-            for (index in 0 until wordSet.count()) {
-                var wordIndex: Int
-                var word: String
-                do {
-                    wordIndex = random.nextInt(wordList.count())
-                    word = wordList[wordIndex]
-                } while (wordSet.contains(word))
-                wordSet[index] = word
-            }
-            return wordSet
-        }
-    }
+            token.contentType = unprotectedBackup.type
+            token
+        }(backup),
+        serializer,
+        password.split(Regex("\\s+")).filter{ it.isNotBlank() })
 
     override suspend fun encrypt() {
         // this can be a very long operation, thus the suspend
@@ -58,7 +46,7 @@ class PasswordProtectedBackup internal constructor(
         throw RuntimeException("No password has been initialized")
     }
 
-    suspend fun decrypt(password: String): Result<UnprotectedBackup> {
+    suspend fun decrypt(password: String): Result<UnprotectedBackup?> {
         // this can be a very long operation, thus the suspend
         val words = password.split(Regex("\\s+")).filter { it.isNotBlank() }
         try {
@@ -70,14 +58,12 @@ class PasswordProtectedBackup internal constructor(
                 data ->
                 return Result.Success(payload = serializer.decodeFromString(UnprotectedBackup.serializer(), String(data)))
             }
-            return Result.Failure(FailedDecrypt("Incorrect Password"))
+            return Result.Failure(BadPassword("Failed to decrypt"))
+        } catch (exception: SdkException) {
+            return Result.Failure(exception)
         } catch (exception: Exception) {
             return Result.Failure(FailedDecrypt("Unknown error", exception))
         }
-    }
-
-    fun getDisplayPassword(): String {
-        return password?.joinToString(" ") ?: ""
     }
 
     fun confirmPassword(password: String): Boolean {

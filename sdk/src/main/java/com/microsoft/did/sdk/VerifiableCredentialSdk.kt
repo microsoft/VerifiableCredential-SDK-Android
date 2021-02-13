@@ -80,7 +80,6 @@ object VerifiableCredentialSdk {
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierManager = sdkComponent.identifierManager()
         backupAndRestoreService = sdkComponent.backupAndRestoreService()
-        DifWordList.initializeWordList(context)
 
         correlationVectorService.startNewFlowAndSave()
 

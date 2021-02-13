@@ -17,6 +17,7 @@ import java.io.IOException
 abstract class JweProtectedBackup internal constructor (
     val jweToken: JweToken
     ) {
+
     companion object {
         suspend fun parseBackup(backupFile: InputStream, serializer: Json): Result<JweProtectedBackup> {
             val jweString = String(backupFile.readBytes())
