@@ -7,10 +7,12 @@ package com.microsoft.did.sdk.datasource.network
 
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
 import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
+import com.microsoft.did.sdk.util.controlflow.ClientException
+import com.microsoft.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.NetworkException
+import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
 import com.microsoft.did.sdk.util.logTime
@@ -59,15 +61,37 @@ abstract class BaseNetworkOperation<S, T> {
                 UnauthorizedException(
                     requestId,
                     correlationVector,
-                    defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
+                    response.code().toString(),
+                    response.errorBody()?.string() ?: "",
                     false
                 )
             )
-            402, 403, 404 -> Result.Failure(
-                ServiceErrorException(
+            402 -> Result.Failure(
+                ClientException(
                     requestId,
                     correlationVector,
-                    defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
+                    response.code().toString(),
+                    response.errorBody()?.string() ?: "",
+                    false
+                )
+            )
+            403 -> {
+                Result.Failure(
+                    ForbiddenException(
+                        requestId,
+                        correlationVector,
+                        response.code().toString(),
+                        response.errorBody()?.string() ?: "",
+                        false
+                    )
+                )
+            }
+            404 -> Result.Failure(
+                NotFoundException(
+                    requestId,
+                    correlationVector,
+                    response.code().toString(),
+                    response.errorBody()?.string() ?: "",
                     false
                 )
             )
@@ -75,22 +99,13 @@ abstract class BaseNetworkOperation<S, T> {
                 ServiceUnreachableException(
                     requestId,
                     correlationVector,
-                    defaultErrorMessage(response.code(), requestId, correlationVector, response.errorBody()?.string() ?: ""),
+                    response.code().toString(),
+                    response.errorBody()?.string() ?: "",
                     true
                 )
             )
-            else -> Result.Failure(NetworkException(requestId, correlationVector, "Unknown Status code ${response.code()}", true))
+            else -> Result.Failure(NetworkException(requestId, correlationVector, response.code().toString(), "Unknown Status code", true))
         }
-    }
-
-    private fun defaultErrorMessage(httpCode: Int, requestId: String?, correlationVector: String?, errorBody: String): String {
-        val errorMessage = StringBuilder()
-        if (requestId != null)
-            errorMessage.append("RequestId: $requestId\n")
-        if (correlationVector != null)
-            errorMessage.append("CorrelationVector: $correlationVector\n")
-        errorMessage.append("Http code: $httpCode\nErrorBody: $errorBody")
-        return errorMessage.toString()
     }
 
     fun <S> onRetry(): Result<S> {

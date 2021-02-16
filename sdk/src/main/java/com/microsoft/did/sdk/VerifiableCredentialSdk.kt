@@ -5,7 +5,6 @@
 
 package com.microsoft.did.sdk
 
-import android.annotation.SuppressLint
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
@@ -37,12 +36,14 @@ object VerifiableCredentialSdk {
     @JvmStatic
     lateinit var revocationService: RevocationService
 
-    @SuppressLint("StaticFieldLeak")
     @JvmStatic
     lateinit var correlationVectorService: CorrelationVectorService
 
     @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
+
+    @JvmStatic
+    lateinit var featureFlag: FeatureFlag
 
     /**
      * Initializes VerifiableCredentialSdk
@@ -76,6 +77,7 @@ object VerifiableCredentialSdk {
         identifierManager = sdkComponent.identifierManager()
 
         correlationVectorService.startNewFlowAndSave()
+        featureFlag = sdkComponent.featureFlag()
 
         SdkLog.addConsumer(logConsumer)
     }

@@ -5,8 +5,7 @@
 
 package com.microsoft.did.sdk
 
-import android.content.Context
-import androidx.preference.PreferenceManager
+import android.content.SharedPreferences
 import com.microsoft.correlationvector.CorrelationVector
 import com.microsoft.correlationvector.CorrelationVectorVersion
 import com.microsoft.did.sdk.util.Constants
@@ -14,31 +13,31 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CorrelationVectorService @Inject constructor(private val context: Context) {
+class CorrelationVectorService @Inject constructor(private val sharedPreferences: SharedPreferences) {
 
     fun startNewFlowAndSave(): String {
         val correlationId = CorrelationVector(CorrelationVectorVersion.V2).value
-        saveCorrelationVector(context, correlationId)
+        saveCorrelationVector(sharedPreferences, correlationId)
         return correlationId
     }
 
     internal fun incrementAndSave(): String {
-        val correlationVectorString = getCorrelationVector(context)
+        val correlationVectorString = getCorrelationVector(sharedPreferences)
         if (correlationVectorString != null && correlationVectorString.isNotEmpty()) {
             val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
-            saveCorrelationVector(context, correlationVectorIncremented)
+            saveCorrelationVector(sharedPreferences, correlationVectorIncremented)
             return correlationVectorIncremented
         }
         return ""
     }
 
-    fun getCorrelationVector(applicationContext: Context = context): String? {
-        return PreferenceManager.getDefaultSharedPreferences(applicationContext).getString(Constants.CORRELATION_VECTOR_IN_PREF, null)
+    fun getCorrelationVector(sharedPreference: SharedPreferences = sharedPreferences): String? {
+        return sharedPreference.getString(Constants.CORRELATION_VECTOR_IN_PREF, null)
     }
 
-    private fun saveCorrelationVector(applicationContext: Context, correlationId: String) {
+    private fun saveCorrelationVector(sharedPreferences: SharedPreferences, correlationId: String) {
         if (correlationId.isNotEmpty())
-            PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()
+            sharedPreferences.edit()
                 .putString(Constants.CORRELATION_VECTOR_IN_PREF, correlationId).apply()
     }
 }

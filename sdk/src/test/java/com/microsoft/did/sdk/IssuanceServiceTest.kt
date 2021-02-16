@@ -10,6 +10,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainDisabled
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
@@ -51,6 +52,7 @@ class IssuanceServiceTest {
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
+    private val featureFlag: FeatureFlag = mockk()
     private val issuanceService =
         spyk(
             IssuanceService(
@@ -60,7 +62,8 @@ class IssuanceServiceTest {
                 mockk(relaxed = true),
                 mockedJwtValidator,
                 issuanceResponseFormatter,
-                defaultTestSerializer
+                defaultTestSerializer,
+                featureFlag
             )
         )
 
@@ -109,7 +112,7 @@ class IssuanceServiceTest {
     }
 
     @Test
-    fun `test to get Issuance Request`() {
+    fun `test to get Issuance Request with linked domains disabled`() {
         val suppliedContractUrl = "BusinessCard"
         val expectedEntityName = "Adatum Corporation"
         val expectedEntityIdentifier =
@@ -117,6 +120,28 @@ class IssuanceServiceTest {
 
         coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(unwrapContract(expectedContractJwt))
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { featureFlag.linkedDomains } returns false
+
+        runBlocking {
+            val actualRequest = issuanceService.getRequest(suppliedContractUrl)
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            assertThat((actualRequest as Result.Success).payload.contractUrl).isEqualTo(suppliedContractUrl)
+            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainDisabled::class.java)
+            assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
+            assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
+        }
+    }
+
+    @Test
+    fun `test to get Issuance Request with linked domains verified`() {
+        val suppliedContractUrl = "BusinessCard"
+        val expectedEntityName = "Adatum Corporation"
+        val expectedEntityIdentifier =
+            "did:ion:EiCfeOciEjwupwRQsJC3wMZzz3_M3XIo6bhy7aJkCG6CAQ?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlEMDQwY2lQakUxR0xqLXEyWmRyLVJaXzVlcU8yNFlDMFI5bTlEd2ZHMkdGQSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUMyRmQ5UE90emFNcUtMaDNRTFp0Wk43V0RDRHJjdkN4eTNvdlNERDhKRGVRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQ2gtaTFDMW1fM2N4SGJNM3pXemRRdExxMnBvRldaX25FVEJTb0NhT2JZTWciLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnXzBmOTdlZWZjIiwidHlwZSI6IkVjZHNhU2VjcDI1NmsxVmVyaWZpY2F0aW9uS2V5MjAxOSIsImp3ayI6eyJrdHkiOiJFQyIsImNydiI6InNlY3AyNTZrMSIsIngiOiJoQ0xsb3JJbGx2M2FWSkRiYkNxM0VHbzU2bWV6Q3RLWkZGcUtvS3RVc3BzIiwieSI6Imh1VG5iTEc3MWU0NDNEeVJkeU5DX3dfc3paR0hVYUcxUHdsMHpXb0h2LUEifSwicHVycG9zZSI6WyJhdXRoIiwiZ2VuZXJhbCJdfV19fV19"
+
+        coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(unwrapContract(expectedContractJwt))
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+        every { featureFlag.linkedDomains } returns true
         coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )

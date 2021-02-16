@@ -6,6 +6,7 @@ import android.net.Uri
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainDisabled
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
@@ -34,18 +35,22 @@ class PresentationService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
-    private val presentationResponseFormatter: PresentationResponseFormatter
+    private val presentationResponseFormatter: PresentationResponseFormatter,
+    private val featureFlag: FeatureFlag
 ) {
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
-            logTime("Presentation getRequest") {
-                val uri = verifyUri(stringUri)
-                val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
-                val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
-                isRequestValid(request).abortOnError()
-                Result.Success(request)
-            }
+			logTime("Presentation getRequest") {
+            	val uri = verifyUri(stringUri)
+            	val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
+            	val isLinkedDomainsEnabled = featureFlag.linkedDomains
+            	val linkedDomainResult =
+                	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
+                    	.abortOnError() else LinkedDomainDisabled()
+            	val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
+            	isRequestValid(request).abortOnError()
+            	Result.Success(request)
+			}
         }
     }
 
