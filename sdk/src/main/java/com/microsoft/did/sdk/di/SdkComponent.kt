@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.FeatureFlag
 import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.IdentifierManager
 import com.microsoft.did.sdk.IssuanceService
-import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.PresentationService
 import com.microsoft.did.sdk.RevocationService
 import dagger.BindsInstance
