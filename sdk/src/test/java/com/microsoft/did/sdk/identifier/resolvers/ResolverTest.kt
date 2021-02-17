@@ -40,11 +40,11 @@ class ResolverTest {
         val resolver = Resolver("", identifierRepository)
         coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(
             NotFoundException(
-                "123",
-                "paMxWRuFSV+mo+Hso8IBVw.0",
                 "404",
                 "Not Found",
-                true
+                true,
+                "123",
+                "paMxWRuFSV+mo+Hso8IBVw.0"
             )
         )
         runBlocking {
