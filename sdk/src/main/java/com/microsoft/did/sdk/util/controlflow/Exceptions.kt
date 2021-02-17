@@ -46,8 +46,6 @@ open class RevocationException(message: String? = null, cause: Throwable? = null
 open class ValidatorException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
-class UnableToFetchWellKnownConfigDocument(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
-
 class InvalidSignatureException(message: String) : ValidatorException(message)
 
 class ExpiredTokenException(message: String) : ValidatorException(message)
@@ -70,16 +68,18 @@ class RegistrarException(message: String, cause: Throwable? = null) : SdkExcepti
 
 open class LocalNetworkException(message: String, cause: Throwable? = null) : SdkException(message, cause, true)
 
-open class NetworkException(val requestId: String? = null, val correlationVector: String? = null, errorCode: String, message: String, retryable: Boolean) : SdkException(message, null, retryable, errorCode)
+open class NetworkException(errorCode: String, message: String, retryable: Boolean, val requestId: String? = null, val correlationVector: String? = null) : SdkException(message, null, retryable, errorCode)
 
-class ServiceUnreachableException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
+class ServiceUnreachableException(errorCode: String, message: String, retryable: Boolean, requestId: String?, correlationVector: String?) : NetworkException(errorCode, message, retryable, requestId, correlationVector)
 
-open class ClientException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
+open class ClientException(errorCode: String, message: String, retryable: Boolean, requestId: String?, correlationVector: String?) : NetworkException(errorCode, message, retryable, requestId, correlationVector)
 
-class ForbiddenException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : ClientException(requestId, correlationVector, errorCode, message, retryable)
+class ForbiddenException(errorCode: String, message: String, retryable: Boolean, requestId: String?, correlationVector: String?) : ClientException(errorCode, message, retryable, requestId, correlationVector)
 
-class NotFoundException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : ClientException(requestId, correlationVector, errorCode, message, retryable)
+class NotFoundException(errorCode: String, message: String, retryable: Boolean, requestId: String?, correlationVector: String?) : ClientException(errorCode, message, retryable, requestId, correlationVector)
 
-class UnauthorizedException(requestId: String?, correlationVector: String?, errorCode: String, message: String, retryable: Boolean) : NetworkException(requestId, correlationVector, errorCode, message, retryable)
+class UnauthorizedException(errorCode: String, message: String, retryable: Boolean, requestId: String?, correlationVector: String?) : NetworkException(errorCode, message, retryable, requestId, correlationVector)
+
+class RedirectException(errorCode: String, message: String, retryable: Boolean) : NetworkException(errorCode, message, retryable)
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
