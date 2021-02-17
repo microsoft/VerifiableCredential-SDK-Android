@@ -82,11 +82,15 @@ class BackupAndRestoreService @Inject constructor(
     suspend fun importMicrosoftBackup(backup: MicrosoftUnprotectedBackup2020,
                                       walletMetadataCallback: suspend (WalletMetadata) -> Unit,
                                       verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit,
+                                      listVerifiableCredentialCallback: suspend () -> List<String>,
+                                      deleteVerifiableCredentialCallback: suspend (String) -> Unit,
                                       jsonSerializer: Json = Json.Default
                                       ): Result<Unit> {
         return backup.import(
             walletMetadataCallback,
             verifiableCredentialCallback,
+            listVerifiableCredentialCallback,
+            deleteVerifiableCredentialCallback,
             this.identityRepository,
             this.keyStore,
             jsonSerializer

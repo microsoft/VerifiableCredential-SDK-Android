@@ -6,7 +6,6 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.DuplicateIdentity
 import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
 import com.microsoft.did.sdk.util.controlflow.MalformedMetadata
 import com.microsoft.did.sdk.util.controlflow.MalformedVerifiableCredential
@@ -39,33 +38,60 @@ class MicrosoftUnprotectedBackup2020 (
 
     companion object {
         const val MICROSOFT_BACKUP_TYPE = "MicrosoftWallet2020"
-
     }
 
     suspend fun import(
         walletMetadataCallback: suspend (WalletMetadata) -> Unit,
         verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit,
+        listVerifiableCredentialCallback: suspend () -> List<String>,
+        deleteVerifiableCredentialCallback: suspend (String) -> Unit,
         identityRepository: IdentifierRepository,
         keyStore: EncryptedKeyStore,
         jsonSerializer: Json): Result<Unit> {
+
+        val identifiers = mutableListOf<Identifier>()
+        var keySet = setOf<JWK>()
         try {
-            this.identifiers.forEach { raw -> restoreIdentifier(raw, identityRepository, keyStore) }
+            this.identifiers.forEach { raw ->
+                val pair = parseRawIdentifier(raw, identityRepository)
+                identifiers.add(pair.first)
+                keySet = keySet.union(pair.second)
+            }
         } catch (exception: SdkException) {
             return Result.Failure(exception)
         } catch (exception: Exception) {
             return Result.Failure(MalformedIdentity("unhandled exception thrown", exception))
         }
-        this.vcsToIterator(jsonSerializer).forEach {
+
+        val existingVCs = listVerifiableCredentialCallback().toSet()
+        val vcsToRemove = existingVCs.subtract(this.vcs.keys)
+        val vcsNotToBeRemoved = existingVCs.intersect(this.vcs.keys)
+
+        val identifiersToRemove = identityRepository.queryAllLocal().filter {
+                dbIdentifier ->
+            identifiers.all { identifier -> identifier.id != dbIdentifier.id } }
+
+        val vcsAdded = mutableListOf<String>()
+        try {
+            this.vcsToIterator(jsonSerializer).forEach {
                 dataPair ->
-            // TODO: Some validation that the VC is issued to an identifier under our control
-            try {
+                vcsAdded.add(dataPair.first.jti)
+                // TODO: Some validation that the VC is issued to an identifier under our control
                 verifiableCredentialCallback(dataPair.first, dataPair.second)
-            } catch (exception: SdkException) {
-                return Result.Failure(exception)
-            } catch (exception: Exception) {
-                return Result.Failure(MalformedVerifiableCredential("unhandled exception thrown", exception))
             }
+            keySet.forEach { key -> importKey(key, keyStore) }
+            identifiers.forEach { id -> identityRepository.insert(id) }
+            vcsToRemove.forEach { vcId -> deleteVerifiableCredentialCallback(vcId) }
+            identifiersToRemove.forEach { identifier -> identityRepository.deleteIdentifier(identifier.id) }
+
+        } catch (exception: SdkException) {
+            vcsAdded.forEach { if (!vcsNotToBeRemoved.contains(it)) { deleteVerifiableCredentialCallback(it) } }
+            return Result.Failure(exception)
+        } catch (exception: Exception) {
+            vcsAdded.forEach { if (!vcsNotToBeRemoved.contains(it)) { deleteVerifiableCredentialCallback(it) } }
+            return Result.Failure(MalformedVerifiableCredential("unhandled exception thrown", exception))
         }
+
         try {
             walletMetadataCallback(this.metaInf)
         } catch (exception: SdkException) {
@@ -76,36 +102,37 @@ class MicrosoftUnprotectedBackup2020 (
         return Result.Success(Unit)
     }
 
-    private suspend fun restoreIdentifier (
+    private suspend fun parseRawIdentifier (
         identifierData: RawIdentity,
-        identityRepository: IdentifierRepository,
-        keyStore: EncryptedKeyStore
-    ): Identifier {
+        identityRepository: IdentifierRepository
+    ): Pair<Identifier, Set<JWK>> {
         var signingKeyRef: String = ""
         var encryptingKeyRef: String = ""
         val recoveryKeyRef: String = identifierData.recoveryKey
         val updateKeyRef: String = identifierData.updateKey
+        val keySet = mutableSetOf<JWK>()
         for (key in identifierData.keys) {
             if (signingKeyRef.isBlank() &&
                 (key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
                     key.keyUse == KeyUse.SIGNATURE)) {
-                signingKeyRef = importKey(key, keyStore)
+                signingKeyRef = getKidFromJWK(key)
+                keySet.add(key)
             } else if (encryptingKeyRef.isBlank() &&
                 (key.keyOperations?.any { listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT).contains(it) } == true ||
                     key.keyOperations?.any { listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY).contains(it) } == true ||
                     key.keyUse == KeyUse.ENCRYPTION)) {
-                encryptingKeyRef = importKey(key, keyStore)
+                encryptingKeyRef = getKidFromJWK(key)
+                keySet.add(key)
             } else if (key.keyID == updateKeyRef) {
-                importKey(key, keyStore)
+                getKidFromJWK(key)
+                keySet.add(key)
             } else if (key.keyID == recoveryKeyRef) {
-                importKey(key, keyStore)
+                getKidFromJWK(key)
+                keySet.add(key)
             }
         }
         if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
             throw MalformedIdentity("update and recovery key required")
-        }
-        if (identityRepository.queryByIdentifier(identifierData.id) != null) {
-            throw DuplicateIdentity("Identifier ${identifierData.id} already exists.")
         }
         val id = Identifier(
             identifierData.id,
@@ -115,21 +142,21 @@ class MicrosoftUnprotectedBackup2020 (
             updateKeyRef,
             identifierData.name
         )
-        identityRepository.insert(id)
-        return id
+        return Pair(id, keySet)
+    }
+
+    private fun getKidFromJWK(jwk: JWK): String {
+        return jwk.keyID ?: throw com.microsoft.did.sdk.util.controlflow.KeyException("Imported JWK has no key id.")
     }
 
     private fun importKey(
         jwk: JWK,
         keyStore: EncryptedKeyStore
-    ): String {
-        val kid = jwk.keyID ?: throw com.microsoft.did.sdk.util.controlflow.KeyException("Imported JWK has no key id.")
-        if (!keyStore.containsKey(kid)) {
-            keyStore.storeKey(jwk, kid)
+    ) {
+        if (!keyStore.containsKey(jwk.keyID)) {
+            keyStore.storeKey(jwk, jwk.keyID)
         }
-        return kid
     }
-
 
     private fun vcsToIterator(serializer: Json): Iterator<Pair<VerifiableCredential, VCMetadata>> {
         return VCIterator(vcs, vcsMetaInf, serializer)

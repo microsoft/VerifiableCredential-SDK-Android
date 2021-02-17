@@ -45,8 +45,6 @@ open class MalformedBackup(message: String, cause: Throwable? = null): BackupRes
 
 class MalformedIdentity(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
 
-class DuplicateIdentity(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
-
 class MalformedMetadata(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
 
 class MalformedVerifiableCredential(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
