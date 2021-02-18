@@ -43,7 +43,7 @@ object Constants {
     const val CORRELATION_VECTOR_IN_PREF = "correlation_vector"
 
     //Identifier Constants
-    const val MASTER_IDENTIFIER_NAME = "did.main.identifier"
+    const val MAIN_IDENTIFIER_REFERENCE = "did.main.identifier"
     const val METHOD_NAME = "ion"
     const val IDENTIFIER_PUBLIC_KEY_PURPOSE = "authentication"
     const val COLON = ":"

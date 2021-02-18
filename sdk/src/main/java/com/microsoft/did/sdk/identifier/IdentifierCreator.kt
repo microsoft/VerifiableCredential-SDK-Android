@@ -80,7 +80,7 @@ class IdentifierCreator @Inject constructor(
     }
 
     internal fun generatePersonaSeed(personaDid: String): ByteArray {
-        val masterSeed = keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME).toOctetSequenceKey().toByteArray()
+        val masterSeed = keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE).toOctetSequenceKey().toByteArray()
         return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, AES_KEY), MacAlgorithm.HmacSha512)
     }
 
