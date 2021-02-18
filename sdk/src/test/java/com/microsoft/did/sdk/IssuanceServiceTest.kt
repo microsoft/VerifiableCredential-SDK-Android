@@ -25,6 +25,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery

@@ -16,6 +16,8 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.internal.FeatureFlag
+import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -33,7 +35,8 @@ class IssuanceService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Json,
-    private val featureFlag: FeatureFlag
+    private val featureFlag: FeatureFlag,
+    private val imageLoader: ImageLoader
 ) {
 
     /**
@@ -47,8 +50,9 @@ class IssuanceService @Inject constructor(
             	val contract = fetchContract(contractUrl).abortOnError()
             	val isLinkedDomainsEnabled = featureFlag.linkedDomains
             	val linkedDomainResult =
-                	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else LinkedDomainDisabled()
+                	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else LinkedDomainDisabled
             	val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
+                imageLoader.loadRemoteImagesIntoContract(request)
             	Result.Success(request)
 			}
         }

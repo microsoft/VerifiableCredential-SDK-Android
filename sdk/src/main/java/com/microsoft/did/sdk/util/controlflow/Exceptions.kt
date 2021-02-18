@@ -7,27 +7,9 @@ package com.microsoft.did.sdk.util.controlflow
 
 open class SdkException(message: String? = null, cause: Throwable? = null, val retryable: Boolean = false, val code: String?= null) : Exception(message, cause)
 
-class UnSupportedOperationException(message: String, cause: Throwable? = null) : SdkException(message, cause)
-
 open class CryptoException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
 class KeyStoreException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class KeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class KeyFormatException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class UnSupportedAlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class SignatureException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class EncodingException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class PairwiseKeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class IdentifierCreatorException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
 open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     SdkException(message, cause, retryable)
@@ -83,3 +65,5 @@ class UnauthorizedException(errorCode: String, message: String, retryable: Boole
 class RedirectException(errorCode: String, message: String, retryable: Boolean) : NetworkException(errorCode, message, retryable)
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
+
+class InvalidImageException(message: String, cause: Throwable? = null) : SdkException(message, cause)

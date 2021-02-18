@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
+import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
 
