@@ -73,6 +73,7 @@ class JweToken private constructor (
         encrypter?.let {
             val builder = JWEHeader.Builder(jweToken.header)
             contentType?.let { builder.contentType(it) }
+            publicKey.keyID?.let { builder.keyID(it) }
             jweToken = JWEObject(builder.build(), jweToken.payload)
             jweToken.encrypt(it)
             return
@@ -97,7 +98,8 @@ class JweToken private constructor (
             jweToken.header.keyID?.let { keyId ->
                 val keyRef = JwaCryptoHelper.extractDidAndKeyId(keyId).second
                 val key = keyStore.getKey(keyRef)
-                decrypter = DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, KeyConverter.toJavaKeys(listOf(key)).first())
+                // KeyConverter.toJavaKeys exports a public and private key if possible (private key after first)
+                decrypter = DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, KeyConverter.toJavaKeys(listOf(key)).last())
             }
         } else {
             throw IllegalArgumentException("keyStore or privateKey must be passed as input")

@@ -51,7 +51,7 @@ class JwtValidatorTest {
     fun `valid signature is validated successfully`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
-        every { mockedJwsToken.getKeyId() } returns expectedKid
+        every { mockedJwsToken.keyId } returns expectedKid
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertTrue(actualValidationResult)
@@ -62,7 +62,7 @@ class JwtValidatorTest {
     fun `invalid signature fails successfully`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns false
-        every { mockedJwsToken.getKeyId() } returns expectedKid
+        every { mockedJwsToken.keyId } returns expectedKid
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertFalse(actualValidationResult)
@@ -73,7 +73,7 @@ class JwtValidatorTest {
     fun `throws when no key id specified`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
-        every { mockedJwsToken.getKeyId() } returns null
+        every { mockedJwsToken.keyId } returns null
         runBlocking {
             try {
                 validator.verifySignature(mockedJwsToken)
@@ -89,7 +89,7 @@ class JwtValidatorTest {
         val expectedException = ValidatorException("test")
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Failure(expectedException)
         every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
-        every { mockedJwsToken.getKeyId() } returns expectedKid
+        every { mockedJwsToken.keyId } returns expectedKid
         runBlocking {
             try {
                 validator.verifySignature(mockedJwsToken)
