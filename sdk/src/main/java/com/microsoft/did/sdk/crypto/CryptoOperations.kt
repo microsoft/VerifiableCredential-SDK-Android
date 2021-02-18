@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.crypto
 
+import com.microsoft.did.sdk.util.Constants.SEED_BYTES
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -87,11 +88,8 @@ object CryptoOperations {
         return factory.generatePublic(alg.keySpec) as T
     }
 
-    /**
-     * Generates a 256 bit seed.
-     */
     fun generateSeed(): ByteArray {
-        val randomNumberGenerator = SecureRandom()
-        return randomNumberGenerator.generateSeed(16)
+        val secureRandom = SecureRandom()
+        return secureRandom.generateSeed(SEED_BYTES)
     }
 }

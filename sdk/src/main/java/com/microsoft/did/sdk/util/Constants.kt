@@ -61,4 +61,5 @@ object Constants {
     const val BASE64_URL_SAFE = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
 
     const val AES_KEY = "AES"
+    const val SEED_BYTES = 32
 }
