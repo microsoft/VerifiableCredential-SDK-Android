@@ -12,10 +12,12 @@ import com.microsoft.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
 import com.microsoft.did.sdk.util.controlflow.NetworkException
 import com.microsoft.did.sdk.util.controlflow.NotFoundException
+import com.microsoft.did.sdk.util.controlflow.RedirectException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
 import com.microsoft.did.sdk.util.logTime
+import com.microsoft.did.sdk.util.log.SdkLog
 import retrofit2.Response
 import java.io.IOException
 
@@ -57,54 +59,61 @@ abstract class BaseNetworkOperation<S, T> {
         val requestId = response.headers()[REQUEST_ID_HEADER]
         val correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
         return when (response.code()) {
+            301, 302, 308 -> {
+                val errorMessage = StringBuilder("Redirecting is disabled: Http code: ${response.code()}\t")
+                if (response.errorBody() != null)
+                    errorMessage.append("ErrorBody: ${response.errorBody()?.string()}")
+                SdkLog.d(errorMessage.toString())
+                Result.Failure(RedirectException(response.code().toString(), response.errorBody()?.string() ?: "", false))
+            }
             401 -> Result.Failure(
                 UnauthorizedException(
-                    requestId,
-                    correlationVector,
                     response.code().toString(),
                     response.errorBody()?.string() ?: "",
-                    false
+                    false,
+                    requestId,
+                    correlationVector
                 )
             )
             402 -> Result.Failure(
                 ClientException(
-                    requestId,
-                    correlationVector,
                     response.code().toString(),
                     response.errorBody()?.string() ?: "",
-                    false
+                    false,
+                    requestId,
+                    correlationVector
                 )
             )
             403 -> {
                 Result.Failure(
                     ForbiddenException(
-                        requestId,
-                        correlationVector,
                         response.code().toString(),
                         response.errorBody()?.string() ?: "",
-                        false
+                        false,
+                        requestId,
+                        correlationVector
                     )
                 )
             }
             404 -> Result.Failure(
                 NotFoundException(
-                    requestId,
-                    correlationVector,
                     response.code().toString(),
                     response.errorBody()?.string() ?: "",
-                    false
+                    false,
+                    requestId,
+                    correlationVector
                 )
             )
             500, 501, 502, 503 -> Result.Failure(
                 ServiceUnreachableException(
-                    requestId,
-                    correlationVector,
                     response.code().toString(),
                     response.errorBody()?.string() ?: "",
-                    true
+                    true,
+                    requestId,
+                    correlationVector
                 )
             )
-            else -> Result.Failure(NetworkException(requestId, correlationVector, response.code().toString(), "Unknown Status code", true))
+            else -> Result.Failure(NetworkException(response.code().toString(), "Unknown Status code", true, requestId, correlationVector))
         }
     }
 
