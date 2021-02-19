@@ -12,9 +12,9 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import org.junit.Before
 import org.junit.Test
-import org.mockito.internal.matchers.Any
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class BackupAndRestoreServiceTest {
     private val identityRepository: IdentifierRepository = mockk()
@@ -42,5 +42,10 @@ class BackupAndRestoreServiceTest {
         assertTrue(passwordSet.count() > 0, "password must contain individual words")
         assertTrue(testWordSet.containsAll(passwordSet), "generated password contains additional words")
         assertEquals(passwordSet.count(), passwordSet.distinct().count(), "password contains duplicate words")
+    }
+
+    @Test
+    fun createPasswordBackupTest() {
+        fail("Not implemented")
     }
 }
