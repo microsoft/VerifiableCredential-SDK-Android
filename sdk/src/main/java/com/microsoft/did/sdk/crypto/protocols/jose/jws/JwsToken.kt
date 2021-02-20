@@ -12,7 +12,7 @@ import com.nimbusds.jose.shaded.json.parser.ParseException
 import com.nimbusds.jose.util.Base64URL
 import java.security.PublicKey
 
-class JwsToken private constructor(
+class JwsToken internal constructor(
     private var jwsObject: JWSObject
 ) {
     var keyId: String? = jwsObject.header.keyID

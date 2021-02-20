@@ -104,13 +104,13 @@ class RawIdentityTest {
                     }
                     signKeyRef -> {
                         val correctUse = it.keyUse == KeyUse.SIGNATURE
-                        val correctOps = it.keyOperations.contains(KeyOperation.SIGN)
-                        assertTrue(correctOps || correctUse, "Did not find correct key_ops or use")
+                        val correctOps = it.keyOperations?.contains(KeyOperation.SIGN)
+                        assertTrue(correctOps == true || correctUse, "Did not find correct key_ops or use")
                     }
                     encryptKeyRef -> {
                         val correctUse = it.keyUse == KeyUse.ENCRYPTION
-                        val correctOps = it.keyOperations.contains(KeyOperation.UNWRAP_KEY)
-                        assertTrue(correctOps || correctUse, "Did not find correct key_ops or use")
+                        val correctOps = it.keyOperations?.contains(KeyOperation.UNWRAP_KEY)
+                        assertTrue(correctOps == true || correctUse, "Did not find correct key_ops or use")
                     }
                     else ->
                         fail("Unexpected Key found: ${it.keyID}")

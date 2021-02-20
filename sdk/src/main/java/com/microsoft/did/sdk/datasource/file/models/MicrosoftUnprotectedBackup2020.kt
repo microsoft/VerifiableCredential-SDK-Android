@@ -6,6 +6,7 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
 import com.microsoft.did.sdk.util.controlflow.MalformedMetadata
 import com.microsoft.did.sdk.util.controlflow.MalformedVerifiableCredential
@@ -53,7 +54,7 @@ class MicrosoftUnprotectedBackup2020 (
         var keySet = setOf<JWK>()
         try {
             this.identifiers.forEach { raw ->
-                val pair = parseRawIdentifier(raw, identityRepository)
+                val pair = parseRawIdentifier(raw)
                 identifiers.add(pair.first)
                 keySet = keySet.union(pair.second)
             }
@@ -102,9 +103,8 @@ class MicrosoftUnprotectedBackup2020 (
         return Result.Success(Unit)
     }
 
-    private suspend fun parseRawIdentifier (
-        identifierData: RawIdentity,
-        identityRepository: IdentifierRepository
+    private fun parseRawIdentifier (
+        identifierData: RawIdentity
     ): Pair<Identifier, Set<JWK>> {
         var signingKeyRef: String = ""
         var encryptingKeyRef: String = ""
@@ -146,7 +146,7 @@ class MicrosoftUnprotectedBackup2020 (
     }
 
     private fun getKidFromJWK(jwk: JWK): String {
-        return jwk.keyID ?: throw com.microsoft.did.sdk.util.controlflow.KeyException("Imported JWK has no key id.")
+        return jwk.keyID ?: throw KeyException("Imported JWK has no key id.")
     }
 
     private fun importKey(
