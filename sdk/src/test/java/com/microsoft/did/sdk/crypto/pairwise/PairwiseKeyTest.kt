@@ -31,7 +31,7 @@ class PairwiseKeyTest {
     private val suppliedStringForSeedGeneration = "abcdefg"
     private val seed: ByteArray = suppliedStringForSeedGeneration.toByteArray()
     private val seedKey = OctetSequenceKey.Builder(seed).build()
-    private val inputStream: InputStream = File(".\\src\\test\\assets\\Pairwise.EC.json").inputStream()
+    private val inputStream: InputStream = File("./src/test/assets/Pairwise.EC.json").inputStream()
 
     /**
      * Tests if pairwise key generated with the same master seed, persona id and peer id is same every time
