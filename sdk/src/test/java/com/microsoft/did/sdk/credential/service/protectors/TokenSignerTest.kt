@@ -7,6 +7,9 @@ import com.nimbusds.jose.jwk.ECKey
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
+import io.mockk.unmockkConstructor
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -17,23 +20,28 @@ class TokenSignerTest {
     private val mockKey: ECKey = mockk()
     private val mockedIdentifier: Identifier = mockk()
 
-    private val signer: TokenSigner
+    private val signer: TokenSigner = TokenSigner(mockedKeyStore)
 
     // TODO random numbers for these strings.
     private val signingKeyRef = "sigKeyRef5237"
     private val expectedDid = "did:test:567812"
-    private val expectedKid = "#kid1426"
     private val expectedPayload = "payload12423"
-    private val expectedTypeInJwtHeader = "JWT"
     private val expectedSignedPayload = "signedPayload45236"
 
     init {
-        signer = TokenSigner(mockedKeyStore)
         setUpIdentifier()
+    }
+
+    @Before
+    fun before() {
         mockkConstructor(JwsToken::class)
     }
 
-    //
+    @After
+    fun after() {
+        unmockkConstructor(JwsToken::class)
+    }
+
     private fun setUpIdentifier() {
         every { mockedIdentifier.signatureKeyReference } returns signingKeyRef
         every { mockedIdentifier.id } returns expectedDid
