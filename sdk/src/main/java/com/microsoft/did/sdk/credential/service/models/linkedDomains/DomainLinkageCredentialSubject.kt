@@ -6,7 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DomainLinkageCredentialSubject (
+data class DomainLinkageCredentialSubject(
     @SerialName("id")
     val did: String,
     @SerialName("origin")

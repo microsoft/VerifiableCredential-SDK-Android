@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.util.controlflow.RedirectException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
+import com.microsoft.did.sdk.util.logTime
 import com.microsoft.did.sdk.util.log.SdkLog
 import retrofit2.Response
 import java.io.IOException
@@ -33,7 +34,9 @@ abstract class BaseNetworkOperation<S, T> {
 
     open suspend fun fire(): Result<T> {
         try {
-            val response = call.invoke()
+            val response = logTime("${this::class.simpleName}") {
+                call.invoke()
+            }
             if (response.isSuccessful) {
                 return onSuccess(response)
             }

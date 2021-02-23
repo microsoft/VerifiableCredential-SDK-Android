@@ -1,11 +1,10 @@
 package com.microsoft.did.sdk.identifier.models.identifierdocument
 
-import com.microsoft.did.sdk.crypto.keys.PublicKey
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePublicKey
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPublicKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.util.controlflow.KeyException
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSerializer
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyConverter
 import kotlinx.serialization.Serializable
+import java.security.PublicKey
 
 /**
  * Data Class for defining a Public Key in Identifier Document in Jwk format which can be used for signing/encryption
@@ -31,25 +30,10 @@ data class IdentifierDocumentPublicKey(
     /**
      * The JWK public key.
      */
-    val publicKeyJwk: JsonWebKey
+    @Serializable(with = JwkSerializer::class)
+    val publicKeyJwk: JWK
 ) {
     fun toPublicKey(): PublicKey {
-        when (type) {
-            in LinkedDataKeySpecification.RsaSignature2018.values -> {
-                return RsaPublicKey(this.publicKeyJwk)
-            }
-            in LinkedDataKeySpecification.EcdsaSecp256k1Signature2019.values -> {
-                return EllipticCurvePublicKey(this.publicKeyJwk)
-            }
-            in LinkedDataKeySpecification.EcdsaKoblitzSignature2016.values -> {
-                throw KeyException("${LinkedDataKeySpecification.EcdsaKoblitzSignature2016.name} not supported.")
-            }
-            in LinkedDataKeySpecification.Ed25519Signature2018.values -> {
-                throw KeyException("${LinkedDataKeySpecification.Ed25519Signature2018.name} not supported.")
-            }
-            else -> {
-                throw KeyException("Unknown key type: $type")
-            }
-        }
+        return KeyConverter.toJavaKeys(listOf(publicKeyJwk)).first() as PublicKey
     }
 }

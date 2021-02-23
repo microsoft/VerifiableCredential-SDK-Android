@@ -2,14 +2,14 @@
 
 package com.microsoft.did.sdk.identifier.models.payload.document
 
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSerializer
+import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  * Data Class for defining public key used for encryption/signing inside document payload sent to Sidetree operation
  */
-
 @Serializable
 data class IdentifierDocumentPublicKeyInput(
     /**
@@ -28,10 +28,8 @@ data class IdentifierDocumentPublicKeyInput(
      */
     val controller: String? = null,
 
-    /**
-     * The JWK public key.
-     */
-    val publicKeyJwk: JsonWebKey,
+    @Serializable(with = JwkSerializer::class)
+    val publicKeyJwk: JWK,
 
     @SerialName("purposes")
     val purpose: List<String>

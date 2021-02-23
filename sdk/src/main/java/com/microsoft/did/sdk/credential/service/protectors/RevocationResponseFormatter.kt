@@ -7,8 +7,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 
 import com.microsoft.did.sdk.credential.service.models.RevocationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseClaims
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.models.Sha
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import kotlinx.serialization.json.Json
@@ -21,22 +20,22 @@ import javax.inject.Singleton
  */
 @Singleton
 class RevocationResponseFormatter @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
     private val serializer: Json,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     fun formatResponse(revocationRequest: RevocationRequest, expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
         val responder = revocationRequest.owner
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val keyJwk = keyStore.getKey(revocationRequest.owner.signatureKeyReference)
         val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {
-                publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+                publicKeyThumbPrint = keyJwk.computeThumbprint().toString()
                 audience = revocationRequest.audience
                 did = responder.id
-                publicKeyJwk = key.toJWK()
+                publicKeyJwk = keyJwk.toPublicJWK()
                 responseCreationTime = issuedTime
                 responseExpirationTime = expiryTime
                 this.responseId = responseId

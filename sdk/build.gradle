@@ -107,13 +107,16 @@ dependencies {
     implementation "androidx.core:core-ktx:$core_ktx_version"
 
     //other
-    implementation "androidx.security:security-crypto:1.0.0-rc03"
-    implementation "androidx.preference:preference:$androidx_preference_version"
+    implementation "androidx.preference:preference-ktx:$androidx_preference_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
+    //noinspection GradleDependency
+    implementation "androidx.security:security-crypto:1.0.0-rc03"
+    implementation "org.bouncycastle:bcprov-jdk15to18:$org_bouncycastle_bcprov_jdk15on"
+
     api 'com.google.guava:guava:28.1-android'
-    // TODO: this seems to be required as api for org.bitcoin.jar? Can we avoid this?
-    implementation "com.madgag.spongycastle:prov:1.58.0.0"
+    // JWE/JWS
+    implementation "com.nimbusds:nimbus-jose-jwt:$nimbus_jose_jwt_version"
     //Used for Json Canonicalization performed for ION
     implementation "io.github.erdtman:java-json-canonicalization:1.1"
     implementation "com.github.microsoft:CorrelationVector-Java:$correlation_vector_version"

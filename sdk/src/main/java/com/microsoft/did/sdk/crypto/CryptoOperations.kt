@@ -5,199 +5,91 @@
 
 package com.microsoft.did.sdk.crypto
 
-import com.microsoft.did.sdk.crypto.keyStore.KeyStore
-import com.microsoft.did.sdk.crypto.keys.KeyContainer
-import com.microsoft.did.sdk.crypto.keys.KeyType
-import com.microsoft.did.sdk.crypto.keys.KeyTypeFactory
-import com.microsoft.did.sdk.crypto.keys.PrivateKey
-import com.microsoft.did.sdk.crypto.keys.PublicKey
-import com.microsoft.did.sdk.crypto.keys.SecretKey
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePairwiseKey
-import com.microsoft.did.sdk.crypto.keys.ellipticCurve.EllipticCurvePrivateKey
-import com.microsoft.did.sdk.crypto.keys.rsa.RsaPrivateKey
-import com.microsoft.did.sdk.crypto.models.AndroidConstants
-import com.microsoft.did.sdk.crypto.models.Sha
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.JsonWebKey
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyFormat
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.KeyUsage
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.SubtleCrypto
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.W3cCryptoApiConstants
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.Algorithm
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.EcKeyGenParams
-import com.microsoft.did.sdk.crypto.models.webCryptoApi.algorithms.RsaHashedKeyAlgorithm
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoFactory
-import com.microsoft.did.sdk.crypto.plugins.SubtleCryptoScope
-import com.microsoft.did.sdk.crypto.protocols.jose.JoseConstants
-import com.microsoft.did.sdk.util.Base64Url
-import com.microsoft.did.sdk.util.controlflow.KeyException
-import com.microsoft.did.sdk.util.controlflow.PairwiseKeyException
-import com.microsoft.did.sdk.util.controlflow.SignatureException
-import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.Constants.SEED_BYTES
+import java.security.Key
+import java.security.KeyFactory
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.MessageDigest
+import java.security.PrivateKey
+import java.security.PublicKey
 import java.security.SecureRandom
+import java.security.Security
+import java.security.Signature
+import javax.crypto.Cipher
+import javax.crypto.Cipher.DECRYPT_MODE
+import javax.crypto.Cipher.ENCRYPT_MODE
+import javax.crypto.Mac
+import javax.crypto.SecretKey
 
-/**
- * Class that encompasses all of Crypto
- * @param subtleCrypto primitives for operations.
- * @param keyStore specific keyStore that securely holds keys.
- */
-class CryptoOperations(
-    subtleCrypto: SubtleCrypto,
-    val keyStore: KeyStore,
-    private val ellipticCurvePairwiseKey: EllipticCurvePairwiseKey
-) {
-    val subtleCryptoFactory = SubtleCryptoFactory(subtleCrypto)
-
-    /**
-     * Sign payload with key stored in keyStore.
-     * @param payload to sign.
-     * @param signingKeyReference reference to key stored in keystore.
-     */
-    fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null): ByteArray {
-        SdkLog.d("Signing with $signingKeyReference")
-        val privateKey = keyStore.getPrivateKey(signingKeyReference)
-        val alg = algorithm ?: privateKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
-        val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.PRIVATE)
-        val key = subtle.importKey(KeyFormat.Jwk, privateKey.getKey().toJWK(), alg, false, listOf(KeyUsage.Sign))
-        return subtle.sign(alg, key, payload)
+object CryptoOperations {
+    init {
+        Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
     }
 
-    /**
-     * Verify payload with key stored in keyStore.
-     */
-    fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null) {
-        SdkLog.d("Verifying with $signingKeyReference")
-        val publicKey = keyStore.getPublicKey(signingKeyReference)
-        val alg = algorithm ?: publicKey.alg ?: throw KeyException("No Algorithm specified for key $signingKeyReference")
-        val subtle = subtleCryptoFactory.getMessageSigner(alg.name, SubtleCryptoScope.PUBLIC)
-        val key = subtle.importKey(KeyFormat.Jwk, publicKey.getKey().toJWK(), alg, true, listOf(KeyUsage.Verify))
-        if (!subtle.verify(alg, key, signature, payload)) {
-            throw SignatureException("Signature invalid")
+    fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
+        val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
+        signer.apply {
+            initSign(signingKey)
+            update(digest)
+            if (alg.spec != null) setParameter(alg.spec)
         }
+        return signer.sign()
     }
 
-    /**
-     * Encrypt payload with key stored in keyStore.
-     */
-    fun encrypt() {
-        TODO("Not implemented")
-    }
-
-    /**
-     * Decrypt payload with key stored in keyStore.
-     */
-    fun decrypt() {
-        TODO("Not implemented")
-    }
-
-    /**
-     * Generates a key pair.
-     * @param keyType the type of key to generate
-     * @returns the associated public key
-     */
-    fun generateKeyPair(keyReference: String, keyType: KeyType): PublicKey {
-        SdkLog.d("Generating new key pair $keyReference of type ${keyType.value}")
-        when (keyType) {
-            KeyType.Octets -> throw KeyException("Cannot generate a symmetric key")
-            KeyType.RSA -> {
-                val subtle = subtleCryptoFactory.getSharedKeyEncrypter(
-                    W3cCryptoApiConstants.RsaSsaPkcs1V15.value,
-                    SubtleCryptoScope.PRIVATE
-                )
-                val keyPair = subtle.generateKeyPair(
-                    RsaHashedKeyAlgorithm(
-                        modulusLength = 4096UL,
-                        publicExponent = 65537UL,
-                        hash = Sha.SHA256.algorithm,
-                        additionalParams = mapOf("KeyReference" to keyReference)
-                    ), false, listOf(KeyUsage.Encrypt, KeyUsage.Decrypt)
-                )
-                SdkLog.d("Saving key pair to keystore.")
-                keyStore.save(keyReference, RsaPrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
-            }
-            KeyType.EllipticCurve -> {
-                val subtle = subtleCryptoFactory.getMessageSigner(W3cCryptoApiConstants.EcDsa.value, SubtleCryptoScope.PRIVATE)
-                val keyPair = subtle.generateKeyPair(
-                    EcKeyGenParams(
-                        namedCurve = W3cCryptoApiConstants.Secp256k1.value,
-                        additionalParams = mapOf(
-                            "hash" to Sha.SHA256.algorithm,
-                            "KeyReference" to keyReference
-                        )
-                    ), true, listOf(KeyUsage.Sign, KeyUsage.Verify)
-                )
-                SdkLog.d("Saving key pair to keystore.")
-                keyStore.save(keyReference, EllipticCurvePrivateKey(subtle.exportKeyJwk(keyPair.privateKey)))
-            }
+    fun verify(digest: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
+        val verifier = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
+        verifier.apply {
+            initVerify(publicKey)
+            update(digest)
+            if (alg.spec != null) setParameter(alg.spec)
         }
-        return keyStore.getPublicKey(keyReference).getKey()
+        return verifier.verify(signature)
     }
 
-    /**
-     * Generate a pairwise key for the specified algorithms
-     * @param algorithm for the key
-     * @param seedReference Reference to the seed
-     * @param userDid Id for the user
-     * @param peerId Id for the peer
-     * @returns the pairwise private key
-     */
-    fun generatePairwise(algorithm: Algorithm, seedReference: String, userDid: String, peerId: String): PrivateKey {
-        val masterKey: ByteArray = this.generatePersonaMasterKey(seedReference, userDid)
-
-        return when (val keyType = KeyTypeFactory.createViaWebCrypto(algorithm)) {
-            KeyType.EllipticCurve -> ellipticCurvePairwiseKey.generate(this, masterKey, algorithm, peerId)
-            else -> throw PairwiseKeyException("Pairwise key for type '${keyType.value}' is not supported.")
-        }
+    fun digest(preImage: ByteArray, alg: DigestAlgorithm): ByteArray {
+        val messageDigest =
+            if (alg.provider == null) MessageDigest.getInstance(alg.name) else MessageDigest.getInstance(alg.name, alg.provider)
+        return messageDigest.digest(preImage)
     }
 
-    /**
-     * Generates a 256 bit seed.
-     */
-    fun generateAndStoreSeed() {
-        val randomNumberGenerator = SecureRandom()
-        val seed = randomNumberGenerator.generateSeed(16)
-        val secretKey = SecretKey(JsonWebKey(k = Base64Url.encode(seed)))
-        keyStore.save(AndroidConstants.masterSeed.value, secretKey)
+    fun encrypt(plainText: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
+        val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
+        cipher.init(ENCRYPT_MODE, key)
+        return cipher.doFinal(plainText)
     }
 
-    /**
-     * Generate a pairwise master key.
-     * @param seedReference  The master seed for generating pairwise keys
-     * @param userDid  The owner DID
-     * @returns the master key for the user
-     */
-    fun generatePersonaMasterKey(seedReference: String, userDid: String): ByteArray {
-        // Set of master keys for the different persona's
-        val masterKeys: MutableMap<String, ByteArray> = mutableMapOf()
-
-        var masterKey: ByteArray? = masterKeys[userDid]
-        if (masterKey != null)
-            return masterKey
-
-        // Get the seed
-        val jwk = keyStore.getSecretKey(seedReference)
-
-        masterKey = generateMasterKeyFromSeed(jwk, userDid)
-        masterKeys[userDid] = masterKey
-        return masterKey
+    fun decrypt(cipherText: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
+        val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
+        cipher.init(DECRYPT_MODE, key)
+        return cipher.doFinal(cipherText)
     }
 
-    private fun generateMasterKeyFromSeed(jwk: KeyContainer<SecretKey>, userDid: String): ByteArray {
-        // Get the subtle crypto
-        val crypto: SubtleCrypto =
-            subtleCryptoFactory.getMessageAuthenticationCodeSigners(W3cCryptoApiConstants.Hmac.value, SubtleCryptoScope.PRIVATE)
+    fun computeMac(payload: ByteArray, key: SecretKey, alg: MacAlgorithm): ByteArray {
+        val mac = if (alg.provider == null) Mac.getInstance(alg.name) else Mac.getInstance(alg.name, alg.provider)
+        mac.init(key)
+        return mac.doFinal(payload)
+    }
 
-        // Generate the master key
-        val alg = Algorithm(name = W3cCryptoApiConstants.HmacSha512.value)
-        val masterJwk = JsonWebKey(
-            kty = KeyType.Octets.value,
-            alg = JoseConstants.Hs512.value,
-            k = jwk.getKey().k
-        )
-        val key = crypto.importKey(
-            KeyFormat.Jwk, masterJwk, alg, false, listOf(
-                KeyUsage.Sign
-            )
-        )
-        return crypto.sign(alg, key, userDid.map { it.toByte() }.toByteArray())
+    fun generateKeyPair(alg: KeyGenAlgorithm): KeyPair {
+        val keyGen =
+            if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
+        keyGen.initialize(alg.spec)
+        return keyGen.genKeyPair()
+    }
+
+    inline fun <reified T : Key> generateKey(alg: PrivateKeyFactoryAlgorithm): T {
+        val factory = if (alg.provider == null) KeyFactory.getInstance(alg.name) else KeyFactory.getInstance(alg.name, alg.provider)
+        return factory.generatePrivate(alg.keySpec) as T
+    }
+
+    inline fun <reified T : Key> generateKey(alg: PublicKeyFactoryAlgorithm): T {
+        val factory = if (alg.provider == null) KeyFactory.getInstance(alg.name) else KeyFactory.getInstance(alg.name, alg.provider)
+        return factory.generatePublic(alg.keySpec) as T
+    }
+
+    fun generateSeed(): ByteArray {
+        val secureRandom = SecureRandom()
+        return secureRandom.generateSeed(SEED_BYTES)
     }
 }

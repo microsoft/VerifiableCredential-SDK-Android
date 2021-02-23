@@ -11,8 +11,7 @@ import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimMode
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.models.Sha
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
@@ -23,10 +22,10 @@ import javax.inject.Singleton
 
 @Singleton
 class PresentationResponseFormatter @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
     fun formatResponse(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
@@ -41,14 +40,14 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse,
             responder
         )
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val key = keyStore.getKey(responder.signatureKeyReference)
 
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
-            publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = presentationResponse.audience
             nonce = presentationResponse.request.content.nonce
             did = responder.id
-            publicKeyJwk = key.toJWK()
+            publicKeyJwk = key.toPublicJWK()
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
             state = presentationResponse.request.content.state

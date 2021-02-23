@@ -84,24 +84,6 @@ object SdkLog {
         CONSUMERS.forEach { it.log(logLevel, message, throwable, tag) }
     }
 
-    @Deprecated("Use short form.", ReplaceWith("this.d(message, tag)"))
-    fun debug(message: String, tag: String = implicitTag()) =
-        d(message, null, tag)
-
-    @Deprecated(
-        "Legacy error log function that returns an Exception. Remove all references, then delete this method.",
-        ReplaceWith("this.e(message, tag)")
-    )
-    fun error(message: String, tag: String = implicitTag()): RuntimeException {
-        log(
-            Level.ERROR,
-            message,
-            null,
-            tag
-        )
-        return RuntimeException(message)
-    }
-
     private fun implicitTag(): String {
         val stackElement = getCallerElement(
             Throwable().stackTrace,

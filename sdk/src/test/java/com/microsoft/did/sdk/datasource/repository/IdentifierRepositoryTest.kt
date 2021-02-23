@@ -42,7 +42,6 @@ class IdentifierRepositoryTest {
     fun insertAndRetrieveIdentifierByIdTest() {
         val expectedIdentifier = Identifier(
             "did:ion:test:testId1",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -62,7 +61,6 @@ class IdentifierRepositoryTest {
     fun insertAndRetrieveIdentifierByNameTest() {
         val expectedIdentifier = Identifier(
             "did:ion:test:testId2",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -82,7 +80,6 @@ class IdentifierRepositoryTest {
     fun resolveIdentifierTest() {
         val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",
@@ -105,7 +102,6 @@ class IdentifierRepositoryTest {
     fun resolveInvalidIdentifierTest() {
         val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
-            "testAlias",
             "testSigningKeyReference",
             "testEncryptionKeyReference",
             "testRecoveryKeyReference",

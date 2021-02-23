@@ -39,7 +39,7 @@ internal interface SdkComponent {
     fun revocationService(): RevocationService
 
     fun linkedDomainsService(): LinkedDomainsService
-    
+
     fun correlationVectorService(): CorrelationVectorService
 
     fun featureFlag() : FeatureFlag

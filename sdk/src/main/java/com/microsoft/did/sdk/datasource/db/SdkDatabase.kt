@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  * More info:
  * https://developer.android.com/topic/libraries/architecture/room
  */
-@Database(entities = [Identifier::class], version = 1)
+@Database(entities = [Identifier::class], version = 2)
 abstract class SdkDatabase : RoomDatabase() {
 
     abstract fun identifierDao(): IdentifierDao

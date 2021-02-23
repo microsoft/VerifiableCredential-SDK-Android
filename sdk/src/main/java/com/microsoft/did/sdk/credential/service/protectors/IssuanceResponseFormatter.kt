@@ -11,8 +11,7 @@ import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.models.Sha
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.identifier.models.Identifier
 import kotlinx.serialization.json.Json
 import java.util.UUID
@@ -21,10 +20,10 @@ import javax.inject.Singleton
 
 @Singleton
 class IssuanceResponseFormatter @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
-    private val signer: TokenSigner
+    private val signer: TokenSigner,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     fun formatResponse(
@@ -53,12 +52,12 @@ class IssuanceResponseFormatter @Inject constructor(
         responseId: String,
         attestationResponse: AttestationClaimModel
     ): String {
-        val key = cryptoOperations.keyStore.getPublicKey(responder.signatureKeyReference).getKey()
+        val key = keyStore.getKey(responder.signatureKeyReference)
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
-            publicKeyThumbPrint = key.getThumbprint(cryptoOperations, Sha.SHA256.algorithm)
+            publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = issuanceResponse.audience
             did = responder.id
-            publicKeyJwk = key.toJWK()
+            publicKeyJwk = key.toPublicJWK()
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
             this.responseId = responseId

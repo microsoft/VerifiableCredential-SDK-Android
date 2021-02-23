@@ -5,14 +5,11 @@
 
 package com.microsoft.did.sdk.credential.service.validators
 
-import com.microsoft.did.sdk.crypto.CryptoOperations
-import com.microsoft.did.sdk.crypto.keys.PublicKey
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsSignature
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
-import kotlinx.serialization.json.Json
+import java.security.PublicKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,9 +18,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class JwtValidator @Inject constructor(
-    private val cryptoOperations: CryptoOperations,
-    private val resolver: Resolver,
-    private val serializer: Json
+    private val resolver: Resolver
 ) {
 
     /**
@@ -32,7 +27,7 @@ class JwtValidator @Inject constructor(
     suspend fun verifySignature(token: JwsToken): Boolean {
         val didInHeader = getDidFromHeader(token)
         val publicKeys = resolvePublicKeys(didInHeader)
-        return token.verify(cryptoOperations, publicKeys)
+        return token.verify(publicKeys)
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
@@ -40,25 +35,24 @@ class JwtValidator @Inject constructor(
         return didInHeader == didInPayload
     }
 
-    private fun getKid(signature: JwsSignature): Pair<String, String> {
-        val kid = signature.getKid(serializer) ?: throw ValidatorException("no kid specified in token")
-        val parsedKid = kid.split("#")
-        return Pair(parsedKid[0], parsedKid[1])
+    private fun getKid(token: JwsToken): Pair<String, String> {
+        token.getKeyId()?.let {
+            kid ->
+            val parsedKid = kid.split("#")
+            return Pair(parsedKid[0], parsedKid[1])
+        }
+        throw ValidatorException("JWS contains no key id")
     }
 
     private suspend fun resolvePublicKeys(did: String): List<PublicKey> {
         return when (val requesterDidDocument = resolver.resolve(did)) {
-            is Result.Success -> {
-                val publicKeys = requesterDidDocument.payload.verificationMethod.map { it.toPublicKey() }
-                publicKeys
-            }
+            is Result.Success -> requesterDidDocument.payload.verificationMethod.map { it.toPublicKey() }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
         }
     }
 
     private fun getDidFromHeader(token: JwsToken): String {
-        val signature = token.signatures.first()
-        val (didInHeader, _) = getKid(signature)
+        val (didInHeader, _) = getKid(token)
         return didInHeader
     }
 }

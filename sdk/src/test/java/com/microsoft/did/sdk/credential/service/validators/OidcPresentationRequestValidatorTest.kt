@@ -105,7 +105,7 @@ class OidcPresentationRequestValidatorTest {
         every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         setUpOidcRequestContentWithValidFields()
-        every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
+        every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
             validator.validate(mockedPresentationRequest)
@@ -116,7 +116,7 @@ class OidcPresentationRequestValidatorTest {
     fun `throws when token expiration is expired`() {
         setUpExpiration(-86400)
         setUpOidcRequestContentWithValidFields()
-        every { JwsToken.deserialize(expectedSerializedToken, serializer) } returns mockedJwsToken
+        every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
             try {

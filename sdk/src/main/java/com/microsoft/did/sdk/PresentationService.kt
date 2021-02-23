@@ -21,6 +21,7 @@ import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import com.microsoft.did.sdk.util.logTime
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,15 +40,17 @@ class PresentationService @Inject constructor(
 ) {
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
-            val uri = verifyUri(stringUri)
-            val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-            val isLinkedDomainsEnabled = featureFlag.linkedDomains
-            val linkedDomainResult =
-                if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
-                    .abortOnError() else LinkedDomainDisabled()
-            val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
-            isRequestValid(request).abortOnError()
-            Result.Success(request)
+			logTime("Presentation getRequest") {
+            	val uri = verifyUri(stringUri)
+            	val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
+            	val isLinkedDomainsEnabled = featureFlag.linkedDomains
+            	val linkedDomainResult =
+                	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
+                    	.abortOnError() else LinkedDomainDisabled()
+            	val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
+            	isRequestValid(request).abortOnError()
+            	Result.Success(request)
+			}
         }
     }
 
@@ -77,7 +80,7 @@ class PresentationService @Inject constructor(
     }
 
     private suspend fun verifyAndUnwrapPresentationRequestFromQueryParam(jwsTokenString: String): Result<PresentationRequestContent> {
-        val jwsToken = JwsToken.deserialize(jwsTokenString, serializer)
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on Presentation Request.")
         return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
@@ -98,17 +101,19 @@ class PresentationService @Inject constructor(
         enablePairwise: Boolean = true
     ): Result<Unit> {
         return runResultTry {
-            val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
-            if (enablePairwise) {
-                val pairwiseIdentifier =
-                    identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
-                val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
-                formAndSendResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
-            } else {
-                val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
-                formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+            logTime("Presentation sendResponse") {
+                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+                if (enablePairwise) {
+                    val pairwiseIdentifier =
+                        identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
+                    val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
+                    formAndSendResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
+                } else {
+                    val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
+                    formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
+                }
+                Result.Success(Unit)
             }
-            Result.Success(Unit)
         }
     }
 

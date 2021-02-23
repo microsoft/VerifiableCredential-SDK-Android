@@ -6,19 +6,16 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Base64Url
-import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
-import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
-import com.microsoft.did.sdk.util.Constants.METHOD_NAME
+import com.microsoft.did.sdk.util.Constants.MAIN_IDENTIFIER_REFERENCE
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
-import com.microsoft.did.sdk.util.stringToByteArray
-import java.security.MessageDigest
+import com.nimbusds.jose.jwk.OctetSequenceKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,12 +25,12 @@ import javax.inject.Singleton
 @Singleton
 class IdentifierManager @Inject constructor(
     private val identifierRepository: IdentifierRepository,
-    private val cryptoOperations: CryptoOperations,
-    private val identifierCreator: IdentifierCreator
+    private val identifierCreator: IdentifierCreator,
+    private val keyStore: EncryptedKeyStore
 ) {
 
     suspend fun getMasterIdentifier(): Result<Identifier> {
-        val identifier = identifierRepository.queryByName(MASTER_IDENTIFIER_NAME)
+        val identifier = identifierRepository.queryByName(MAIN_IDENTIFIER_REFERENCE)
         return if (identifier != null) {
             Result.Success(identifier)
         } else {
@@ -41,14 +38,12 @@ class IdentifierManager @Inject constructor(
         }
     }
 
-    // Master Identifier will be created once per app.
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
-            //TODO(seed is needed for pairwise key generation)
-            cryptoOperations.generateAndStoreSeed()
-            // peer id for master Identifier will be method name for now.
-            val identifier = identifierCreator.create(METHOD_NAME).abortOnError()
-            SdkLog.i("Creating Identifier: $identifier")
+            val seed = CryptoOperations.generateSeed()
+            keyStore.storeKey(MAIN_IDENTIFIER_REFERENCE, OctetSequenceKey.Builder(seed).build())
+            val identifier = identifierCreator.create(MAIN_IDENTIFIER_REFERENCE)
+            SdkLog.i("Created Identifier: $identifier")
             identifierRepository.insert(identifier)
             Result.Success(identifier)
         }
@@ -63,21 +58,17 @@ class IdentifierManager @Inject constructor(
         }
     }
 
-    suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
+    suspend fun getOrCreatePairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
         return runResultTry {
-            when (val pairwiseIdentifier = identifierRepository.queryByName(pairwiseIdentifierName(peerId))) {
-                null -> {
-                    val registeredIdentifier = identifierCreator.createPairwiseId(identifier.id, peerId).abortOnError()
-                    identifierRepository.insert(registeredIdentifier)
-                    Result.Success(registeredIdentifier)
-                }
-                else -> Result.Success(pairwiseIdentifier)
-            }
+            val pairwiseName = identifierCreator.pairwiseIdentifierName(identifier.id, peerId)
+            val pairwiseIdentifier = identifierRepository.queryByName(pairwiseName) ?: createPairwiseIdentifier(identifier, peerId)
+            Result.Success(pairwiseIdentifier)
         }
     }
 
-    private fun pairwiseIdentifierName(peerId: String): String {
-        val digest = MessageDigest.getInstance(HASHING_ALGORITHM_FOR_ID)
-        return Base64Url.encode(digest.digest(stringToByteArray(peerId)))
+    private suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Identifier {
+        val registeredIdentifier = identifierCreator.createPairwiseId(identifier, peerId)
+        identifierRepository.insert(registeredIdentifier)
+        return registeredIdentifier
     }
 }

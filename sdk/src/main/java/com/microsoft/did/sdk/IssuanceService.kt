@@ -19,6 +19,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import com.microsoft.did.sdk.util.logTime
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,12 +43,14 @@ class IssuanceService @Inject constructor(
      */
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
-            val contract = fetchContract(contractUrl).abortOnError()
-            val isLinkedDomainsEnabled = featureFlag.linkedDomains
-            val linkedDomainResult =
-                if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else LinkedDomainDisabled()
-            val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
-            Result.Success(request)
+			logTime("Issuance getRequest") {
+            	val contract = fetchContract(contractUrl).abortOnError()
+            	val isLinkedDomainsEnabled = featureFlag.linkedDomains
+            	val linkedDomainResult =
+                	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else LinkedDomainDisabled()
+            	val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
+            	Result.Success(request)
+			}
         }
     }
 
@@ -70,17 +73,19 @@ class IssuanceService @Inject constructor(
         enablePairwise: Boolean = true
     ): Result<VerifiableCredential> {
         return runResultTry {
-            val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
-            val verifiableCredential = if (enablePairwise) {
-                val pairwiseIdentifier =
-                    identifierManager.createPairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
-                val requestedVcMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
-                formAndSendResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
-            } else {
-                val requestedVcMap = response.requestedVcMap
-                formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
-            }
-            Result.Success(verifiableCredential)
+            logTime("Issuance sendResponse", {
+                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+                val verifiableCredential = if (enablePairwise) {
+                    val pairwiseIdentifier =
+                        identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
+                    val requestedVcMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
+                    formAndSendResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
+                } else {
+                    val requestedVcMap = response.requestedVcMap
+                    formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
+                }
+                Result.Success(verifiableCredential)
+            })
         }
     }
 

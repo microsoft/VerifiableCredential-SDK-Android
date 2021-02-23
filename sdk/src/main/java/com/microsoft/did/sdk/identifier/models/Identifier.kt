@@ -10,10 +10,8 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 data class Identifier(
-
     @PrimaryKey
     val id: String,
-    val alias: String,
     val signatureKeyReference: String,
     val encryptionKeyReference: String,
     val recoveryKeyReference: String,
