@@ -9,13 +9,10 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import java.io.ByteArrayOutputStream
 
 object ImageUtil {
-    fun convert(base64Str: String?): Bitmap? {
+    fun parse(base64Str: String?): Bitmap? {
         if (base64Str == null) return null
         return try {
-            val decodedBytes = Base64.decode(
-                base64Str.substring(base64Str.indexOf(",") + 1),
-                Base64.DEFAULT
-            )
+            val decodedBytes = Base64.decode(base64Str, Constants.BASE64_URL_SAFE)
             BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
         } catch (ex: Exception) {
             SdkLog.w("Image couldn't be converted from Base64", ex)
@@ -26,6 +23,6 @@ object ImageUtil {
     fun convert(bitmap: Bitmap): String {
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-        return Base64.encodeToString(outputStream.toByteArray(), Base64.DEFAULT)
+        return Base64.encodeToString(outputStream.toByteArray(), Constants.BASE64_URL_SAFE)
     }
 }
