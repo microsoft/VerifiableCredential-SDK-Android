@@ -79,8 +79,8 @@ class IdentifierCreator @Inject constructor(
         return privateKey.toPublicJWK()
     }
 
-    internal fun generatePersonaSeed(personaDid: String): ByteArray {
-        val masterSeed = keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME).toOctetSequenceKey().toByteArray()
+    fun generatePersonaSeed(personaDid: String): ByteArray {
+        val masterSeed = keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE).toOctetSequenceKey().toByteArray()
         return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, AES_KEY), MacAlgorithm.HmacSha512)
     }
 

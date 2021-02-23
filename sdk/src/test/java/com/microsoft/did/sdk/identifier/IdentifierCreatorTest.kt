@@ -97,7 +97,7 @@ class IdentifierCreatorTest {
     fun `pairwise Identifier gets created properly`() {
         val masterIdentifier = identifierCreator.create(personaName)
         val masterSeed = ByteArray(16, { it.toByte() })
-        every { keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME) } returns OctetSequenceKey.Builder(masterSeed).build()
+        every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns OctetSequenceKey.Builder(masterSeed).build()
         val actualIdentifier = identifierCreator.createPairwiseId(masterIdentifier, "randomDid")
         val expectedDid = "did:ion:EiDm_INb-7RpbbbiftnuCXt033w6UCLiL7aUEZRSEtaydA:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiI2NTA2YWE2NzFhNTE0MmEwYTE4NzU0NDJiM2QxY2QyNSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJzZWNwMjU2azEiLCJraWQiOiI2NTA2YWE2NzFhNTE0MmEwYTE4NzU0NDJiM2QxY2QyNSIsImt0eSI6IkVDIiwieCI6IkJCdkxxSkNyeWJoLUJhV1VOMDhLdG9ibUl4ME5SZUNCQTVDWDhKTzI0ZXciLCJ5IjoiaUJVM1A2TGt4VTJKb0Y3MnpFTEprUjdEZmxJLWNtN1F1aHBMZEZCTXJCYyJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiRWNkc2FTZWNwMjU2azFWZXJpZmljYXRpb25LZXkyMDE5In1dfX1dLCJ1cGRhdGVDb21taXRtZW50IjoiRWlDYllJcEJTaVU5dFVlOS1GdWd3Ti1MWmxPQS03dGlOWThHWWJUejFXY3JQdyJ9LCJzdWZmaXhEYXRhIjp7ImRlbHRhSGFzaCI6IkVpQW96Ty1JcGQ5SFFESjNOaUtVaF92UnVoc3JDX0ctbUR3QjExMjlQN1N6Z2ciLCJyZWNvdmVyeUNvbW1pdG1lbnQiOiJFaUJDYy1HQmt0NXo0Y1FXQUhHc1RFM3FocktxZG1nM0NyWDY1cEhWNVVBeDFBIn19"
         val expectedPairwiseName = "q9eFTKE8MG8LO_YzDIgmGw"

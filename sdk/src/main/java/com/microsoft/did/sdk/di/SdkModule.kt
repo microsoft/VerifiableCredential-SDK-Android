@@ -87,6 +87,7 @@ class SdkModule {
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
         return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
+            .fallbackToDestructiveMigration() // TODO: Remove during public preview
             .build()
     }
 

@@ -107,13 +107,15 @@ dependencies {
     implementation "androidx.core:core-ktx:$core_ktx_version"
 
     //other
-    implementation "androidx.security:security-crypto:1.0.0-rc03"
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "com.squareup.picasso:picasso:$picasso_version"
 
+    //noinspection GradleDependency
+    implementation "androidx.security:security-crypto:1.0.0-rc03"
+    implementation "org.bouncycastle:bcprov-jdk15to18:$org_bouncycastle_bcprov_jdk15on"
+
     api 'com.google.guava:guava:28.1-android'
-    implementation "org.bouncycastle:bcprov-jdk15on:$org_bouncycastle_bcprov_jdk15on"
     // JWE/JWS
     implementation "com.nimbusds:nimbus-jose-jwt:$nimbus_jose_jwt_version"
     //Used for Json Canonicalization performed for ION

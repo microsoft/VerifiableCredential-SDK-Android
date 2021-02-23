@@ -31,7 +31,7 @@ class PairwiseKeyTest {
     private val suppliedStringForSeedGeneration = "abcdefg"
     private val seed: ByteArray = suppliedStringForSeedGeneration.toByteArray()
     private val seedKey = OctetSequenceKey.Builder(seed).build()
-    private val inputStream: InputStream = File(".\\src\\test\\assets\\Pairwise.EC.json").inputStream()
+    private val inputStream: InputStream = File("./src/test/assets/Pairwise.EC.json").inputStream()
 
     /**
      * Tests if pairwise key generated with the same master seed, persona id and peer id is same every time
@@ -55,7 +55,7 @@ class PairwiseKeyTest {
         val expectedEncodedMasterKey = "h-Z5gO1eBjY1EYXh64-f8qQF5ojeh1KVMKxmd0JI3YKScTOYjVm-h1j2pUNV8q6s8yphAR4lk5yXYiQhAOVlUw"
         var persona = "persona"
         val keyStore: EncryptedKeyStore = mockk()
-        every { keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME) } returns seedKey
+        every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns seedKey
         val creator = IdentifierCreator(mockk(), mockk(), mockk(), keyStore)
         var masterKey = creator.generatePersonaSeed(persona)
         var actualEncodedMasterKey = Base64URL.encode(masterKey)
@@ -99,7 +99,7 @@ class PairwiseKeyTest {
         val creator = IdentifierCreator(mockk(), mockk(), mockk(), keyStore)
         for (i in 0..49) {
             val seed ="1234567890-$i".toByteArray()
-            every { keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME) } returns OctetSequenceKey.Builder(seed).build()
+            every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns OctetSequenceKey.Builder(seed).build()
             val generatedSeed = creator.generatePersonaSeed(persona)
             val pairwiseKey = crypto.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(
                 EcPairwisePrivateKeySpec(generatedSeed, peer)
@@ -120,7 +120,7 @@ class PairwiseKeyTest {
         val peer = "did:peer:1"
         val keyStore: EncryptedKeyStore = mockk()
         val creator = IdentifierCreator(mockk(), mockk(), mockk(), keyStore)
-        every { keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME) } returns seedKey
+        every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns seedKey
         val personaSeed = creator.generatePersonaSeed(persona)
         for (i in 0..49) {
             val suppliedPeer = "$peer-$i"
@@ -145,7 +145,7 @@ class PairwiseKeyTest {
         val seed = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi".toByteArray()
         val keyStore: EncryptedKeyStore = mockk()
         val creator = IdentifierCreator(mockk(), mockk(), mockk(), keyStore)
-        every { keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME) } returns OctetSequenceKey.Builder(seed).build()
+        every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns OctetSequenceKey.Builder(seed).build()
         val persona = "abcdef"
         val personaSeed = creator.generatePersonaSeed(persona)
         for (index in 0 until countOfIds) {
