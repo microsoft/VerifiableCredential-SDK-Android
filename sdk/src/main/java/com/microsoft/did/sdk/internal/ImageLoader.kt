@@ -26,7 +26,7 @@ class ImageLoader @Inject constructor() {
         logo.uri = null
     }
 
-    suspend fun loadImageToBase64(uri: String): String = withContext(Dispatchers.IO) {
+    private suspend fun loadImageToBase64(uri: String): String = withContext(Dispatchers.IO) {
         val imageBitmap = Picasso.get().load(uri).get()
         if (imageBitmap.byteCount > MAX_IMAGE_SIZE_BYTES)
             throw InvalidImageException("Image size exceeds max file size ${MAX_IMAGE_SIZE_BYTES / 1000000.0f}MB")
