@@ -109,6 +109,7 @@ class IssuanceServiceTest {
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
         coEvery { issuanceResponseFormatter.formatResponse(any(), any(), any(), any()) } returns formattedResponse
+        coEvery { imageLoader.loadRemoteImagesIntoContract(any()) } returns Unit
     }
 
     private fun setUpTestContract(expectedContractJwt: String): VerifiableCredentialContract {
