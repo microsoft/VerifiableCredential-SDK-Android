@@ -158,7 +158,7 @@ task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', '
 
     sourceDirectories.setFrom(files([mainSrc]))
     classDirectories.setFrom(files([debugTree, kotlinClasses]))
-    executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+    executionData.setFrom(fileTree(dir: project.projectDir, includes: [
             '**/*.exec', '**/*.ec'
     ]))
 }
