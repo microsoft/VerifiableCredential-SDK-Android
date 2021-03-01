@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
@@ -46,7 +47,7 @@ class PresentationService @Inject constructor(
             	val isLinkedDomainsEnabled = featureFlag.linkedDomains
             	val linkedDomainResult =
                 	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer)
-                    	.abortOnError() else LinkedDomainDisabled()
+                    	.abortOnError() else LinkedDomainDisabled
             	val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
             	isRequestValid(request).abortOnError()
             	Result.Success(request)

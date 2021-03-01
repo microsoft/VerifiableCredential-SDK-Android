@@ -25,6 +25,8 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.internal.FeatureFlag
+import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
@@ -53,6 +55,7 @@ class IssuanceServiceTest {
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
     private val featureFlag: FeatureFlag = mockk()
+    private val imageLoader: ImageLoader = mockk()
     private val issuanceService =
         spyk(
             IssuanceService(
@@ -63,7 +66,8 @@ class IssuanceServiceTest {
                 mockedJwtValidator,
                 issuanceResponseFormatter,
                 defaultTestSerializer,
-                featureFlag
+                featureFlag,
+                imageLoader
             )
         )
 
@@ -105,6 +109,7 @@ class IssuanceServiceTest {
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
         coEvery { issuanceResponseFormatter.formatResponse(any(), any(), any(), any()) } returns formattedResponse
+        coEvery { imageLoader.loadRemoteImagesIntoContract(any()) } returns Unit
     }
 
     private fun setUpTestContract(expectedContractJwt: String): VerifiableCredentialContract {
