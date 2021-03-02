@@ -42,7 +42,7 @@ abstract class BaseNetworkOperation<S, T> {
             }
             return onFailure(response)
         } catch (exception: IOException) {
-            return Result.Failure(LocalNetworkException("Failed to send request.", exception))
+            return Result.Failure(LocalNetworkException("Failed to send request due to ${exception.message}", exception))
         }
     }
 
@@ -75,7 +75,7 @@ abstract class BaseNetworkOperation<S, T> {
                     correlationVector
                 )
             )
-            402 -> Result.Failure(
+            400, 402 -> Result.Failure(
                 ClientException(
                     response.code().toString(),
                     response.errorBody()?.string() ?: "",

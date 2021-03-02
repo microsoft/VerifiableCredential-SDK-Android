@@ -42,7 +42,7 @@ suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>)
         Result.Failure(ex)
     } catch (ex: Exception) {
         SdkLog.e("Unhandled Sdk Exception", ex)
-        Result.Failure(SdkException("Unhandled Exception", ex))
+        Result.Failure(SdkException("Unhandled Exception due to ${ex.message}", ex))
     }
 
 class RunResultTryContext {
