@@ -7,7 +7,6 @@ package com.microsoft.did.sdk.di
 
 import android.content.Context
 import com.microsoft.did.sdk.CorrelationVectorService
-import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.IdentifierManager
 import com.microsoft.did.sdk.IssuanceService
@@ -41,8 +40,6 @@ internal interface SdkComponent {
     fun linkedDomainsService(): LinkedDomainsService
 
     fun correlationVectorService(): CorrelationVectorService
-
-    fun featureFlag() : FeatureFlag
 
     @Component.Builder
     interface Builder {

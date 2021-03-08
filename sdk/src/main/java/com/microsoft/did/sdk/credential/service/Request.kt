@@ -7,7 +7,6 @@ package com.microsoft.did.sdk.credential.service
 
 import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAttestations
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
