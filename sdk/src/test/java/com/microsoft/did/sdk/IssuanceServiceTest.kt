@@ -10,8 +10,8 @@ import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainDisabled
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
@@ -25,7 +25,6 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -54,7 +53,6 @@ class IssuanceServiceTest {
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
-    private val featureFlag: FeatureFlag = mockk()
     private val imageLoader: ImageLoader = mockk()
     private val issuanceService =
         spyk(
@@ -66,7 +64,6 @@ class IssuanceServiceTest {
                 mockedJwtValidator,
                 issuanceResponseFormatter,
                 defaultTestSerializer,
-                featureFlag,
                 imageLoader
             )
         )
@@ -117,7 +114,7 @@ class IssuanceServiceTest {
     }
 
     @Test
-    fun `test to get Issuance Request with linked domains disabled`() {
+    fun `test to get Issuance Request with linked domains unverified`() {
         val suppliedContractUrl = "BusinessCard"
         val expectedEntityName = "Adatum Corporation"
         val expectedEntityIdentifier =
@@ -125,13 +122,16 @@ class IssuanceServiceTest {
 
         coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(unwrapContract(expectedContractJwt))
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
-        every { featureFlag.linkedDomains } returns false
+        coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
+            LinkedDomainUnVerified(mockedIdentifierDocumentServiceEndpoint)
+        )
+        coEvery { mockedResolver.resolve(expectedContract.input.issuer) } returns Result.Success(mockedIdentifierDocument)
 
         runBlocking {
             val actualRequest = issuanceService.getRequest(suppliedContractUrl)
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             assertThat((actualRequest as Result.Success).payload.contractUrl).isEqualTo(suppliedContractUrl)
-            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainDisabled::class.java)
+            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainUnVerified::class.java)
             assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
             assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
         }
@@ -146,7 +146,6 @@ class IssuanceServiceTest {
 
         coEvery { anyConstructed<FetchContractNetworkOperation>().fire() } returns Result.Success(unwrapContract(expectedContractJwt))
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
-        every { featureFlag.linkedDomains } returns true
         coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
             LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
         )
