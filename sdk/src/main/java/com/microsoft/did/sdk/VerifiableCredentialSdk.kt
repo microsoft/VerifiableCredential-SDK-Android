@@ -7,7 +7,6 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
-import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
 
@@ -43,9 +42,6 @@ object VerifiableCredentialSdk {
     @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
 
-    @JvmStatic
-    lateinit var featureFlag: FeatureFlag
-
     /**
      * Initializes VerifiableCredentialSdk
      *
@@ -78,7 +74,6 @@ object VerifiableCredentialSdk {
         identifierManager = sdkComponent.identifierManager()
 
         correlationVectorService.startNewFlowAndSave()
-        featureFlag = sdkComponent.featureFlag()
 
         SdkLog.addConsumer(logConsumer)
     }

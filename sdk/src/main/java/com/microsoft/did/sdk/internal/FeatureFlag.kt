@@ -7,5 +7,5 @@ import javax.inject.Singleton
 
 @Singleton
 class FeatureFlag @Inject constructor() {
-    var linkedDomains: Boolean = false
+    var linkedDomains: Boolean = true
 }
