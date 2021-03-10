@@ -5,4 +5,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("BaseWallet")
-open class WalletMetadata {}
+open class WalletMetadata

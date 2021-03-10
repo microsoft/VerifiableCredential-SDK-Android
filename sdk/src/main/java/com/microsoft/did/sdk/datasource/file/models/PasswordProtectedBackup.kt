@@ -10,18 +10,14 @@ import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.json.Json
-import java.lang.Exception
 import javax.crypto.spec.SecretKeySpec
 
-const val PASSWORD_SET_SIZE = 12
-
 class PasswordProtectedBackup internal constructor(
-    token: JweToken,
+    override val jweToken: JweToken,
+    val password: List<String>? = null,
     val serializer: Json,
-    val password: List<String>? = null
-    ) : JweProtectedBackup(token) {
-
-    internal constructor(
+) : JweProtectedBackup() {
+    constructor(
         backup: UnprotectedBackup,
         password: String,
         serializer: Json
@@ -31,8 +27,8 @@ class PasswordProtectedBackup internal constructor(
             token.contentType = unprotectedBackup.type
             token
         }(backup),
-        serializer,
-        password.split(Regex("\\s+")).filter{ it.isNotBlank() })
+        password.split(Regex("\\s+")).filter { it.isNotBlank() },
+        serializer)
 
     override suspend fun encrypt() {
         // this can be a very long operation, thus the suspend
@@ -54,8 +50,7 @@ class PasswordProtectedBackup internal constructor(
                 words.joinToString(" ").toByteArray(),
                 "RAW"
             )
-            jweToken.decrypt(privateKey = secretKey)?.let {
-                data ->
+            jweToken.decrypt(privateKey = secretKey)?.let { data ->
                 return Result.Success(payload = serializer.decodeFromString(UnprotectedBackup.serializer(), String(data)))
             }
             return Result.Failure(BadPassword("Failed to decrypt"))
@@ -68,7 +63,7 @@ class PasswordProtectedBackup internal constructor(
 
     fun confirmPassword(password: String): Boolean {
         if (this.password != null) {
-            val words = password.split(Regex("\\s+")).filter{ it.isNotBlank() }
+            val words = password.split(Regex("\\s+")).filter { it.isNotBlank() }
             if (words.count() != this.password.count()) {
                 return false
             }

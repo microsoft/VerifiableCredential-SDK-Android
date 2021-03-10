@@ -5,18 +5,16 @@ package com.microsoft.did.sdk
 import android.content.Context
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
+import com.microsoft.did.sdk.datasource.file.RawIdentifierUtility
+import com.microsoft.did.sdk.datasource.file.models.DifWordList
 import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
-import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
 import com.microsoft.did.sdk.datasource.file.models.VCMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
-import com.microsoft.did.sdk.datasource.file.models.DifWordList
-import com.microsoft.did.sdk.datasource.file.models.PASSWORD_SET_SIZE
-import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.did.sdk.util.Constants.PASSWORD_SET_SIZE
 import com.microsoft.did.sdk.util.controlflow.Result
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.security.SecureRandom
@@ -27,9 +25,12 @@ import javax.inject.Singleton
 class BackupAndRestoreService @Inject constructor(
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
+    private val rawIdentifierUtility: RawIdentifierUtility,
+    private val jweBackupFactory: JweProtectedBackupFactory,
+    private val jsonSerializer: Json = Json.Default,
     context: Context
-){
-    val wordlist by lazy { DifWordList.getWordList(context) }
+) {
+    val wordList by lazy { DifWordList.getWordList(context) }
 
     fun generateDifPassword(): String {
         val random = SecureRandom()
@@ -38,62 +39,52 @@ class BackupAndRestoreService @Inject constructor(
             var wordIndex: Int
             var word: String
             do {
-                wordIndex = random.nextInt(wordlist.count())
-                word = wordlist[wordIndex]
+                wordIndex = random.nextInt(wordList.count())
+                word = wordList[wordIndex]
             } while (wordSet.contains(word))
             wordSet[index] = word
         }
         return wordSet.joinToString(" ")
     }
 
-    suspend fun createPasswordBackup(
-        password: String,
+    suspend fun createMicrosoftBackup(
         walletMetadata: WalletMetadata,
-        verifiableCredentials: List<Pair<VerifiableCredential, VCMetadata>>,
-        jsonSerializer: Json = UnprotectedBackup.serializer,
-    ): PasswordProtectedBackup {
+        verifiableCredentials: List<Pair<VerifiableCredential, VCMetadata>>
+    ): MicrosoftUnprotectedBackup2020 {
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VCMetadata>()
-        val owningDids = mutableSetOf<String>()
+        val dids = rawIdentifierUtility.getAllIdentifiers()
         verifiableCredentials.forEach { vcPair ->
             val jti = vcPair.first.jti
             vcMap[jti] = vcPair.first.raw
             vcMetaMap[jti] = vcPair.second
-            owningDids.add(vcPair.first.contents.sub)
         }
-        val owningIds = owningDids.mapNotNull { did -> RawIdentity.didToRawIdentifier(did, identityRepository, keyStore) }
-        return PasswordProtectedBackup(
-            MicrosoftUnprotectedBackup2020(
-                vcs = vcMap,
-                vcsMetaInf = vcMetaMap,
-                metaInf = walletMetadata,
-                owningIds
-            ),
-            password,
-            jsonSerializer,
+        return MicrosoftUnprotectedBackup2020(
+            vcs = vcMap,
+            vcsMetaInf = vcMetaMap,
+            metaInf = walletMetadata,
+            dids
         )
     }
 
-    suspend fun parseJweBackup(input: InputStream,
-                               jsonSerializer: Json = UnprotectedBackup.serializer): Result<JweProtectedBackup> {
-        return JweProtectedBackup.parseBackup(input, jsonSerializer)
+    suspend fun parseJweBackup(input: InputStream): Result<JweProtectedBackup> {
+        return jweBackupFactory.parseBackup(input)
     }
 
-    suspend fun importMicrosoftBackup(backup: MicrosoftUnprotectedBackup2020,
-                                      walletMetadataCallback: suspend (WalletMetadata) -> Unit,
-                                      verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit,
-                                      listVerifiableCredentialCallback: suspend () -> List<String>,
-                                      deleteVerifiableCredentialCallback: suspend (String) -> Unit,
-                                      jsonSerializer: Json = Json.Default
-                                      ): Result<Unit> {
+    suspend fun importMicrosoftBackup(
+        backup: MicrosoftUnprotectedBackup2020,
+        walletMetadataCallback: suspend (WalletMetadata) -> Unit,
+        verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit,
+        listVerifiableCredentialCallback: suspend () -> List<String>,
+        deleteVerifiableCredentialCallback: suspend (String) -> Unit
+    ): Result<Unit> {
         return backup.import(
             walletMetadataCallback,
             verifiableCredentialCallback,
             listVerifiableCredentialCallback,
             deleteVerifiableCredentialCallback,
             this.identityRepository,
-            this.keyStore,
-            jsonSerializer
+            this.keyStore
         )
     }
 }

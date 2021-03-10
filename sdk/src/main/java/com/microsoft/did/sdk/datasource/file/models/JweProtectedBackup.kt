@@ -4,37 +4,13 @@ package com.microsoft.did.sdk.datasource.file.models
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.util.controlflow.IoFailure
-import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
-import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
-import kotlinx.serialization.json.Json
-import java.io.InputStream
-import java.io.OutputStream
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.Result.Success
-import com.microsoft.did.sdk.util.controlflow.Result.Failure
+import kotlinx.serialization.json.Json
 import java.io.IOException
+import java.io.OutputStream
 
-abstract class JweProtectedBackup internal constructor (
-    val jweToken: JweToken
-    ) {
-
-    companion object {
-        suspend fun parseBackup(backupFile: InputStream, serializer: Json): Result<JweProtectedBackup> {
-            val jweString = String(backupFile.readBytes())
-            val token = JweToken.deserialize(jweString)
-            val cty = token.contentType
-            // for now we only know microsoft password, fail early.
-            if (cty != MicrosoftUnprotectedBackup2020.MICROSOFT_BACKUP_TYPE) {
-                return Failure(UnknownBackupFormat("Backup of an unknown format: $cty"))
-            }
-            val alg = token.getKeyAlgorithm()
-            return if (alg.name.startsWith("PBE")) {
-                Success(PasswordProtectedBackup(token, serializer))
-            } else {
-                Failure(UnknownProtectionMethod("Unknown backup protection method: $alg"))
-            }
-        }
-    }
+abstract class JweProtectedBackup {
+    abstract val jweToken: JweToken
 
     abstract suspend fun encrypt()
 

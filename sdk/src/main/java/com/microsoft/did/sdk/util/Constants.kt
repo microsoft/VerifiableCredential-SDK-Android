@@ -59,4 +59,7 @@ object Constants {
 
     //  Base64 Encoding flags
     const val BASE64_URL_SAFE = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
+
+    // Export password generation parameters
+    const val PASSWORD_SET_SIZE = 12
 }

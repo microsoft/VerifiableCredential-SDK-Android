@@ -17,6 +17,7 @@ import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 
 /**
@@ -28,11 +29,11 @@ import kotlinx.serialization.json.Json
  */
 @Serializable
 @SerialName(MicrosoftUnprotectedBackup2020.MICROSOFT_BACKUP_TYPE)
-class MicrosoftUnprotectedBackup2020 (
+class MicrosoftUnprotectedBackup2020(
     val vcs: Map<String, String>,
     val vcsMetaInf: Map<String, VCMetadata>,
     val metaInf: WalletMetadata,
-    val identifiers: List<RawIdentity>,
+    val identifiers: List<RawIdentity>
 ) : UnprotectedBackup() {
     override val type: String
         get() = MICROSOFT_BACKUP_TYPE
@@ -47,8 +48,8 @@ class MicrosoftUnprotectedBackup2020 (
         listVerifiableCredentialCallback: suspend () -> List<String>,
         deleteVerifiableCredentialCallback: suspend (String) -> Unit,
         identityRepository: IdentifierRepository,
-        keyStore: EncryptedKeyStore,
-        jsonSerializer: Json): Result<Unit> {
+        keyStore: EncryptedKeyStore
+    ): Result<Unit> {
 
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
@@ -68,14 +69,13 @@ class MicrosoftUnprotectedBackup2020 (
         val vcsToRemove = existingVCs.subtract(this.vcs.keys)
         val vcsNotToBeRemoved = existingVCs.intersect(this.vcs.keys)
 
-        val identifiersToRemove = identityRepository.queryAllLocal().filter {
-                dbIdentifier ->
-            identifiers.all { identifier -> identifier.id != dbIdentifier.id } }
+        val identifiersToRemove = identityRepository.queryAllLocal().filter { dbIdentifier ->
+            identifiers.all { identifier -> identifier.id != dbIdentifier.id }
+        }
 
         val vcsAdded = mutableListOf<String>()
         try {
-            this.vcsToIterator(jsonSerializer).forEach {
-                dataPair ->
+            this.vcsToIterator(jsonSerializer).forEach { dataPair ->
                 vcsAdded.add(dataPair.first.jti)
                 // TODO: Some validation that the VC is issued to an identifier under our control
                 verifiableCredentialCallback(dataPair.first, dataPair.second)
@@ -86,10 +86,18 @@ class MicrosoftUnprotectedBackup2020 (
             identifiersToRemove.forEach { identifier -> identityRepository.deleteIdentifier(identifier.id) }
 
         } catch (exception: SdkException) {
-            vcsAdded.forEach { if (!vcsNotToBeRemoved.contains(it)) { deleteVerifiableCredentialCallback(it) } }
+            vcsAdded.forEach {
+                if (!vcsNotToBeRemoved.contains(it)) {
+                    deleteVerifiableCredentialCallback(it)
+                }
+            }
             return Result.Failure(exception)
         } catch (exception: Exception) {
-            vcsAdded.forEach { if (!vcsNotToBeRemoved.contains(it)) { deleteVerifiableCredentialCallback(it) } }
+            vcsAdded.forEach {
+                if (!vcsNotToBeRemoved.contains(it)) {
+                    deleteVerifiableCredentialCallback(it)
+                }
+            }
             return Result.Failure(MalformedVerifiableCredential("unhandled exception thrown", exception))
         }
 
@@ -103,7 +111,7 @@ class MicrosoftUnprotectedBackup2020 (
         return Result.Success(Unit)
     }
 
-    private fun parseRawIdentifier (
+    private fun parseRawIdentifier(
         identifierData: RawIdentity
     ): Pair<Identifier, Set<JWK>> {
         var signingKeyRef: String = ""
@@ -114,13 +122,15 @@ class MicrosoftUnprotectedBackup2020 (
         for (key in identifierData.keys) {
             if (signingKeyRef.isBlank() &&
                 (key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
-                    key.keyUse == KeyUse.SIGNATURE)) {
+                    key.keyUse == KeyUse.SIGNATURE)
+            ) {
                 signingKeyRef = getKidFromJWK(key)
                 keySet.add(key)
             } else if (encryptingKeyRef.isBlank() &&
                 (key.keyOperations?.any { listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT).contains(it) } == true ||
                     key.keyOperations?.any { listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY).contains(it) } == true ||
-                    key.keyUse == KeyUse.ENCRYPTION)) {
+                    key.keyUse == KeyUse.ENCRYPTION)
+            ) {
                 encryptingKeyRef = getKidFromJWK(key)
                 keySet.add(key)
             } else if (key.keyID == updateKeyRef) {
@@ -162,7 +172,7 @@ class MicrosoftUnprotectedBackup2020 (
         return VCIterator(vcs, vcsMetaInf, serializer)
     }
 
-    private class VCIterator (
+    private class VCIterator(
         val vcs: Map<String, String>,
         val vcsMetaInf: Map<String, VCMetadata>,
         val serializer: Json
