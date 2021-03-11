@@ -42,7 +42,7 @@ abstract class BaseNetworkOperation<S, T> {
             }
             return onFailure(response)
         } catch (exception: IOException) {
-            return Result.Failure(LocalNetworkException("Failed to send request due to ${exception.message}", exception))
+            return Result.Failure(LocalNetworkException("Failed to send request.", exception))
         }
     }
 
