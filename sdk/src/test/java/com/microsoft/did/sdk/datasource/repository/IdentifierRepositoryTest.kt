@@ -111,11 +111,8 @@ class IdentifierRepositoryTest {
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
         coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(
             NotFoundException(
-                "404",
                 "Not found",
                 true,
-                "123",
-                "paMxWRuFSV+mo+Hso8IBVw.0"
             )
         )
         runBlocking {

@@ -5,28 +5,28 @@ package com.microsoft.did.sdk.util
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
-class NetworkUtilTest {
+class NetworkErrorParserTest {
 
     @Test
     fun `parse null`() {
-        assertThat(NetworkUtil.parseInnerErrors(null)).isNull()
+        assertThat(NetworkErrorParser.extractInnerErrorsCodes(null)).isNull()
     }
 
     @Test
     fun `parse empty String`() {
-        assertThat(NetworkUtil.parseInnerErrors("")).isEqualTo("")
+        assertThat(NetworkErrorParser.extractInnerErrorsCodes("")).isEqualTo("")
     }
 
     @Test
     fun `parse invalid json`() {
         val testJson = "{ error:: code}"
-        assertThat(NetworkUtil.parseInnerErrors(testJson)).isEqualTo("")
+        assertThat(NetworkErrorParser.extractInnerErrorsCodes(testJson)).isEqualTo("")
     }
 
     @Test
     fun `parse literal`() {
         val literal = "Errorcode: 241"
-        assertThat(NetworkUtil.parseInnerErrors(literal)).isEqualTo("")
+        assertThat(NetworkErrorParser.extractInnerErrorsCodes(literal)).isEqualTo("")
     }
 
     @Test
@@ -39,7 +39,7 @@ class NetworkUtilTest {
                 }
             }""".trimIndent()
         val expectedConcatError = "12345"
-        val actualConcatError = NetworkUtil.parseInnerErrors(testJson)
+        val actualConcatError = NetworkErrorParser.extractInnerErrorsCodes(testJson)
         assertThat(actualConcatError).isEqualTo(expectedConcatError)
     }
 
@@ -54,7 +54,7 @@ class NetworkUtilTest {
                 }
             }""".trimIndent()
         val expectedConcatError = "12345"
-        val actualConcatError = NetworkUtil.parseInnerErrors(testJson)
+        val actualConcatError = NetworkErrorParser.extractInnerErrorsCodes(testJson)
         assertThat(actualConcatError).isEqualTo(expectedConcatError)
     }
 
@@ -83,7 +83,7 @@ class NetworkUtilTest {
             }
         """.trimIndent()
         val expectedConcatError = "BadArgument,PasswordError,PasswordDoesNotMeetPolicy,PasswordReuseNotAllowed"
-        val actualConcatError = NetworkUtil.parseInnerErrors(testJson)
+        val actualConcatError = NetworkErrorParser.extractInnerErrorsCodes(testJson)
         assertThat(actualConcatError).isEqualTo(expectedConcatError)
     }
 }

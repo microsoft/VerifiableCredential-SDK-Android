@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 
-object NetworkUtil {
+object NetworkErrorParser {
 
     /**
      * Attempts to parse an json ErrorBody and extracts and concatenates all error codes.
@@ -18,7 +18,7 @@ object NetworkUtil {
      *
      * @return all concatenated error codes delimited by "," null if errorBody is null, or empty if not a valid json
      */
-    fun parseInnerErrors(errorBody: String?): String? {
+    fun extractInnerErrorsCodes(errorBody: String?): String? {
         if (errorBody == null) return null
         val errorCodes = ArrayList<String>()
         try {
