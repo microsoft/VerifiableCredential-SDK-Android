@@ -43,7 +43,7 @@ class IdentifierManager @Inject constructor(
             val seed = CryptoOperations.generateSeed()
             keyStore.storeKey(MAIN_IDENTIFIER_REFERENCE, OctetSequenceKey.Builder(seed).build())
             val identifier = identifierCreator.create(MAIN_IDENTIFIER_REFERENCE)
-            SdkLog.i("Created Identifier: $identifier")
+            SdkLog.v("Created Identifier: $identifier")
             identifierRepository.insert(identifier)
             Result.Success(identifier)
         }

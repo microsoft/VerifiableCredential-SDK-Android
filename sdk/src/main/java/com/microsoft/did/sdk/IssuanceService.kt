@@ -77,7 +77,7 @@ class IssuanceService @Inject constructor(
         enablePairwise: Boolean = true
     ): Result<VerifiableCredential> {
         return runResultTry {
-            logTime("Issuance sendResponse", {
+            logTime("Issuance sendResponse") {
                 val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
                 val verifiableCredential = if (enablePairwise) {
                     val pairwiseIdentifier =
@@ -89,7 +89,7 @@ class IssuanceService @Inject constructor(
                     formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 }
                 Result.Success(verifiableCredential)
-            })
+            }
         }
     }
 
