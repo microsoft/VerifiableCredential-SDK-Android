@@ -8,8 +8,8 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import retrofit2.Response
 
 object MetricsConstants {
-    const val NAME = "Name"
-    const val TIME = "Time"
+    const val NAME = "name"
+    const val TIME = "time"
 }
 
 inline fun <R> logTime(name: String, block: () -> R): R {
