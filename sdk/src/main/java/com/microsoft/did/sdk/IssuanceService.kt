@@ -9,14 +9,12 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
-import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainDisabled
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.internal.FeatureFlag
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -35,7 +33,6 @@ class IssuanceService @Inject constructor(
     private val jwtValidator: JwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Json,
-    private val featureFlag: FeatureFlag,
     private val imageLoader: ImageLoader
 ) {
 
@@ -46,15 +43,13 @@ class IssuanceService @Inject constructor(
      */
     suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
         return runResultTry {
-			logTime("Issuance getRequest") {
-            	val contract = fetchContract(contractUrl).abortOnError()
-            	val isLinkedDomainsEnabled = featureFlag.linkedDomains
-            	val linkedDomainResult =
-                	if (isLinkedDomainsEnabled) linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError() else LinkedDomainDisabled
-            	val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
+            logTime("Issuance getRequest") {
+                val contract = fetchContract(contractUrl).abortOnError()
+                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+                val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 imageLoader.loadRemoteImagesIntoContract(request)
-            	Result.Success(request)
-			}
+                Result.Success(request)
+            }
         }
     }
 
