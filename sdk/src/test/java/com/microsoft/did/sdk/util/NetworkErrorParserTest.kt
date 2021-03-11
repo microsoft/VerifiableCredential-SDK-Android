@@ -44,13 +44,15 @@ class NetworkErrorParserTest {
     }
 
     @Test
-    fun `parse innererror depth 1,5`() {
+    fun `parse innererror depth 3, but code is missing in depth 2`() {
         val testJson = """
             {
               "error": {
                 "code": "12345",
                 "message": "Previous passwords may not be reused",
-                "innererror": { "message": "message but no code :(" }
+                "innererror": { "message": "message but no code :(",
+                    "innererror": { "code": "abc", "message": "code won't be picked up" }
+                    }
                 }
             }""".trimIndent()
         val expectedConcatError = "12345"

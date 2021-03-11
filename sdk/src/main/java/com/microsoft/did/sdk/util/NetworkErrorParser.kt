@@ -11,12 +11,13 @@ import kotlinx.serialization.json.JsonPrimitive
 object NetworkErrorParser {
 
     /**
-     * Attempts to parse an json ErrorBody and extracts and concatenates all error codes.
+     * Attempts to parse a json errorBody and extracts and concatenates all error codes.
      *
-     * The outmost error has to have the key "error", all subsequent errors "innererror".
-     * Any error has to contain a "code" property for parsing to continue.
-     *
-     * @return all concatenated error codes delimited by "," null if errorBody is null, or empty if not a valid json
+     * @param errorBody A json object. The topmost error under the propertyname "error".
+     *          All subsequent errors within the error under "innererror". Each error has to contain
+     *          a "code" property for parsing to continue.
+     * @return all concatenated error codes delimited by "," null if errorBody is null,
+     *          or empty if not a valid json
      */
     fun extractInnerErrorsCodes(errorBody: String?): String? {
         if (errorBody == null) return null
