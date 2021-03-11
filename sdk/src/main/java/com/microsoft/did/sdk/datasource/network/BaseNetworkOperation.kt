@@ -7,6 +7,7 @@ package com.microsoft.did.sdk.datasource.network
 
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
 import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
+import com.microsoft.did.sdk.util.NetworkUtil
 import com.microsoft.did.sdk.util.controlflow.ClientException
 import com.microsoft.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
@@ -67,6 +68,8 @@ abstract class BaseNetworkOperation<S, T> {
         exception.errorCode = response.code().toString()
         exception.correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
         exception.requestId = response.headers()[REQUEST_ID_HEADER]
+        exception.errorBody = response.errorBody()?.string()
+        exception.innerErrors = NetworkUtil.parseInnerErrors(exception.errorBody)
         return Result.Failure(exception)
     }
 

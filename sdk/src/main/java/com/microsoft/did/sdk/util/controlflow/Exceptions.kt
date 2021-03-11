@@ -54,6 +54,8 @@ open class NetworkException(message: String, retryable: Boolean) : SdkException(
     var requestId: String? = null
     var correlationVector: String? = null
     var errorCode: String? = null
+    var errorBody: String? = null
+    var innerErrors: String? = null
 }
 
 class ServiceUnreachableException(message: String, retryable: Boolean) : NetworkException(message, retryable)
