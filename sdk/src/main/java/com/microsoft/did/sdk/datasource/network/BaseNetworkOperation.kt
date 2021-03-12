@@ -75,7 +75,7 @@ abstract class BaseNetworkOperation<S, T> {
                     correlationVector
                 )
             )
-            402 -> Result.Failure(
+            400, 402 -> Result.Failure(
                 ClientException(
                     response.code().toString(),
                     response.errorBody()?.string() ?: "",
