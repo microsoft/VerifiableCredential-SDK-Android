@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk.util.controlflow
 
 import com.microsoft.did.sdk.util.log.SdkLog
+import kotlinx.coroutines.CancellationException
 
 typealias Success = Boolean
 
@@ -37,6 +38,8 @@ suspend fun <T> runResultTry(block: suspend RunResultTryContext.() -> Result<T>)
         RunResultTryContext().block()
     } catch (ex: RunResultTryAbortion) {
         Result.Failure(ex.error as SdkException)
+    } catch (ex: CancellationException) {
+        throw ex
     } catch (ex: SdkException) {
         SdkLog.w("Internal Sdk Exception", ex)
         Result.Failure(ex)
