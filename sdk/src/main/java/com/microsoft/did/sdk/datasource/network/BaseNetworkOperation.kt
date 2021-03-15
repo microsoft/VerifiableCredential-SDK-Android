@@ -59,7 +59,7 @@ abstract class BaseNetworkOperation<S, T> {
         val exception = when (response.code()) {
             301, 302, 308 -> RedirectException(response.errorBody()?.string() ?: "", false)
             401 -> UnauthorizedException(response.errorBody()?.string() ?: "", false)
-            402 -> ClientException(response.errorBody()?.string() ?: "", false)
+            400, 402 -> ClientException(response.errorBody()?.string() ?: "", false)
             403 -> ForbiddenException(response.errorBody()?.string() ?: "", false)
             404 -> NotFoundException(response.errorBody()?.string() ?: "", false)
             500, 501, 502, 503 -> ServiceUnreachableException(response.errorBody()?.string() ?: "", true)
