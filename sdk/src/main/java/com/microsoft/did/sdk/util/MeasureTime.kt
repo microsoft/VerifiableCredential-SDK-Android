@@ -3,13 +3,13 @@
 package com.microsoft.did.sdk.util
 
 import com.microsoft.did.sdk.util.MetricsConstants.NAME
-import com.microsoft.did.sdk.util.MetricsConstants.TIME
+import com.microsoft.did.sdk.util.MetricsConstants.DURATION
 import com.microsoft.did.sdk.util.log.SdkLog
 import retrofit2.Response
 
 object MetricsConstants {
-    const val NAME = "name"
-    const val TIME = "time"
+    const val NAME = "eventName"
+    const val DURATION = "duration_ms"
 }
 
 inline fun <R> logTime(name: String, block: () -> R): R {
@@ -19,7 +19,7 @@ inline fun <R> logTime(name: String, block: () -> R): R {
     SdkLog.event(
         "DIDPerformanceMetrics", mapOf(
             NAME to name,
-            TIME to "$elapsedTime"
+            DURATION to "$elapsedTime"
         )
     )
     return result
@@ -37,7 +37,7 @@ inline fun <S> logNetworkTime(name: String, block: () -> Response<S>): Response<
     SdkLog.event(
         "DIDNetworkMetrics", mapOf(
             NAME to name,
-            TIME to "$elapsedTime",
+            DURATION to "$elapsedTime",
             "CV_request" to cvRequest,
             "CV_response" to cvResponse,
             "request_Id" to requestId,
