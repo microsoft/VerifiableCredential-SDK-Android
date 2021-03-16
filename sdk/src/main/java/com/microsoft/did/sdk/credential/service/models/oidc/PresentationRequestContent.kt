@@ -17,28 +17,28 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PresentationRequestContent(
     @SerialName("response_type")
-    val responseType: String = "",
+    val responseType: String,
 
     @SerialName("response_mode")
-    val responseMode: String = "",
+    val responseMode: String,
 
     @SerialName("client_id")
-    val clientId: String = "",
+    val clientId: String,
 
     @SerialName("redirect_uri")
     val redirectUrl: String = "",
 
     @SerialName("iss")
-    val issuer: String = "",
+    val issuer: String,
 
-    val scope: String = "",
+    val scope: String,
 
     val state: String = "",
 
     val nonce: String = "",
 
     @SerialName("presentation_definition")
-    val presentationDefinition: PresentationDefinition = PresentationDefinition(),
+    val presentationDefinition: PresentationDefinition,
 
     @SerialName("exp")
     val expirationTime: Long = 0,

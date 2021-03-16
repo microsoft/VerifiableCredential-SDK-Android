@@ -23,7 +23,7 @@ class IssuanceRequest(
     val contractUrl: String,
     override val linkedDomainResult: LinkedDomainResult
 ) : Request(contract.display.card.issuedBy, contract.input.issuer) {
-    fun getAttestations(): CredentialAttestations {
+    fun getAttestations(): CredentialAttestations? {
         return contract.input.attestations
     }
 }

@@ -20,5 +20,5 @@ data class Logo(
     var image: String? = null,
 
     // Description used for alt text or voice over.
-    val description: String? = null
+    val description: String
 )

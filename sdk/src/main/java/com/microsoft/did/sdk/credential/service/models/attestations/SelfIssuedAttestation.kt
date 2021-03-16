@@ -7,5 +7,10 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SelfIssuedAttestation(
-    val claims: List<ClaimAttestation> = emptyList()
+    val claims: List<ClaimAttestation> = emptyList(),
+
+    // True, if presentation is required.
+    val required: Boolean = false,
+
+    val encrypted: Boolean = false
 )

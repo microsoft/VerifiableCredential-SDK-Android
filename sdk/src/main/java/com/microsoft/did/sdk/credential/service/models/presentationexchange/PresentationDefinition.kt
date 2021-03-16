@@ -11,5 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PresentationDefinition(
     @SerialName("input_descriptors")
-    val credentialPresentationInputDescriptors: List<CredentialPresentationInputDescriptor> = emptyList()
+    val credentialPresentationInputDescriptors: List<CredentialPresentationInputDescriptor>
 )

@@ -15,9 +15,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationAttestation(
-    // True, if presentation is required.
-    val required: Boolean = false,
-
     // The type of the verifiable credential that is being requested.
     val credentialType: String,
 
@@ -27,6 +24,13 @@ data class PresentationAttestation(
     // A list of contracts if user does not have requested credential.
     val contracts: List<String> = emptyList(),
 
+    // True, if presentation is required.
+    val required: Boolean = false,
+
+    val encrypted: Boolean = false,
+
     // How long the requested Verifiable Presentation should be valid for.
-    val validityInterval: Int = DEFAULT_VP_EXPIRATION_IN_SECONDS
+    val validityInterval: Int = DEFAULT_VP_EXPIRATION_IN_SECONDS,
+
+    val claims: List<ClaimAttestation> = emptyList()
 )

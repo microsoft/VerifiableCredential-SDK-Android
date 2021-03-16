@@ -14,11 +14,13 @@ data class IdTokenAttestation(
 
     val configuration: String,
 
-    val required: Boolean = false,
-
     val client_id: String,
+
+    val required: Boolean = false,
 
     val redirect_uri: String = "",
 
-    val scope: String = "openid"
+    val scope: String = "openid",
+
+    val encrypted: Boolean = false
 )
