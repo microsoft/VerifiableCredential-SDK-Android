@@ -7,6 +7,8 @@ import java.util.regex.Pattern
 object SdkLog {
     interface Consumer {
         fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String)
+
+        fun event(name: String, properties: Map<String, String>? = null)
     }
 
     enum class Level {
@@ -26,58 +28,34 @@ object SdkLog {
 
     fun addConsumer(consumer: Consumer) = CONSUMERS.add(consumer)
 
+    fun event(name: String, properties: Map<String, String>? = null) {
+        CONSUMERS.forEach {
+            it.event(name, properties)
+        }
+    }
+
     fun v(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(
-            Level.VERBOSE,
-            message,
-            throwable,
-            tag
-        )
+        log(Level.VERBOSE, message, throwable, tag)
     }
 
     fun d(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(
-            Level.DEBUG,
-            message,
-            throwable,
-            tag
-        )
+        log(Level.DEBUG, message, throwable, tag)
     }
 
     fun i(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(
-            Level.INFO,
-            message,
-            throwable,
-            tag
-        )
+        log(Level.INFO, message, throwable, tag)
     }
 
     fun w(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(
-            Level.WARN,
-            message,
-            throwable,
-            tag
-        )
+        log(Level.WARN, message, throwable, tag)
     }
 
     fun e(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(
-            Level.ERROR,
-            message,
-            throwable,
-            tag
-        )
+        log(Level.ERROR, message, throwable, tag)
     }
 
     fun f(message: String, throwable: Throwable? = null, tag: String = implicitTag()) {
-        log(
-            Level.FAILURE,
-            message,
-            throwable,
-            tag
-        )
+        log(Level.FAILURE, message, throwable, tag)
     }
 
     private fun log(logLevel: Level, message: String, throwable: Throwable? = null, tag: String) {
