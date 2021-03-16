@@ -17,6 +17,7 @@ import com.microsoft.did.sdk.util.controlflow.RedirectException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.logNetworkTime
 import retrofit2.Response
 import java.io.IOException
@@ -70,6 +71,7 @@ abstract class BaseNetworkOperation<S, T> {
         exception.requestId = response.headers()[REQUEST_ID_HEADER]
         exception.errorBody = response.errorBody()?.string()
         exception.innerErrors = NetworkErrorParser.extractInnerErrorsCodes(exception.errorBody)
+        SdkLog.v("HttpError: ${exception.errorCode} body: ${exception.errorBody}")
         return Result.Failure(exception)
     }
 
