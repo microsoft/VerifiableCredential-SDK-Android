@@ -15,7 +15,7 @@ object ImageUtil {
             val decodedBytes = Base64.decode(base64Str, Constants.BASE64_URL_SAFE)
             BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
         } catch (ex: Exception) {
-            SdkLog.w("Image couldn't be converted from Base64", ex)
+            SdkLog.d("Image couldn't be converted from Base64", ex)
             null
         }
     }
