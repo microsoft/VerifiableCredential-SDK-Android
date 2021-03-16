@@ -7,6 +7,7 @@ package com.microsoft.did.sdk.datasource.network
 
 import com.microsoft.did.sdk.util.Constants.CORRELATION_VECTOR_HEADER
 import com.microsoft.did.sdk.util.Constants.REQUEST_ID_HEADER
+import com.microsoft.did.sdk.util.NetworkErrorParser
 import com.microsoft.did.sdk.util.controlflow.ClientException
 import com.microsoft.did.sdk.util.controlflow.ForbiddenException
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
@@ -16,8 +17,8 @@ import com.microsoft.did.sdk.util.controlflow.RedirectException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ServiceUnreachableException
 import com.microsoft.did.sdk.util.controlflow.UnauthorizedException
-import com.microsoft.did.sdk.util.logTime
 import com.microsoft.did.sdk.util.log.SdkLog
+import com.microsoft.did.sdk.util.logNetworkTime
 import retrofit2.Response
 import java.io.IOException
 
@@ -34,7 +35,7 @@ abstract class BaseNetworkOperation<S, T> {
 
     open suspend fun fire(): Result<T> {
         try {
-            val response = logTime("${this::class.simpleName}") {
+            val response = logNetworkTime("${this::class.simpleName}") {
                 call.invoke()
             }
             if (response.isSuccessful) {
@@ -56,65 +57,22 @@ abstract class BaseNetworkOperation<S, T> {
 
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
-        val requestId = response.headers()[REQUEST_ID_HEADER]
-        val correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
-        return when (response.code()) {
-            301, 302, 308 -> {
-                val errorMessage = StringBuilder("Redirecting is disabled: Http code: ${response.code()}\t")
-                if (response.errorBody() != null)
-                    errorMessage.append("ErrorBody: ${response.errorBody()?.string()}")
-                SdkLog.d(errorMessage.toString())
-                Result.Failure(RedirectException(response.code().toString(), response.errorBody()?.string() ?: "", false))
-            }
-            401 -> Result.Failure(
-                UnauthorizedException(
-                    response.code().toString(),
-                    response.errorBody()?.string() ?: "",
-                    false,
-                    requestId,
-                    correlationVector
-                )
-            )
-            400, 402 -> Result.Failure(
-                ClientException(
-                    response.code().toString(),
-                    response.errorBody()?.string() ?: "",
-                    false,
-                    requestId,
-                    correlationVector
-                )
-            )
-            403 -> {
-                Result.Failure(
-                    ForbiddenException(
-                        response.code().toString(),
-                        response.errorBody()?.string() ?: "",
-                        false,
-                        requestId,
-                        correlationVector
-                    )
-                )
-            }
-            404 -> Result.Failure(
-                NotFoundException(
-                    response.code().toString(),
-                    response.errorBody()?.string() ?: "",
-                    false,
-                    requestId,
-                    correlationVector
-                )
-            )
-            500, 501, 502, 503 -> Result.Failure(
-                ServiceUnreachableException(
-                    response.code().toString(),
-                    response.errorBody()?.string() ?: "",
-                    true,
-                    requestId,
-                    correlationVector
-                )
-            )
-            else -> Result.Failure(NetworkException(response.code().toString(), "Unknown Status code", true, requestId, correlationVector))
+        val exception = when (response.code()) {
+            301, 302, 308 -> RedirectException(response.errorBody()?.string() ?: "", false)
+            401 -> UnauthorizedException(response.errorBody()?.string() ?: "", false)
+            400, 402 -> ClientException(response.errorBody()?.string() ?: "", false)
+            403 -> ForbiddenException(response.errorBody()?.string() ?: "", false)
+            404 -> NotFoundException(response.errorBody()?.string() ?: "", false)
+            500, 501, 502, 503 -> ServiceUnreachableException(response.errorBody()?.string() ?: "", true)
+            else -> NetworkException("Unknown Status code", true)
         }
+        exception.errorCode = response.code().toString()
+        exception.correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
+        exception.requestId = response.headers()[REQUEST_ID_HEADER]
+        exception.errorBody = response.errorBody()?.string()
+        exception.innerErrors = NetworkErrorParser.extractInnerErrorsCodes(exception.errorBody)
+        SdkLog.v("HttpError: ${exception.errorCode} body: ${exception.errorBody}")
+        return Result.Failure(exception)
     }
 
     fun <S> onRetry(): Result<S> {
