@@ -17,8 +17,5 @@ data class ClaimDescriptor(
     val type: String,
 
     // A label used to describe the claim (ex. "Birthday").
-    val label: String,
-
-    // Used to describe to claim if claim is an image for alt text or voice over.
-    val description: String? = null
+    val label: String
 )

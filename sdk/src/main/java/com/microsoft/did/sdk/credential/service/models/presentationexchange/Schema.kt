@@ -11,7 +11,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Schema(
     @SerialName("uri")
-    val uris: List<String> = emptyList(),
+    val uris: List<String>,
 
     val name: String = "",
 

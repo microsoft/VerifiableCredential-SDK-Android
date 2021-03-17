@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PresentationResponseClaims(
     @SerialName("presentation_submission")
-    val presentationSubmission: PresentationSubmission = PresentationSubmission(),
+    val presentationSubmission: PresentationSubmission = PresentationSubmission(emptyList()),
 
     val attestations: AttestationClaimModel = AttestationClaimModel(),
 

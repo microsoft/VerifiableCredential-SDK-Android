@@ -13,8 +13,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ConsentDescriptor(
     // Title that will be display on prompt page.
-    val title: String,
+    val title: String = "",
 
     // Instructions for what the user will have to do to get Card.
-    val instructions: String = ""
+    val instructions: String
 )

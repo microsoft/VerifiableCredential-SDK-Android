@@ -18,12 +18,14 @@ class ImageLoader @Inject constructor() {
 
     suspend fun loadRemoteImagesIntoContract(request: IssuanceRequest) {
         val logo = request.contract.display.card.logo
-        if (logo.image != null || logo.uri == null) {
+        if(logo != null) {
+            if (logo.image != null || logo.uri == null) {
+                logo.uri = null
+                return
+            }
+            logo.image = loadImageToBase64(logo.uri!!)
             logo.uri = null
-            return
         }
-        logo.image = loadImageToBase64(logo.uri!!)
-        logo.uri = null
     }
 
     private suspend fun loadImageToBase64(uri: String): String = withContext(Dispatchers.IO) {
