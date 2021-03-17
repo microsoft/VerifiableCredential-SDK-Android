@@ -30,8 +30,9 @@ class ImageLoader @Inject constructor() {
 
     private suspend fun loadImageToBase64(uri: String): String = withContext(Dispatchers.IO) {
         val imageBitmap = Picasso.get().load(uri).get()
-        if (imageBitmap.byteCount > MAX_IMAGE_SIZE_BYTES)
-            throw InvalidImageException("Image size exceeds max file size ${MAX_IMAGE_SIZE_BYTES / 1000000.0f}MB")
+        // TODO: check is temporarily disabled because file size is not matching bytecount by order of magnitues sometimes
+//        if (imageBitmap.byteCount > MAX_IMAGE_SIZE_BYTES)
+//            throw InvalidImageException("Image size exceeds max file size ${MAX_IMAGE_SIZE_BYTES / 1000000.0f}MB")
         return@withContext ImageUtil.convert(imageBitmap)
     }
 }
