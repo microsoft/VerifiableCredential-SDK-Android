@@ -46,7 +46,11 @@ class JwtValidator @Inject constructor(
 
     private suspend fun resolvePublicKeys(did: String): List<PublicKey> {
         return when (val requesterDidDocument = resolver.resolve(did)) {
-            is Result.Success -> requesterDidDocument.payload.verificationMethod.map { it.toPublicKey() }
+            is Result.Success -> {
+                val publicKeys = requesterDidDocument.payload.verificationMethod
+                if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
+                publicKeys.map { it.toPublicKey() }
+            }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
         }
     }

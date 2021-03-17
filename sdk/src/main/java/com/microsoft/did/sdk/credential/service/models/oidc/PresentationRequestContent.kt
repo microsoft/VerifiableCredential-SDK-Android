@@ -23,7 +23,7 @@ data class PresentationRequestContent(
     val responseMode: String,
 
     @SerialName("client_id")
-    val clientId: String,
+    val clientId: String? = null,
 
     @SerialName("redirect_uri")
     val redirectUrl: String = "",
