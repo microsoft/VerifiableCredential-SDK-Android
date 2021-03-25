@@ -20,8 +20,15 @@ class CorrelationVectorServiceTest {
     fun `test start new flow and save correlation vector `() {
         justRun { correlationVectorService["saveCorrelationVector"](mockedSharedPreferences, any<String>()) }
         val createdCorrelationVector = correlationVectorService.startNewFlowAndSave()
-        val actualIndex = Integer.valueOf(createdCorrelationVector.substring(createdCorrelationVector.lastIndexOf(".") + 1))
-        assertThat(actualIndex).isEqualTo(0)
+        assertThat(createdCorrelationVector.isEmpty()).isFalse
+        assertThat(createdCorrelationVector.endsWith(".0")).isTrue
+    }
+
+    @Test
+    fun testNullCvIncrementAndSave() {
+        every { mockedSharedPreferences.getString(Constants.CORRELATION_VECTOR_IN_PREF, null) } returns null
+        val incrementedCorrelationVector = correlationVectorService.incrementAndSave()
+        assertThat(incrementedCorrelationVector.isEmpty()).isTrue
     }
 
     @Test
@@ -29,8 +36,7 @@ class CorrelationVectorServiceTest {
         justRun { correlationVectorService["saveCorrelationVector"](mockedSharedPreferences, any<String>()) }
         every { mockedSharedPreferences.getString(Constants.CORRELATION_VECTOR_IN_PREF, null) } returns expectedCorrelationVector
         val incrementedCorrelationVector = correlationVectorService.incrementAndSave()
-        val incrementedIndex = Integer.valueOf(incrementedCorrelationVector.substring(incrementedCorrelationVector.lastIndexOf(".") + 1))
-        val actualIndex = Integer.valueOf(expectedCorrelationVector.substring(expectedCorrelationVector.lastIndexOf(".") + 1))
-        assertThat(incrementedIndex-actualIndex).isEqualTo(1)
+        assertThat(incrementedCorrelationVector.isEmpty()).isFalse
+        assertThat(incrementedCorrelationVector.endsWith(".1")).isTrue
     }
 }

@@ -2,31 +2,49 @@
 
 package com.microsoft.did.sdk
 
+import android.net.Uri
+import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
+import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
 import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.PresentationResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
-import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
+import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
+import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.di.defaultTestSerializer
+import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
+import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
+import io.mockk.coEvery
+import io.mockk.coJustRun
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.spyk
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
 class PresentationServiceTest {
 
     private val identifierManager: IdentifierManager = mockk()
+    private val masterIdentifier: Identifier = mockk()
+    private val pairwiseIdentifier: Identifier = mockk()
+
     private val mockedResolver: Resolver = mockk()
     private val mockedJwtValidator: JwtValidator = mockk()
     private val exchangeResponseFormatter: ExchangeResponseFormatter = mockk()
+    private val presentationRequestValidator: PresentationRequestValidator = mockk()
     private val presentationResponseFormatter: PresentationResponseFormatter = mockk()
     private val exchangeService = ExchangeService(
         mockk(relaxed = true), exchangeResponseFormatter,
-        defaultTestSerializer, mockedJwtValidator)
-    private val mockedOidcPresentationRequestValidator = OidcPresentationRequestValidator()
+        defaultTestSerializer, mockedJwtValidator
+    )
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
@@ -38,64 +56,149 @@ class PresentationServiceTest {
                 linkedDomainsService,
                 defaultTestSerializer,
                 mockedJwtValidator,
-                mockedOidcPresentationRequestValidator,
+                presentationRequestValidator,
                 mockk(relaxed = true),
                 presentationResponseFormatter
             )
         )
 
     private val expectedPresentationRequestString =
-        """{
-  "response_type": "id_token",
-  "response_mode": "form_post",
-  "client_id": "https://test-relyingparty.azurewebsites.net/verify",
-  "redirect_uri": "https://test-relyingparty.azurewebsites.net/verify",
-  "scope": "openid did_authn",
-  "state": "0Qabvmm1KLD23w",
-  "nonce": "X6M24JhpeJKgyw",
-  "iss": "did:ion:EiDN4VhftlVKqGIzf6xboqG9lnRd323cq_KSwVzyP2VdNg:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJzaWduIiwicHVibGljS2V5SndrIjp7ImNydiI6InNlY3AyNTZrMSIsImt0eSI6IkVDIiwieCI6Im8zLWt0bjByUHlFSVFuTWg0LVFYVzB4LXpHaWhPeWZuTlNaNG4xT3JjYnciLCJ5IjoicW5MOFZ5ejNwYmVxZWpuTk03QnE2S1hPQTk2MjNlMFRtc1N3cjAxeGUxMCJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiIsImtleUFncmVlbWVudCJdLCJ0eXBlIjoiRWNkc2FTZWNwMjU2azFWZXJpZmljYXRpb25LZXkyMDE5In1dLCJzZXJ2aWNlcyI6W119fV0sInVwZGF0ZUNvbW1pdG1lbnQiOiJFaUNUcHFub1dLRXpYQ0dRZ0VMaW95Z0JVaTNGSkxQbjNhbUNlcmVmWXN6YVpnIn0sInN1ZmZpeERhdGEiOnsiZGVsdGFIYXNoIjoiRWlCazFSdHJBTGlJYUFSR05TR1NwYS13RV9tZDRGcWt0SVhCMFROMzFxUHQ1dyIsInJlY292ZXJ5Q29tbWl0bWVudCI6IkVpQTEyc2V5cG8ya01IdDQwMnllT2h0N2k5dF9mUjVfOUg4R25uYXctWmlXbHcifX0",
-  "registration": {
-    "client_name": "Decentralized Identity Team",
-    "client_purpose": "Give us this information please (with cherry on top)!",
-    "tos_uri": "https://test-relyingparty.azurewebsites.net/tos.html",
-    "logo_uri": "https://test-relyingparty.azurewebsites.net/images/did_logo.png"
-  },
-  "iat": 1616706894,
-  "exp": 1616707194,
-  "presentation_definition": {
-    "input_descriptors": [
-      {
-        "id": "BusinessCardCredential",
-        "schema": {
-          "uri": [
-            "BusinessCardCredential"
-          ],
-          "name": "BusinessCardCredential",
-          "purpose": "Give us this information please (with cherry on top)!"
-        },
-        "issuance": [
-          {
-            "manifest": "https://dev.did.msidentity.com/v1.0/536279f6-15cc-45f2-be2d-61e352b51eef/verifiableCredential/contracts/BusinessCard"
-          }
-        ]
-      }
-    ],
-    "name": "Decentralized Identity Team",
-    "purpose": "Give us this information please (with cherry on top)!"
-  },
-  "nbf": 1616706894,
-  "jti": "09df6908-bc30-456b-92e4-1a52670c69e7"
-}"""
+        """{"response_type":"id_token","response_mode":"form_post","client_id":"https://test-relyingparty.azurewebsites.net/verify","redirect_uri":"https://test-relyingparty.azurewebsites.net/verify","iss":"did:ion:EiCXp3lIdFclfl0vvu4qAY8iTumjxiZoKrEmfokRpGcEbg?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlCWHB4b2VwU2NVdnNmc01UOEpRN0ZqWXpsMHZqZlhjc2RMam9Ga2Y0T3FJUSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUEtU0lSeXNzOTEwMmEzUlpVMVktTFFjVU1JbUdVTE9BVk5rOWFzZ0tkX2hRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQW5QbGJ2djBmQ1RKVnNpNjB4VU9qYUJ1cnBDNWtJVjdsSHhkOFQxZmFtRFEiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnbiIsInR5cGUiOiJFY2RzYVNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkiLCJqd2siOnsia3R5IjoiRUMiLCJ1c2UiOiJzaWciLCJhbGciOiJFUzI1NksiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiQ0djSmNmWlVHelc1Qnh5MC1aV1VkQ05WT2tTbDFVRnhIekNycW1LM3RfZyIsInkiOiJNdEZkcnlDVE5BRTRjdmU3Q1RqSkJjQlFlMVQ1YnZVM3MzWmlSdG9zNHVZIn0sInB1cnBvc2UiOlsiYXV0aCIsImdlbmVyYWwiXX1dfX1dfQ","scope":"openid did_authn","state":"OmTlKvp8_qxFbg","nonce":"BxwhKDRMvesRHQ","presentation_definition":{"input_descriptors":[{"id":"BusinessCardCredential","schema":{"uri":["BusinessCardCredential"],"name":"BusinessCardCredential","purpose":"Give us this information please (with cherry on top)!"},"issuance":[{"manifest":"https://portableidentitycards.azure-api.net/dev/536279f6-15cc-45f2-be2d-61e352b51eef/portableIdentities/contracts/BusinessCard"}]}]},"exp":1610660698,"iat":1610660398,"nbf":1610660398,"registration":{"client_name":"Decentralized Identity Team","client_purpose":"Give us this information please (with cherry on top)!","tos_uri":"https://test-relyingparty.azurewebsites.net/tos.html","logo_uri":"https://test-relyingparty.azurewebsites.net/images/did_logo.png"}}"""
     private val expectedPresentationRequestJwt =
-        "eyJ0eXAiOiJKV1QiLCJraWQiOiJkaWQ6aW9uOkVpRE40VmhmdGxWS3FHSXpmNnhib3FHOWxuUmQzMjNjcV9LU3dWenlQMlZkTmc6ZXlKa1pXeDBZU0k2ZXlKd1lYUmphR1Z6SWpwYmV5SmhZM1JwYjI0aU9pSnlaWEJzWVdObElpd2laRzlqZFcxbGJuUWlPbnNpY0hWaWJHbGpTMlY1Y3lJNlczc2lhV1FpT2lKemFXZHVJaXdpY0hWaWJHbGpTMlY1U25kcklqcDdJbU55ZGlJNkluTmxZM0F5TlRack1TSXNJbXQwZVNJNklrVkRJaXdpZUNJNkltOHpMV3QwYmpCeVVIbEZTVkZ1VFdnMExWRllWekI0TFhwSGFXaFBlV1p1VGxOYU5HNHhUM0pqWW5jaUxDSjVJam9pY1c1TU9GWjVlak53WW1WeFpXcHVUazAzUW5FMlMxaFBRVGsyTWpObE1GUnRjMU4zY2pBeGVHVXhNQ0o5TENKd2RYSndiM05sY3lJNld5SmhkWFJvWlc1MGFXTmhkR2x2YmlJc0ltdGxlVUZuY21WbGJXVnVkQ0pkTENKMGVYQmxJam9pUldOa2MyRlRaV053TWpVMmF6RldaWEpwWm1sallYUnBiMjVMWlhreU1ERTVJbjFkTENKelpYSjJhV05sY3lJNlcxMTlmVjBzSW5Wd1pHRjBaVU52YlcxcGRHMWxiblFpT2lKRmFVTlVjSEZ1YjFkTFJYcFlRMGRSWjBWTWFXOTVaMEpWYVROR1NreFFiak5oYlVObGNtVm1XWE42WVZwbkluMHNJbk4xWm1acGVFUmhkR0VpT25zaVpHVnNkR0ZJWVhOb0lqb2lSV2xDYXpGU2RISkJUR2xKWVVGU1IwNVRSMU53WVMxM1JWOXRaRFJHY1d0MFNWaENNRlJPTXpGeFVIUTFkeUlzSW5KbFkyOTJaWEo1UTI5dGJXbDBiV1Z1ZENJNklrVnBRVEV5YzJWNWNHOHlhMDFJZERRd01ubGxUMmgwTjJrNWRGOW1ValZmT1VnNFIyNXVZWGN0V21sWGJIY2lmWDAjc2lnbiIsImFsZyI6IkVTMjU2SyJ9.eyJyZXNwb25zZV90eXBlIjoiaWRfdG9rZW4iLCJyZXNwb25zZV9tb2RlIjoiZm9ybV9wb3N0IiwiY2xpZW50X2lkIjoiaHR0cHM6Ly90ZXN0LXJlbHlpbmdwYXJ0eS5henVyZXdlYnNpdGVzLm5ldC92ZXJpZnkiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL3Rlc3QtcmVseWluZ3BhcnR5LmF6dXJld2Vic2l0ZXMubmV0L3ZlcmlmeSIsInNjb3BlIjoib3BlbmlkIGRpZF9hdXRobiIsInN0YXRlIjoiMFFhYnZtbTFLTEQyM3ciLCJub25jZSI6Ilg2TTI0SmhwZUpLZ3l3IiwiaXNzIjoiZGlkOmlvbjpFaURONFZoZnRsVktxR0l6ZjZ4Ym9xRzlsblJkMzIzY3FfS1N3Vnp5UDJWZE5nOmV5SmtaV3gwWVNJNmV5SndZWFJqYUdWeklqcGJleUpoWTNScGIyNGlPaUp5WlhCc1lXTmxJaXdpWkc5amRXMWxiblFpT25zaWNIVmliR2xqUzJWNWN5STZXM3NpYVdRaU9pSnphV2R1SWl3aWNIVmliR2xqUzJWNVNuZHJJanA3SW1OeWRpSTZJbk5sWTNBeU5UWnJNU0lzSW10MGVTSTZJa1ZESWl3aWVDSTZJbTh6TFd0MGJqQnlVSGxGU1ZGdVRXZzBMVkZZVnpCNExYcEhhV2hQZVdadVRsTmFORzR4VDNKalluY2lMQ0o1SWpvaWNXNU1PRlo1ZWpOd1ltVnhaV3B1VGswM1FuRTJTMWhQUVRrMk1qTmxNRlJ0YzFOM2NqQXhlR1V4TUNKOUxDSndkWEp3YjNObGN5STZXeUpoZFhSb1pXNTBhV05oZEdsdmJpSXNJbXRsZVVGbmNtVmxiV1Z1ZENKZExDSjBlWEJsSWpvaVJXTmtjMkZUWldOd01qVTJhekZXWlhKcFptbGpZWFJwYjI1TFpYa3lNREU1SW4xZExDSnpaWEoyYVdObGN5STZXMTE5ZlYwc0luVndaR0YwWlVOdmJXMXBkRzFsYm5RaU9pSkZhVU5VY0hGdWIxZExSWHBZUTBkUlowVk1hVzk1WjBKVmFUTkdTa3hRYmpOaGJVTmxjbVZtV1hONllWcG5JbjBzSW5OMVptWnBlRVJoZEdFaU9uc2laR1ZzZEdGSVlYTm9Jam9pUldsQ2F6RlNkSEpCVEdsSllVRlNSMDVUUjFOd1lTMTNSVjl0WkRSR2NXdDBTVmhDTUZST016RnhVSFExZHlJc0luSmxZMjkyWlhKNVEyOXRiV2wwYldWdWRDSTZJa1ZwUVRFeWMyVjVjRzh5YTAxSWREUXdNbmxsVDJoME4yazVkRjltVWpWZk9VZzRSMjV1WVhjdFdtbFhiSGNpZlgwIiwicmVnaXN0cmF0aW9uIjp7ImNsaWVudF9uYW1lIjoiRGVjZW50cmFsaXplZCBJZGVudGl0eSBUZWFtIiwiY2xpZW50X3B1cnBvc2UiOiJHaXZlIHVzIHRoaXMgaW5mb3JtYXRpb24gcGxlYXNlICh3aXRoIGNoZXJyeSBvbiB0b3ApISIsInRvc191cmkiOiJodHRwczovL3Rlc3QtcmVseWluZ3BhcnR5LmF6dXJld2Vic2l0ZXMubmV0L3Rvcy5odG1sIiwibG9nb191cmkiOiJodHRwczovL3Rlc3QtcmVseWluZ3BhcnR5LmF6dXJld2Vic2l0ZXMubmV0L2ltYWdlcy9kaWRfbG9nby5wbmcifSwiaWF0IjoxNjE2NzA2ODk0LCJleHAiOjE2MTY3MDcxOTQsInByZXNlbnRhdGlvbl9kZWZpbml0aW9uIjp7ImlucHV0X2Rlc2NyaXB0b3JzIjpbeyJpZCI6IkJ1c2luZXNzQ2FyZENyZWRlbnRpYWwiLCJzY2hlbWEiOnsidXJpIjpbIkJ1c2luZXNzQ2FyZENyZWRlbnRpYWwiXSwibmFtZSI6IkJ1c2luZXNzQ2FyZENyZWRlbnRpYWwiLCJwdXJwb3NlIjoiR2l2ZSB1cyB0aGlzIGluZm9ybWF0aW9uIHBsZWFzZSAod2l0aCBjaGVycnkgb24gdG9wKSEifSwiaXNzdWFuY2UiOlt7Im1hbmlmZXN0IjoiaHR0cHM6Ly9kZXYuZGlkLm1zaWRlbnRpdHkuY29tL3YxLjAvNTM2Mjc5ZjYtMTVjYy00NWYyLWJlMmQtNjFlMzUyYjUxZWVmL3ZlcmlmaWFibGVDcmVkZW50aWFsL2NvbnRyYWN0cy9CdXNpbmVzc0NhcmQifV19XSwibmFtZSI6IkRlY2VudHJhbGl6ZWQgSWRlbnRpdHkgVGVhbSIsInB1cnBvc2UiOiJHaXZlIHVzIHRoaXMgaW5mb3JtYXRpb24gcGxlYXNlICh3aXRoIGNoZXJyeSBvbiB0b3ApISJ9LCJuYmYiOjE2MTY3MDY4OTQsImp0aSI6IjA5ZGY2OTA4LWJjMzAtNDU2Yi05MmU0LTFhNTI2NzBjNjllNyJ9.KPdRfAnMFZ_LjLAoBU-JrvVf7-R6L3d4c8A1htK5nyvixzBtRPEiY50B-98UXBPa8vhYDDRfIYUe6RGjseEsqg"
+        "eyJ0eXAiOiJKV1QiLCJraWQiOiJkaWQ6aW9uOkVpQ1hwM2xJZEZjbGZsMHZ2dTRxQVk4aVR1bWp4aVpvS3JFbWZva1JwR2NFYmc_LWlvbi1pbml0aWFsLXN0YXRlPWV5SmtaV3gwWVY5b1lYTm9Jam9pUldsQ1dIQjRiMlZ3VTJOVmRuTm1jMDFVT0VwUk4wWnFXWHBzTUhacVpsaGpjMlJNYW05R2EyWTBUM0ZKVVNJc0luSmxZMjkyWlhKNVgyTnZiVzFwZEcxbGJuUWlPaUpGYVVFdFUwbFNlWE56T1RFd01tRXpVbHBWTVZrdFRGRmpWVTFKYlVkVlRFOUJWazVyT1dGelowdGtYMmhSSW4wLmV5SjFjR1JoZEdWZlkyOXRiV2wwYldWdWRDSTZJa1ZwUVc1UWJHSjJkakJtUTFSS1ZuTnBOakI0VlU5cVlVSjFjbkJETld0SlZqZHNTSGhrT0ZReFptRnRSRkVpTENKd1lYUmphR1Z6SWpwYmV5SmhZM1JwYjI0aU9pSnlaWEJzWVdObElpd2laRzlqZFcxbGJuUWlPbnNpY0hWaWJHbGpYMnRsZVhNaU9sdDdJbWxrSWpvaWMybG5iaUlzSW5SNWNHVWlPaUpGWTJSellWTmxZM0F5TlRack1WWmxjbWxtYVdOaGRHbHZia3RsZVRJd01Ua2lMQ0pxZDJzaU9uc2lhM1I1SWpvaVJVTWlMQ0oxYzJVaU9pSnphV2NpTENKaGJHY2lPaUpGVXpJMU5rc2lMQ0pqY25ZaU9pSnpaV053TWpVMmF6RWlMQ0o0SWpvaVEwZGpTbU5tV2xWSGVsYzFRbmg1TUMxYVYxVmtRMDVXVDJ0VGJERlZSbmhJZWtOeWNXMUxNM1JmWnlJc0lua2lPaUpOZEVaa2NubERWRTVCUlRSamRtVTNRMVJxU2tKalFsRmxNVlExWW5aVk0zTXpXbWxTZEc5ek5IVlpJbjBzSW5CMWNuQnZjMlVpT2xzaVlYVjBhQ0lzSW1kbGJtVnlZV3dpWFgxZGZYMWRmUSNzaWduIiwiYWxnIjoiRVMyNTZLIn0.eyJyZXNwb25zZV90eXBlIjoiaWRfdG9rZW4iLCJyZXNwb25zZV9tb2RlIjoiZm9ybV9wb3N0IiwiY2xpZW50X2lkIjoiaHR0cHM6Ly90ZXN0LXJlbHlpbmdwYXJ0eS5henVyZXdlYnNpdGVzLm5ldC92ZXJpZnkiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL3Rlc3QtcmVseWluZ3BhcnR5LmF6dXJld2Vic2l0ZXMubmV0L3ZlcmlmeSIsInNjb3BlIjoib3BlbmlkIGRpZF9hdXRobiIsInN0YXRlIjoiT21UbEt2cDhfcXhGYmciLCJub25jZSI6IkJ4d2hLRFJNdmVzUkhRIiwiaXNzIjoiZGlkOmlvbjpFaUNYcDNsSWRGY2xmbDB2dnU0cUFZOGlUdW1qeGlab0tyRW1mb2tScEdjRWJnPy1pb24taW5pdGlhbC1zdGF0ZT1leUprWld4MFlWOW9ZWE5vSWpvaVJXbENXSEI0YjJWd1UyTlZkbk5tYzAxVU9FcFJOMFpxV1hwc01IWnFabGhqYzJSTWFtOUdhMlkwVDNGSlVTSXNJbkpsWTI5MlpYSjVYMk52YlcxcGRHMWxiblFpT2lKRmFVRXRVMGxTZVhOek9URXdNbUV6VWxwVk1Wa3RURkZqVlUxSmJVZFZURTlCVms1ck9XRnpaMHRrWDJoUkluMC5leUoxY0dSaGRHVmZZMjl0YldsMGJXVnVkQ0k2SWtWcFFXNVFiR0oyZGpCbVExUktWbk5wTmpCNFZVOXFZVUoxY25CRE5XdEpWamRzU0hoa09GUXhabUZ0UkZFaUxDSndZWFJqYUdWeklqcGJleUpoWTNScGIyNGlPaUp5WlhCc1lXTmxJaXdpWkc5amRXMWxiblFpT25zaWNIVmliR2xqWDJ0bGVYTWlPbHQ3SW1sa0lqb2ljMmxuYmlJc0luUjVjR1VpT2lKRlkyUnpZVk5sWTNBeU5UWnJNVlpsY21sbWFXTmhkR2x2Ymt0bGVUSXdNVGtpTENKcWQyc2lPbnNpYTNSNUlqb2lSVU1pTENKMWMyVWlPaUp6YVdjaUxDSmhiR2NpT2lKRlV6STFOa3NpTENKamNuWWlPaUp6WldOd01qVTJhekVpTENKNElqb2lRMGRqU21ObVdsVkhlbGMxUW5oNU1DMWFWMVZrUTA1V1QydFRiREZWUm5oSWVrTnljVzFMTTNSZlp5SXNJbmtpT2lKTmRFWmtjbmxEVkU1QlJUUmpkbVUzUTFScVNrSmpRbEZsTVZRMVluWlZNM016V21sU2RHOXpOSFZaSW4wc0luQjFjbkJ2YzJVaU9sc2lZWFYwYUNJc0ltZGxibVZ5WVd3aVhYMWRmWDFkZlEiLCJyZWdpc3RyYXRpb24iOnsiY2xpZW50X25hbWUiOiJEZWNlbnRyYWxpemVkIElkZW50aXR5IFRlYW0iLCJjbGllbnRfcHVycG9zZSI6IkdpdmUgdXMgdGhpcyBpbmZvcm1hdGlvbiBwbGVhc2UgKHdpdGggY2hlcnJ5IG9uIHRvcCkhIiwidG9zX3VyaSI6Imh0dHBzOi8vdGVzdC1yZWx5aW5ncGFydHkuYXp1cmV3ZWJzaXRlcy5uZXQvdG9zLmh0bWwiLCJsb2dvX3VyaSI6Imh0dHBzOi8vdGVzdC1yZWx5aW5ncGFydHkuYXp1cmV3ZWJzaXRlcy5uZXQvaW1hZ2VzL2RpZF9sb2dvLnBuZyJ9LCJpYXQiOjE2MTA2NjAzOTgsImV4cCI6MTYxMDY2MDY5OCwicHJlc2VudGF0aW9uX2RlZmluaXRpb24iOnsiaW5wdXRfZGVzY3JpcHRvcnMiOlt7ImlkIjoiQnVzaW5lc3NDYXJkQ3JlZGVudGlhbCIsInNjaGVtYSI6eyJ1cmkiOlsiQnVzaW5lc3NDYXJkQ3JlZGVudGlhbCJdLCJuYW1lIjoiQnVzaW5lc3NDYXJkQ3JlZGVudGlhbCIsInB1cnBvc2UiOiJHaXZlIHVzIHRoaXMgaW5mb3JtYXRpb24gcGxlYXNlICh3aXRoIGNoZXJyeSBvbiB0b3ApISJ9LCJpc3N1YW5jZSI6W3sibWFuaWZlc3QiOiJodHRwczovL3BvcnRhYmxlaWRlbnRpdHljYXJkcy5henVyZS1hcGkubmV0L2Rldi81MzYyNzlmNi0xNWNjLTQ1ZjItYmUyZC02MWUzNTJiNTFlZWYvcG9ydGFibGVJZGVudGl0aWVzL2NvbnRyYWN0cy9CdXNpbmVzc0NhcmQifV19XSwibmFtZSI6IkRlY2VudHJhbGl6ZWQgSWRlbnRpdHkgVGVhbSIsInB1cnBvc2UiOiJHaXZlIHVzIHRoaXMgaW5mb3JtYXRpb24gcGxlYXNlICh3aXRoIGNoZXJyeSBvbiB0b3ApISJ9LCJuYmYiOjE2MTA2NjAzOTgsImp0aSI6ImRhNWY1MDBkLWMyODktNDA5Yy1hYjIyLWVhYzY3NTdlMWZhZiJ9.GqL5DxozP0UcEhcLKHfc8aK4kZK6hU2mYalmj-ffjH8tfStMZwBZxCQ4d_iPupXD6-_HwkAZfw_j5Tih-69QjA"
+    private val mockedIdentifierDocument: IdentifierDocument = mockk()
+    private val mockedIdentifierDocumentService: IdentifierDocumentService = mockk()
+    private val mockedIdentifierDocumentServiceEndpoint = "testserviceendpoint.com"
+    private val mockedIdentifierDocumentServiceType = "LinkedDomains"
+
+    private val suppliedOpenIdUrl = "openid://vc/?request_uri=https://test-relyingparty.azurewebsites.net/request/OmTlKvp8_qxFbg"
+    private val expectedEntityName = "Decentralized Identity Team"
+    private val expectedEntityIdentifier =
+        "did:ion:EiCXp3lIdFclfl0vvu4qAY8iTumjxiZoKrEmfokRpGcEbg?-ion-initial-state=eyJkZWx0YV9oYXNoIjoiRWlCWHB4b2VwU2NVdnNmc01UOEpRN0ZqWXpsMHZqZlhjc2RMam9Ga2Y0T3FJUSIsInJlY292ZXJ5X2NvbW1pdG1lbnQiOiJFaUEtU0lSeXNzOTEwMmEzUlpVMVktTFFjVU1JbUdVTE9BVk5rOWFzZ0tkX2hRIn0.eyJ1cGRhdGVfY29tbWl0bWVudCI6IkVpQW5QbGJ2djBmQ1RKVnNpNjB4VU9qYUJ1cnBDNWtJVjdsSHhkOFQxZmFtRFEiLCJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljX2tleXMiOlt7ImlkIjoic2lnbiIsInR5cGUiOiJFY2RzYVNlY3AyNTZrMVZlcmlmaWNhdGlvbktleTIwMTkiLCJqd2siOnsia3R5IjoiRUMiLCJ1c2UiOiJzaWciLCJhbGciOiJFUzI1NksiLCJjcnYiOiJzZWNwMjU2azEiLCJ4IjoiQ0djSmNmWlVHelc1Qnh5MC1aV1VkQ05WT2tTbDFVRnhIekNycW1LM3RfZyIsInkiOiJNdEZkcnlDVE5BRTRjdmU3Q1RqSkJjQlFlMVQ1YnZVM3MzWmlSdG9zNHVZIn0sInB1cnBvc2UiOlsiYXV0aCIsImdlbmVyYWwiXX1dfX1dfQ"
+
+    private val invalidSignaturePresentationRequestJwt =
+        "eyJ0eXAiOiJKV1QiLCJraWQiOiJkaWQ6aW9uOkVpQ1hwM2xJZEZjbGZsMHZ2dTRxQVk4aVR1bWp4aVpvS3JFbWZva1JwR2NFYmc_LWlvbi1pbml0aWFsLXN0YXRlPWV5SmtaV3gwWVY5b1lYTm9Jam9pUldsQ1dIQjRiMlZ3VTJOVmRuTm1jMDFVT0VwUk4wWnFXWHBzTUhacVpsaGpjMlJNYW05R2EyWTBUM0ZKVVNJc0luSmxZMjkyWlhKNVgyTnZiVzFwZEcxbGJuUWlPaUpGYVVFdFUwbFNlWE56T1RFd01tRXpVbHBWTVZrdFRGRmpWVTFKYlVkVlRFOUJWazVyT1dGelowdGtYMmhSSW4wLmV5SjFjR1JoZEdWZlkyOXRiV2wwYldWdWRDSTZJa1ZwUVc1UWJHSjJkakJtUTFSS1ZuTnBOakI0VlU5cVlVSjFjbkJETld0SlZqZHNTSGhrT0ZReFptRnRSRkVpTENKd1lYUmphR1Z6SWpwYmV5SmhZM1JwYjI0aU9pSnlaWEJzWVdObElpd2laRzlqZFcxbGJuUWlPbnNpY0hWaWJHbGpYMnRsZVhNaU9sdDdJbWxrSWpvaWMybG5iaUlzSW5SNWNHVWlPaUpGWTJSellWTmxZM0F5TlRack1WWmxjbWxtYVdOaGRHbHZia3RsZVRJd01Ua2lMQ0pxZDJzaU9uc2lhM1I1SWpvaVJVTWlMQ0oxYzJVaU9pSnphV2NpTENKaGJHY2lPaUpGVXpJMU5rc2lMQ0pqY25ZaU9pSnpaV053TWpVMmF6RWlMQ0o0SWpvaVEwZGpTbU5tV2xWSGVsYzFRbmg1TUMxYVYxVmtRMDVXVDJ0VGJERlZSbmhJZWtOeWNXMUxNM1JmWnlJc0lua2lPaUpOZEVaa2NubERWRTVCUlRSamRtVTNRMVJxU2tKalFsRmxNVlExWW5aVk0zTXpXbWxTZEc5ek5IVlpJbjBzSW5CMWNuQnZjMlVpT2xzaVlYVjBhQ0lzSW1kbGJtVnlZV3dpWFgxZGZYMWRmUSNzaWduIiwiYWxnIjoiRVMyNTZLIn0.eyJyZXNwb25zZV90eXBlIjoiaWRfdG9rZW4iLCJyZXNwb25zZV9tb2RlIjoiZm9ybV9wb3N0IiwiY2xpZW50X2lkIjoiaHR0cHM6Ly90ZXN0LXJlbHlpbmdwYXJ0eS5henVyZXdlYnNpdGVzLm5ldC92ZXJpZnkiLCJyZWRpcmVjdF91cmkiOiJodHRwczovL3Rlc3QtcmVseWluZ3BhcnR5LmF6dXJld2Vic2l0ZXMubmV0L3ZlcmlmeSIsInNjb3BlIjoib3BlbmlkIGRpZF9hdXRobiIsInN0YXRlIjoiT21UbEt2cDhfcXhGYmciLCJub25jZSI6IkJ4d2hLRFJNdmVzUkhRIiwiaXNzIjoiZGlkOmlvbjpFaUNYcDNsSWRGY2xmbDB2dnU0cUFZOGlUdW1qeGlab0tyRW1mb2tScEdjRWJnPy1pb24taW5pdGlhbC1zdGF0ZT1leUprWld4MFlWOW9ZWE5vSWpvaVJXbENXSEI0YjJWd1UyTlZkbk5tYzAxVU9FcFJOMFpxV1hwc01IWnFabGhqYzJSTWFtOUdhMlkwVDNGSlVTSXNJbkpsWTI5MlpYSjVYMk52YlcxcGRHMWxiblFpT2lKRmFVRXRVMGxTZVhOek9URXdNbUV6VWxwVk1Wa3RURkZqVlUxSmJVZFZURTlCVms1ck9XRnpaMHRrWDJoUkluMC5leUoxY0dSaGRHVmZZMjl0YldsMGJXVnVkQ0k2SWtWcFFXNVFiR0oyZGpCbVExUktWbk5wTmpCNFZVOXFZVUoxY25CRE5XdEpWamRzU0hoa09GUXhabUZ0UkZFaUxDSndZWFJqYUdWeklqcGJleUpoWTNScGIyNGlPaUp5WlhCc1lXTmxJaXdpWkc5amRXMWxiblFpT25zaWNIVmliR2xqWDJ0bGVYTWlPbHQ3SW1sa0lqb2ljMmxuYmlJc0luUjVjR1VpT2lKRlkyUnpZVk5sWTNBeU5UWnJNVlpsY21sbWFXTmhkR2x2Ymt0bGVUSXdNVGtpTENKcWQyc2lPbnNpYTNSNUlqb2lSVU1pTENKMWMyVWlPaUp6YVdjaUxDSmhiR2NpT2lKRlV6STFOa3NpTENKamNuWWlPaUp6WldOd01qVTJhekVpTENKNElqb2lRMGRqU21ObVdsVkhlbGMxUW5oNU1DMWFWMVZrUTA1V1QydFRiREZWUm5oSWVrTnljVzFMTTNSZlp5SXNJbmtpT2lKTmRFWmtjbmxEVkU1QlJUUmpkbVUzUTFScVNrSmpRbEZsTVZRMVluWlZNM016V21sU2RHOXpOSFZaSW4wc0luQjFjbkJ2YzJVaU9sc2lZWFYwYUNJc0ltZGxibVZ5WVd3aVhYMWRmWDFkZlEiLCJyZWdpc3RyYXRpb24iOnsiY2xpZW50X25hbWUiOiJEZWNlbnRyYWxpemVkIElkZW50aXR5IFRlYW0iLCJjbGllbnRfcHVycG9zZSI6IkdpdmUgdXMgdGhpcyBpbmZvcm1hdGlvbiBwbGVhc2UgKHdpdGggY2hlcnJ5IG9uIHRvcCkhIiwidG9zX3VyaSI6Imh0dHBzOi8vdGVzdC1yZWx5aW5ncGFydHkuYXp1cmV3ZWJzaXRlcy5uZXQvdG9zLmh0bWwiLCJsb2dvX3VyaSI6Imh0dHBzOi8vdGVzdC1yZWx5aW5ncGFydHkuYXp1cmV3ZWJzaXRlcy5uZXQvaW1hZ2VzL2RpZF9sb2dvLnBuZyJ9LCJpYXQiOjE2MTA2NjAzOTgsImV4cCI6MTYxMDY2MDY5OCwicHJlc2VudGF0aW9uX2RlZmluaXRpb24iOnsiaW5wdXRfZGVzY3JpcHRvcnMiOlt7ImlkIjoiQnVzaW5lc3NDYXJkQ3JlZGVudGlhbCIsInNjaGVtYSI6eyJ1cmkiOlsiQnVzaW5lc3NDYXJkQ3JlZGVudGlhbCJdLCJuYW1lIjoiQnVzaW5lc3NDYXJkQ3JlZGVudGlhbCIsInB1cnBvc2UiOiJHaXZlIHVzIHRoaXMgaW5mb3JtYXRpb24gcGxlYXNlICh3aXRoIGNoZXJyeSBvbiB0b3ApISJ9LCJpc3N1YW5jZSI6W3sibWFuaWZlc3QiOiJodHRwczovL3BvcnRhYmxlaWRlbnRpdHljYXJkcy5henVyZS1hcGkubmV0L2Rldi81MzYyNzlmNi0xNWNjLTQ1ZjItYmUyZC02MWUzNTJiNTFlZWYvcG9ydGFibGVJZGVudGl0aWVzL2NvbnRyYWN0cy9CdXNpbmVzc0NhcmQifV19XSwibmFtZSI6IkRlY2VudHJhbGl6ZWQgSWRlbnRpdHkgVGVhbSIsInB1cnBvc2UiOiJHaXZlIHVzIHRoaXMgaW5mb3JtYXRpb24gcGxlYXNlICh3aXRoIGNoZXJyeSBvbiB0b3ApISJ9LCJuYmYiOjE2MTA2NjAzOTgsImp0aSI6ImRhNWY1MDBkLWMyODktNDA5Yy1hYjIyLWVhYzY3NTdlMWZhZiJ9.GqL5DxozP0UcEhcLKHfc8aK4kZK6hU2mYalmj-ffjH8tfStMZwBZxCQ4d_iPupXD6-_HwkAh-69QjA"
+
+    init {
+        coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
+        coEvery { identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, any()) } returns Result.Success(pairwiseIdentifier)
+        mockkConstructor(FetchPresentationRequestNetworkOperation::class)
+    }
 
     @Test
-    fun `test to get Presentation Request with linked domains unverified`() {
-        val presentationOpenIdUrl = ""
-        runBlocking {
-            val actualRequest = presentationService.getRequest(presentationOpenIdUrl)
-            Assertions.assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
-        }
+    fun `test to get Presentation Request successfully from valid request uri param`() {
+        val mockUri = mockk<Uri>()
+        mockPresentationRequestFromNetwork()
+        mockIdentifierAndLinkedDomains()
 
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request") } returns null
+        every { mockUri.getQueryParameter("request_uri") } returns "https://test-relyingparty.azurewebsites.net/request/OmTlKvp8_qxFbg"
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
+            val actualPresentationRequestString = defaultTestSerializer.encodeToString(
+                PresentationRequestContent.serializer(),
+                actualPresentationRequestContent
+            )
+            assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
+            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(mockedIdentifierDocumentServiceEndpoint)
+            assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
+            assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
+        }
+    }
+
+    @Test
+    fun `test to get Presentation Request successfully from valid request param`() {
+        val mockUri = mockk<Uri>()
+        mockPresentationRequestFromNetwork()
+        mockIdentifierAndLinkedDomains()
+
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request_uri") } returns null
+        every { mockUri.getQueryParameter("request") } returns expectedPresentationRequestJwt
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
+            val actualPresentationRequestContent = (actualRequest as Result.Success).payload.content
+            val actualPresentationRequestString = defaultTestSerializer.encodeToString(
+                PresentationRequestContent.serializer(),
+                actualPresentationRequestContent
+            )
+            assertThat(actualPresentationRequestString).isEqualTo(expectedPresentationRequestString)
+            assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
+            assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(mockedIdentifierDocumentServiceEndpoint)
+            assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
+            assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
+        }
+    }
+
+    @Test
+    fun `test to get Presentation Request failed from request param with invalid signature`() {
+        val mockUri = mockk<Uri>()
+        mockPresentationRequestWithInvalidSignatureFromNetwork()
+        mockIdentifierAndLinkedDomains()
+
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request_uri") } returns null
+        every { mockUri.getQueryParameter("request") } returns invalidSignaturePresentationRequestJwt
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
+            assertThat((actualRequest as Result.Failure).payload).isInstanceOf(InvalidSignatureException::class.java)
+        }
+    }
+
+    @Test
+    fun `test to get Presentation Request failed from invalid param`() {
+        val mockUri = mockk<Uri>()
+        mockPresentationRequestFromNetwork()
+        mockIdentifierAndLinkedDomains()
+
+        every { presentationService["verifyUri"](suppliedOpenIdUrl) } returns mockUri
+        every { mockUri.getQueryParameter("request") } returns null
+        every { mockUri.getQueryParameter("request_uri") } returns null
+        coJustRun { presentationRequestValidator.validate(any()) }
+
+        runBlocking {
+            val actualRequest = presentationService.getRequest(suppliedOpenIdUrl)
+            assertThat(actualRequest).isInstanceOf(Result.Failure::class.java)
+            assertThat((actualRequest as Result.Failure).payload).isInstanceOf(PresentationException::class.java)
+        }
+    }
+
+    private fun unwrapPresentationContent(jwsTokenString: String): PresentationRequestContent {
+        val jwsToken = JwsToken.deserialize(jwsTokenString)
+        return defaultTestSerializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content())
+    }
+
+    private fun mockIdentifierAndLinkedDomains() {
+        coEvery { linkedDomainsService.fetchAndVerifyLinkedDomains(any()) } returns Result.Success(
+            LinkedDomainVerified(mockedIdentifierDocumentServiceEndpoint)
+        )
+        coEvery { mockedResolver.resolve(expectedEntityIdentifier) } returns Result.Success(mockedIdentifierDocument)
+        every { mockedIdentifierDocument.service } returns listOf(mockedIdentifierDocumentService)
+        every { mockedIdentifierDocumentService.type } returns mockedIdentifierDocumentServiceType
+        every { mockedIdentifierDocumentService.serviceEndpoint } returns listOf(mockedIdentifierDocumentServiceEndpoint)
+    }
+
+    private fun mockPresentationRequestFromNetwork() {
+        val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
+        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns Result.Success(expectedPresentationRequest)
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns true
+    }
+
+    private fun mockPresentationRequestWithInvalidSignatureFromNetwork() {
+        val expectedPresentationRequest = unwrapPresentationContent(expectedPresentationRequestJwt)
+        coEvery { anyConstructed<FetchPresentationRequestNetworkOperation>().fire() } returns Result.Success(expectedPresentationRequest)
+        coEvery { mockedJwtValidator.verifySignature(any()) } returns false
     }
 }
