@@ -21,7 +21,7 @@ class CorrelationVectorService @Inject constructor(private val sharedPreferences
         return correlationId
     }
 
-    internal fun incrementAndSave(): String {
+    fun incrementAndSave(): String {
         val correlationVectorString = getCorrelationVector(sharedPreferences)
         if (correlationVectorString != null && correlationVectorString.isNotEmpty()) {
             val correlationVectorIncremented = CorrelationVector.parse(correlationVectorString).increment()
