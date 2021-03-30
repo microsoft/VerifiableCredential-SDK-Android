@@ -58,5 +58,8 @@ data class PresentationRequestContent(
     @SerialName("max_age")
     val maxAge: Int = 0,
 
-    var registration: Registration = Registration()
+    var registration: Registration = Registration(),
+
+    @SerialName("id_token_hint")
+    val idTokenHint: String? = null
 )
