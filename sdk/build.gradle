@@ -79,11 +79,7 @@ android {
         }
         test {
             java.srcDirs += "src/sharedTest/java"
-        }
-        main {
-            java {
-                srcDir 'src/samples/java'
-            }
+            java.srcDirs += "src/samples/java"
         }
     }
 }
