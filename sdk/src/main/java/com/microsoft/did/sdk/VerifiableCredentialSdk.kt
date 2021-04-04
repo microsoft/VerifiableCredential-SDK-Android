@@ -6,6 +6,7 @@
 package com.microsoft.did.sdk
 
 import android.content.Context
+import android.os.Build
 import com.microsoft.did.sdk.di.DaggerSdkComponent
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -55,7 +56,7 @@ object VerifiableCredentialSdk {
     @JvmStatic
     fun init(
         context: Context,
-        userAgentInfo: String,
+        userAgentInfo: String = BuildConfig.LIBRARY_PACKAGE_NAME + ":" + BuildConfig.VERSION_NAME,
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         registrationUrl: String = "",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
