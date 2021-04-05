@@ -3,7 +3,7 @@
 ![Tests Passing](https://img.shields.io/azure-devops/tests/verifiable-credentials/VerifiableCredential/3)
 ![Open Issued](https://img.shields.io/github/issues/microsoft/VerifiableCredential-SDK-Android)
 
-This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and [Dezentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/) on the [ION network](https://github.com/decentralized-identity/ion). It can be integrated with any app to provide interactions with Verifiable Credentials.
+This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and [Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/) on the [ION network](https://github.com/decentralized-identity/ion). It can be integrated with any app to provide interactions using verifiable credentials.
  
 # Verifiable Credentials 
  
@@ -37,12 +37,12 @@ lifecycleScope.launchWhenStarted {
 }
 ```
 
-All our public APIs return `Result<T>` objects. This forces explicit error handling. Always make sure to import  
+All our public APIs return `Result<T>` objects. This forces explicit error handling. Always make sure to use the following import statement.
 ```kotlin
 import com.microsoft.did.sdk.util.controlflow.Result
 ```
 
-You can unpack and handle these results easily in Kotlin with a `when`
+You can unpack and handle these results easily in Kotlin with the `when` statement
 
 ```kotlin
 when (result) {
@@ -51,9 +51,9 @@ when (result) {
 }
 ```
 
-## Receiving a Verifiable Credential (IssuanceService)
+## Receive a Verifiable Credential (IssuanceService)
 
-To receive a verifiable credential you need a service endpoint providing an issuance contract. You can either get it from someone or create your own. See [How to customize your credentials](https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design) for more information or use an existing provider.
+To receive a verifiable credential you need a service endpoint providing an issuance contract. You can either get it from someone or create your own. See [How to customize your credentials](https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design) for more information or use an existing provider. In the future, we plan to support the DIF standard [Credential Manifest](https://identity.foundation/credential-manifest/) from the DIF.
 
 ```kotlin
 suspend fun issuanceSample() {
@@ -73,7 +73,7 @@ private suspend fun handleRequestSuccess(request: IssuanceRequest) {
 }
 ```
 
-Most issuance requests will ask you for attestations that the user has to provide. Provide them by filling the three available maps for self attested claims, idtokens and vcs.
+Most issuance requests will ask you for attestations that the user might need to provide. Provide them by filling the three available maps for self attested claims, idtokens and vcs.
 
 ```kotlin
 private fun addRequestedData(response: IssuanceResponse) {
@@ -127,7 +127,7 @@ See the [full sample](https://github.com/microsoft/VerifiableCredential-SDK-Andr
 
 ## Revoke a Verifiable Presentation (RevocationService)
 
-A Verifiable Presentation can be revoked from a relying party (rp).
+A Verifiable Presentation can be revoked from a relying party (RP).
 
 ```kotlin
 suspend fun revocationSample(verifiableCredential: VerifiableCredential) {
@@ -143,7 +143,7 @@ See the [full sample](https://github.com/microsoft/VerifiableCredential-SDK-Andr
 
 ## Pairwise Identifiers
 
-By default every relationship to relying parties will use a different DID per RP such that they can not correlate users actions. The client will automatically fetch exchanged VCs from the original issuer. This behavior can be disabled on a per call basis with the `enablePairwise` flag in `sendResponse`.
+By default every relationship to relying parties (RP) will use a different DID per RP such that they can not correlate users actions. The client will automatically fetch exchanged VCs from the original issuer. This behavior can be disabled on a per call basis with the `enablePairwise` flag in `sendResponse`.
 
 # Contributing
 
