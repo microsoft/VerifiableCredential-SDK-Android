@@ -23,7 +23,7 @@ object ClaimFormatter {
 
     fun formatDateAndTime(timestamp: Long?): String {
         if (timestamp == null) return "?"
-        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp)
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp * 1000L)
     }
 
     fun formatDate(timestamp: Long): String {
