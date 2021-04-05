@@ -13,7 +13,6 @@ import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCrede
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainMissing
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainUnVerified
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainVerified
-import com.microsoft.did.sdk.credential.service.protectors.ExchangeResponseFormatter
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
@@ -26,7 +25,7 @@ import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocu
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.internal.ImageLoader
-import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.DEFAULT_EXPIRATION_IN_SECONDS
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
 import io.mockk.every
@@ -46,10 +45,8 @@ class IssuanceServiceTest {
 
     private val mockedResolver: Resolver = mockk()
     private val mockedJwtValidator: JwtValidator = mockk()
-    private val exchangeResponseFormatter: ExchangeResponseFormatter = mockk()
     private val issuanceResponseFormatter: IssuanceResponseFormatter = mockk()
-    private val exchangeService = ExchangeService(mockk(relaxed = true), exchangeResponseFormatter,
-        defaultTestSerializer, mockedJwtValidator)
+    private val exchangeService: ExchangeService = mockk()
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
@@ -93,6 +90,13 @@ class IssuanceServiceTest {
             suppliedVcRaw,
             suppliedVcContent
         )
+    private val suppliedPairwiseVcJti = "testPairwiseJti"
+    private val expectedPairwiseVerifiableCredential =
+        VerifiableCredential(
+            suppliedPairwiseVcJti,
+            suppliedVcRaw,
+            suppliedVcContent
+        )
     private val formattedResponse = "FORMATTED_RESPONSE"
     private val mockedIdentifierDocument: IdentifierDocument = mockk()
     private val mockedIdentifierDocumentService: IdentifierDocumentService = mockk()
@@ -105,7 +109,6 @@ class IssuanceServiceTest {
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
-        coEvery { issuanceResponseFormatter.formatResponse(any(), any(), any(), any()) } returns formattedResponse
         coEvery { imageLoader.loadRemoteImagesIntoContract(any()) } returns Unit
     }
 
@@ -170,21 +173,14 @@ class IssuanceServiceTest {
         val suppliedContractUrl = "BusinessCard"
         val issuanceRequest = IssuanceRequest(expectedContract, suppliedContractUrl, LinkedDomainMissing)
         val issuanceResponse = IssuanceResponse(issuanceRequest)
-        val requestedVcMap = mapOf(mockk<PresentationAttestation>() to expectedVerifiableCredential) as RequestedVcMap
+        val mockedPresentationAttestation = mockk<PresentationAttestation>()
 
-        every { issuanceService["exchangeVcsInIssuanceRequest"](issuanceResponse, pairwiseIdentifier) } returns Result.Success(
-            requestedVcMap
-        )
-        every {
-            issuanceService["formAndSendResponse"](
-                issuanceResponse,
-                pairwiseIdentifier,
-                requestedVcMap,
-                Constants.DEFAULT_EXPIRATION_IN_SECONDS
-            )
-        } returns Result.Success(
-            expectedVerifiableCredential
-        )
+        every { issuanceResponseFormatter.formatResponse(issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential} as RequestedVcMap, issuanceResponse, pairwiseIdentifier, DEFAULT_EXPIRATION_IN_SECONDS) } returns formattedResponse
+        coEvery { identifierManager.getIdentifierById(expectedVerifiableCredential.contents.sub) } returns Result.Success(masterIdentifier)
+        coEvery { exchangeService.getExchangedVerifiableCredential(expectedVerifiableCredential, masterIdentifier, pairwiseIdentifier) } returns Result.Success(expectedPairwiseVerifiableCredential)
+        every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
+        every { mockedPresentationAttestation.validityInterval } returns 1000
+        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVerifiableCredential)
 
         runBlocking {
             val createdVerifiableCredential = issuanceService.sendResponse(issuanceResponse)
@@ -199,8 +195,8 @@ class IssuanceServiceTest {
             issuanceService["formAndSendResponse"](
                 issuanceResponse,
                 pairwiseIdentifier,
-                requestedVcMap,
-                Constants.DEFAULT_EXPIRATION_IN_SECONDS
+                issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential} as RequestedVcMap,
+                DEFAULT_EXPIRATION_IN_SECONDS
             )
         }
     }
