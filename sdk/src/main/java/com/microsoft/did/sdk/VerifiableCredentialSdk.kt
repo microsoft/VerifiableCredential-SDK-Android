@@ -56,7 +56,7 @@ object VerifiableCredentialSdk {
     @JvmStatic
     fun init(
         context: Context,
-        userAgentInfo: String = BuildConfig.LIBRARY_PACKAGE_NAME + ":" + BuildConfig.VERSION_NAME,
+        userAgentInfo: String = "",
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         registrationUrl: String = "",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
