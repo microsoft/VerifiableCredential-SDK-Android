@@ -14,7 +14,7 @@ To learn more about verifiable credentials, please review our [documentation.](h
 # How to use SDK
 
 ## Initializing SDK
-`VerifiableCredentialSdk` - this class is used to initialize the SDK. You may want to call it in your apps  `Application.onCreate()` or during your dependency injection initialization:
+`VerifiableCredentialSdk` - this class is used to initialize the SDK. You may want to call it in your apps `Application` `onCreate()` or during your dependency injection initialization:
 ```kotlin
 VerifiableCredentialSdk.init(getApplicationContext());
 ```
@@ -46,14 +46,14 @@ You can unpack and handle these results easily in Kotlin with the `when` stateme
 
 ```kotlin
 when (result) {
-    is Result.Success -> handleRequestSuccess(result.payload) // will be smartcasted into <T>
-    is Result.Failure -> handleRequestFailure(result.payload) // will be smartcasted into SdkException
+    is Result.Success -> handleRequestSuccess(result.payload) // will be smartcast into <T>
+    is Result.Failure -> handleRequestFailure(result.payload) // will be smartcast into SdkException
 }
 ```
 
 ## Receive a Verifiable Credential (IssuanceService)
 
-To receive a verifiable credential you need a service endpoint providing an issuance contract. You can either get it from someone or create your own. See [How to customize your credentials](https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design) for more information or use an existing provider. In the future, we plan to support the DIF standard [Credential Manifest](https://identity.foundation/credential-manifest/) from the DIF.
+To receive a verifiable credential you need a service endpoint providing an issuance contract. You can either get it from someone or create your own. See [How to customize your credentials](https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design) for more information or use an existing provider. In the future, we plan to support the Decentralized Identity Foundation (DIF) standard [Credential Manifest](https://identity.foundation/credential-manifest/).
 
 ```kotlin
 suspend fun issuanceSample() {
@@ -73,7 +73,7 @@ private suspend fun handleRequestSuccess(request: IssuanceRequest) {
 }
 ```
 
-Most issuance requests will ask you for attestations that the user might need to provide. Provide them by filling the three available maps for self attested claims, idtokens and vcs.
+Most issuance requests will ask you for attestations that the user might need to provide. Provide them by filling the values for the existing keys in the three available maps for self attested claims, idtokens and vcs.
 
 ```kotlin
 private fun addRequestedData(response: IssuanceResponse) {
