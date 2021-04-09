@@ -57,19 +57,20 @@ abstract class BaseNetworkOperation<S, T> {
 
     // TODO("what do we want our base to look like")
     open fun onFailure(response: Response<S>): Result<Nothing> {
+        val responseBody = response.errorBody()?.string() ?: ""
         val exception = when (response.code()) {
-            301, 302, 308 -> RedirectException(response.errorBody()?.string() ?: "", false)
-            401 -> UnauthorizedException(response.errorBody()?.string() ?: "", false)
-            400, 402 -> ClientException(response.errorBody()?.string() ?: "", false)
-            403 -> ForbiddenException(response.errorBody()?.string() ?: "", false)
-            404 -> NotFoundException(response.errorBody()?.string() ?: "", false)
-            500, 501, 502, 503 -> ServiceUnreachableException(response.errorBody()?.string() ?: "", true)
+            301, 302, 308 -> RedirectException(responseBody, false)
+            401 -> UnauthorizedException(responseBody, false)
+            400, 402 -> ClientException(responseBody, false)
+            403 -> ForbiddenException(responseBody, false)
+            404 -> NotFoundException(responseBody, false)
+            500, 501, 502, 503 -> ServiceUnreachableException(responseBody, true)
             else -> NetworkException("Unknown Status code", true)
         }
         exception.errorCode = response.code().toString()
         exception.correlationVector = response.headers()[CORRELATION_VECTOR_HEADER]
         exception.requestId = response.headers()[REQUEST_ID_HEADER]
-        exception.errorBody = response.errorBody()?.string()
+        exception.errorBody = responseBody
         exception.innerErrors = NetworkErrorParser.extractInnerErrorsCodes(exception.errorBody)
         SdkLog.v("HttpError: ${exception.errorCode} body: ${exception.errorBody}")
         return Result.Failure(exception)
