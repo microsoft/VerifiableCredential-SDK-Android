@@ -12,8 +12,6 @@ import java.io.OutputStream
 abstract class JweProtectedBackup {
     abstract val jweToken: JweToken
 
-    abstract suspend fun encrypt()
-
     fun getBackupType(): String? {
         return jweToken.contentType
     }

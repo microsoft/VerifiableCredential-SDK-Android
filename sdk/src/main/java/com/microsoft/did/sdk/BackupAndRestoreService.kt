@@ -2,89 +2,87 @@
 
 package com.microsoft.did.sdk
 
-import android.content.Context
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
+import com.microsoft.did.sdk.datasource.file.MicrosoftBackupSerializer
 import com.microsoft.did.sdk.datasource.file.RawIdentifierUtility
-import com.microsoft.did.sdk.datasource.file.models.DifWordList
+import com.microsoft.did.sdk.datasource.file.models.JweEncryptedBackupOptions
 import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
+import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackupOptions
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
+import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupOptions
+import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupOptions
+import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackup
+import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackupOptions
+import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
+import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupOptions
 import com.microsoft.did.sdk.datasource.file.models.VCMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.util.Constants.PASSWORD_SET_SIZE
+import com.microsoft.did.sdk.util.controlflow.BadPassword
 import com.microsoft.did.sdk.util.controlflow.Result
-import kotlinx.serialization.json.Json
+import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
+import com.microsoft.did.sdk.util.controlflow.andThen
 import java.io.InputStream
-import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class BackupAndRestoreService @Inject constructor(
-    private val identityRepository: IdentifierRepository,
-    private val keyStore: EncryptedKeyStore,
-    private val rawIdentifierUtility: RawIdentifierUtility,
     private val jweBackupFactory: JweProtectedBackupFactory,
-    private val jsonSerializer: Json = Json.Default,
-    context: Context
+    private val microsoftBackupSerializer: MicrosoftBackupSerializer
 ) {
-    val wordList by lazy { DifWordList.getWordList(context) }
-
-    fun generateDifPassword(): String {
-        val random = SecureRandom()
-        val wordSet = MutableList(PASSWORD_SET_SIZE) { "" }
-        for (index in 0 until wordSet.count()) {
-            var wordIndex: Int
-            var word: String
-            do {
-                wordIndex = random.nextInt(wordList.count())
-                word = wordList[wordIndex]
-            } while (wordSet.contains(word))
-            wordSet[index] = word
+    suspend fun createBackup(options: JweProtectedBackupOptions): Result<JweProtectedBackup> {
+        return when (options) {
+            is PasswordProtectedBackupOptions -> {
+                createUnprotectedBackup(options.unprotectedBackup).andThen { backup ->
+                    jweBackupFactory.createPasswordBackup(backup, options.password);
+                }
+            }
+            else -> {
+                Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
+            }
         }
-        return wordSet.joinToString(" ")
     }
 
-    suspend fun createMicrosoftBackup(
-        walletMetadata: WalletMetadata,
-        verifiableCredentials: List<Pair<VerifiableCredential, VCMetadata>>
-    ): MicrosoftUnprotectedBackup2020 {
-        val vcMap = mutableMapOf<String, String>()
-        val vcMetaMap = mutableMapOf<String, VCMetadata>()
-        val dids = rawIdentifierUtility.getAllIdentifiers()
-        verifiableCredentials.forEach { vcPair ->
-            val jti = vcPair.first.jti
-            vcMap[jti] = vcPair.first.raw
-            vcMetaMap[jti] = vcPair.second
+    private suspend fun createUnprotectedBackup(options: UnprotectedBackupOptions): Result<UnprotectedBackup> {
+        return when (options) {
+            is MicrosoftUnprotectedBackupOptions -> {
+                microsoftBackupSerializer.create(options)
+            }
+            else -> {
+                Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
+             }
         }
-        return MicrosoftUnprotectedBackup2020(
-            vcs = vcMap,
-            vcsMetaInf = vcMetaMap,
-            metaInf = walletMetadata,
-            dids
-        )
     }
 
-    suspend fun parseJweBackup(input: InputStream): Result<JweProtectedBackup> {
-        return jweBackupFactory.parseBackup(input)
+    suspend fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
+        return jweBackupFactory.parseBackup(backupFile);
     }
 
-    suspend fun importMicrosoftBackup(
-        backup: MicrosoftUnprotectedBackup2020,
-        walletMetadataCallback: suspend (WalletMetadata) -> Unit,
-        verifiableCredentialCallback: suspend (VerifiableCredential, VCMetadata) -> Unit,
-        listVerifiableCredentialCallback: suspend () -> List<String>,
-        deleteVerifiableCredentialCallback: suspend (String) -> Unit
-    ): Result<Unit> {
-        return backup.import(
-            walletMetadataCallback,
-            verifiableCredentialCallback,
-            listVerifiableCredentialCallback,
-            deleteVerifiableCredentialCallback,
-            this.identityRepository,
-            this.keyStore
-        )
+    suspend fun restoreBackup(options: JweEncryptedBackupOptions): Result<UnprotectedBackupOptions> {
+        when (options) {
+            is PasswordEncryptedBackupOptions -> {
+                when (val backupAttempt = options.backup.decrypt(options.password)) {
+                    is Result.Success -> importBackup(backupAttempt.payload)
+                    is Result.Failure -> backupAttempt
+                }
+            }
+            else -> {
+                Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
+            }
+        }
+    }
+
+    private suspend fun importBackup(backup: UnprotectedBackup): Result<UnprotectedBackupOptions> {
+        return when (backup) {
+            is MicrosoftUnprotectedBackup2020 -> {
+                microsoftBackupSerializer.import(backup)
+            }
+            else -> {
+                Result.Failure(UnknownBackupFormat("Unknown backup file: ${backup::class.qualifiedName}"))
+            }
+        }
     }
 }
