@@ -39,7 +39,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         return Result.Success(MicrosoftUnprotectedBackup2020(
             vcs = vcMap,
             vcsMetaInf = vcMetaMap,
-            metaInf = options.meta,
+            metaInf = options.walletMetadata,
             identifiers = rawIdentifierUtility.getAllIdentifiers()
         ))
     }

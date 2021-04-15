@@ -21,7 +21,7 @@ class RawIdentifierUtility @Inject constructor(
     }
 
     private fun createRawIdentifier(identity: Identifier): RawIdentity? {
-        RawIdentity(
+        return RawIdentity(
             id = identity.id,
             name = identity.name,
             keys = getIdentifierKeys(identity),

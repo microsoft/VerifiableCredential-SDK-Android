@@ -23,6 +23,7 @@ import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.util.controlflow.BadPassword
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
+import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
 import com.microsoft.did.sdk.util.controlflow.andThen
 import java.io.InputStream
 import javax.inject.Inject
@@ -36,12 +37,15 @@ class BackupAndRestoreService @Inject constructor(
     suspend fun createBackup(options: JweProtectedBackupOptions): Result<JweProtectedBackup> {
         return when (options) {
             is PasswordProtectedBackupOptions -> {
-                createUnprotectedBackup(options.unprotectedBackup).andThen { backup ->
-                    jweBackupFactory.createPasswordBackup(backup, options.password);
+                val backup = createUnprotectedBackup(options.unprotectedBackup)
+                if (backup is Result.Success) {
+                    jweBackupFactory.createPasswordBackup(backup.payload, options.password);
+                } else {
+                    backup as Result.Failure;
                 }
             }
             else -> {
-                Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
+                Result.Failure(UnknownProtectionMethod("Unknown protection options: ${options::class.qualifiedName}"));
             }
         }
     }
@@ -62,7 +66,7 @@ class BackupAndRestoreService @Inject constructor(
     }
 
     suspend fun restoreBackup(options: JweEncryptedBackupOptions): Result<UnprotectedBackupOptions> {
-        when (options) {
+        return when (options) {
             is PasswordEncryptedBackupOptions -> {
                 when (val backupAttempt = options.backup.decrypt(options.password)) {
                     is Result.Success -> importBackup(backupAttempt.payload)
