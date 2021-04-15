@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.IdentifierCreator
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.Constants.MASTER_IDENTIFIER_NAME
+import com.microsoft.did.sdk.util.Constants.MAIN_IDENTIFIER_REFERENCE
 import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -30,7 +30,7 @@ class IdentifierManager @Inject constructor(
 ) {
 
     suspend fun getMasterIdentifier(): Result<Identifier> {
-        val identifier = identifierRepository.queryByName(MASTER_IDENTIFIER_NAME)
+        val identifier = identifierRepository.queryByName(MAIN_IDENTIFIER_REFERENCE)
         return if (identifier != null) {
             Result.Success(identifier)
         } else {
@@ -41,9 +41,9 @@ class IdentifierManager @Inject constructor(
     private suspend fun createMasterIdentifier(): Result<Identifier> {
         return runResultTry {
             val seed = CryptoOperations.generateSeed()
-            keyStore.storeKey(OctetSequenceKey.Builder(seed).build(), MASTER_IDENTIFIER_NAME)
-            val identifier = identifierCreator.create(MASTER_IDENTIFIER_NAME)
-            SdkLog.i("Creating Identifier: $identifier")
+            keyStore.storeKey(MAIN_IDENTIFIER_REFERENCE, OctetSequenceKey.Builder(seed).build())
+            val identifier = identifierCreator.create(MAIN_IDENTIFIER_REFERENCE)
+            SdkLog.v("Created Identifier: $identifier")
             identifierRepository.insert(identifier)
             Result.Success(identifier)
         }

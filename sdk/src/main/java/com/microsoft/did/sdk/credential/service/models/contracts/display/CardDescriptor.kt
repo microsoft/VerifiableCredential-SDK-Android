@@ -27,7 +27,7 @@ data class CardDescriptor(
     val textColor: String,
 
     // Logo that should be displayed on the card.
-    val logo: Logo,
+    val logo: Logo? = null,
 
     // Description of the card that should be displayed below the card.
     val description: String

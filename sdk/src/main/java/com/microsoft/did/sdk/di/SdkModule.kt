@@ -6,6 +6,8 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -55,6 +57,7 @@ class SdkModule {
         val httpLoggingInterceptor = HttpLoggingInterceptor { SdkLog.d(it) }
         return OkHttpClient()
             .newBuilder()
+            .followRedirects(false)
             .addInterceptor(httpLoggingInterceptor)
             .addInterceptor(UserAgentInterceptor(userAgentInfo))
             .addInterceptor(CorrelationVectorInterceptor(correlationVectorService))
@@ -84,6 +87,7 @@ class SdkModule {
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
         return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
+            .fallbackToDestructiveMigration() // TODO: Remove during public preview
             .build()
     }
 
@@ -107,5 +111,11 @@ class SdkModule {
             ignoreUnknownKeys = true
             isLenient = true
         }
+    }
+
+    @Provides
+    @Singleton
+    fun defaultSharedPreferences(context: Context): SharedPreferences {
+        return PreferenceManager.getDefaultSharedPreferences(context)
     }
 }

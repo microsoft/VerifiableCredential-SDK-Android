@@ -10,7 +10,11 @@ import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestC
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
+import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
+import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
+import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
+import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
+import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -20,7 +24,6 @@ import kotlinx.serialization.json.Json
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 import java.util.Date
-import kotlin.test.fail
 
 class OidcPresentationRequestValidatorTest {
 
@@ -37,15 +40,19 @@ class OidcPresentationRequestValidatorTest {
     private val expectedSerializedToken: String = "token2364302"
 
     private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator()
-    
-	private val serializer: Json = Json
+
+    private val serializer: Json = Json
 
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
-    private val expectedResponseType = "id_token"
-    private val expectedResponseMode = "form_post"
-    private val expectedScope = "openid did_authn"
+    private val expectedValidResponseType = "id_token"
+    private val expectedValidResponseMode = "form_post"
+    private val expectedValidScope = "openid did_authn"
     private val expectedExpirationTime = 86400L
+
+    private val expectedInvalidResponseMode = "invalid_response_mode"
+    private val expectedInvalidResponseType = "invalid_response_type"
+    private val expectedInvalidScope = "invalid_scope"
 
     init {
         setUpPresentationRequest()
@@ -68,10 +75,28 @@ class OidcPresentationRequestValidatorTest {
         every { mockedOidcRequestContent.expirationTime } returns currentTimePlusOffsetInSeconds
     }
 
-    private fun setUpOidcRequestContent() {
-        every { mockedOidcRequestContent.responseType } returns expectedResponseType
-        every { mockedOidcRequestContent.responseMode } returns expectedResponseMode
-        every { mockedOidcRequestContent.scope } returns expectedScope
+    private fun setUpOidcRequestContentWithValidFields() {
+        every { mockedOidcRequestContent.responseType } returns expectedValidResponseType
+        every { mockedOidcRequestContent.responseMode } returns expectedValidResponseMode
+        every { mockedOidcRequestContent.scope } returns expectedValidScope
+    }
+
+    private fun setUpOidcRequestContentWithInvalidResponseMode() {
+        every { mockedOidcRequestContent.responseType } returns expectedValidResponseType
+        every { mockedOidcRequestContent.responseMode } returns expectedInvalidResponseMode
+        every { mockedOidcRequestContent.scope } returns expectedValidScope
+    }
+
+    private fun setUpOidcRequestContentWithInvalidResponseType() {
+        every { mockedOidcRequestContent.responseType } returns expectedInvalidResponseType
+        every { mockedOidcRequestContent.responseMode } returns expectedValidResponseMode
+        every { mockedOidcRequestContent.scope } returns expectedValidScope
+    }
+
+    private fun setUpOidcRequestContentWithInvalidScope() {
+        every { mockedOidcRequestContent.responseType } returns expectedValidResponseType
+        every { mockedOidcRequestContent.responseMode } returns expectedValidResponseMode
+        every { mockedOidcRequestContent.scope } returns expectedInvalidScope
     }
 
     @Test
@@ -79,7 +104,7 @@ class OidcPresentationRequestValidatorTest {
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
-        setUpOidcRequestContent()
+        setUpOidcRequestContentWithValidFields()
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
@@ -90,15 +115,74 @@ class OidcPresentationRequestValidatorTest {
     @Test
     fun `throws when token expiration is expired`() {
         setUpExpiration(-86400)
-        setUpOidcRequestContent()
+        setUpOidcRequestContentWithValidFields()
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
         runBlocking {
             try {
                 validator.validate(mockedPresentationRequest)
-                fail()
             } catch (exception: Exception) {
-                assertThat(exception).isInstanceOf(ExpiredTokenExpirationException::class.java)
+                assertThat(exception).isInstanceOf(ExpiredTokenException::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `throws when request has invalid response mode`() {
+        setUpExpiration(86400)
+        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        setUpOidcRequestContentWithInvalidResponseMode()
+        runBlocking {
+            try {
+                validator.validate(mockedPresentationRequest)
+            } catch (exception: Exception) {
+                assertThat(exception).isInstanceOf(InvalidResponseModeException::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `throws when request has invalid response type`() {
+        setUpExpiration(86400)
+        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        setUpOidcRequestContentWithInvalidResponseType()
+        runBlocking {
+            try {
+                validator.validate(mockedPresentationRequest)
+            } catch (exception: Exception) {
+                assertThat(exception).isInstanceOf(InvalidResponseTypeException::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `throws when request has invalid scope`() {
+        setUpExpiration(86400)
+        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        setUpOidcRequestContentWithInvalidScope()
+        runBlocking {
+            try {
+                validator.validate(mockedPresentationRequest)
+            } catch (exception: Exception) {
+                assertThat(exception).isInstanceOf(InvalidScopeException::class.java)
+            }
+        }
+    }
+
+    @Test
+    fun `throws when request has missing input`() {
+        setUpExpiration(86400)
+        every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns emptyList()
+        every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        setUpOidcRequestContentWithValidFields()
+        runBlocking {
+            try {
+                validator.validate(mockedPresentationRequest)
+            } catch (exception: Exception) {
+                assertThat(exception).isInstanceOf(MissingInputInRequestException::class.java)
             }
         }
     }

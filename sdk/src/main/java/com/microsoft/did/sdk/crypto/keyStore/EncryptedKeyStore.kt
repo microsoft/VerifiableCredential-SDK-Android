@@ -17,7 +17,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
         private const val FILE_NAME = "DID_encrypted_keys"
     }
 
-    private val encryptedSharedPreferences = getSharedPreferences(context)
+    private val encryptedSharedPreferences by lazy { getSharedPreferences(context) }
 
     private fun getSharedPreferences(context: Context): SharedPreferences {
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
@@ -30,7 +30,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
         )
     }
 
-    fun storeKey(key: JWK, keyId: String) {
+    fun storeKey(keyId: String, key: JWK) {
         encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, key.toJSONString()).apply()
     }
 

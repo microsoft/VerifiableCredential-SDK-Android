@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.payload.RegistrationPayload
 import com.microsoft.did.sdk.identifier.models.payload.SuffixData
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.Constants.AES_KEY
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyUse
@@ -27,10 +28,10 @@ import java.security.KeyPair
 import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
+import java.util.UUID
 import javax.crypto.spec.SecretKeySpec
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.random.Random
 
 @Singleton
 class IdentifierCreator @Inject constructor(
@@ -75,17 +76,17 @@ class IdentifierCreator @Inject constructor(
     private fun generateAndStoreKeyPair(use: KeyUse = KeyUse.SIGNATURE): JWK {
         val keyId = generateRandomKeyId()
         val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1()).toPrivateJwk(keyId, use)
-        keyStore.storeKey(privateKey, keyId)
+        keyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }
 
-    internal fun generatePersonaSeed(personaDid: String): ByteArray {
-        val masterSeed = keyStore.getKey(Constants.MASTER_IDENTIFIER_NAME).toOctetSequenceKey().toByteArray()
-        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, "AES"), MacAlgorithm.HmacSha512())
+    fun generatePersonaSeed(personaDid: String): ByteArray {
+        val masterSeed = keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE).toOctetSequenceKey().toByteArray()
+        return CryptoOperations.computeMac(personaDid.toByteArray(), SecretKeySpec(masterSeed, AES_KEY), MacAlgorithm.HmacSha512)
     }
 
     private fun generateRandomKeyId(): String {
-        return Base64.encodeToString(Random.nextBytes(16), Constants.BASE64_URL_SAFE)
+        return UUID.randomUUID().toString().replace("-", "")
     }
 
     fun createPairwiseId(persona: Identifier, peerId: String): Identifier {
@@ -105,7 +106,7 @@ class IdentifierCreator @Inject constructor(
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
         val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk(keyId, KeyUse.SIGNATURE)
-        keyStore.storeKey(pairwisePrivateKey, keyId)
+        keyStore.storeKey(keyId, pairwisePrivateKey)
         return pairwisePrivateKey.toPublicJWK()
     }
 
@@ -122,7 +123,7 @@ class IdentifierCreator @Inject constructor(
 
     private fun computeDidShortFormIdentifier(registrationPayload: RegistrationPayload): String {
         val suffixDataString = serializer.encodeToString(SuffixData.serializer(), registrationPayload.suffixData)
-        val uniqueSuffix = sideTreeHelper.canonicalizeAndMultiHash(suffixDataString)
+        val uniqueSuffix = sideTreeHelper.canonicalizeMultiHashEncode(suffixDataString)
         return "did${Constants.COLON}${Constants.METHOD_NAME}${Constants.COLON}$uniqueSuffix"
     }
 

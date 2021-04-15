@@ -3,218 +3,147 @@
 ![Tests Passing](https://img.shields.io/azure-devops/tests/verifiable-credentials/VerifiableCredential/3)
 ![Open Issued](https://img.shields.io/github/issues/microsoft/VerifiableCredential-SDK-Android)
 
-This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and DIDs on the [ION network.](https://github.com/decentralized-identity/ion)
+This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and [Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/) on the [ION network](https://github.com/decentralized-identity/ion). It can be integrated with any app to provide interactions using verifiable credentials.
  
 # Verifiable Credentials 
  
-Verifiable credentials are a [W3C standard format](https://www.w3.org/TR/vc-data-model/) that can be used to validate information about people, organizations, and more. Verifiable credentials put people in control of their personal information, enabling more trustworthy digital experiences while respecting people's privacy. 
+Verifiable credentials is a [W3C standard](https://www.w3.org/TR/vc-data-model/) that can be used to validate information about people, organizations, and more. Verifiable credentials put people in control of their personal information, enabling more trustworthy digital experiences while respecting people's privacy. 
  
 To learn more about verifiable credentials, please review our [documentation.](https://didproject.azurewebsites.net/docs/verifiable-credentials.html)
 
 # How to use SDK
 
 ## Initializing SDK
-`VerifiableCredentialSdk` - this class is used to initialize the SDK inside of the app with these init method parameters:
+`VerifiableCredentialSdk` - this class is used to initialize the SDK. You may want to call it in your apps `Application` `onCreate()` or during your dependency injection initialization:
 ```kotlin
-fun init(
-    context: Context,
-    logConsumer: SdkLog.Consumer = DefaultLogConsumer(), // Optional: Provide your app logger
-    registrationUrl: String = "", // Not supported in MVP
-    resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers" // Optional: Provide identifier resolution service
-)
+VerifiableCredentialSdk.init(getApplicationContext());
 ```
 
-Example of SDK initialization within app (call in your `Application` `onCreate()`):
+After initialization you can access various services from this singleton directly, but we recommend to access it through your dependency injection framework (like dagger). We currently support the following services:
+
 ```kotlin
-VerifiableCredentialSdk.init(getApplicationContext(), new VerifiableCredentialSdkLogConsumer());
+VerifiableCredentialSdk.issuanceService
+VerifiableCredentialSdk.presentationService
+VerifiableCredentialSdk.revocationService
 ```
 
-After initialization you can access `identifierManager` and `verifiableCredentialManager` from this singleton directly, but it you may want to access it through your dependency injection framework (like dagger).
+## APIs
+
+Our APIs use Kotlin coroutines. Read more about coroutines [here](https://kotlinlang.org/docs/coroutines-overview.html). To be able to call into `suspend` functions you need to run the method within a Coroutine Context. Usually you can start one in your Fragment as such:
+
 ```kotlin
-VerifiableCredentialSdk.verifiableCredentialManager
-VerifiableCredentialSdk.identifierManager
-```
-
-## External facing APIs
-There two classes that are external to our SDK.
-
-### Identifier Manager
-`IdentifierManager` - this class deals with any logic related to Identifiers such as creating Identifiers, creating Pairwise Identifiers, and resolving Identifiers through the Resolver.
-
-Creating and saving Identifier Example:
-```kotlin
-val identifier = identifierManager.initLongFormIdentifier()
-```
-
-To get master Identifier
-```kotlin
-val identifier = identifierManager.getIdentifier()
-```
-
-> note: Personas Identifiers to come.
-
-#### Pairwise Identifiers
-Pairwise Identifier are Identifiers created from four things:
-* An Identifier (in our case, the Master Identifier)
-* A target string (in our case, the relying party DID)
-* The algorithm of the keys that will be generated for the Identifier
-* The key type of the keys that will be generated for the Identifier
-
-Pairwise Identifiers are created for every interaction with a relying party to prevent two relying parties from correlating users based off of Identifiers.
-
-### Verifiable Credential Manager
-`VerifiableCredentialManager` - this class deals with any logic related to Verifiable Credentials such as requesting vcs through the Issuance service, presenting vcs back to relying parties, and saving them.
-
-Issuance Flow Example:
-```kotlin
-// to get a new issuance request from a contract url
-val request = verifiableCredentialManager.getIssuanceRequest(url)
-
-// create issuance response.
-val response = verifiableCredentialManager.createIssuanceResponse(request)
-// add requested verifiable credentials to response.
-addCollectedRequirementsToResponse(response, requirementList)
-// get Master Identifier.
-val identifier = identifierManager.getMasterIdentifier()
-// create a pairwise identifier for connection from master identifier and requester's identifier.
-val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
-// send issuance response in order to get a verifiable credential, signed by pairwise identifier. 
-val vch = verifiableCredentialManager.sendIssuanceResponse(response, pairwiseIdentifier)
-// save vc to database.
-verifiableCredentialManager.saveVch(vch)
-```
-
-Presentation Flow Example:
-```kotlin
-// to get a new presentation request from a openid:// scanned through QRCode or deeplink
-val request = verifiableCredentialManager.getPresentationRequest(url)
-
-// create and send presentation response.
-val response = verifiableCredentialManager.createPresentationResponse(request)
-// add requested verifiable credentials to response.
-addCollectedRequirementsToResponse(response, requirementList)
-// get Master Identifier.
-val identifier = identifierManager.getMasterIdentifier()
-// create a pairwise identifier for connection from master identifier and requester's identifier.
-val pairwiseIdentifier = identifierManager.createPairwiseIdentifier(identifier, request.entityIdentifier)
-// send response to relying party the initiated request, signed by pairwise identifier.
-// if successful, create and store receipts of interaction with the relying party for each verifiable credential that was presented.
-verifiableCredentialManager.sendPresentationResponse(response, pairwiseIdentifier)
-```
-
-Get all saved VCs
-```kotlin
-val verifiableCredentials = verifiableCredentialManager.getVerifiableCredentials()
-```
-
-> note: Every method is wrapped in a Result object. Unwrapping these returns is not included in these examples to simplify things a bit. (see [Result Class Section](#Result-Class) for more details)
-
-### OIDC Formatter and Validator
-
-#### OIDC Response Formatter
-A `OidcResponseFormatter` object creates a token payload based on the OpenID Connect Protocol (Self-Issued token) with an addition of a `attestations` claim that is not yet standard. This `attestations` claim contains all verifiable credentials, id-tokens, or self-attested claims that the initial request asked for. Then the payload is signed with the keys owned by the responder `Identifier`.
-
-> note: [OIDC Self-Issued Protocol](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued) is the only protocol we support as of now in the `OidcResponseFormatter` class.
-
-#### Presentation Request Validator 
-`PresentationRequestValidator` object takes in a `PresentationRequest` and validates the request based on protocol.
-```kotlin
-interface PresentationRequestValidator {
-    suspend fun validate(request: PresentationRequest)
+lifecycleScope.launchWhenStarted {
+    // call suspend functions
 }
 ```
 
-> note: [OIDC Self-Issued Protocol](https://openid.net/specs/openid-connect-core-1_0.html#SelfIssued) is the only protocol we support as of now in `OidcRequestValidator` class.
-
-
-### VerifiableCredential Data Model
-VerifiableCredentialHolder is comprised of:
-* A unique ID
-* A [Verifiable Credential](https://www.w3.org/TR/vc-data-model/)
-* Display information in order to render the vc.
-* History and other meta data
-
+All our public APIs return `Result<T>` objects. This forces explicit error handling. Always make sure to use the following import statement.
 ```kotlin
-data class VerifiableCredentialHolder (
-
-    val id: String,
-
-    val verifiableCredential: VerifiableCredential,
-
-    val displayContract: DisplayContract
-)
+import com.microsoft.did.sdk.util.controlflow.Result
 ```
 
-> note: this data model will change when pairwise feature is implemented.
-
-### Receipts
-A `Receipt` is created for every verifiable credential that is presented. The purpose of a `Receipt` is to keep track of when a verifiable credential was presented and who that vc was presented to.
+You can unpack and handle these results easily in Kotlin with the `when` statement
 
 ```kotlin
-data class Receipt (
-    val id: Int,
-
-    // Issuance or Presentation
-    val action: ReceiptAction,
-
-    // did of the verifier/issuer
-    val entityIdentifier: String,
-
-    // date action occurred
-    val activityDate: Long,
-
-    //Name of the verifier/issuer
-    val entityName: String,
-
-    val vcId: String
-)
-```
-
-### Repository Layer
-The repository is an abstraction layer that is consumed by business logic and abstracts away the various data sources that an app can have. There are two datasources in our SDK: network and database.
-
-`VerifiableCredentialRepository` - this class saves Verifiable Credentials and Receipts to the database, retrieves vcs and receipts from the database, `GET`s presentation and issuance requests, and `POST`s presentation and issuance responses.
-
-`IdentifierRepository` - this class save Identifiers to database, retrieves Identifiers from database, and resolves Identifiers.
-
-> note: we are using [Room](https://developer.android.com/topic/libraries/architecture/room) for database access and [Retrofit](https://square.github.io/retrofit/) for network calls.
-
-### Crypto Layer
-`CryptoOperations` - this class is the top layer of our crypto abstractions. 
-
-Initialized like so:
-```kotlin
-class CryptoOperations (
-    subtleCrypto: SubtleCrypto,
-    val keyStore: KeyStore
-)
-```
-* SubtleCrypto - interface of the [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto) that provides a number of low-level cryptographic functions
-* KeyStore - where keys are stored, default implementation is AndroidKeyStore.
-
-Crypto methods exposed in cryptoOperations layer
-```kotlin
-fun sign(payload: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null)
-fun verify(payload: ByteArray, signature: ByteArray, signingKeyReference: String, algorithm: Algorithm? = null)
-fun encrypt() // TODO
-fun decrypt() // TODO
-fun generateKeyPair(keyReference: String, keyType: KeyType)
-fun generatePairwise(seed: String)
-fun generateSeed(): String
-```
-
-### Result Class
-Every external method returns a `Result` for error handling simplicity.
-
-```kotlin
-sealed class Result<out S> {
-    class Success<out S>(val payload: S) : Result<S>()
-    class Failure(val payload: SdkException) : Result<Nothing>()
+when (result) {
+    is Result.Success -> handleRequestSuccess(result.payload) // will be smartcast into <T>
+    is Result.Failure -> handleRequestFailure(result.payload) // will be smartcast into SdkException
 }
 ```
 
-If the method was successful, `Result.Success(ReturnType)` is returned.
-If an exception occurred, `Result.Failure(SdkException)` is returned.
+## Receive a Verifiable Credential (IssuanceService)
+
+To receive a verifiable credential you need a service endpoint providing an issuance contract. You can either get it from someone or create your own. See [How to customize your credentials](https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design) for more information or use an existing provider. In the future, we plan to support the Decentralized Identity Foundation (DIF) standard [Credential Manifest](https://identity.foundation/credential-manifest/).
+
+```kotlin
+suspend fun issuanceSample() {
+    when (val result = VerifiableCredentialSdk.issuanceService.getRequest("<issuance request url>")) {
+        is Result.Success -> handleRequestSuccess(result.payload)
+        is Result.Failure -> handleRequestFailure(result.payload)
+    }
+}
+
+private suspend fun handleRequestSuccess(request: IssuanceRequest) {
+    val response = IssuanceResponse(request)
+    addRequestedData(response)
+    when (val result = VerifiableCredentialSdk.issuanceService.sendResponse(response)) {
+        is Result.Success -> handleResponseSuccess(result.payload)
+        is Result.Failure -> handleResponseFailure(result.payload)
+    }
+}
+```
+
+Most issuance requests will ask you for attestations that the user might need to provide. Provide them by filling the values for the existing keys in the three available maps for self attested claims, idtokens and vcs.
+
+```kotlin
+private fun addRequestedData(response: IssuanceResponse) {
+    for (requestedClaim in response.requestedSelfAttestedClaimMap) {
+        requestedClaim.setValue("your data") 
+    }
+    for (requestedIdToken in response.requestedIdTokenMap) {
+        requestedIdToken.setValue("your idToken") 
+    }
+    for (requestedVc in response.requestedVcMap) {
+        requestedVc.setValue(yourVc) 
+    }
+}
+```
+
+See the [full sample](https://github.com/microsoft/VerifiableCredential-SDK-Android/blob/master/sdk/src/samples/java/com/microsoft/did/sdk/IssuanceSample.kt).
+
+## Present Verifiable Credentials (PresentationService)
+
+A presentation request can ask for multiple VCs and follows the [Presentation Exchange](https://identity.foundation/presentation-exchange/) of the Decentralized Identity Foundation. In code, presenting follows an almost identical pattern as issuance.
+
+```kotlin
+suspend fun presentationSample() {
+    when (val result = VerifiableCredentialSdk.presentationService.getRequest("<presentation request url>")) {
+        is Result.Success -> handleRequestSuccess(result.payload)
+        is Result.Failure -> handleRequestFailure(result.payload)
+    }
+}
+
+private suspend fun handleRequestSuccess(request: PresentationRequest) {
+    val response = PresentationResponse(request)
+    addRequestedData(response)
+    when (val result = VerifiableCredentialSdk.presentationService.sendResponse(response)) {
+        is Result.Success -> handleResponseSuccess()
+        is Result.Failure -> handleResponseFailure(result.payload)
+    }
+}
+```
+
+You can only present VCs in a presentation request. Add the requested VCs:
+
+```kotlin
+private fun addRequestedData(response: PresentationResponse) {
+    for (requestedVc in response.requestedVcPresentationSubmissionMap) {
+        requestedVc.setValue(yourVc) // Set values here
+    }
+}
+```
+
+See the [full sample](https://github.com/microsoft/VerifiableCredential-SDK-Android/blob/master/sdk/src/samples/java/com/microsoft/did/sdk/PresentationSample.kt).
+
+## Revoke a Verifiable Presentation (RevocationService)
+
+A Verifiable Presentation can be revoked from a relying party (RP).
+
+```kotlin
+suspend fun revocationSample(verifiableCredential: VerifiableCredential) {
+    val rpList = listOf("did:ion:12345") // provide a list of DIDs that the VC is revoked from
+    when (val result = VerifiableCredentialSdk.revocationService.revokeVerifiablePresentation(verifiableCredential, rpList)) {
+        is Result.Success -> handleRevokeSuccess(result.payload)
+        is Result.Failure -> handleRevokeFailure(result.payload)
+    }
+}
+```
+
+See the [full sample](https://github.com/microsoft/VerifiableCredential-SDK-Android/blob/master/sdk/src/samples/java/com/microsoft/did/sdk/RevocationSample.kt).
+
+## Pairwise Identifiers
+
+By default every relationship to relying parties (RP) will use a different DID per RP such that they can not correlate users actions. The client will automatically fetch exchanged VCs from the original issuer. This behavior can be disabled on a per call basis with the `enablePairwise` flag in `sendResponse`.
 
 # Contributing
 

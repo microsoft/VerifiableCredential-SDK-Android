@@ -28,5 +28,5 @@ data class InputContract(
     val issuer: String,
 
     // Claims that are being requested.
-    val attestations: CredentialAttestations
+    val attestations: CredentialAttestations = CredentialAttestations()
 )

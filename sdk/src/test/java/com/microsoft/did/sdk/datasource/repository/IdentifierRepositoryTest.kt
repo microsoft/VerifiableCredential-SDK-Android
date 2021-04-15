@@ -8,8 +8,8 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.identifierOperations.ResolveIdentifierNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
+import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.coJustRun
@@ -110,17 +110,15 @@ class IdentifierRepositoryTest {
         )
         mockkConstructor(ResolveIdentifierNetworkOperation::class)
         coEvery { anyConstructed<ResolveIdentifierNetworkOperation>().fire() } returns Result.Failure(
-            ServiceErrorException(
-                "123",
-                "paMxWRuFSV+mo+Hso8IBVw.0",
+            NotFoundException(
                 "Not found",
-                true
+                true,
             )
         )
         runBlocking {
             val actualIdentifierDocument = identifierRepository.resolveIdentifier("testUrl", suppliedIdentifier.id)
             assertThat(actualIdentifierDocument).isInstanceOf(Result.Failure::class.java)
-            assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(ServiceErrorException::class.java)
+            assertThat((actualIdentifierDocument as Result.Failure).payload).isInstanceOf(NotFoundException::class.java)
         }
         coVerify(exactly = 1) {
             anyConstructed<ResolveIdentifierNetworkOperation>().fire()

@@ -4,7 +4,7 @@ import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenExpirationException
+import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
@@ -20,8 +20,8 @@ import javax.inject.Singleton
 class OidcPresentationRequestValidator @Inject constructor() : PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
-        //TODO: Check for response type once it is changed to id_token
         checkResponseMode(request.content.responseMode)
+        checkResponseType(request.content.responseType)
         checkScope(request.content.scope)
         checkTokenExpiration(request.content.expirationTime)
         checkForInputInPresentationRequest(request)
@@ -29,23 +29,23 @@ class OidcPresentationRequestValidator @Inject constructor() : PresentationReque
 
     private fun checkTokenExpiration(expiration: Long) {
         if (getExpirationDeadlineInSeconds() > expiration) {
-            throw ExpiredTokenExpirationException("Request Token has expired.")
+            throw ExpiredTokenException("The QR code or Deep Link has expired. You need to refresh and try again.")
         }
     }
 
     private fun checkResponseType(responseType: String) {
         if (!responseType.equals(Constants.RESPONSE_TYPE, true))
-            throw InvalidResponseTypeException("Invalid response type in request.")
+            throw InvalidResponseTypeException("Invalid response type in presentation request.")
     }
 
     private fun checkResponseMode(responseMode: String) {
         if (!responseMode.equals(Constants.RESPONSE_MODE, true))
-            throw InvalidResponseModeException("Invalid response mode in request.")
+            throw InvalidResponseModeException("Invalid response mode in presentation request.")
     }
 
     private fun checkScope(scope: String) {
         if (!scope.equals(Constants.SCOPE, true))
-            throw InvalidScopeException("Invalid scope in request.")
+            throw InvalidScopeException("Invalid scope in presentation request.")
     }
 
     private fun getExpirationDeadlineInSeconds(expirationCheckTimeOffsetInMinutes: Int = 5): Long {

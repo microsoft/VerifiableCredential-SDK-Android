@@ -5,9 +5,9 @@ package com.microsoft.did.sdk.identifier.resolvers
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierResponse
 import com.microsoft.did.sdk.util.controlflow.LocalNetworkException
+import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.ResolverException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.ServiceErrorException
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -39,17 +39,16 @@ class ResolverTest {
     fun failedResolutionInvalidIdTest() {
         val resolver = Resolver("", identifierRepository)
         coEvery { identifierRepository.resolveIdentifier("", invalidIdentifier) } returns Result.Failure(
-            ServiceErrorException(
-                "123",
-                "paMxWRuFSV+mo+Hso8IBVw.0",
+            NotFoundException(
                 "Not Found",
-                true
+                true,
             )
         )
         runBlocking {
             val actualResult = resolver.resolve(invalidIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
             assertThat((actualResult as Result.Failure).payload).isInstanceOf(ResolverException::class.java)
+            assertThat(actualResult.payload.cause).isInstanceOf(NotFoundException::class.java)
         }
     }
 
@@ -66,6 +65,7 @@ class ResolverTest {
             val actualResult = resolver.resolve(expectedIdentifier)
             assertThat(actualResult).isInstanceOf(Result.Failure::class.java)
             assertThat((actualResult as Result.Failure).payload).isInstanceOf(ResolverException::class.java)
+            assertThat(actualResult.payload.cause).isInstanceOf(LocalNetworkException::class.java)
         }
     }
 }

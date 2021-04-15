@@ -7,9 +7,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CredentialPresentationInputDescriptor(
-    var id: String = "",
+    var id: String,
 
-    val schema: Schema = Schema(),
+    val schema: Schema,
 
     @SerialName("issuance")
     var issuanceMetadataList: List<IssuanceMetadata> = emptyList()

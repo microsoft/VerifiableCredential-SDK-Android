@@ -19,10 +19,10 @@ data class DisplayContract(
     val id: String = "display",
 
     // What locale the display information is in.
-    val locale: String,
+    val locale: String = "",
 
     // URL pointing to the contract.
-    val contract: String,
+    val contract: String = "",
 
     // Properties used to render the card
     val card: CardDescriptor,

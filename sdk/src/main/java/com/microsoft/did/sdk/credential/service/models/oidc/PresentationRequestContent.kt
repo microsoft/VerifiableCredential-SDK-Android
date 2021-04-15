@@ -16,32 +16,29 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationRequestContent(
-    // what type of object the response should be (should be idtoken). // TODO: validate
     @SerialName("response_type")
-    val responseType: String = "",
+    val responseType: String,
 
-    // what mode the response should be sent in (should always be form post). // TODO: validate
     @SerialName("response_mode")
-    val responseMode: String = "",
+    val responseMode: String,
 
     @SerialName("client_id")
-    val clientId: String = "",
+    val clientId: String? = null,
 
     @SerialName("redirect_uri")
     val redirectUrl: String = "",
 
     @SerialName("iss")
-    val issuer: String = "",
+    val issuer: String,
 
-    // should contain "openid did_authn" // TODO: validate
-    val scope: String = "",
+    val scope: String,
 
     val state: String = "",
 
     val nonce: String = "",
 
     @SerialName("presentation_definition")
-    val presentationDefinition: PresentationDefinition = PresentationDefinition(),
+    val presentationDefinition: PresentationDefinition,
 
     @SerialName("exp")
     val expirationTime: Long = 0,
@@ -61,5 +58,8 @@ data class PresentationRequestContent(
     @SerialName("max_age")
     val maxAge: Int = 0,
 
-    var registration: Registration = Registration()
+    var registration: Registration = Registration(),
+
+    @SerialName("id_token_hint")
+    val idTokenHint: String? = null
 )

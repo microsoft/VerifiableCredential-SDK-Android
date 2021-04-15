@@ -14,11 +14,11 @@ import kotlinx.serialization.Serializable
 data class Logo(
 
     // If image needs to be fetched, service will use this property.
-    val uri: String = "",
+    var uri: String? = null,
 
     // Else if image is in svg or base64 format, service will use this property.
-    val image: String = "",
+    var image: String? = null,
 
     // Description used for alt text or voice over.
-    val description: String = ""
+    val description: String
 )

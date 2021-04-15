@@ -12,11 +12,11 @@ import javax.inject.Inject
 
 class SideTreeHelper @Inject constructor() {
 
-    fun canonicalizeAndMultiHash(json: String): String {
+    fun canonicalizeMultiHashEncode(json: String): String {
         val jsonCanonicalizer = JsonCanonicalizer(json)
-        val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
-        val hashedInfo = prependMultiHashInfo(hashed)
-        return Base64.encodeToString(hashedInfo, Constants.BASE64_URL_SAFE)
+        val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256)
+        val hashedWithMultiHashInfo = prependMultiHashInfo(hashed)
+        return Base64.encodeToString(hashedWithMultiHashInfo, Constants.BASE64_URL_SAFE)
     }
 
     /**
@@ -31,10 +31,10 @@ class SideTreeHelper @Inject constructor() {
      */
     private fun canonicalizeAndDoubleMultiHash(json: String): String {
         val jsonCanonicalizer = JsonCanonicalizer(json)
-        val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256())
-        val doubleHashed = CryptoOperations.digest(hashed, DigestAlgorithm.Sha256())
-        val doubleHashedInfo = prependMultiHashInfo(doubleHashed)
-        return Base64.encodeToString(doubleHashedInfo, Constants.BASE64_URL_SAFE)
+        val hashed = CryptoOperations.digest(jsonCanonicalizer.encodedUTF8, DigestAlgorithm.Sha256)
+        val doubleHashed = CryptoOperations.digest(hashed, DigestAlgorithm.Sha256)
+        val doubleHashedWithMultiHashInfo = prependMultiHashInfo(doubleHashed)
+        return Base64.encodeToString(doubleHashedWithMultiHashInfo, Constants.BASE64_URL_SAFE)
     }
 
     /**

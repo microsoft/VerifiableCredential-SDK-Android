@@ -43,7 +43,7 @@ object Constants {
     const val CORRELATION_VECTOR_IN_PREF = "correlation_vector"
 
     //Identifier Constants
-    const val MASTER_IDENTIFIER_NAME = "did.main.identifier"
+    const val MAIN_IDENTIFIER_REFERENCE = "did.main.identifier"
     const val METHOD_NAME = "ion"
     const val IDENTIFIER_PUBLIC_KEY_PURPOSE = "authentication"
     const val COLON = ":"
@@ -62,4 +62,7 @@ object Constants {
 
     // Export password generation parameters
     const val PASSWORD_SET_SIZE = 12
+
+    const val AES_KEY = "AES"
+    const val SEED_BYTES = 32
 }

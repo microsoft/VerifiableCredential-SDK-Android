@@ -14,6 +14,8 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.map
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import com.microsoft.did.sdk.util.log.SdkLog
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -35,12 +37,16 @@ class LinkedDomainsService @Inject constructor(
             if (domainUrls.isEmpty())
                 return@runResultTry Result.Success(LinkedDomainMissing)
             val domainUrl = domainUrls.first()
-            val wellKnownConfigDocument = getWellKnownConfigDocument(domainUrl).abortOnError()
-            wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
-                val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
-                if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainVerified(domainUrl))
-            }
-            Result.Success(LinkedDomainUnVerified(domainUrl))
+            val hostname = URL(domainUrl).host
+            val wellKnownConfigDocumentResult = getWellKnownConfigDocument(domainUrl)
+            if (wellKnownConfigDocumentResult is Result.Success) {
+                val wellKnownConfigDocument = wellKnownConfigDocumentResult.payload
+                wellKnownConfigDocument.linkedDids.forEach { linkedDidJwt ->
+                    val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
+                    if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainVerified(hostname))
+                }
+            } else SdkLog.d("Unable to fetch well-known config document from $domainUrl")
+            Result.Success(LinkedDomainUnVerified(hostname))
         }
     }
 

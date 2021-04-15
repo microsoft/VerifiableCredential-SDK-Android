@@ -23,15 +23,15 @@ class EncryptedKeyStoreInstrumentedTest {
 
     @Test
     fun saveAndGet() {
-        keyStore.storeKey(signingJwk, "key1")
+        keyStore.storeKey("key1", signingJwk)
         val actualKey = keyStore.getKey("key1")
         assertThat(signingJwk).isEqualToComparingFieldByFieldRecursively(actualKey)
     }
 
     @Test
     fun overwriteKey() {
-        keyStore.storeKey(signingJwk, "key2")
-        keyStore.storeKey(updateJwk, "key2")
+        keyStore.storeKey("key2", signingJwk)
+        keyStore.storeKey("key2", updateJwk)
         val actualKey = keyStore.getKey("key2")
         assertThat(actualKey).isEqualToComparingFieldByFieldRecursively(updateJwk)
     }

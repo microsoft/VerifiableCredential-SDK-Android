@@ -8,6 +8,7 @@ package com.microsoft.did.sdk.credential.service
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.attestations.PresentationAttestation
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
+import com.microsoft.did.sdk.util.controlflow.ValidatorException
 
 /**
  * Response formed from a Request.
@@ -25,7 +26,7 @@ class IssuanceResponse(override val request: IssuanceRequest) :
 }
 
 class PresentationResponse(override val request: PresentationRequest) :
-    Response(request, request.content.redirectUrl) {
+    Response(request, request.content.clientId ?: throw ValidatorException("No audience in presentation request")) {
     val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
 }
 

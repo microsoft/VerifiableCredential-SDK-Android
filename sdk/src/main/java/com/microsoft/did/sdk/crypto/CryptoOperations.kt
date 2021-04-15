@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.crypto
 
+import com.microsoft.did.sdk.util.Constants.SEED_BYTES
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -26,44 +27,42 @@ object CryptoOperations {
         Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
     }
 
-    fun sign(payload: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
+    fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
         val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
-        signer
-            .apply {
-                initSign(signingKey)
-                update(payload)
-                if (alg.spec != null) setParameter(alg.spec)
-            }
+        signer.apply {
+            initSign(signingKey)
+            update(digest)
+            if (alg.spec != null) setParameter(alg.spec)
+        }
         return signer.sign()
     }
 
-    fun verify(payload: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
+    fun verify(digest: ByteArray, signature: ByteArray, publicKey: PublicKey, alg: SigningAlgorithm): Boolean {
         val verifier = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
-        verifier
-            .apply {
-                initVerify(publicKey)
-                this.update(payload)
-                if (alg.spec != null) setParameter(alg.spec)
-            }
+        verifier.apply {
+            initVerify(publicKey)
+            update(digest)
+            if (alg.spec != null) setParameter(alg.spec)
+        }
         return verifier.verify(signature)
     }
 
-    fun digest(payload: ByteArray, alg: DigestAlgorithm): ByteArray {
+    fun digest(preImage: ByteArray, alg: DigestAlgorithm): ByteArray {
         val messageDigest =
             if (alg.provider == null) MessageDigest.getInstance(alg.name) else MessageDigest.getInstance(alg.name, alg.provider)
-        return messageDigest.digest(payload)
+        return messageDigest.digest(preImage)
     }
 
-    fun encrypt(payload: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
+    fun encrypt(plainText: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
         val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
         cipher.init(ENCRYPT_MODE, key)
-        return cipher.doFinal(payload)
+        return cipher.doFinal(plainText)
     }
 
-    fun decrypt(payload: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
+    fun decrypt(cipherText: ByteArray, key: SecretKey, alg: CipherAlgorithm): ByteArray {
         val cipher = if (alg.provider == null) Cipher.getInstance(alg.name) else Cipher.getInstance(alg.name, alg.provider)
         cipher.init(DECRYPT_MODE, key)
-        return cipher.doFinal(payload)
+        return cipher.doFinal(cipherText)
     }
 
     fun computeMac(payload: ByteArray, key: SecretKey, alg: MacAlgorithm): ByteArray {
@@ -89,11 +88,8 @@ object CryptoOperations {
         return factory.generatePublic(alg.keySpec) as T
     }
 
-    /**
-     * Generates a 256 bit seed.
-     */
     fun generateSeed(): ByteArray {
-        val randomNumberGenerator = SecureRandom()
-        return randomNumberGenerator.generateSeed(16)
+        val secureRandom = SecureRandom()
+        return secureRandom.generateSeed(SEED_BYTES)
     }
 }

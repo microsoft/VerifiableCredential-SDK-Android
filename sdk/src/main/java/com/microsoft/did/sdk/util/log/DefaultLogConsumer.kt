@@ -14,6 +14,14 @@ class DefaultLogConsumer : SdkLog.Consumer {
         }
     }
 
+    override fun event(name: String, properties: Map<String, String>?) {
+        val sb = StringBuilder()
+        properties?.forEach {
+            sb.append("${it.key}: ${it.value}\n")
+        }
+        Log.i(name, sb.toString())
+    }
+
     private fun getAndroidLogLevel(logLevel: SdkLog.Level): Int {
         return logLevel.severity() + 2
     }
