@@ -7,4 +7,4 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 class MicrosoftBackup2020Data (
     val walletMetadata: WalletMetadata,
     val verifiableCredentials: List<Pair<VerifiableCredential, VCMetadata>>
-) : UnprotectedBackupOptions()
+) : UnprotectedBackupData()

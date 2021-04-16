@@ -12,7 +12,7 @@ import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020Data
 import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
-import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupOptions
+import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
@@ -41,7 +41,7 @@ class BackupAndRestoreService @Inject constructor(
         }
     }
 
-    private suspend fun createUnprotectedBackup(options: UnprotectedBackupOptions): Result<UnprotectedBackup> {
+    private suspend fun createUnprotectedBackup(options: UnprotectedBackupData): Result<UnprotectedBackup> {
         return when (options) {
             is MicrosoftBackup2020Data -> {
                 microsoftBackupSerializer.create(options)
@@ -56,7 +56,7 @@ class BackupAndRestoreService @Inject constructor(
         return jweBackupFactory.parseBackup(backupFile);
     }
 
-    suspend fun restoreBackup(options: EncryptedBackupData): Result<UnprotectedBackupOptions> {
+    suspend fun restoreBackup(options: EncryptedBackupData): Result<UnprotectedBackupData> {
         return when (options) {
             is PasswordEncryptedBackupData -> {
                 when (val backupAttempt = options.backup.decrypt(options.password)) {
@@ -70,7 +70,7 @@ class BackupAndRestoreService @Inject constructor(
         }
     }
 
-    private suspend fun importBackup(backup: UnprotectedBackup): Result<UnprotectedBackupOptions> {
+    private suspend fun importBackup(backup: UnprotectedBackup): Result<UnprotectedBackupData> {
         return when (backup) {
             is MicrosoftUnprotectedBackup2020 -> {
                 microsoftBackupSerializer.import(backup)

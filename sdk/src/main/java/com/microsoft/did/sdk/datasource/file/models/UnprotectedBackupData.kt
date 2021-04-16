@@ -2,4 +2,4 @@
 
 package com.microsoft.did.sdk.datasource.file.models
 
-abstract class UnprotectedBackupOptions
+abstract class UnprotectedBackupData
