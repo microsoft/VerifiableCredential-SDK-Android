@@ -12,8 +12,4 @@ import kotlinx.serialization.modules.subclass
 @Serializable
 abstract class UnprotectedBackup {
     abstract val type: String
-
-    fun toString(jsonSerializer: Json): String {
-        return jsonSerializer.encodeToString(this)
-    }
 }
