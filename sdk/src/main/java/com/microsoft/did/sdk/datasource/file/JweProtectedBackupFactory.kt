@@ -29,7 +29,7 @@ class JweProtectedBackupFactory @Inject constructor(
         }
         val alg = token.getKeyAlgorithm()
         return if (alg.name.startsWith("PBE")) {
-            Result.Success(PasswordProtectedBackup(token, jsonSerializer))
+            Result.Success(PasswordProtectedBackup(token))
         } else {
             Result.Failure(UnknownProtectionMethod("Unknown backup protection method: $alg"))
         }
@@ -43,6 +43,6 @@ class JweProtectedBackupFactory @Inject constructor(
             password.toByteArray()
         ).build()
         token.encrypt(secretKey)
-        return Result.Success(PasswordProtectedBackup(token, jsonSerializer))
+        return Result.Success(PasswordProtectedBackup(token))
     }
 }

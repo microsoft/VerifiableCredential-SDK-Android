@@ -15,10 +15,9 @@ import javax.crypto.spec.SecretKeySpec
 
 class PasswordProtectedBackup internal constructor(
     override val jweToken: JweToken,
-    val serializer: Json,
 ) : JweProtectedBackup() {
 
-    internal fun decrypt(password: String): UnprotectedBackup? {
+    internal fun decrypt(password: String, serializer: Json): UnprotectedBackup? {
         // this can be a very long operation, thus the suspend
         val secretKey = SecretKeySpec(
             password.toByteArray(),

@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import kotlinx.serialization.json.Json
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +26,8 @@ import javax.inject.Singleton
 @Singleton
 class BackupAndRestoreService @Inject constructor(
     private val jweBackupFactory: JweProtectedBackupFactory,
-    private val microsoftBackupSerializer: MicrosoftBackupSerializer
+    private val microsoftBackupSerializer: MicrosoftBackupSerializer,
+    private val serializer: Json
 ) {
     suspend fun createBackup(options: ProtectedBackupData): Result<JweProtectedBackup> {
         return when (options) {
@@ -61,7 +63,7 @@ class BackupAndRestoreService @Inject constructor(
     suspend fun restoreBackup(options: EncryptedBackupData): Result<UnprotectedBackupData> {
         return when (options) {
             is PasswordEncryptedBackupData -> {
-                val backupAttempt = options.backup.decrypt(options.password)
+                val backupAttempt = options.backup.decrypt(options.password, serializer);
                 if (backupAttempt != null) {
                     importBackup(backupAttempt)
                 } else {
