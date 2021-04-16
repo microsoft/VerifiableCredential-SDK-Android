@@ -39,9 +39,8 @@ class JweProtectedBackupFactory @Inject constructor(
         val data = unprotectedBackup.toString(jsonSerializer)
         val token = JweToken(data, JWEAlgorithm.PBES2_HS512_A256KW)
         token.contentType = unprotectedBackup.type
-        val words = password.split(Regex("\\s+")).filter { it.isNotBlank() }
         val secretKey = OctetSequenceKey.Builder(
-            words.joinToString(" ").toByteArray()
+            password.toByteArray()
         ).build()
         token.encrypt(secretKey)
         return Result.Success(PasswordProtectedBackup(token, jsonSerializer))

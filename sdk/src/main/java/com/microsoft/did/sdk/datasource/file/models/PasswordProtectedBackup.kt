@@ -18,19 +18,17 @@ class PasswordProtectedBackup internal constructor(
     val serializer: Json,
 ) : JweProtectedBackup() {
 
-    suspend fun decrypt(password: String): Result<UnprotectedBackup> {
+    internal fun decrypt(password: String): UnprotectedBackup? {
         // this can be a very long operation, thus the suspend
-        return runResultTry {
-            val secretKey = SecretKeySpec(
-                password.toByteArray(),
-                "RAW"
-            )
-            val data = jweToken.decrypt(privateKey = secretKey);
-            if (data != null) {
-                Result.Success(payload = serializer.decodeFromString(UnprotectedBackup.serializer(), String(data)))
-            } else {
-                Result.Failure(BadPassword("Failed to decrypt"))
-            }
+        val secretKey = SecretKeySpec(
+            password.toByteArray(),
+            "RAW"
+        )
+        val data = jweToken.decrypt(privateKey = secretKey);
+        return if (data != null) {
+            serializer.decodeFromString(UnprotectedBackup.serializer(), String(data))
+        } else {
+            null
         }
     }
 }

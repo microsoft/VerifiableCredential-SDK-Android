@@ -13,9 +13,11 @@ import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
+import com.microsoft.did.sdk.util.controlflow.BadPassword
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
+import com.microsoft.did.sdk.util.controlflow.runResultTry
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,9 +61,11 @@ class BackupAndRestoreService @Inject constructor(
     suspend fun restoreBackup(options: EncryptedBackupData): Result<UnprotectedBackupData> {
         return when (options) {
             is PasswordEncryptedBackupData -> {
-                when (val backupAttempt = options.backup.decrypt(options.password)) {
-                    is Result.Success -> importBackup(backupAttempt.payload)
-                    is Result.Failure -> backupAttempt
+                val backupAttempt = options.backup.decrypt(options.password)
+                if (backupAttempt != null) {
+                    importBackup(backupAttempt)
+                } else {
+                    Result.Failure(BadPassword("Failed to decrypt"))
                 }
             }
             else -> {
