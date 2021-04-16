@@ -114,7 +114,7 @@ dependencies {
 
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0-rc03"
-    implementation "org.bouncycastle:bcprov-jdk15to18:$org_bouncycastle"
+    implementation "org.bouncycastle:bcprov-jdk15to18:$org_bouncycastle_bcprov"
 
     api 'com.google.guava:guava:28.1-android'
     // JWE/JWS
