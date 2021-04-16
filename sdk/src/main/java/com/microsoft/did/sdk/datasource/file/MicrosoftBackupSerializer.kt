@@ -2,18 +2,15 @@
 
 package com.microsoft.did.sdk.datasource.file
 
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupOptions
+import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020Data
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.file.models.VCMetadata
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
-import com.microsoft.did.sdk.util.controlflow.MalformedMetadata
-import com.microsoft.did.sdk.util.controlflow.MalformedVerifiableCredential
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.nimbusds.jose.jwk.JWK
@@ -29,10 +26,10 @@ class MicrosoftBackupSerializer @Inject constructor(
     private val jsonSerializer: Json
 ) {
 
-    suspend fun create(options: MicrosoftUnprotectedBackupOptions): Result<MicrosoftUnprotectedBackup2020> {
+    suspend fun create(a2020Data: MicrosoftBackup2020Data): Result<MicrosoftUnprotectedBackup2020> {
         val vcMap = mutableMapOf<String, String>();
         val vcMetaMap = mutableMapOf<String, VCMetadata>();
-        options.verifiableCredentials.forEach { verifiableCredentailMetadataPair ->
+        a2020Data.verifiableCredentials.forEach { verifiableCredentailMetadataPair ->
             vcMap.put(verifiableCredentailMetadataPair.first.jti, verifiableCredentailMetadataPair.first.raw);
             vcMetaMap.put(verifiableCredentailMetadataPair.first.jti, verifiableCredentailMetadataPair.second);
         }
@@ -44,7 +41,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         ))
     }
 
-    suspend fun import(backup: MicrosoftUnprotectedBackup2020): Result<MicrosoftUnprotectedBackupOptions> {
+    suspend fun import(backup: MicrosoftUnprotectedBackup2020): Result<MicrosoftBackup2020Data> {
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
         try {
@@ -61,7 +58,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }
 
-        return Result.Success(MicrosoftUnprotectedBackupOptions(
+        return Result.Success(MicrosoftBackup2020Data(
             walletMetadata = backup.metaInf,
             verifiableCredentials = backup.vcsToIterator(jsonSerializer).asSequence().toList()
         ))

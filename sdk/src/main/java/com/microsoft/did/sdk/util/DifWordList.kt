@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.file.models
+package com.microsoft.did.sdk.util
 
 import android.content.Context
 import android.content.res.AssetManager
-import com.microsoft.did.sdk.util.Constants
 import java.io.InputStreamReader
 import java.security.SecureRandom
 import java.util.Locale
 import java.util.regex.Pattern
-import javax.inject.Inject
 
 object DifWordList {
     lateinit var wordList: List<String>
@@ -23,7 +21,7 @@ object DifWordList {
 
     fun generateDifPassword(): String {
         val random = SecureRandom()
-        val wordSet = hashSetOf<String>()
+        val wordSet = linkedSetOf<String>()
         for (index in 0 until Constants.PASSWORD_SET_SIZE) {
             var wordIndex: Int
             var word: String

@@ -2,6 +2,6 @@
 
 package com.microsoft.did.sdk.datasource.file.models
 
-abstract class JweEncryptedBackupOptions {
-    abstract val backup: JweProtectedBackup
+abstract class ProtectedBackupData {
+    abstract val unprotectedBackup: UnprotectedBackupOptions
 }

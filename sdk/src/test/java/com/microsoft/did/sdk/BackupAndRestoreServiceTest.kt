@@ -5,7 +5,7 @@ package com.microsoft.did.sdk
 // only used for type
 import android.content.Context
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.datasource.file.models.DifWordList
+import com.microsoft.did.sdk.util.DifWordList
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import io.mockk.every
 import io.mockk.mockk
