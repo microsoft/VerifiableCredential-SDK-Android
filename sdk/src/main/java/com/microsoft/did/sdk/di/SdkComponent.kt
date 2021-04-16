@@ -15,6 +15,8 @@ import com.microsoft.did.sdk.PresentationService
 import com.microsoft.did.sdk.RevocationService
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -59,5 +61,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun userAgentInfo(@Named("userAgentInfo") userAgentInfo: String): Builder
+
+        @BindsInstance
+        fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
     }
 }

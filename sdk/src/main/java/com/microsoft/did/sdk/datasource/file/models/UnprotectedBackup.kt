@@ -13,16 +13,6 @@ import kotlinx.serialization.modules.subclass
 abstract class UnprotectedBackup {
     abstract val type: String
 
-    companion object {
-        val serializer = Json {
-            serializersModule = SerializersModule {
-                polymorphic(UnprotectedBackup::class) {
-                    subclass(MicrosoftUnprotectedBackup2020::class)
-                }
-            }
-        }
-    }
-
     fun toString(jsonSerializer: Json): String {
         return jsonSerializer.encodeToString(this)
     }

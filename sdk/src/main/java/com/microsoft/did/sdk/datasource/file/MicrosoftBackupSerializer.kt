@@ -121,7 +121,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         keyStore: EncryptedKeyStore
     ) {
         if (!keyStore.containsKey(jwk.keyID)) {
-            keyStore.storeKey(jwk, jwk.keyID)
+            keyStore.storeKey(jwk.keyID, jwk)
         }
     }
 }

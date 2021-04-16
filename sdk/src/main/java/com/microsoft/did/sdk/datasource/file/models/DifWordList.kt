@@ -7,6 +7,8 @@ import android.content.res.AssetManager
 import com.microsoft.did.sdk.util.Constants
 import java.io.InputStreamReader
 import java.security.SecureRandom
+import java.util.Locale
+import java.util.regex.Pattern
 import javax.inject.Inject
 
 object DifWordList {
@@ -32,5 +34,9 @@ object DifWordList {
             wordSet.add(word)
         }
         return wordSet.joinToString(" ")
+    }
+
+    fun normalizePassword(password: String): String {
+        return password.split(Pattern.compile("\\s+")).filter { it.isNotBlank() }.joinToString(" ") { it.toLowerCase(Locale.ENGLISH) }
     }
 }

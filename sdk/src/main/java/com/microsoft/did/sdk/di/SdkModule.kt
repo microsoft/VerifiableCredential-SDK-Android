@@ -17,6 +17,8 @@ import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCrede
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
+import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
 import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor
 import com.microsoft.did.sdk.identifier.registrars.Registrar
@@ -25,6 +27,10 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.plus
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -105,8 +111,16 @@ class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultJsonSerializer(): Json {
+    fun defaultJsonSerializer(
+        @Named("polymorphicJsonSerializer") additionalJsonSerializers: SerializersModule
+    ): Json {
         return Json {
+            serializersModule = additionalJsonSerializers +
+                SerializersModule {
+                polymorphic(UnprotectedBackup::class) {
+                    subclass(MicrosoftUnprotectedBackup2020::class)
+                }
+            }
             encodeDefaults = false
             ignoreUnknownKeys = true
             isLenient = true
