@@ -27,7 +27,7 @@ import java.security.Key
 const val SALT_LENGTH = 8
 const val ITERATION_COUNT = 100 * 1000
 
-class JweToken private constructor (
+class JweToken private constructor(
     private var jweToken: JWEObject
 ) {
     var contentType: String? = jweToken.header.contentType
@@ -43,18 +43,22 @@ class JweToken private constructor (
     val contentAsString: String
         get() = this.jweToken.payload.toString()
 
-    constructor(plaintext: String, algorithm: JWEAlgorithm = JWEAlgorithm.ECDH_ES_A256KW,
-                encryption: EncryptionMethod = EncryptionMethod.A256CBC_HS512): this(
+    constructor(
+        plaintext: String, algorithm: JWEAlgorithm = JWEAlgorithm.ECDH_ES_A256KW,
+        encryption: EncryptionMethod = EncryptionMethod.A256CBC_HS512
+    ) : this(
         JWEObject(
             JWEHeader(algorithm, encryption),
             Payload(plaintext)
-        )) {}
+        )
+    ) {
+    }
 
     fun getKeyAlgorithm(): JWEAlgorithm {
         return jweToken.header.algorithm
     }
 
-    fun encrypt(publicKey: JWK)  {
+    fun encrypt(publicKey: JWK) {
         var encrypter: JWEEncrypter? = null
         when (publicKey::class) {
             ECKey::class -> {

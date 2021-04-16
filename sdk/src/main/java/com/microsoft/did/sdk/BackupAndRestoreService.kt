@@ -48,7 +48,7 @@ class BackupAndRestoreService @Inject constructor(
             }
             else -> {
                 Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
-             }
+            }
         }
     }
 

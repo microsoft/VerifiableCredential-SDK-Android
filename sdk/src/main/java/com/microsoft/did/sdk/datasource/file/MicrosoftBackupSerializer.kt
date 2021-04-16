@@ -33,12 +33,14 @@ class MicrosoftBackupSerializer @Inject constructor(
             vcMap.put(verifiableCredentailMetadataPair.first.jti, verifiableCredentailMetadataPair.first.raw);
             vcMetaMap.put(verifiableCredentailMetadataPair.first.jti, verifiableCredentailMetadataPair.second);
         }
-        return Result.Success(MicrosoftUnprotectedBackup2020(
-            vcs = vcMap,
-            vcsMetaInf = vcMetaMap,
-            metaInf = backupData.walletMetadata,
-            identifiers = rawIdentifierUtility.getAllIdentifiers()
-        ))
+        return Result.Success(
+            MicrosoftUnprotectedBackup2020(
+                vcs = vcMap,
+                vcsMetaInf = vcMetaMap,
+                metaInf = backupData.walletMetadata,
+                identifiers = rawIdentifierUtility.getAllIdentifiers()
+            )
+        )
     }
 
     suspend fun import(backup: MicrosoftUnprotectedBackup2020): Result<MicrosoftBackup2020Data> {
@@ -58,10 +60,12 @@ class MicrosoftBackupSerializer @Inject constructor(
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }
 
-        return Result.Success(MicrosoftBackup2020Data(
-            walletMetadata = backup.metaInf,
-            verifiableCredentials = backup.vcsToIterator(jsonSerializer).asSequence().toList()
-        ))
+        return Result.Success(
+            MicrosoftBackup2020Data(
+                walletMetadata = backup.metaInf,
+                verifiableCredentials = backup.vcsToIterator(jsonSerializer).asSequence().toList()
+            )
+        )
     }
 
     private fun parseRawIdentifier(
@@ -76,7 +80,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         val excludeKeysForUse = listOf(updateKeyRef, recoveryKeyRef)
         val id = Identifier(
             identifierData.id,
-            getKeyFromKeySet(KeyUse.SIGNATURE, keySet, excludeKeysForUse)?.keyID  ?: "",
+            getKeyFromKeySet(KeyUse.SIGNATURE, keySet, excludeKeysForUse)?.keyID ?: "",
             getKeyFromKeySet(KeyUse.ENCRYPTION, keySet, excludeKeysForUse)?.keyID ?: "",
             recoveryKeyRef,
             updateKeyRef,
@@ -85,7 +89,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         return Pair(id, keySet)
     }
 
-    private fun getKeyFromKeySet( keyUse: KeyUse, keySet: Set<JWK>, exclude: List<String>? = null): JWK? {
+    private fun getKeyFromKeySet(keyUse: KeyUse, keySet: Set<JWK>, exclude: List<String>? = null): JWK? {
         return when (keyUse) {
             KeyUse.SIGNATURE -> {
                 keySet.firstOrNull { keyIsSigning(it) && !(exclude?.contains(it.keyID) ?: false) }
