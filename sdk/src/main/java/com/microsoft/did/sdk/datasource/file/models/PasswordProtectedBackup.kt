@@ -20,10 +20,9 @@ class PasswordProtectedBackup internal constructor(
 
     suspend fun decrypt(password: String): Result<UnprotectedBackup> {
         // this can be a very long operation, thus the suspend
-        val words = password.split(Regex("\\s+")).filter { it.isNotBlank() }
         return runResultTry {
             val secretKey = SecretKeySpec(
-                words.joinToString(" ").toByteArray(),
+                password.toByteArray(),
                 "RAW"
             )
             val data = jweToken.decrypt(privateKey = secretKey);

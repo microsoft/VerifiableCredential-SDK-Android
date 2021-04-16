@@ -86,6 +86,11 @@ class JweToken private constructor (
     }
 
     fun decrypt(keyStore: EncryptedKeyStore? = null, privateKey: Key? = null): ByteArray? {
+        // we're already decrypted
+        if (jweToken.state == JWEObject.State.DECRYPTED || jweToken.state == JWEObject.State.UNENCRYPTED) {
+            return jweToken.payload.toBytes()
+        }
+
         // attempt with a specific key
         var decrypter: JWEDecrypter? = null
         if (privateKey != null) {

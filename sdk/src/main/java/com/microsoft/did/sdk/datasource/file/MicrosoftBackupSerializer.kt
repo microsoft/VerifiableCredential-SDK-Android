@@ -58,7 +58,6 @@ class MicrosoftBackupSerializer @Inject constructor(
         } catch (exception: Exception) {
             return Result.Failure(MalformedIdentity("unhandled exception thrown", exception))
         }
-
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }
 
@@ -71,23 +70,47 @@ class MicrosoftBackupSerializer @Inject constructor(
     private fun parseRawIdentifier(
         identifierData: RawIdentity
     ): Pair<Identifier, Set<JWK>> {
+        val updateKeyRef: String = identifierData.updateKey
+        val recoveryKeyRef: String = identifierData.recoveryKey
+        val keySet = rawIdentifierToKeySet(identifierData, updateKeyRef, recoveryKeyRef)
+        if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
+            throw MalformedIdentity("update and recovery key required")
+        }
+        val excludeKeysForUse = listOf(updateKeyRef, recoveryKeyRef)
+        val id = Identifier(
+            identifierData.id,
+            getKeyFromKeySet(KeyUse.SIGNATURE, keySet, excludeKeysForUse)?.keyID  ?: "",
+            getKeyFromKeySet(KeyUse.ENCRYPTION, keySet, excludeKeysForUse)?.keyID ?: "",
+            recoveryKeyRef,
+            updateKeyRef,
+            identifierData.name
+        )
+        return Pair(id, keySet)
+    }
+
+    private fun getKeyFromKeySet( keyUse: KeyUse, keySet: Set<JWK>, exclude: List<String>? = null): JWK? {
+        return when (keyUse) {
+            KeyUse.SIGNATURE -> {
+                keySet.firstOrNull { keyIsSigning(it) && !(exclude?.contains(it.keyID) ?: false) }
+            }
+            KeyUse.ENCRYPTION -> {
+                keySet.firstOrNull { keyIsEncrypting(it) && !(exclude?.contains(it.keyID) ?: false) }
+            }
+            else -> {
+                null
+            }
+        }
+    }
+
+    private fun rawIdentifierToKeySet(identifierData: RawIdentity, updateKeyRef: String, recoveryKeyRef: String): Set<JWK> {
         var signingKeyRef: String = ""
         var encryptingKeyRef: String = ""
-        val recoveryKeyRef: String = identifierData.recoveryKey
-        val updateKeyRef: String = identifierData.updateKey
         val keySet = mutableSetOf<JWK>()
         for (key in identifierData.keys) {
-            if (signingKeyRef.isBlank() &&
-                (key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
-                    key.keyUse == KeyUse.SIGNATURE)
-            ) {
+            if (signingKeyRef.isBlank() && keyIsSigning(key)) {
                 signingKeyRef = getKidFromJWK(key)
                 keySet.add(key)
-            } else if (encryptingKeyRef.isBlank() &&
-                (key.keyOperations?.any { listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT).contains(it) } == true ||
-                    key.keyOperations?.any { listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY).contains(it) } == true ||
-                    key.keyUse == KeyUse.ENCRYPTION)
-            ) {
+            } else if (encryptingKeyRef.isBlank() && keyIsEncrypting(key)) {
                 encryptingKeyRef = getKidFromJWK(key)
                 keySet.add(key)
             } else if (key.keyID == updateKeyRef) {
@@ -98,18 +121,18 @@ class MicrosoftBackupSerializer @Inject constructor(
                 keySet.add(key)
             }
         }
-        if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
-            throw MalformedIdentity("update and recovery key required")
-        }
-        val id = Identifier(
-            identifierData.id,
-            signingKeyRef,
-            encryptingKeyRef,
-            recoveryKeyRef,
-            updateKeyRef,
-            identifierData.name
-        )
-        return Pair(id, keySet)
+        return keySet
+    }
+
+    private fun keyIsSigning(key: JWK): Boolean {
+        return key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
+            key.keyUse == KeyUse.SIGNATURE
+    }
+
+    private fun keyIsEncrypting(key: JWK): Boolean {
+        return key.keyOperations?.any { listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT).contains(it) } == true ||
+            key.keyOperations?.any { listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY).contains(it) } == true ||
+            key.keyUse == KeyUse.ENCRYPTION
     }
 
     private fun getKidFromJWK(jwk: JWK): String {
