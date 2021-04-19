@@ -11,15 +11,4 @@ import java.io.OutputStream
 
 abstract class JweProtectedBackup {
     abstract val jweToken: JweToken
-
-    fun writeOutput(output: OutputStream): Result<Unit> {
-        return try {
-            output.write(jweToken.serialize().toByteArray())
-            output.flush()
-            output.close()
-            Result.Success(payload = Unit)
-        } catch (exception: IOException) {
-            Result.Failure(IoFailure("Failed to write backup", exception))
-        }
-    }
 }

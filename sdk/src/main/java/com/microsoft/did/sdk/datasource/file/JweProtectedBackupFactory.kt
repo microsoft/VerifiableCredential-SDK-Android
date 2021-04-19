@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackup
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
+import com.microsoft.did.sdk.util.controlflow.IoFailure
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
@@ -14,7 +15,9 @@ import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,5 +50,13 @@ class JweProtectedBackupFactory @Inject constructor(
         ).build()
         token.encrypt(secretKey)
         return Result.Success(PasswordProtectedBackup(token))
+    }
+
+
+
+    internal fun writeOutput(backup: JweProtectedBackup, output: OutputStream) {
+            output.write(backup.jweToken.serialize().toByteArray())
+            output.flush()
+            output.close()
     }
 }
