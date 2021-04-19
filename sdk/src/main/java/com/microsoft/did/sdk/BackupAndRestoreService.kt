@@ -60,7 +60,7 @@ class BackupAndRestoreService @Inject constructor(
     private suspend fun createUnprotectedBackup(options: UnprotectedBackupData): Result<UnprotectedBackup> {
         return when (options) {
             is MicrosoftBackup2020Data -> {
-                microsoftBackupSerializer.create(options)
+                Result.Success(microsoftBackupSerializer.create(options))
             }
             else -> {
                 Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
@@ -91,7 +91,7 @@ class BackupAndRestoreService @Inject constructor(
     private suspend fun importBackup(backup: UnprotectedBackup): Result<UnprotectedBackupData> {
         return when (backup) {
             is MicrosoftUnprotectedBackup2020 -> {
-                microsoftBackupSerializer.import(backup)
+                Result.Success(microsoftBackupSerializer.import(backup))
             }
             else -> {
                 Result.Failure(UnknownBackupFormat("Unknown backup file: ${backup::class.qualifiedName}"))
