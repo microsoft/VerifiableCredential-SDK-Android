@@ -18,7 +18,10 @@ class PasswordProtectedBackup internal constructor(
 ) : JweProtectedBackup() {
 
     internal fun decrypt(password: String, serializer: Json): UnprotectedBackup? {
-        // this can be a very long operation, thus the suspend
+        // empty passwords throw if attempted
+        if (password.isEmpty()) {
+            return null
+        }
         val secretKey = SecretKeySpec(
             password.toByteArray(),
             "RAW"
