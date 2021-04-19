@@ -14,12 +14,15 @@ import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.BadPassword
+import com.microsoft.did.sdk.util.controlflow.IoFailure
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json
+import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,6 +32,15 @@ class BackupAndRestoreService @Inject constructor(
     private val microsoftBackupSerializer: MicrosoftBackupSerializer,
     private val serializer: Json
 ) {
+    fun writeBackup(backup: JweProtectedBackup, output: OutputStream): Result<Unit> {
+        return try {
+            jweBackupFactory.writeOutput(backup, output)
+            return Result.Success(Unit)
+        } catch (exception: IOException) {
+            Result.Failure(IoFailure("Failed to write backup", exception))
+        }
+    }
+
     suspend fun createBackup(options: ProtectedBackupData): Result<JweProtectedBackup> {
         return when (options) {
             is PasswordProtectedBackupData -> {
