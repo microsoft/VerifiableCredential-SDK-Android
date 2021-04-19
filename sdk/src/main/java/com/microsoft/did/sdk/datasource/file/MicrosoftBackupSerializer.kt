@@ -18,7 +18,9 @@ import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class MicrosoftBackupSerializer @Inject constructor(
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,

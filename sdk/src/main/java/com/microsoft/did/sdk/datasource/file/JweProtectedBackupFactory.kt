@@ -16,11 +16,13 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.InputStream
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class JweProtectedBackupFactory @Inject constructor(
     private val jsonSerializer: Json
 ) {
-    suspend fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
+    fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
         val jweString = String(backupFile.readBytes())
         val token = JweToken.deserialize(jweString)
         val cty = token.contentType
@@ -36,7 +38,7 @@ class JweProtectedBackupFactory @Inject constructor(
         }
     }
 
-    suspend fun createPasswordBackup(unprotectedBackup: UnprotectedBackup, password: String): Result<PasswordProtectedBackup> {
+    fun createPasswordBackup(unprotectedBackup: UnprotectedBackup, password: String): Result<PasswordProtectedBackup> {
         val data = jsonSerializer.encodeToString(unprotectedBackup)
         val token = JweToken(data, JWEAlgorithm.PBES2_HS512_A256KW)
         token.contentType = unprotectedBackup.type

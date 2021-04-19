@@ -56,7 +56,7 @@ class BackupAndRestoreService @Inject constructor(
         }
     }
 
-    suspend fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
+    fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
         return jweBackupFactory.parseBackup(backupFile);
     }
 
