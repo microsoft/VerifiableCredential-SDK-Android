@@ -25,23 +25,23 @@ import javax.inject.Singleton
 class JweProtectedBackupFactory @Inject constructor(
     private val jsonSerializer: Json
 ) {
-    fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
+    fun parseBackup(backupFile: InputStream): JweProtectedBackup {
         val jweString = String(backupFile.readBytes())
         val token = JweToken.deserialize(jweString)
         val cty = token.contentType
         // for now we only know microsoft password, fail early.
         if (cty != MicrosoftUnprotectedBackup2020.MICROSOFT_BACKUP_TYPE) {
-            return Result.Failure(UnknownBackupFormat("Backup of an unknown format: $cty"))
+            throw UnknownBackupFormat("Backup of an unknown format: $cty")
         }
         val alg = token.getKeyAlgorithm()
         return if (alg.name.startsWith("PBE")) {
-            Result.Success(PasswordProtectedBackup(token))
+            return PasswordProtectedBackup(token)
         } else {
-            Result.Failure(UnknownProtectionMethod("Unknown backup protection method: $alg"))
+            throw UnknownProtectionMethod("Unknown backup protection method: $alg")
         }
     }
 
-    fun createPasswordBackup(unprotectedBackup: UnprotectedBackup, password: String): Result<PasswordProtectedBackup> {
+    fun createPasswordBackup(unprotectedBackup: UnprotectedBackup, password: String): PasswordProtectedBackup {
         val data = jsonSerializer.encodeToString(unprotectedBackup)
         val token = JweToken(data, JWEAlgorithm.PBES2_HS512_A256KW)
         token.contentType = unprotectedBackup.type
@@ -49,7 +49,7 @@ class JweProtectedBackupFactory @Inject constructor(
             password.toByteArray()
         ).build()
         token.encrypt(secretKey)
-        return Result.Success(PasswordProtectedBackup(token))
+        return PasswordProtectedBackup(token)
     }
 
 

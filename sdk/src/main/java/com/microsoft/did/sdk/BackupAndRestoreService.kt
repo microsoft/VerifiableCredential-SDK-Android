@@ -18,6 +18,7 @@ import com.microsoft.did.sdk.util.controlflow.IoFailure
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
+import com.microsoft.did.sdk.util.controlflow.andThen
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json
 import java.io.IOException
@@ -44,11 +45,9 @@ class BackupAndRestoreService @Inject constructor(
     suspend fun createBackup(options: ProtectedBackupData): Result<JweProtectedBackup> {
         return when (options) {
             is PasswordProtectedBackupData -> {
-                val backup = createUnprotectedBackup(options.unprotectedBackup)
-                if (backup is Result.Success) {
-                    jweBackupFactory.createPasswordBackup(backup.payload, options.password);
-                } else {
-                    backup as Result.Failure;
+                return createUnprotectedBackup(options.unprotectedBackup).andThen {
+                    backup ->
+                    Result.Success(jweBackupFactory.createPasswordBackup(backup, options.password));
                 }
             }
             else -> {
@@ -69,7 +68,7 @@ class BackupAndRestoreService @Inject constructor(
     }
 
     fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
-        return jweBackupFactory.parseBackup(backupFile);
+        return Result.Success(jweBackupFactory.parseBackup(backupFile));
     }
 
     suspend fun restoreBackup(options: EncryptedBackupData): Result<UnprotectedBackupData> {
