@@ -12,14 +12,6 @@ import java.io.OutputStream
 abstract class JweProtectedBackup {
     abstract val jweToken: JweToken
 
-    fun getBackupType(): String? {
-        return jweToken.contentType
-    }
-
-    fun getBackup(jsonSerializer: Json): UnprotectedBackup {
-        return jsonSerializer.decodeFromString(UnprotectedBackup.serializer(), jweToken.contentAsString)
-    }
-
     fun writeOutput(output: OutputStream): Result<Unit> {
         return try {
             output.write(jweToken.serialize().toByteArray())
