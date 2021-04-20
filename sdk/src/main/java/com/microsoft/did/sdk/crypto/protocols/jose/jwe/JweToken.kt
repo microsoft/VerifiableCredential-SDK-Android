@@ -61,13 +61,12 @@ class JweToken private constructor(
         return jweToken.header.algorithm
     }
 
-    fun encrypt(publicKey: JWK) {
+    fun encrypt(publicKey: JWK, overrideHeaders: JWEHeader? = null) {
         val encrypter = getEncrypter(publicKey)
-        val builder = JWEHeader.Builder(jweToken.header)
-            .contentType(contentType)
-            .keyID(publicKey.keyID)
-            .build()
-        jweToken = JWEObject(builder, jweToken.payload)
+
+        overrideHeaders?.let { headers ->
+            jweToken = JWEObject(headers, jweToken.payload)
+        }
         jweToken.encrypt(encrypter)
     }
 

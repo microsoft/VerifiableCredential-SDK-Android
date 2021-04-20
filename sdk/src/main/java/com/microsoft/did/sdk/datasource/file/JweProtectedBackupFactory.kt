@@ -11,7 +11,9 @@ import com.microsoft.did.sdk.util.controlflow.IoFailure
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
+import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
+import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -43,12 +45,14 @@ class JweProtectedBackupFactory @Inject constructor(
 
     fun createPasswordBackup(unprotectedBackup: UnprotectedBackup, password: String): PasswordProtectedBackup {
         val data = jsonSerializer.encodeToString(unprotectedBackup)
-        val token = JweToken(data, JWEAlgorithm.PBES2_HS512_A256KW)
-        token.contentType = unprotectedBackup.type
+        val token = JweToken(data)
+        val headers = JWEHeader.Builder(JWEAlgorithm.PBES2_HS512_A256KW, EncryptionMethod.A256CBC_HS512)
+            .contentType(unprotectedBackup.type)
+            .build()
         val secretKey = OctetSequenceKey.Builder(
             password.toByteArray()
         ).build()
-        token.encrypt(secretKey)
+        token.encrypt(secretKey, headers)
         return PasswordProtectedBackup(token)
     }
 

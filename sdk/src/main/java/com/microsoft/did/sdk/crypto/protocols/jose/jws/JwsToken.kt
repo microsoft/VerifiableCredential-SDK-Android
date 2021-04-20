@@ -1,6 +1,5 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
-import com.nimbusds.jose.JOSEObjectType
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
@@ -8,17 +7,15 @@ import com.nimbusds.jose.Payload
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.shaded.json.parser.ParseException
 import com.nimbusds.jose.util.Base64URL
 import java.security.PublicKey
 
 class JwsToken internal constructor(
     private var jwsObject: JWSObject
 ) {
+
     val keyId: String?
         get() = jwsObject.header.keyID
-    val type: JOSEObjectType?
-        get() = jwsObject.header.type
 
     companion object {
         fun deserialize(jws: String): JwsToken {
@@ -34,11 +31,10 @@ class JwsToken internal constructor(
         return jwsObject.serialize()
     }
 
-    fun sign(privateKey: JWK) {
-        val builder = JWSHeader.Builder(jwsObject.header)
-        keyId?.let { builder.keyID(it) }
-        type?.let { builder.type(it) }
-        jwsObject = JWSObject(builder.build(), jwsObject.payload)
+    fun sign(privateKey: JWK, overrideHeaders: JWSHeader? = null) {
+        overrideHeaders?.let {headers ->
+            jwsObject = JWSObject(headers, jwsObject.payload)
+        }
         val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)
         jwsObject.sign(signer)
     }
