@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.BadPassword
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JOSEException
@@ -91,7 +92,11 @@ class JweToken private constructor(
         }
 
         val decrypter = getDecrypter(keyStore, privateKey)
-        jweToken.decrypt(decrypter)
+        try {
+            jweToken.decrypt(decrypter)
+        } catch (exception: JOSEException) {
+            throw BadPassword("Failed to decrypt")
+        }
         return jweToken.payload.toBytes()
     }
 
