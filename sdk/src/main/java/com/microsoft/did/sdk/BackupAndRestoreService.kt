@@ -16,6 +16,7 @@ import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.BadPassword
 import com.microsoft.did.sdk.util.controlflow.IoFailure
 import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.RunResultTryContext
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
 import com.microsoft.did.sdk.util.controlflow.andThen
@@ -36,7 +37,7 @@ class BackupAndRestoreService @Inject constructor(
     fun writeBackup(backup: JweProtectedBackup, output: OutputStream): Result<Unit> {
         return try {
             jweBackupFactory.writeOutput(backup, output)
-            return Result.Success(Unit)
+            Result.Success(Unit)
         } catch (exception: IOException) {
             Result.Failure(IoFailure("Failed to write backup", exception))
         }
@@ -57,12 +58,14 @@ class BackupAndRestoreService @Inject constructor(
     }
 
     private suspend fun createUnprotectedBackup(options: UnprotectedBackupData): Result<UnprotectedBackup> {
-        return when (options) {
-            is MicrosoftBackup2020Data -> {
-                Result.Success(microsoftBackupSerializer.create(options))
-            }
-            else -> {
-                Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
+        return runResultTry {
+            when (options) {
+                is MicrosoftBackup2020Data -> {
+                    Result.Success(microsoftBackupSerializer.create(options))
+                }
+                else -> {
+                    throw UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}");
+                }
             }
         }
     }
@@ -72,28 +75,32 @@ class BackupAndRestoreService @Inject constructor(
     }
 
     suspend fun restoreBackup(options: EncryptedBackupData): Result<UnprotectedBackupData> {
-        return when (options) {
-            is PasswordEncryptedBackupData -> {
-                val backupAttempt = options.backup.decrypt(options.password, serializer);
-                if (backupAttempt != null) {
-                    importBackup(backupAttempt)
-                } else {
-                    Result.Failure(BadPassword("Failed to decrypt"))
+        return runResultTry {
+            when (options) {
+                is PasswordEncryptedBackupData -> {
+                    val backupAttempt = options.backup.decrypt(options.password, serializer);
+                    if (backupAttempt != null) {
+                        importBackup(backupAttempt)
+                    } else {
+                        throw BadPassword("Failed to decrypt")
+                    }
                 }
-            }
-            else -> {
-                Result.Failure(UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}"));
+                else -> {
+                    throw UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}");
+                }
             }
         }
     }
 
     private suspend fun importBackup(backup: UnprotectedBackup): Result<UnprotectedBackupData> {
-        return when (backup) {
-            is MicrosoftUnprotectedBackup2020 -> {
-                Result.Success(microsoftBackupSerializer.import(backup))
-            }
-            else -> {
-                Result.Failure(UnknownBackupFormat("Unknown backup file: ${backup::class.qualifiedName}"))
+        return runResultTry {
+            when (backup) {
+                is MicrosoftUnprotectedBackup2020 -> {
+                    Result.Success(microsoftBackupSerializer.import(backup))
+                }
+                else -> {
+                    throw UnknownBackupFormat("Unknown backup file: ${backup::class.qualifiedName}")
+                }
             }
         }
     }
