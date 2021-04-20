@@ -48,7 +48,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         var keySet = setOf<JWK>()
         try {
             backup.identifiers.forEach { raw ->
-                val pair = parseRawIdentifier(raw)
+                val pair = rawIdentifierUtility.parseRawIdentifier(raw)
                 identifiers.add(pair.first)
                 keySet = keySet.union(pair.second)
             }
@@ -64,78 +64,6 @@ class MicrosoftBackupSerializer @Inject constructor(
             walletMetadata = backup.metaInf,
             verifiableCredentials = backup.vcsToIterator(jsonSerializer).asSequence().toList()
         )
-    }
-
-    private fun parseRawIdentifier(
-        identifierData: RawIdentity
-    ): Pair<Identifier, Set<JWK>> {
-        val updateKeyRef: String = identifierData.updateKey
-        val recoveryKeyRef: String = identifierData.recoveryKey
-        val keySet = rawIdentifierToKeySet(identifierData, updateKeyRef, recoveryKeyRef)
-        if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
-            throw MalformedIdentity("update and recovery key required")
-        }
-        val excludeKeysForUse = listOf(updateKeyRef, recoveryKeyRef)
-        val id = Identifier(
-            identifierData.id,
-            getKeyFromKeySet(KeyUse.SIGNATURE, keySet, excludeKeysForUse)?.keyID ?: "",
-            getKeyFromKeySet(KeyUse.ENCRYPTION, keySet, excludeKeysForUse)?.keyID ?: "",
-            recoveryKeyRef,
-            updateKeyRef,
-            identifierData.name
-        )
-        return Pair(id, keySet)
-    }
-
-    private fun getKeyFromKeySet(keyUse: KeyUse, keySet: Set<JWK>, exclude: List<String>? = null): JWK? {
-        return when (keyUse) {
-            KeyUse.SIGNATURE -> {
-                keySet.firstOrNull { keyIsSigning(it) && !(exclude?.contains(it.keyID) ?: false) }
-            }
-            KeyUse.ENCRYPTION -> {
-                keySet.firstOrNull { keyIsEncrypting(it) && !(exclude?.contains(it.keyID) ?: false) }
-            }
-            else -> {
-                null
-            }
-        }
-    }
-
-    private fun rawIdentifierToKeySet(identifierData: RawIdentity, updateKeyRef: String, recoveryKeyRef: String): Set<JWK> {
-        var signingKeyRef: String = ""
-        var encryptingKeyRef: String = ""
-        val keySet = mutableSetOf<JWK>()
-        for (key in identifierData.keys) {
-            if (signingKeyRef.isBlank() && keyIsSigning(key)) {
-                signingKeyRef = getKidFromJWK(key)
-                keySet.add(key)
-            } else if (encryptingKeyRef.isBlank() && keyIsEncrypting(key)) {
-                encryptingKeyRef = getKidFromJWK(key)
-                keySet.add(key)
-            } else if (key.keyID == updateKeyRef) {
-                getKidFromJWK(key)
-                keySet.add(key)
-            } else if (key.keyID == recoveryKeyRef) {
-                getKidFromJWK(key)
-                keySet.add(key)
-            }
-        }
-        return keySet
-    }
-
-    private fun keyIsSigning(key: JWK): Boolean {
-        return key.keyOperations?.any { listOf(KeyOperation.SIGN, KeyOperation.VERIFY).contains(it) } == true ||
-            key.keyUse == KeyUse.SIGNATURE
-    }
-
-    private fun keyIsEncrypting(key: JWK): Boolean {
-        return key.keyOperations?.any { listOf(KeyOperation.ENCRYPT, KeyOperation.DECRYPT).contains(it) } == true ||
-            key.keyOperations?.any { listOf(KeyOperation.WRAP_KEY, KeyOperation.UNWRAP_KEY).contains(it) } == true ||
-            key.keyUse == KeyUse.ENCRYPTION
-    }
-
-    private fun getKidFromJWK(jwk: JWK): String {
-        return jwk.keyID ?: throw KeyException("Imported JWK has no key id.")
     }
 
     private fun importKey(
