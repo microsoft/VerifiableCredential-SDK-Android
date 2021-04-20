@@ -29,7 +29,8 @@ class JweToken private constructor(
     private var jweToken: JWEObject
 ) {
 
-    var contentType: String? = jweToken.header.contentType
+    val contentType: String?
+        get() = jweToken.header.contentType
 
     companion object {
         private const val SALT_LENGTH = 8

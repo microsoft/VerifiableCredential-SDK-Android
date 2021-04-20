@@ -15,8 +15,10 @@ import java.security.PublicKey
 class JwsToken internal constructor(
     private var jwsObject: JWSObject
 ) {
-    var keyId: String? = jwsObject.header.keyID
-    var type: JOSEObjectType? = jwsObject.header.type
+    val keyId: String?
+        get() = jwsObject.header.keyID
+    val type: JOSEObjectType?
+        get() = jwsObject.header.type
 
     companion object {
         fun deserialize(jws: String): JwsToken {
