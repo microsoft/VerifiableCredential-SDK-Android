@@ -17,20 +17,16 @@ class PasswordProtectedBackup internal constructor(
     override val jweToken: JweToken,
 ) : JweProtectedBackup() {
 
-    internal fun decrypt(password: String, serializer: Json): UnprotectedBackup? {
+    internal fun decrypt(password: String, serializer: Json): UnprotectedBackup {
         // empty passwords throw if attempted
         if (password.isEmpty()) {
-            return null
+            throw BadPassword("Failed to decrypt")
         }
         val secretKey = SecretKeySpec(
             password.toByteArray(),
             "RAW"
         )
         val data = jweToken.decrypt(privateKey = secretKey);
-        return if (data != null) {
-            serializer.decodeFromString(UnprotectedBackup.serializer(), String(data))
-        } else {
-            null
-        }
+        return serializer.decodeFromString(UnprotectedBackup.serializer(), String(data))
     }
 }

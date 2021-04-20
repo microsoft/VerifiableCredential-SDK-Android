@@ -79,11 +79,7 @@ class BackupAndRestoreService @Inject constructor(
             when (options) {
                 is PasswordEncryptedBackupData -> {
                     val backupAttempt = options.backup.decrypt(options.password, serializer);
-                    if (backupAttempt != null) {
-                        importBackup(backupAttempt)
-                    } else {
-                        throw BadPassword("Failed to decrypt")
-                    }
+                    importBackup(backupAttempt)
                 }
                 else -> {
                     throw UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}");

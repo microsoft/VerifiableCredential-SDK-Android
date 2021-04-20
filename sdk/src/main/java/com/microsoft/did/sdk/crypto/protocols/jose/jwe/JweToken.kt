@@ -3,6 +3,7 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
+import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JOSEException
 import com.nimbusds.jose.JWEAlgorithm
@@ -24,15 +25,16 @@ import com.nimbusds.jose.jwk.OctetSequenceKey
 import com.nimbusds.jose.jwk.RSAKey
 import java.security.Key
 
-const val SALT_LENGTH = 8
-const val ITERATION_COUNT = 100 * 1000
-
 class JweToken private constructor(
     private var jweToken: JWEObject
 ) {
+
     var contentType: String? = jweToken.header.contentType
 
     companion object {
+        private const val SALT_LENGTH = 8
+        private const val ITERATION_COUNT = 100 * 1000
+
         fun deserialize(jwe: String): JweToken {
             return JweToken(JWEObject.parse(jwe))
         }
@@ -59,69 +61,65 @@ class JweToken private constructor(
     }
 
     fun encrypt(publicKey: JWK) {
-        var encrypter: JWEEncrypter? = null
-        when (publicKey::class) {
-            ECKey::class -> {
-                encrypter = ECDHEncrypter(publicKey as ECKey)
-            }
-            RSAKey::class -> {
-                encrypter = RSAEncrypter(publicKey as RSAKey)
-            }
-            OctetKeyPair::class -> {
-                encrypter = X25519Encrypter(publicKey as OctetKeyPair)
-            }
-            OctetSequenceKey::class -> {
-                encrypter = PasswordBasedEncrypter((publicKey as OctetSequenceKey).keyValue.decode(), SALT_LENGTH, ITERATION_COUNT)
-            }
+        val encrypter = getEncrypter(publicKey)
+        val builder = JWEHeader.Builder(jweToken.header)
+            .contentType(contentType)
+            .keyID(publicKey.keyID)
+            .build()
+        jweToken = JWEObject(builder, jweToken.payload)
+        jweToken.encrypt(encrypter)
+    }
+
+    private fun getEncrypter(publicKey: JWK): JWEEncrypter {
+        return when (publicKey) {
+            is ECKey -> ECDHEncrypter(publicKey)
+            is RSAKey -> RSAEncrypter(publicKey)
+            is OctetKeyPair -> X25519Encrypter(publicKey)
+            is OctetSequenceKey -> PasswordBasedEncrypter((publicKey).keyValue.decode(), SALT_LENGTH, ITERATION_COUNT)
+            else -> throw AlgorithmException("Unknown public key type ${publicKey::class.qualifiedName}")
         }
-        encrypter?.let {
-            val builder = JWEHeader.Builder(jweToken.header)
-            contentType?.let { builder.contentType(it) }
-            publicKey.keyID?.let { builder.keyID(it) }
-            jweToken = JWEObject(builder.build(), jweToken.payload)
-            jweToken.encrypt(it)
-            return
-        }
-        throw AlgorithmException("Unsupported JWK")
     }
 
     fun serialize(): String {
         return jweToken.serialize()
     }
 
-    fun decrypt(keyStore: EncryptedKeyStore? = null, privateKey: Key? = null): ByteArray? {
+    fun decrypt(keyStore: EncryptedKeyStore? = null, privateKey: Key? = null): ByteArray {
         // we're already decrypted
         if (jweToken.state == JWEObject.State.DECRYPTED || jweToken.state == JWEObject.State.UNENCRYPTED) {
             return jweToken.payload.toBytes()
         }
 
-        // attempt with a specific key
-        var decrypter: JWEDecrypter? = null
-        if (privateKey != null) {
-            try {
-                decrypter = DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, privateKey)
-            } catch (exception: JOSEException) {
-                return null
-            }
-        } else if (keyStore != null) {
-            jweToken.header.keyID?.let { keyId ->
-                val keyRef = JwaCryptoHelper.extractDidAndKeyId(keyId).second
-                val key = keyStore.getKey(keyRef)
-                // KeyConverter.toJavaKeys exports a public and private key if possible (private key after first)
-                decrypter = DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, KeyConverter.toJavaKeys(listOf(key)).last())
-            }
-        } else {
+        val decrypter = getDecrypter(keyStore, privateKey)
+        jweToken.decrypt(decrypter)
+        return jweToken.payload.toBytes()
+    }
+
+    private fun getDecrypter(keyStore: EncryptedKeyStore?, privateKey: Key?): JWEDecrypter {
+        if (keyStore == null && privateKey == null) {
             throw IllegalArgumentException("keyStore or privateKey must be passed as input")
         }
-        if (decrypter != null) {
-            try {
-                jweToken.decrypt(decrypter)
-            } catch (exception: JOSEException) {
-                return null
-            }
-            return jweToken.payload.toBytes()
+        return privateKey?.let {
+            getDecrypterByKey(it)
+        } ?: keyStore?.let {
+            getDecrypterByKeyStore(it)
+        } ?: throw KeyException("No key found")
+    }
+
+    private fun getDecrypterByKey(privateKey: Key): JWEDecrypter? {
+        return try {
+            DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, privateKey)
+        } catch (exception: JOSEException) {
+            null
         }
-        // no specific key was found
-        return null
+    }
+
+    private fun getDecrypterByKeyStore(keyStore: EncryptedKeyStore): JWEDecrypter? {
+        return jweToken.header.keyID?.let { keyId ->
+            val keyRef = JwaCryptoHelper.extractDidAndKeyId(keyId).second
+            val key = keyStore.getKey(keyRef)
+            // KeyConverter.toJavaKeys exports a public and private key if possible (private key after first)
+            DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, KeyConverter.toJavaKeys(listOf(key)).last())
+        }
     }
 }
