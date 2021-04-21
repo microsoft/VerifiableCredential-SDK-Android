@@ -1,8 +1,12 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
+import com.microsoft.did.sdk.util.controlflow.BadPassword
+import com.microsoft.did.sdk.util.controlflow.FailedDecrypt
+import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
+import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
@@ -86,15 +90,21 @@ class JweTokenTest {
     }
 
     @Test
-    fun decryptBadKeysDontThrow() {
+    fun decryptBadKeysThrow() {
         val token = JweToken.deserialize(expectedToken)
-        assertNull( token.decrypt(null, key.toPrivateKey()), "thrown exception was not expected")
+        assertFailsWith( KeyException::class ) {
+            token.decrypt(null, key.toPrivateKey())
+        }
     }
 
     @Test
     fun encryptAndSerializeTest() {
-        val token = JweToken(expectedPlaintext, JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)
-        token.encrypt(key.toPublicJWK())
+        val token = JweToken(expectedPlaintext)
+        token.encrypt(key.toPublicJWK(),
+            JWEHeader.Builder(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)
+                .keyID(keyRef)
+                .build()
+        )
         val jwe = token.serialize()
         val decryptedToken = JweToken.deserialize(jwe)
         val keystore: EncryptedKeyStore = mockk()

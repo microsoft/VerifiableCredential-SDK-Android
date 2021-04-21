@@ -3,6 +3,8 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.jwk.ECKey
 import io.mockk.every
 import io.mockk.mockk
@@ -51,7 +53,7 @@ class TokenSignerTest {
     @Test
     fun signPayloadTest() {
         every {
-            anyConstructed<JwsToken>().sign(mockKey)
+            anyConstructed<JwsToken>().sign(mockKey, any())
         } answers { }
         every { anyConstructed<JwsToken>().serialize() } returns expectedSignedPayload
         val actualSignedPayload = signer.signWithIdentifier(expectedPayload, mockedIdentifier)

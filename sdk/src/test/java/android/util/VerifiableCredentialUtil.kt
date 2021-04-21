@@ -34,7 +34,7 @@ object VerifiableCredentialUtil {
     val testDisplayContract = DisplayContract(
         locale = "en-US",
         contract = "http://localhost/contract",
-        card = CardDescriptor("Test", "n/a", "#f64ded", "#a80aa5", Logo(), "test card"),
+        card = CardDescriptor("Test", "n/a", "#f64ded", "#a80aa5", Logo(description = "test"), "test card"),
         consent = ConsentDescriptor("You shouldn't approve this", "Reject this card"),
         claims = emptyMap()
     )
