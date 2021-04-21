@@ -9,8 +9,10 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDes
 import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
+import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -21,6 +23,9 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jose.util.Base64URL
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -54,7 +59,9 @@ object VerifiableCredentialUtil {
     )
     val testVerifiedCredential: VerifiableCredential by lazy {
         val jws = JwsToken(JWSObject(JWSHeader(JWSAlgorithm.ES256), Payload(Base64URL.encode(Json.Default.encodeToString(testVerifiableCredentialContent)))))
-        jws.sign(signKey)
+        jws.sign(signKey, JWSHeader.Builder(JWSAlgorithm.ES256)
+            .keyID(signKey.keyID)
+            .build())
         VerifiableCredential(
             jti,
             jws.serialize(),
@@ -76,4 +83,27 @@ object VerifiableCredentialUtil {
         "recover",
         "update"
     )
+
+    fun getMockKeyStore(): EncryptedKeyStore {
+        val keyStore = mockk<EncryptedKeyStore>();
+        every { keyStore.getKey(VerifiableCredentialUtil.recoverKey.keyID) } returns (VerifiableCredentialUtil.recoverKey)
+        every { keyStore.containsKey(recoverKey.keyID) } returns true
+        every { keyStore.getKey(VerifiableCredentialUtil.updateKey.keyID) } returns (VerifiableCredentialUtil.updateKey)
+        every { keyStore.containsKey(updateKey.keyID) } returns true
+        every { keyStore.getKey(VerifiableCredentialUtil.signKey.keyID) } returns (VerifiableCredentialUtil.signKey)
+        every { keyStore.containsKey(signKey.keyID) } returns true
+        every { keyStore.getKey(VerifiableCredentialUtil.encryptKey.keyID) } returns (VerifiableCredentialUtil.encryptKey)
+        every { keyStore.containsKey(encryptKey.keyID) } returns true
+        every { keyStore.storeKey(any(), any()) } returns (Unit)
+        return keyStore
+    }
+
+    fun getMockIdentifierRepository(): IdentifierRepository {
+        val identifierRepository = mockk<IdentifierRepository>()
+        coEvery { identifierRepository.queryByIdentifier(VerifiableCredentialUtil.testDid) } returns(VerifiableCredentialUtil.testIdentifer)
+        coEvery { identifierRepository.queryAllLocal() } returns(listOf(VerifiableCredentialUtil.testIdentifer))
+        coEvery { identifierRepository.queryByName(VerifiableCredentialUtil.testIdentifer.name)} returns(VerifiableCredentialUtil.testIdentifer)
+        coEvery { identifierRepository.insert(any()) } returns (Unit)
+        return identifierRepository
+    }
 }

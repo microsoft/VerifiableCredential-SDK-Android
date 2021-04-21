@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
+import com.microsoft.did.sdk.di.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -19,24 +20,21 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 class MicrosoftUnprotectedBackup2020Test {
     private val walletMetadata = WalletMetadata()
 
-    @Serializable
-    @SerialName("TestVCMetadata")
-    private class TestVCMetadata(override val displayContract: DisplayContract) : VCMetadata() {}
-    private val vcMetadata = TestVCMetadata(
+    private val vcMetadata = VCMetadata(
         VerifiableCredentialUtil.testDisplayContract
     )
-    private val rawId = VerifiableCredentialUtil.rawIdentifier
 
     private val backup = MicrosoftUnprotectedBackup2020(
         mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
         mapOf("test" to vcMetadata),
         walletMetadata,
-        listOf(rawId)
+        listOf(VerifiableCredentialUtil.rawIdentifier)
     )
 
     @Test
@@ -46,10 +44,8 @@ class MicrosoftUnprotectedBackup2020Test {
 
     @Test
     fun vcsToIteratorTest() {
-        val iterator = backup.vcsToIterator( Json { SerializersModule {
-            polymorphic(VCMetadata::class) {
-                subclass(TestVCMetadata::class)
-            }
-        } } )
+        val iterator = backup.vcsToIterator( defaultTestSerializer )
+        assertTrue(iterator.hasNext())
+        assertEquals(iterator.next(), Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     }
 }
