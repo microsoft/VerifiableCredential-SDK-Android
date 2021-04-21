@@ -112,7 +112,7 @@ class SdkModule {
     @Provides
     @Singleton
     fun defaultJsonSerializer(
-        @Named("polymorphicJsonSerializer") additionalJsonSerializers: SerializersModule
+        @Named("polymorphicJsonSerializer") additionalJsonSerializers: SerializersModule = Json.serializersModule
     ): Json {
         return Json {
             serializersModule = additionalJsonSerializers +
