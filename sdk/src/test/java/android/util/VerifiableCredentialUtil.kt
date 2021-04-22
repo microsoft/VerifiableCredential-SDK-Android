@@ -4,11 +4,11 @@ package android.util
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.file.models.RawIdentity
@@ -19,7 +19,9 @@ import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
 import com.nimbusds.jose.jwk.Curve
+import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.KeyUse
+import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
 import com.nimbusds.jose.util.Base64URL
@@ -31,11 +33,11 @@ import kotlinx.serialization.json.Json
 
 // cryptographically correct and consistent Verifiable Credential data
 object VerifiableCredentialUtil {
-    val testDid = "did:web:localhost"
-    val signKey = ECKeyGenerator(Curve.P_256).keyID("sign").keyUse(KeyUse.SIGNATURE).generate()
-    val updateKey = ECKeyGenerator(Curve.P_256).keyID("update").keyUse(KeyUse.SIGNATURE).generate()
-    val recoverKey = ECKeyGenerator(Curve.P_256).keyID("recover").keyUse(KeyUse.SIGNATURE).generate()
-    val encryptKey = RSAKeyGenerator(4096).keyID("encrypt").keyUse(KeyUse.ENCRYPTION).generate()
+    const val testDid = "did:web:localhost"
+    val signKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("sign").keyUse(KeyUse.SIGNATURE).generate()
+    val updateKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("update").keyUse(KeyUse.SIGNATURE).generate()
+    val recoverKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("recover").keyUse(KeyUse.SIGNATURE).generate()
+    val encryptKey: RSAKey = RSAKeyGenerator(4096).keyID("encrypt").keyUse(KeyUse.ENCRYPTION).generate()
     val testDisplayContract = DisplayContract(
         locale = "en-US",
         contract = "http://localhost/contract",
@@ -86,13 +88,13 @@ object VerifiableCredentialUtil {
 
     fun getMockKeyStore(): EncryptedKeyStore {
         val keyStore = mockk<EncryptedKeyStore>();
-        every { keyStore.getKey(VerifiableCredentialUtil.recoverKey.keyID) } returns (VerifiableCredentialUtil.recoverKey)
+        every { keyStore.getKey(recoverKey.keyID) } returns (recoverKey)
         every { keyStore.containsKey(recoverKey.keyID) } returns true
-        every { keyStore.getKey(VerifiableCredentialUtil.updateKey.keyID) } returns (VerifiableCredentialUtil.updateKey)
+        every { keyStore.getKey(updateKey.keyID) } returns (updateKey)
         every { keyStore.containsKey(updateKey.keyID) } returns true
-        every { keyStore.getKey(VerifiableCredentialUtil.signKey.keyID) } returns (VerifiableCredentialUtil.signKey)
+        every { keyStore.getKey(signKey.keyID) } returns (signKey)
         every { keyStore.containsKey(signKey.keyID) } returns true
-        every { keyStore.getKey(VerifiableCredentialUtil.encryptKey.keyID) } returns (VerifiableCredentialUtil.encryptKey)
+        every { keyStore.getKey(encryptKey.keyID) } returns (encryptKey)
         every { keyStore.containsKey(encryptKey.keyID) } returns true
         every { keyStore.storeKey(any(), any()) } returns (Unit)
         return keyStore
@@ -100,9 +102,9 @@ object VerifiableCredentialUtil {
 
     fun getMockIdentifierRepository(): IdentifierRepository {
         val identifierRepository = mockk<IdentifierRepository>()
-        coEvery { identifierRepository.queryByIdentifier(VerifiableCredentialUtil.testDid) } returns(VerifiableCredentialUtil.testIdentifer)
-        coEvery { identifierRepository.queryAllLocal() } returns(listOf(VerifiableCredentialUtil.testIdentifer))
-        coEvery { identifierRepository.queryByName(VerifiableCredentialUtil.testIdentifer.name)} returns(VerifiableCredentialUtil.testIdentifer)
+        coEvery { identifierRepository.queryByIdentifier(testDid) } returns(testIdentifer)
+        coEvery { identifierRepository.queryAllLocal() } returns(listOf(testIdentifer))
+        coEvery { identifierRepository.queryByName(testIdentifer.name)} returns(testIdentifer)
         coEvery { identifierRepository.insert(any()) } returns (Unit)
         return identifierRepository
     }

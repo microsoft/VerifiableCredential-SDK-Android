@@ -1,8 +1,6 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.util.controlflow.BadPassword
-import com.microsoft.did.sdk.util.controlflow.FailedDecrypt
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
@@ -12,18 +10,13 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.serialization.json.Json
 import org.junit.Test
-import java.util.Base64
-import kotlin.random.Random
 import kotlin.test.assertEquals
-import kotlin.test.assertFails
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
 
 class JweTokenTest {
-    private val keyRef = Base64.getEncoder().encodeToString(Random.nextBytes(8))
+    private val keyRef = "TestKeyID"
     private val key: ECKey = ECKeyGenerator(Curve.P_256)
         .keyID(keyRef)
         .generate()
@@ -31,26 +24,27 @@ class JweTokenTest {
     // RFC 7516 A.2
     private val expectedPlaintext = "Live long and prosper."
     private val expectedToken = "eyJhbGciOiJSU0ExXzUiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0." +
-        "UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN94nHPoltGRhWhw7Zx0-kFm" +
-        "1NJn8LE9XShH59_i8J0PH5ZZyNfGy2xGdULU7sHNF6Gp2vPLgNZ__deLKxGHZ7Pc" +
-        "HALUzoOegEI-8E66jX2E4zyJKx-YxzZIItRzC5hlRirb6Y5Cl_p-ko3YvkkysZIF" +
-        "NPccxRU7qve1WYPxqbb2Yw8kZqa2rMWI5ng8OtvzlV7elprCbuPhcCdZ6XDP0_F8" +
-        "rkXds2vE4X-ncOIM8hAYHHi29NX0mcKiRaD0-D-ljQTP-cFPgwCp6X-nZZd9OHBv" +
-        "-B3oWh2TbqmScqXMR4gp_A." +
-        "AxY8DCtDaGlsbGljb3RoZQ." +
-        "KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY." +
-        "9hH0vgRfYgPnAHOd8stkvw"
-    private val RSAKey = com.nimbusds.jose.jwk.RSAKey.parse("{\"kty\":\"RSA\"," +
-        "      \"n\":\"sXchDaQebHnPiGvyDOAT4saGEUetSyo9MKLOoWFsueri23bOdgWp4Dy1Wl" +
-        "           UzewbgBHod5pcM9H95GQRV3JDXboIRROSBigeC5yjU1hGzHHyXss8UDpre" +
-        "           cbAYxknTcQkhslANGRUZmdTOQ5qTRsLAt6BTYuyvVRdhS8exSZEy_c4gs_" +
-        "           7svlJJQ4H9_NxsiIoLwAEk7-Q3UXERGYw_75IDrGA84-lA_-Ct4eTlXHBI" +
-        "           Y2EaV7t7LjJaynVJCpkv4LKjTTAumiGUIuQhrNhZLuF_RJLqHpM2kgWFLU" +
-        "           7-VTdL1VbC2tejvcI2BlMkEpk1BzBZI0KQB0GaDWFLN-aEAw3vRw\"," +
-        "      \"e\":\"AQAB\"," +
-        "      \"d\":\"VFCWOqXr8nvZNyaaJLXdnNPXZKRaWCjkU5Q2egQQpTBMwhprMzWzpR8Sxq" +
-        "           1OPThh_J6MUD8Z35wky9b8eEO0pwNS8xlh1lOFRRBoNqDIKVOku0aZb-ry" +
-        "           nq8cxjDTLZQ6Fz7jSjR1Klop-YKaUHc9GsEofQqYruPhzSA-QgajZGPbE_" +
+            "UGhIOguC7IuEvf_NPVaXsGMoLOmwvc1GyqlIKOK1nN94nHPoltGRhWhw7Zx0-kFm" +
+            "1NJn8LE9XShH59_i8J0PH5ZZyNfGy2xGdULU7sHNF6Gp2vPLgNZ__deLKxGHZ7Pc" +
+            "HALUzoOegEI-8E66jX2E4zyJKx-YxzZIItRzC5hlRirb6Y5Cl_p-ko3YvkkysZIF" +
+            "NPccxRU7qve1WYPxqbb2Yw8kZqa2rMWI5ng8OtvzlV7elprCbuPhcCdZ6XDP0_F8" +
+            "rkXds2vE4X-ncOIM8hAYHHi29NX0mcKiRaD0-D-ljQTP-cFPgwCp6X-nZZd9OHBv" +
+            "-B3oWh2TbqmScqXMR4gp_A." +
+            "AxY8DCtDaGlsbGljb3RoZQ." +
+            "KDlTtXchhZTGufMYmOYGS4HffxPSUrfmqCHXaI9wOGY." +
+            "9hH0vgRfYgPnAHOd8stkvw"
+    private val rsaKey = com.nimbusds.jose.jwk.RSAKey.parse(
+        "{\"kty\":\"RSA\"," +
+                "      \"n\":\"sXchDaQebHnPiGvyDOAT4saGEUetSyo9MKLOoWFsueri23bOdgWp4Dy1Wl" +
+                "           UzewbgBHod5pcM9H95GQRV3JDXboIRROSBigeC5yjU1hGzHHyXss8UDpre" +
+                "           cbAYxknTcQkhslANGRUZmdTOQ5qTRsLAt6BTYuyvVRdhS8exSZEy_c4gs_" +
+                "           7svlJJQ4H9_NxsiIoLwAEk7-Q3UXERGYw_75IDrGA84-lA_-Ct4eTlXHBI" +
+                "           Y2EaV7t7LjJaynVJCpkv4LKjTTAumiGUIuQhrNhZLuF_RJLqHpM2kgWFLU" +
+                "           7-VTdL1VbC2tejvcI2BlMkEpk1BzBZI0KQB0GaDWFLN-aEAw3vRw\"," +
+                "      \"e\":\"AQAB\"," +
+                "      \"d\":\"VFCWOqXr8nvZNyaaJLXdnNPXZKRaWCjkU5Q2egQQpTBMwhprMzWzpR8Sxq" +
+                "           1OPThh_J6MUD8Z35wky9b8eEO0pwNS8xlh1lOFRRBoNqDIKVOku0aZb-ry" +
+                "           nq8cxjDTLZQ6Fz7jSjR1Klop-YKaUHc9GsEofQqYruPhzSA-QgajZGPbE_" +
         "           0ZaVDJHfyd7UUBUKunFMScbflYAAOYJqVIVwaYR5zWEEceUjNnTNo_CVSj" +
         "           -VvXLO5VZfCUAVLgW4dpf1SrtZjSt34YLsRarSb127reG_DUwg9Ch-Kyvj" +
         "           T1SkHgUWRVGcyly7uvVGRSDwsXypdrNinPA4jlhoNdizK2zF2CWQ\"," +
@@ -71,10 +65,10 @@ class JweTokenTest {
         "           B9nNTwMVvH3VRRSLWACvPnSiwP8N5Usy-WRXS-V7TbpxIhvepTfE0NNo\"}")
 
     @Test
-    fun deserializeAndDecryptTest() {
+    fun `deserialize and decrypt test`() {
         val token = JweToken.deserialize(expectedToken)
         assertEquals(JWEAlgorithm.RSA1_5, token.getKeyAlgorithm(), "Expected algorithm to match RFC")
-        val plaintext = token.decrypt(null, RSAKey.toRSAPrivateKey())
+        val plaintext = token.decrypt(null, rsaKey.toRSAPrivateKey())
         assertNotNull(plaintext, "failed to decrypt")
         assertEquals(expectedPlaintext, String(plaintext), "plaintext does not match")
         assertEquals(plaintext, token.contentAsByteArray, "should be able to retrieve payload later")
@@ -82,7 +76,7 @@ class JweTokenTest {
     }
 
     @Test
-    fun decryptRequiresArguments() {
+    fun `decrypt requires arguments`() {
         val token = JweToken.deserialize(expectedToken)
         assertFailsWith(IllegalArgumentException::class, "thrown exception was not expected") {
             token.decrypt(null, null)
@@ -90,17 +84,18 @@ class JweTokenTest {
     }
 
     @Test
-    fun decryptBadKeysThrow() {
+    fun `decrypt bad keys throw`() {
         val token = JweToken.deserialize(expectedToken)
-        assertFailsWith( KeyException::class ) {
+        assertFailsWith(KeyException::class) {
             token.decrypt(null, key.toPrivateKey())
         }
     }
 
     @Test
-    fun encryptAndSerializeTest() {
+    fun `encrypt and serialize Test`() {
         val token = JweToken(expectedPlaintext)
-        token.encrypt(key.toPublicJWK(),
+        token.encrypt(
+            key.toPublicJWK(),
             JWEHeader.Builder(JWEAlgorithm.ECDH_ES_A256KW, EncryptionMethod.A256CBC_HS512)
                 .keyID(keyRef)
                 .build()
@@ -108,7 +103,7 @@ class JweTokenTest {
         val jwe = token.serialize()
         val decryptedToken = JweToken.deserialize(jwe)
         val keystore: EncryptedKeyStore = mockk()
-        every { keystore.getKey(keyRef) } returns(key)
+        every { keystore.getKey(keyRef) } returns (key)
         val decrypted = decryptedToken.decrypt(keystore)
         assertNotNull(decrypted, "Expected token to decrypt")
         assertEquals(expectedPlaintext, String(decrypted), "Does not match expected payload")

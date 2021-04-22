@@ -3,25 +3,10 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.di.defaultTestSerializer
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class MicrosoftUnprotectedBackup2020Test {
     private val walletMetadata = WalletMetadata()
@@ -38,7 +23,7 @@ class MicrosoftUnprotectedBackup2020Test {
     )
 
     @Test
-    fun typeShouldMatchStaticTest() {
+    fun `type field should match static test`() {
         assertEquals(MicrosoftUnprotectedBackup2020.MICROSOFT_BACKUP_TYPE, backup.type, "types should match")
     }
 
