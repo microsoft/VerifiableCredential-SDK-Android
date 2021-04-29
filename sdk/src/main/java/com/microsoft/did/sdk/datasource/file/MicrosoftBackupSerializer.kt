@@ -24,11 +24,11 @@ class MicrosoftBackupSerializer @Inject constructor(
 ) {
 
     suspend fun create(backupData: MicrosoftBackup2020Data): MicrosoftUnprotectedBackup2020 {
-        val vcMap = mutableMapOf<String, String>();
-        val vcMetaMap = mutableMapOf<String, VCMetadata>();
-        backupData.verifiableCredentials.forEach { verifiableCredentailMetadataPair ->
-            vcMap.put(verifiableCredentailMetadataPair.first.jti, verifiableCredentailMetadataPair.first.raw);
-            vcMetaMap.put(verifiableCredentailMetadataPair.first.jti, verifiableCredentailMetadataPair.second);
+        val vcMap = mutableMapOf<String, String>()
+        val vcMetaMap = mutableMapOf<String, VCMetadata>()
+        backupData.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
+            vcMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.first.raw;
+            vcMetaMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.second;
         }
         return MicrosoftUnprotectedBackup2020(
             vcs = vcMap,
