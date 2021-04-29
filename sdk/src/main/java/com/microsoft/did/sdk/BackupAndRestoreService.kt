@@ -13,12 +13,10 @@ import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
-import com.microsoft.did.sdk.util.controlflow.BadPassword
-import com.microsoft.did.sdk.util.controlflow.IoFailure
+import com.microsoft.did.sdk.util.controlflow.IoFailureException
 import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.RunResultTryContext
-import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
-import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
+import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
+import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethodException
 import com.microsoft.did.sdk.util.controlflow.andThen
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json
@@ -34,25 +32,15 @@ class BackupAndRestoreService @Inject constructor(
     private val microsoftBackupSerializer: MicrosoftBackupSerializer,
     private val serializer: Json
 ) {
-    fun writeBackup(backup: JweProtectedBackup, output: OutputStream): Result<Unit> {
-        return try {
-            jweBackupFactory.writeOutput(backup, output)
-            Result.Success(Unit)
-        } catch (exception: IOException) {
-            Result.Failure(IoFailure("Failed to write backup", exception))
-        }
-    }
-
     suspend fun createBackup(options: ProtectedBackupData): Result<JweProtectedBackup> {
         return when (options) {
             is PasswordProtectedBackupData -> {
                 return createUnprotectedBackup(options.unprotectedBackup).andThen {
-                    backup ->
-                    Result.Success(jweBackupFactory.createPasswordBackup(backup, options.password));
+                    backup -> Result.Success(jweBackupFactory.createPasswordBackup(backup, options.password))
                 }
             }
             else -> {
-                Result.Failure(UnknownProtectionMethod("Unknown protection options: ${options::class.qualifiedName}"));
+                Result.Failure(UnknownProtectionMethodException("Unknown protection options: ${options::class.qualifiedName}"));
             }
         }
     }
@@ -64,7 +52,7 @@ class BackupAndRestoreService @Inject constructor(
                     Result.Success(microsoftBackupSerializer.create(options))
                 }
                 else -> {
-                    throw UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}");
+                    throw UnknownBackupFormatException("Unknown backup options: ${options::class.qualifiedName}");
                 }
             }
         }
@@ -82,7 +70,7 @@ class BackupAndRestoreService @Inject constructor(
                     importBackup(backupAttempt)
                 }
                 else -> {
-                    throw UnknownBackupFormat("Unknown backup options: ${options::class.qualifiedName}");
+                    throw UnknownBackupFormatException("Unknown backup options: ${options::class.qualifiedName}");
                 }
             }
         }
@@ -95,7 +83,7 @@ class BackupAndRestoreService @Inject constructor(
                     Result.Success(microsoftBackupSerializer.import(backup))
                 }
                 else -> {
-                    throw UnknownBackupFormat("Unknown backup file: ${backup::class.qualifiedName}")
+                    throw UnknownBackupFormatException("Unknown backup file: ${backup::class.qualifiedName}")
                 }
             }
         }

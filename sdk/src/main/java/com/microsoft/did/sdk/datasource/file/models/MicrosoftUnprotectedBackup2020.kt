@@ -2,22 +2,9 @@ package com.microsoft.did.sdk.datasource.file.models
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
-import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.KeyException
-import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
-import com.microsoft.did.sdk.util.controlflow.MalformedMetadata
-import com.microsoft.did.sdk.util.controlflow.MalformedVerifiableCredential
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.SdkException
-import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyOperation
-import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.json.Json
 
 /**

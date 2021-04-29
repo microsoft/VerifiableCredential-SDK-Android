@@ -7,7 +7,7 @@ import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.KeyException
-import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
+import com.microsoft.did.sdk.util.controlflow.MalformedIdentityException
 import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
@@ -31,7 +31,7 @@ class RawIdentifierUtility @Inject constructor(
         val recoveryKeyRef: String = identifierData.recoveryKey
         val keySet = rawIdentifierToKeySet(identifierData, updateKeyRef, recoveryKeyRef)
         if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
-            throw MalformedIdentity("update and recovery key required")
+            throw MalformedIdentityException("update and recovery key required")
         }
         val excludeKeysForUse = listOf(updateKeyRef, recoveryKeyRef)
         val id = Identifier(

@@ -7,19 +7,15 @@ import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackup
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
-import com.microsoft.did.sdk.util.controlflow.IoFailure
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormat
-import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethod
+import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
+import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethodException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
 import com.nimbusds.jose.JWEHeader
 import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.IOException
 import java.io.InputStream
-import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,13 +29,13 @@ class JweProtectedBackupFactory @Inject constructor(
         val cty = token.contentType
         // for now we only know microsoft password, fail early.
         if (cty != MicrosoftUnprotectedBackup2020.MICROSOFT_BACKUP_TYPE) {
-            throw UnknownBackupFormat("Backup of an unknown format: $cty")
+            throw UnknownBackupFormatException("Backup of an unknown format: $cty")
         }
         val alg = token.getKeyAlgorithm()
         return if (alg.name.startsWith("PBE")) {
             return PasswordProtectedBackup(token)
         } else {
-            throw UnknownProtectionMethod("Unknown backup protection method: $alg")
+            throw UnknownProtectionMethodException("Unknown backup protection method: $alg")
         }
     }
 
@@ -54,13 +50,5 @@ class JweProtectedBackupFactory @Inject constructor(
         ).build()
         token.encrypt(secretKey, headers)
         return PasswordProtectedBackup(token)
-    }
-
-
-
-    internal fun writeOutput(backup: JweProtectedBackup, output: OutputStream) {
-            output.write(backup.jweToken.serialize().toByteArray())
-            output.flush()
-            output.close()
     }
 }

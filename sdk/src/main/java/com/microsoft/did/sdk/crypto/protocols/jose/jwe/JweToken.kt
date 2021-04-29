@@ -3,8 +3,7 @@ package com.microsoft.did.sdk.crypto.protocols.jose.jwe
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.util.controlflow.AlgorithmException
-import com.microsoft.did.sdk.util.controlflow.BadPassword
-import com.microsoft.did.sdk.util.controlflow.FailedDecrypt
+import com.microsoft.did.sdk.util.controlflow.FailedDecryptException
 import com.microsoft.did.sdk.util.controlflow.KeyException
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JOSEException
@@ -96,7 +95,7 @@ class JweToken private constructor(
         try {
             jweToken.decrypt(decrypter)
         } catch (exception: JOSEException) {
-            throw FailedDecrypt("Failed to decrypt")
+            throw FailedDecryptException("Failed to decrypt")
         }
         return jweToken.payload.toBytes()
     }

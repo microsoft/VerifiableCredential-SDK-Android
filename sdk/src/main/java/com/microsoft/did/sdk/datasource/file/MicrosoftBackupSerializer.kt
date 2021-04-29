@@ -5,17 +5,12 @@ package com.microsoft.did.sdk.datasource.file
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
 import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020Data
-import com.microsoft.did.sdk.datasource.file.models.RawIdentity
 import com.microsoft.did.sdk.datasource.file.models.VCMetadata
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.KeyException
-import com.microsoft.did.sdk.util.controlflow.MalformedIdentity
-import com.microsoft.did.sdk.util.controlflow.Result
+import com.microsoft.did.sdk.util.controlflow.MalformedIdentityException
 import com.microsoft.did.sdk.util.controlflow.SdkException
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyOperation
-import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -55,7 +50,7 @@ class MicrosoftBackupSerializer @Inject constructor(
         } catch (exception: SdkException) {
             throw exception
         } catch (exception: Exception) {
-            throw MalformedIdentity("unhandled exception thrown", exception)
+            throw MalformedIdentityException("unhandled exception thrown", exception)
         }
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }

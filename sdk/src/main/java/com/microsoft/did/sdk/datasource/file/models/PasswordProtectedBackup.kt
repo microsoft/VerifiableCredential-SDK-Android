@@ -3,13 +3,7 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
-import com.microsoft.did.sdk.util.controlflow.BadPassword
-import com.microsoft.did.sdk.util.controlflow.FailedDecrypt
-import com.microsoft.did.sdk.util.controlflow.Result
-import com.microsoft.did.sdk.util.controlflow.SdkException
-import com.microsoft.did.sdk.util.controlflow.runResultTry
-import com.nimbusds.jose.JWEAlgorithm
-import com.nimbusds.jose.jwk.OctetSequenceKey
+import com.microsoft.did.sdk.util.controlflow.BadPasswordException
 import kotlinx.serialization.json.Json
 import javax.crypto.spec.SecretKeySpec
 
@@ -20,7 +14,7 @@ class PasswordProtectedBackup internal constructor(
     internal fun decrypt(password: String, serializer: Json): UnprotectedBackup {
         // empty passwords throw if attempted
         if (password.isEmpty()) {
-            throw BadPassword("Failed to decrypt")
+            throw BadPasswordException("Failed to decrypt")
         }
         val secretKey = SecretKeySpec(
             password.toByteArray(),

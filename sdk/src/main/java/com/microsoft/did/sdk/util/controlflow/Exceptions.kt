@@ -31,25 +31,23 @@ class IdentifierCreatorException(message: String, cause: Throwable? = null) : Cr
 
 open class BackupRestoreException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
-class UnknownBackupFormat(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
+class UnknownBackupFormatException(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
 
-class UnknownProtectionMethod(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
+class UnknownProtectionMethodException(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
 
-class IoFailure(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
+class NoBackupException(message: String = "", retryable: Boolean = false): BackupRestoreException(message, null, retryable)
 
-class NoBackup(message: String = "", retryable: Boolean = false): BackupRestoreException(message, null, retryable)
+open class MalformedBackupException(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
 
-open class MalformedBackup(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
+class MalformedIdentityException(message: String, cause: Throwable? = null): MalformedBackupException(message, cause)
 
-class MalformedIdentity(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
+class MalformedMetadataException(message: String, cause: Throwable? = null): MalformedBackupException(message, cause)
 
-class MalformedMetadata(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
+class MalformedVerifiableCredentialException(message: String, cause: Throwable? = null): MalformedBackupException(message, cause)
 
-class MalformedVerifiableCredential(message: String, cause: Throwable? = null): MalformedBackup(message, cause)
+class FailedDecryptException(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
 
-class FailedDecrypt(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
-
-class BadPassword(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
+class BadPasswordException(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
 
 open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     SdkException(message, cause, retryable)
