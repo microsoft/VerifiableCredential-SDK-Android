@@ -2,26 +2,25 @@
 
 package com.microsoft.did.sdk.datasource.file
 
-import com.microsoft.did.sdk.datasource.file.models.VCMetadata
+import com.microsoft.did.sdk.datasource.file.models.VcMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
+import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.OutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class JweProtectedBackupFactoryTest {
     private val walletMetadata = WalletMetadata()
 
-    private val vcMetadata = VCMetadata(
+    private val vcMetadata = VcMetadata(
         VerifiableCredentialUtil.testDisplayContract
     )
 
-    private val backup = MicrosoftUnprotectedBackup2020(
+    private val backup = MicrosoftUnprotectedBackupData2020(
         mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
         mapOf("test" to vcMetadata),
         walletMetadata,

@@ -4,5 +4,5 @@ package com.microsoft.did.sdk.datasource.file.models
 
 class PasswordEncryptedBackupData constructor(
     val password: String,
-    override val backup: PasswordProtectedBackup
+    override val backup: PasswordProtectedJweBackup
 ) : EncryptedBackupData()

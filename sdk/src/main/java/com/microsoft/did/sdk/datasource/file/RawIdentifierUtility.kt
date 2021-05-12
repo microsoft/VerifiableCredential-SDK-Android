@@ -27,8 +27,8 @@ class RawIdentifierUtility @Inject constructor(
     internal fun parseRawIdentifier(
         identifierData: RawIdentity
     ): Pair<Identifier, Set<JWK>> {
-        val updateKeyRef: String = identifierData.updateKey
-        val recoveryKeyRef: String = identifierData.recoveryKey
+        val updateKeyRef = identifierData.updateKey
+        val recoveryKeyRef = identifierData.recoveryKey
         val keySet = rawIdentifierToKeySet(identifierData, updateKeyRef, recoveryKeyRef)
         if (updateKeyRef.isBlank() || recoveryKeyRef.isBlank()) {
             throw MalformedIdentityException("update and recovery key required")
@@ -60,8 +60,8 @@ class RawIdentifierUtility @Inject constructor(
     }
 
     private fun rawIdentifierToKeySet(identifierData: RawIdentity, updateKeyRef: String, recoveryKeyRef: String): Set<JWK> {
-        var signingKeyRef: String = ""
-        var encryptingKeyRef: String = ""
+        var signingKeyRef = ""
+        var encryptingKeyRef = ""
         val keySet = mutableSetOf<JWK>()
         for (key in identifierData.keys) {
             if (signingKeyRef.isBlank() && keyIsSigning(key)) {
@@ -96,7 +96,7 @@ class RawIdentifierUtility @Inject constructor(
         return jwk.keyID ?: throw KeyException("Imported JWK has no key id.")
     }
 
-    private fun createRawIdentifier(identity: Identifier): RawIdentity? {
+    private fun createRawIdentifier(identity: Identifier): RawIdentity {
         return RawIdentity(
             id = identity.id,
             name = identity.name,

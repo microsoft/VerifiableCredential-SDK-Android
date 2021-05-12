@@ -4,9 +4,9 @@ package com.microsoft.did.sdk.datasource.file
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackup2020
-import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
+import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
+import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedJweBackup
+import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethodException
 import com.nimbusds.jose.EncryptionMethod
@@ -28,27 +28,27 @@ class JweProtectedBackupFactory @Inject constructor(
         val token = JweToken.deserialize(jweString)
         val cty = token.contentType
         // for now we only know microsoft password, fail early.
-        if (cty != MicrosoftUnprotectedBackup2020.MICROSOFT_BACKUP_TYPE) {
+        if (cty != MicrosoftUnprotectedBackupData2020.MICROSOFT_BACKUP_TYPE) {
             throw UnknownBackupFormatException("Backup of an unknown format: $cty")
         }
         val alg = token.getKeyAlgorithm()
         return if (alg.name.startsWith("PBE")) {
-            return PasswordProtectedBackup(token)
+            return PasswordProtectedJweBackup(token)
         } else {
             throw UnknownProtectionMethodException("Unknown backup protection method: $alg")
         }
     }
 
-    fun createPasswordBackup(unprotectedBackup: UnprotectedBackup, password: String): PasswordProtectedBackup {
-        val data = jsonSerializer.encodeToString(unprotectedBackup)
+    fun createPasswordBackup(unprotectedBackupData: UnprotectedBackupData, password: String): PasswordProtectedJweBackup {
+        val data = jsonSerializer.encodeToString(unprotectedBackupData)
         val token = JweToken(data)
         val headers = JWEHeader.Builder(JWEAlgorithm.PBES2_HS512_A256KW, EncryptionMethod.A256CBC_HS512)
-            .contentType(unprotectedBackup.type)
+            .contentType(unprotectedBackupData.type)
             .build()
         val secretKey = OctetSequenceKey.Builder(
             password.toByteArray()
         ).build()
         token.encrypt(secretKey, headers)
-        return PasswordProtectedBackup(token)
+        return PasswordProtectedJweBackup(token)
     }
 }

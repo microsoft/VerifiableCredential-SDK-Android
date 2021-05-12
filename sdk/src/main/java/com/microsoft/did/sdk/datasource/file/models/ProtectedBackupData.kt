@@ -3,5 +3,5 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 abstract class ProtectedBackupData {
-    abstract val unprotectedBackup: UnprotectedBackupData
+    abstract val unprotectedBackup2: UnprotectedBackup
 }
