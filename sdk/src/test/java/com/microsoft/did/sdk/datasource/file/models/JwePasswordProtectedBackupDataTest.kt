@@ -14,7 +14,7 @@ import org.junit.Test
 import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
-class PasswordProtectedJweBackupTest {
+class JwePasswordProtectedBackupDataTest {
     val password = "incredibly weak password, do not attempt."
     val payload = Microsoft2020UnprotectedBackupData(
         vcs = emptyMap(),
@@ -22,7 +22,7 @@ class PasswordProtectedJweBackupTest {
         metaInf = WalletMetadata(),
         identifiers = emptyList()
     )
-    var passwordBackup: PasswordProtectedJweBackup
+    var passwordBackup: JwePasswordProtectedBackupData
 
     init {
         val token = JweToken(
@@ -36,7 +36,7 @@ class PasswordProtectedJweBackupTest {
                 JWEAlgorithm.PBES2_HS512_A256KW, EncryptionMethod.A256GCM
             ).build()
         )
-        passwordBackup = PasswordProtectedJweBackup(token)
+        passwordBackup = JwePasswordProtectedBackupData(token)
     }
 
     @Test

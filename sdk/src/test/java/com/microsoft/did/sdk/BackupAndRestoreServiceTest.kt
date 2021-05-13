@@ -5,12 +5,12 @@ package com.microsoft.did.sdk
 // only used for type
 import android.util.VerifiableCredentialUtil
 import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.MicrosoftBackupSerializer
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020BackupProcessor
 import com.microsoft.did.sdk.datasource.file.RawIdentifierConverter
-import com.microsoft.did.sdk.datasource.file.models.ProtectedBackup
+import com.microsoft.did.sdk.datasource.file.models.ProtectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020Backup
 import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
-import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedJweBackup
+import com.microsoft.did.sdk.datasource.file.models.JwePasswordProtectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordBackupInputData
 import com.microsoft.did.sdk.datasource.file.models.microsoft2020.VcMetadata
 import com.microsoft.did.sdk.datasource.file.models.microsoft2020.WalletMetadata
@@ -28,7 +28,7 @@ class BackupAndRestoreServiceTest {
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
 
     private val jweBackupFactory = JweProtectedBackupFactory(defaultTestSerializer)
-    private val microsoftBackupSerializer = MicrosoftBackupSerializer(
+    private val microsoftBackupSerializer = Microsoft2020BackupProcessor(
         identifierRepository,
         keyStore,
         RawIdentifierConverter(identifierRepository, keyStore),
@@ -43,7 +43,7 @@ class BackupAndRestoreServiceTest {
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     )
 
-    suspend fun createBackup(): ProtectedBackup? {
+    suspend fun createBackup(): ProtectedBackupData? {
         val encBackup = service.createBackup(PasswordBackupInputData(
             password,
             unprotectedBackup = backupData
@@ -99,7 +99,7 @@ class BackupAndRestoreServiceTest {
             val actual = service.restoreBackup(
                 PasswordEncryptedBackupData(
                     password,
-                    backup = encBackup as PasswordProtectedJweBackup
+                    backup = encBackup as JwePasswordProtectedBackupData
                 )
             )
             assertTrue(actual is Result.Success)

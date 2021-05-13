@@ -13,21 +13,7 @@ class KeyStoreException(message: String, cause: Throwable? = null) : CryptoExcep
 
 class KeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-class KeyFormatException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
 class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class UnSupportedAlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class SignatureException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class EncryptionException(message: String, cause: Throwable? = null): CryptoException(message, cause)
-
-class EncodingException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class PairwiseKeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
-
-class IdentifierCreatorException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
 open class BackupRestoreException(message: String, cause: Throwable? = null, retryable: Boolean = false) : SdkException(message, cause, retryable)
 
@@ -40,10 +26,6 @@ class NoBackupException(message: String = "", retryable: Boolean = false): Backu
 open class MalformedBackupException(message: String, cause: Throwable? = null): BackupRestoreException(message, cause, false)
 
 class MalformedIdentityException(message: String, cause: Throwable? = null): MalformedBackupException(message, cause)
-
-class MalformedMetadataException(message: String, cause: Throwable? = null): MalformedBackupException(message, cause)
-
-class MalformedVerifiableCredentialException(message: String, cause: Throwable? = null): MalformedBackupException(message, cause)
 
 class FailedDecryptException(message: String, cause: Throwable? = null, retryable: Boolean = false): BackupRestoreException(message, cause, retryable)
 

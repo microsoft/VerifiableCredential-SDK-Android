@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class ProtectedBackupFactoryTest {
+class ProtectedBackupDataFactoryTest {
     private val walletMetadata = WalletMetadata()
 
     private val vcMetadata = VcMetadata(

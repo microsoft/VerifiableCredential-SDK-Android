@@ -16,14 +16,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MicrosoftBackupSerializer @Inject constructor(
+class Microsoft2020BackupProcessor @Inject constructor(
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
     private val rawIdentifierConverter: RawIdentifierConverter,
     private val jsonSerializer: Json
 ) {
 
-    suspend fun create(backup: Microsoft2020Backup): Microsoft2020UnprotectedBackupData {
+    suspend fun transformToBackupData(backup: Microsoft2020Backup): Microsoft2020UnprotectedBackupData {
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
@@ -53,11 +53,11 @@ class MicrosoftBackupSerializer @Inject constructor(
 
         return Microsoft2020Backup(
             walletMetadata = backup.metaInf,
-            verifiableCredentials = importVcs(backup)
+            verifiableCredentials = transformVcs(backup)
         )
     }
 
-    private fun importVcs(backup: Microsoft2020UnprotectedBackupData): List<Pair<VerifiableCredential, VcMetadata>> {
+    private fun transformVcs(backup: Microsoft2020UnprotectedBackupData): List<Pair<VerifiableCredential, VcMetadata>> {
         val vcList = ArrayList<Pair<VerifiableCredential, VcMetadata>>()
         backup.vcs.forEach { mapEntry ->
             val (jti, rawVcToken) = mapEntry
