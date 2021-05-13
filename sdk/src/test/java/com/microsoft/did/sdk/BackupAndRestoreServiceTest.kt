@@ -46,7 +46,7 @@ class BackupAndRestoreServiceTest {
     suspend fun createBackup(): JweProtectedBackup? {
         val encBackup = service.createBackup(PasswordProtectedBackupData(
             password,
-            unprotectedBackup2 = backupData
+            unprotectedBackup = backupData
         ))
         return if (encBackup is Result.Success) {
             encBackup.payload
@@ -60,7 +60,7 @@ class BackupAndRestoreServiceTest {
         runBlocking {
             val actual = service.createBackup(PasswordProtectedBackupData(
                 password,
-                unprotectedBackup2 = backupData
+                unprotectedBackup = backupData
             ))
             assertTrue(actual is Result.Success)
             assertTrue(actual.payload.jweToken.serialize().isNotBlank())

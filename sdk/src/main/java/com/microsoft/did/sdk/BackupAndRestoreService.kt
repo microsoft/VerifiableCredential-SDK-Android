@@ -38,7 +38,7 @@ class BackupAndRestoreService @Inject constructor(
 
     private fun unwrapProtection(protectedBackupData: ProtectedBackupData): UnprotectedBackup {
         return when (protectedBackupData) {
-            is PasswordProtectedBackupData -> protectedBackupData.unprotectedBackup2
+            is PasswordProtectedBackupData -> protectedBackupData.unprotectedBackup
             else -> throw UnknownProtectionMethodException("Unknown protection options: ${protectedBackupData::class.qualifiedName}")
         }
     }
