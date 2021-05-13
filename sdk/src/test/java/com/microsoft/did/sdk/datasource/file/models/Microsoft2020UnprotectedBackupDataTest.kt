@@ -3,6 +3,9 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 import android.util.VerifiableCredentialUtil
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.VcMetadata
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.di.defaultTestSerializer
 import org.junit.Test
 import kotlin.test.assertEquals

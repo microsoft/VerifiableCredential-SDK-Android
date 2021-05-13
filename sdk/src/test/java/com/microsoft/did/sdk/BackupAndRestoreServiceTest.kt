@@ -5,15 +5,15 @@ package com.microsoft.did.sdk
 // only used for type
 import android.util.VerifiableCredentialUtil
 import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
-import com.microsoft.did.sdk.datasource.file.MicrosoftBackupSerializer
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.MicrosoftBackupSerializer
 import com.microsoft.did.sdk.datasource.file.RawIdentifierConverter
-import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.Microsoft2020Backup
+import com.microsoft.did.sdk.datasource.file.models.ProtectedBackup
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020Backup
 import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedJweBackup
 import com.microsoft.did.sdk.datasource.file.models.PasswordBackupInputData
-import com.microsoft.did.sdk.datasource.file.models.VcMetadata
-import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.VcMetadata
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import kotlinx.coroutines.runBlocking
@@ -43,7 +43,7 @@ class BackupAndRestoreServiceTest {
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     )
 
-    suspend fun createBackup(): JweProtectedBackup? {
+    suspend fun createBackup(): ProtectedBackup? {
         val encBackup = service.createBackup(PasswordBackupInputData(
             password,
             unprotectedBackup = backupData

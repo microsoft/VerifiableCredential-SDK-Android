@@ -3,5 +3,5 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 abstract class EncryptedBackupData {
-    abstract val backup: JweProtectedBackup
+    abstract val backup: ProtectedBackup
 }

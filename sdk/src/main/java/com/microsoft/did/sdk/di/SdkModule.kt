@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCrede
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor

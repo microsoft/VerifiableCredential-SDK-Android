@@ -3,11 +3,11 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
-import com.microsoft.did.sdk.datasource.file.MicrosoftBackupSerializer
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.MicrosoftBackupSerializer
 import com.microsoft.did.sdk.datasource.file.models.EncryptedBackupData
-import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.Microsoft2020Backup
-import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.ProtectedBackup
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020Backup
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordBackupInputData
 import com.microsoft.did.sdk.datasource.file.models.BackupInputData
@@ -18,7 +18,6 @@ import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethodException
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json
-import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,7 +27,7 @@ class BackupAndRestoreService @Inject constructor(
     private val microsoftBackupSerializer: MicrosoftBackupSerializer,
     private val serializer: Json
 ) {
-    suspend fun createBackup(backupInputData: BackupInputData): Result<JweProtectedBackup> {
+    suspend fun createBackup(backupInputData: BackupInputData): Result<ProtectedBackup> {
         return runResultTry {
             val unprotectedBackup = createUnprotectedBackup(backupInputData.unprotectedBackup)
             Result.Success(protectBackup(unprotectedBackup, backupInputData))
@@ -42,18 +41,18 @@ class BackupAndRestoreService @Inject constructor(
         }
     }
 
-    private fun protectBackup(unprotectedBackupData: UnprotectedBackupData, backupInputData: BackupInputData): JweProtectedBackup {
+    private fun protectBackup(unprotectedBackupData: UnprotectedBackupData, backupInputData: BackupInputData): ProtectedBackup {
         return when (backupInputData) {
             is PasswordBackupInputData -> jweBackupFactory.createPasswordBackup(unprotectedBackupData, backupInputData.password)
             else -> throw UnknownProtectionMethodException("Unknown protection options: ${backupInputData::class.qualifiedName}")
         }
     }
 
-    fun parseBackup(backupFile: InputStream): Result<JweProtectedBackup> {
-        return Result.Success(jweBackupFactory.parseBackup(backupFile));
+    fun parseBackup(backup: String): Result<ProtectedBackup> {
+        return Result.Success(jweBackupFactory.parseBackup(backup))
     }
 
-    suspend fun restoreBackup(backupData: EncryptedBackupData): Result<UnprotectedBackup> {
+    suspend fun restoreBackup(protectedBackup: ProtectedBackup, backupData: EncryptedBackupData): Result<UnprotectedBackup> {
         return runResultTry {
             val unprotectedBackup = decryptBackup(backupData)
             val unprotectedBackupData = importBackup(unprotectedBackup)

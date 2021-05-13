@@ -3,7 +3,7 @@
 package com.microsoft.did.sdk.datasource.file
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.datasource.file.models.RawIdentity
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.KeyException

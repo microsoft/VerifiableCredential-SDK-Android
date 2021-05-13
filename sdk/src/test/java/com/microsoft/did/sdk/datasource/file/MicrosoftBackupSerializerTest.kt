@@ -3,10 +3,11 @@
 package com.microsoft.did.sdk.datasource.file
 
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.file.models.Microsoft2020Backup
-import com.microsoft.did.sdk.datasource.file.models.VcMetadata
-import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
-import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020Backup
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.VcMetadata
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.microsoft2020.MicrosoftBackupSerializer
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coVerify
 import io.mockk.verify

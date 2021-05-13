@@ -8,8 +8,8 @@ import kotlinx.serialization.json.Json
 import javax.crypto.spec.SecretKeySpec
 
 class PasswordProtectedJweBackup internal constructor(
-    override val jweToken: JweToken,
-) : JweProtectedBackup() {
+    val jweToken: JweToken,
+) : ProtectedBackup() {
 
     internal fun decrypt(password: String, serializer: Json): UnprotectedBackupData {
         if (password.isEmpty()) {
