@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.file.models
+package com.microsoft.did.sdk.datasource.file
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020UnprotectedBackupData
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.datasource.backup.content.UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.backup.container.jwe.JwePasswordProtectedBackupData
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.file.models
+package com.microsoft.did.sdk.datasource.backup.content
 
 /**
  * A ProtectedBackup holds a UnprotectedBackupData in some shape or form.

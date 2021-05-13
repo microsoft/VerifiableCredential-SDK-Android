@@ -3,7 +3,8 @@
 package com.microsoft.did.sdk.datasource.file
 
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.RawIdentity
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.RawIdentifierConverter
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.RawIdentity
 import com.nimbusds.jose.jwk.KeyOperation
 import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.coroutines.runBlocking

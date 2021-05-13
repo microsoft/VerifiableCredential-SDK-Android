@@ -2,15 +2,15 @@
 
 package com.microsoft.did.sdk
 
-import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020BackupProcessor
-import com.microsoft.did.sdk.datasource.file.models.ProtectedBackupData
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020Backup
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020UnprotectedBackupData
-import com.microsoft.did.sdk.datasource.file.models.JwePasswordProtectionMethod
-import com.microsoft.did.sdk.datasource.file.models.ProtectionMethod
-import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
-import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
+import com.microsoft.did.sdk.datasource.backup.container.jwe.JweProtectedBackupFactory
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020BackupProcessor
+import com.microsoft.did.sdk.datasource.backup.content.ProtectedBackupData
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020Backup
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.backup.container.jwe.JwePasswordProtectionMethod
+import com.microsoft.did.sdk.datasource.backup.container.ProtectionMethod
+import com.microsoft.did.sdk.datasource.backup.content.UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.backup.UnprotectedBackup
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethodException
@@ -39,12 +39,12 @@ class BackupAndRestoreService @Inject constructor(
      */
     suspend fun createBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): Result<ProtectedBackupData> {
         return runResultTry {
-            val unprotectedBackupData = createUnprotectedBackupData(unprotectedBackup)
+            val unprotectedBackupData = transformToBackupData(unprotectedBackup)
             Result.Success(protectBackup(unprotectedBackupData, protectionMethod))
         }
     }
 
-    private suspend fun createUnprotectedBackupData(unprotectedBackup: UnprotectedBackup): UnprotectedBackupData {
+    private suspend fun transformToBackupData(unprotectedBackup: UnprotectedBackup): UnprotectedBackupData {
         return when (unprotectedBackup) {
             is Microsoft2020Backup -> microsoft2020BackupProcessor.transformToBackupData(unprotectedBackup)
             else -> throw UnknownBackupFormatException("Unknown backup options: ${unprotectedBackup::class.qualifiedName}")
@@ -53,7 +53,7 @@ class BackupAndRestoreService @Inject constructor(
 
     private fun protectBackup(unprotectedBackupData: UnprotectedBackupData, protectionMethod: ProtectionMethod): ProtectedBackupData {
         return when (protectionMethod) {
-            is JwePasswordProtectionMethod -> protectionMethod.encrypt(unprotectedBackupData, serializer)
+            is JwePasswordProtectionMethod -> protectionMethod.wrap(unprotectedBackupData, serializer)
             else -> throw UnknownProtectionMethodException("Unknown protection options: ${protectionMethod::class.qualifiedName}")
         }
     }
@@ -76,15 +76,15 @@ class BackupAndRestoreService @Inject constructor(
      */
     suspend fun restoreBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
         return runResultTry {
-            val unprotectedBackup = decryptBackup(protectedBackupData, protectionMethod)
+            val unprotectedBackup = unwrapBackup(protectedBackupData, protectionMethod)
             val unprotectedBackupData = importBackup(unprotectedBackup)
             Result.Success(unprotectedBackupData)
         }
     }
 
-    private fun decryptBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): UnprotectedBackupData {
+    private fun unwrapBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): UnprotectedBackupData {
         return when (protectionMethod) {
-            is JwePasswordProtectionMethod -> protectionMethod.decrypt(protectedBackupData, serializer)
+            is JwePasswordProtectionMethod -> protectionMethod.unwrap(protectedBackupData, serializer)
             else -> throw UnknownBackupFormatException("Unknown backup options: ${protectedBackupData::class.qualifiedName}")
         }
     }

@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.file.models.microsoft2020
+package com.microsoft.did.sdk.datasource.backup.content.microsoft2020
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
-import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackup
+import com.microsoft.did.sdk.datasource.backup.UnprotectedBackup
 
 class Microsoft2020Backup(
     val walletMetadata: WalletMetadata,

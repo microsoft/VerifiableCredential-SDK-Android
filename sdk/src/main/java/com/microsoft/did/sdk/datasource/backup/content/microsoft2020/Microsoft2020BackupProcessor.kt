@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.file.models.microsoft2020
+package com.microsoft.did.sdk.datasource.backup.content.microsoft2020
 
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.datasource.file.RawIdentifierConverter
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.BackupRestoreException

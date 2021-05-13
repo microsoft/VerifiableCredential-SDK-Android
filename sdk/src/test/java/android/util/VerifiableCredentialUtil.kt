@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.RawIdentity
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JWSAlgorithm

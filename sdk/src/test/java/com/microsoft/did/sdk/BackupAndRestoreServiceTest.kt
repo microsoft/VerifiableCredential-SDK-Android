@@ -4,16 +4,16 @@ package com.microsoft.did.sdk
 
 // only used for type
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020BackupProcessor
-import com.microsoft.did.sdk.datasource.file.RawIdentifierConverter
-import com.microsoft.did.sdk.datasource.file.models.ProtectedBackupData
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.Microsoft2020Backup
-import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
-import com.microsoft.did.sdk.datasource.file.models.JwePasswordProtectedBackupData
-import com.microsoft.did.sdk.datasource.file.models.PasswordBackupInputData
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.VcMetadata
-import com.microsoft.did.sdk.datasource.file.models.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.datasource.backup.container.jwe.JweProtectedBackupFactory
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020BackupProcessor
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.RawIdentifierConverter
+import com.microsoft.did.sdk.datasource.backup.content.ProtectedBackupData
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020Backup
+import com.microsoft.did.sdk.datasource.backup.PasswordEncryptedBackupData
+import com.microsoft.did.sdk.datasource.backup.container.jwe.JwePasswordProtectedBackupData
+import com.microsoft.did.sdk.datasource.backup.PasswordBackupInputData
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.VcMetadata
+import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import kotlinx.coroutines.runBlocking
