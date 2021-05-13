@@ -17,7 +17,7 @@ import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCrede
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor
@@ -118,7 +118,7 @@ class SdkModule {
             serializersModule = additionalJsonSerializers +
                 SerializersModule {
                 polymorphic(UnprotectedBackupData::class) {
-                    subclass(MicrosoftUnprotectedBackupData2020::class)
+                    subclass(Microsoft2020UnprotectedBackupData::class)
                 }
             }
             encodeDefaults = false

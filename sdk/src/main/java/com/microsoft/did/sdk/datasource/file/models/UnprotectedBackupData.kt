@@ -11,7 +11,7 @@ import kotlinx.serialization.modules.subclass
 
 /**
  * BackupData classes represent the data as found in the backup file. It is a serialized version of the file.
- * Backup classes represent the same Backups but imported into the class model of the SDK.
+ * On the other hand, Backup classes represent the same Backups but imported into the class model of the SDK.
  */
 @Serializable
 abstract class UnprotectedBackupData {

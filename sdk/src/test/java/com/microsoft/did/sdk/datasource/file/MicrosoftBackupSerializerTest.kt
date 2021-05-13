@@ -3,10 +3,10 @@
 package com.microsoft.did.sdk.datasource.file
 
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020Backup
 import com.microsoft.did.sdk.datasource.file.models.VcMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coVerify
 import io.mockk.verify
@@ -18,7 +18,7 @@ import kotlin.test.assertTrue
 class MicrosoftBackupSerializerTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
-    private val rawIdentifierUtility = RawIdentifierUtility(identifierRepository, keyStore)
+    private val rawIdentifierUtility = RawIdentifierConverter(identifierRepository, keyStore)
     private val microsoftBackupSerializer = MicrosoftBackupSerializer(
         identifierRepository,
         keyStore,
@@ -27,7 +27,7 @@ class MicrosoftBackupSerializerTest {
     )
 
     private val vcMetadata = VcMetadata(VerifiableCredentialUtil.testDisplayContract)
-    private val backupData = MicrosoftBackup2020(
+    private val backupData = Microsoft2020Backup(
         WalletMetadata(),
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     )
@@ -35,7 +35,7 @@ class MicrosoftBackupSerializerTest {
     @Test
     fun importTest() {
         runBlocking {
-            val rawData = MicrosoftUnprotectedBackupData2020(
+            val rawData = Microsoft2020UnprotectedBackupData(
                 mapOf(
                     "test" to VerifiableCredentialUtil.testVerifiedCredential.raw,
                 ),

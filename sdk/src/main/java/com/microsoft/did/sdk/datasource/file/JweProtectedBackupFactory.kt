@@ -4,7 +4,7 @@ package com.microsoft.did.sdk.datasource.file
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedJweBackup
 import com.microsoft.did.sdk.datasource.file.models.UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
@@ -28,7 +28,7 @@ class JweProtectedBackupFactory @Inject constructor(
         val token = JweToken.deserialize(jweString)
         val cty = token.contentType
         // for now we only know microsoft password, fail early.
-        if (cty != MicrosoftUnprotectedBackupData2020.MICROSOFT_BACKUP_TYPE) {
+        if (cty != Microsoft2020UnprotectedBackupData.MICROSOFT_BACKUP_TYPE) {
             throw UnknownBackupFormatException("Backup of an unknown format: $cty")
         }
         val alg = token.getKeyAlgorithm()

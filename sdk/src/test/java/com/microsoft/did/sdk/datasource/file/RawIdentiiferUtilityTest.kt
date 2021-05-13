@@ -16,7 +16,7 @@ import kotlin.test.fail
 class RawIdentiiferUtilityTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
-    private val rawIdentifierUtility = RawIdentifierUtility(identifierRepository, keyStore)
+    private val rawIdentifierUtility = RawIdentifierConverter(identifierRepository, keyStore)
 
     @Test
     fun parseRawIdentifierTest() {

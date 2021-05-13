@@ -11,8 +11,8 @@ import kotlinx.serialization.Serializable
  * @param identifiers List of raw identifiers.
  */
 @Serializable
-@SerialName(MicrosoftUnprotectedBackupData2020.MICROSOFT_BACKUP_TYPE)
-class MicrosoftUnprotectedBackupData2020(
+@SerialName(Microsoft2020UnprotectedBackupData.MICROSOFT_BACKUP_TYPE)
+class Microsoft2020UnprotectedBackupData(
     val vcs: Map<String, String>,
     val vcsMetaInf: Map<String, VcMetadata>,
     val metaInf: WalletMetadata,

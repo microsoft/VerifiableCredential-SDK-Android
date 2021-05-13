@@ -6,8 +6,8 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020Backup
 import com.microsoft.did.sdk.datasource.file.models.VcMetadata
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -21,31 +21,31 @@ import javax.inject.Singleton
 class MicrosoftBackupSerializer @Inject constructor(
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
-    private val rawIdentifierUtility: RawIdentifierUtility,
+    private val rawIdentifierConverter: RawIdentifierConverter,
     private val jsonSerializer: Json
 ) {
 
-    suspend fun create(backupData: MicrosoftBackup2020): MicrosoftUnprotectedBackupData2020 {
+    suspend fun create(backup: Microsoft2020Backup): Microsoft2020UnprotectedBackupData {
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
-        backupData.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
+        backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
             vcMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.first.raw;
             vcMetaMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.second;
         }
-        return MicrosoftUnprotectedBackupData2020(
+        return Microsoft2020UnprotectedBackupData(
             vcs = vcMap,
             vcsMetaInf = vcMetaMap,
-            metaInf = backupData.walletMetadata,
-            identifiers = rawIdentifierUtility.getAllIdentifiers()
+            metaInf = backup.walletMetadata,
+            identifiers = rawIdentifierConverter.getAllIdentifiers()
         )
     }
 
-    suspend fun import(backup: MicrosoftUnprotectedBackupData2020): MicrosoftBackup2020 {
+    suspend fun import(backup: Microsoft2020UnprotectedBackupData): Microsoft2020Backup {
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
 
         backup.identifiers.forEach { raw ->
-            val pair = rawIdentifierUtility.parseRawIdentifier(raw)
+            val pair = rawIdentifierConverter.parseRawIdentifier(raw)
             identifiers.add(pair.first)
             keySet = keySet.union(pair.second)
         }
@@ -53,13 +53,13 @@ class MicrosoftBackupSerializer @Inject constructor(
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }
 
-        return MicrosoftBackup2020(
+        return Microsoft2020Backup(
             walletMetadata = backup.metaInf,
             verifiableCredentials = importVcs(backup)
         )
     }
 
-    private fun importVcs(backup: MicrosoftUnprotectedBackupData2020): List<Pair<VerifiableCredential, VcMetadata>> {
+    private fun importVcs(backup: Microsoft2020UnprotectedBackupData): List<Pair<VerifiableCredential, VcMetadata>> {
         val vcList = ArrayList<Pair<VerifiableCredential, VcMetadata>>()
         backup.vcs.forEach { mapEntry ->
             val (jti, rawVcToken) = mapEntry

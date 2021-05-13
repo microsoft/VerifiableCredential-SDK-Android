@@ -7,16 +7,6 @@ import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 
-/**
- * @constructor
- * @param id Decentralized Identifier
- * @param name External label
- * @param alias Internal name
- * @param signatureKey Signing private key
- * @param encryptionKey Encrypting private key
- * @param recoveryKey private key used to recover
- * @param updateKey key used for DID updates
- */
 @Serializable
 data class RawIdentity(
     val id: String,

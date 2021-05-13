@@ -3,7 +3,10 @@
 package com.microsoft.did.sdk.datasource.file.models
 
 /**
- * BackupData classes represent the data as found in the backup file. It is a serialized version of the file.
  * Backup classes represent the same Backups but imported into the class model of the SDK.
+ * On the other hand, BackupData classes represent the data as found in the backup file. It is a serialized version of the file.
+ *
+ * This class serves as the parent class for any kind of backup that may hold any kind of data.
+ * This way the implementations of backups can evolve without the APIs changing.
  */
 abstract class UnprotectedBackup

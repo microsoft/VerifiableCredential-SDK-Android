@@ -6,12 +6,12 @@ package com.microsoft.did.sdk
 import android.util.VerifiableCredentialUtil
 import com.microsoft.did.sdk.datasource.file.JweProtectedBackupFactory
 import com.microsoft.did.sdk.datasource.file.MicrosoftBackupSerializer
-import com.microsoft.did.sdk.datasource.file.RawIdentifierUtility
+import com.microsoft.did.sdk.datasource.file.RawIdentifierConverter
 import com.microsoft.did.sdk.datasource.file.models.JweProtectedBackup
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftBackup2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020Backup
 import com.microsoft.did.sdk.datasource.file.models.PasswordEncryptedBackupData
 import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedJweBackup
-import com.microsoft.did.sdk.datasource.file.models.PasswordProtectedBackupData
+import com.microsoft.did.sdk.datasource.file.models.PasswordBackupInputData
 import com.microsoft.did.sdk.datasource.file.models.VcMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -31,20 +31,20 @@ class BackupAndRestoreServiceTest {
     private val microsoftBackupSerializer = MicrosoftBackupSerializer(
         identifierRepository,
         keyStore,
-        RawIdentifierUtility(identifierRepository, keyStore),
+        RawIdentifierConverter(identifierRepository, keyStore),
         defaultTestSerializer
     )
     private val service = BackupAndRestoreService(jweBackupFactory, microsoftBackupSerializer, defaultTestSerializer)
     private val password = "Big complex passsword you'll never be able to guess"
 
     private val vcMetadata = VcMetadata(VerifiableCredentialUtil.testDisplayContract)
-    private val backupData = MicrosoftBackup2020(
+    private val backupData = Microsoft2020Backup(
         WalletMetadata(),
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     )
 
     suspend fun createBackup(): JweProtectedBackup? {
-        val encBackup = service.createBackup(PasswordProtectedBackupData(
+        val encBackup = service.createBackup(PasswordBackupInputData(
             password,
             unprotectedBackup = backupData
         ))
@@ -58,7 +58,7 @@ class BackupAndRestoreServiceTest {
     @Test
     fun createBackupTest() {
         runBlocking {
-            val actual = service.createBackup(PasswordProtectedBackupData(
+            val actual = service.createBackup(PasswordBackupInputData(
                 password,
                 unprotectedBackup = backupData
             ))
@@ -103,7 +103,7 @@ class BackupAndRestoreServiceTest {
                 )
             )
             assertTrue(actual is Result.Success)
-            assertTrue(actual.payload is MicrosoftBackup2020)
+            assertTrue(actual.payload is Microsoft2020Backup)
         }
     }
 }

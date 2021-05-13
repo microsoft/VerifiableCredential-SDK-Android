@@ -14,7 +14,7 @@ import kotlin.test.assertTrue
 
 class PasswordProtectedJweBackupTest {
     val password = "incredibly weak password, do not attempt."
-    val payload = MicrosoftUnprotectedBackupData2020(
+    val payload = Microsoft2020UnprotectedBackupData(
         vcs = emptyMap(),
         vcsMetaInf = emptyMap(),
         metaInf = WalletMetadata(),
@@ -46,6 +46,6 @@ class PasswordProtectedJweBackupTest {
             passwordBackup.decrypt("not the password", defaultTestSerializer)
         }
         val actual = passwordBackup.decrypt(password, defaultTestSerializer)
-        assertTrue(actual is MicrosoftUnprotectedBackupData2020)
+        assertTrue(actual is Microsoft2020UnprotectedBackupData)
     }
 }

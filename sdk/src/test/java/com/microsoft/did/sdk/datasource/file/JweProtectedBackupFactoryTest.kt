@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.datasource.file
 import com.microsoft.did.sdk.datasource.file.models.VcMetadata
 import com.microsoft.did.sdk.datasource.file.models.WalletMetadata
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.file.models.MicrosoftUnprotectedBackupData2020
+import com.microsoft.did.sdk.datasource.file.models.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -20,7 +20,7 @@ class JweProtectedBackupFactoryTest {
         VerifiableCredentialUtil.testDisplayContract
     )
 
-    private val backup = MicrosoftUnprotectedBackupData2020(
+    private val backup = Microsoft2020UnprotectedBackupData(
         mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
         mapOf("test" to vcMetadata),
         walletMetadata,

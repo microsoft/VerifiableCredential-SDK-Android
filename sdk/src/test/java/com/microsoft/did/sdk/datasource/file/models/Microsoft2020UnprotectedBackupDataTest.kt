@@ -8,14 +8,14 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class MicrosoftUnprotectedBackupData2020Test {
+class Microsoft2020UnprotectedBackupDataTest {
     private val walletMetadata = WalletMetadata()
 
     private val vcMetadata = VcMetadata(
         VerifiableCredentialUtil.testDisplayContract
     )
 
-    private val backup = MicrosoftUnprotectedBackupData2020(
+    private val backup = Microsoft2020UnprotectedBackupData(
         mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
         mapOf("test" to vcMetadata),
         walletMetadata,
@@ -24,7 +24,7 @@ class MicrosoftUnprotectedBackupData2020Test {
 
     @Test
     fun `type field should match static test`() {
-        assertEquals(MicrosoftUnprotectedBackupData2020.MICROSOFT_BACKUP_TYPE, backup.type, "types should match")
+        assertEquals(Microsoft2020UnprotectedBackupData.MICROSOFT_BACKUP_TYPE, backup.type, "types should match")
     }
 
     @Test
