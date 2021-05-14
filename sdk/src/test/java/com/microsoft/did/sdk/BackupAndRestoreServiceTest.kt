@@ -44,7 +44,7 @@ class BackupAndRestoreServiceTest {
     )
 
     suspend fun createBackup(): ProtectedBackupData? {
-        val encBackup = service.createBackup(PasswordBackupInputData(
+        val encBackup = service.exportBackup(PasswordBackupInputData(
             password,
             unprotectedBackup = backupData
         ))
@@ -58,7 +58,7 @@ class BackupAndRestoreServiceTest {
     @Test
     fun createBackupTest() {
         runBlocking {
-            val actual = service.createBackup(PasswordBackupInputData(
+            val actual = service.exportBackup(PasswordBackupInputData(
                 password,
                 unprotectedBackup = backupData
             ))
@@ -96,7 +96,7 @@ class BackupAndRestoreServiceTest {
     fun restoreBackupTest() {
         runBlocking {
             val encBackup = createBackup() ?: fail("Failed to create backup")
-            val actual = service.restoreBackup(
+            val actual = service.importBackup(
                 PasswordEncryptedBackupData(
                     password,
                     backup = encBackup as JwePasswordProtectedBackupData

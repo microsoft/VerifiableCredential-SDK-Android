@@ -36,11 +36,29 @@ class BackupAndRestoreService @Inject constructor(
      * @param protectionMethod the type of this parameter determines the protection method applied
      * @return content of the backup ready to be written to a file
      */
-    suspend fun createBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): Result<ProtectedBackupData> {
+    suspend fun exportBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): Result<ProtectedBackupData> {
         return runResultTry {
             val unprotectedBackupData = backupProcessorFactory.export(unprotectedBackup)
             val protectedBackup = protectionMethod.wrap(unprotectedBackupData, serializer)
             Result.Success(protectedBackup)
+        }
+    }
+
+    /**
+     * ProtectedBackupData is decrypted and transformed into an UnprotectedBackup.
+     *
+     * During this process all contained Identifiers and keys are restored into the SDKs database!
+     * Everything else is contained in the UnprotectedBackup and IS NOT restored.
+     *
+     * @param protectedBackupData the contents are unwraped and returned
+     * @param protectionMethod the type and contents of this parameter determines the protection method used to unwrap and decrypt the backup
+     * @return the transformed and decrypted backup of the type found within protectedBackupData
+     */
+    suspend fun importBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
+        return runResultTry {
+            val unprotectedBackup = protectionMethod.unwrap(protectedBackupData, serializer)
+            val unprotectedBackupData = backupProcessorFactory.import(unprotectedBackup)
+            Result.Success(unprotectedBackupData)
         }
     }
 
@@ -53,24 +71,6 @@ class BackupAndRestoreService @Inject constructor(
     suspend fun parseBackup(backup: String): Result<ProtectedBackupData> {
         return runResultTry {
             Result.Success(backupParser.parseBackup(backup))
-        }
-    }
-
-    /**
-     * ProtectedBackupData is decrypted and transformed into an UnprotectedBackup.
-     *
-     * During this process all contained Identifiers and keys are restored into the SDKs database!
-     * Everything else is contained in the UnprotectedBackup and IS NOT restored.
-     *
-     * @param protectedBackupData a protected method that will be transformed and decrypted according to it's type
-     * @param protectionMethod used to decrypt the passed backup and has to fit the way the it's protection method
-     * @return the transformed and decrypted backup of the type found within protectedBackupData
-     */
-    suspend fun restoreBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
-        return runResultTry {
-            val unprotectedBackup = protectionMethod.unwrap(protectedBackupData, serializer)
-            val unprotectedBackupData = backupProcessorFactory.import(unprotectedBackup)
-            Result.Success(unprotectedBackupData)
         }
     }
 }

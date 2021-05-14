@@ -18,14 +18,14 @@ class BackupProcessorFactory @Inject constructor(
     private fun getProcessor(unprotectedBackup: UnprotectedBackup): BackupProcessor {
         return when (unprotectedBackup) {
             is Microsoft2020Backup -> microsoft2020BackupProcessor
-            else -> throw UnknownBackupFormatException("Unknown backup options: ${unprotectedBackup::class.qualifiedName}")
+            else -> throw UnknownBackupFormatException("Unknown backup type: ${unprotectedBackup::class.qualifiedName}")
         }
     }
 
     private fun getProcessor(backupData: UnprotectedBackupData): BackupProcessor {
         return when (backupData) {
             is Microsoft2020UnprotectedBackupData -> microsoft2020BackupProcessor
-            else -> throw UnknownBackupFormatException("Unknown restore file: ${backupData::class.qualifiedName}")
+            else -> throw UnknownBackupFormatException("Unknown backupData type: ${backupData::class.qualifiedName}")
         }
     }
 
