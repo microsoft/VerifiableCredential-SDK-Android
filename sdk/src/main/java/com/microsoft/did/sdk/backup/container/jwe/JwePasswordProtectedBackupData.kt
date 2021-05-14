@@ -5,7 +5,7 @@ package com.microsoft.did.sdk.backup.container.jwe
 import com.microsoft.did.sdk.backup.content.ProtectedBackupData
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 
-class JwePasswordProtectedBackupData internal constructor(
+data class JwePasswordProtectedBackupData internal constructor(
     val jweToken: JweToken,
 ) : ProtectedBackupData() {
 

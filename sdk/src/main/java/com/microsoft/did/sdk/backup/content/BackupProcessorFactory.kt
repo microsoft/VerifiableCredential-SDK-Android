@@ -3,7 +3,7 @@
 package com.microsoft.did.sdk.backup.content
 
 import com.microsoft.did.sdk.backup.UnprotectedBackup
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020Backup
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
@@ -17,7 +17,7 @@ class BackupProcessorFactory @Inject constructor(
 
     private fun getProcessor(unprotectedBackup: UnprotectedBackup): BackupProcessor {
         return when (unprotectedBackup) {
-            is Microsoft2020Backup -> microsoft2020BackupProcessor
+            is Microsoft2020UnprotectedBackup -> microsoft2020BackupProcessor
             else -> throw UnknownBackupFormatException("Unknown backup type: ${unprotectedBackup::class.qualifiedName}")
         }
     }

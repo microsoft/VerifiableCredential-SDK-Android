@@ -6,6 +6,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("BaseVC")
-abstract class VcMetadata {
-    abstract val displayContract: DisplayContract
-}
+class VcMetadata(val displayContract: DisplayContract)

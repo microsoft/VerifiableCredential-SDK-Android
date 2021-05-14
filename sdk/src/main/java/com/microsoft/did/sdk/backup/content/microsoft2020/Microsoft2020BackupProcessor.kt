@@ -26,7 +26,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
 ) : BackupProcessor {
 
     override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
-        if (backup !is Microsoft2020Backup) throw BackupRestoreException("Backup has wrong type ${backup::class.simpleName}")
+        if (backup !is Microsoft2020UnprotectedBackup) throw BackupRestoreException("Backup has wrong type ${backup::class.simpleName}")
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
@@ -55,7 +55,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }
 
-        return Microsoft2020Backup(
+        return Microsoft2020UnprotectedBackup(
             walletMetadata = backupData.metaInf,
             verifiableCredentials = transformVcs(backupData)
         )

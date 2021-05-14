@@ -13,6 +13,8 @@ import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectionMethod
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -20,9 +22,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BackupParserTest {
-    private class TestVcMetaData(override val displayContract: DisplayContract) : VcMetadata()
 
-    private val vcMetadata = TestVcMetaData(
+    private val vcMetadata = VcMetadata(
         VerifiableCredentialUtil.testDisplayContract
     )
     private val walletMetadata = WalletMetadata()

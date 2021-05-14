@@ -11,10 +11,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals
 
-class Microsoft2020BackupProcessorTest {
+class Microsoft2020UnprotectedBackupProcessorTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
     private val rawIdentifierUtility = RawIdentifierConverter(identifierRepository, keyStore)
+
     private val backupProcessor = Microsoft2020BackupProcessor(
         identifierRepository,
         keyStore,
@@ -22,10 +23,8 @@ class Microsoft2020BackupProcessorTest {
         defaultTestSerializer
     )
 
-    private class TestVcMetaData(override val displayContract: DisplayContract) : VcMetadata()
-
-    private val vcMetadata = TestVcMetaData(VerifiableCredentialUtil.testDisplayContract)
-    private val backupData = Microsoft2020Backup(
+    private val vcMetadata = VcMetadata(VerifiableCredentialUtil.testDisplayContract)
+    private val backupData = Microsoft2020UnprotectedBackup(
         WalletMetadata(),
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     )
@@ -45,7 +44,7 @@ class Microsoft2020BackupProcessorTest {
                     VerifiableCredentialUtil.rawIdentifier
                 )
             )
-            val actual = backupProcessor.import(rawData)
+            val actual = backupProcessor.import(rawData) as Microsoft2020UnprotectedBackup
             assertEquals(
                 backupData.verifiableCredentials,
                 actual.verifiableCredentials
@@ -65,7 +64,7 @@ class Microsoft2020BackupProcessorTest {
     @Test
     fun `transformToBackupData transforms backup correctly`() {
         runBlocking {
-            val actual = backupProcessor.export(backupData)
+            val actual = backupProcessor.export(backupData) as Microsoft2020UnprotectedBackupData
             coVerify {
                 identifierRepository.queryAllLocal()
             }

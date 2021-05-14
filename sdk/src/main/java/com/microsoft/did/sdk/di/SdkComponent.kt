@@ -6,7 +6,7 @@
 package com.microsoft.did.sdk.di
 
 import android.content.Context
-import com.microsoft.did.sdk.BackupAndRestoreService
+import com.microsoft.did.sdk.BackupService
 import com.microsoft.did.sdk.CorrelationVectorService
 import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.IdentifierManager
@@ -15,7 +15,6 @@ import com.microsoft.did.sdk.PresentationService
 import com.microsoft.did.sdk.RevocationService
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import javax.inject.Named
 import javax.inject.Singleton
@@ -44,7 +43,7 @@ internal interface SdkComponent {
 
     fun correlationVectorService(): CorrelationVectorService
 
-    fun backupAndRestoreService(): BackupAndRestoreService
+    fun backupAndRestoreService(): BackupService
 
     @Component.Builder
     interface Builder {
