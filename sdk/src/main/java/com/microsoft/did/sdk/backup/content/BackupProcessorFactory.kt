@@ -3,8 +3,8 @@
 package com.microsoft.did.sdk.backup.content
 
 import com.microsoft.did.sdk.backup.UnprotectedBackup
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
 import javax.inject.Inject
@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @Singleton
 class BackupProcessorFactory @Inject constructor(
     private val microsoft2020BackupProcessor: Microsoft2020BackupProcessor
-): BackupProcessor {
+) : BackupProcessor {
 
     private fun getProcessor(unprotectedBackup: UnprotectedBackup): BackupProcessor {
         return when (unprotectedBackup) {

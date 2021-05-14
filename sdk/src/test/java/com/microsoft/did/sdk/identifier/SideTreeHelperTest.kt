@@ -11,8 +11,10 @@ class SideTreeHelperTest {
 
     private val sideTreeHelper = SideTreeHelper()
 
-    private val testJwk = "{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"signKey\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}"
-    private val testJwkRearrangedWithSpaces = "{ \"kid\" : \"signKey\",\"crv\":\"secp256k1\",\"kty\":\"EC\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}"
+    private val testJwk =
+        "{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"signKey\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}"
+    private val testJwkRearrangedWithSpaces =
+        "{ \"kid\" : \"signKey\",\"crv\":\"secp256k1\",\"kty\":\"EC\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}"
 
     @Test
     fun `multi hash is equal through canonicalization`() {

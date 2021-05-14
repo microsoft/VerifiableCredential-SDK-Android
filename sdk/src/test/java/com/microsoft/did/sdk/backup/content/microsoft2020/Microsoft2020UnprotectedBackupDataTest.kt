@@ -3,11 +3,8 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
-import com.microsoft.did.sdk.di.defaultTestSerializer
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class Microsoft2020UnprotectedBackupDataTest {
     private val vcMetadata = VcMetadata(

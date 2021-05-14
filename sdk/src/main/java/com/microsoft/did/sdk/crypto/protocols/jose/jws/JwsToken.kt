@@ -32,7 +32,7 @@ class JwsToken internal constructor(
     }
 
     fun sign(privateKey: JWK, overrideHeaders: JWSHeader? = null) {
-        overrideHeaders?.let {headers ->
+        overrideHeaders?.let { headers ->
             jwsObject = JWSObject(headers, jwsObject.payload)
         }
         val signer = DefaultJWSSignerFactory().createJWSSigner(privateKey, jwsObject.header.algorithm)

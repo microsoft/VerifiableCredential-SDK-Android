@@ -36,8 +36,7 @@ class JwtValidator @Inject constructor(
     }
 
     private fun getKid(token: JwsToken): Pair<String, String> {
-        token.keyId?.let {
-            kid ->
+        token.keyId?.let { kid ->
             val parsedKid = kid.split("#")
             return Pair(parsedKid[0], parsedKid[1])
         }

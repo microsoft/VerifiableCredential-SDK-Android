@@ -162,7 +162,9 @@ class IssuanceServiceTest {
             assertThat(actualRequest).isInstanceOf(Result.Success::class.java)
             assertThat((actualRequest as Result.Success).payload.contractUrl).isEqualTo(suppliedContractUrl)
             assertThat(actualRequest.payload.linkedDomainResult).isInstanceOf(LinkedDomainVerified::class.java)
-            assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(mockedIdentifierDocumentServiceEndpoint)
+            assertThat((actualRequest.payload.linkedDomainResult as LinkedDomainVerified).domainUrl).isEqualTo(
+                mockedIdentifierDocumentServiceEndpoint
+            )
             assertThat(actualRequest.payload.entityName).isEqualTo(expectedEntityName)
             assertThat(actualRequest.payload.entityIdentifier).isEqualTo(expectedEntityIdentifier)
         }
@@ -175,12 +177,25 @@ class IssuanceServiceTest {
         val issuanceResponse = IssuanceResponse(issuanceRequest)
         val mockedPresentationAttestation = mockk<PresentationAttestation>()
 
-        every { issuanceResponseFormatter.formatResponse(issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential} as RequestedVcMap, issuanceResponse, pairwiseIdentifier, DEFAULT_EXPIRATION_IN_SECONDS) } returns formattedResponse
+        every {
+            issuanceResponseFormatter.formatResponse(issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential } as RequestedVcMap,
+                issuanceResponse,
+                pairwiseIdentifier,
+                DEFAULT_EXPIRATION_IN_SECONDS)
+        } returns formattedResponse
         coEvery { identifierManager.getIdentifierById(expectedVerifiableCredential.contents.sub) } returns Result.Success(masterIdentifier)
-        coEvery { exchangeService.getExchangedVerifiableCredential(expectedVerifiableCredential, masterIdentifier, pairwiseIdentifier) } returns Result.Success(expectedPairwiseVerifiableCredential)
+        coEvery {
+            exchangeService.getExchangedVerifiableCredential(
+                expectedVerifiableCredential,
+                masterIdentifier,
+                pairwiseIdentifier
+            )
+        } returns Result.Success(expectedPairwiseVerifiableCredential)
         every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
         every { mockedPresentationAttestation.validityInterval } returns 1000
-        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(expectedVerifiableCredential)
+        coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(
+            expectedVerifiableCredential
+        )
 
         runBlocking {
             val createdVerifiableCredential = issuanceService.sendResponse(issuanceResponse)
@@ -195,7 +210,7 @@ class IssuanceServiceTest {
             issuanceService["formAndSendResponse"](
                 issuanceResponse,
                 pairwiseIdentifier,
-                issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential} as RequestedVcMap,
+                issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential } as RequestedVcMap,
                 DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

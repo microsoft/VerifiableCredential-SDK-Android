@@ -3,10 +3,10 @@
 package com.microsoft.did.sdk
 
 import com.microsoft.did.sdk.backup.BackupParser
-import com.microsoft.did.sdk.backup.content.ProtectedBackupData
-import com.microsoft.did.sdk.backup.container.ProtectionMethod
 import com.microsoft.did.sdk.backup.UnprotectedBackup
+import com.microsoft.did.sdk.backup.container.ProtectionMethod
 import com.microsoft.did.sdk.backup.content.BackupProcessorFactory
+import com.microsoft.did.sdk.backup.content.ProtectedBackupData
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json

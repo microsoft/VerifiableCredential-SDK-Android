@@ -12,13 +12,13 @@ import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.CorrelationVectorService
+import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
-import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
 import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor
 import com.microsoft.did.sdk.identifier.registrars.Registrar
@@ -117,10 +117,10 @@ class SdkModule {
         return Json {
             serializersModule = additionalJsonSerializers +
                 SerializersModule {
-                polymorphic(UnprotectedBackupData::class) {
-                    subclass(Microsoft2020UnprotectedBackupData::class)
+                    polymorphic(UnprotectedBackupData::class) {
+                        subclass(Microsoft2020UnprotectedBackupData::class)
+                    }
                 }
-            }
             encodeDefaults = false
             ignoreUnknownKeys = true
             isLenient = true

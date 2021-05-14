@@ -2,12 +2,12 @@
 
 package com.microsoft.did.sdk.backup
 
-import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
-import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
 import android.util.VerifiableCredentialUtil
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectionMethod
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
+import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test

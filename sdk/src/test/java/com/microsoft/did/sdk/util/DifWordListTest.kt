@@ -2,16 +2,14 @@
 
 package com.microsoft.did.sdk.util
 
-import io.mockk.every
-import io.mockk.mockkObject
-import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class DifWordListTest {
-    private val testWordSet = listOf("alpha", "bravo", "charlie", "delta", "echo",
-        "foxtrot", "golf", "hotel", "india","juliett",
+    private val testWordSet = listOf(
+        "alpha", "bravo", "charlie", "delta", "echo",
+        "foxtrot", "golf", "hotel", "india", "juliett",
         "kilo", "lima", "mike", "november", "oscar",
         "papa", "quebec", "romeo", "sierra", "tango",
         "uniform", "victor", "whiskey", "xray", "yankee",

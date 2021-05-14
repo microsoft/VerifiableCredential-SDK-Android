@@ -3,7 +3,6 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coVerify
 import io.mockk.verify

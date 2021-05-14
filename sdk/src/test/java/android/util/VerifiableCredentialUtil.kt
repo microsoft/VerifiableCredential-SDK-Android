@@ -2,16 +2,16 @@
 
 package android.util
 
+import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentity
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
+import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.CardDescriptor
 import com.microsoft.did.sdk.credential.service.models.contracts.display.ConsentDescriptor
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.credential.service.models.contracts.display.Logo
-import com.microsoft.did.sdk.credential.models.VerifiableCredentialDescriptor
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
-import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentity
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JWSAlgorithm
@@ -60,10 +60,17 @@ object VerifiableCredentialUtil {
         "INVALID: FOR TESTING USE ONLY"
     )
     val testVerifiedCredential: VerifiableCredential by lazy {
-        val jws = JwsToken(JWSObject(JWSHeader(JWSAlgorithm.ES256), Payload(Base64URL.encode(Json.Default.encodeToString(testVerifiableCredentialContent)))))
-        jws.sign(signKey, JWSHeader.Builder(JWSAlgorithm.ES256)
-            .keyID(signKey.keyID)
-            .build())
+        val jws = JwsToken(
+            JWSObject(
+                JWSHeader(JWSAlgorithm.ES256),
+                Payload(Base64URL.encode(Json.Default.encodeToString(testVerifiableCredentialContent)))
+            )
+        )
+        jws.sign(
+            signKey, JWSHeader.Builder(JWSAlgorithm.ES256)
+                .keyID(signKey.keyID)
+                .build()
+        )
         VerifiableCredential(
             jti,
             jws.serialize(),
@@ -102,9 +109,9 @@ object VerifiableCredentialUtil {
 
     fun getMockIdentifierRepository(): IdentifierRepository {
         val identifierRepository = mockk<IdentifierRepository>()
-        coEvery { identifierRepository.queryByIdentifier(testDid) } returns(testIdentifer)
-        coEvery { identifierRepository.queryAllLocal() } returns(listOf(testIdentifer))
-        coEvery { identifierRepository.queryByName(testIdentifer.name)} returns(testIdentifer)
+        coEvery { identifierRepository.queryByIdentifier(testDid) } returns (testIdentifer)
+        coEvery { identifierRepository.queryAllLocal() } returns (listOf(testIdentifer))
+        coEvery { identifierRepository.queryByName(testIdentifer.name) } returns (testIdentifer)
         coEvery { identifierRepository.insert(any()) } returns (Unit)
         return identifierRepository
     }

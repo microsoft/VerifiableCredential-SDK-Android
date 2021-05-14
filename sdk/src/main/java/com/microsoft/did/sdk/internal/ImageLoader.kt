@@ -4,7 +4,6 @@ package com.microsoft.did.sdk.internal
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.util.ImageUtil
-import com.microsoft.did.sdk.util.controlflow.InvalidImageException
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +17,7 @@ class ImageLoader @Inject constructor() {
 
     suspend fun loadRemoteImagesIntoContract(request: IssuanceRequest) {
         val logo = request.contract.display.card.logo
-        if(logo != null) {
+        if (logo != null) {
             if (logo.image != null || logo.uri == null) {
                 logo.uri = null
                 return

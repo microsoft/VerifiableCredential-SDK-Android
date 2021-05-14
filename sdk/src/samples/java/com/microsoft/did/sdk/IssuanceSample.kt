@@ -8,6 +8,7 @@ import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.SdkException
+
 class IssuanceSample {
     suspend fun issuanceSample() {
         when (val result = VerifiableCredentialSdk.issuanceService.getRequest("<issuance request url>")) {

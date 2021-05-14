@@ -2,10 +2,10 @@
 
 package com.microsoft.did.sdk.backup
 
-import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
 import com.microsoft.did.sdk.backup.content.ProtectedBackupData
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
 import com.microsoft.did.sdk.util.controlflow.UnknownBackupFormatException
 import com.microsoft.did.sdk.util.controlflow.UnknownProtectionMethodException
 import javax.inject.Inject

@@ -18,8 +18,10 @@ class EncryptedKeyStoreInstrumentedTest {
 
     private val keyStore = EncryptedKeyStore(InstrumentationRegistry.getInstrumentation().targetContext)
 
-    private val signingJwk = JWK.parse("{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"signKey\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}")
-    private val updateJwk = JWK.parse("{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"updateKey\",\"x\":\"iK9EveBFpO_KltBpKJfvq2KA2da-_VmYOwhJCAk6pRM\",\"y\":\"45wg6vkIT4JXcwzEJBjEWsJWxWv9cLXhdOAA4CACb8k\"}")
+    private val signingJwk =
+        JWK.parse("{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"signKey\",\"x\":\"dqEeSHC5KhsMSW_Zh8kBzQXB9HLgZqzBtmkAh-tAw4U\",\"y\":\"Yo_a4_sB2METsA9YRD6II_PjbHiWg4gwqQJiOxx4Suk\"}")
+    private val updateJwk =
+        JWK.parse("{\"kty\":\"EC\",\"crv\":\"secp256k1\",\"kid\":\"updateKey\",\"x\":\"iK9EveBFpO_KltBpKJfvq2KA2da-_VmYOwhJCAk6pRM\",\"y\":\"45wg6vkIT4JXcwzEJBjEWsJWxWv9cLXhdOAA4CACb8k\"}")
 
     @Test
     fun saveAndGet() {

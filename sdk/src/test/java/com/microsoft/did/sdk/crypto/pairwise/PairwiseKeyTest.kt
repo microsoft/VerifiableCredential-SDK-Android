@@ -75,16 +75,20 @@ class PairwiseKeyTest {
     fun `generate pairwise KeyPair, sign and verify`() {
         val peer = "did:peer"
 
-        val ecPairwiseKey = crypto.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(
-            EcPairwisePrivateKeySpec(seed, peer)
-        ))
-        val ecPairwisePublic = crypto.generateKey<ECPublicKey>(PublicKeyFactoryAlgorithm.EcPairwise(
-            EcPairwisePublicKeySpec(ecPairwiseKey)
-        ))
+        val ecPairwiseKey = crypto.generateKey<ECPrivateKey>(
+            PrivateKeyFactoryAlgorithm.EcPairwise(
+                EcPairwisePrivateKeySpec(seed, peer)
+            )
+        )
+        val ecPairwisePublic = crypto.generateKey<ECPublicKey>(
+            PublicKeyFactoryAlgorithm.EcPairwise(
+                EcPairwisePublicKeySpec(ecPairwiseKey)
+            )
+        )
 
         val data = "1234567890".toByteArray()
         val signature = crypto.sign(data, ecPairwiseKey, SigningAlgorithm.ES256K)
-        assertThat(crypto.verify(data, signature, ecPairwisePublic,  SigningAlgorithm.ES256K)).isTrue;
+        assertThat(crypto.verify(data, signature, ecPairwisePublic, SigningAlgorithm.ES256K)).isTrue
     }
 
     /**
@@ -98,12 +102,14 @@ class PairwiseKeyTest {
         val keyStore: EncryptedKeyStore = mockk()
         val creator = IdentifierCreator(mockk(), mockk(), mockk(), keyStore)
         for (i in 0..49) {
-            val seed ="1234567890-$i".toByteArray()
+            val seed = "1234567890-$i".toByteArray()
             every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns OctetSequenceKey.Builder(seed).build()
             val generatedSeed = creator.generatePersonaSeed(persona)
-            val pairwiseKey = crypto.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(
-                EcPairwisePrivateKeySpec(generatedSeed, peer)
-            ))
+            val pairwiseKey = crypto.generateKey<ECPrivateKey>(
+                PrivateKeyFactoryAlgorithm.EcPairwise(
+                    EcPairwisePrivateKeySpec(generatedSeed, peer)
+                )
+            )
             val privateKeySecret = pairwiseKey.s.toString(16)
             results[i] = privateKeySecret
             assertThat(results.filter { value -> value == privateKeySecret }.size).isEqualTo(1)
@@ -124,9 +130,11 @@ class PairwiseKeyTest {
         val personaSeed = creator.generatePersonaSeed(persona)
         for (i in 0..49) {
             val suppliedPeer = "$peer-$i"
-            val actualPrivate = crypto.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(
-                EcPairwisePrivateKeySpec(personaSeed, suppliedPeer)
-            ))
+            val actualPrivate = crypto.generateKey<ECPrivateKey>(
+                PrivateKeyFactoryAlgorithm.EcPairwise(
+                    EcPairwisePrivateKeySpec(personaSeed, suppliedPeer)
+                )
+            )
             val privateKeySecret = actualPrivate.s.toString(16)
             results[i] = privateKeySecret
             assertThat(results.filter { value -> value == privateKeySecret }.size).isEqualTo(1)
@@ -142,16 +150,19 @@ class PairwiseKeyTest {
         val countOfIds = 10
         val testKeysJsonString = inputStream.bufferedReader().readText()
         val testPairwiseKeys = defaultTestSerializer.decodeFromString(TestKeys.serializer(), testKeysJsonString)
-        val seed = "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi".toByteArray()
+        val seed =
+            "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi".toByteArray()
         val keyStore: EncryptedKeyStore = mockk()
         val creator = IdentifierCreator(mockk(), mockk(), mockk(), keyStore)
         every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns OctetSequenceKey.Builder(seed).build()
         val persona = "abcdef"
         val personaSeed = creator.generatePersonaSeed(persona)
         for (index in 0 until countOfIds) {
-            val pairwiseKey = crypto.generateKey<ECPrivateKey>(PrivateKeyFactoryAlgorithm.EcPairwise(
-                EcPairwisePrivateKeySpec(personaSeed, testPairwiseKeys.keys[index].pwid)
-            ))
+            val pairwiseKey = crypto.generateKey<ECPrivateKey>(
+                PrivateKeyFactoryAlgorithm.EcPairwise(
+                    EcPairwisePrivateKeySpec(personaSeed, testPairwiseKeys.keys[index].pwid)
+                )
+            )
             val privateKeySecret = Base64URL.encode(pairwiseKey.s).toString()
             assertThat(testPairwiseKeys.keys[index].key).isEqualTo(privateKeySecret)
             assertThat(1).isEqualTo(testPairwiseKeys.keys.filter { it.key == privateKeySecret }.size)
