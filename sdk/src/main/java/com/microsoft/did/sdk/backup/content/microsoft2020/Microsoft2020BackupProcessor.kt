@@ -2,6 +2,9 @@
 
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
+import com.microsoft.did.sdk.backup.UnprotectedBackup
+import com.microsoft.did.sdk.backup.content.BackupProcessor
+import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
@@ -20,9 +23,10 @@ class Microsoft2020BackupProcessor @Inject constructor(
     private val keyStore: EncryptedKeyStore,
     private val rawIdentifierConverter: RawIdentifierConverter,
     private val jsonSerializer: Json
-) {
+) : BackupProcessor {
 
-    suspend fun transformToBackupData(backup: Microsoft2020Backup): Microsoft2020UnprotectedBackupData {
+    override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
+        if (backup !is Microsoft2020Backup) throw BackupRestoreException("Backup has wrong type ${backup::class.simpleName}")
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
@@ -37,11 +41,12 @@ class Microsoft2020BackupProcessor @Inject constructor(
         )
     }
 
-    suspend fun import(backup: Microsoft2020UnprotectedBackupData): Microsoft2020Backup {
+    override suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup {
+        if (backupData !is Microsoft2020UnprotectedBackupData) throw BackupRestoreException("BackupData has wrong type ${backupData::class.simpleName}")
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
 
-        backup.identifiers.forEach { raw ->
+        backupData.identifiers.forEach { raw ->
             val pair = rawIdentifierConverter.parseRawIdentifier(raw)
             identifiers.add(pair.first)
             keySet = keySet.union(pair.second)
@@ -51,8 +56,8 @@ class Microsoft2020BackupProcessor @Inject constructor(
         identifiers.forEach { id -> identityRepository.insert(id) }
 
         return Microsoft2020Backup(
-            walletMetadata = backup.metaInf,
-            verifiableCredentials = transformVcs(backup)
+            walletMetadata = backupData.metaInf,
+            verifiableCredentials = transformVcs(backupData)
         )
     }
 

@@ -65,7 +65,7 @@ class Microsoft2020BackupProcessorTest {
     @Test
     fun `transformToBackupData transforms backup correctly`() {
         runBlocking {
-            val actual = backupProcessor.transformToBackupData(backupData)
+            val actual = backupProcessor.export(backupData)
             coVerify {
                 identifierRepository.queryAllLocal()
             }
