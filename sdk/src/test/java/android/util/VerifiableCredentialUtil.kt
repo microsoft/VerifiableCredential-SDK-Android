@@ -33,7 +33,7 @@ import kotlinx.serialization.json.Json
 
 // cryptographically correct and consistent Verifiable Credential data
 object VerifiableCredentialUtil {
-    const val testDid = "did:web:localhost"
+    private const val testDid = "did:web:localhost"
     val signKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("sign").keyUse(KeyUse.SIGNATURE).generate()
     val updateKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("update").keyUse(KeyUse.SIGNATURE).generate()
     val recoverKey: ECKey = ECKeyGenerator(Curve.P_256).keyID("recover").keyUse(KeyUse.SIGNATURE).generate()
@@ -46,7 +46,7 @@ object VerifiableCredentialUtil {
         claims = emptyMap()
     )
     private const val jti = "iri:vc:test"
-    val testVerifiableCredentialContent = VerifiableCredentialContent(
+    private val testVerifiableCredentialContent = VerifiableCredentialContent(
         jti,
         VerifiableCredentialDescriptor(
             listOf(),

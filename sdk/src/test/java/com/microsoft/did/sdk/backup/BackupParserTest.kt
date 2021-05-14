@@ -6,19 +6,21 @@ import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
 import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
 import android.util.VerifiableCredentialUtil
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
-import com.microsoft.did.sdk.util.defaultTestSerializer
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class ProtectedBackupDataFactoryTest {
-    private val walletMetadata = WalletMetadata()
+class BackupParserTest {
+    private class TestVcMetaData(override val displayContract: DisplayContract) : VcMetadata()
 
-    private val vcMetadata = VcMetadata(
+    private val vcMetadata = TestVcMetaData(
         VerifiableCredentialUtil.testDisplayContract
     )
+
+    private val walletMetadata = WalletMetadata()
 
     private val backup = Microsoft2020UnprotectedBackupData(
         mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
@@ -27,28 +29,19 @@ class ProtectedBackupDataFactoryTest {
         listOf(VerifiableCredentialUtil.rawIdentifier)
     )
 
-    val jweProtectedBackupFactory = BackupParser(defaultTestSerializer)
-
-    @Test
-    fun createPasswordBackupTest() {
-        val password = "foobarbaz"
-        val actual = jweProtectedBackupFactory.createPasswordBackup(
-            backup, password
-        )
-        assertTrue(actual.jweToken.contentAsString.isNotBlank())
-    }
+    private val backupParser = BackupParser()
 
     @Test
     fun parseBackupTest() {
         val password = "foobarbaz"
-        val backup = jweProtectedBackupFactory.createPasswordBackup(
+        val backup = backupParser.createPasswordBackup(
             backup, password
         )
         val outputData = ByteArrayOutputStream()
-        jweProtectedBackupFactory.writeOutput(backup, outputData)
+        backupParser.writeOutput(backup, outputData)
         assertTrue(outputData.size() > 0)
         val inputData = ByteArrayInputStream(outputData.toByteArray())
-        val actual = jweProtectedBackupFactory.parseBackup(inputData)
+        val actual = backupParser.parseBackup(inputData)
         assertEquals(backup.jweToken.serialize(), actual.jweToken.serialize())
     }
 }

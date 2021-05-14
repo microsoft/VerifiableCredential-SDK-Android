@@ -3,33 +3,35 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.VerifiableCredentialUtil
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coVerify
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class Microsoft2020BackupProcessorTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
     private val rawIdentifierUtility = RawIdentifierConverter(identifierRepository, keyStore)
-    private val microsoftBackupSerializer = Microsoft2020BackupProcessor(
+    private val backupProcessor = Microsoft2020BackupProcessor(
         identifierRepository,
         keyStore,
         rawIdentifierUtility,
         defaultTestSerializer
     )
 
-    private val vcMetadata = VcMetadata(VerifiableCredentialUtil.testDisplayContract)
+    private class TestVcMetaData(override val displayContract: DisplayContract) : VcMetadata()
+
+    private val vcMetadata = TestVcMetaData(VerifiableCredentialUtil.testDisplayContract)
     private val backupData = Microsoft2020Backup(
         WalletMetadata(),
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
     )
 
     @Test
-    fun importTest() {
+    fun `import BackupData returns data and writes keys and identifiers`() {
         runBlocking {
             val rawData = Microsoft2020UnprotectedBackupData(
                 mapOf(
@@ -43,13 +45,10 @@ class Microsoft2020BackupProcessorTest {
                     VerifiableCredentialUtil.rawIdentifier
                 )
             )
-            val actual = microsoftBackupSerializer.import( rawData )
+            val actual = backupProcessor.import(rawData)
             assertEquals(
                 backupData.verifiableCredentials,
                 actual.verifiableCredentials
-            )
-            assertTrue(
-                actual.walletMetadata is WalletMetadata
             )
             verify {
                 keyStore.containsKey(VerifiableCredentialUtil.signKey.keyID)
@@ -64,21 +63,24 @@ class Microsoft2020BackupProcessorTest {
     }
 
     @Test
-    fun createTest() {
+    fun `transformToBackupData transforms backup correctly`() {
         runBlocking {
-            val actual = microsoftBackupSerializer.transformToBackupData(backupData)
+            val actual = backupProcessor.transformToBackupData(backupData)
             coVerify {
                 identifierRepository.queryAllLocal()
             }
-            assertTrue(actual.metaInf is WalletMetadata)
             assertEquals(1, actual.vcs.size)
-            assertEquals(VerifiableCredentialUtil.testVerifiedCredential.raw,
-                actual.vcs.values.first())
+            assertEquals(
+                VerifiableCredentialUtil.testVerifiedCredential.raw,
+                actual.vcs.values.first()
+            )
             assertEquals(1, actual.vcsMetaInf.size)
             assertEquals(vcMetadata, actual.vcsMetaInf.values.first())
             assertEquals(1, actual.identifiers.size)
-            assertEquals(VerifiableCredentialUtil.rawIdentifier.id,
-                actual.identifiers.first().id)
+            assertEquals(
+                VerifiableCredentialUtil.rawIdentifier.id,
+                actual.identifiers.first().id
+            )
         }
     }
 }

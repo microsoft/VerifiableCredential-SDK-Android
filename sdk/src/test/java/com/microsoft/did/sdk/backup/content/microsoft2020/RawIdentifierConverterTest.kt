@@ -12,7 +12,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-class RawIdentiiferUtilityTest {
+class RawIdentifierConverterTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
     private val rawIdentifierUtility = RawIdentifierConverter(identifierRepository, keyStore)
