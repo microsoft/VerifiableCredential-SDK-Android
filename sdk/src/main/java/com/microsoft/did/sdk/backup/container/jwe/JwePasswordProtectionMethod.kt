@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.backup.container.jwe
+package com.microsoft.did.sdk.backup.container.jwe
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
-import com.microsoft.did.sdk.datasource.backup.content.ProtectedBackupData
-import com.microsoft.did.sdk.datasource.backup.container.ProtectionMethod
-import com.microsoft.did.sdk.datasource.backup.content.UnprotectedBackupData
+import com.microsoft.did.sdk.backup.content.ProtectedBackupData
+import com.microsoft.did.sdk.backup.container.ProtectionMethod
+import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
 import com.microsoft.did.sdk.util.controlflow.BadPasswordException
 import com.microsoft.did.sdk.util.controlflow.FailedDecryptException
 import com.nimbusds.jose.EncryptionMethod

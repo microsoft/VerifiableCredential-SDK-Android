@@ -1,6 +1,6 @@
 @file:UseSerializers(JwkSerializer::class)
 
-package com.microsoft.did.sdk.datasource.backup.content.microsoft2020
+package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import com.microsoft.did.sdk.crypto.protocols.jose.serialization.JwkSerializer
 import com.nimbusds.jose.jwk.JWK

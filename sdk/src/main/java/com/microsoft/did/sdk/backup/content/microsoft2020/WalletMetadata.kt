@@ -1,4 +1,4 @@
-package com.microsoft.did.sdk.datasource.backup.content.microsoft2020
+package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

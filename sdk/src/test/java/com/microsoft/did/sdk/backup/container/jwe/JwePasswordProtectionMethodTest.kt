@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.file
+package com.microsoft.did.sdk.backup.container.jwe
 
 import com.microsoft.did.sdk.crypto.protocols.jose.jwe.JweToken
-import com.microsoft.did.sdk.datasource.backup.content.UnprotectedBackupData
-import com.microsoft.did.sdk.datasource.backup.container.jwe.JwePasswordProtectedBackupData
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
+import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.nimbusds.jose.EncryptionMethod
 import com.nimbusds.jose.JWEAlgorithm
@@ -16,15 +15,16 @@ import org.junit.Test
 import kotlin.test.assertFails
 import kotlin.test.assertTrue
 
-class JwePasswordProtectedBackupDataTest {
-    val password = "incredibly weak password, do not attempt."
+class JwePasswordProtectionMethodTest {
+    private val password = "incredibly weak password, do not attempt."
+
     val payload = Microsoft2020UnprotectedBackupData(
         vcs = emptyMap(),
         vcsMetaInf = emptyMap(),
         metaInf = WalletMetadata(),
         identifiers = emptyList()
     )
-    var passwordBackup: JwePasswordProtectedBackupData
+    var backup: JwePasswordProtectedBackupData
 
     init {
         val token = JweToken(
@@ -38,18 +38,29 @@ class JwePasswordProtectedBackupDataTest {
                 JWEAlgorithm.PBES2_HS512_A256KW, EncryptionMethod.A256GCM
             ).build()
         )
-        passwordBackup = JwePasswordProtectedBackupData(token)
+        backup = JwePasswordProtectedBackupData(token)
     }
 
     @Test
-    fun decryptTest() {
+    fun `empty password fails`() {
+        val protectionMethod = JwePasswordProtectionMethod("")
         assertFails {
-            passwordBackup.decrypt("", defaultTestSerializer)
+            protectionMethod.unwrap(backup, defaultTestSerializer)
         }
+    }
+
+    @Test
+    fun `wrong password fails`() {
+        val protectionMethod = JwePasswordProtectionMethod("wrong password")
         assertFails {
-            passwordBackup.decrypt("not the password", defaultTestSerializer)
+            protectionMethod.unwrap(backup, defaultTestSerializer)
         }
-        val actual = passwordBackup.decrypt(password, defaultTestSerializer)
+    }
+
+    @Test
+    fun `correct password passes`() {
+        val protectionMethod = JwePasswordProtectionMethod(password)
+        val actual = protectionMethod.unwrap(backup, defaultTestSerializer)
         assertTrue(actual is Microsoft2020UnprotectedBackupData)
     }
 }

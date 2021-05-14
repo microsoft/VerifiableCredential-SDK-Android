@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.backup.content.microsoft2020
+package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository

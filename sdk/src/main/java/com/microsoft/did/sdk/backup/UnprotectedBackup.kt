@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.backup
+package com.microsoft.did.sdk.backup
 
 /**
  * Backup classes represent the same Backups but imported into the class model of the SDK.

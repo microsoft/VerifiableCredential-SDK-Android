@@ -4,16 +4,16 @@ package com.microsoft.did.sdk
 
 // only used for type
 import android.util.VerifiableCredentialUtil
-import com.microsoft.did.sdk.datasource.backup.container.jwe.JweProtectedBackupFactory
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020BackupProcessor
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.RawIdentifierConverter
-import com.microsoft.did.sdk.datasource.backup.content.ProtectedBackupData
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.Microsoft2020Backup
-import com.microsoft.did.sdk.datasource.backup.PasswordEncryptedBackupData
-import com.microsoft.did.sdk.datasource.backup.container.jwe.JwePasswordProtectedBackupData
-import com.microsoft.did.sdk.datasource.backup.PasswordBackupInputData
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.VcMetadata
-import com.microsoft.did.sdk.datasource.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.backup.BackupParser
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
+import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
+import com.microsoft.did.sdk.backup.content.ProtectedBackupData
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020Backup
+import com.microsoft.did.sdk.backup.PasswordEncryptedBackupData
+import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
+import com.microsoft.did.sdk.backup.PasswordBackupInputData
+import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
+import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import kotlinx.coroutines.runBlocking
@@ -27,7 +27,7 @@ class BackupAndRestoreServiceTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
     private val keyStore = VerifiableCredentialUtil.getMockKeyStore()
 
-    private val jweBackupFactory = JweProtectedBackupFactory(defaultTestSerializer)
+    private val jweBackupFactory = BackupParser(defaultTestSerializer)
     private val microsoftBackupSerializer = Microsoft2020BackupProcessor(
         identifierRepository,
         keyStore,

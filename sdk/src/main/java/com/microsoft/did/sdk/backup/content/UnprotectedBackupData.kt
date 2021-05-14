@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved
 
-package com.microsoft.did.sdk.datasource.backup.content
+package com.microsoft.did.sdk.backup.content
 
 import kotlinx.serialization.Serializable
 
