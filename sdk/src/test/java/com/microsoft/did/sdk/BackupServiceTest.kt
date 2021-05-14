@@ -3,29 +3,20 @@
 package com.microsoft.did.sdk
 
 import android.util.VerifiableCredentialUtil
-import assertk.assertThat
-import assertk.assertions.isDataClassEqualTo
-import assertk.assertions.isInstanceOf
 import com.microsoft.did.sdk.backup.BackupParser
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
-import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
-import com.microsoft.did.sdk.backup.content.ProtectedBackupData
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectionMethod
 import com.microsoft.did.sdk.backup.content.BackupProcessorFactory
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
+import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
 import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
 import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
-import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import kotlin.test.assertFails
-import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class BackupServiceTest {
     private val identifierRepository = VerifiableCredentialUtil.getMockIdentifierRepository()
@@ -54,10 +45,10 @@ class BackupServiceTest {
         runBlocking {
             val protectionMethod = JwePasswordProtectionMethod(password)
             val protectedBackupData = (service.exportBackup(backup, protectionMethod) as Result.Success).payload
-            assertThat(protectedBackupData).isInstanceOf(JwePasswordProtectedBackupData::class)
+            assertThat(protectedBackupData).isInstanceOf(JwePasswordProtectedBackupData::class.java)
 
             val actualBackup = service.importBackup(protectedBackupData, protectionMethod)
-            assertThat(actualBackup).isDataClassEqualTo(backup)
+            assertThat(actualBackup).isEqualToComparingFieldByFieldRecursively(backup)
         }
     }
 
@@ -69,7 +60,7 @@ class BackupServiceTest {
     @Test
     fun `parse backup returns Failure for bad String`() {
         runBlocking {
-            assertThat(service.parseBackup("ASDF")).isInstanceOf(Result.Failure::class)
+            assertThat(service.parseBackup("ASDF")).isInstanceOf(Result.Failure::class.java)
         }
     }
 }
