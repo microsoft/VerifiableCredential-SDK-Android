@@ -1,14 +1,20 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
+import com.microsoft.did.sdk.util.controlflow.InvalidPinDetailsException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
+import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,7 +23,7 @@ import javax.inject.Singleton
  * Validates an OpenID Connect Request.
  */
 @Singleton
-class OidcPresentationRequestValidator @Inject constructor() : PresentationRequestValidator {
+class OidcPresentationRequestValidator @Inject constructor(private val jwtValidator: JwtValidator) : PresentationRequestValidator {
 
     override suspend fun validate(request: PresentationRequest) {
         checkResponseMode(request.content.responseMode)
@@ -25,6 +31,7 @@ class OidcPresentationRequestValidator @Inject constructor() : PresentationReque
         checkScope(request.content.scope)
         checkTokenExpiration(request.content.expirationTime)
         checkForInputInPresentationRequest(request)
+        validateIdTokenHint(request.content.idTokenHint)
     }
 
     private fun checkTokenExpiration(expiration: Long) {
@@ -56,5 +63,18 @@ class OidcPresentationRequestValidator @Inject constructor() : PresentationReque
     private fun checkForInputInPresentationRequest(request: PresentationRequest) {
         if (request.getPresentationDefinition().credentialPresentationInputDescriptors.isNullOrEmpty())
             throw MissingInputInRequestException("Input Descriptor is missing in presentation request.")
+    }
+
+    private suspend fun validateIdTokenHint(idTokenHint: String?) {
+        idTokenHint ?: return
+        val jwsToken = JwsToken.deserialize(idTokenHint)
+        if (!jwtValidator.verifySignature(jwsToken))
+            throw InvalidSignatureException("Signature is not valid on id token hint.")
+        val json = Json.decodeFromString(JsonObject.serializer(), jwsToken.content())
+        val pinObject = json["pin"] as? JsonObject ?: throw InvalidPinDetailsException("PIN details is missing in request.")
+        val length = (pinObject["length"] as? JsonPrimitive)?.content?.toInt() ?: throw InvalidPinDetailsException("PIN length is missing in request.")
+        val type = (pinObject["type"] as? JsonPrimitive)?.content ?: throw InvalidPinDetailsException("PIN type is missing in request.")
+        if (length < 1) throw InvalidPinDetailsException("PIN length is invalid in request.")
+        if (!(type == "numeric" || type == "text")) throw InvalidPinDetailsException("PIN type is invalid in request.")
     }
 }
