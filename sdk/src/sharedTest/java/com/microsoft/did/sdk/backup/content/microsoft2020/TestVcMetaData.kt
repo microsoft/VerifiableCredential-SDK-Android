@@ -8,4 +8,4 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("TestVcMetaData")
-class TestVcMetaData(override val displayContract: DisplayContract) : VcMetadata()
+data class TestVcMetaData(override val displayContract: DisplayContract) : VcMetadata()

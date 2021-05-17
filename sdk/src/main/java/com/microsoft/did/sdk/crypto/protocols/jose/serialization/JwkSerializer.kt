@@ -36,7 +36,7 @@ object JwkSerializer : KSerializer<JWK> {
                 use = value.keyUse?.value,
                 key_ops = value.keyOperations?.toList()?.map { it.identifier() },
                 alg = value.algorithm?.name,
-                crv = ecJwk?.curve?.stdName ?: okpJwk?.curve?.stdName,
+                crv = ecJwk?.curve?.name ?: okpJwk?.curve?.name,
                 x = ecJwk?.x?.toString() ?: okpJwk?.x?.toString(),
                 y = ecJwk?.y?.toString(),
                 d = ecJwk?.d?.toString() ?: rsaJwk?.privateExponent?.toString() ?: okpJwk?.d?.toString(),

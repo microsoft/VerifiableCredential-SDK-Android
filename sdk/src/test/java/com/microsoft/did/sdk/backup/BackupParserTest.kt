@@ -2,12 +2,11 @@
 
 package com.microsoft.did.sdk.backup
 
-import android.util.VerifiableCredentialUtil
+import android.util.BackupTestUtil
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectedBackupData
 import com.microsoft.did.sdk.backup.container.jwe.JwePasswordProtectionMethod
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.backup.content.microsoft2020.TestVcMetaData
-import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
 import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import org.assertj.core.api.Assertions.assertThat
@@ -16,14 +15,14 @@ import org.junit.Test
 class BackupParserTest {
 
     private val vcMetadata = TestVcMetaData(
-        VerifiableCredentialUtil.testDisplayContract
+        BackupTestUtil.testDisplayContract
     )
     private val walletMetadata = WalletMetadata()
     private val backup = Microsoft2020UnprotectedBackupData(
-        mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
+        mapOf("test" to BackupTestUtil.testVerifiedCredential.raw),
         mapOf("test" to vcMetadata),
         walletMetadata,
-        listOf(VerifiableCredentialUtil.rawIdentifier)
+        listOf(BackupTestUtil.rawIdentifier)
     )
     private val backupParser = BackupParser()
 

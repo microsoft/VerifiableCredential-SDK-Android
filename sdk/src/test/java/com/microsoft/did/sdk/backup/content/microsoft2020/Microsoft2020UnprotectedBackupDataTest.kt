@@ -2,21 +2,21 @@
 
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
-import android.util.VerifiableCredentialUtil
+import android.util.BackupTestUtil
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class Microsoft2020UnprotectedBackupDataTest {
     private val vcMetadata = TestVcMetaData(
-        VerifiableCredentialUtil.testDisplayContract
+        BackupTestUtil.testDisplayContract
     )
     private val walletMetadata = WalletMetadata()
 
     private val backup = Microsoft2020UnprotectedBackupData(
-        mapOf("test" to VerifiableCredentialUtil.testVerifiedCredential.raw),
+        mapOf("test" to BackupTestUtil.testVerifiedCredential.raw),
         mapOf("test" to vcMetadata),
         walletMetadata,
-        listOf(VerifiableCredentialUtil.rawIdentifier)
+        listOf(BackupTestUtil.rawIdentifier)
     )
 
     @Test
