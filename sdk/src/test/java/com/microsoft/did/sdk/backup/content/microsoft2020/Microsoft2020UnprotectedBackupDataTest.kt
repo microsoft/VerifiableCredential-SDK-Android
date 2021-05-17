@@ -7,7 +7,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class Microsoft2020UnprotectedBackupDataTest {
-    private val vcMetadata = VcMetadata(
+    private val vcMetadata = TestVcMetaData(
         VerifiableCredentialUtil.testDisplayContract
     )
     private val walletMetadata = WalletMetadata()

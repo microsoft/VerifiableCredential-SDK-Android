@@ -10,11 +10,15 @@ import com.microsoft.did.sdk.backup.content.BackupProcessorFactory
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020BackupProcessor
 import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackup
 import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
+import com.microsoft.did.sdk.backup.content.microsoft2020.TestVcMetaData
 import com.microsoft.did.sdk.backup.content.microsoft2020.VcMetadata
 import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.credential.service.models.contracts.display.DisplayContract
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -34,7 +38,8 @@ class BackupServiceTest {
     private val service = BackupService(jweBackupFactory, backupProcessorFactory, defaultTestSerializer)
     private val password = "Big complex passsword you'll never be able to guess"
 
-    private val vcMetadata = VcMetadata(VerifiableCredentialUtil.testDisplayContract)
+    private val vcMetadata = TestVcMetaData(VerifiableCredentialUtil.testDisplayContract)
+
     private val backup = Microsoft2020UnprotectedBackup(
         WalletMetadata(),
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))

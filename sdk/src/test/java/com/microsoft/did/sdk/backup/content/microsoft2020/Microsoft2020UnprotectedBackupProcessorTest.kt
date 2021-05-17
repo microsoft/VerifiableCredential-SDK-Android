@@ -22,7 +22,7 @@ class Microsoft2020UnprotectedBackupProcessorTest {
         defaultTestSerializer
     )
 
-    private val vcMetadata = VcMetadata(VerifiableCredentialUtil.testDisplayContract)
+    private val vcMetadata = TestVcMetaData(VerifiableCredentialUtil.testDisplayContract)
     private val backupData = Microsoft2020UnprotectedBackup(
         WalletMetadata(),
         listOf(Pair(VerifiableCredentialUtil.testVerifiedCredential, vcMetadata))
