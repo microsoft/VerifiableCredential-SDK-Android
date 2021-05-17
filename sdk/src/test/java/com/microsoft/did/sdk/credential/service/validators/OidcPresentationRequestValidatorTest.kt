@@ -39,7 +39,7 @@ class OidcPresentationRequestValidatorTest {
 
     private val expectedSerializedToken: String = "token2364302"
 
-    private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator()
+    private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator(mockedJwtValidator)
 
     private val serializer: Json = Json
 
