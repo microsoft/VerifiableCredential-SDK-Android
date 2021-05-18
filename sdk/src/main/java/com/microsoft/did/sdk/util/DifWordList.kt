@@ -22,14 +22,9 @@ object DifWordList {
     fun generateDifPassword(): String {
         val random = SecureRandom()
         val wordSet = linkedSetOf<String>()
-        for (index in 0 until Constants.PASSWORD_SET_SIZE) {
-            var wordIndex: Int
-            var word: String
-            do {
-                wordIndex = random.nextInt(wordList.count())
-                word = wordList[wordIndex]
-            } while (wordSet.contains(word))
-            wordSet.add(word)
+        while (wordSet.size < Constants.PASSWORD_SET_SIZE) {
+            val randomWord = wordList[random.nextInt(wordList.count())]
+            wordSet.add(randomWord)
         }
         return wordSet.joinToString(" ")
     }
