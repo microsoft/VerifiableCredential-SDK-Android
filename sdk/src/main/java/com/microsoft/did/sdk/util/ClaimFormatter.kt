@@ -21,13 +21,13 @@ object ClaimFormatter {
         }
     }
 
-    fun formatDateAndTime(timestamp: Long?): String {
-        if (timestamp == null) return "?"
-        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestamp * 1000L)
+    fun formatDateAndTime(timestampInMillis: Long?): String {
+        if (timestampInMillis == null) return "?"
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestampInMillis)
     }
 
-    fun formatDate(timestamp: Long): String {
-        return DateFormat.getDateInstance(DateFormat.LONG).format(timestamp * 1000L)
+    fun formatDate(timestampInSeconds: Long): String {
+        return DateFormat.getDateInstance(DateFormat.LONG).format(timestampInSeconds * 1000L)
     }
 }
 
