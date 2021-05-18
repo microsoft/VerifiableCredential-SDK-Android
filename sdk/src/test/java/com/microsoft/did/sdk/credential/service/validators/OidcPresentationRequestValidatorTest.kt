@@ -39,7 +39,7 @@ class OidcPresentationRequestValidatorTest {
 
     private val expectedSerializedToken: String = "token2364302"
 
-    private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator()
+    private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator(mockedJwtValidator)
 
     private val serializer: Json = Json
 
@@ -104,6 +104,7 @@ class OidcPresentationRequestValidatorTest {
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
+        every {mockedOidcRequestContent.idTokenHint } returns null
         setUpOidcRequestContentWithValidFields()
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
