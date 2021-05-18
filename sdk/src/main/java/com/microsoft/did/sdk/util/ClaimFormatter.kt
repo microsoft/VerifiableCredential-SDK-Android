@@ -16,17 +16,18 @@ object ClaimFormatter {
 
     fun formatClaimValue(type: String, claimValue: String): String {
         return when (type.asEnumOrDefault(ClaimType.TEXT)) {
-            ClaimType.DATE -> formatDateAndTime(claimValue.toLongOrNull())
+            ClaimType.DATE -> formatDateInSeconds(claimValue.toLongOrNull())
             ClaimType.TEXT -> claimValue
         }
     }
 
-    fun formatDateAndTime(timestampInMillis: Long?): String {
+    fun formatDateAndTimeInMillis(timestampInMillis: Long?): String {
         if (timestampInMillis == null) return "?"
         return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(timestampInMillis)
     }
 
-    fun formatDate(timestampInSeconds: Long): String {
+    fun formatDateInSeconds(timestampInSeconds: Long?): String {
+        if (timestampInSeconds == null) return "?"
         return DateFormat.getDateInstance(DateFormat.LONG).format(timestampInSeconds * 1000L)
     }
 }
