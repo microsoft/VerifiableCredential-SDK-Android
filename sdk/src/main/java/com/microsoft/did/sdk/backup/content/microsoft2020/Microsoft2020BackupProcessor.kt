@@ -11,7 +11,7 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
-import com.microsoft.did.sdk.util.controlflow.BackupRestoreException
+import com.microsoft.did.sdk.util.controlflow.BackupException
 import com.nimbusds.jose.jwk.JWK
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -26,7 +26,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
 ) : BackupProcessor {
 
     override suspend fun export(backup: UnprotectedBackup): UnprotectedBackupData {
-        if (backup !is Microsoft2020UnprotectedBackup) throw BackupRestoreException("Backup has wrong type ${backup::class.simpleName}")
+        if (backup !is Microsoft2020UnprotectedBackup) throw BackupException("Backup has wrong type ${backup::class.simpleName}")
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
@@ -42,7 +42,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
     }
 
     override suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup {
-        if (backupData !is Microsoft2020UnprotectedBackupData) throw BackupRestoreException("BackupData has wrong type ${backupData::class.simpleName}")
+        if (backupData !is Microsoft2020UnprotectedBackupData) throw BackupException("BackupData has wrong type ${backupData::class.simpleName}")
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
 
@@ -68,7 +68,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
             val jwsToken = JwsToken.deserialize(rawVcToken)
             val verifiableCredentialContent = jsonSerializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
             val vc = VerifiableCredential(verifiableCredentialContent.jti, rawVcToken, verifiableCredentialContent)
-            if (backup.vcsMetaInf[jti] == null) throw BackupRestoreException("Corrupt backup. MetaInf for $jti is missing.")
+            if (backup.vcsMetaInf[jti] == null) throw BackupException("Corrupt backup. MetaInf for $jti is missing.")
             vcList.add(Pair(vc, backup.vcsMetaInf[jti]!!))
         }
         return vcList

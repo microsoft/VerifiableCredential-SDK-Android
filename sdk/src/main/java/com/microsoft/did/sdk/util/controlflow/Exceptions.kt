@@ -15,24 +15,24 @@ class KeyException(message: String, cause: Throwable? = null) : CryptoException(
 
 class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
-open class BackupRestoreException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+open class BackupException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
     SdkException(message, cause, retryable)
 
-class UnknownBackupFormatException(message: String, cause: Throwable? = null) : BackupRestoreException(message, cause, false)
+class UnknownBackupFormatException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
 
-class UnknownProtectionMethodException(message: String, cause: Throwable? = null) : BackupRestoreException(message, cause, false)
+class UnknownProtectionMethodException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
 
-class NoBackupException(message: String = "", retryable: Boolean = false) : BackupRestoreException(message, null, retryable)
+class NoBackupException(message: String = "", retryable: Boolean = false) : BackupException(message, null, retryable)
 
-open class MalformedBackupException(message: String, cause: Throwable? = null) : BackupRestoreException(message, cause, false)
+open class MalformedBackupException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
 
 class MalformedIdentityException(message: String, cause: Throwable? = null) : MalformedBackupException(message, cause)
 
 class FailedDecryptException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
-    BackupRestoreException(message, cause, retryable)
+    BackupException(message, cause, retryable)
 
 class BadPasswordException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
-    BackupRestoreException(message, cause, retryable)
+    BackupException(message, cause, retryable)
 
 open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     SdkException(message, cause, retryable)
