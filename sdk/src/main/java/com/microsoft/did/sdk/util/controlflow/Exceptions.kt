@@ -61,6 +61,8 @@ class InvalidResponseModeException(message: String) : ValidatorException(message
 
 class InvalidScopeException(message: String) : ValidatorException(message)
 
+class InvalidPinDetailsException(message: String) : ValidatorException(message)
+
 class MissingInputInRequestException(message: String) : ValidatorException(message)
 
 class DidInHeaderAndPayloadNotMatching(message: String) : ValidatorException(message)

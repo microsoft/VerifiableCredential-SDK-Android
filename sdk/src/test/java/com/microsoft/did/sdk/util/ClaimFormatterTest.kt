@@ -9,9 +9,10 @@ class ClaimFormatterTest {
 
     private val suppliedClaimValueForText = "claim value"
     private val expectedClaimValueForIncorrectDate = "?"
-    private val suppliedClaimValueForDate = 1617906551L
-    private val expectedFormattedDateTimeInDifferentTimeZone = listOf("Apr 8, 2021 11:29:11 AM", "Apr 8, 2021 6:29:11 PM", "Apr 8, 2021 8:29:11 PM")
-    private val expectedFormattedDate = "April 8, 2021"
+    private val suppliedClaimValueForDateInMills = 1621366869159L
+    private val expectedFormattedDateTimeInDifferentTimeZone = listOf("May 18, 2021 12:41:09 PM", "May 18, 2021 7:41:09 PM")
+    private val suppliedClaimValueForDateInSeconds = 1621366850L
+    private val expectedFormattedDate = "May 18, 2021"
 
     @Test
     fun `test formatting claim value with incorrect claim type successfully`() {
@@ -33,13 +34,19 @@ class ClaimFormatterTest {
 
     @Test
     fun `test formatting claim value with correct claim value for type date successfully`() {
-        val actualFormattedClaim = ClaimFormatter.formatClaimValue("date", suppliedClaimValueForDate.toString())
-        assertThat(actualFormattedClaim).isIn(expectedFormattedDateTimeInDifferentTimeZone)
+        val actualFormattedClaim = ClaimFormatter.formatClaimValue("date", suppliedClaimValueForDateInSeconds.toString())
+        assertThat(actualFormattedClaim).isEqualTo(expectedFormattedDate)
     }
 
     @Test
     fun `test formatting date successfully`() {
-        val actualFormattedClaim = ClaimFormatter.formatDate(suppliedClaimValueForDate)
+        val actualFormattedClaim = ClaimFormatter.formatDateInSeconds(suppliedClaimValueForDateInSeconds)
         assertThat(actualFormattedClaim).isEqualTo(expectedFormattedDate)
+    }
+
+    @Test
+    fun `test formatting date and time successfully`() {
+        val actualFormattedClaim = ClaimFormatter.formatDateAndTimeInMillis(suppliedClaimValueForDateInMills)
+        assertThat(actualFormattedClaim).isIn(expectedFormattedDateTimeInDifferentTimeZone)
     }
 }
