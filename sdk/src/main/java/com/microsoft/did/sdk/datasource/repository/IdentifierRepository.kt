@@ -27,4 +27,6 @@ class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiPro
     suspend fun queryAllLocal(): List<Identifier> = identifierDao.queryAllLocal()
 
     suspend fun deleteIdentifier(identifier: String) = identifierDao.deleteIdentifier(identifier)
+
+    suspend fun deleteAll() = identifierDao.deleteAll()
 }

@@ -7,6 +7,7 @@ import com.microsoft.did.sdk.backup.UnprotectedBackup
 import com.microsoft.did.sdk.backup.container.ProtectionMethod
 import com.microsoft.did.sdk.backup.content.BackupProcessorFactory
 import com.microsoft.did.sdk.backup.content.ProtectedBackupData
+import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import kotlinx.serialization.json.Json
@@ -17,6 +18,7 @@ import javax.inject.Singleton
 class BackupService @Inject constructor(
     private val backupParser: BackupParser,
     private val backupProcessorFactory: BackupProcessorFactory,
+    private val identityRepository: IdentifierRepository,
     private val serializer: Json
 ) {
 
@@ -42,8 +44,9 @@ class BackupService @Inject constructor(
     /**
      * ProtectedBackupData is decrypted and transformed into an UnprotectedBackup.
      *
-     * During this process all contained Identifiers and keys are restored into the SDKs database!
-     * Everything else is contained in the UnprotectedBackup and IS NOT restored.
+     * All identifiers in the SDK database are cleared before starting the import!
+     * During this process all contained Identifiers and keys are restored into the SDKs database.
+     * Everything else (3rd party metadata) is contained in the UnprotectedBackup and IS NOT restored.
      *
      * @param protectedBackupData the contents are unwraped and returned
      * @param protectionMethod the type and contents of this parameter determines the protection method used to unwrap and decrypt the backup
@@ -51,6 +54,7 @@ class BackupService @Inject constructor(
      */
     suspend fun importBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
         return runResultTry {
+            identityRepository.deleteAll()
             val unprotectedBackup = protectionMethod.unwrap(protectedBackupData, serializer)
             val unprotectedBackupData = backupProcessorFactory.import(unprotectedBackup)
             Result.Success(unprotectedBackupData)

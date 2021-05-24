@@ -23,5 +23,8 @@ interface IdentifierDao {
     suspend fun queryAllLocal(): List<Identifier>
 
     @Query("DELETE FROM Identifier where id = :identifier")
-    suspend fun deleteIdentifier(identifier: String): Unit
+    suspend fun deleteIdentifier(identifier: String)
+
+    @Query("DELETE FROM Identifier")
+    suspend fun deleteAll()
 }
