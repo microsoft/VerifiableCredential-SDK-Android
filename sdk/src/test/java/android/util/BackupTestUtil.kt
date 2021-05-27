@@ -103,7 +103,7 @@ object BackupTestUtil {
         every { keyStore.containsKey(signKey.keyID) } returns true
         every { keyStore.getKey(encryptKey.keyID) } returns (encryptKey)
         every { keyStore.containsKey(encryptKey.keyID) } returns true
-        every { keyStore.storeKey(any(), any()) } returns (Unit)
+        every { keyStore.storeKey(any(), any()) } returns Unit
         return keyStore
     }
 
@@ -112,7 +112,8 @@ object BackupTestUtil {
         coEvery { identifierRepository.queryByIdentifier(testDid) } returns (testIdentifer)
         coEvery { identifierRepository.queryAllLocal() } returns (listOf(testIdentifer))
         coEvery { identifierRepository.queryByName(testIdentifer.name) } returns (testIdentifer)
-        coEvery { identifierRepository.insert(any()) } returns (Unit)
+        coEvery { identifierRepository.insert(any()) } returns Unit
+        coEvery { identifierRepository.deleteAll() } returns Unit
         return identifierRepository
     }
 }
