@@ -104,6 +104,7 @@ object BackupTestUtil {
         every { keyStore.getKey(encryptKey.keyID) } returns (encryptKey)
         every { keyStore.containsKey(encryptKey.keyID) } returns true
         every { keyStore.storeKey(any(), any()) } returns Unit
+        every { keyStore.getKey(any()) } returns (recoverKey)
         return keyStore
     }
 
