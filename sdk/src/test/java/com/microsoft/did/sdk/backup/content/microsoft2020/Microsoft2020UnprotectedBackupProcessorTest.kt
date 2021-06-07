@@ -61,7 +61,7 @@ class Microsoft2020UnprotectedBackupProcessorTest {
     }
 
     @Test
-    fun `transformToBackupData transforms backup correctly`() {
+    fun `export transforms backup correctly`() {
         runBlocking {
             val actual = backupProcessor.export(backupData) as Microsoft2020UnprotectedBackupData
             coVerify {

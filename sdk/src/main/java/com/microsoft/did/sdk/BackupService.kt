@@ -36,8 +36,8 @@ class BackupService @Inject constructor(
     suspend fun exportBackup(unprotectedBackup: UnprotectedBackup, protectionMethod: ProtectionMethod): Result<ProtectedBackupData> {
         return runResultTry {
             val unprotectedBackupData = backupProcessorFactory.export(unprotectedBackup)
-            val protectedBackup = protectionMethod.wrap(unprotectedBackupData, serializer)
-            Result.Success(protectedBackup)
+            val protectedBackupData = protectionMethod.wrap(unprotectedBackupData, serializer)
+            Result.Success(protectedBackupData)
         }
     }
 
@@ -55,9 +55,9 @@ class BackupService @Inject constructor(
     suspend fun importBackup(protectedBackupData: ProtectedBackupData, protectionMethod: ProtectionMethod): Result<UnprotectedBackup> {
         return runResultTry {
             identityRepository.deleteAll()
-            val unprotectedBackup = protectionMethod.unwrap(protectedBackupData, serializer)
-            val unprotectedBackupData = backupProcessorFactory.import(unprotectedBackup)
-            Result.Success(unprotectedBackupData)
+            val unprotectedBackupData = protectionMethod.unwrap(protectedBackupData, serializer)
+            val unprotectedBackup = backupProcessorFactory.import(unprotectedBackupData)
+            Result.Success(unprotectedBackup)
         }
     }
 
