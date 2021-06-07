@@ -66,33 +66,6 @@ class IdentifierDaoInstrumentedTest {
     }
 
     @Test
-    fun insertIdentifiersWithSameIdsFailingForSecondInsertTest() {
-        val suppliedIdentifier1 = Identifier(
-            "did:ion:test:testId",
-            "testSigningKeyReference",
-            "testEncryptionKeyReference",
-            "testRecoveryKeyReference",
-            "testUpdateKeyReference",
-            "testIdentifierName"
-        )
-        val suppliedIdentifier2 = Identifier(
-            "did:ion:test:testId",
-            "testSigningKeyReference",
-            "testEncryptionKeyReference",
-            "testRecoveryKeyReference",
-            "testUpdateKeyReference",
-            "testIdentifierName"
-        )
-        runBlocking {
-            identifierDao.insert(suppliedIdentifier1)
-            Assertions.assertThatThrownBy { runBlocking { identifierDao.insert(suppliedIdentifier2) } }
-                .isInstanceOf(android.database.sqlite.SQLiteConstraintException::class.java)
-            val actualIdentifier = identifierDao.queryByIdentifier(suppliedIdentifier1.id)
-            assertThat(actualIdentifier).isEqualTo(suppliedIdentifier1)
-        }
-    }
-
-    @Test
     fun insertAndRetrieveIdentifierByNameTest() {
         val suppliedIdentifier = Identifier(
             "did:ion:test:testId",
