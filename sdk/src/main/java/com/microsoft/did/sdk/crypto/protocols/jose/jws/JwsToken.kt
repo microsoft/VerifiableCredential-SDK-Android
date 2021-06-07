@@ -10,7 +10,7 @@ import com.nimbusds.jose.jwk.JWK
 import com.nimbusds.jose.util.Base64URL
 import java.security.PublicKey
 
-class JwsToken internal constructor(
+class JwsToken constructor(
     private var jwsObject: JWSObject
 ) {
 

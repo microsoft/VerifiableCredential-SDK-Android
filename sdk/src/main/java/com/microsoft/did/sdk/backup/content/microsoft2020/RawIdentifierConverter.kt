@@ -19,11 +19,11 @@ class RawIdentifierConverter @Inject constructor(
     private val keyStore: EncryptedKeyStore
 ) {
 
-    internal suspend fun getAllIdentifiers(): List<RawIdentity> {
+    suspend fun getAllIdentifiers(): List<RawIdentity> {
         return identityRepository.queryAllLocal().map { did -> createRawIdentifier(did) }
     }
 
-    internal fun parseRawIdentifier(
+    fun parseRawIdentifier(
         identifierData: RawIdentity
     ): Pair<Identifier, Set<JWK>> {
         val updateKeyRef = identifierData.updateKey
