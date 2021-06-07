@@ -11,8 +11,10 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.repository.IdentifierRepository
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.BackupException
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.OctetSequenceKey
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,9 +32,11 @@ class Microsoft2020BackupProcessor @Inject constructor(
         val vcMap = mutableMapOf<String, String>()
         val vcMetaMap = mutableMapOf<String, VcMetadata>()
         backup.verifiableCredentials.forEach { verifiableCredentialMetadataPair ->
-            vcMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.first.raw;
-            vcMetaMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.second;
+            vcMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.first.raw
+            vcMetaMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.second
         }
+
+        backup.walletMetadata.seed = keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE).toJSONString()
         return Microsoft2020UnprotectedBackupData(
             vcs = vcMap,
             vcsMetaInf = vcMetaMap,
@@ -55,6 +59,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
         keySet.forEach { key -> importKey(key, keyStore) }
         identifiers.forEach { id -> identityRepository.insert(id) }
 
+        keyStore.storeKey(Constants.MAIN_IDENTIFIER_REFERENCE, JWK.parse(backupData.metaInf.seed))
         return Microsoft2020UnprotectedBackup(
             walletMetadata = backupData.metaInf,
             verifiableCredentials = transformVcs(backupData)
