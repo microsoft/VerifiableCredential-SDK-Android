@@ -43,6 +43,7 @@ class Microsoft2020UnprotectedBackupProcessorTest {
                     BackupTestUtil.rawIdentifier
                 )
             )
+            rawData.metaInf.seed = "{\"kty\":\"EC\",\"d\":\"7-RR2JBX1tWCUw17ujvjhYFyB0zwkvM9ttKyBMfQUNM\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"recover\",\"x\":\"XIpoCl3CxnSUfZXew2Gc1tSwCJBUos1EacEXnQyfjhg\",\"y\":\"YDHaAGK0rL7wZwp2vp4aCaKuzg_tSB-8i4q_u-kLxSw\"}"
             val actual = backupProcessor.import(rawData) as Microsoft2020UnprotectedBackup
             assertEquals(
                 backupData.verifiableCredentials,
