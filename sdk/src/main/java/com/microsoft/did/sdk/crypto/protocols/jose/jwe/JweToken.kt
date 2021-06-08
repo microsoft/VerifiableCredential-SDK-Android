@@ -55,8 +55,7 @@ class JweToken private constructor(
             JWEHeader(algorithm, encryption),
             Payload(plaintext)
         )
-    ) {
-    }
+    )
 
     fun getKeyAlgorithm(): JWEAlgorithm {
         return jweToken.header.algorithm
