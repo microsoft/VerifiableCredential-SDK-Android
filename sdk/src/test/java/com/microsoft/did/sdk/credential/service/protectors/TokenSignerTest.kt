@@ -51,7 +51,7 @@ class TokenSignerTest {
     @Test
     fun signPayloadTest() {
         every {
-            anyConstructed<JwsToken>().sign(mockKey)
+            anyConstructed<JwsToken>().sign(mockKey, any())
         } answers { }
         every { anyConstructed<JwsToken>().serialize() } returns expectedSignedPayload
         val actualSignedPayload = signer.signWithIdentifier(expectedPayload, mockedIdentifier)

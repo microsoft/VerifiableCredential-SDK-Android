@@ -21,6 +21,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.AES_KEY
 import com.microsoft.did.sdk.util.Constants.HASHING_ALGORITHM_FOR_ID
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyUse
 import kotlinx.serialization.json.Json
 import org.erdtman.jcs.JsonCanonicalizer
 import java.security.KeyPair
@@ -72,9 +73,9 @@ class IdentifierCreator @Inject constructor(
      *
      * @return returns the public Key in JWK format
      */
-    private fun generateAndStoreKeyPair(): JWK {
+    private fun generateAndStoreKeyPair(use: KeyUse = KeyUse.SIGNATURE): JWK {
         val keyId = generateRandomKeyId()
-        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk(keyId)
+        val privateKey = CryptoOperations.generateKeyPair(KeyGenAlgorithm.Secp256k1).toPrivateJwk(keyId, use)
         keyStore.storeKey(keyId, privateKey)
         return privateKey.toPublicJWK()
     }
@@ -104,7 +105,7 @@ class IdentifierCreator @Inject constructor(
      */
     private fun createAndStorePairwiseKeyPair(persona: Identifier, peerId: String): JWK {
         val keyId = generateRandomKeyId()
-        val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk(keyId)
+        val pairwisePrivateKey = createPairwiseKeyPair(persona, peerId).toPrivateJwk(keyId, KeyUse.SIGNATURE)
         keyStore.storeKey(keyId, pairwisePrivateKey)
         return pairwisePrivateKey.toPublicJWK()
     }

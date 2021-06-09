@@ -11,6 +11,29 @@ open class CryptoException(message: String, cause: Throwable? = null, retryable:
 
 class KeyStoreException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
 
+class KeyException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
+
+class AlgorithmException(message: String, cause: Throwable? = null) : CryptoException(message, cause)
+
+open class BackupException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+    SdkException(message, cause, retryable)
+
+class UnknownBackupFormatException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
+
+class UnknownProtectionMethodException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
+
+class NoBackupException(message: String = "", retryable: Boolean = false) : BackupException(message, null, retryable)
+
+open class MalformedBackupException(message: String, cause: Throwable? = null) : BackupException(message, cause, false)
+
+class MalformedIdentityException(message: String, cause: Throwable? = null) : MalformedBackupException(message, cause)
+
+class FailedDecryptException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+    BackupException(message, cause, retryable)
+
+class BadPasswordException(message: String, cause: Throwable? = null, retryable: Boolean = false) :
+    BackupException(message, cause, retryable)
+
 open class AuthenticationException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     SdkException(message, cause, retryable)
 

@@ -17,10 +17,11 @@ class SerializationTest {
                     id = "#signingKey",
                     type = "Secp256k1VerificationKey2018",
                     controller = "did:test:hub.id",
-                    publicKeyJwk = JWK.parse( "{\"kty\": \"EC\"," +
-                        "\"crv\": \"secp256k1\"," +
-                        "\"x\": \"AEaA_TMpNsRwmZNwe70z2q_dz1rQ7G8gN0_UAydEMyU\"," +
-                        "\"y\": \"ICzV5CiqZJeAS34tJ6t9AwKoe5dQpqlf25Eay5Stpco\"}"
+                    publicKeyJwk = JWK.parse(
+                        "{\"kty\": \"EC\"," +
+                            "\"crv\": \"secp256k1\"," +
+                            "\"x\": \"AEaA_TMpNsRwmZNwe70z2q_dz1rQ7G8gN0_UAydEMyU\"," +
+                            "\"y\": \"ICzV5CiqZJeAS34tJ6t9AwKoe5dQpqlf25Eay5Stpco\"}"
                     )
                 )
             )

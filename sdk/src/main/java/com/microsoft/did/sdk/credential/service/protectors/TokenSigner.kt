@@ -9,6 +9,8 @@ import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,10 +21,12 @@ class TokenSigner @Inject constructor(
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
         val token = JwsToken(payload)
         // adding kid value to header.
-        token.setKeyId("${identifier.id}#${identifier.signatureKeyReference}")
-        token.setType(JOSEObjectType.JWT)
+        val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
+            .type(JOSEObjectType.JWT)
+            .keyID("${identifier.id}#${identifier.signatureKeyReference}")
+            .build()
         val privateKey = keyStore.getKey(identifier.signatureKeyReference)
-        token.sign(privateKey)
+        token.sign(privateKey, header)
         return token.serialize()
     }
 }

@@ -6,10 +6,12 @@
 package com.microsoft.did.sdk
 
 import android.content.Context
-import android.os.Build
 import com.microsoft.did.sdk.di.DaggerSdkComponent
+import com.microsoft.did.sdk.util.DifWordList
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 
 /**
  * This class initializes the VerifiableCredentialSdk. The `init` method has to be called before the members can be accessed.
@@ -41,7 +43,11 @@ object VerifiableCredentialSdk {
     lateinit var correlationVectorService: CorrelationVectorService
 
     @JvmStatic
+    lateinit var backupService: BackupService
+
+    @JvmStatic
     internal lateinit var identifierManager: IdentifierManager
+
 
     /**
      * Initializes VerifiableCredentialSdk
@@ -58,6 +64,7 @@ object VerifiableCredentialSdk {
         context: Context,
         userAgentInfo: String = "",
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
+        polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
         resolverUrl: String = "https://beta.discover.did.microsoft.com/1.0/identifiers"
     ) {
@@ -66,6 +73,7 @@ object VerifiableCredentialSdk {
             .userAgentInfo(userAgentInfo)
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
+            .polymorphicJsonSerializer(polymorphicJsonSerializers)
             .build()
 
         issuanceService = sdkComponent.issuanceService()
@@ -73,9 +81,12 @@ object VerifiableCredentialSdk {
         revocationService = sdkComponent.revocationService()
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierManager = sdkComponent.identifierManager()
+        backupService = sdkComponent.backupAndRestoreService()
 
         correlationVectorService.startNewFlowAndSave()
 
         SdkLog.addConsumer(logConsumer)
+
+        DifWordList.initialize(context)
     }
 }

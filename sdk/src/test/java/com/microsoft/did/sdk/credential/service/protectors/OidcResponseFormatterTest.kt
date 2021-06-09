@@ -15,17 +15,12 @@ import com.microsoft.did.sdk.credential.service.models.oidc.RevocationResponseCl
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.CredentialPresentationInputDescriptor
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.Schema
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.serialization.JwkSerializer
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyType
-import com.nimbusds.jose.util.Base64URL
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkClass
-import io.mockk.mockkConstructor
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -53,9 +48,11 @@ class OidcResponseFormatterTest {
     private val expectedResponseAudience: String = "audience2432"
     private val expectedPresentationAudience: String = "audience6237"
     private val expectedExpiry: Int = 42
-    private val expectedJsonWebKey: JWK = JWK.parse("{\"kty\":\"EC\"," +
+    private val expectedJsonWebKey: JWK = JWK.parse(
+        "{\"kty\":\"EC\"," +
             "\"crv\":\"secp256k1\",\"x\":\"WfY7Px6AgH6x-_dgAoRbg8weYRJA36ON-gQiFnETrqw\"," +
-            "\"y\":\"IzFx3BUGztK0cyDStiunXbrZYYTtKbOUzx16SUK0sAY\"}")
+            "\"y\":\"IzFx3BUGztK0cyDStiunXbrZYYTtKbOUzx16SUK0sAY\"}"
+    )
     private val expectedThumbprint: String = expectedJsonWebKey.computeThumbprint().toString()
     private val expectedVerifiablePresentation = "expectedPresentation"
     private val expectedSelfAttestedField = "testField3423442"

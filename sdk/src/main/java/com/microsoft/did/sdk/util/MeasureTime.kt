@@ -2,8 +2,8 @@
 
 package com.microsoft.did.sdk.util
 
-import com.microsoft.did.sdk.util.MetricsConstants.NAME
 import com.microsoft.did.sdk.util.MetricsConstants.DURATION
+import com.microsoft.did.sdk.util.MetricsConstants.NAME
 import com.microsoft.did.sdk.util.log.SdkLog
 import retrofit2.Response
 

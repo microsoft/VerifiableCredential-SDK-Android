@@ -12,6 +12,8 @@ import androidx.room.Room
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.CorrelationVectorService
+import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
+import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
@@ -25,6 +27,10 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.plus
+import kotlinx.serialization.modules.polymorphic
+import kotlinx.serialization.modules.subclass
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -105,8 +111,16 @@ class SdkModule {
 
     @Provides
     @Singleton
-    fun defaultJsonSerializer(): Json {
+    fun defaultJsonSerializer(
+        @Named("polymorphicJsonSerializer") additionalJsonSerializers: SerializersModule = Json.serializersModule
+    ): Json {
         return Json {
+            serializersModule = additionalJsonSerializers +
+                SerializersModule {
+                    polymorphic(UnprotectedBackupData::class) {
+                        subclass(Microsoft2020UnprotectedBackupData::class)
+                    }
+                }
             encodeDefaults = false
             ignoreUnknownKeys = true
             isLenient = true

@@ -39,4 +39,8 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
             ?: throw KeyStoreException("Key $keyId not found")
         return JWK.parse(keyJson)
     }
+
+    fun containsKey(keyId: String): Boolean {
+        return encryptedSharedPreferences.contains(KEY_PREFIX + keyId)
+    }
 }

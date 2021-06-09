@@ -23,4 +23,10 @@ class IdentifierRepository @Inject constructor(database: SdkDatabase, val apiPro
     suspend fun queryByIdentifier(identifier: String): Identifier? = identifierDao.queryByIdentifier(identifier)
 
     suspend fun queryByName(name: String): Identifier? = identifierDao.queryByName(name)
+
+    suspend fun queryAllLocal(): List<Identifier> = identifierDao.queryAllLocal()
+
+    suspend fun deleteIdentifier(identifier: String) = identifierDao.deleteIdentifier(identifier)
+
+    suspend fun deleteAll() = identifierDao.deleteAll()
 }
