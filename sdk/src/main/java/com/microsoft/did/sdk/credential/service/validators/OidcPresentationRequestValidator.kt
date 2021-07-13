@@ -71,10 +71,13 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not valid on id token hint.")
         val json = Json.decodeFromString(JsonObject.serializer(), jwsToken.content())
-        val pinObject = json["pin"] as? JsonObject ?: throw InvalidPinDetailsException("PIN details is missing in request.")
-        val length = (pinObject["length"] as? JsonPrimitive)?.content?.toInt() ?: throw InvalidPinDetailsException("PIN length is missing in request.")
-        val type = (pinObject["type"] as? JsonPrimitive)?.content ?: throw InvalidPinDetailsException("PIN type is missing in request.")
-        if (length < 1) throw InvalidPinDetailsException("PIN length is invalid in request.")
-        if (!(type == "numeric" || type == "text")) throw InvalidPinDetailsException("PIN type is invalid in request.")
+        val pinObject = json["pin"] as? JsonObject
+        if (pinObject != null) {
+            val length = (pinObject["length"] as? JsonPrimitive)?.content?.toInt()
+                ?: throw InvalidPinDetailsException("PIN length is missing in request.")
+            val type = (pinObject["type"] as? JsonPrimitive)?.content ?: throw InvalidPinDetailsException("PIN type is missing in request.")
+            if (length < 1) throw InvalidPinDetailsException("PIN length is invalid in request.")
+            if (!(type == "numeric" || type == "text")) throw InvalidPinDetailsException("PIN type is invalid in request.")
+        }
     }
 }
