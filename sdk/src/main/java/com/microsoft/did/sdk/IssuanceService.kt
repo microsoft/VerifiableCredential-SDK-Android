@@ -9,10 +9,12 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
+import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
+import com.microsoft.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.internal.ImageLoader
@@ -41,7 +43,9 @@ class IssuanceService @Inject constructor(
      *
      * @param contractUrl url that the contract is fetched from
      */
-    suspend fun getRequest(contractUrl: String): Result<IssuanceRequest> {
+    suspend fun getRequest(
+        contractUrl: String
+    ): Result<IssuanceRequest> {
         return runResultTry {
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).abortOnError()
@@ -84,6 +88,18 @@ class IssuanceService @Inject constructor(
                     formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 }
                 Result.Success(verifiableCredential)
+            }
+        }
+    }
+
+    suspend fun sendCompletionResponse(completionResponse: IssuanceCompletionResponse, url: String): Result<Unit> {
+        return runResultTry {
+            logTime("Issuance sendCompletionResponse") {
+                SendIssuanceCompletionResponse(
+                    url,
+                    completionResponse.toString(),
+                    apiProvider
+                ).fire()
             }
         }
     }
