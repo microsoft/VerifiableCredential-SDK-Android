@@ -50,7 +50,7 @@ class PresentationResponseFormatter @Inject constructor(
             publicKeyJwk = key.toPublicJWK()
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
-            state = presentationResponse.request.content.state
+            state = presentationResponse.request.content.state ?: ""
             this.responseId = responseId
         }
         return signContents(oidcResponseClaims, responder)
