@@ -57,6 +57,7 @@ class IssuanceResponseFormatter @Inject constructor(
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = issuanceResponse.audience
             did = responder.id
+            pin = issuanceResponse.pin
             publicKeyJwk = key.toPublicJWK()
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime

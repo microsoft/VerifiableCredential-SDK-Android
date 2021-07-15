@@ -20,6 +20,7 @@ sealed class Response(open val request: Request, val audience: String)
 
 class IssuanceResponse(override val request: IssuanceRequest) :
     Response(request, request.contract.input.credentialIssuer) {
+    var pin: String? = null
     val requestedVcMap: RequestedVcMap = mutableMapOf()
     val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
     val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()

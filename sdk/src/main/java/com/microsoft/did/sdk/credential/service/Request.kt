@@ -23,6 +23,7 @@ class IssuanceRequest(
     val contractUrl: String,
     override val linkedDomainResult: LinkedDomainResult
 ) : Request(contract.display.card.issuedBy, contract.input.issuer) {
+    var pin: String? = null
     fun getAttestations(): CredentialAttestations {
         return contract.input.attestations
     }
