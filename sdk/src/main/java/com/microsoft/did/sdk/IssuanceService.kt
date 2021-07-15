@@ -22,6 +22,7 @@ import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.logTime
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -97,7 +98,7 @@ class IssuanceService @Inject constructor(
             logTime("Issuance sendCompletionResponse") {
                 SendIssuanceCompletionResponse(
                     url,
-                    completionResponse.toString(),
+                    serializer.encodeToString(completionResponse),
                     apiProvider
                 ).fire()
             }
