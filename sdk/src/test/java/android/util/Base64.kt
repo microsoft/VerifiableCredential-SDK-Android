@@ -17,7 +17,7 @@ import java.util.Base64
 object Base64 {
     @JvmStatic
     fun encodeToString(input: ByteArray?, flags: Int): String {
-        if (flags != Constants.BASE64_URL_SAFE) throw UnsupportedOperationException("This mock currently supports only one combination of flags")
+        if (flags != Constants.BASE64_URL_SAFE && flags != Constants.BASE64_NO_WRAP) throw UnsupportedOperationException("This mock currently supports only one combination of flags")
         return Base64.getUrlEncoder().withoutPadding().encodeToString(input)
     }
 
