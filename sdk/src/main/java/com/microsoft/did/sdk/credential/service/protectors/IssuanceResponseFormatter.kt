@@ -5,12 +5,15 @@
 
 package com.microsoft.did.sdk.credential.service.protectors
 
+import android.util.Base64
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.oidc.AttestationClaimModel
 import com.microsoft.did.sdk.credential.service.models.oidc.IssuanceResponseClaims
+import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.did.sdk.crypto.keyStore.EncryptedKeyStore
 import com.microsoft.did.sdk.identifier.models.Identifier
 import kotlinx.serialization.json.Json
@@ -57,6 +60,7 @@ class IssuanceResponseFormatter @Inject constructor(
             publicKeyThumbPrint = key.computeThumbprint().toString()
             audience = issuanceResponse.audience
             did = responder.id
+            pin = hashIssuancePin(issuanceResponse)
             publicKeyJwk = key.toPublicJWK()
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
@@ -101,5 +105,13 @@ class IssuanceResponseFormatter @Inject constructor(
         requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap
     ): Boolean {
         return (requestedVcMap.isNullOrEmpty() && requestedIdTokenMap.isNullOrEmpty() && requestedSelfAttestedClaimMap.isNullOrEmpty())
+    }
+
+    private fun hashIssuancePin(response: IssuanceResponse): String {
+        val pinValueToHash = response.issuancePin?.pin + (response.issuancePin?.pinSalt ?: "")
+        return Base64.encodeToString(
+            CryptoOperations.digest(pinValueToHash.toByteArray(), DigestAlgorithm.Sha256),
+            Base64.NO_WRAP
+        )
     }
 }
