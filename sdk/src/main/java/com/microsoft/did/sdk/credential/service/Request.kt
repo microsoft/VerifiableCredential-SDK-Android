@@ -9,6 +9,7 @@ import com.microsoft.did.sdk.credential.service.models.attestations.CredentialAt
 import com.microsoft.did.sdk.credential.service.models.contracts.VerifiableCredentialContract
 import com.microsoft.did.sdk.credential.service.models.linkedDomains.LinkedDomainResult
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.did.sdk.credential.service.models.pin.IssuancePin
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import kotlinx.serialization.Serializable
 
@@ -23,7 +24,7 @@ class IssuanceRequest(
     val contractUrl: String,
     override val linkedDomainResult: LinkedDomainResult
 ) : Request(contract.display.card.issuedBy, contract.input.issuer) {
-    var pin: String? = null
+    var issuancePin: IssuancePin? = null
     fun getAttestations(): CredentialAttestations {
         return contract.input.attestations
     }
