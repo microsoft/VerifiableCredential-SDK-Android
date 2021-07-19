@@ -23,6 +23,7 @@ interface IssuanceApis {
     @POST
     suspend fun sendResponse(@Url overrideUrl: String, @Body body: String): Response<IssuanceServiceResponse>
 
+    @Headers("Content-Type: application/json")
     @POST
     suspend fun sendCompletionResponse(@Url overrideUrl: String, @Body body: String): Response<Unit>
 }
