@@ -33,9 +33,9 @@ data class PresentationRequestContent(
 
     val scope: String,
 
-    val state: String = "",
+    val state: String? = null,
 
-    val nonce: String = "",
+    val nonce: String,
 
     @SerialName("presentation_definition")
     val presentationDefinition: PresentationDefinition,
