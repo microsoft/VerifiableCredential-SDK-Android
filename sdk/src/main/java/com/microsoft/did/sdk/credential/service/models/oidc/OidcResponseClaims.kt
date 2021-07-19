@@ -35,4 +35,6 @@ abstract class OidcResponseClaims {
     @Required
     @SerialName("iss")
     var issuer: String = Constants.SELF_ISSUED
+
+    var pin: String? = null
 }

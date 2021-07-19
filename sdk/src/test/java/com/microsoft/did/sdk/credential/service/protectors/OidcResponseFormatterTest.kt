@@ -277,6 +277,7 @@ class OidcResponseFormatterTest {
     private fun mockIssuanceResponseWithNoAttestations() {
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedDid
         every { mockedIssuanceResponse.audience } returns expectedResponseAudience
+        every { mockedIssuanceResponse.issuancePin } returns null
         every { mockedIssuanceResponse.request.contractUrl } returns expectedContract
     }
 
