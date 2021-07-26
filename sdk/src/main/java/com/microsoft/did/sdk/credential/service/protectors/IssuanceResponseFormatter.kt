@@ -108,7 +108,7 @@ class IssuanceResponseFormatter @Inject constructor(
     }
 
     private fun hashIssuancePin(response: IssuanceResponse): String {
-        val pinValueToHash = response.issuancePin?.pin + (response.issuancePin?.pinSalt ?: "")
+        val pinValueToHash = (response.issuancePin?.pinSalt ?: "") + response.issuancePin?.pin
         return Base64.encodeToString(
             CryptoOperations.digest(pinValueToHash.toByteArray(), DigestAlgorithm.Sha256),
             Base64.NO_WRAP
