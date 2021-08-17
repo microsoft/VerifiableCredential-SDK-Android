@@ -30,9 +30,9 @@ inline fun <S> logNetworkTime(name: String, block: () -> Response<S>): Response<
     val result = block()
     val elapsedTime = System.currentTimeMillis() - start
 
-    val cvRequest = result.raw().request().headers()[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-    val cvResponse = result.raw().headers()[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
-    val requestId = result.raw().headers()[Constants.REQUEST_ID_HEADER] ?: "none"
+    val cvRequest = result.raw().request.headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
+    val cvResponse = result.raw().headers[Constants.CORRELATION_VECTOR_HEADER] ?: "none"
+    val requestId = result.raw().headers[Constants.REQUEST_ID_HEADER] ?: "none"
 
     SdkLog.event(
         "DIDNetworkMetrics", mapOf(
