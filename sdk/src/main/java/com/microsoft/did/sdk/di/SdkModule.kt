@@ -32,6 +32,7 @@ import kotlinx.serialization.modules.plus
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -73,7 +74,7 @@ class SdkModule {
     @Provides
     @Singleton
     fun defaultRetrofit(okHttpClient: OkHttpClient, serializer: Json): Retrofit {
-        val contentType = MediaType.get("application/json")
+        val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
             .baseUrl("http://TODO.me")
             .client(okHttpClient)
