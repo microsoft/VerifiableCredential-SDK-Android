@@ -5,9 +5,11 @@ package com.microsoft.did.sdk.internal
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.ImageUtil
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import javax.inject.Inject
 
 class ImageLoader @Inject constructor() {
@@ -30,7 +32,12 @@ class ImageLoader @Inject constructor() {
         val logo = request.content.registration.logoData
         if (logo == null) {
             val logoUri = request.content.registration.logoUri
-            request.content.registration.logoData = loadImageToBase64(logoUri)
+            try {
+                request.content.registration.logoData = loadImageToBase64(logoUri)
+            } catch (ioe: IOException) {
+                SdkLog.d("Exception while loading presentation logo", ioe)
+                request.content.registration.logoData = null
+            }
         }
     }
 
