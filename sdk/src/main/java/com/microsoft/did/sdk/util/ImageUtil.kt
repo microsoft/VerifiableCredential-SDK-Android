@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream
 
 object ImageUtil {
     fun parse(base64Str: String?): Bitmap? {
-        if (base64Str == null) return null
+        if (base64Str.isNullOrBlank()) return null
         return try {
             val decodedBytes = Base64.decode(base64Str, Constants.BASE64_URL_SAFE)
             BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)

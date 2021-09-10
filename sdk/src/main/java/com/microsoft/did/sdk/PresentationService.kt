@@ -15,6 +15,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
@@ -35,6 +36,7 @@ class PresentationService @Inject constructor(
     private val presentationRequestValidator: PresentationRequestValidator,
     private val apiProvider: ApiProvider,
     private val presentationResponseFormatter: PresentationResponseFormatter,
+    private val imageLoader: ImageLoader
 ) {
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
@@ -43,6 +45,7 @@ class PresentationService @Inject constructor(
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
                 val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
+                imageLoader.loadRemoteImage(request)
                 isRequestValid(request).abortOnError()
                 Result.Success(request)
             }

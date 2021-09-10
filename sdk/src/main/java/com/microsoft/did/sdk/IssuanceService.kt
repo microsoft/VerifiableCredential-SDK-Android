@@ -52,7 +52,7 @@ class IssuanceService @Inject constructor(
                 val contract = fetchContract(contractUrl).abortOnError()
                 val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
-                imageLoader.loadRemoteImagesIntoContract(request)
+                imageLoader.loadRemoteImage(request)
                 Result.Success(request)
             }
         }

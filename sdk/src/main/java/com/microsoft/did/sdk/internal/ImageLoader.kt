@@ -3,6 +3,7 @@
 package com.microsoft.did.sdk.internal
 
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
+import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.util.ImageUtil
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
@@ -15,15 +16,21 @@ class ImageLoader @Inject constructor() {
         const val MAX_IMAGE_SIZE_BYTES = 1000000 // 1 MB
     }
 
-    suspend fun loadRemoteImagesIntoContract(request: IssuanceRequest) {
+    suspend fun loadRemoteImage(request: IssuanceRequest) {
         val logo = request.contract.display.card.logo
         if (logo != null) {
             if (logo.image != null || logo.uri == null) {
-                logo.uri = null
                 return
             }
             logo.image = loadImageToBase64(logo.uri!!)
-            logo.uri = null
+        }
+    }
+
+    suspend fun loadRemoteImage(request: PresentationRequest) {
+        val logo = request.content.registration.logoData
+        if (logo == null) {
+            val logoUri = request.content.registration.logoUri
+            request.content.registration.logoData = loadImageToBase64(logoUri)
         }
     }
 
