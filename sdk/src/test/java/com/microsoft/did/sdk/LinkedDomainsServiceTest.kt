@@ -48,7 +48,7 @@ class LinkedDomainsServiceTest {
         val expectedDomainUrl = "https://issuertestng.com"
         val hostnameOfUrl = URI(expectedDomainUrl).host
         coEvery { mockedResolver.resolve(suppliedDidWithSingleServiceEndpoint) } returns Result.Success(expectedResponse.didDocument)
-        coEvery { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(
+        coEvery { linkedDomainsService.getWellKnownConfigDocument(expectedDomainUrl) } returns Result.Success(
             expectedWellKnownConfigDocument
         )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
@@ -75,7 +75,7 @@ class LinkedDomainsServiceTest {
         val expectedDomainUrl = "https://issuertestng.com"
         val hostnameOfUrl = URI(expectedDomainUrl).host
         coEvery { mockedResolver.resolve(suppliedDidWithMultipleServiceEndpoints) } returns Result.Success(expectedResponse.didDocument)
-        coEvery { linkedDomainsService["getWellKnownConfigDocument"](expectedDomainUrl) } returns Result.Success(
+        coEvery { linkedDomainsService.getWellKnownConfigDocument(expectedDomainUrl) } returns Result.Success(
             expectedWellKnownConfigDocument
         )
         coEvery { mockedJwtValidator.verifySignature(any()) } returns true
