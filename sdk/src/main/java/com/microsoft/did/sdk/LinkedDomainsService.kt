@@ -59,7 +59,7 @@ class LinkedDomainsService @Inject constructor(
         }
     }
 
-    suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
+    private suspend fun getWellKnownConfigDocument(domainUrl: String) = FetchWellKnownConfigDocumentNetworkOperation(
         domainUrl,
         apiProvider
     ).fire()
