@@ -43,8 +43,6 @@ open class PresentationException(message: String, cause: Throwable? = null, retr
 open class IssuanceException(message: String, cause: Throwable? = null, retryable: Boolean = true) :
     AuthenticationException(message, cause, retryable)
 
-class ExchangeException(message: String, cause: Throwable? = null) : PresentationException(message, cause)
-
 open class RevocationException(message: String? = null, cause: Throwable? = null, retryable: Boolean = true) :
     SdkException(message, cause, retryable)
 
