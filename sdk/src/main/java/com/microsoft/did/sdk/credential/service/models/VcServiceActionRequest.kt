@@ -13,9 +13,6 @@ import com.microsoft.did.sdk.identifier.models.Identifier
  */
 sealed class VcServiceActionRequest(val audience: String)
 
-data class ExchangeRequest(val verifiableCredential: VerifiableCredential, val pairwiseDid: String, val requester: Identifier) :
-    VcServiceActionRequest(verifiableCredential.contents.vc.exchangeService?.id ?: "")
-
 data class RevocationRequest(
     val verifiableCredential: VerifiableCredential,
     val owner: Identifier,

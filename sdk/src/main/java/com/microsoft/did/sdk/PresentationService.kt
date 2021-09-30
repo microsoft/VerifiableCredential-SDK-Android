@@ -28,7 +28,6 @@ import javax.inject.Singleton
 @Singleton
 class PresentationService @Inject constructor(
     private val identifierManager: IdentifierManager,
-    private val exchangeService: ExchangeService,
     private val linkedDomainsService: LinkedDomainsService,
     private val serializer: Json,
     private val jwtValidator: JwtValidator,
@@ -88,40 +87,17 @@ class PresentationService @Inject constructor(
      * Send a Presentation Response.
      *
      * @param response PresentationResponse to be formed, signed, and sent.
-     * @param enablePairwise when true a pairwise identifier will be used for this communication,
-     * otherwise the master identifier is used which may allow the relying party to correlate the user
      */
     suspend fun sendResponse(
-        response: PresentationResponse,
-        enablePairwise: Boolean = true
+        response: PresentationResponse
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
                 val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
-                if (enablePairwise) {
-                    val pairwiseIdentifier =
-                        identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
-                    val vcRequestedMapping = exchangeVcsInPresentationRequest(response, pairwiseIdentifier).abortOnError()
-                    formAndSendResponse(response, pairwiseIdentifier, vcRequestedMapping).abortOnError()
-                } else {
-                    val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
-                    formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
-                }
-                Result.Success(Unit)
+                val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
+                formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
             }
-        }
-    }
-
-    private suspend fun exchangeVcsInPresentationRequest(
-        response: PresentationResponse,
-        pairwiseIdentifier: Identifier
-    ): Result<RequestedVcPresentationSubmissionMap> {
-        return runResultTry {
-            val exchangedVcMap = response.requestedVcPresentationSubmissionMap.mapValues {
-                val owner = identifierManager.getIdentifierById(it.value.contents.sub).abortOnError()
-                exchangeService.getExchangedVerifiableCredential(it.value, owner, pairwiseIdentifier).abortOnError()
-            }
-            Result.Success(exchangedVcMap as RequestedVcPresentationSubmissionMap)
+            Result.Success(Unit)
         }
     }
 
