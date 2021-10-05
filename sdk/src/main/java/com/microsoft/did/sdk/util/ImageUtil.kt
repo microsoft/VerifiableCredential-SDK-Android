@@ -20,7 +20,8 @@ object ImageUtil {
         }
     }
 
-    fun convert(bitmap: Bitmap): String {
+    fun convert(bitmap: Bitmap?): String? {
+        if (bitmap == null) return null
         val outputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
         return Base64.encodeToString(outputStream.toByteArray(), Constants.BASE64_URL_SAFE)
