@@ -17,6 +17,7 @@ class ImageLoader @Inject constructor() {
 
     companion object {
         const val MAX_IMAGE_SIZE_BYTES = 1000000 // 1 MB
+        const val BASE64_SIZE_INCREASE_ESTIMATION = 1.3 // Base64 string is about 30% bigger
     }
 
     suspend fun loadRemoteImage(request: IssuanceRequest) {
@@ -28,7 +29,7 @@ class ImageLoader @Inject constructor() {
             logo.image = loadImageToBase64(logo.uri!!)
         }
         logo?.image?.let {
-            if (it.length * 2 > MAX_IMAGE_SIZE_BYTES)
+            if (it.length * 2 > MAX_IMAGE_SIZE_BYTES * BASE64_SIZE_INCREASE_ESTIMATION)
                 throw InvalidImageException("Image size exceeds max file size ${MAX_IMAGE_SIZE_BYTES / 1000000.0f}MB")
         }
     }
@@ -45,7 +46,7 @@ class ImageLoader @Inject constructor() {
             }
         }
         request.content.registration.logoData?.let {
-            if (it.length * 2 > MAX_IMAGE_SIZE_BYTES)
+            if (it.length * 2 > MAX_IMAGE_SIZE_BYTES * BASE64_SIZE_INCREASE_ESTIMATION)
                 throw InvalidImageException("Image size exceeds max file size ${MAX_IMAGE_SIZE_BYTES / 1000000.0f}MB")
         }
     }
