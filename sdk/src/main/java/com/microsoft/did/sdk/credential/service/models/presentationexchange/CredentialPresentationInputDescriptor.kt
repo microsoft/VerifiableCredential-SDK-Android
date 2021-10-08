@@ -12,5 +12,8 @@ data class CredentialPresentationInputDescriptor(
     val schema: Schema,
 
     @SerialName("issuance")
-    var issuanceMetadataList: List<IssuanceMetadata> = emptyList()
+    var issuanceMetadataList: List<IssuanceMetadata> = emptyList(),
+
+    @Serializable(with = PresentationRequestFormatSerializer::class)
+    val format: List<String> = emptyList()
 )
