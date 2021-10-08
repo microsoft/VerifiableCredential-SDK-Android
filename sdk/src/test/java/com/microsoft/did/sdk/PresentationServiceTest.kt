@@ -25,6 +25,7 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocument
 import com.microsoft.did.sdk.identifier.models.payload.document.IdentifierDocumentService
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
@@ -58,6 +59,8 @@ class PresentationServiceTest {
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
+
+    private val imageLoader: ImageLoader = mockk(relaxed = true)
     private val presentationService =
         spyk(
             PresentationService(
@@ -68,7 +71,8 @@ class PresentationServiceTest {
                 mockedJwtValidator,
                 presentationRequestValidator,
                 mockk(relaxed = true),
-                presentationResponseFormatter
+                presentationResponseFormatter,
+                imageLoader
             )
         )
 
