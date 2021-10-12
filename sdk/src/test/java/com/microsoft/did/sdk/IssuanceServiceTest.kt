@@ -41,12 +41,10 @@ class IssuanceServiceTest {
 
     private val identifierManager: IdentifierManager = mockk()
     private val masterIdentifier: Identifier = mockk()
-    private val pairwiseIdentifier: Identifier = mockk()
 
     private val mockedResolver: Resolver = mockk()
     private val mockedJwtValidator: JwtValidator = mockk()
     private val issuanceResponseFormatter: IssuanceResponseFormatter = mockk()
-    private val exchangeService: ExchangeService = mockk()
     private val mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
     private val linkedDomainsService =
         spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
@@ -55,7 +53,6 @@ class IssuanceServiceTest {
         spyk(
             IssuanceService(
                 identifierManager,
-                exchangeService,
                 linkedDomainsService,
                 mockk(relaxed = true),
                 mockedJwtValidator,
@@ -90,13 +87,6 @@ class IssuanceServiceTest {
             suppliedVcRaw,
             suppliedVcContent
         )
-    private val suppliedPairwiseVcJti = "testPairwiseJti"
-    private val expectedPairwiseVerifiableCredential =
-        VerifiableCredential(
-            suppliedPairwiseVcJti,
-            suppliedVcRaw,
-            suppliedVcContent
-        )
     private val formattedResponse = "FORMATTED_RESPONSE"
     private val mockedIdentifierDocument: IdentifierDocument = mockk()
     private val mockedIdentifierDocumentService: IdentifierDocumentService = mockk()
@@ -105,7 +95,6 @@ class IssuanceServiceTest {
 
     init {
         coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
-        coEvery { identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, any()) } returns Result.Success(pairwiseIdentifier)
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
@@ -178,19 +167,12 @@ class IssuanceServiceTest {
         val mockedPresentationAttestation = mockk<PresentationAttestation>()
 
         every {
-            issuanceResponseFormatter.formatResponse(issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential } as RequestedVcMap,
+            issuanceResponseFormatter.formatResponse(issuanceResponse.requestedVcMap.mapValues { expectedVerifiableCredential } as RequestedVcMap,
                 issuanceResponse,
-                pairwiseIdentifier,
+                masterIdentifier,
                 DEFAULT_EXPIRATION_IN_SECONDS)
         } returns formattedResponse
         coEvery { identifierManager.getIdentifierById(expectedVerifiableCredential.contents.sub) } returns Result.Success(masterIdentifier)
-        coEvery {
-            exchangeService.getExchangedVerifiableCredential(
-                expectedVerifiableCredential,
-                masterIdentifier,
-                pairwiseIdentifier
-            )
-        } returns Result.Success(expectedPairwiseVerifiableCredential)
         every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
         every { mockedPresentationAttestation.validityInterval } returns 1000
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(
@@ -206,11 +188,10 @@ class IssuanceServiceTest {
         }
 
         verify(exactly = 1) {
-            issuanceService["exchangeVcsInIssuanceRequest"](issuanceResponse, pairwiseIdentifier)
             issuanceService["formAndSendResponse"](
                 issuanceResponse,
-                pairwiseIdentifier,
-                issuanceResponse.requestedVcMap.mapValues { expectedPairwiseVerifiableCredential } as RequestedVcMap,
+                masterIdentifier,
+                issuanceResponse.requestedVcMap.mapValues { expectedVerifiableCredential } as RequestedVcMap,
                 DEFAULT_EXPIRATION_IN_SECONDS
             )
         }

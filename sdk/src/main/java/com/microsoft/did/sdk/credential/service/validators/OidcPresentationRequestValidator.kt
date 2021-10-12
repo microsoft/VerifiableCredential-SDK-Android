@@ -77,7 +77,7 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
                 ?: throw InvalidPinDetailsException("PIN length is missing in request.")
             val type = (pinObject["type"] as? JsonPrimitive)?.content ?: throw InvalidPinDetailsException("PIN type is missing in request.")
             if (length < 1) throw InvalidPinDetailsException("PIN length is invalid in request.")
-            if (!(type == "numeric" || type == "text")) throw InvalidPinDetailsException("PIN type is invalid in request.")
+            if (!(type == "numeric" || type == "alphanumeric")) throw InvalidPinDetailsException("PIN type is invalid in request.")
         }
     }
 }

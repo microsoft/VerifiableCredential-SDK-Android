@@ -141,10 +141,6 @@ suspend fun revocationSample(verifiableCredential: VerifiableCredential) {
 
 See the [full sample](https://github.com/microsoft/VerifiableCredential-SDK-Android/blob/master/sdk/src/samples/java/com/microsoft/did/sdk/RevocationSample.kt).
 
-## Pairwise Identifiers
-
-By default every relationship to relying parties (RP) will use a different DID per RP such that they can not correlate users actions. The client will automatically fetch exchanged VCs from the original issuer. This behavior can be disabled on a per call basis with the `enablePairwise` flag in `sendResponse`.
-
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
