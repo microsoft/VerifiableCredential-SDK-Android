@@ -17,7 +17,6 @@ object Constants {
     const val SCOPE = "openid"
     const val SUBJECT_IDENTIFIER_TYPE_DID = "did"
     const val DID_METHODS_SUPPORTED = "did:ion:"
-    const val VP_FORMAT_IN_REGISTRATION = "jwp_vp"
     const val ALGORITHM_SUPPORTED_IN_VP = "ES256"
 
     //Presentation Exchange Constants
