@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.presentationexchange
 
+import com.microsoft.did.sdk.util.controlflow.VpFormatNotSupported
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -34,13 +35,12 @@ class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSeri
         val algList = mutableListOf<String>()
         val formatJsonElement = (decoder as JsonDecoder).decodeJsonElement()
         val formatJsonObjectKey = (formatJsonElement as JsonObject).keys.find { it.equals(FormatKeys.JwtVp.value, true) }
-        if (formatJsonObjectKey != null) {
-            val algJsonObject = formatJsonElement[formatJsonObjectKey] as JsonObject
-            val algJsonObjectKey = algJsonObject.keys.find { it.equals(AlgorithmKeys.Alg.value, true) }
-            if (algJsonObjectKey != null) {
-                val jsonArray = algJsonObject[algJsonObjectKey] as JsonArray
-                algList.addAll(jsonArray.map { jsonElement -> (jsonElement as JsonPrimitive).content })
-            }
+            ?: throw VpFormatNotSupported("VP format in registration of request is not supported")
+        val algJsonObject = formatJsonElement[formatJsonObjectKey] as JsonObject
+        val algJsonObjectKey = algJsonObject.keys.find { it.equals(AlgorithmKeys.Alg.value, true) }
+        if (algJsonObjectKey != null) {
+            val jsonArray = algJsonObject[algJsonObjectKey] as JsonArray
+            algList.addAll(jsonArray.map { jsonElement -> (jsonElement as JsonPrimitive).content })
         }
         return algList
     }
