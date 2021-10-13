@@ -106,6 +106,7 @@ dependencies {
     // KTX
     implementation "androidx.collection:collection-ktx:$collections_ktx_version"
     implementation "androidx.core:core-ktx:$core_ktx_version"
+    implementation "com.jayway.jsonpath:json-path:2.6.0"
 
     //other
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
