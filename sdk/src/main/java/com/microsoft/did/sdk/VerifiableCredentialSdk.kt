@@ -46,8 +46,7 @@ object VerifiableCredentialSdk {
     lateinit var backupService: BackupService
 
     @JvmStatic
-    internal lateinit var identifierManager: IdentifierManager
-
+    lateinit var identifierManager: IdentifierManager
 
     /**
      * Initializes VerifiableCredentialSdk
