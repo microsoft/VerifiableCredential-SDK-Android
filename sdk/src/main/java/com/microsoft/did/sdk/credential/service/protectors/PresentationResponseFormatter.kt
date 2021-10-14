@@ -43,11 +43,9 @@ class PresentationResponseFormatter @Inject constructor(
         val key = keyStore.getKey(responder.signatureKeyReference)
 
         val oidcResponseClaims = PresentationResponseClaims(credentialPresentationSubmission, attestationResponse).apply {
-            publicKeyThumbPrint = key.computeThumbprint().toString()
+            publicKeyThumbPrint = responder.id
             audience = presentationResponse.audience
             nonce = presentationResponse.request.content.nonce
-            did = responder.id
-            publicKeyJwk = key.toPublicJWK()
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
             state = presentationResponse.request.content.state ?: ""
