@@ -30,7 +30,6 @@ import javax.inject.Singleton
 @Singleton
 class IssuanceService @Inject constructor(
     private val identifierManager: IdentifierManager,
-    private val exchangeService: ExchangeService,
     private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
@@ -69,25 +68,15 @@ class IssuanceService @Inject constructor(
      * Send an Issuance Response.
      *
      * @param response IssuanceResponse containing the requested attestations
-     * @param enablePairwise when true a pairwise identifier will be used for this communication,
-     * otherwise the master identifier is used which may allow the relying party to correlate the user
      */
     suspend fun sendResponse(
-        response: IssuanceResponse,
-        enablePairwise: Boolean = true
+        response: IssuanceResponse
     ): Result<VerifiableCredential> {
         return runResultTry {
             logTime("Issuance sendResponse") {
                 val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
-                val verifiableCredential = if (enablePairwise) {
-                    val pairwiseIdentifier =
-                        identifierManager.getOrCreatePairwiseIdentifier(masterIdentifier, response.request.entityIdentifier).abortOnError()
-                    val requestedVcMap = exchangeVcsInIssuanceRequest(response, pairwiseIdentifier).abortOnError()
-                    formAndSendResponse(response, pairwiseIdentifier, requestedVcMap).abortOnError()
-                } else {
-                    val requestedVcMap = response.requestedVcMap
-                    formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
-                }
+                val requestedVcMap = response.requestedVcMap
+                val verifiableCredential = formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 Result.Success(verifiableCredential)
             }
         }
@@ -102,19 +91,6 @@ class IssuanceService @Inject constructor(
                     apiProvider
                 ).fire()
             }
-        }
-    }
-
-    private suspend fun exchangeVcsInIssuanceRequest(
-        response: IssuanceResponse,
-        pairwiseIdentifier: Identifier
-    ): Result<RequestedVcMap> {
-        return runResultTry {
-            val exchangedVcMap = response.requestedVcMap.mapValues {
-                val owner = identifierManager.getIdentifierById(it.value.contents.sub).abortOnError()
-                exchangeService.getExchangedVerifiableCredential(it.value, owner, pairwiseIdentifier).abortOnError()
-            }
-            Result.Success(exchangedVcMap as RequestedVcMap)
         }
     }
 
