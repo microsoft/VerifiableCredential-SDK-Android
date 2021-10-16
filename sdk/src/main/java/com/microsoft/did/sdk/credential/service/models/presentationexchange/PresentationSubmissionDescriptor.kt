@@ -17,5 +17,5 @@ data class PresentationSubmissionDescriptor(
 
     val format: String = "",
 
-    val encoding: String = ""
+    var pathNested: PathNested? = null
 )

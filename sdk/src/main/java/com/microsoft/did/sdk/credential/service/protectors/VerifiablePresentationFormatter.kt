@@ -45,4 +45,36 @@ class VerifiablePresentationFormatter @Inject constructor(
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)
     }
+
+    // supports multiple VCs per VP
+    fun createPresentation(
+        verifiableCredentials: List<VerifiableCredential>,
+        validityInterval: Int,
+        audience: String,
+        responder: Identifier
+    ): String {
+        val rawVerifiableCredentials = mutableListOf<String>()
+        verifiableCredentials.forEach { rawVerifiableCredentials.add(it.raw) }
+        val verifiablePresentation = VerifiablePresentationDescriptor(
+            verifiableCredential = rawVerifiableCredentials,
+            context = listOf(Constants.VP_CONTEXT_URL),
+            type = listOf(Constants.VERIFIABLE_PRESENTATION_TYPE)
+        )
+
+        val (issuedTime, expiryTime: Long) = createIssuedAndExpiryTime(validityInterval)
+        val vpId = UUID.randomUUID().toString()
+        val responderDid = responder.id
+        val contents =
+            VerifiablePresentationContent(
+                vpId = vpId,
+                verifiablePresentation = verifiablePresentation,
+                issuerOfVp = responderDid,
+                tokenIssuedTime = issuedTime,
+                tokenNotValidBefore = issuedTime,
+                tokenExpiryTime = expiryTime,
+                audience = audience
+            )
+        val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
+        return signer.signWithIdentifier(serializedContents, responder)
+    }
 }

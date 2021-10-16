@@ -17,9 +17,8 @@ object Constants {
     const val SCOPE = "openid did_authn"
 
     //Presentation Exchange Constants
-    const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"
-    const val CREDENTIAL_PRESENTATION_FORMAT = "JWT"
-    const val CREDENTIAL_PRESENTATION_ENCODING = "base64Url"
+    const val CREDENTIAL_PATH_IN_RESPONSE = "$.verifiableCredential["
+    const val CREDENTIAL_PRESENTATION_FORMAT = "jwt_vp"
 
     //Verifiable Credential Constants
     const val CONTEXT = "@context"
