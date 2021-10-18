@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PresentationDefinition(
+    val id: String,
+
     @SerialName("input_descriptors")
     val credentialPresentationInputDescriptors: List<CredentialPresentationInputDescriptor>
 )

@@ -24,6 +24,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.util.UUID
 import kotlin.test.assertEquals
 
 class OidcResponseFormatterTest {
@@ -67,6 +68,7 @@ class OidcResponseFormatterTest {
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
     private val mockedState = "mockedState"
+    private val mockedPresentationDefinitionId = UUID.randomUUID().toString()
     private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
     private val credentialPresentationInputDescriptors =
         CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
@@ -272,6 +274,7 @@ class OidcResponseFormatterTest {
         every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
         every { mockedPresentationResponse.request.content.state } returns mockedState
         every { mockedPresentationResponse.requestedVcPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap
+        every { mockedPresentationResponse.requestedVcPresentationDefinitionId } returns mockedPresentationDefinitionId
     }
 
     private fun mockIssuanceResponseWithNoAttestations() {
