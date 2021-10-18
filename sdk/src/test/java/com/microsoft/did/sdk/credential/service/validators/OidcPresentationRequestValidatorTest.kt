@@ -55,7 +55,7 @@ class OidcPresentationRequestValidatorTest {
 
     private val expectedSubjectIdentifierType = "did"
     private val expectedDidMethodSupported = "did:ion:"
-    private val expectedAlgorithmSupported = "ES256"
+    private val expectedAlgorithmSupported = "ES256K"
 
     private val expectedInvalidResponseMode = "invalid_response_mode"
     private val expectedInvalidResponseType = "invalid_response_type"
