@@ -5,7 +5,6 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationDefinition
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -37,8 +36,8 @@ data class PresentationRequestContent(
 
     val nonce: String,
 
-    @SerialName("presentation_definition")
-    val presentationDefinition: PresentationDefinition,
+    @SerialName("claims")
+    val claims: Claims,
 
     @SerialName("exp")
     val expirationTime: Long = 0,

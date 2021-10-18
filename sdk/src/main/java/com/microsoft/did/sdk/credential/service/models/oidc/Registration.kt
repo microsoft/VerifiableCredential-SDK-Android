@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationRequestFormatSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -28,5 +29,15 @@ data class Registration(
     val logoUri: String = "",
 
     @SerialName("client_uri")
-    val clientUri: String = ""
+    val clientUri: String = "",
+
+    @SerialName("subject_identifier_types_supported")
+    val subjectIdentifierTypesSupported: List<String> = emptyList(),
+
+    @SerialName("did_methods_supported")
+    val didMethodsSupported: List<String> = emptyList(),
+
+    @Serializable(with = PresentationRequestFormatSerializer::class)
+    @SerialName("vp_formats")
+    val format: List<String> = emptyList()
 )

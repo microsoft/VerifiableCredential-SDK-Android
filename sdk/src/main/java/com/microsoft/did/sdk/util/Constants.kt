@@ -13,8 +13,11 @@ object Constants {
     const val SELF_ISSUED = "https://self-issued.me"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
     const val RESPONSE_TYPE = "id_token"
-    const val RESPONSE_MODE = "form_post"
-    const val SCOPE = "openid did_authn"
+    const val RESPONSE_MODE = "post"
+    const val SCOPE = "openid"
+    const val SUBJECT_IDENTIFIER_TYPE_DID = "did"
+    const val DID_METHODS_SUPPORTED = "did:ion:"
+    const val ALGORITHM_SUPPORTED_IN_VP = "ES256K"
 
     //Presentation Exchange Constants
     const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"

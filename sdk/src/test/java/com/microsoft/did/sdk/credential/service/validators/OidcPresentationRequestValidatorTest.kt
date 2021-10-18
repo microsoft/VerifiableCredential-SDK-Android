@@ -7,6 +7,7 @@ package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationRequestContent
+import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
@@ -37,6 +38,8 @@ class OidcPresentationRequestValidatorTest {
 
     private val mockedIdentifier: Identifier = mockk()
 
+    private val mockedRegistration: Registration = mockk()
+
     private val expectedSerializedToken: String = "token2364302"
 
     private val validator: OidcPresentationRequestValidator = OidcPresentationRequestValidator(mockedJwtValidator)
@@ -46,9 +49,13 @@ class OidcPresentationRequestValidatorTest {
     private val expectedSigningKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
     private val expectedValidResponseType = "id_token"
-    private val expectedValidResponseMode = "form_post"
-    private val expectedValidScope = "openid did_authn"
+    private val expectedValidResponseMode = "post"
+    private val expectedValidScope = "openid"
     private val expectedExpirationTime = 86400L
+
+    private val expectedSubjectIdentifierType = "did"
+    private val expectedDidMethodSupported = "did:ion:"
+    private val expectedAlgorithmSupported = "ES256K"
 
     private val expectedInvalidResponseMode = "invalid_response_mode"
     private val expectedInvalidResponseType = "invalid_response_type"
@@ -104,7 +111,11 @@ class OidcPresentationRequestValidatorTest {
         setUpExpiration(86400)
         every { mockedPresentationRequest.getPresentationDefinition().credentialPresentationInputDescriptors } returns listOf(mockk())
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
-        every {mockedOidcRequestContent.idTokenHint } returns null
+        every { mockedOidcRequestContent.idTokenHint } returns null
+        every { mockedOidcRequestContent.registration } returns mockedRegistration
+        every { mockedRegistration.subjectIdentifierTypesSupported } returns listOf(expectedSubjectIdentifierType)
+        every { mockedRegistration.didMethodsSupported } returns listOf(expectedDidMethodSupported)
+        every { mockedRegistration.format } returns listOf(expectedAlgorithmSupported)
         setUpOidcRequestContentWithValidFields()
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
