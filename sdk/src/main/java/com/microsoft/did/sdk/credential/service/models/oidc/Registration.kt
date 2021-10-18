@@ -27,6 +27,9 @@ data class Registration(
     @SerialName("logo_uri")
     val logoUri: String = "",
 
+    @SerialName("logo_data")
+    var logoData: String? = null,
+
     @SerialName("client_uri")
     val clientUri: String = ""
 )
