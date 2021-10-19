@@ -20,7 +20,7 @@ import kotlinx.serialization.json.JsonPrimitive
 /**
  * This class serializes/deserializes format property in Presentation Request.
  * The format is a Key/Value pair where key can be "jwt_vp" and value is a list of String.
- * @see [Presentation Exchange] (https://identity.foundation/presentation-exchange/#presentation-submission)
+ * @see [Presentation Exchange] (https://identity.foundation/presentation-exchange/#presentation-definition)
  */
 @Serializer(forClass = List::class)
 class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSerializer: KSerializer<String>) :

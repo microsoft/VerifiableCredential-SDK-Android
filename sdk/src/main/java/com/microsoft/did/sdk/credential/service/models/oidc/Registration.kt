@@ -39,5 +39,5 @@ data class Registration(
 
     @Serializable(with = PresentationRequestFormatSerializer::class)
     @SerialName("vp_formats")
-    val format: List<String> = emptyList()
+    val vpFormats: List<String> = emptyList()
 )
