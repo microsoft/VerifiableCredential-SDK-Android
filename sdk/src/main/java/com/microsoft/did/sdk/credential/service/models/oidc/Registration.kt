@@ -28,6 +28,9 @@ data class Registration(
     @SerialName("logo_uri")
     val logoUri: String = "",
 
+    @SerialName("logo_data")
+    var logoData: String? = null,
+
     @SerialName("client_uri")
     val clientUri: String = "",
 
@@ -39,5 +42,5 @@ data class Registration(
 
     @Serializable(with = PresentationRequestFormatSerializer::class)
     @SerialName("vp_formats")
-    val format: List<String> = emptyList()
+    val vpFormats: List<String> = emptyList()
 )

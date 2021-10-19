@@ -115,7 +115,7 @@ class OidcPresentationRequestValidatorTest {
         every { mockedOidcRequestContent.registration } returns mockedRegistration
         every { mockedRegistration.subjectIdentifierTypesSupported } returns listOf(expectedSubjectIdentifierType)
         every { mockedRegistration.didMethodsSupported } returns listOf(expectedDidMethodSupported)
-        every { mockedRegistration.format } returns listOf(expectedAlgorithmSupported)
+        every { mockedRegistration.vpFormats } returns listOf(expectedAlgorithmSupported)
         setUpOidcRequestContentWithValidFields()
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true

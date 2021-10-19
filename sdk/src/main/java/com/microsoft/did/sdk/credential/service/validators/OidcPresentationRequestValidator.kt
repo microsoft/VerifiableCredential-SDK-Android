@@ -44,7 +44,7 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
             throw SubjectIdentifierTypeNotSupported("The subject identifier type in registration of request is not supported")
         if (!registration.didMethodsSupported.contains(Constants.DID_METHODS_SUPPORTED))
             throw DidMethodNotSupported("Did method in registration of request is not supported")
-        if (!registration.format.contains(Constants.ALGORITHM_SUPPORTED_IN_VP))
+        if (!registration.vpFormats.contains(Constants.ALGORITHM_SUPPORTED_IN_VP))
             throw VpFormatNotSupported("VP format algorithm in registration of request is not supported")
     }
 
