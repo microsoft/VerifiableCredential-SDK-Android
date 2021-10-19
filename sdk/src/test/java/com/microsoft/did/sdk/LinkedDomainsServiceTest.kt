@@ -26,13 +26,10 @@ import java.net.URI
 class LinkedDomainsServiceTest {
     private val mockedResolver: Resolver = mockk()
     private val mockedJwtValidator: JwtValidator = mockk()
-    private val mockedJwtDomainLinkageCredentialValidator: JwtDomainLinkageCredentialValidator
-    private val linkedDomainsService: LinkedDomainsService
-
-    init {
-        mockedJwtDomainLinkageCredentialValidator = JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
-        linkedDomainsService = spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
-    }
+    private val mockedJwtDomainLinkageCredentialValidator: JwtDomainLinkageCredentialValidator =
+        JwtDomainLinkageCredentialValidator(mockedJwtValidator, defaultTestSerializer)
+    private val linkedDomainsService: LinkedDomainsService =
+        spyk(LinkedDomainsService(mockk(relaxed = true), mockedResolver, mockedJwtDomainLinkageCredentialValidator))
 
     @Test
     fun `test linked domains with single domain as string successfully`() {
