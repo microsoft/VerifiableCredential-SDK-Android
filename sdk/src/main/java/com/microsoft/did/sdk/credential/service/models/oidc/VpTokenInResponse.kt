@@ -7,7 +7,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VpToken(
+data class VpTokenInResponse(
+
     @SerialName("presentation_submission")
-    val presentationSubmission: PresentationSubmission = PresentationSubmission(emptyList())
+    val presentationSubmission: PresentationSubmission
 )

@@ -15,12 +15,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationResponseClaims(
+
     @SerialName("_vp_token")
-    val vpToken: VpToken = VpToken(),
-
-//    val attestations: AttestationClaimModel = AttestationClaimModel(),
-
-//    var state: String = "",
+    val vpToken: VpTokenInResponse,
 
     var nonce: String = ""
 ) : OidcResponseClaims()

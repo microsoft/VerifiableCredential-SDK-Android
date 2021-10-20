@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
-import com.microsoft.did.sdk.credential.service.models.oidc.VpToken
+import com.microsoft.did.sdk.credential.service.models.oidc.VpTokenInResponse
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PathNested
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
@@ -25,7 +25,7 @@ class PresentationResponseFormatter @Inject constructor(
     private val serializer: Json,
     private val verifiablePresentationFormatter: VerifiablePresentationFormatter,
     private val signer: TokenSigner
-) {
+    ) {
     fun formatResponse(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf(),
         presentationResponse: PresentationResponse,
@@ -36,7 +36,7 @@ class PresentationResponseFormatter @Inject constructor(
         val responseId = UUID.randomUUID().toString()
         val credentialPresentationSubmission = createAttestationsAndPresentationSubmission(presentationResponse)
 
-        val oidcResponseClaims = PresentationResponseClaims(VpToken(credentialPresentationSubmission)).apply {
+        val oidcResponseClaims = PresentationResponseClaims(VpTokenInResponse(credentialPresentationSubmission)).apply {
             publicKeyThumbPrint = responder.id
             audience = presentationResponse.audience
             nonce = presentationResponse.request.content.nonce
@@ -72,7 +72,12 @@ class PresentationResponseFormatter @Inject constructor(
                     )
                 )
             }
-        return PresentationSubmission(credentialPresentationSubmissionDescriptors)
+        val presentationSubmissionId = UUID.randomUUID().toString()
+        return PresentationSubmission(
+            presentationSubmissionId,
+            presentationResponse.requestedVcPresentationDefinitionId,
+            credentialPresentationSubmissionDescriptors
+        )
     }
 
     private fun createPresentations(
