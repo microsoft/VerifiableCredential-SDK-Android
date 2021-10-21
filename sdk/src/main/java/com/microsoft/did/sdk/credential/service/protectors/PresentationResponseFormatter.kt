@@ -32,7 +32,6 @@ class PresentationResponseFormatter @Inject constructor(
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): String {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
-        val responseId = UUID.randomUUID().toString()
         val (attestationResponse, credentialPresentationSubmission) = createAttestationsAndPresentationSubmission(
             requestedVcPresentationSubmissionMap,
             presentationResponse,
@@ -46,7 +45,6 @@ class PresentationResponseFormatter @Inject constructor(
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
             state = presentationResponse.request.content.state ?: ""
-            this.responseId = responseId
         }
         return signContents(oidcResponseClaims, responder)
     }
