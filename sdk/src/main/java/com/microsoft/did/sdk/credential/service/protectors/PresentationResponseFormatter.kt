@@ -44,7 +44,6 @@ class PresentationResponseFormatter @Inject constructor(
             nonce = presentationResponse.request.content.nonce
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
-            state = presentationResponse.request.content.state ?: ""
         }
         return signContents(oidcResponseClaims, responder)
     }

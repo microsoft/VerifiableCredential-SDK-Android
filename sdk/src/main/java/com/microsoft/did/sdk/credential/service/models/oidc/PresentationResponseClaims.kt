@@ -21,7 +21,5 @@ data class PresentationResponseClaims(
 
     val attestations: AttestationClaimModel = AttestationClaimModel(),
 
-    var state: String = "",
-
     var nonce: String = ""
 ) : OidcResponseClaims()
