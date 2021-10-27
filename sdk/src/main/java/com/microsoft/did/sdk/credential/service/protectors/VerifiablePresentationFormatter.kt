@@ -51,7 +51,8 @@ class VerifiablePresentationFormatter @Inject constructor(
         verifiableCredentials: List<VerifiableCredential>,
         validityInterval: Int,
         audience: String,
-        responder: Identifier
+        responder: Identifier,
+        nonce: String
     ): String {
         val rawVerifiableCredentials = mutableListOf<String>()
         verifiableCredentials.forEach { rawVerifiableCredentials.add(it.raw) }
@@ -72,7 +73,8 @@ class VerifiablePresentationFormatter @Inject constructor(
                 tokenIssuedTime = issuedTime,
                 tokenNotValidBefore = issuedTime,
                 tokenExpiryTime = expiryTime,
-                audience = audience
+                audience = audience,
+                nonce = nonce
             )
         val serializedContents = serializer.encodeToString(VerifiablePresentationContent.serializer(), contents)
         return signer.signWithIdentifier(serializedContents, responder)

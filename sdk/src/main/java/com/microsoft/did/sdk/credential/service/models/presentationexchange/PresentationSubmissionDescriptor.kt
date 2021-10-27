@@ -17,5 +17,6 @@ data class PresentationSubmissionDescriptor(
 
     val format: String = "",
 
+    @SerialName("path_nested")
     var pathNested: PathNested? = null
 )

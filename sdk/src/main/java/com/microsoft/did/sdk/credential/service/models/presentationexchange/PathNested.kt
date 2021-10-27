@@ -14,5 +14,6 @@ data class PathNested(
 
     val path: String = "",
 
+    @SerialName("path_nested")
     var pathNested: PathNested? = null
 )

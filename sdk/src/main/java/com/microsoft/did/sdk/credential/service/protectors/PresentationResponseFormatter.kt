@@ -33,7 +33,6 @@ class PresentationResponseFormatter @Inject constructor(
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Pair<String, String> {
         val (issuedTime, expiryTime) = createIssuedAndExpiryTime(expiryInSeconds)
-        val responseId = UUID.randomUUID().toString()
         val credentialPresentationSubmission = createAttestationsAndPresentationSubmission(presentationResponse)
 
         val oidcResponseClaims = PresentationResponseClaims(VpTokenInResponse(credentialPresentationSubmission)).apply {
@@ -42,13 +41,13 @@ class PresentationResponseFormatter @Inject constructor(
             nonce = presentationResponse.request.content.nonce
             responseCreationTime = issuedTime
             responseExpirationTime = expiryTime
-            this.responseId = responseId
         }
 
         val attestationResponse = createPresentations(
             requestedVcPresentationSubmissionMap,
             presentationResponse.request.entityIdentifier,
-            responder
+            responder,
+            presentationResponse.request.content.nonce
         )
 
         val idToken = signContents(oidcResponseClaims, responder)
@@ -83,13 +82,15 @@ class PresentationResponseFormatter @Inject constructor(
     private fun createPresentations(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         audience: String,
-        responder: Identifier
+        responder: Identifier,
+        nonce: String
     ): String {
         return verifiablePresentationFormatter.createPresentation(
             requestedVcPresentationSubmissionMap.values.toList(),
             DEFAULT_VP_EXPIRATION_IN_SECONDS,
             audience,
-            responder
+            responder,
+            nonce
         )
     }
 
