@@ -59,11 +59,11 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse.requestedVcPresentationSubmissionMap.map { pair ->
                 PresentationSubmissionDescriptor(
                     pair.key.id,
-                    Constants.CREDENTIAL_PRESENTATION_FORMAT,
+                    Constants.VERIFIABLE_PRESENTATION_FORMAT,
                     "$",
                     PresentationSubmissionDescriptor(
                         pair.key.id,
-                        Constants.CREDENTIAL_PRESENTATION_FORMAT,
+                        Constants.VERIFIABLE_CREDENTIAL_FORMAT,
                         "${Constants.CREDENTIAL_PATH_IN_RESPONSE}${
                             presentationResponse.requestedVcPresentationSubmissionMap.toList().indexOf(Pair(pair.key, pair.value))
                         }]"

@@ -21,7 +21,8 @@ object Constants {
 
     //Presentation Exchange Constants
     const val CREDENTIAL_PATH_IN_RESPONSE = "$.verifiableCredential["
-    const val CREDENTIAL_PRESENTATION_FORMAT = "jwt_vp"
+    const val VERIFIABLE_PRESENTATION_FORMAT = "jwt_vp"
+    const val VERIFIABLE_CREDENTIAL_FORMAT = "jwt_vc"
 
     //Verifiable Credential Constants
     const val CONTEXT = "@context"
