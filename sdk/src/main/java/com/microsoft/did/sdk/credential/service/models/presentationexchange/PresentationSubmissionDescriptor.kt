@@ -13,10 +13,10 @@ data class PresentationSubmissionDescriptor(
     @SerialName("id")
     val idFromPresentationRequest: String = "",
 
-    val path: String = "",
-
     val format: String = "",
 
+    val path: String = "",
+
     @SerialName("path_nested")
-    var pathNested: PathNested? = null
+    var pathNested: PresentationSubmissionDescriptor? = null
 )

@@ -9,7 +9,6 @@ import com.microsoft.did.sdk.credential.service.PresentationResponse
 import com.microsoft.did.sdk.credential.service.RequestedVcPresentationSubmissionMap
 import com.microsoft.did.sdk.credential.service.models.oidc.PresentationResponseClaims
 import com.microsoft.did.sdk.credential.service.models.oidc.VpTokenInResponse
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PathNested
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmissionDescriptor
 import com.microsoft.did.sdk.identifier.models.Identifier
@@ -60,14 +59,14 @@ class PresentationResponseFormatter @Inject constructor(
             presentationResponse.requestedVcPresentationSubmissionMap.map { pair ->
                 PresentationSubmissionDescriptor(
                     pair.key.id,
-                    "$",
                     Constants.CREDENTIAL_PRESENTATION_FORMAT,
-                    PathNested(
+                    "$",
+                    PresentationSubmissionDescriptor(
                         pair.key.id,
                         Constants.CREDENTIAL_PRESENTATION_FORMAT,
                         "${Constants.CREDENTIAL_PATH_IN_RESPONSE}${
                             presentationResponse.requestedVcPresentationSubmissionMap.toList().indexOf(Pair(pair.key, pair.value))
-                        }]",
+                        }]"
                     )
                 )
             }
