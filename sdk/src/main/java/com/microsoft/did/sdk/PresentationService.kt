@@ -104,7 +104,7 @@ class PresentationService @Inject constructor(
         }
     }
 
-    suspend fun formAndSendResponse(
+    private suspend fun formAndSendResponse(
         response: PresentationResponse,
         responder: Identifier,
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
