@@ -19,6 +19,7 @@ data class VerifiableCredentialDescriptor(
 
     val type: List<String>,
 
+    @Serializable(with = CredentialSubjectSerializer::class)
     val credentialSubject: Map<String, String>,
 
     val credentialStatus: ServiceDescriptor? = null,
