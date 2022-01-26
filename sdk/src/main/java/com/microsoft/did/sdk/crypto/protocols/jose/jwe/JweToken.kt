@@ -94,7 +94,7 @@ class JweToken private constructor(
         try {
             jweToken.decrypt(decrypter)
         } catch (exception: JOSEException) {
-            throw FailedDecryptException("Failed to decrypt")
+            throw FailedDecryptException("Failed to decrypt", exception)
         }
         return jweToken.payload.toBytes()
     }
