@@ -10,14 +10,15 @@ import android.util.Base64
 object Constants {
 
     // OIDC Protocol Constants
-    const val SELF_ISSUED = "https://self-issued.me"
+    const val SELF_ISSUED_V1 = "https://self-issued.me"
+    const val SELF_ISSUED_V2 = "https://self-issued.me/v2/openid-vc"
     const val PURE_ISSUANCE_FLOW_VALUE = "create"
     const val RESPONSE_TYPE = "id_token"
     const val RESPONSE_MODE = "post"
     const val SCOPE = "openid"
-    const val SUBJECT_IDENTIFIER_TYPE_DID = "did"
-    const val DID_METHODS_SUPPORTED = "did:ion:"
+    const val SUBJECT_IDENTIFIER_TYPE_DID_ION = "did:ion"
     const val ALGORITHM_SUPPORTED_IN_VP = "ES256K"
+    const val ALGORITHM_SUPPORTED_IN_VC = "ES256K"
 
     //Presentation Exchange Constants
     const val CREDENTIAL_PATH_IN_RESPONSE = "$.verifiableCredential["

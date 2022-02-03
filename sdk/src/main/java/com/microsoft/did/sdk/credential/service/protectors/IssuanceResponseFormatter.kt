@@ -57,7 +57,7 @@ class IssuanceResponseFormatter @Inject constructor(
     ): String {
         val key = keyStore.getKey(responder.signatureKeyReference)
         val contents = IssuanceResponseClaims(issuanceResponse.request.contractUrl, attestationResponse).apply {
-            publicKeyThumbPrint = key.computeThumbprint().toString()
+            subject = key.computeThumbprint().toString()
             audience = issuanceResponse.audience
             did = responder.id
             pin = hashIssuancePin(issuanceResponse)

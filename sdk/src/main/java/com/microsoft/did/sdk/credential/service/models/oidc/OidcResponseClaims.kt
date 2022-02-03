@@ -12,12 +12,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 abstract class OidcResponseClaims {
     @SerialName("sub")
-    var publicKeyThumbPrint: String = ""
+    var subject: String = ""
 
     @SerialName("aud")
     var audience: String = ""
-
-    var did: String = ""
 
     @SerialName("sub_jwk")
     @Serializable(with = JwkSerializer::class)
@@ -34,7 +32,7 @@ abstract class OidcResponseClaims {
 
     @Required
     @SerialName("iss")
-    var issuer: String = Constants.SELF_ISSUED
+    var issuer: String = Constants.SELF_ISSUED_V2
 
     var pin: String? = null
 }
