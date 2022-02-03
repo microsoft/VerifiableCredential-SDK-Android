@@ -110,7 +110,7 @@ class PresentationService @Inject constructor(
         requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap,
         expiryInSeconds: Int = Constants.DEFAULT_EXPIRATION_IN_SECONDS
     ): Result<Unit> {
-        val formattedResponse = presentationResponseFormatter.formatResponse(
+        val (idToken, vpToken) = presentationResponseFormatter.formatResponse(
             requestedVcPresentationSubmissionMap = requestedVcPresentationSubmissionMap,
             presentationResponse = response,
             responder = responder,
@@ -118,7 +118,8 @@ class PresentationService @Inject constructor(
         )
         return SendPresentationResponseNetworkOperation(
             response.audience,
-            formattedResponse,
+            idToken,
+            vpToken,
             response.request.content.state,
             apiProvider
         ).fire()
