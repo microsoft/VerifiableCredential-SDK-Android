@@ -72,7 +72,7 @@ abstract class BaseNetworkOperation<S, T> {
         exception.requestId = response.headers()[REQUEST_ID_HEADER]
         exception.errorBody = responseBody
         exception.innerErrors = NetworkErrorParser.extractInnerErrorsCodes(exception.errorBody)
-        SdkLog.v("HttpError: ${exception.errorCode} body: ${exception.errorBody}")
+        SdkLog.i("HttpError: ${exception.errorCode} body: ${exception.errorBody} cv: ${exception.correlationVector}", exception)
         return Result.Failure(exception)
     }
 
