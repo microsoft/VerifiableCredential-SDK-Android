@@ -10,7 +10,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class VpToken(
+data class VpTokenInRequest(
+
     @SerialName("presentation_definition")
     val presentationDefinition: PresentationDefinition
 )

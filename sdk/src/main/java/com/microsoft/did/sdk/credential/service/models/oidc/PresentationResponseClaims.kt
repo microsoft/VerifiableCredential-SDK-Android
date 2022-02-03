@@ -5,7 +5,6 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
-import com.microsoft.did.sdk.credential.service.models.presentationexchange.PresentationSubmission
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -16,12 +15,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PresentationResponseClaims(
-    @SerialName("presentation_submission")
-    val presentationSubmission: PresentationSubmission,
 
-    val attestations: AttestationClaimModel = AttestationClaimModel(),
-
-    var state: String = "",
+    @SerialName("_vp_token")
+    val vpToken: VpTokenInResponse,
 
     var nonce: String = ""
 ) : OidcResponseClaims()
