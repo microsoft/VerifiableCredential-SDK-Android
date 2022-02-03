@@ -75,7 +75,12 @@ class PresentationResponseFormatter @Inject constructor(
                     Constants.CREDENTIAL_PRESENTATION_ENCODING
                 )
             }
-        val credentialPresentationSubmission = PresentationSubmission(credentialPresentationSubmissionDescriptors)
+        val presentationSubmissionId = UUID.randomUUID().toString()
+        val credentialPresentationSubmission = PresentationSubmission(
+            presentationSubmissionId,
+            presentationResponse.requestedVcPresentationDefinitionId,
+            credentialPresentationSubmissionDescriptors
+        )
         return Pair(attestationResponse, credentialPresentationSubmission)
     }
 

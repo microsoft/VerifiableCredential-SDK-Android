@@ -1,10 +1,12 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
+import com.microsoft.did.sdk.util.controlflow.DidMethodNotSupported
 import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidPinDetailsException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
@@ -12,6 +14,8 @@ import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
+import com.microsoft.did.sdk.util.controlflow.SubjectIdentifierTypeNotSupported
+import com.microsoft.did.sdk.util.controlflow.VpFormatNotSupported
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -31,7 +35,17 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
         checkScope(request.content.scope)
         checkTokenExpiration(request.content.expirationTime)
         checkForInputInPresentationRequest(request)
+        checkRegistrationParameters(request.content.registration)
         validateIdTokenHint(request.content.idTokenHint)
+    }
+
+    private fun checkRegistrationParameters(registration: Registration) {
+        if (!registration.subjectIdentifierTypesSupported.contains(Constants.SUBJECT_IDENTIFIER_TYPE_DID))
+            throw SubjectIdentifierTypeNotSupported("The subject identifier type in registration of request is not supported")
+        if (!registration.didMethodsSupported.contains(Constants.DID_METHODS_SUPPORTED))
+            throw DidMethodNotSupported("Did method in registration of request is not supported")
+        if (!registration.vpFormats.contains(Constants.ALGORITHM_SUPPORTED_IN_VP))
+            throw VpFormatNotSupported("VP format algorithm in registration of request is not supported")
     }
 
     private fun checkTokenExpiration(expiration: Long) {
