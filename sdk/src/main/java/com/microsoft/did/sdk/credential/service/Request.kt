@@ -36,6 +36,6 @@ class PresentationRequest(
     override val linkedDomainResult: LinkedDomainResult
 ) : Request(content.registration.clientName, content.issuer) {
     fun getPresentationDefinition(): PresentationDefinition {
-        return content.claims.vpToken.presentationDefinition
+        return content.claims.vpTokenInRequest.presentationDefinition
     }
 }

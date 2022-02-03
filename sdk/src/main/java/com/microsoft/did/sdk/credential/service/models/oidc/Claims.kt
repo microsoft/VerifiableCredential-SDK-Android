@@ -11,5 +11,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Claims(
     @SerialName("vp_token")
-    val vpToken: VpToken,
+    val vpTokenInRequest: VpTokenInRequest,
 )
