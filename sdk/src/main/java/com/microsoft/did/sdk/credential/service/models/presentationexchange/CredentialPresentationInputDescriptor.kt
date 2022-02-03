@@ -13,4 +13,6 @@ data class CredentialPresentationInputDescriptor(
 
     @SerialName("issuance")
     var issuanceMetadataList: List<IssuanceMetadata> = emptyList()
-)
+) {
+    var constraints: Constraints? = null
+}

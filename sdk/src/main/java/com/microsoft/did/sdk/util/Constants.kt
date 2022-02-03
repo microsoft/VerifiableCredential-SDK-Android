@@ -20,9 +20,9 @@ object Constants {
     const val ALGORITHM_SUPPORTED_IN_VP = "ES256K"
 
     //Presentation Exchange Constants
-    const val CREDENTIAL_PATH_IN_RESPONSE = "$.attestations.presentations"
-    const val CREDENTIAL_PRESENTATION_FORMAT = "JWT"
-    const val CREDENTIAL_PRESENTATION_ENCODING = "base64Url"
+    const val CREDENTIAL_PATH_IN_RESPONSE = "$.verifiableCredential["
+    const val VERIFIABLE_PRESENTATION_FORMAT = "jwt_vp"
+    const val VERIFIABLE_CREDENTIAL_FORMAT = "jwt_vc"
 
     //Verifiable Credential Constants
     const val CONTEXT = "@context"

@@ -41,5 +41,8 @@ data class VerifiablePresentationContent(
     val audience: String,
 
     @SerialName("wrn")
-    val warning: String = ""
+    val warning: String = "",
+
+    @SerialName("nonce")
+    val nonce: String = ""
 )
