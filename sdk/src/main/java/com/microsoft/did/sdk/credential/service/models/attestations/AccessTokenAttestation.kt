@@ -7,20 +7,20 @@ package com.microsoft.did.sdk.credential.service.models.attestations
 
 import kotlinx.serialization.Serializable
 
-/**
- * Class to bucket together credential requests.
- */
 @Serializable
-data class CredentialAttestations(
-    // IdToken Requests.
-    val idTokens: List<IdTokenAttestation> = emptyList(),
+data class AccessTokenAttestation(
 
-    val accessTokens: List<AccessTokenAttestation> = emptyList(),
+    val claims: List<ClaimAttestation>,
 
-    // Verifiable Presentation Requests.
-    val presentations: List<PresentationAttestation> = emptyList(),
+    val configuration: String,
 
-    // SelfIssued Claim Requests.
-    val selfIssued: SelfIssuedAttestation = SelfIssuedAttestation()
+    val client_id: String,
 
+    val required: Boolean = false,
+
+    val redirect_uri: String = "",
+
+    val scope: String = "openid",
+
+    val encrypted: Boolean = false
 )
