@@ -13,5 +13,7 @@ data class AttestationClaimModel(
 
     val idTokens: Map<String, String> = emptyMap(),
 
+    val accessTokens: Map<String, String> = emptyMap(),
+
     val presentations: Map<String, String> = emptyMap()
 )

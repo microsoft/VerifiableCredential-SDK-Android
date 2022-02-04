@@ -7,6 +7,7 @@ package com.microsoft.did.sdk.credential.service.protectors
 
 import android.util.Base64
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
+import com.microsoft.did.sdk.credential.service.RequestedAccessTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedIdTokenMap
 import com.microsoft.did.sdk.credential.service.RequestedSelfAttestedClaimMap
 import com.microsoft.did.sdk.credential.service.RequestedVcMap
@@ -40,6 +41,7 @@ class IssuanceResponseFormatter @Inject constructor(
         val attestationResponse = this.createAttestationClaimModel(
             requestedVcMap,
             issuanceResponse.requestedIdTokenMap,
+            issuanceResponse.requestedAccessTokenMap,
             issuanceResponse.requestedSelfAttestedClaimMap,
             issuanceResponse.request.entityIdentifier,
             responder
@@ -77,6 +79,7 @@ class IssuanceResponseFormatter @Inject constructor(
     private fun createAttestationClaimModel(
         requestedVcMap: RequestedVcMap,
         requestedIdTokenMap: RequestedIdTokenMap,
+        requestedAccessTokenMap: RequestedAccessTokenMap,
         requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap,
         presentationsAudience: String,
         responder: Identifier
@@ -85,7 +88,7 @@ class IssuanceResponseFormatter @Inject constructor(
             return AttestationClaimModel()
         }
         val presentationAttestations = createPresentations(requestedVcMap, presentationsAudience, responder)
-        return AttestationClaimModel(requestedSelfAttestedClaimMap, requestedIdTokenMap, presentationAttestations)
+        return AttestationClaimModel(requestedSelfAttestedClaimMap, requestedIdTokenMap, requestedAccessTokenMap, presentationAttestations)
     }
 
     private fun createPresentations(requestedVcMap: RequestedVcMap, audience: String, responder: Identifier): Map<String, String> {

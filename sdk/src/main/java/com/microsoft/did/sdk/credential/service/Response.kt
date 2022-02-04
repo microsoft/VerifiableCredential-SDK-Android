@@ -24,6 +24,7 @@ class IssuanceResponse(override val request: IssuanceRequest) :
     var issuancePin: IssuancePin? = null
     val requestedVcMap: RequestedVcMap = mutableMapOf()
     val requestedIdTokenMap: RequestedIdTokenMap = mutableMapOf()
+    val requestedAccessTokenMap: RequestedAccessTokenMap = mutableMapOf()
     val requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap = mutableMapOf()
 }
 
@@ -34,6 +35,7 @@ class PresentationResponse(override val request: PresentationRequest) :
 }
 
 typealias RequestedIdTokenMap = MutableMap<String, String>
+typealias RequestedAccessTokenMap = MutableMap<String, String>
 typealias RequestedSelfAttestedClaimMap = MutableMap<String, String>
 typealias RequestedVcMap = MutableMap<PresentationAttestation, VerifiableCredential>
 typealias RequestedVcPresentationSubmissionMap = MutableMap<CredentialPresentationInputDescriptor, VerifiableCredential>
