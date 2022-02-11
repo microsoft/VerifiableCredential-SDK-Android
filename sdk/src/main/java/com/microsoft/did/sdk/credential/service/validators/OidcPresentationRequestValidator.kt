@@ -40,12 +40,12 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
     }
 
     private fun checkRegistrationParameters(registration: Registration) {
-        if (!registration.subjectIdentifierTypesSupported.contains(Constants.SUBJECT_IDENTIFIER_TYPE_DID))
+        if (!registration.subjectSyntaxTypesSupported.contains(Constants.SUBJECT_IDENTIFIER_TYPE_DID_ION))
             throw SubjectIdentifierTypeNotSupported("The subject identifier type in registration of request is not supported")
-        if (!registration.didMethodsSupported.contains(Constants.DID_METHODS_SUPPORTED))
-            throw DidMethodNotSupported("Did method in registration of request is not supported")
-        if (!registration.vpFormats.contains(Constants.ALGORITHM_SUPPORTED_IN_VP))
+        if (registration.vpFormats != null && !registration.vpFormats.jwtVp.contains(Constants.ALGORITHM_SUPPORTED_IN_VP))
             throw VpFormatNotSupported("VP format algorithm in registration of request is not supported")
+        if (registration.vpFormats != null && !registration.vpFormats.jwtVc.contains(Constants.ALGORITHM_SUPPORTED_IN_VC))
+            throw VpFormatNotSupported("VC format algorithm in registration of request is not supported")
     }
 
     private fun checkTokenExpiration(expiration: Long) {

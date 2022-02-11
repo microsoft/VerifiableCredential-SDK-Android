@@ -22,13 +22,10 @@ data class PresentationRequestContent(
     val responseMode: String,
 
     @SerialName("client_id")
-    val clientId: String? = null,
+    val clientId: String,
 
     @SerialName("redirect_uri")
     val redirectUrl: String = "",
-
-    @SerialName("iss")
-    val issuer: String,
 
     val scope: String,
 

@@ -32,7 +32,7 @@ class RevocationResponseFormatter @Inject constructor(
         val responseId = UUID.randomUUID().toString()
         val contents =
             RevocationResponseClaims(revocationRequest.rpList, revocationRequest.reason, revocationRequest.verifiableCredential.raw).apply {
-                publicKeyThumbPrint = keyJwk.computeThumbprint().toString()
+                subject = keyJwk.computeThumbprint().toString()
                 audience = revocationRequest.audience
                 did = responder.id
                 publicKeyJwk = keyJwk.toPublicJWK()

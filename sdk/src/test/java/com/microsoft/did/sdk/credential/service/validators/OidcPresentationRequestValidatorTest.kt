@@ -51,10 +51,8 @@ class OidcPresentationRequestValidatorTest {
     private val expectedValidResponseType = "id_token"
     private val expectedValidResponseMode = "post"
     private val expectedValidScope = "openid"
-    private val expectedExpirationTime = 86400L
 
-    private val expectedSubjectIdentifierType = "did"
-    private val expectedDidMethodSupported = "did:ion:"
+    private val expectedSubjectSyntaxTypesSupported = "did:ion"
     private val expectedAlgorithmSupported = "ES256K"
 
     private val expectedInvalidResponseMode = "invalid_response_mode"
@@ -113,9 +111,9 @@ class OidcPresentationRequestValidatorTest {
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         every { mockedOidcRequestContent.idTokenHint } returns null
         every { mockedOidcRequestContent.registration } returns mockedRegistration
-        every { mockedRegistration.subjectIdentifierTypesSupported } returns listOf(expectedSubjectIdentifierType)
-        every { mockedRegistration.didMethodsSupported } returns listOf(expectedDidMethodSupported)
-        every { mockedRegistration.vpFormats } returns listOf(expectedAlgorithmSupported)
+        every { mockedRegistration.subjectSyntaxTypesSupported } returns listOf(expectedSubjectSyntaxTypesSupported)
+        every { mockedRegistration.vpFormats?.jwtVp } returns listOf(expectedAlgorithmSupported)
+        every { mockedRegistration.vpFormats?.jwtVc } returns listOf(expectedAlgorithmSupported)
         setUpOidcRequestContentWithValidFields()
         every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
         coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true

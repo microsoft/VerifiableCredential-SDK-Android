@@ -12,5 +12,7 @@ data class RevocationResponseClaims(
 
     val reason: String = "",
 
-    val vc: String = ""
+    val vc: String = "",
+
+    var did: String = ""
 ) : OidcResponseClaims()

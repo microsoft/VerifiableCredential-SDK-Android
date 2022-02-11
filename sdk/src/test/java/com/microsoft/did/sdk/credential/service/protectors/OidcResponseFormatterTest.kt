@@ -44,7 +44,7 @@ class OidcResponseFormatterTest {
 
     private val signingKeyRef: String = "sigKeyRef1243523"
     private val expectedDid: String = "did:test:2354543"
-    private val expectedValidityInterval: Int = 32958
+    private val expectedValidityInterval: Int = 3600
     private val expectedContract = "http://testcontract.com"
     private val expectedResponseAudience: String = "audience2432"
     private val expectedPresentationAudience: String = "audience6237"
@@ -54,7 +54,7 @@ class OidcResponseFormatterTest {
             "\"crv\":\"secp256k1\",\"x\":\"WfY7Px6AgH6x-_dgAoRbg8weYRJA36ON-gQiFnETrqw\"," +
             "\"y\":\"IzFx3BUGztK0cyDStiunXbrZYYTtKbOUzx16SUK0sAY\"}"
     )
-    private val expectedThumbprint: String = expectedJsonWebKey.computeThumbprint().toString()
+    private val expectedSub: String = expectedJsonWebKey.computeThumbprint().toString()
     private val expectedVerifiablePresentation = "expectedPresentation"
     private val expectedSelfAttestedField = "testField3423442"
     private val expectedIdTokenConfig = "testIdTokenConfig234"
@@ -67,13 +67,11 @@ class OidcResponseFormatterTest {
     private val expectedRevocationReason = "testing revocation"
     private val mockedPresentationResponse: PresentationResponse = mockk()
     private val mockedNonce = "123456789876"
+    private val mockedClientId = "mockedClientId"
     private val mockedState = "mockedState"
     private val mockedPresentationDefinitionId = UUID.randomUUID().toString()
-    private val credentialSchema = Schema(listOf("https://schema.org/testcredential1", "https://schema.org/testcredential2"))
-    private val credentialPresentationInputDescriptors =
-        CredentialPresentationInputDescriptor("mocked_presentation_Input1", credentialSchema)
-    private val requestedVchPresentationSubmissionMap =
-        mapOf(credentialPresentationInputDescriptors to mockedVc) as RequestedVcPresentationSubmissionMap
+    private val credentialSchema = listOf(Schema("https://schema.org/testcredential1"), Schema("https://schema.org/testcredential2"))
+    private val requestedVchPresentationSubmissionMap = mutableMapOf<CredentialPresentationInputDescriptor, VerifiableCredential>()
 
     private val mockedIssuanceResponse: IssuanceResponse = mockk()
     private val expectedRawToken = "rawToken2343"
@@ -94,8 +92,7 @@ class OidcResponseFormatterTest {
         presentationResponseFormatter = PresentationResponseFormatter(
             defaultTestSerializer,
             mockedVerifiablePresentationFormatter,
-            mockedTokenSigner,
-            mockedKeyStore
+            mockedTokenSigner
         )
         revocationResponseFormatter = RevocationResponseFormatter(
             defaultTestSerializer,
@@ -127,10 +124,11 @@ class OidcResponseFormatterTest {
     private fun setUpExpectedPresentations() {
         every {
             mockedVerifiablePresentationFormatter.createPresentation(
-                mockedVc,
+                emptyList(),
                 expectedValidityInterval,
-                expectedPresentationAudience,
-                mockedIdentifier
+                expectedDid,
+                mockedIdentifier,
+                mockedNonce
             )
         } returns expectedVerifiablePresentation
     }
@@ -143,16 +141,11 @@ class OidcResponseFormatterTest {
             mockedIdentifier,
             expectedExpiry
         )
-        val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), actualFormattedToken)
+        val actualTokenContents = defaultTestSerializer.decodeFromString(PresentationResponseClaims.serializer(), actualFormattedToken.first)
         assertEquals(expectedPresentationAudience, actualTokenContents.audience)
-        assertEquals(mockedState, actualTokenContents.state)
         assertEquals(mockedNonce, actualTokenContents.nonce)
-        assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
-        assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
-        assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
-        assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
-        assertThat(actualTokenContents.attestations.selfIssued.size).isEqualTo(0)
+        assertEquals(expectedDid, actualTokenContents.subject)
+        assertThat(actualTokenContents.vpToken.presentationSubmission.presentationSubmissionDescriptors.size).isEqualTo(0)
     }
 
     @Test
@@ -169,7 +162,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedSub, actualTokenContents.subject)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
         assertThat(actualTokenContents.attestations.presentations.size).isEqualTo(0)
@@ -190,7 +183,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedSub, actualTokenContents.subject)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(expectedRawToken, actualTokenContents.attestations.idTokens.entries.first().value)
         assertEquals(expectedIdTokenConfig, actualTokenContents.attestations.idTokens.entries.first().key)
@@ -212,7 +205,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedSub, actualTokenContents.subject)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(expectedSelfAttestedField, actualTokenContents.attestations.selfIssued.entries.first().key)
         assertEquals(expectedSelfAttestedClaimValue, actualTokenContents.attestations.selfIssued.entries.first().value)
@@ -235,7 +228,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedSub, actualTokenContents.subject)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations.presentations)
         assertThat(actualTokenContents.attestations.idTokens.size).isEqualTo(0)
@@ -259,7 +252,7 @@ class OidcResponseFormatterTest {
         assertEquals(expectedResponseAudience, actualTokenContents.audience)
         assertEquals(expectedContract, actualTokenContents.contract)
         assertEquals(expectedDid, actualTokenContents.did)
-        assertEquals(expectedThumbprint, actualTokenContents.publicKeyThumbPrint)
+        assertEquals(expectedSub, actualTokenContents.subject)
         assertEquals(expectedJsonWebKey, actualTokenContents.publicKeyJwk)
         assertEquals(mapOf(expectedCredentialType to expectedVerifiablePresentation), actualTokenContents.attestations.presentations)
         assertEquals(expectedSelfAttestedField, actualTokenContents.attestations.selfIssued.entries.first().key)
@@ -269,8 +262,9 @@ class OidcResponseFormatterTest {
     }
 
     private fun mockPresentationResponse() {
-        every { mockedPresentationResponse.request.entityIdentifier } returns expectedDid
+        //every { mockedPresentationResponse.request.entityIdentifier } returns expectedDid
         every { mockedPresentationResponse.audience } returns expectedPresentationAudience
+        every { mockedPresentationResponse.request.content.clientId } returns expectedDid
         every { mockedPresentationResponse.request.content.nonce } returns mockedNonce
         every { mockedPresentationResponse.request.content.state } returns mockedState
         every { mockedPresentationResponse.requestedVcPresentationSubmissionMap } returns requestedVchPresentationSubmissionMap

@@ -33,10 +33,7 @@ class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSeri
 
     override fun deserialize(decoder: Decoder): List<String> {
         val algList = mutableListOf<String>()
-        val formatJsonElement = (decoder as JsonDecoder).decodeJsonElement()
-        val formatJsonObjectKey = (formatJsonElement as JsonObject).keys.find { it.equals(FormatKeys.JwtVp.value, true) }
-            ?: throw VpFormatNotSupported("VP format in registration of request is not supported")
-        val algJsonObject = formatJsonElement[formatJsonObjectKey] as JsonObject
+        val algJsonObject = (decoder as JsonDecoder).decodeJsonElement() as JsonObject
         val algJsonObjectKey = algJsonObject.keys.find { it.equals(AlgorithmKeys.Alg.value, true) }
         if (algJsonObjectKey != null) {
             val jsonArray = algJsonObject[algJsonObjectKey] as JsonArray
@@ -44,10 +41,6 @@ class PresentationRequestFormatSerializer(@Suppress("UNUSED_PARAMETER") dataSeri
         }
         return algList
     }
-}
-
-enum class FormatKeys(val value: String) {
-    JwtVp("jwt_vp")
 }
 
 enum class AlgorithmKeys(val value: String) {

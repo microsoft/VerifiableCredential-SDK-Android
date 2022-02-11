@@ -34,13 +34,9 @@ data class Registration(
     @SerialName("client_uri")
     val clientUri: String = "",
 
-    @SerialName("subject_identifier_types_supported")
-    val subjectIdentifierTypesSupported: List<String> = emptyList(),
+    @SerialName("subject_syntax_types_supported")
+    val subjectSyntaxTypesSupported: List<String> = emptyList(),
 
-    @SerialName("did_methods_supported")
-    val didMethodsSupported: List<String> = emptyList(),
-
-    @Serializable(with = PresentationRequestFormatSerializer::class)
     @SerialName("vp_formats")
-    val vpFormats: List<String> = emptyList()
+    val vpFormats: VpFormats? = null
 )

@@ -14,8 +14,8 @@ import retrofit2.http.POST
 import retrofit2.http.Url
 
 interface PresentationApis {
-
-    @Headers("prefer: WACI4ION-0.0.1")
+    
+    @Headers("prefer: JWT-interop-profile-0.0.1")
     @GET
     suspend fun getRequest(@Url overrideUrl: String): Response<String>
 
