@@ -14,7 +14,7 @@ data class AccessTokenAttestation(
 
     val configuration: String,
 
-    val client_id: String,
+    val resource_id: String,
 
     val required: Boolean = false,
 
