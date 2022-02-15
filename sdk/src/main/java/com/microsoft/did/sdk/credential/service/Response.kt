@@ -29,7 +29,7 @@ class IssuanceResponse(override val request: IssuanceRequest) :
 }
 
 class PresentationResponse(override val request: PresentationRequest) :
-    Response(request, request.content.clientId ?: throw ValidatorException("No audience in presentation request")) {
+    Response(request, request.content.clientId) {
     val requestedVcPresentationSubmissionMap: RequestedVcPresentationSubmissionMap = mutableMapOf()
     val requestedVcPresentationDefinitionId: String = request.getPresentationDefinition().id
 }

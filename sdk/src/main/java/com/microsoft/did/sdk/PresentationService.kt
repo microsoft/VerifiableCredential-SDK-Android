@@ -37,12 +37,13 @@ class PresentationService @Inject constructor(
     private val presentationResponseFormatter: PresentationResponseFormatter,
     private val imageLoader: ImageLoader
 ) {
+
     suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.issuer).abortOnError()
+                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 imageLoader.loadRemoteImage(request)
                 isRequestValid(request).abortOnError()
@@ -117,7 +118,7 @@ class PresentationService @Inject constructor(
             expiryInSeconds = expiryInSeconds
         )
         return SendPresentationResponseNetworkOperation(
-            response.audience,
+            response.request.content.redirectUrl,
             idToken,
             vpToken,
             response.request.content.state,

@@ -14,6 +14,7 @@ import com.microsoft.did.sdk.credential.service.models.presentationexchange.Pres
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.DEFAULT_VP_EXPIRATION_IN_SECONDS
+import com.microsoft.did.sdk.util.controlflow.ValidatorException
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -35,7 +36,7 @@ class PresentationResponseFormatter @Inject constructor(
         val credentialPresentationSubmission = createAttestationsAndPresentationSubmission(presentationResponse)
 
         val oidcResponseClaims = PresentationResponseClaims(VpTokenInResponse(credentialPresentationSubmission)).apply {
-            publicKeyThumbPrint = responder.id
+            subject = responder.id
             audience = presentationResponse.audience
             nonce = presentationResponse.request.content.nonce
             responseCreationTime = issuedTime
@@ -44,7 +45,7 @@ class PresentationResponseFormatter @Inject constructor(
 
         val attestationResponse = createPresentations(
             requestedVcPresentationSubmissionMap,
-            presentationResponse.request.entityIdentifier,
+            presentationResponse.request.content.clientId,
             responder,
             presentationResponse.request.content.nonce
         )

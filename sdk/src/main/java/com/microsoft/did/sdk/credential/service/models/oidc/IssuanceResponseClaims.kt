@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk.credential.service.models.oidc
 
+import com.microsoft.did.sdk.util.Constants
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,6 +16,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class IssuanceResponseClaims(
     var contract: String = "",
-
-    var attestations: AttestationClaimModel = AttestationClaimModel()
-) : OidcResponseClaims()
+    var attestations: AttestationClaimModel = AttestationClaimModel(),
+    ) : OidcResponseClaims() {
+    var did: String = ""
+    init {
+        issuer = Constants.SELF_ISSUED_V1
+    }
+}
