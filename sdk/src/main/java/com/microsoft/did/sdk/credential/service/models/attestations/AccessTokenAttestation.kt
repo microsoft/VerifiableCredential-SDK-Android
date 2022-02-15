@@ -14,11 +14,11 @@ data class AccessTokenAttestation(
 
     val configuration: String,
 
-    val resource_id: String,
+    val resourceId: String,
 
     val required: Boolean = false,
 
-    val redirect_uri: String = "",
+    val redirectUri: String = "",
 
     val scope: String = "openid",
 
