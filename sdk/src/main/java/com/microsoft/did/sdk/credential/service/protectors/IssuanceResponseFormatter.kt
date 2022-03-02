@@ -81,7 +81,7 @@ class IssuanceResponseFormatter @Inject constructor(
         presentationsAudience: String,
         responder: Identifier
     ): AttestationClaimModel {
-        if (areNoCollectedClaims(requestedVcMap, requestedIdTokenMap, requestedSelfAttestedClaimMap)) {
+        if (areNoCollectedClaims(requestedVcMap, requestedIdTokenMap, requestedAccessTokenMap, requestedSelfAttestedClaimMap)) {
             return AttestationClaimModel()
         }
         val presentationAttestations = createPresentations(requestedVcMap, presentationsAudience, responder)
@@ -102,9 +102,11 @@ class IssuanceResponseFormatter @Inject constructor(
     private fun areNoCollectedClaims(
         requestedVcMap: RequestedVcMap,
         requestedIdTokenMap: RequestedIdTokenMap,
+        requestedAccessTokenMap: RequestedAccessTokenMap,
         requestedSelfAttestedClaimMap: RequestedSelfAttestedClaimMap
     ): Boolean {
-        return (requestedVcMap.isNullOrEmpty() && requestedIdTokenMap.isNullOrEmpty() && requestedSelfAttestedClaimMap.isNullOrEmpty())
+        return (requestedVcMap.isNullOrEmpty() && requestedIdTokenMap.isNullOrEmpty()
+            && requestedAccessTokenMap.isNullOrEmpty() && requestedSelfAttestedClaimMap.isNullOrEmpty())
     }
 
     private fun hashIssuancePin(response: IssuanceResponse): String {
