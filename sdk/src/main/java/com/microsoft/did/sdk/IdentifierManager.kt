@@ -57,18 +57,4 @@ class IdentifierManager @Inject constructor(
             Result.Failure(RepositoryException("Identifier doesn't exist in db."))
         }
     }
-
-    suspend fun getOrCreatePairwiseIdentifier(identifier: Identifier, peerId: String): Result<Identifier> {
-        return runResultTry {
-            val pairwiseName = identifierCreator.pairwiseIdentifierName(identifier.id, peerId)
-            val pairwiseIdentifier = identifierRepository.queryByName(pairwiseName) ?: createPairwiseIdentifier(identifier, peerId)
-            Result.Success(pairwiseIdentifier)
-        }
-    }
-
-    private suspend fun createPairwiseIdentifier(identifier: Identifier, peerId: String): Identifier {
-        val registeredIdentifier = identifierCreator.createPairwiseId(identifier, peerId)
-        identifierRepository.insert(registeredIdentifier)
-        return registeredIdentifier
-    }
 }
