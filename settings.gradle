@@ -1,2 +1,2 @@
-include ':SDK'
+include ':sdk'
 rootProject.name='VerifiableCredential-SDK'
