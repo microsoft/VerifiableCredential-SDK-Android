@@ -15,9 +15,12 @@ data class CredentialAttestations(
     // IdToken Requests.
     val idTokens: List<IdTokenAttestation> = emptyList(),
 
+    val accessTokens: List<AccessTokenAttestation> = emptyList(),
+
     // Verifiable Presentation Requests.
     val presentations: List<PresentationAttestation> = emptyList(),
 
     // SelfIssued Claim Requests.
     val selfIssued: SelfIssuedAttestation = SelfIssuedAttestation()
+
 )

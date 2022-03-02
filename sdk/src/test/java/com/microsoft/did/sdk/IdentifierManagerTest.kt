@@ -56,30 +56,6 @@ class IdentifierManagerTest {
     }
 
     @Test
-    fun `test get pairwise identifier successfully when it is already created`() {
-        coEvery { mockedIdentifierRepository.queryByName(any()) } returns mockedIdentifier
-        every { mockedIdentifierCreator.pairwiseIdentifierName(mockedMasterIdentifier.id, mockedPeerDid) } returns mockedPairwiseName
-        runBlocking {
-            val actualIdentifier = identifierManager.getOrCreatePairwiseIdentifier(mockedMasterIdentifier, mockedPeerDid)
-            assertThat(actualIdentifier).isInstanceOf(Result.Success::class.java)
-            assertThat((actualIdentifier as Result.Success).payload).isEqualTo(mockedIdentifier)
-        }
-    }
-
-    @Test
-    fun `test get pairwise identifier successfully when it doesn't exist`() {
-        coEvery { mockedIdentifierRepository.queryByName(any()) } returns null
-        coEvery { mockedIdentifierCreator.createPairwiseId(mockedMasterIdentifier, mockedPeerDid) } returns mockedCreatedIdentifier
-        every { mockedIdentifierCreator.pairwiseIdentifierName(mockedMasterIdentifier.id, mockedPeerDid) } returns mockedPairwiseName
-        coJustRun { mockedIdentifierRepository.insert(mockedCreatedIdentifier) }
-        runBlocking {
-            val actualIdentifier = identifierManager.getOrCreatePairwiseIdentifier(mockedMasterIdentifier, mockedPeerDid)
-            assertThat(actualIdentifier).isInstanceOf(Result.Success::class.java)
-            assertThat((actualIdentifier as Result.Success).payload).isEqualTo(mockedCreatedIdentifier)
-        }
-    }
-
-    @Test
     fun `test get identifier by id successfully`() {
         coEvery { mockedIdentifierRepository.queryByIdentifier(mockedMasterDid) } returns mockedMasterIdentifier
         runBlocking {

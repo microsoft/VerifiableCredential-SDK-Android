@@ -3,17 +3,24 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-package com.microsoft.did.sdk.credential.service.models.oidc
+package com.microsoft.did.sdk.credential.service.models.attestations
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AttestationClaimModel(
-    val selfIssued: Map<String, String> = emptyMap(),
+data class AccessTokenAttestation(
 
-    val idTokens: Map<String, String> = emptyMap(),
+    val claims: List<ClaimAttestation>,
 
-    val accessTokens: Map<String, String> = emptyMap(),
+    val configuration: String,
 
-    val presentations: Map<String, String> = emptyMap()
+    val resourceId: String,
+
+    val required: Boolean = false,
+
+    val redirectUri: String = "",
+
+    val scope: String = "openid",
+
+    val encrypted: Boolean = false
 )
