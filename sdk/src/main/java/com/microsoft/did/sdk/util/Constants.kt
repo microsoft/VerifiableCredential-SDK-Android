@@ -40,7 +40,6 @@ object Constants {
     const val SECONDS_IN_A_MINUTE = 60
     const val DEFAULT_EXPIRATION_IN_SECONDS = 3600
     const val DEFAULT_VP_EXPIRATION_IN_SECONDS = 3600
-    const val HASHING_ALGORITHM_FOR_ID = "MD5"
 
     const val DEEP_LINK_SCHEME = "openid"
     const val DEEP_LINK_HOST = "vc"

@@ -92,20 +92,4 @@ class IdentifierCreatorTest {
         val publicKey = CryptoOperations.generateKey<ECPublicKey>(PublicKeyFactoryAlgorithm.Secp256k1(BigInteger(x), BigInteger(y)))
         return KeyPair(publicKey, privateKey)
     }
-
-    @Test
-    fun `pairwise Identifier gets created properly`() {
-        val masterIdentifier = identifierCreator.create(personaName)
-        val masterSeed = ByteArray(16, { it.toByte() })
-        every { keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE) } returns OctetSequenceKey.Builder(masterSeed).build()
-        val actualIdentifier = identifierCreator.createPairwiseId(masterIdentifier, "randomDid")
-        val expectedDid =
-            "did:ion:EiAOWWLKPjQuCfLtolMIPU9Sgtxp68OxL_lBaUWbquEyqQ:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiI2NTA2YWE2NzFhNTE0MmEwYTE4NzU0NDJiM2QxY2QyNSIsInB1YmxpY0tleUp3ayI6eyJjcnYiOiJzZWNwMjU2azEiLCJraWQiOiI2NTA2YWE2NzFhNTE0MmEwYTE4NzU0NDJiM2QxY2QyNSIsImt0eSI6IkVDIiwidXNlIjoic2lnIiwieCI6IjdPZF8tSFY0OXhuMlgxY1g3VE9FdmJrTHVyc0dIZHhoanZmck1QdGhDbjQiLCJ5IjoidzNtbHZMUnJXSjV0N1FObUFVN0tJWTRzNnBjUkRIMEpEdUlGR29NSmNmQSJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiJdLCJ0eXBlIjoiRWNkc2FTZWNwMjU2azFWZXJpZmljYXRpb25LZXkyMDE5In1dfX1dLCJ1cGRhdGVDb21taXRtZW50IjoiRWlESWI4V0xGRjZiQXYyTFcyalhhUllJTXNrdW1rTkxHbW9YZVBqLTJwbUQxdyJ9LCJzdWZmaXhEYXRhIjp7ImRlbHRhSGFzaCI6IkVpRGFENk9wZXZKLWItNHBHZmhoSmdld3JfMVl5RmZJRFBkYS1zWmJDTDFUaWciLCJyZWNvdmVyeUNvbW1pdG1lbnQiOiJFaUNoLS1fZ1dIa0plX3FKdFV3WGJ5anE0QWhmZWViTGVJc2g3dWxkWUtLSXJ3In19"
-        val expectedPairwiseName = "jDgUbT04B8KF2TNjWlu1YA"
-        assertThat(actualIdentifier.id).isEqualTo(expectedDid)
-        assertThat(actualIdentifier.signatureKeyReference).isEqualTo(firstKeyId.replace("-", ""))
-        assertThat(actualIdentifier.recoveryKeyReference).isEqualTo(secondKeyId.replace("-", ""))
-        assertThat(actualIdentifier.updateKeyReference).isEqualTo(thirdKeyId.replace("-", ""))
-        assertThat(actualIdentifier.name).isEqualTo(expectedPairwiseName)
-    }
 }
