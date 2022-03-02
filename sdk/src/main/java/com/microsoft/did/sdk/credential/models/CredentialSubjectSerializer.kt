@@ -32,7 +32,10 @@ object CredentialSubjectSerializer :
         if (element !is JsonObject) throw SerializationException("CredentialSubject has to be a JSON object")
         val newContent = HashMap<String, JsonElement>()
         element.entries.forEach { entry ->
-            val jsonAsString = serializer.encodeToString(JsonElement.serializer(), entry.value)
+            var jsonAsString = serializer.encodeToString(JsonElement.serializer(), entry.value)
+            if ((entry.value as? JsonPrimitive)?.isString == true) {
+                jsonAsString = jsonAsString.subSequence(1, jsonAsString.length - 1).toString()
+            }
             newContent[entry.key] = JsonPrimitive(jsonAsString)
         }
         return JsonObject(newContent)
