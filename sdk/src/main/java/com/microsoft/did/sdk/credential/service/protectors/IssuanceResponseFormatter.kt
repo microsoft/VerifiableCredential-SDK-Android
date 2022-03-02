@@ -109,8 +109,9 @@ class IssuanceResponseFormatter @Inject constructor(
             && requestedAccessTokenMap.isNullOrEmpty() && requestedSelfAttestedClaimMap.isNullOrEmpty())
     }
 
-    private fun hashIssuancePin(response: IssuanceResponse): String {
-        val pinValueToHash = (response.issuancePin?.pinSalt ?: "") + response.issuancePin?.pin
+    private fun hashIssuancePin(response: IssuanceResponse): String? {
+        val pinValueToHash = (response.issuancePin?.pinSalt ?: "") + (response.issuancePin?.pin ?: "")
+        if (pinValueToHash.isEmpty()) return null
         return Base64.encodeToString(
             CryptoOperations.digest(pinValueToHash.toByteArray(), DigestAlgorithm.Sha256),
             Base64.NO_WRAP
