@@ -17,6 +17,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresent
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.DidDeepLinkUtil
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -54,7 +55,7 @@ class PresentationService @Inject constructor(
 
     private fun verifyUri(uri: String): Uri {
         val url = Uri.parse(uri)
-        if (url.scheme != Constants.DEEP_LINK_SCHEME && url.host != Constants.DEEP_LINK_HOST) {
+        if (!DidDeepLinkUtil.isDidDeepLink(url)) {
             throw PresentationException("Request Protocol not supported.")
         }
         return url
