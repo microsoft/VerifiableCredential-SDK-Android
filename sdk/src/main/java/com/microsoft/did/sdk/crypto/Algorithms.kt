@@ -18,6 +18,7 @@ abstract class SigningAlgorithm(val name: String, val provider: String?, val spe
 
 abstract class DigestAlgorithm(val name: String, val provider: String?) {
     object Sha256 : DigestAlgorithm("SHA-256", null)
+    object Sha512 : DigestAlgorithm("SHA-512", null)
 }
 
 abstract class CipherAlgorithm(val name: String, val provider: String?)
