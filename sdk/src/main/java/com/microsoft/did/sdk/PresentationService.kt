@@ -29,7 +29,7 @@ import javax.inject.Singleton
 
 @Singleton
 class PresentationService @Inject constructor(
-    private val identifierManager: IdentifierManager,
+    private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
     private val serializer: Json,
     private val jwtValidator: JwtValidator,
@@ -98,7 +98,7 @@ class PresentationService @Inject constructor(
     ): Result<Unit> {
         return runResultTry {
             logTime("Presentation sendResponse") {
-                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
                 val vcRequestedMapping = response.requestedVcPresentationSubmissionMap
                 formAndSendResponse(response, masterIdentifier, vcRequestedMapping).abortOnError()
             }

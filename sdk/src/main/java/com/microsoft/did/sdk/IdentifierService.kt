@@ -23,7 +23,7 @@ import javax.inject.Singleton
  * This class provides methods to create, update and manage decentralized identifiers.
  */
 @Singleton
-class IdentifierManager @Inject constructor(
+class IdentifierService @Inject constructor(
     private val identifierRepository: IdentifierRepository,
     private val identifierCreator: IdentifierCreator,
     private val keyStore: EncryptedKeyStore

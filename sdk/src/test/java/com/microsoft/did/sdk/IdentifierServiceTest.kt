@@ -11,18 +11,17 @@ import com.microsoft.did.sdk.util.controlflow.RepositoryException
 import com.microsoft.did.sdk.util.controlflow.Result
 import io.mockk.coEvery
 import io.mockk.coJustRun
-import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.AssertionsForInterfaceTypes.assertThat
 import org.junit.Test
 
-class IdentifierManagerTest {
+class IdentifierServiceTest {
 
     private val mockedEncryptedKeyStore: EncryptedKeyStore = mockk()
     private val mockedIdentifierCreator: IdentifierCreator = mockk()
     private val mockedIdentifierRepository: IdentifierRepository = mockk()
-    private val identifierManager = IdentifierManager(mockedIdentifierRepository, mockedIdentifierCreator, mockedEncryptedKeyStore)
+    private val identifierManager = IdentifierService(mockedIdentifierRepository, mockedIdentifierCreator, mockedEncryptedKeyStore)
     private val mockedIdentifier: Identifier = mockk()
     private val mockedCreatedIdentifier: Identifier = mockk()
     private val mockedMasterDid =

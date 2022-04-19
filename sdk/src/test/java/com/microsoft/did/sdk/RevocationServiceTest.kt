@@ -21,10 +21,10 @@ import org.junit.Test
 
 class RevocationServiceTest {
 
-    private val identifierManager: IdentifierManager = mockk()
+    private val identifierService: IdentifierService = mockk()
     private val masterIdentifier: Identifier = mockk()
     private val revocationResponseFormatter: RevocationResponseFormatter = mockk()
-    private val revocationService = spyk(RevocationService(mockk(relaxed = true), identifierManager, revocationResponseFormatter, mockk()))
+    private val revocationService = spyk(RevocationService(mockk(relaxed = true), identifierService, revocationResponseFormatter, mockk()))
 
     private val revokeRpList = listOf("did:ion:test")
     private val revokeReason = "test reason"
@@ -34,7 +34,7 @@ class RevocationServiceTest {
     @Before
     fun setup() {
         mockkConstructor(SendVerifiablePresentationRevocationRequestNetworkOperation::class)
-        coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
+        coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
         coEvery { verifiableCredential.contents.vc.revokeService?.id } returns "https://microsoft.com/vcs"
         coEvery { revocationResponseFormatter.formatResponse(any(), any()) } returns formattedResponse
     }
