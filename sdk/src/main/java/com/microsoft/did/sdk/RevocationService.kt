@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class RevocationService @Inject constructor(
     private val apiProvider: ApiProvider,
-    private val identifierManager: IdentifierManager,
+    private val identifierService: IdentifierService,
     private val revocationResponseFormatter: RevocationResponseFormatter,
     private val serializer: Json
 ) {
@@ -37,7 +37,7 @@ class RevocationService @Inject constructor(
     ): Result<RevocationReceipt> {
         return runResultTry {
             if (rpList.isEmpty()) throw RevocationException("No relying party has been provided.")
-            val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+            val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
             val revocationRequest = RevocationRequest(verifiableCredential, masterIdentifier, rpList, reason)
             val formattedRevocationRequest = revocationResponseFormatter.formatResponse(revocationRequest)
             sendRevocationRequest(revocationRequest, formattedRevocationRequest)

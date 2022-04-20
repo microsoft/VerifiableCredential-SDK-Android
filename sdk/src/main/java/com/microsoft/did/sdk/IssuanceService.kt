@@ -29,7 +29,7 @@ import javax.inject.Singleton
 
 @Singleton
 class IssuanceService @Inject constructor(
-    private val identifierManager: IdentifierManager,
+    private val identifierService: IdentifierService,
     private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
@@ -74,7 +74,7 @@ class IssuanceService @Inject constructor(
     ): Result<VerifiableCredential> {
         return runResultTry {
             logTime("Issuance sendResponse") {
-                val masterIdentifier = identifierManager.getMasterIdentifier().abortOnError()
+                val masterIdentifier = identifierService.getMasterIdentifier().abortOnError()
                 val requestedVcMap = response.requestedVcMap
                 val verifiableCredential = formAndSendResponse(response, masterIdentifier, requestedVcMap).abortOnError()
                 Result.Success(verifiableCredential)

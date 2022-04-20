@@ -8,7 +8,7 @@ package com.microsoft.did.sdk.di
 import android.content.Context
 import com.microsoft.did.sdk.BackupService
 import com.microsoft.did.sdk.CorrelationVectorService
-import com.microsoft.did.sdk.IdentifierManager
+import com.microsoft.did.sdk.IdentifierService
 import com.microsoft.did.sdk.IssuanceService
 import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.PresentationService
@@ -31,7 +31,7 @@ import javax.inject.Singleton
 @Component(modules = [SdkModule::class])
 internal interface SdkComponent {
 
-    fun identifierManager(): IdentifierManager
+    fun identifierManager(): IdentifierService
 
     fun issuanceService(): IssuanceService
 

@@ -39,7 +39,7 @@ import org.junit.Test
 
 class IssuanceServiceTest {
 
-    private val identifierManager: IdentifierManager = mockk()
+    private val identifierService: IdentifierService = mockk()
     private val masterIdentifier: Identifier = mockk()
 
     private val mockedResolver: Resolver = mockk()
@@ -52,7 +52,7 @@ class IssuanceServiceTest {
     private val issuanceService =
         spyk(
             IssuanceService(
-                identifierManager,
+                identifierService,
                 linkedDomainsService,
                 mockk(relaxed = true),
                 mockedJwtValidator,
@@ -94,7 +94,7 @@ class IssuanceServiceTest {
     private val mockedIdentifierDocumentServiceType = "LinkedDomains"
 
     init {
-        coEvery { identifierManager.getMasterIdentifier() } returns Result.Success(masterIdentifier)
+        coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
         mockkConstructor(FetchContractNetworkOperation::class)
         expectedContract = setUpTestContract(expectedContractString)
         mockkConstructor(SendVerifiableCredentialIssuanceRequestNetworkOperation::class)
@@ -172,7 +172,7 @@ class IssuanceServiceTest {
                 masterIdentifier,
                 DEFAULT_EXPIRATION_IN_SECONDS)
         } returns formattedResponse
-        coEvery { identifierManager.getIdentifierById(expectedVerifiableCredential.contents.sub) } returns Result.Success(masterIdentifier)
+        coEvery { identifierService.getIdentifierById(expectedVerifiableCredential.contents.sub) } returns Result.Success(masterIdentifier)
         every { mockedPresentationAttestation.credentialType } returns "TestCredentialType"
         every { mockedPresentationAttestation.validityInterval } returns 1000
         coEvery { anyConstructed<SendVerifiableCredentialIssuanceRequestNetworkOperation>().fire() } returns Result.Success(
