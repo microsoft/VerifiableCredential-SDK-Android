@@ -18,7 +18,9 @@ import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.DidDeepLinkUtil
+import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
@@ -44,7 +46,8 @@ class PresentationService @Inject constructor(
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).abortOnError()
+                val linkedDomainResult =
+                    linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 imageLoader.loadRemoteImage(request)
                 isRequestValid(request).abortOnError()
@@ -61,7 +64,7 @@ class PresentationService @Inject constructor(
         return url
     }
 
-    private suspend fun getPresentationRequestContent(uri: Uri): Result<PresentationRequestContent> {
+    suspend fun getPresentationRequestContent(uri: Uri): Result<PresentationRequestContent> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
@@ -85,8 +88,28 @@ class PresentationService @Inject constructor(
         return Result.Success(serializer.decodeFromString(PresentationRequestContent.serializer(), jwsToken.content()))
     }
 
-    private suspend fun fetchRequest(url: String) =
-        FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer).fire()
+    private suspend fun fetchRequest(url: String): Result<PresentationRequestContent> {
+        val result = FetchPresentationRequestNetworkOperation(url, apiProvider, jwtValidator, serializer).fire()
+        when (result) {
+            is Result.Failure -> {
+                when (val sdkException = result.payload) {
+                    is NotFoundException -> {
+                        val exception = ExpiredTokenException("The request has expired.", false)
+                        exception.apply {
+                            correlationVector = sdkException.correlationVector
+                            errorBody = sdkException.errorBody
+                            errorCode = sdkException.errorCode
+                            innerErrorCodes = sdkException.innerErrorCodes
+                            errorMessage = sdkException.errorMessage
+                        }
+                        return Result.Failure(exception)
+                    }
+                }
+            }
+            is Result.Success -> return result
+        }
+        return result
+    }
 
     /**
      * Send a Presentation Response.
