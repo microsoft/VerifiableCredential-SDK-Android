@@ -64,7 +64,7 @@ class PresentationService @Inject constructor(
         return url
     }
 
-    suspend fun getPresentationRequestContent(uri: Uri): Result<PresentationRequestContent> {
+    private suspend fun getPresentationRequestContent(uri: Uri): Result<PresentationRequestContent> {
         val requestParameter = uri.getQueryParameter("request")
         if (requestParameter != null)
             return verifyAndUnwrapPresentationRequestFromQueryParam(requestParameter)
