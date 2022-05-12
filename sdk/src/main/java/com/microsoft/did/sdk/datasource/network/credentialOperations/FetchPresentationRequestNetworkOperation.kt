@@ -35,15 +35,15 @@ class FetchPresentationRequestNetworkOperation(
 
     override fun onFailure(response: Response<String>): Result<Nothing> {
         val result = super.onFailure(response)
-        when (val sdkException = (result as Result.Failure).payload) {
+        when (val exception = (result as Result.Failure).payload) {
             is NotFoundException -> {
-                val exception = ExpiredTokenException("The request has expired.", false)
-                exception.apply {
-                    correlationVector = sdkException.correlationVector
-                    errorBody = sdkException.errorBody
-                    errorCode = sdkException.errorCode
-                    innerErrorCodes = sdkException.innerErrorCodes
-                    errorMessage = sdkException.errorMessage
+                val expiredTokenException = ExpiredTokenException(exception.message ?: "", false)
+                expiredTokenException.apply {
+                    correlationVector = exception.correlationVector
+                    errorBody = exception.errorBody
+                    errorCode = exception.errorCode
+                    innerErrorCodes = exception.innerErrorCodes
+//                    errorMessage = exception.errorMessage
                 }
                 return Result.Failure(exception)
             }

@@ -57,6 +57,9 @@ object Constants {
     const val CORRELATION_VECTOR_HEADER = "ms-cv"
     const val REQUEST_ID_HEADER = "request-id"
 
+    // Error Codes for network calls
+    const val INVALID_PIN = "token_validation.invalid_openid_token_hint_pin"
+
     //  Base64 Encoding flags
     const val BASE64_URL_SAFE = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
     const val BASE64_NO_WRAP = Base64.NO_WRAP
