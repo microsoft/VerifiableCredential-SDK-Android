@@ -12,6 +12,8 @@ import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.util.controlflow.ForbiddenException
+import com.microsoft.did.sdk.util.controlflow.InvalidPinException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -30,6 +32,24 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     override suspend fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
         val jwsTokenString = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
         return verifyAndUnWrapIssuanceResponse(jwsTokenString)
+    }
+
+    override fun onFailure(response: Response<IssuanceServiceResponse>): Result<Nothing> {
+        val result = super.onFailure(response)
+        when (val sdkException = (result as Result.Failure).payload) {
+            is ForbiddenException -> {
+                val exception = InvalidPinException("Incorrect verification code", false)
+                exception.apply {
+                    correlationVector = sdkException.correlationVector
+                    errorBody = sdkException.errorBody
+                    errorCode = sdkException.errorCode
+                    innerErrorCodes = sdkException.innerErrorCodes
+                    errorMessage = sdkException.errorMessage
+                }
+                return Result.Failure(exception)
+            }
+        }
+        return result
     }
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {

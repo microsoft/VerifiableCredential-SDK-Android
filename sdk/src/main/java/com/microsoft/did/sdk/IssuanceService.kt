@@ -19,10 +19,6 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifia
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
-import com.microsoft.did.sdk.util.controlflow.ForbiddenException
-import com.microsoft.did.sdk.util.controlflow.InvalidPinException
-import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.logTime
@@ -110,31 +106,12 @@ class IssuanceService @Inject constructor(
             responder = responder,
             expiryInSeconds = expiryInSeconds
         )
-        val result = SendVerifiableCredentialIssuanceRequestNetworkOperation(
+        return SendVerifiableCredentialIssuanceRequestNetworkOperation(
             response.audience,
             formattedResponse,
             apiProvider,
             jwtValidator,
             serializer
         ).fire()
-        when (result) {
-            is Result.Failure -> {
-                when (val sdkException = result.payload) {
-                    is ForbiddenException -> {
-                        val exception = InvalidPinException("Incorrect verification code", false)
-                        exception.apply {
-                            correlationVector = sdkException.correlationVector
-                            errorBody = sdkException.errorBody
-                            errorCode = sdkException.errorCode
-                            innerErrorCodes = sdkException.innerErrorCodes
-                            errorMessage = sdkException.errorMessage
-                        }
-                        return Result.Failure(exception)
-                    }
-                }
-            }
-            is Result.Success -> return result
-        }
-        return result
     }
 }
