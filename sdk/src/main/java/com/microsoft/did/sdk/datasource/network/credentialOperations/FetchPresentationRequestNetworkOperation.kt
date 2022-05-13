@@ -43,9 +43,8 @@ class FetchPresentationRequestNetworkOperation(
                     errorBody = exception.errorBody
                     errorCode = exception.errorCode
                     innerErrorCodes = exception.innerErrorCodes
-//                    errorMessage = exception.errorMessage
                 }
-                return Result.Failure(exception)
+                return Result.Failure(expiredTokenException)
             }
         }
         return result

@@ -83,7 +83,6 @@ open class NetworkException(message: String, retryable: Boolean) : SdkException(
     var errorCode: String? = null
     var errorBody: String? = null
     var innerErrorCodes: String? = null
-    var errorMessage: String? = null
 }
 
 class ServiceUnreachableException(message: String, retryable: Boolean) : NetworkException(message, retryable)
