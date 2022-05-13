@@ -12,6 +12,9 @@ import com.microsoft.did.sdk.credential.service.validators.JwtValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
+import com.microsoft.did.sdk.util.Constants
+import com.microsoft.did.sdk.util.controlflow.ForbiddenException
+import com.microsoft.did.sdk.util.controlflow.InvalidPinException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.IssuanceException
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -30,6 +33,26 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     override suspend fun onSuccess(response: Response<IssuanceServiceResponse>): Result<VerifiableCredential> {
         val jwsTokenString = response.body()?.vc ?: throw IssuanceException("No Verifiable Credential in Body.")
         return verifyAndUnWrapIssuanceResponse(jwsTokenString)
+    }
+
+    override fun onFailure(response: Response<IssuanceServiceResponse>): Result<Nothing> {
+        val result = super.onFailure(response)
+        when (val exception = (result as Result.Failure).payload) {
+            is ForbiddenException -> {
+                val innerErrorCode = exception.innerErrorCodes?.substringBefore(",")
+                if (innerErrorCode == Constants.INVALID_PIN) {
+                    val invalidPinException = InvalidPinException(exception.message ?: "", false)
+                    invalidPinException.apply {
+                        correlationVector = exception.correlationVector
+                        errorBody = exception.errorBody
+                        errorCode = exception.errorCode
+                        innerErrorCodes = exception.innerErrorCodes
+                    }
+                    return Result.Failure(invalidPinException)
+                }
+            }
+        }
+        return result
     }
 
     private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {

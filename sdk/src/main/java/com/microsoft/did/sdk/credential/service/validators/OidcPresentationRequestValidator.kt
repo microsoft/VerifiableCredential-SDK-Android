@@ -33,7 +33,6 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
         checkResponseMode(request.content.responseMode)
         checkResponseType(request.content.responseType)
         checkScope(request.content.scope)
-        checkTokenExpiration(request.content.expirationTime)
         checkForInputInPresentationRequest(request)
         checkRegistrationParameters(request.content.registration)
         validateIdTokenHint(request.content.idTokenHint)
@@ -46,12 +45,6 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
             throw VpFormatNotSupported("VP format algorithm in registration of request is not supported")
         if (registration.vpFormats != null && !registration.vpFormats.jwtVc.contains(Constants.ALGORITHM_SUPPORTED_IN_VC))
             throw VpFormatNotSupported("VC format algorithm in registration of request is not supported")
-    }
-
-    private fun checkTokenExpiration(expiration: Long) {
-        if (getExpirationDeadlineInSeconds() > expiration) {
-            throw ExpiredTokenException("The QR code or Deep Link has expired. You need to refresh and try again.")
-        }
     }
 
     private fun checkResponseType(responseType: String) {

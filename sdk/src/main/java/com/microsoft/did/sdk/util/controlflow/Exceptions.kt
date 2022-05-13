@@ -51,8 +51,6 @@ open class ValidatorException(message: String, cause: Throwable? = null, retryab
 
 class InvalidSignatureException(message: String) : ValidatorException(message)
 
-class ExpiredTokenException(message: String) : ValidatorException(message)
-
 class InvalidResponseTypeException(message: String) : ValidatorException(message)
 
 class InvalidResponseModeException(message: String) : ValidatorException(message)
@@ -84,7 +82,7 @@ open class NetworkException(message: String, retryable: Boolean) : SdkException(
     var correlationVector: String? = null
     var errorCode: String? = null
     var errorBody: String? = null
-    var innerErrors: String? = null
+    var innerErrorCodes: String? = null
 }
 
 class ServiceUnreachableException(message: String, retryable: Boolean) : NetworkException(message, retryable)
@@ -98,6 +96,10 @@ class NotFoundException(message: String, retryable: Boolean) : NetworkException(
 class UnauthorizedException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 
 class RedirectException(message: String, retryable: Boolean) : NetworkException(message, retryable)
+
+class ExpiredTokenException(message: String, retryable: Boolean) : NetworkException(message, retryable)
+
+class InvalidPinException(message: String, retryable: Boolean) : NetworkException(message, retryable)
 
 class RepositoryException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 

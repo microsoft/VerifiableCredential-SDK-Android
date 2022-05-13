@@ -11,7 +11,9 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.GetNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.util.controlflow.DidInHeaderAndPayloadNotMatching
+import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
+import com.microsoft.did.sdk.util.controlflow.NotFoundException
 import com.microsoft.did.sdk.util.controlflow.PresentationException
 import com.microsoft.did.sdk.util.controlflow.Result
 import kotlinx.serialization.json.Json
@@ -29,6 +31,23 @@ class FetchPresentationRequestNetworkOperation(
     override suspend fun onSuccess(response: Response<String>): Result<PresentationRequestContent> {
         val jwsTokenString = response.body() ?: throw PresentationException("No Presentation Request in Body.")
         return verifyAndUnwrapPresentationRequest(jwsTokenString)
+    }
+
+    override fun onFailure(response: Response<String>): Result<Nothing> {
+        val result = super.onFailure(response)
+        when (val exception = (result as Result.Failure).payload) {
+            is NotFoundException -> {
+                val expiredTokenException = ExpiredTokenException(exception.message ?: "", false)
+                expiredTokenException.apply {
+                    correlationVector = exception.correlationVector
+                    errorBody = exception.errorBody
+                    errorCode = exception.errorCode
+                    innerErrorCodes = exception.innerErrorCodes
+                }
+                return Result.Failure(expiredTokenException)
+            }
+        }
+        return result
     }
 
     private suspend fun verifyAndUnwrapPresentationRequest(jwsTokenString: String): Result<PresentationRequestContent> {

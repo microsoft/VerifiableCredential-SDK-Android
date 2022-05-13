@@ -36,4 +36,25 @@ object NetworkErrorParser {
         }
         return errorCodes.joinToString(",")
     }
+
+    /**
+     * Attempts to parse a json errorBody and extract top level error message from error object
+     *
+     * @param errorBody A json object. The topmost error under the propertyname "error".
+     *          All subsequent errors within the error under "innererror". Only the top
+     *          level error object is considered.
+     * @return top level of error message. null if errorBody is null
+     *          or not a valid json
+     */
+    fun extractErrorMessage(errorBody: String?): String? {
+        if (errorBody == null) return null
+        try {
+            val json = Json.decodeFromString<JsonObject>(errorBody)
+            val error = (json["error"] as? JsonObject)
+            return (error?.get("message") as? JsonPrimitive)?.content
+        } catch (ex: Exception) {
+            SdkLog.d("Parsing error response canceled. Json: $errorBody", ex)
+        }
+        return null
+    }
 }
