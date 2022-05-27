@@ -10,7 +10,8 @@ class ClaimFormatterTest {
     private val suppliedClaimValueForText = "claim value"
     private val expectedClaimValueForIncorrectDate = "?"
     private val suppliedClaimValueForDateInMills = 1621366869159L
-    private val expectedFormattedDateTimeInDifferentTimeZone = listOf("May 18, 2021, 12:41:09 PM", "May 18, 2021, 7:41:09 PM", "May 18, 2021, 9:41:09 PM")
+    private val expectedFormattedDateTimeInDifferentTimeZone =
+        listOf("May 18, 2021, 12:41:09 PM", "May 18, 2021, 7:41:09 PM", "May 18, 2021, 9:41:09 PM", "May 18, 2021, 3:41:09 PM")
     private val suppliedClaimValueForDateInSeconds = 1621366850L
     private val expectedFormattedDate = "May 18, 2021"
 

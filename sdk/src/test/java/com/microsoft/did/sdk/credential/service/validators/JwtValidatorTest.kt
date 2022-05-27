@@ -35,6 +35,7 @@ class JwtValidatorTest {
     private val expectedDid: String = "did:test:4235"
     private val expectedKid: String = "$expectedDid#kidTest2353"
 
+    private val mockedIdentifierDocumentPublicKeyId = "kidTest2353"
 
     init {
         validator = JwtValidator(mockedResolver)
@@ -52,6 +53,7 @@ class JwtValidatorTest {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
         every { mockedJwsToken.keyId } returns expectedKid
+        every { mockedIdentifierDocumentPublicKey.id } returns mockedIdentifierDocumentPublicKeyId
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertTrue(actualValidationResult)
@@ -63,6 +65,7 @@ class JwtValidatorTest {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
         every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns false
         every { mockedJwsToken.keyId } returns expectedKid
+        every { mockedIdentifierDocumentPublicKey.id } returns mockedIdentifierDocumentPublicKeyId
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertFalse(actualValidationResult)

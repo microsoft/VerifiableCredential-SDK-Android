@@ -152,6 +152,7 @@ class OidcResponseFormatterTest {
     fun `format issuance response with no attestations`() {
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -173,6 +174,7 @@ class OidcResponseFormatterTest {
     fun `format issuance response with id-token attestations`() {
         every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -195,6 +197,7 @@ class OidcResponseFormatterTest {
     fun `format issuance response with self attested attestations`() {
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mutableMapOf(),
             mockedIssuanceResponse,
@@ -218,6 +221,7 @@ class OidcResponseFormatterTest {
         every { mockedIssuanceResponse.requestedVcMap } returns mockedRequestedVcMap
         every { mockedIssuanceResponse.requestedIdTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns mutableMapOf()
+        every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
         val actualFormattedToken = issuanceResponseFormatter.formatResponse(
             mockedRequestedVcMap,
             mockedIssuanceResponse,
@@ -241,6 +245,7 @@ class OidcResponseFormatterTest {
         every { mockedIssuanceResponse.requestedIdTokenMap } returns requestedIdTokenMap
         every { mockedIssuanceResponse.requestedSelfAttestedClaimMap } returns requestedSelfAttestedClaimsMap
         every { mockedIssuanceResponse.requestedVcMap } returns mockedRequestedVcMap
+        every { mockedIssuanceResponse.requestedAccessTokenMap } returns mutableMapOf()
         every { mockedIssuanceResponse.request.entityIdentifier } returns expectedResponseAudience
         val results = issuanceResponseFormatter.formatResponse(
             mockedRequestedVcMap,
