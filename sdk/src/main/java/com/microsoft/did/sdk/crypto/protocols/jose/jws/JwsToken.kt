@@ -4,9 +4,11 @@ import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.Payload
+import com.nimbusds.jose.crypto.Ed25519Verifier
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import java.security.PublicKey
 
@@ -23,7 +25,7 @@ class JwsToken constructor(
         }
     }
 
-    constructor(content: ByteArray) : this(JWSObject(JWSHeader(JWSAlgorithm.ES256K), Payload(content)))
+    constructor(content: ByteArray, jwsAlgorithm: JWSAlgorithm) : this(JWSObject(JWSHeader(jwsAlgorithm), Payload(content)))
 
     constructor(content: String) : this(JWSObject(JWSHeader(JWSAlgorithm.ES256K), Payload(Base64URL.encode(content))))
 
@@ -45,6 +47,14 @@ class JwsToken constructor(
             if (jwsObject.verify(verifier)) {
                 return true
             }
+        }
+        return false
+    }
+
+    fun verify(publicKey: OctetKeyPair): Boolean {
+        val verifier = Ed25519Verifier(publicKey)
+        if (jwsObject.verify(verifier)) {
+            return true
         }
         return false
     }
