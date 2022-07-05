@@ -61,7 +61,8 @@ class PresentationServiceTest {
                 mockk(relaxed = true),
                 presentationResponseFormatter,
                 imageLoader
-            )
+            ),
+            recordPrivateCalls = true
         )
     private val formattedResponse = Pair("FORMATTED_RESPONSE", "FORMATTED_RESPONSE")
     private val expectedPresentationRequestString =
