@@ -11,7 +11,6 @@ import com.microsoft.did.sdk.credential.service.models.oidc.Registration
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.Constants
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
@@ -121,21 +120,6 @@ class OidcPresentationRequestValidatorTest {
             validator.validate(mockedPresentationRequest)
         }
     }
-
-/*    @Test
-    fun `throws when token expiration is expired`() {
-        setUpExpiration(-86400)
-        setUpOidcRequestContentWithValidFields()
-        every { JwsToken.deserialize(expectedSerializedToken) } returns mockedJwsToken
-        coEvery { mockedJwtValidator.verifySignature(mockedJwsToken) } returns true
-        runBlocking {
-            try {
-                validator.validate(mockedPresentationRequest)
-            } catch (exception: Exception) {
-                assertThat(exception).isInstanceOf(ExpiredTokenException::class.java)
-            }
-        }
-    }*/
 
     @Test
     fun `throws when request has invalid response mode`() {
