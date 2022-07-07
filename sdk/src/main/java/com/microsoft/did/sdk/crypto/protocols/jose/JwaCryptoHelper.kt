@@ -1,10 +1,8 @@
 package com.microsoft.did.sdk.crypto.protocols.jose
 
-import com.microsoft.did.sdk.util.controlflow.ValidatorException
-
 object JwaCryptoHelper {
     fun extractDidAndKeyId(keyId: String): Pair<String?, String> {
-        val matches = Regex("^([^#]*)#(.+)$").matchEntire(keyId)
+        val matches = matchDidAndKeyId(keyId)
         return if (matches != null) {
             Pair(
                 if (matches.groupValues[1].isNotBlank()) {
@@ -14,7 +12,11 @@ object JwaCryptoHelper {
                 }, matches.groupValues[2]
             )
         } else {
-            throw ValidatorException("JWS contains no key id")
+            Pair(null, keyId)
         }
+    }
+
+    fun matchDidAndKeyId(keyId: String): MatchResult? {
+        return Regex("^([^#]*)#(.+)$").matchEntire(keyId)
     }
 }
