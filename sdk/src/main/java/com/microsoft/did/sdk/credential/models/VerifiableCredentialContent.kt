@@ -33,7 +33,7 @@ data class VerifiableCredentialContent(
     val iat: Long,
 
     // When the token expires.
-    val exp: Long,
+    val exp: Long? = null,
 
     // optional parameter.
     val wrn: String = ""
