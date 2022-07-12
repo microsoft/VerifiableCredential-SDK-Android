@@ -59,7 +59,8 @@ class IssuanceServiceTest {
                 issuanceResponseFormatter,
                 defaultTestSerializer,
                 imageLoader
-            )
+            ),
+            recordPrivateCalls = true
         )
 
     private val expectedContractString =

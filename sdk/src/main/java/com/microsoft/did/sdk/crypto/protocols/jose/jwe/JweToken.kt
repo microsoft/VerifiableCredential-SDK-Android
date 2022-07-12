@@ -120,7 +120,7 @@ class JweToken private constructor(
 
     private fun getDecrypterByKeyStore(keyStore: EncryptedKeyStore): JWEDecrypter? {
         return jweToken.header.keyID?.let { keyId ->
-            val keyRef = JwaCryptoHelper.extractDidAndKeyId(keyId).second
+            val keyRef = JwaCryptoHelper.extractDidAndKeyRef(keyId).second
             val key = keyStore.getKey(keyRef)
             // KeyConverter.toJavaKeys exports a public and private key if possible (private key after first)
             DefaultJWEDecrypterFactory().createJWEDecrypter(jweToken.header, KeyConverter.toJavaKeys(listOf(key)).last())
