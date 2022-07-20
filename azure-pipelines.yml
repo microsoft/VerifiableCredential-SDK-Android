@@ -9,11 +9,18 @@ pr:
 - master
 
 pool:
-  vmImage: 'macOS-10.14'
+  name: Azure Pipelines
+  demands: java
+
+#Your build pipeline references an undefined variable named ‘getprop sys.boot_completed | tr -d '\r'’. Create or edit the build pipeline for this YAML file, define the variable on the Variables tab. See https://go.microsoft.com/fwlink/?linkid=865972
 
 steps:
 - task: Gradle@2
-  displayName: 'gradlew build'
+  displayName: 'gradlew clean build'
+  inputs:
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    jdkVersionOption: 1.11
+    gradleOptions: '-Xmx4608M'
 
 - bash: |
    #!/usr/bin/env bash
@@ -40,27 +47,25 @@ steps:
 - task: Gradle@2
   displayName: 'gradlew -Pcoverage jacocoCoverageReport'
   inputs:
+    workingDirectory: '$(System.DefaultWorkingDirectory)'
     tasks: '-Pcoverage jacocoCoverageReport'
-
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: drop'
-  inputs:
-    PathtoPublish: 'sdk/build/outputs/aar/'
-
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
-  inputs:
-    summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
-    reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
+    jdkVersionOption: 1.11
+    gradleOptions: '-Xmx4608M'
 
 - task: Gradle@2
   displayName: 'gradlew lint'
   inputs:
     tasks: lint
     publishJUnitResults: false
+  enabled: false
 
-- task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-  displayName: 'Component Detection'
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
   inputs:
-    verbosity: Normal
-    failOnAlert: true
+    PathtoPublish: sdk/build/outputs/aar/
+
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage from $(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
+  inputs:
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
