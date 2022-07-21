@@ -9,7 +9,7 @@ pr:
 - master
 
 pool:
-  vmImage: 'macOS-latest'
+  vmImage: 'macOS-10.15'
 
 steps:
 - task: Gradle@2
