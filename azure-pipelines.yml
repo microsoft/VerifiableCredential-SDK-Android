@@ -9,7 +9,6 @@ pr:
 - master
 
 pool:
-  vmImage: 'macOS-11'
   name: Azure Pipelines
   demands: java
 
