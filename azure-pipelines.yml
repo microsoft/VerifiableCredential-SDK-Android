@@ -14,7 +14,32 @@ pool:
 
 steps:
 - task: Gradle@2
-  displayName: 'gradlew build'
+  displayName: 'gradlew clean build'
+  
+- bash: |
+   ndkVersion=21.3.6528147
+   echo "Checking for NDK $ndkVersion"
+   
+   if [[ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]]
+   then
+     sdkManagerCmd=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+   else
+     sdkManagerCmd=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager.bat
+   fi
+   
+   sdkManager=$($sdkManagerCmd --list | grep -o "ndk;$ndkVersion")
+   
+   if [ $sdkManager -eq "ndk;$ndkVersion" ]
+   then
+   echo "NDK found"
+   else
+   $sdkManagerCmd --install "ndk;$ndkVersion"
+   fi
+   
+   echo "Checking all SDKs installed"
+   $sdkManagerCmd --list
+  displayName: 'Installing NDK'
+
 
 - bash: |
    #!/usr/bin/env bash
