@@ -17,38 +17,13 @@ steps:
   displayName: 'gradlew clean build'
   
 - bash: |
-   ndkVersion=21.3.6528147
-   echo "Checking for NDK $ndkVersion"
-   
-   if [[ -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]]
-   then
-     sdkManagerCmd=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
-   else
-     sdkManagerCmd=$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager.bat
-   fi
-   
-   sdkManager=$($sdkManagerCmd --list | grep -o "ndk;$ndkVersion")
-   
-   if [ $sdkManager -eq "ndk;$ndkVersion" ]
-   then
-   echo "NDK found"
-   else
-   $sdkManagerCmd --install "ndk;$ndkVersion"
-   fi
-   
-   echo "Checking all SDKs installed"
-   $sdkManagerCmd --list
-  displayName: 'Installing NDK'
-
-
-- bash: |
    #!/usr/bin/env bash
    
    # Install AVD files
-   echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-28;google_apis;x86'
+   echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-30;google_apis;x86'
    
    # Create emulator
-   echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n xamarin_android_emulator -k 'system-images;android-28;google_apis;x86' --force
+   echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n xamarin_android_emulator -k 'system-images;android-30;google_apis;x86' --force
    
    $ANDROID_HOME/emulator/emulator -list-avds
    
