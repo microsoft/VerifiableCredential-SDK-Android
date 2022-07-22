@@ -9,8 +9,7 @@ pr:
 - master
 
 pool:
-  name: Azure Pipelines
-  demands: java
+  vmImage: macos-latest
 
 steps:
 - task: Gradle@2
