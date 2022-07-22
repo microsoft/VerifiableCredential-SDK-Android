@@ -13,8 +13,13 @@ pool:
   demands: java
 
 steps:
-- task: Gradle@2
+- task: Gradle@3
   displayName: 'gradlew clean build'
+  inputs:
+    tasks: clean build
+    publishJUnitResults: false
+    jdkVersionOption: 1.11
+    gradleOptions: '-Xmx4608M'
   
 - bash: |
    #!/usr/bin/env bash
