@@ -45,6 +45,7 @@ steps:
 - task: Gradle@3
   displayName: 'gradlew -Pcoverage jacocoCoverageReport'
   inputs:
+    jdkVersionOption: 1.11
     tasks: '-Pcoverage jacocoCoverageReport'
 
 - task: PublishBuildArtifacts@1
