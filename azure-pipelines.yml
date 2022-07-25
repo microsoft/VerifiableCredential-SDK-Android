@@ -59,9 +59,10 @@ steps:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
     reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
 
-- task: Gradle@2
+- task: Gradle@3
   displayName: 'gradlew lint'
   inputs:
+    jdkVersionOption: 1.11
     tasks: lint
     publishJUnitResults: false
 
