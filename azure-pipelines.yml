@@ -9,20 +9,25 @@ pr:
 - master
 
 pool:
-  vmImage: 'macOS-10.14'
+  vmImage: 'macos-latest'
 
 steps:
-- task: Gradle@2
-  displayName: 'gradlew build'
-
+- task: Gradle@3
+  displayName: 'gradlew clean build'
+  inputs:
+    tasks: clean build
+    publishJUnitResults: false
+    jdkVersionOption: 1.11
+    gradleOptions: '-Xmx4608M'
+  
 - bash: |
    #!/usr/bin/env bash
    
    # Install AVD files
-   echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-27;google_apis;x86'
+   echo "y" | $ANDROID_HOME/tools/bin/sdkmanager --install 'system-images;android-28;google_apis;x86'
    
    # Create emulator
-   echo "no" | $ANDROID_HOME/tools/bin/avdmanager create avd -n xamarin_android_emulator -k 'system-images;android-27;google_apis;x86' --force
+   echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n xamarin_android_emulator -k 'system-images;android-28;google_apis;x86' --force
    
    $ANDROID_HOME/emulator/emulator -list-avds
    
@@ -37,9 +42,10 @@ steps:
    echo "Emulator started"
   displayName: 'Starting emulator'
 
-- task: Gradle@2
+- task: Gradle@3
   displayName: 'gradlew -Pcoverage jacocoCoverageReport'
   inputs:
+    jdkVersionOption: 1.11
     tasks: '-Pcoverage jacocoCoverageReport'
 
 - task: PublishBuildArtifacts@1
@@ -53,9 +59,10 @@ steps:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/jacocoCoverageReport.xml'
     reportDirectory: '$(System.DefaultWorkingDirectory)/sdk/build/reports/jacoco/jacocoCoverageReport/html'
 
-- task: Gradle@2
+- task: Gradle@3
   displayName: 'gradlew lint'
   inputs:
+    jdkVersionOption: 1.11
     tasks: lint
     publishJUnitResults: false
 
