@@ -76,7 +76,7 @@ class IssuanceService @Inject constructor(
 
     private fun getDidHash(): String {
         val did = runBlocking {
-            when(val result = identifierService.getMasterIdentifier()) {
+            when (val result = identifierService.getMasterIdentifier()) {
                 is Result.Success -> result.payload.id
                 is Result.Failure -> {
                     SdkLog.e("Could not get DID", result.payload)
