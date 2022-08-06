@@ -10,6 +10,8 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyConverter
 import java.security.PublicKey
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +31,10 @@ class JwtValidator @Inject constructor(
         val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(token)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
         val publicKeys = resolvePublicKey(didInHeader, keyIdInHeader)
-        return token.verify(publicKeys)
+        return if (publicKeys[0].keyType.value == "OKP")
+            token.verify(publicKeys[0].toOctetKeyPair())
+        else
+            token.verify(listOf(KeyConverter.toJavaKeys(publicKeys).first() as PublicKey))
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
@@ -42,7 +47,7 @@ class JwtValidator @Inject constructor(
         throw ValidatorException("JWS contains no key id")
     }
 
-    private suspend fun resolvePublicKey(did: String, keyId: String): List<PublicKey> {
+    private suspend fun resolvePublicKey(did: String, keyId: String): List<JWK> {
         return when (val requesterDidDocument = resolver.resolve(did)) {
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
