@@ -8,6 +8,7 @@ trigger:
 pr:
   - master
 
+
 pool:
   vmImage: 'macos-latest'
 
