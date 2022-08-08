@@ -24,7 +24,8 @@ class RevocationServiceTest {
     private val identifierService: IdentifierService = mockk()
     private val masterIdentifier: Identifier = mockk()
     private val revocationResponseFormatter: RevocationResponseFormatter = mockk()
-    private val revocationService = spyk(RevocationService(mockk(relaxed = true), identifierService, revocationResponseFormatter, mockk()))
+    private val revocationService =
+        spyk(RevocationService(mockk(relaxed = true), identifierService, revocationResponseFormatter, mockk()), recordPrivateCalls = true)
 
     private val revokeRpList = listOf("did:ion:test")
     private val revokeReason = "test reason"
