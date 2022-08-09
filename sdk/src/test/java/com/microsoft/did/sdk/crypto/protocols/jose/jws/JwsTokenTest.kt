@@ -1,17 +1,12 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
-import com.microsoft.did.sdk.crypto.keyStore.toPrivateJwk
-import com.microsoft.did.sdk.crypto.keyStore.toPublicJwk
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
-import com.nimbusds.jose.jwk.KeyConverter
-import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import org.assertj.core.api.Assertions
 import org.junit.Test
-import java.security.PublicKey
 import java.util.Base64
 import kotlin.random.Random
 
