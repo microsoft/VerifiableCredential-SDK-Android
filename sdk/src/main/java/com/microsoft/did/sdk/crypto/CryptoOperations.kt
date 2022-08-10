@@ -6,9 +6,6 @@
 package com.microsoft.did.sdk.crypto
 
 import com.microsoft.did.sdk.util.Constants.SEED_BYTES
-import com.nimbusds.jose.jwk.Curve
-import com.nimbusds.jose.jwk.OctetKeyPair
-import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -79,10 +76,6 @@ object CryptoOperations {
             if (alg.provider == null) KeyPairGenerator.getInstance(alg.name) else KeyPairGenerator.getInstance(alg.name, alg.provider)
         keyGen.initialize(alg.spec)
         return keyGen.genKeyPair()
-    }
-
-    fun generateOctetKeyPair(alg: KeyGenAlgorithm): OctetKeyPair {
-        return OctetKeyPairGenerator(Curve.Ed25519).generate()
     }
 
     inline fun <reified T : Key> generateKey(alg: PrivateKeyFactoryAlgorithm): T {

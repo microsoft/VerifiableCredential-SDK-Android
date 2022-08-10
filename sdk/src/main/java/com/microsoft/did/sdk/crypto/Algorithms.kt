@@ -39,9 +39,8 @@ abstract class PublicKeyFactoryAlgorithm(val name: String, val provider: String?
         PublicKeyFactoryAlgorithm("ecPairwise", "DID", ecPairwisePublicKeySpec)
 }
 
-abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec?, val curve: Curve?) {
-    object Secp256k1 : KeyGenAlgorithm("EC", null, Curve.SECP256K1.toECParameterSpec(), null)
-    object Ed25519: KeyGenAlgorithm("Ed25519", null, null, Curve.Ed25519)
+abstract class KeyGenAlgorithm(val name: String, val provider: String?, val spec: AlgorithmParameterSpec) {
+    object Secp256k1 : KeyGenAlgorithm("EC", null, Curve.SECP256K1.toECParameterSpec())
 }
 
 abstract class MacAlgorithm(val name: String, val provider: String?) {

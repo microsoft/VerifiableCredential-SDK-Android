@@ -27,7 +27,7 @@ class JwsToken constructor(
 
     constructor(content: ByteArray, jwsAlgorithm: JWSAlgorithm) : this(JWSObject(JWSHeader(jwsAlgorithm), Payload(content)))
 
-    constructor(content: String) : this(JWSObject(JWSHeader(JWSAlgorithm.ES256K), Payload(Base64URL.encode(content))))
+    constructor(content: String, jwsAlgorithm: JWSAlgorithm) : this(JWSObject(JWSHeader(jwsAlgorithm), Payload(Base64URL.encode(content))))
 
     fun serialize(): String {
         return jwsObject.serialize()
