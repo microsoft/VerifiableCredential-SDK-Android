@@ -44,7 +44,7 @@ class JwtValidatorTest {
 
     private fun setUpResolver() {
         every { mockedIdentifierDocument.verificationMethod } returns listOf(mockedIdentifierDocumentPublicKey)
-        every { mockedIdentifierDocumentPublicKey.toPublicKey() } returns mockedPublicKey
+        every { mockedIdentifierDocumentPublicKey.publicKeyJwk } returns mockedIdentifierDocumentPublicKey.publicKeyJwk
     }
 
     @Test

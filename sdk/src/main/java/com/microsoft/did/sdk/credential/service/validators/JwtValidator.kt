@@ -8,6 +8,7 @@ package com.microsoft.did.sdk.credential.service.validators
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
+import com.microsoft.did.sdk.util.Constants.ED25519_CURVE_KTY
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
 import com.nimbusds.jose.jwk.JWK
@@ -31,8 +32,12 @@ class JwtValidator @Inject constructor(
         val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(token)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
         val publicKeys = resolvePublicKey(didInHeader, keyIdInHeader)
-        return if (publicKeys[0].keyType.value == "OKP")
-            token.verify(publicKeys[0].toOctetKeyPair())
+        return verifySignatureUsingPublicKey(token, publicKeys)
+    }
+
+    private fun verifySignatureUsingPublicKey(token: JwsToken, publicKeys: List<JWK>): Boolean {
+        return if (publicKeys[0].keyType.value == ED25519_CURVE_KTY)
+            token.verifyUsingOctetKeyPair(listOf(publicKeys.first().toOctetKeyPair()))
         else
             token.verify(listOf(KeyConverter.toJavaKeys(publicKeys).first() as PublicKey))
     }
@@ -52,7 +57,7 @@ class JwtValidator @Inject constructor(
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyId }.map { it.toPublicKey() }
+                publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyId }.map { it.publicKeyJwk }
             }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
         }

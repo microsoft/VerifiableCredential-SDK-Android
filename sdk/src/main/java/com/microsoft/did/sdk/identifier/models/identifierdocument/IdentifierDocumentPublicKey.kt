@@ -30,8 +30,4 @@ data class IdentifierDocumentPublicKey(
      */
     @Serializable(with = JwkSerializer::class)
     val publicKeyJwk: JWK
-) {
-    fun toPublicKey(): JWK {
-        return publicKeyJwk
-    }
-}
+)

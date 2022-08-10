@@ -51,10 +51,12 @@ class JwsToken constructor(
         return false
     }
 
-    fun verify(publicKey: OctetKeyPair): Boolean {
-        val verifier = Ed25519Verifier(publicKey)
-        if (jwsObject.verify(verifier)) {
-            return true
+    fun verifyUsingOctetKeyPair(publicKeys: List<OctetKeyPair> = emptyList()): Boolean {
+        for (key in publicKeys) {
+            val verifier = Ed25519Verifier(key)
+            if (jwsObject.verify(verifier)) {
+                return true
+            }
         }
         return false
     }
