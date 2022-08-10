@@ -64,7 +64,7 @@ class JwsTokenTest {
         val serialized = token.serialize()
         val verifyToken = JwsToken.deserialize(serialized)
         Assertions.assertThat(verifyToken.verify()).isFalse
-        Assertions.assertThat(verifyToken.verify(edKeyPair.toPublicJWK())).isTrue
+        Assertions.assertThat(verifyToken.verifyUsingOctetKeyPair(listOf(edKeyPair.toPublicJWK()))).isTrue
         Assertions.assertThat(token.content()).asString().isEqualToIgnoringNewLines(verifyToken.content())
     }
 }
