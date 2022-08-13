@@ -1,5 +1,6 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
+import com.microsoft.did.sdk.util.Constants
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
@@ -8,6 +9,7 @@ import com.nimbusds.jose.crypto.Ed25519Verifier
 import com.nimbusds.jose.crypto.factories.DefaultJWSSignerFactory
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
 import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyConverter
 import com.nimbusds.jose.jwk.OctetKeyPair
 import com.nimbusds.jose.util.Base64URL
 import java.security.PublicKey
@@ -41,22 +43,31 @@ class JwsToken constructor(
         jwsObject.sign(signer)
     }
 
-    fun verify(publicKeys: List<PublicKey> = emptyList()): Boolean {
-        for (key in publicKeys) {
-            val verifier = DefaultJWSVerifierFactory().createJWSVerifier(jwsObject.header, key)
-            if (jwsObject.verify(verifier)) {
-                return true
+    fun verify(publicKeyJWKs: List<JWK> = emptyList()): Boolean {
+        for (key in publicKeyJWKs) {
+            return if (key.keyType.value == Constants.ED25519_CURVE_KTY) {
+                val octetKeyPair = key.toOctetKeyPair()
+                verifyUsingOctetKeyPair(octetKeyPair)
+            } else {
+                val publicKey = KeyConverter.toJavaKeys(listOf(key)).first() as PublicKey
+                verifyUsingPublicKey(publicKey)
             }
         }
         return false
     }
 
-    fun verifyUsingOctetKeyPair(publicKeys: List<OctetKeyPair> = emptyList()): Boolean {
-        for (key in publicKeys) {
-            val verifier = Ed25519Verifier(key)
-            if (jwsObject.verify(verifier)) {
-                return true
-            }
+    private fun verifyUsingPublicKey(publicKey: PublicKey): Boolean {
+        val verifier = DefaultJWSVerifierFactory().createJWSVerifier(jwsObject.header, publicKey)
+        if (jwsObject.verify(verifier)) {
+            return true
+        }
+        return false
+    }
+
+    private fun verifyUsingOctetKeyPair(octetKeyPair: OctetKeyPair): Boolean {
+        val verifier = Ed25519Verifier(octetKeyPair)
+        if (jwsObject.verify(verifier)) {
+            return true
         }
         return false
     }

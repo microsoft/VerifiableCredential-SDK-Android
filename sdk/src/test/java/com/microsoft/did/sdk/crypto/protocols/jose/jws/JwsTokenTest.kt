@@ -38,7 +38,7 @@ class JwsTokenTest {
                             "\"y\":\"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0\"," +
                             "\"d\":\"jpsQnnGQmL-YBIffH1136cspYG6-0iY7X1fCE9-E9LI\"" +
                             "}"
-                    ).toPublicKey()
+                    )
                 )
             )
         ).isTrue
@@ -53,7 +53,7 @@ class JwsTokenTest {
         val serialized = token.serialize()
         val verifyToken = JwsToken.deserialize(serialized)
         Assertions.assertThat(verifyToken.verify()).isFalse
-        Assertions.assertThat(verifyToken.verify(listOf(key.toPublicKey()))).isTrue
+        Assertions.assertThat(verifyToken.verify(listOf(key))).isTrue
     }
 
     @Test
@@ -64,7 +64,7 @@ class JwsTokenTest {
         val serialized = token.serialize()
         val verifyToken = JwsToken.deserialize(serialized)
         Assertions.assertThat(verifyToken.verify()).isFalse
-        Assertions.assertThat(verifyToken.verifyUsingOctetKeyPair(listOf(edKeyPair.toPublicJWK()))).isTrue
+        Assertions.assertThat(verifyToken.verify(listOf(edKeyPair.toPublicJWK()))).isTrue
         Assertions.assertThat(token.content()).asString().isEqualToIgnoringNewLines(verifyToken.content())
     }
 }

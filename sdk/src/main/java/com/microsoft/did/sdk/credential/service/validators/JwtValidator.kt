@@ -8,12 +8,9 @@ package com.microsoft.did.sdk.credential.service.validators
 import com.microsoft.did.sdk.crypto.protocols.jose.JwaCryptoHelper
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
-import com.microsoft.did.sdk.util.Constants.ED25519_CURVE_KTY
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
 import com.nimbusds.jose.jwk.JWK
-import com.nimbusds.jose.jwk.KeyConverter
-import java.security.PublicKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,15 +28,12 @@ class JwtValidator @Inject constructor(
     suspend fun verifySignature(token: JwsToken): Boolean {
         val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(token)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
-        val publicKeys = resolvePublicKey(didInHeader, keyIdInHeader)
-        return verifySignatureUsingPublicKey(token, publicKeys)
+        val publicKeyJwks = resolvePublicKeyJwks(didInHeader, keyIdInHeader)
+        return verifySignatureUsingPublicKey(token, publicKeyJwks)
     }
 
     private fun verifySignatureUsingPublicKey(token: JwsToken, publicKeys: List<JWK>): Boolean {
-        return if (publicKeys[0].keyType.value == ED25519_CURVE_KTY)
-            token.verifyUsingOctetKeyPair(listOf(publicKeys.first().toOctetKeyPair()))
-        else
-            token.verify(listOf(KeyConverter.toJavaKeys(publicKeys).first() as PublicKey))
+        return token.verify(publicKeys)
     }
 
     fun validateDidInHeaderAndPayload(jwsToken: JwsToken, didInPayload: String): Boolean {
@@ -52,7 +46,7 @@ class JwtValidator @Inject constructor(
         throw ValidatorException("JWS contains no key id")
     }
 
-    private suspend fun resolvePublicKey(did: String, keyId: String): List<JWK> {
+    private suspend fun resolvePublicKeyJwks(did: String, keyId: String): List<JWK> {
         return when (val requesterDidDocument = resolver.resolve(did)) {
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod

@@ -6,6 +6,8 @@ import com.microsoft.did.sdk.identifier.models.identifierdocument.IdentifierDocu
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
+import com.nimbusds.jose.jwk.JWK
+import com.nimbusds.jose.jwk.KeyType
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -13,7 +15,6 @@ import io.mockk.mockkObject
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
-import java.security.PublicKey
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -24,11 +25,11 @@ class JwtValidatorTest {
 
     private val mockedIdentifierDocumentPublicKey: IdentifierDocumentPublicKey = mockk()
 
-    private val mockedPublicKey: PublicKey = mockk()
-
     private val mockedJwsToken: JwsToken = mockk()
 
     private val mockedResolver: Resolver = mockk()
+
+    private val mockedPublicKeyJwk: JWK = mockk()
 
     private val validator: JwtValidator
 
@@ -44,15 +45,16 @@ class JwtValidatorTest {
 
     private fun setUpResolver() {
         every { mockedIdentifierDocument.verificationMethod } returns listOf(mockedIdentifierDocumentPublicKey)
-        every { mockedIdentifierDocumentPublicKey.publicKeyJwk } returns mockedIdentifierDocumentPublicKey.publicKeyJwk
+        every { mockedIdentifierDocumentPublicKey.publicKeyJwk } returns mockedPublicKeyJwk
     }
 
     @Test
     fun `valid signature is validated successfully`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
-        every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
+        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns expectedKid
+        every { mockedPublicKeyJwk.keyType } returns KeyType.EC
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertTrue(actualValidationResult)
@@ -62,9 +64,10 @@ class JwtValidatorTest {
     @Test
     fun `invalid signature fails successfully`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
-        every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns false
+        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns false
         every { mockedJwsToken.keyId } returns expectedKid
         every { mockedIdentifierDocumentPublicKey.id } returns expectedKid
+        every { mockedPublicKeyJwk.keyType } returns KeyType.EC
         runBlocking {
             val actualValidationResult = validator.verifySignature(mockedJwsToken)
             assertFalse(actualValidationResult)
@@ -74,7 +77,7 @@ class JwtValidatorTest {
     @Test
     fun `throws when no key id specified`() {
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Success(mockedIdentifierDocument)
-        every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
+        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns null
         runBlocking {
             try {
@@ -90,7 +93,7 @@ class JwtValidatorTest {
     fun `throws when unable to resolve identifier document`() {
         val expectedException = ValidatorException("test")
         coEvery { mockedResolver.resolve(expectedDid) } returns Result.Failure(expectedException)
-        every { mockedJwsToken.verify(listOf(mockedPublicKey)) } returns true
+        every { mockedJwsToken.verify(listOf(mockedPublicKeyJwk)) } returns true
         every { mockedJwsToken.keyId } returns expectedKid
         runBlocking {
             try {
