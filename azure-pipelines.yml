@@ -12,7 +12,6 @@ pr:
 pool:
   vmImage: 'macos-latest'
 
-
 steps:
 - task: Gradle@3
   displayName: 'gradlew clean build'
@@ -22,7 +21,6 @@ steps:
     jdkVersionOption: 1.11
     gradleOptions: '-Xmx4608M'
   
-
 - bash: |
    #!/usr/bin/env bash
    
