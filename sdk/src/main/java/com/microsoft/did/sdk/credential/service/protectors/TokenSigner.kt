@@ -19,7 +19,7 @@ class TokenSigner @Inject constructor(
     private val keyStore: EncryptedKeyStore
 ) {
     fun signWithIdentifier(payload: String, identifier: Identifier): String {
-        val token = JwsToken(payload)
+        val token = JwsToken(payload, JWSAlgorithm.ES256K)
         // adding kid value to header.
         val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
             .type(JOSEObjectType.JWT)

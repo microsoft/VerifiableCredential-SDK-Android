@@ -10,7 +10,7 @@ import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.identifier.resolvers.Resolver
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.ValidatorException
-import java.security.PublicKey
+import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,7 +28,11 @@ class JwtValidator @Inject constructor(
     suspend fun verifySignature(token: JwsToken): Boolean {
         val (didInHeader: String?, keyIdInHeader: String) = getDidAndKeyIdFromHeader(token)
         if (didInHeader == null) throw ValidatorException("JWS contains no DID")
-        val publicKeys = resolvePublicKey(didInHeader, keyIdInHeader)
+        val publicKeyJwks = resolvePublicKeyJwks(didInHeader, keyIdInHeader)
+        return verifySignatureUsingPublicKey(token, publicKeyJwks)
+    }
+
+    private fun verifySignatureUsingPublicKey(token: JwsToken, publicKeys: List<JWK>): Boolean {
         return token.verify(publicKeys)
     }
 
@@ -42,12 +46,12 @@ class JwtValidator @Inject constructor(
         throw ValidatorException("JWS contains no key id")
     }
 
-    private suspend fun resolvePublicKey(did: String, keyId: String): List<PublicKey> {
+    private suspend fun resolvePublicKeyJwks(did: String, keyId: String): List<JWK> {
         return when (val requesterDidDocument = resolver.resolve(did)) {
             is Result.Success -> {
                 val publicKeys = requesterDidDocument.payload.verificationMethod
                 if (publicKeys.isNullOrEmpty()) throw ValidatorException("No public key found in identifier document")
-                publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyId }.map { it.toPublicKey() }
+                publicKeys.filter { publicKey -> JwaCryptoHelper.extractDidAndKeyId(publicKey.id).second == keyId }.map { it.publicKeyJwk }
             }
             is Result.Failure -> throw ValidatorException("Unable to fetch public keys", requesterDidDocument.payload)
         }
