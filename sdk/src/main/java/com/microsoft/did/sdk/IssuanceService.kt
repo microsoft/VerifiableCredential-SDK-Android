@@ -70,6 +70,11 @@ class IssuanceService @Inject constructor(
         serializer
     ).fire()
 
+    /**
+     * Generates a random string that is used to associate a client session with an ID Token, and to mitigate replay
+     * attacks.
+     * @return Hash of DID appended to random string
+     */
     fun getNonce(): String {
         return generateSecureRandomString() + "." + getDidHash()
     }
