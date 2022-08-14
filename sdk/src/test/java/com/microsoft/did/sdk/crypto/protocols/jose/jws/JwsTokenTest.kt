@@ -1,8 +1,10 @@
 package com.microsoft.did.sdk.crypto.protocols.jose.jws
 
+import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator
 import org.assertj.core.api.Assertions
 import org.junit.Test
 import java.util.Base64
@@ -13,6 +15,7 @@ class JwsTokenTest {
     private val key: ECKey = ECKeyGenerator(Curve.SECP256K1)
         .keyID(keyRef)
         .generate()
+    private val edKeyPair =  OctetKeyPairGenerator(Curve.Ed25519).keyID("123").generate()
     private val payload: String = "{\"iss\":\"joe\",\n" +
         " \"exp\":1300819380,\n" +
         " \"http://example.com/is_root\":true}"
@@ -35,7 +38,7 @@ class JwsTokenTest {
                             "\"y\":\"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0\"," +
                             "\"d\":\"jpsQnnGQmL-YBIffH1136cspYG6-0iY7X1fCE9-E9LI\"" +
                             "}"
-                    ).toPublicKey()
+                    )
                 )
             )
         ).isTrue
@@ -45,11 +48,23 @@ class JwsTokenTest {
     @Test
     fun `sign and verify`() {
         val testData = ByteArray(32, { it.toByte() })
-        val token = JwsToken(testData)
+        val token = JwsToken(testData, JWSAlgorithm.ES256K)
         token.sign(key)
         val serialized = token.serialize()
         val verifyToken = JwsToken.deserialize(serialized)
         Assertions.assertThat(verifyToken.verify()).isFalse
-        Assertions.assertThat(verifyToken.verify(listOf(key.toPublicKey()))).isTrue
+        Assertions.assertThat(verifyToken.verify(listOf(key))).isTrue
+    }
+
+    @Test
+    fun `sign and verify using ed curve`() {
+        val testData = "Just a test payload".toByteArray()
+        val token = JwsToken(testData, JWSAlgorithm.EdDSA)
+        token.sign(edKeyPair)
+        val serialized = token.serialize()
+        val verifyToken = JwsToken.deserialize(serialized)
+        Assertions.assertThat(verifyToken.verify()).isFalse
+        Assertions.assertThat(verifyToken.verify(listOf(edKeyPair.toPublicJWK()))).isTrue
+        Assertions.assertThat(token.content()).asString().isEqualToIgnoringNewLines(verifyToken.content())
     }
 }
