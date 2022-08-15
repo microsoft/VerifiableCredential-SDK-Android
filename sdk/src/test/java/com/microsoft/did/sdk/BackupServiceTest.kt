@@ -12,9 +12,12 @@ import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020Unprotect
 import com.microsoft.did.sdk.backup.content.microsoft2020.RawIdentifierConverter
 import com.microsoft.did.sdk.backup.content.microsoft2020.TestVcMetaData
 import com.microsoft.did.sdk.backup.content.microsoft2020.WalletMetadata
+import com.microsoft.did.sdk.identifier.models.Identifier
 import com.microsoft.did.sdk.util.controlflow.FailedDecryptException
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
@@ -22,6 +25,8 @@ import org.junit.Test
 class BackupServiceTest {
     private val identifierRepository = BackupTestUtil.getMockIdentifierRepository()
     private val keyStore = BackupTestUtil.getMockKeyStore()
+    private val identifierService: IdentifierService = mockk()
+    private val masterIdentifier: Identifier = mockk()
 
     // String has to be split as it is too long for the compiler to accept it
     private val testBackupString =
@@ -33,6 +38,7 @@ class BackupServiceTest {
 
     private val jweBackupFactory = BackupParser()
     private val microsoft2020BackupProcessor = Microsoft2020BackupProcessor(
+        identifierService,
         identifierRepository,
         keyStore,
         RawIdentifierConverter(identifierRepository, keyStore),
@@ -52,6 +58,7 @@ class BackupServiceTest {
 
     @Test
     fun `export and import returns protectedBackupData`() {
+        coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
         runBlocking {
             val protectionMethod = JwePasswordProtectionMethod(password)
             val protectedBackupData = (service.exportBackup(backup, protectionMethod) as Result.Success).payload
@@ -65,6 +72,7 @@ class BackupServiceTest {
 
     @Test
     fun `export and import fails with wrong password`() {
+        coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
         runBlocking {
             val protectionMethod = JwePasswordProtectionMethod(password)
             val protectionMethod2 = JwePasswordProtectionMethod("wrong password")

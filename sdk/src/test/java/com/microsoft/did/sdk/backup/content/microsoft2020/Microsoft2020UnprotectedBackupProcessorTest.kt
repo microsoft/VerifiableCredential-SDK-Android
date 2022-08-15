@@ -3,8 +3,14 @@
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
 import android.util.BackupTestUtil
+import com.microsoft.did.sdk.IdentifierService
+import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
+import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -14,8 +20,11 @@ class Microsoft2020UnprotectedBackupProcessorTest {
     private val identifierRepository = BackupTestUtil.getMockIdentifierRepository()
     private val keyStore = BackupTestUtil.getMockKeyStore()
     private val rawIdentifierUtility = RawIdentifierConverter(identifierRepository, keyStore)
+    private val identifierService: IdentifierService = mockk()
+    private val masterIdentifier: Identifier = mockk()
 
     private val backupProcessor = Microsoft2020BackupProcessor(
+        identifierService,
         identifierRepository,
         keyStore,
         rawIdentifierUtility,
@@ -63,6 +72,7 @@ class Microsoft2020UnprotectedBackupProcessorTest {
 
     @Test
     fun `export transforms backup correctly`() {
+        coEvery { identifierService.getMasterIdentifier() } returns Result.Success(masterIdentifier)
         runBlocking {
             val actual = backupProcessor.export(backupData) as Microsoft2020UnprotectedBackupData
             coVerify {
