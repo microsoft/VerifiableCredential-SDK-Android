@@ -5,6 +5,7 @@
 
 package com.microsoft.did.sdk
 
+import android.util.Base64
 import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.service.IssuanceRequest
 import com.microsoft.did.sdk.credential.service.IssuanceResponse
@@ -12,6 +13,8 @@ import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.did.sdk.crypto.CryptoOperations
+import com.microsoft.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContractNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
@@ -21,9 +24,12 @@ import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.controlflow.runResultTry
+import com.microsoft.did.sdk.util.log.SdkLog
 import com.microsoft.did.sdk.util.logTime
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -63,6 +69,36 @@ class IssuanceService @Inject constructor(
         jwtValidator,
         serializer
     ).fire()
+
+    /**
+     * Generates a random string that is used to associate a client session with an ID Token, and to mitigate replay
+     * attacks.
+     * @return Hash of DID appended to random string
+     */
+    fun getNonce(): String {
+        return generateSecureRandomString() + "." + getDidHash()
+    }
+
+    private fun getDidHash(): String {
+        val did = runBlocking {
+            when (val result = identifierService.getMasterIdentifier()) {
+                is Result.Success -> result.payload.id
+                is Result.Failure -> {
+                    SdkLog.e("Could not get DID", result.payload)
+                    ""
+                }
+            }
+        }
+        val digest = CryptoOperations.digest(did.toByteArray(), DigestAlgorithm.Sha512)
+        return Base64.encodeToString(digest, Constants.BASE64_URL_SAFE)
+    }
+
+    private fun generateSecureRandomString(): String {
+        val random = SecureRandom()
+        val bytes = ByteArray(32)
+        random.nextBytes(bytes)
+        return Base64.encodeToString(bytes, Constants.BASE64_URL_SAFE)
+    }
 
     /**
      * Send an Issuance Response.
