@@ -2,6 +2,7 @@
 
 package com.microsoft.did.sdk.backup.content.microsoft2020
 
+import com.microsoft.did.sdk.IdentifierService
 import com.microsoft.did.sdk.backup.UnprotectedBackup
 import com.microsoft.did.sdk.backup.content.BackupProcessor
 import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
@@ -21,6 +22,7 @@ import javax.inject.Singleton
 
 @Singleton
 class Microsoft2020BackupProcessor @Inject constructor(
+    private val identifierService: IdentifierService,
     private val identityRepository: IdentifierRepository,
     private val keyStore: EncryptedKeyStore,
     private val rawIdentifierConverter: RawIdentifierConverter,
@@ -36,6 +38,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
             vcMetaMap[verifiableCredentialMetadataPair.first.jti] = verifiableCredentialMetadataPair.second
         }
 
+        identifierService.getMasterIdentifier()
         backup.walletMetadata.seed = keyStore.getKey(Constants.MAIN_IDENTIFIER_REFERENCE).toJSONString()
         return Microsoft2020UnprotectedBackupData(
             vcs = vcMap,
