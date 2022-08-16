@@ -36,7 +36,6 @@ class JwtValidatorTest {
     private val expectedDid: String = "did:test:4235"
     private val expectedKid: String = "$expectedDid#kidTest2353"
 
-
     init {
         validator = JwtValidator(mockedResolver)
         setUpResolver()

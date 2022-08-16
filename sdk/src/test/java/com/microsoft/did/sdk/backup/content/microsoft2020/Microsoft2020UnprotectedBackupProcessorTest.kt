@@ -9,7 +9,6 @@ import com.microsoft.did.sdk.util.controlflow.Result
 import com.microsoft.did.sdk.util.defaultTestSerializer
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking
@@ -42,17 +41,18 @@ class Microsoft2020UnprotectedBackupProcessorTest {
         runBlocking {
             val rawData = Microsoft2020UnprotectedBackupData(
                 mapOf(
-                    "test" to BackupTestUtil.testVerifiedCredential.raw,
+                    "test" to BackupTestUtil.testVerifiedCredential.raw
                 ),
                 mapOf(
-                    "test" to vcMetadata,
+                    "test" to vcMetadata
                 ),
                 WalletMetadata(),
                 listOf(
                     BackupTestUtil.rawIdentifier
                 )
             )
-            rawData.metaInf.seed = "{\"kty\":\"EC\",\"d\":\"7-RR2JBX1tWCUw17ujvjhYFyB0zwkvM9ttKyBMfQUNM\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"recover\",\"x\":\"XIpoCl3CxnSUfZXew2Gc1tSwCJBUos1EacEXnQyfjhg\",\"y\":\"YDHaAGK0rL7wZwp2vp4aCaKuzg_tSB-8i4q_u-kLxSw\"}"
+            rawData.metaInf.seed = """{\"kty\":\"EC\",\"d\":\"7-RR2JBX1tWCUw17ujvjhYFyB0zwkvM9ttKyBMfQUNM\",\"use\":\"sig\",\"crv\":\"P-256\",\"kid\":\"recover\",
+                |\"x\":\"XIpoCl3CxnSUfZXew2Gc1tSwCJBUos1EacEXnQyfjhg\",\"y\":\"YDHaAGK0rL7wZwp2vp4aCaKuzg_tSB-8i4q_u-kLxSw\"}""".trimMargin()
             val actual = backupProcessor.import(rawData) as Microsoft2020UnprotectedBackup
             assertEquals(
                 backupData.verifiableCredentials,

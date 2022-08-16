@@ -15,7 +15,7 @@ class JwsTokenTest {
     private val key: ECKey = ECKeyGenerator(Curve.SECP256K1)
         .keyID(keyRef)
         .generate()
-    private val edKeyPair =  OctetKeyPairGenerator(Curve.Ed25519).keyID("123").generate()
+    private val edKeyPair = OctetKeyPairGenerator(Curve.Ed25519).keyID("123").generate()
     private val payload: String = "{\"iss\":\"joe\",\n" +
         " \"exp\":1300819380,\n" +
         " \"http://example.com/is_root\":true}"
