@@ -9,7 +9,7 @@ This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/
  
 Verifiable credentials is a [W3C standard](https://www.w3.org/TR/vc-data-model/) that can be used to validate information about people, organizations, and more. Verifiable credentials put people in control of their personal information, enabling more trustworthy digital experiences while respecting people's privacy. 
  
-To learn more about verifiable credentials, please review our [documentation.](https://didproject.azurewebsites.net/docs/verifiable-credentials.html)
+To learn more about verifiable credentials, please review our [documentation.](https://aka.ms/didfordevs)
 
 # How to use SDK
 
