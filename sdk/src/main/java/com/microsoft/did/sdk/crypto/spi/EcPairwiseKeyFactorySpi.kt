@@ -1,3 +1,4 @@
+/*
 // Copyright (c) Microsoft Corporation. All rights reserved
 
 package com.microsoft.did.sdk.crypto.spi
@@ -20,6 +21,7 @@ import java.security.spec.InvalidKeySpecException
 import java.security.spec.KeySpec
 import javax.crypto.spec.SecretKeySpec
 
+*/
 /**
  * This KeyFactorySpi is registered in DidProvider to provide Pairwise Key generation through the Java Security Framework.
  *
@@ -28,7 +30,8 @@ import javax.crypto.spec.SecretKeySpec
  * A Pairwise key pair is deterministically generated given the original key and information about the peer that this key
  * is supposed to be used with. The pairwise key provides anonymity such that peers can not correlate the entity using them
  * through the signatures used for communication.
- */
+ *//*
+
 class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
 
     override fun engineGeneratePublic(keySpec: KeySpec?): PublicKey {
@@ -68,13 +71,15 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
         throw UnsupportedOperationException("")
     }
 
-    /**
+    */
+/**
      * Private key size is 32 bytes for Secp256k1. Since we use SHA512 to generate pairwise key it is 64 bytes.
      * This method computes a modulus of generated pairwise key with order N of Secp256k1 curve to reduce its size to 32 bytes. It returns BigInteger of reduced pairwise key
      * While converting BigInteger returned to byte array it is converted to signed byte array. Since we don't need the sign bit, it is truncated and converted to unsigned byte array
      * @param keySeed byte array of pairwise key generated using SHA512 (64 bytes)
      * @return unsigned byte array of pairwise key reduced to 32 bytes
-     */
+     *//*
+
     private fun reduceKeySeedSizeAndConvertToUnsigned(keySeed: ByteArray): ByteArray {
         val ecSpec = ECNamedCurveTable.getParameterSpec(Constants.SECP256K1_CURVE_NAME_EC)
         return convertSignedToUnsignedByteArray(BigInteger(1, keySeed).rem(ecSpec.n).toByteArray())
@@ -95,4 +100,4 @@ class EcPairwiseKeyFactorySpi : KeyFactorySpi() {
         }
         return paddedByteArray
     }
-}
+}*/

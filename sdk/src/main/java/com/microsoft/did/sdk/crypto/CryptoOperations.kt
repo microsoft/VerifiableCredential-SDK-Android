@@ -24,7 +24,7 @@ import javax.crypto.SecretKey
 
 object CryptoOperations {
     init {
-        Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
+//        Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
     }
 
     fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
