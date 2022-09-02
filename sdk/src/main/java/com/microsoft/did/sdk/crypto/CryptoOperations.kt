@@ -14,7 +14,6 @@ import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.security.SecureRandom
-import java.security.Security
 import java.security.Signature
 import javax.crypto.Cipher
 import javax.crypto.Cipher.DECRYPT_MODE
@@ -23,9 +22,6 @@ import javax.crypto.Mac
 import javax.crypto.SecretKey
 
 object CryptoOperations {
-    init {
-        Security.insertProviderAt(DidProvider(), Security.getProviders().size + 1)
-    }
 
     fun sign(digest: ByteArray, signingKey: PrivateKey, alg: SigningAlgorithm): ByteArray {
         val signer = if (alg.provider == null) Signature.getInstance(alg.name) else Signature.getInstance(alg.name, alg.provider)
