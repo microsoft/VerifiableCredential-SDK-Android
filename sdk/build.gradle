@@ -112,7 +112,7 @@ dependencies {
     implementation "com.squareup.picasso:picasso:$picasso_version"
 
     //noinspection GradleDependency
-    implementation "androidx.security:security-crypto:1.0.0-rc03"
+    implementation "androidx.security:security-crypto:1.1.0-alpha01"
     implementation "org.bouncycastle:bcprov-jdk15on:$org_bouncycastle_bcprov"
 
     api 'com.google.guava:guava:28.1-android'
