@@ -55,7 +55,13 @@ class VerifiablePresentationFormatter @Inject constructor(
         nonce: String
     ): String {
         val rawVerifiableCredentials = mutableListOf<String>()
-        verifiableCredentials.forEach { rawVerifiableCredentials.add(it.raw) }
+        verifiableCredentials.forEach {
+            if (it.disclosures != null) {
+                rawVerifiableCredentials.add(it.raw + "." + it.disclosures.joinToString("~"))
+            } else {
+                rawVerifiableCredentials.add(it.raw)
+            }
+        }
         val verifiablePresentation = VerifiablePresentationDescriptor(
             verifiableCredential = rawVerifiableCredentials,
             context = listOf(Constants.VP_CONTEXT_URL),

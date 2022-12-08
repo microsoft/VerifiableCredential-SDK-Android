@@ -13,6 +13,7 @@ import com.microsoft.did.sdk.credential.service.RequestedVcMap
 import com.microsoft.did.sdk.credential.service.models.issuancecallback.IssuanceCompletionResponse
 import com.microsoft.did.sdk.credential.service.protectors.IssuanceResponseFormatter
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.did.sdk.credential.service.validators.SdJwtValidator
 import com.microsoft.did.sdk.crypto.CryptoOperations
 import com.microsoft.did.sdk.crypto.DigestAlgorithm
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -39,6 +40,7 @@ class IssuanceService @Inject constructor(
     private val linkedDomainsService: LinkedDomainsService,
     private val apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
+    private val sdJwtValidator: SdJwtValidator,
     private val issuanceResponseFormatter: IssuanceResponseFormatter,
     private val serializer: Json,
     private val imageLoader: ImageLoader
@@ -147,6 +149,7 @@ class IssuanceService @Inject constructor(
             formattedResponse,
             apiProvider,
             jwtValidator,
+            sdJwtValidator,
             serializer
         ).fire()
     }

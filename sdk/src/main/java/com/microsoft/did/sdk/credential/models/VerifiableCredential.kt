@@ -18,5 +18,7 @@ data class VerifiableCredential(
     val raw: String,
 
     // contents of the Verifiable Credential token.
-    val contents: VerifiableCredentialContent
+    val contents: VerifiableCredentialContent,
+
+    val disclosures: List<String>? = null,
 )

@@ -69,6 +69,8 @@ class DidMethodNotSupported(message: String) : ValidatorException(message)
 
 class VpFormatNotSupported(message: String) : ValidatorException(message)
 
+class InvalidSdJwtException(message: String) : ValidatorException(message)
+
 open class ResolverException(message: String, cause: Throwable? = null) : SdkException(message, cause)
 
 class LinkedDomainEndpointInUnknownFormatException(message: String, cause: Throwable? = null) : ResolverException(message, cause)

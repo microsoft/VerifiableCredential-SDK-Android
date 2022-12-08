@@ -36,5 +36,7 @@ data class VerifiableCredentialContent(
     val exp: Long? = null,
 
     // optional parameter.
-    val wrn: String = ""
+    val wrn: String = "",
+
+    val sd_digest_derivation_alg: String? = null,
 )

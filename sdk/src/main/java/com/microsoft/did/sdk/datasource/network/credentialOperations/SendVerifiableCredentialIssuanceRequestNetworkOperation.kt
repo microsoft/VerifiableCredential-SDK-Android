@@ -9,6 +9,7 @@ import com.microsoft.did.sdk.credential.models.VerifiableCredential
 import com.microsoft.did.sdk.credential.models.VerifiableCredentialContent
 import com.microsoft.did.sdk.credential.service.models.serviceResponses.IssuanceServiceResponse
 import com.microsoft.did.sdk.credential.service.validators.JwtValidator
+import com.microsoft.did.sdk.credential.service.validators.SdJwtValidator
 import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.datasource.network.PostNetworkOperation
 import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
@@ -26,6 +27,7 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
     serializedResponse: String,
     apiProvider: ApiProvider,
     private val jwtValidator: JwtValidator,
+    private val sdJwtValidator: SdJwtValidator,
     private val serializer: Json
 ) : PostNetworkOperation<IssuanceServiceResponse, VerifiableCredential>() {
     override val call: suspend () -> Response<IssuanceServiceResponse> = { apiProvider.issuanceApis.sendResponse(url, serializedResponse) }
@@ -55,11 +57,21 @@ class SendVerifiableCredentialIssuanceRequestNetworkOperation(
         return result
     }
 
-    private suspend fun verifyAndUnWrapIssuanceResponse(jwsTokenString: String): Result<VerifiableCredential> {
-        val jwsToken = JwsToken.deserialize(jwsTokenString)
+    private suspend fun verifyAndUnWrapIssuanceResponse(tokenString: String): Result<VerifiableCredential> {
+        val jwsParts = tokenString.split('.')
+        var jwtString = tokenString
+        val disclosures = if (jwsParts.size == 4) {
+            val sdJwtPart = jwsParts[3]
+            jwtString = jwsParts.subList(0, 3).joinToString(separator = ".")
+            sdJwtPart.split('~')
+        } else null
+
+        val jwsToken = JwsToken.deserialize(jwtString)
         if (!jwtValidator.verifySignature(jwsToken))
             throw InvalidSignatureException("Signature is not Valid on Issuance Response.")
         val verifiableCredentialContent = serializer.decodeFromString(VerifiableCredentialContent.serializer(), jwsToken.content())
-        return Result.Success(VerifiableCredential(verifiableCredentialContent.jti, jwsTokenString, verifiableCredentialContent))
+        if (!sdJwtValidator.verifyDisclosures(verifiableCredentialContent, disclosures))
+            throw InvalidSignatureException("Error when verifying disclosures of sd-jwt.")
+        return Result.Success(VerifiableCredential(verifiableCredentialContent.jti, jwtString, verifiableCredentialContent, disclosures))
     }
 }
