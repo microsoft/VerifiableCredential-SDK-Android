@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import androidx.room.Room
-import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.CorrelationVectorService
 import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
@@ -80,7 +79,6 @@ class SdkModule {
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(serializer.asConverterFactory(contentType))
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
     }
 

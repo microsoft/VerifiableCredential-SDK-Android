@@ -89,7 +89,6 @@ dependencies {
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
-    implementation "com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2"
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
     implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
@@ -113,7 +112,6 @@ dependencies {
 
     //noinspection GradleDependency
     implementation "androidx.security:security-crypto:1.0.0-rc03"
-    implementation "org.bouncycastle:bcprov-jdk15on:$org_bouncycastle_bcprov"
 
     api 'com.google.guava:guava:28.1-android'
     // JWE/JWS
