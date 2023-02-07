@@ -56,6 +56,9 @@ data class PresentationRequestContent(
 
     var registration: Registration = Registration(),
 
+    @SerialName("pin")
+    val pinDetails: PinDetails? = null,
+
     @SerialName("id_token_hint")
     val idTokenHint: String? = null
 )
