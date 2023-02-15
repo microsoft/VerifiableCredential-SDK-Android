@@ -3,7 +3,6 @@ package com.microsoft.did.sdk.credential.service.validators
 import com.microsoft.did.sdk.credential.service.PresentationRequest
 import com.microsoft.did.sdk.credential.service.models.oidc.PinDetails
 import com.microsoft.did.sdk.credential.service.models.oidc.Registration
-import com.microsoft.did.sdk.credential.service.models.pin.IssuancePin
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
