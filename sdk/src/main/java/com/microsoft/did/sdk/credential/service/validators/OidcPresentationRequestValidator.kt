@@ -1,24 +1,18 @@
 package com.microsoft.did.sdk.credential.service.validators
 
 import com.microsoft.did.sdk.credential.service.PresentationRequest
+import com.microsoft.did.sdk.credential.service.models.oidc.PinDetails
 import com.microsoft.did.sdk.credential.service.models.oidc.Registration
-import com.microsoft.did.sdk.crypto.protocols.jose.jws.JwsToken
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.Constants.MILLISECONDS_IN_A_SECOND
 import com.microsoft.did.sdk.util.Constants.SECONDS_IN_A_MINUTE
-import com.microsoft.did.sdk.util.controlflow.DidMethodNotSupported
-import com.microsoft.did.sdk.util.controlflow.ExpiredTokenException
 import com.microsoft.did.sdk.util.controlflow.InvalidPinDetailsException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseModeException
 import com.microsoft.did.sdk.util.controlflow.InvalidResponseTypeException
 import com.microsoft.did.sdk.util.controlflow.InvalidScopeException
-import com.microsoft.did.sdk.util.controlflow.InvalidSignatureException
 import com.microsoft.did.sdk.util.controlflow.MissingInputInRequestException
 import com.microsoft.did.sdk.util.controlflow.SubjectIdentifierTypeNotSupported
 import com.microsoft.did.sdk.util.controlflow.VpFormatNotSupported
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,7 +29,7 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
         checkScope(request.content.scope)
         checkForInputInPresentationRequest(request)
         checkRegistrationParameters(request.content.registration)
-        validateIdTokenHint(request.content.idTokenHint)
+        validatePinDetails(request.content.pinDetails)
     }
 
     private fun checkRegistrationParameters(registration: Registration) {
@@ -72,19 +66,11 @@ class OidcPresentationRequestValidator @Inject constructor(private val jwtValida
             throw MissingInputInRequestException("Input Descriptor is missing in presentation request.")
     }
 
-    private suspend fun validateIdTokenHint(idTokenHint: String?) {
-        idTokenHint ?: return
-        val jwsToken = JwsToken.deserialize(idTokenHint)
-        if (!jwtValidator.verifySignature(jwsToken))
-            throw InvalidSignatureException("Signature is not valid on id token hint.")
-        val json = Json.decodeFromString(JsonObject.serializer(), jwsToken.content())
-        val pinObject = json["pin"] as? JsonObject
-        if (pinObject != null) {
-            val length = (pinObject["length"] as? JsonPrimitive)?.content?.toInt()
-                ?: throw InvalidPinDetailsException("PIN length is missing in request.")
-            val type = (pinObject["type"] as? JsonPrimitive)?.content ?: throw InvalidPinDetailsException("PIN type is missing in request.")
-            if (length < 1) throw InvalidPinDetailsException("PIN length is invalid in request.")
-            if (!(type == "numeric" || type == "alphanumeric")) throw InvalidPinDetailsException("PIN type is invalid in request.")
-        }
+    private fun validatePinDetails(pinDetails: PinDetails?) {
+        pinDetails ?: return
+        val length = pinDetails.length
+        val type = pinDetails.type
+        if (length < 1) throw InvalidPinDetailsException("PIN length is invalid in request.")
+        if (!(type == "numeric" || type == "alphanumeric")) throw InvalidPinDetailsException("PIN type is invalid in request.")
     }
 }

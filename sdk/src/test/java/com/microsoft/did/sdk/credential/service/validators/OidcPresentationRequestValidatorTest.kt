@@ -110,6 +110,7 @@ class OidcPresentationRequestValidatorTest {
         every { mockedPresentationRequest.content } returns mockedOidcRequestContent
         every { mockedOidcRequestContent.idTokenHint } returns null
         every { mockedOidcRequestContent.registration } returns mockedRegistration
+        every { mockedOidcRequestContent.pinDetails } returns null
         every { mockedRegistration.subjectSyntaxTypesSupported } returns listOf(expectedSubjectSyntaxTypesSupported)
         every { mockedRegistration.vpFormats?.jwtVp } returns listOf(expectedAlgorithmSupported)
         every { mockedRegistration.vpFormats?.jwtVc } returns listOf(expectedAlgorithmSupported)
