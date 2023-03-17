@@ -127,7 +127,6 @@ dependencies {
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     androidTestImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     androidTestImplementation "io.mockk:mockk-android:$mockk_version"
-    androidTestImplementation "android.arch.core:core-testing:1.1.1"
 
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
@@ -135,7 +134,6 @@ dependencies {
     testImplementation 'com.willowtreeapps.assertk:assertk-jvm:0.21'
     testImplementation "org.assertj:assertj-core:$assertj_test_version"
     testImplementation "junit:junit:$junit_version"
-    testImplementation "android.arch.core:core-testing:1.1.1"
 }
 
 /**
