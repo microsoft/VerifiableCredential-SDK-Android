@@ -6,12 +6,10 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.microsoft.did.sdk.di.defaultTestSerializer
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.MissingFieldException
+import kotlinx.serialization.SerializationException
 import org.assertj.core.api.Assertions
 import org.junit.Test
 
-@OptIn(ExperimentalSerializationApi::class)
 class PinDetailsTest {
     private val pinDetailsHashedFlowSerializedString = """{
       "length": 4,
@@ -63,14 +61,14 @@ class PinDetailsTest {
     fun `test serialization of pin details when missing length fails`() {
         Assertions.assertThatThrownBy {
             defaultTestSerializer.decodeFromString(PinDetails.serializer(), pinDetailsWithNoLengthSerializedString)
-        }.isInstanceOf(MissingFieldException::class.java)
+        }.isInstanceOf(SerializationException::class.java)
     }
 
     @Test
     fun `test serialization of pin details when missing type fails`() {
         Assertions.assertThatThrownBy {
             defaultTestSerializer.decodeFromString(PinDetails.serializer(), pinDetailsWithNoTypeSerializedString)
-        }.isInstanceOf(MissingFieldException::class.java)
+        }.isInstanceOf(SerializationException::class.java)
     }
 
     @Test
