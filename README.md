@@ -3,6 +3,8 @@
 ![Tests Passing](https://img.shields.io/azure-devops/tests/verifiable-credentials/VerifiableCredential/3)
 ![Open Issued](https://img.shields.io/github/issues/microsoft/VerifiableCredential-SDK-Android)
 
+*This project is currently being moved to [Microsoft Entra Verified Id Wallet Library](https://github.com/microsoft/entra-verifiedid-wallet-library-android). Feel free to browse the code, but we will not support this library moving forward.*
+
 This SDK is used in the [Microsoft Authenticator app](https://www.microsoft.com/en-us/account/authenticator) in order to interact with [verifiable credentials](https://www.w3.org/TR/vc-data-model/) and [Decentralized Identifiers (DIDs)](https://www.w3.org/TR/did-core/) on the [ION network](https://github.com/decentralized-identity/ion). It can be integrated with any app to provide interactions using verifiable credentials.
  
 # Verifiable Credentials 
