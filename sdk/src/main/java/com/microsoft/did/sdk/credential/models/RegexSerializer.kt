@@ -15,5 +15,5 @@ class RegexSerializer : KSerializer<String> {
 
     override fun serialize(encoder: Encoder, value: String) = encoder.encodeString(value)
 
-    override fun deserialize(decoder: Decoder) = decoder.decodeString().replace("\\", "").replace("/gi", "").replace("/","")
+    override fun deserialize(decoder: Decoder): String = decoder.decodeString().split("/")[1]
 }
