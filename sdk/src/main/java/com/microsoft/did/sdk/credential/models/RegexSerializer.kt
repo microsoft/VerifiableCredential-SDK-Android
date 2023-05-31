@@ -15,5 +15,5 @@ class RegexSerializer : KSerializer<String> {
 
     override fun serialize(encoder: Encoder, value: String) = encoder.encodeString(value)
 
-    override fun deserialize(decoder: Decoder): String = decoder.decodeString().split("/")[1]
+    override fun deserialize(decoder: Decoder): String = decoder.decodeString().split("/").first { it.isNotEmpty() }
 }
