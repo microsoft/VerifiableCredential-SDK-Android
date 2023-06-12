@@ -7,6 +7,7 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
+import com.microsoft.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.did.sdk.util.DifWordList
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
@@ -67,7 +68,8 @@ object VerifiableCredentialSdk {
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
-        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers"
+        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
+        rootOfTrustResolver: RootOfTrustResolver
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
@@ -75,6 +77,7 @@ object VerifiableCredentialSdk {
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
+            .rootOfTrustResolver(rootOfTrustResolver)
             .build()
 
         issuanceService = sdkComponent.issuanceService()

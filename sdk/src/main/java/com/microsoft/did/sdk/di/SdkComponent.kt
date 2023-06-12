@@ -13,6 +13,7 @@ import com.microsoft.did.sdk.IssuanceService
 import com.microsoft.did.sdk.LinkedDomainsService
 import com.microsoft.did.sdk.PresentationService
 import com.microsoft.did.sdk.RevocationService
+import com.microsoft.did.sdk.identifier.resolvers.RootOfTrustResolver
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.serialization.modules.SerializersModule
@@ -63,5 +64,8 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
+
+        @BindsInstance
+        fun rootOfTrustResolver(@Named("rootOfTrustResolver") rootOfTrustResolver: RootOfTrustResolver): Builder
     }
 }
