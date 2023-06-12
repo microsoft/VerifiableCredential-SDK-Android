@@ -68,8 +68,7 @@ object VerifiableCredentialSdk {
         logConsumer: SdkLog.Consumer = DefaultLogConsumer(),
         polymorphicJsonSerializers: SerializersModule = Json.serializersModule,
         registrationUrl: String = "",
-        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers",
-        rootOfTrustResolver: RootOfTrustResolver
+        resolverUrl: String = "https://discover.did.msidentity.com/v1.0/identifiers"
     ) {
         val sdkComponent = DaggerSdkComponent.builder()
             .context(context)
@@ -77,7 +76,6 @@ object VerifiableCredentialSdk {
             .registrationUrl(registrationUrl)
             .resolverUrl(resolverUrl)
             .polymorphicJsonSerializer(polymorphicJsonSerializers)
-            .rootOfTrustResolver(rootOfTrustResolver)
             .build()
 
         issuanceService = sdkComponent.issuanceService()

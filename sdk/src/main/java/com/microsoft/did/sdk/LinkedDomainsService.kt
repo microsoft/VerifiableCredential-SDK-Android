@@ -26,12 +26,15 @@ import javax.inject.Singleton
 class LinkedDomainsService @Inject constructor(
     private val apiProvider: ApiProvider,
     private val resolver: Resolver,
-    private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator,
-    @Named("rootOfTrustResolver") private val rootOfTrustResolver: RootOfTrustResolver? = null
+    private val jwtDomainLinkageCredentialValidator: DomainLinkageCredentialValidator
 ) {
-    suspend fun fetchAndVerifyLinkedDomains(relyingPartyDid: String): Result<LinkedDomainResult> {
+
+    suspend fun fetchAndVerifyLinkedDomains(
+        relyingPartyDid: String,
+        rootOfTrustResolver: RootOfTrustResolver? = null
+    ): Result<LinkedDomainResult> {
         return runResultTry {
-            when (val verifiedDomainsResult = verifyLinkedDomainsUsingResolver(relyingPartyDid)) {
+            when (val verifiedDomainsResult = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)) {
                 is Result.Success -> verifiedDomainsResult
                 is Result.Failure -> {
                     SdkLog.d("Linked Domains verification using resolver failed with ${verifiedDomainsResult.payload} exception. Verifying it using Well Known Document.")
@@ -41,7 +44,10 @@ class LinkedDomainsService @Inject constructor(
         }
     }
 
-    private suspend fun verifyLinkedDomainsUsingResolver(relyingPartyDid: String): Result<LinkedDomainResult> {
+    private suspend fun verifyLinkedDomainsUsingResolver(
+        relyingPartyDid: String,
+        rootOfTrustResolver: RootOfTrustResolver?
+    ): Result<LinkedDomainResult> {
         return runResultTry {
             rootOfTrustResolver ?: return@runResultTry Result.Failure(SdkException("Root of trust resolver is not configured"))
             try {

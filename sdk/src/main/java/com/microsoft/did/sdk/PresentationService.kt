@@ -15,6 +15,7 @@ import com.microsoft.did.sdk.datasource.network.apis.ApiProvider
 import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchPresentationRequestNetworkOperation
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendPresentationResponseNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.DidDeepLinkUtil
@@ -39,12 +40,16 @@ class PresentationService @Inject constructor(
     private val imageLoader: ImageLoader
 ) {
 
-    suspend fun getRequest(stringUri: String): Result<PresentationRequest> {
+    suspend fun getRequest(
+        stringUri: String,
+        rootOfTrustResolver: RootOfTrustResolver? = null
+    ): Result<PresentationRequest> {
         return runResultTry {
             logTime("Presentation getRequest") {
                 val uri = verifyUri(stringUri)
                 val presentationRequestContent = getPresentationRequestContent(uri).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId).abortOnError()
+                val linkedDomainResult =
+                    linkedDomainsService.fetchAndVerifyLinkedDomains(presentationRequestContent.clientId, rootOfTrustResolver).abortOnError()
                 val request = PresentationRequest(presentationRequestContent, linkedDomainResult)
                 imageLoader.loadRemoteImage(request)
                 isRequestValid(request).abortOnError()

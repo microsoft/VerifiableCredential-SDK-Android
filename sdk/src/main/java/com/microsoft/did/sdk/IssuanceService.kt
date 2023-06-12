@@ -20,6 +20,7 @@ import com.microsoft.did.sdk.datasource.network.credentialOperations.FetchContra
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendIssuanceCompletionResponse
 import com.microsoft.did.sdk.datasource.network.credentialOperations.SendVerifiableCredentialIssuanceRequestNetworkOperation
 import com.microsoft.did.sdk.identifier.models.Identifier
+import com.microsoft.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.did.sdk.internal.ImageLoader
 import com.microsoft.did.sdk.util.Constants
 import com.microsoft.did.sdk.util.controlflow.Result
@@ -50,12 +51,13 @@ class IssuanceService @Inject constructor(
      * @param contractUrl url that the contract is fetched from
      */
     suspend fun getRequest(
-        contractUrl: String
+        contractUrl: String,
+        rootOfTrustResolver: RootOfTrustResolver? = null
     ): Result<IssuanceRequest> {
         return runResultTry {
             logTime("Issuance getRequest") {
                 val contract = fetchContract(contractUrl).abortOnError()
-                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer).abortOnError()
+                val linkedDomainResult = linkedDomainsService.fetchAndVerifyLinkedDomains(contract.input.issuer, rootOfTrustResolver).abortOnError()
                 val request = IssuanceRequest(contract, contractUrl, linkedDomainResult)
                 imageLoader.loadRemoteImage(request)
                 Result.Success(request)

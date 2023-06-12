@@ -64,8 +64,5 @@ internal interface SdkComponent {
 
         @BindsInstance
         fun polymorphicJsonSerializer(@Named("polymorphicJsonSerializer") jsonSerializer: SerializersModule): Builder
-
-        @BindsInstance
-        fun rootOfTrustResolver(@Named("rootOfTrustResolver") rootOfTrustResolver: RootOfTrustResolver): Builder
     }
 }
