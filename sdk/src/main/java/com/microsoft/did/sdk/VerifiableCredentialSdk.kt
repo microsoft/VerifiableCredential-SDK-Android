@@ -7,7 +7,6 @@ package com.microsoft.did.sdk
 
 import android.content.Context
 import com.microsoft.did.sdk.di.DaggerSdkComponent
-import com.microsoft.did.sdk.identifier.resolvers.RootOfTrustResolver
 import com.microsoft.did.sdk.util.DifWordList
 import com.microsoft.did.sdk.util.log.DefaultLogConsumer
 import com.microsoft.did.sdk.util.log.SdkLog
