@@ -19,7 +19,6 @@ import com.microsoft.did.sdk.util.controlflow.runResultTry
 import com.microsoft.did.sdk.util.log.SdkLog
 import java.net.URL
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -38,7 +37,7 @@ class LinkedDomainsService @Inject constructor(
                 is Result.Success -> verifiedDomainsResult
                 is Result.Failure -> {
                     SdkLog.d("Linked Domains verification using resolver failed with ${verifiedDomainsResult.payload} exception. Verifying it using Well Known Document.")
-                    verifyUsingWellKnownDocument(relyingPartyDid)
+                    verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
                 }
             }
         }
@@ -60,7 +59,7 @@ class LinkedDomainsService @Inject constructor(
         }
     }
 
-    private suspend fun verifyUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
+    private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
         return runResultTry {
             val domainUrls = getLinkedDomainsFromDid(relyingPartyDid).abortOnError()
             verifyLinkedDomains(domainUrls, relyingPartyDid)
