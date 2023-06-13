@@ -49,6 +49,7 @@ class IssuanceService @Inject constructor(
      * Load a Issuance Request from a contract.
      *
      * @param contractUrl url that the contract is fetched from
+     * @param rootOfTrustResolver resolver that is used to verify the root of trust (domains) of the issuer
      */
     suspend fun getRequest(
         contractUrl: String,

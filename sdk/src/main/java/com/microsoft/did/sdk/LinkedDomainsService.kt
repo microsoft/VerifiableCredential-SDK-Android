@@ -36,7 +36,8 @@ class LinkedDomainsService @Inject constructor(
             when (val verifiedDomainsResult = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)) {
                 is Result.Success -> verifiedDomainsResult
                 is Result.Failure -> {
-                    SdkLog.d("Linked Domains verification using resolver failed with ${verifiedDomainsResult.payload} exception. Verifying it using Well Known Document.")
+                    SdkLog.d("Linked Domains verification using resolver failed with ${verifiedDomainsResult.payload} exception. " +
+                        "Verifying it using Well Known Document.")
                     verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
                 }
             }
