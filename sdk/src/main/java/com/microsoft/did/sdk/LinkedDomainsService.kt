@@ -32,32 +32,26 @@ class LinkedDomainsService @Inject constructor(
         relyingPartyDid: String,
         rootOfTrustResolver: RootOfTrustResolver? = null
     ): Result<LinkedDomainResult> {
-        return runResultTry {
-            when (val verifiedDomainsResult = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)) {
-                is Result.Success -> verifiedDomainsResult
-                is Result.Failure -> {
-                    SdkLog.d("Linked Domains verification using resolver failed with ${verifiedDomainsResult.payload} exception. " +
-                        "Verifying it using Well Known Document.")
-                    verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
-                }
-            }
+        return try {
+            val verifiedDomains = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)
+            Result.Success(verifiedDomains)
+        } catch (ex: Exception) {
+            SdkLog.d(
+                "Linked Domains verification using resolver failed with $ex exception. " +
+                    "Verifying it using Well Known Document."
+            )
+            verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
         }
     }
 
     private suspend fun verifyLinkedDomainsUsingResolver(
         relyingPartyDid: String,
         rootOfTrustResolver: RootOfTrustResolver?
-    ): Result<LinkedDomainResult> {
-        return runResultTry {
-            rootOfTrustResolver ?: return@runResultTry Result.Failure(SdkException("Root of trust resolver is not configured"))
-            try {
-                val linkedDomainResult = rootOfTrustResolver.resolve(relyingPartyDid)
-                if (linkedDomainResult is LinkedDomainVerified) return@runResultTry Result.Success(linkedDomainResult)
-                else return@runResultTry Result.Failure(SdkException("Root of trust resolver did not return a verified domain"))
-            } catch (ex: SdkException) {
-                return@runResultTry Result.Failure(ex)
-            }
-        }
+    ): LinkedDomainResult {
+        rootOfTrustResolver ?: throw SdkException("Root of trust resolver is not configured")
+        val linkedDomainResult = rootOfTrustResolver.resolve(relyingPartyDid)
+        if (linkedDomainResult is LinkedDomainVerified) return linkedDomainResult
+        else throw SdkException("Root of trust resolver did not return a verified domain")
     }
 
     private suspend fun verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid: String): Result<LinkedDomainResult> {
