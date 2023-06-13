@@ -35,9 +35,9 @@ class LinkedDomainsService @Inject constructor(
         return try {
             val verifiedDomains = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)
             Result.Success(verifiedDomains)
-        } catch (ex: Exception) {
+        } catch (ex: SdkException) {
             SdkLog.d(
-                "Linked Domains verification using resolver failed with $ex exception. " +
+                "Linked Domains verification using resolver failed with exception $ex. " +
                     "Verifying it using Well Known Document."
             )
             verifyLinkedDomainsUsingWellKnownDocument(relyingPartyDid)
