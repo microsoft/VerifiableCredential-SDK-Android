@@ -43,7 +43,7 @@ object CredentialSubjectSerializer :
         val newContent = HashMap<String, JsonElement>()
         element.entries.forEach { entry ->
             run {
-                if (entry.value.jsonPrimitive.content == "") {
+                if (entry.value.jsonPrimitive.content.isEmpty()) {
                     newContent[entry.key] = JsonPrimitive("")
                 } else
                     newContent[entry.key] = serializer.decodeFromString(JsonElement.serializer(), entry.value.jsonPrimitive.content)
