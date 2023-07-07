@@ -26,7 +26,7 @@ class ImageLoader @Inject constructor() {
             if (logo.image != null || logo.uri == null) {
                 return
             }
-            logo.image = loadImageToBase64(logo.uri!!)
+            logo.image = logo.uri?.let { loadImageToBase64(it) }
         }
         logo?.image?.let {
             if (it.length * 2 > MAX_IMAGE_SIZE_BYTES * BASE64_SIZE_INCREASE_ESTIMATION)
@@ -51,8 +51,8 @@ class ImageLoader @Inject constructor() {
         }
     }
 
-    private suspend fun loadImageToBase64(uri: String): String? = withContext(Dispatchers.IO) {
-        val nonEmptyUri = if (uri.isBlank()) null else uri
+    suspend fun loadImageToBase64(uri: String): String? = withContext(Dispatchers.IO) {
+        val nonEmptyUri = uri.ifBlank { null }
         val imageBitmap = Picasso.get().load(nonEmptyUri).get()
 
         return@withContext ImageUtil.convert(imageBitmap)
