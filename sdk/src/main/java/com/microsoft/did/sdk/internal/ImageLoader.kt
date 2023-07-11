@@ -10,7 +10,6 @@ import com.microsoft.did.sdk.util.log.SdkLog
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import javax.inject.Inject
 
 class ImageLoader @Inject constructor() {
@@ -38,12 +37,7 @@ class ImageLoader @Inject constructor() {
         val logo = request.content.registration.logoData
         if (logo == null) {
             val logoUri = request.content.registration.logoUri
-            try {
-                request.content.registration.logoData = loadImageToBase64(logoUri)
-            } catch (ioe: IOException) {
-                SdkLog.d("Exception while loading presentation logo", ioe)
-                request.content.registration.logoData = null
-            }
+            request.content.registration.logoData = loadImageToBase64(logoUri)
         }
         request.content.registration.logoData?.let {
             if (it.length * 2 > MAX_IMAGE_SIZE_BYTES * BASE64_SIZE_INCREASE_ESTIMATION)
@@ -52,9 +46,14 @@ class ImageLoader @Inject constructor() {
     }
 
     suspend fun loadImageToBase64(uri: String): String? = withContext(Dispatchers.IO) {
-        val nonEmptyUri = uri.ifBlank { null }
-        val imageBitmap = Picasso.get().load(nonEmptyUri).get()
+        try {
+            val nonEmptyUri = uri.ifBlank { null }
+            val imageBitmap = Picasso.get().load(nonEmptyUri).get()
 
-        return@withContext ImageUtil.convert(imageBitmap)
+            return@withContext ImageUtil.convert(imageBitmap)
+        } catch (ex: Exception) {
+            SdkLog.d("Exception while loading image", ex)
+            null
+        }
     }
 }
