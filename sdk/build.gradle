@@ -102,7 +102,7 @@ dependencies {
 
     // KTX
     implementation "androidx.collection:collection-ktx:$collections_ktx_version"
-    implementation "androidx.core:core-ktx:$core_ktx_version"
+    implementation "androidx.core:core-ktx:$androidx_core_version"
 
     //other
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
