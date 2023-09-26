@@ -36,7 +36,7 @@ class LinkedDomainsService @Inject constructor(
             val verifiedDomains = verifyLinkedDomainsUsingResolver(relyingPartyDid, rootOfTrustResolver)
             Result.Success(verifiedDomains)
         } catch (ex: SdkException) {
-            SdkLog.d(
+            SdkLog.i(
                 "Linked Domains verification using resolver failed with exception $ex. " +
                     "Verifying it using Well Known Document."
             )
@@ -74,7 +74,7 @@ class LinkedDomainsService @Inject constructor(
                     val isDomainLinked = jwtDomainLinkageCredentialValidator.validate(linkedDidJwt, relyingPartyDid, domainUrl)
                     if (isDomainLinked) return@runResultTry Result.Success(LinkedDomainVerified(hostname))
                 }
-            } else SdkLog.d("Unable to fetch well-known config document from $domainUrl")
+            } else SdkLog.i("Unable to fetch well-known config document from $domainUrl")
             Result.Success(LinkedDomainUnVerified(hostname))
         }
     }

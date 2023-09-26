@@ -32,7 +32,7 @@ object NetworkErrorParser {
                 code = (error?.get("code") as? JsonPrimitive)?.content
             }
         } catch (ex: Exception) {
-            SdkLog.d("Parsing error response canceled. Json: $errorBody", ex)
+            SdkLog.i("Parsing error response canceled. Json: $errorBody", ex)
         }
         return errorCodes.joinToString(",")
     }
@@ -59,7 +59,7 @@ object NetworkErrorParser {
                 msg = (error?.get("message") as? JsonPrimitive)?.content
             }
         } catch (ex: Exception) {
-            SdkLog.d("Parsing error response canceled. Json: $errorBody", ex)
+            SdkLog.i("Parsing error response canceled. Json: $errorBody", ex)
         }
         return errorMessages.joinToString("; ")
     }

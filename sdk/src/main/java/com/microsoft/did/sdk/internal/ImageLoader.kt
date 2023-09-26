@@ -52,7 +52,7 @@ class ImageLoader @Inject constructor() {
 
             return@withContext ImageUtil.convert(imageBitmap)
         } catch (ex: Exception) {
-            SdkLog.d("Exception while loading image", ex)
+            SdkLog.i("Exception while loading image", ex)
             null
         }
     }
