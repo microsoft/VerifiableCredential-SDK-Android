@@ -17,7 +17,6 @@ repositories {
 
 android {
     compileSdkVersion compile_sdk_version as Integer
-//    ndkVersion ndk_version
 
     defaultConfig {
         minSdkVersion min_sdk_version as Integer
