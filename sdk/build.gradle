@@ -18,6 +18,8 @@ repositories {
 android {
     compileSdkVersion compile_sdk_version as Integer
 
+    namespace = "com.microsoft.did.sdk"
+
     defaultConfig {
         minSdkVersion min_sdk_version as Integer
         targetSdkVersion target_sdk_version as Integer
@@ -141,8 +143,8 @@ dependencies {
  */
 task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
     reports {
-        xml.enabled = true
-        html.enabled = true
+        xml.required  = true
+        html.required = true
     }
 
     final def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*',
