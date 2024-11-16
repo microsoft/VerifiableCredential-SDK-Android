@@ -51,6 +51,7 @@ class Microsoft2020BackupProcessor @Inject constructor(
 
     override suspend fun import(backupData: UnprotectedBackupData): UnprotectedBackup {
         if (backupData !is Microsoft2020UnprotectedBackupData) throw BackupException("BackupData has wrong type ${backupData::class.simpleName}")
+        identityRepository.deleteAll()
         val identifiers = mutableListOf<Identifier>()
         var keySet = setOf<JWK>()
 

@@ -56,7 +56,6 @@ class BackupService @Inject constructor(
         return runResultTry {
             val unprotectedBackupData = protectionMethod.unwrap(protectedBackupData, serializer)
             val unprotectedBackup = backupProcessorFactory.import(unprotectedBackupData)
-            identityRepository.deleteAll()
             Result.Success(unprotectedBackup)
         }
     }
