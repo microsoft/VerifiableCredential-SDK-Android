@@ -16,6 +16,7 @@ repositories {
 }
 
 android {
+    namespace 'com.microsoft.did.sdk'
     compileSdkVersion compile_sdk_version as Integer
 
     defaultConfig {
