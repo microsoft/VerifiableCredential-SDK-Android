@@ -47,8 +47,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility jvmTarget
-        targetCompatibility jvmTarget
+        sourceCompatibility target_jvmTarget
+        targetCompatibility target_jvmTarget
     }
 
     testOptions {
@@ -58,7 +58,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = jvmTarget
+        jvmTarget = target_jvmTarget
         freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
     }
 
