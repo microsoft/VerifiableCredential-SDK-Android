@@ -56,7 +56,6 @@ android {
     }
 
     lint {
-        disable 'KaptUsageInsteadOfKsp'
         disable 'MissingClass'
     }
 
