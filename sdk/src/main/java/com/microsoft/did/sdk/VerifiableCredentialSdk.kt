@@ -45,7 +45,6 @@ object VerifiableCredentialSdk {
     @JvmStatic
     lateinit var identifierService: IdentifierService
 
-
     /**
      * Initializes VerifiableCredentialSdk
      *
