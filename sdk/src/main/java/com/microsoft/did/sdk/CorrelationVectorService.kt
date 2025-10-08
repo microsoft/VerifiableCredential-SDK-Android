@@ -11,6 +11,7 @@ import com.microsoft.correlationvector.CorrelationVectorVersion
 import com.microsoft.did.sdk.util.Constants
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 @Singleton
 class CorrelationVectorService @Inject constructor(private val sharedPreferences: SharedPreferences) {
@@ -37,7 +38,8 @@ class CorrelationVectorService @Inject constructor(private val sharedPreferences
 
     private fun saveCorrelationVector(sharedPreferences: SharedPreferences, correlationId: String) {
         if (correlationId.isNotEmpty())
-            sharedPreferences.edit()
-                .putString(Constants.CORRELATION_VECTOR_IN_PREF, correlationId).apply()
+            sharedPreferences.edit {
+                putString(Constants.CORRELATION_VECTOR_IN_PREF, correlationId)
+            }
     }
 }
