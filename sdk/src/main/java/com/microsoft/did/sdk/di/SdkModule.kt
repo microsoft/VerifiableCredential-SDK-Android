@@ -11,13 +11,12 @@ import androidx.preference.PreferenceManager
 import androidx.room.Room
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.microsoft.did.sdk.CorrelationVectorService
-import com.microsoft.did.sdk.backup.content.UnprotectedBackupData
-import com.microsoft.did.sdk.backup.content.microsoft2020.Microsoft2020UnprotectedBackupData
 import com.microsoft.did.sdk.credential.service.validators.DomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.JwtDomainLinkageCredentialValidator
 import com.microsoft.did.sdk.credential.service.validators.OidcPresentationRequestValidator
 import com.microsoft.did.sdk.credential.service.validators.PresentationRequestValidator
 import com.microsoft.did.sdk.datasource.db.SdkDatabase
+import com.microsoft.did.sdk.datasource.db.SdkDbMigrations
 import com.microsoft.did.sdk.datasource.network.interceptors.CorrelationVectorInterceptor
 import com.microsoft.did.sdk.datasource.network.interceptors.UserAgentInterceptor
 import com.microsoft.did.sdk.identifier.registrars.Registrar
@@ -27,9 +26,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.plus
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.modules.subclass
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -90,9 +86,11 @@ class SdkModule {
     @Provides
     @Singleton
     fun sdkDatabase(context: Context): SdkDatabase {
-        return Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
-            .fallbackToDestructiveMigration() // TODO: Remove during public preview
-            .build()
+        val dbBuilder = Room.databaseBuilder(context, SdkDatabase::class.java, "vc-sdk-db")
+        SdkDbMigrations.MIGRATIONS.forEach {
+            dbBuilder.addMigrations(it)
+        }
+        return dbBuilder.build()
     }
 
     @Provides
@@ -113,12 +111,7 @@ class SdkModule {
         @Named("polymorphicJsonSerializer") additionalJsonSerializers: SerializersModule = Json.serializersModule
     ): Json {
         return Json {
-            serializersModule = additionalJsonSerializers +
-                SerializersModule {
-                    polymorphic(UnprotectedBackupData::class) {
-                        subclass(Microsoft2020UnprotectedBackupData::class)
-                    }
-                }
+            serializersModule = additionalJsonSerializers
             encodeDefaults = false
             ignoreUnknownKeys = true
             isLenient = true

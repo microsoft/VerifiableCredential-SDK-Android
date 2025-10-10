@@ -1,10 +1,10 @@
 plugins {
     id "org.jetbrains.kotlin.plugin.serialization" version "$kotlin_version"
+    id("com.google.devtools.ksp")
 }
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
 apply plugin: 'jacoco'
 
 jacoco {
@@ -16,6 +16,7 @@ repositories {
 }
 
 android {
+    namespace 'com.microsoft.did.sdk'
     compileSdkVersion compile_sdk_version as Integer
 
     defaultConfig {
@@ -25,11 +26,9 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        kapt {
-            arguments {
-                arg("room.schemaLocation", "$projectDir/schemas")
-                arg("room.incremental", "true")
-            }
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+            arg("room.incremental", "true")
         }
     }
     buildTypes {
@@ -46,8 +45,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility target_jvmTarget
+        targetCompatibility target_jvmTarget
     }
 
     testOptions {
@@ -57,8 +56,12 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = target_jvmTarget
         freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
+    }
+
+    lint {
+        disable 'MissingClass'
     }
 
     lintOptions {
@@ -83,7 +86,7 @@ android {
 
 dependencies {
     implementation "com.google.dagger:dagger:$dagger_version"
-    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    ksp "com.google.dagger:dagger-compiler:$dagger_version"
 
     implementation "com.squareup.retrofit2:retrofit:$retrofit2_version"
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit2_version"
@@ -91,7 +94,7 @@ dependencies {
 
     implementation "androidx.room:room-runtime:$androidx_room_persistence_version"
     implementation "androidx.room:room-ktx:$androidx_room_persistence_version"
-    kapt "androidx.room:room-compiler:$androidx_room_persistence_version"
+    ksp "androidx.room:room-compiler:$androidx_room_persistence_version"
     testImplementation "androidx.room:room-testing:$androidx_room_persistence_version"
 
     implementation "com.squareup.okhttp3:okhttp:$com_squareup_okhttp3_okhttp_version"
@@ -141,8 +144,8 @@ dependencies {
  */
 task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
     reports {
-        xml.enabled = true
-        html.enabled = true
+        xml.required = true
+        html.required = true
     }
 
     final def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*', '**/*Test*.*', 'android/**/*.*',

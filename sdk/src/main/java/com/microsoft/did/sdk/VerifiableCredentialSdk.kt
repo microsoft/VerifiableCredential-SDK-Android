@@ -43,11 +43,7 @@ object VerifiableCredentialSdk {
     lateinit var correlationVectorService: CorrelationVectorService
 
     @JvmStatic
-    lateinit var backupService: BackupService
-
-    @JvmStatic
     lateinit var identifierService: IdentifierService
-
 
     /**
      * Initializes VerifiableCredentialSdk
@@ -82,7 +78,6 @@ object VerifiableCredentialSdk {
         revocationService = sdkComponent.revocationService()
         correlationVectorService = sdkComponent.correlationVectorService()
         identifierService = sdkComponent.identifierManager()
-        backupService = sdkComponent.backupAndRestoreService()
 
         correlationVectorService.startNewFlowAndSave()
 

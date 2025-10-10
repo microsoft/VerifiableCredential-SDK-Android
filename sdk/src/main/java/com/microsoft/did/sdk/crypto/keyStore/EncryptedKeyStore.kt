@@ -9,6 +9,7 @@ import androidx.security.crypto.MasterKeys
 import com.microsoft.did.sdk.util.controlflow.KeyStoreException
 import com.nimbusds.jose.jwk.JWK
 import javax.inject.Inject
+import androidx.core.content.edit
 
 class EncryptedKeyStore @Inject constructor(context: Context) {
 
@@ -31,7 +32,7 @@ class EncryptedKeyStore @Inject constructor(context: Context) {
     }
 
     fun storeKey(keyId: String, key: JWK) {
-        encryptedSharedPreferences.edit().putString(KEY_PREFIX + keyId, key.toJSONString()).apply()
+        encryptedSharedPreferences.edit { putString(KEY_PREFIX + keyId, key.toJSONString()) }
     }
 
     fun getKey(keyId: String): JWK {

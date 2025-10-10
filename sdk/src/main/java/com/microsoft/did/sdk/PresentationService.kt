@@ -27,6 +27,7 @@ import com.microsoft.did.sdk.util.logTime
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
+import androidx.core.net.toUri
 
 @Singleton
 class PresentationService @Inject constructor(
@@ -59,7 +60,7 @@ class PresentationService @Inject constructor(
     }
 
     private fun verifyUri(uri: String): Uri {
-        val url = Uri.parse(uri)
+        val url = uri.toUri()
         if (!DidDeepLinkUtil.isDidDeepLink(url)) {
             throw PresentationException("Request Protocol not supported.")
         }
