@@ -6,13 +6,24 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isInstanceOf
 import com.microsoft.did.sdk.util.Constants.AES_KEY
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.junit.BeforeClass
 import org.junit.Test
 import java.math.BigInteger
+import java.security.Security
 import java.security.interfaces.ECPrivateKey
 import java.security.interfaces.ECPublicKey
 import javax.crypto.spec.SecretKeySpec
 
 class AlgorithmsTest {
+
+    companion object {
+        @JvmStatic
+        @BeforeClass
+        fun setupClass() {
+            Security.insertProviderAt(BouncyCastleProvider(), 1)
+        }
+    }
 
     private fun ByteArray.toHexString() = asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
 
