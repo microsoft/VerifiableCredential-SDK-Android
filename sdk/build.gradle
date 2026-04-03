@@ -16,7 +16,7 @@ repositories {
 }
 
 android {
-    namespace "com.microsoft.did.sdk"
+    namespace 'com.microsoft.did.sdk'
     compileSdkVersion compile_sdk_version as Integer
 
     defaultConfig {
@@ -45,8 +45,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility target_jvmTarget
+        targetCompatibility target_jvmTarget
     }
 
     testOptions {
@@ -60,17 +60,17 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = target_jvmTarget
         freeCompilerArgs += "-Xuse-experimental=kotlin.ExperimentalUnsignedTypes"
     }
 
-    lintOptions {
+    lint {
+        disable 'MissingClass'
+        disable 'UseKtx'
         abortOnError false
         warningsAsErrors false
         textReport true
-        textOutput "stdout"
         explainIssues true
-        showAll true
     }
 
     sourceSets {
