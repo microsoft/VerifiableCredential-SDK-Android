@@ -10,12 +10,23 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import io.mockk.every
 import io.mockk.mockk
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.junit.BeforeClass
 import org.junit.Test
+import java.security.Security
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
 
 class JweTokenTest {
+    companion object {
+        @BeforeClass
+        @JvmStatic
+        fun setupBouncyCastle() {
+            Security.insertProviderAt(BouncyCastleProvider(), 1)
+        }
+    }
+
     private val keyRef = "TestKeyID"
     private val key: ECKey = ECKeyGenerator(Curve.P_256)
         .keyID(keyRef)
