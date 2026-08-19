@@ -30,6 +30,6 @@ object DifWordList {
     }
 
     fun normalizePassword(password: String): String {
-        return password.split(Pattern.compile("\\s+")).filter { it.isNotBlank() }.joinToString(" ") { it.toLowerCase(Locale.ENGLISH) }
+        return password.split(Pattern.compile("\\s+")).filter { it.isNotBlank() }.joinToString(" ") { it.lowercase(Locale.ENGLISH) }
     }
 }
