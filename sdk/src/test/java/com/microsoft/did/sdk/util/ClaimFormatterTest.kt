@@ -46,7 +46,12 @@ class ClaimFormatterTest {
 
     @Test
     fun `test formatting date and time successfully`() {
+        // CLDR 42 (bundled with JDK 20+) uses a narrow no-break space (U+202F) before AM/PM; older
+        // CLDR used a regular space. Normalize NBSP/NNBSP so the output still matches the expected
+        // regular-space variants when tests run on JDK 21.
         val actualFormattedClaim = ClaimFormatter.formatDateAndTimeInMillis(suppliedClaimValueForDateInMills)
+            .replace('\u202F', ' ')
+            .replace('\u00A0', ' ')
         assertThat(actualFormattedClaim).isIn(expectedFormattedDateTimeInDifferentTimeZone)
     }
 }
